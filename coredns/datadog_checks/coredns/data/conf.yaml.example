@@ -60,14 +60,14 @@ instances:
     tags:
       - dns-pod:%%host%%
 
-    ## @param metrics - list of strings - required
+    ## @param metrics - list of strings - optional
     ## List of metrics to be fetched from the prometheus endpoint, if there's a
     ## value it'll be renamed. This list should contain at least one metric.
     #
-    metrics:
-      - coredns_template_matches_total: template_matches_count
-      - coredns_template_template_failures_total: template_templating_failures_count
-      - coredns_template_rr_failures_total: template_resource_record_failures_count
+    # metrics:
+    #   - coredns_template_matches_total: template_matches_count
+    #   - coredns_template_template_failures_total: template_templating_failures_count
+    #   - coredns_template_rr_failures_total: template_resource_record_failures_count
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.

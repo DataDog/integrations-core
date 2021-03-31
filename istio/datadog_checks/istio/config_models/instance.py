@@ -87,10 +87,10 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
-    metrics: Sequence[str]
+    metrics: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     mixer_endpoint: Optional[str]
-    namespace: str
+    namespace: Optional[str]
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
