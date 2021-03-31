@@ -1,9 +1,0 @@
-#!/usr/bin/execlineb -P
-# Funky service syntax file
-# Man page here: https://skarnet.org/software/execline/execlineb.html
-# Helpful blog: https://danyspin97.org/blog/getting-started-with-execline-scripting/
-
-foreground { /initlog.sh "starting kubectl port-forwarding" }
-
-if { redirfd -w 1 /dev/null kubectl } kubectl port-forward --address localhost --namespace linkerd deployment/linkerd-controller 9990:4191
-

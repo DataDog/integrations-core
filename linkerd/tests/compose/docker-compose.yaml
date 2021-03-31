@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  linkerd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /tmp/kubeconfig.yaml:/root/.kube/config
+
+networks:
+  default:
+    external:
+      name: kind

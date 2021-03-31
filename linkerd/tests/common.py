@@ -553,17 +553,6 @@ EXPECTED_METRICS_V2_E2E = {
 EXPECTED_METRICS_V2_NEW = {}
 
 
-E2E_METADATA = {
-    'docker_volumes': [
-        '{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
-        '{}/agent_scripts/port-forward:/etc/services.d/port-forward'.format(HERE),
-        '/tmp/kubeconfig.yaml:/root/.kube/config',
-    ],
-    'start_commands': ['bash /tmp/start_commands.sh'],
-    'network': 'kind',
-}
-
-
 for metric_name, metric_type in list(EXPECTED_METRICS_V2.items()):
     if metric_name == 'linkerd.prometheus.health':
         EXPECTED_METRICS_V2_NEW['linkerd.openmetrics.health'] = metric_type
