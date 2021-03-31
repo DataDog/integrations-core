@@ -27,7 +27,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Twemproxy - Overview": "assets/dashboards/twemproxy_overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"
