@@ -38,7 +38,7 @@ def dd_environment():
                 ip, port = stack.enter_context(port_forward(kubeconfig, 'linkerd', 'linkerd-controller', 4191))
 
             instance = {
-                'prometheus_url': f'http://{ip}:{port}/metrics',
+                'prometheus_url': 'http://{ip}:{port}/metrics'.format(ip=ip, port=port),
                 'metrics': [LINKERD_FIXTURE_METRICS],
                 'type_overrides': LINKERD_FIXTURE_TYPES,
             }
