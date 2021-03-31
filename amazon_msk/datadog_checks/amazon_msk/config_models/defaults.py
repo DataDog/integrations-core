@@ -132,8 +132,16 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_namespace(field, value):
+    return 'service'
 
 
 def instance_node_exporter_port(field, value):
@@ -152,7 +160,15 @@ def instance_persist_connections(field, value):
     return False
 
 
+def instance_prometheus_metrics_path(field, value):
+    return '/metrics'
+
+
 def instance_prometheus_metrics_prefix(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_prometheus_url(field, value):
     return get_default_field_value(field, value)
 
 
