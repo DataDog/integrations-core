@@ -82,6 +82,13 @@ instances:
     #
     # fetch_intermediate_certs: false
 
+    ## @param send_cert_duration - boolean - optional - default: false
+    ## Whether or not to send the days or seconds of a certificates valid duration.
+    ##
+    ## If enabled this will send the duration of the certificates valid timespan in days and seconds.
+    #
+    # send_cert_duration: false
+
     ## @param intermediate_cert_refresh_interval - number - optional - default: 60
     ## When `fetch_intermediate_certs` is set to `true`, this indicates how often to
     ## refresh the intermediate certificate cache in minutes.
