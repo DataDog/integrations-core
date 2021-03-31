@@ -16,8 +16,10 @@ except ImportError:
 
 
 def setup_linkerd_cluster():
+    clusters = run_command(["kind", "get", "clusters"], capture='out')
+    cluster = [c for c in clusters.stdout.split() if 'linkerd' in c][0]
     result = run_command(
-        ["kind", "get", "kubeconfig", "--internal", "--name", "cluster-linkerd-py38"],
+        ["kind", "get", "kubeconfig", "--internal", "--name", cluster],
         capture='out',
         check=True,
     )
