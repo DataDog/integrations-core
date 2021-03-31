@@ -34,7 +34,7 @@ def dd_environment():
         compose_file = os.path.join(HERE, "compose", "docker-compose.yaml")
         with docker_run(
             compose_file=compose_file,
-            conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=60)],
+            conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=120)],
         ):
             with ExitStack() as stack:
                 ip, port = stack.enter_context(port_forward(kubeconfig, 'linkerd', 'linkerd-controller', 4191))
