@@ -104,6 +104,11 @@ def instance_local_cert_expired(certs):
     yield {'local_cert_path': certs['expired.pem'], 'tls_validate_hostname': False}
 
 
+@pytest.fixture
+def instance_local_send_cert_duration(certs):
+    yield {'local_cert_path': certs['valid.pem'], 'tls_validate_hostname': False, 'send_cert_duration': True}
+
+
 @pytest.fixture(scope='session')
 def instance_local_cert_critical_days(certs):
     yield {'local_cert_path': certs['valid.pem'], 'tls_validate_hostname': False, 'days_critical': 200}
@@ -212,6 +217,11 @@ def instance_remote_cert_expired():
 @pytest.fixture
 def instance_remote_fetch_intermediate_certs():
     return {'server': 'incomplete-chain.badssl.com', 'fetch_intermediate_certs': True}
+
+
+@pytest.fixture
+def instance_remote_send_cert_duration():
+    return {'server': 'https://valid.mock', 'send_cert_duration': True, 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
