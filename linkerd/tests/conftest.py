@@ -1,13 +1,13 @@
 import os
+
 import pytest
 
-from datadog_checks.dev import run_command, docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import HERE, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
-
 
 try:
     from contextlib import ExitStack
