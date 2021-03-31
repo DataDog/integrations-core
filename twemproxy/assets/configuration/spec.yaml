@@ -20,3 +20,8 @@ files:
         example: 22222
         type: integer
     - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: var/log/twemproxy/*.log
+        source: twemproxy
