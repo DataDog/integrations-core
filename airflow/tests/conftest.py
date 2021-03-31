@@ -13,7 +13,7 @@ from .common import AIRFLOW_VERSION, URL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-TMP_DATA_FOLDER = path.join(HERE, "compose", AIRFLOW_VERSION, 'tmp_data')
+TMP_DATA_FOLDER = path.join(HERE, 'compose', AIRFLOW_VERSION, 'tmp_data')
 
 E2E_METADATA = {
     'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(TMP_DATA_FOLDER)],
@@ -48,7 +48,7 @@ dogstatsd_metrics_stats_enable: true
         endpoint += "/api/experimental/test"
 
     with docker_run(
-        os.path.join(HERE, "compose", AIRFLOW_VERSION, 'docker-compose.yaml'),
+        os.path.join(HERE, 'compose', AIRFLOW_VERSION, 'docker-compose.yaml'),
         conditions=[CheckEndpoints(endpoint, attempts=100)],
     ):
         yield instance, E2E_METADATA

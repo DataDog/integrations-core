@@ -17,11 +17,8 @@ psql -h ${DB__HOST} -p ${DB__PORT} -U ${DB__USERNAME} ${DB__NAME} -t
 echo "Airflow database upgrade"
 airflow db upgrade
 
-# if [ "${SECURITY_ALREADY_INITIALIZED}" == "0" ]; then
 echo "Creating admin user.."
 airflow users create -r Admin -u "$SECURITY__ADMIN_USERNAME" -e "$SECURITY__ADMIN_EMAIL" -f "$SECURITY__ADMIN_FIRSTNAME" -l "$SECURITY__ADMIN_LASTNAME" -p "$SECURITY__ADMIN_PASSWORD"
-# cat /opt/airflow/extra/set_init.sql | psql -h ${DB__HOST} -p ${DB__PORT} -U ${DB__USERNAME} ${DB__NAME} -t
-# fi
 
 # Run scheduler 
 airflow scheduler &
