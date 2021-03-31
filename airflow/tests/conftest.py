@@ -9,11 +9,11 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
-from .common import URL
+from .common import AIRFLOW_VERSION, URL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-TMP_DATA_FOLDER = path.join(HERE, 'compose', 'tmp_data')
+TMP_DATA_FOLDER = path.join(HERE, "compose", AIRFLOW_VERSION, 'tmp_data')
 
 E2E_METADATA = {
     'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(TMP_DATA_FOLDER)],
@@ -40,9 +40,16 @@ def dd_environment(instance):
 dogstatsd_metrics_stats_enable: true
 """
     create_datadog_config(datadog_config + get_readme_mappings())
+
+    endpoint = URL
+    if AIRFLOW_VERSION == "v2":
+        endpoint += "/api/v1/health"
+    else:
+        endpoint += "/api/experimental/test"
+
     with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        conditions=[CheckEndpoints(URL + '/api/experimental/test', attempts=100)],
+        os.path.join(HERE, "compose", AIRFLOW_VERSION, 'docker-compose.yaml'),
+        conditions=[CheckEndpoints(endpoint, attempts=100)],
     ):
         yield instance, E2E_METADATA
 
