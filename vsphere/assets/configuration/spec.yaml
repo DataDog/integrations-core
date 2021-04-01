@@ -6,7 +6,10 @@ files:
     options:
     - template: init_config/default
     - name: rest_api_options
-      description: REST API options
+      description: |
+        REST API options
+        Those options are used when making vSphere REST API calls to retrieve vSphere tags
+        when `collect_tags` instance config is enabled.
       options:
         - template: init_config/http
   - template: instances
@@ -426,7 +429,10 @@ files:
           type: boolean
           example: true
       - name: rest_api_options
-        description: REST API options
+        description: |
+          REST API options
+          The options are used when making vSphere REST API calls to retrieve vSphere tags
+          when `collect_tags` instance config is enabled.
         options:
           - template: instances/http
       - template: instances/default

@@ -10,6 +10,8 @@ init_config:
     # service: <SERVICE>
 
     ## REST API options
+    ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
+    ## when `collect_tags` instance config is enabled.
     #
     rest_api_options:
 
@@ -378,6 +380,8 @@ instances:
     # include_datastore_cluster_folder_tag: true
 
     ## REST API options
+    ## The options are used when making vSphere REST API calls to retrieve vSphere tags
+    ## when `collect_tags` instance config is enabled.
     #
     rest_api_options:
 
