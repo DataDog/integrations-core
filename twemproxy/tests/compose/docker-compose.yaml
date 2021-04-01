@@ -33,7 +33,10 @@ services:
 
   twemproxy:
     # Version 0.3.0
-    build: .
+    build:
+      context: .
+      args:
+        TWEMPROXY_VERSION: ${TWEMPROXY_VERSION}
     ports:
       - 6100:6100
       - 6222:6222
