@@ -9,11 +9,10 @@
 # etcdctl set /services/redis/01 10.10.100.11:6001
 # etcdctl set /services/redis/02 10.10.100.12:6002
 
-ARG TWEMPROXY_VERSION
 FROM ubuntu:14.04
 
+ARG TWEMPROXY_VERSION
 ENV DEBIAN_FRONTEND noninteractive
-ENV TWEMPROXY_VERSION ${TWEMPROXY_VERSION}
 
 # Install basics
 RUN apt-get update
@@ -28,7 +27,7 @@ RUN mkdir -p /etc/confd/conf.d
 RUN mkdir -p /etc/confd/templates
 
 # Install twemproxy
-RUN curl -qL https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/twemproxy/nutcracker-${TWEMPROXY_VERSION}.tar.gz | tar xzf -
+RUN curl -qL https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/twemproxy/nutcracker-$TWEMPROXY_VERSION.tar.gz | tar xzf -
 RUN cd nutcracker-0.3.0 && ./configure --enable-debug=log && make && mv src/nutcracker /twemproxy
 RUN cd / && rm -rf nutcracker-0.3.0
 
