@@ -30,6 +30,30 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][117].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `activemq_xml.d/conf.yaml` or `activemq.d/conf.yaml` file to start collecting your ActiveMQ logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: "<ACTIVEMQ_BASEDIR>/data/activemq.log"
+       source: activemq
+       service: "<SERVICE_NAME>"
+     - type: file
+       path: "<ACTIVEMQ_BASEDIR>/data/audit.log"
+       source: activemq
+       service: "<SERVICE_NAME>"
+   ```
+
+3. [Restart the Agent][7].
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
