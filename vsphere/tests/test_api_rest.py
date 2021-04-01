@@ -15,7 +15,7 @@ logger = logging.getLogger()
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type")
 def test_get_resource_tags(realtime_instance):
-    config = VSphereConfig(realtime_instance, logger)
+    config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = VSphereRestAPI(config, log=logger)
     mock_mors = [MagicMock(spec=vim.VirtualMachine, _moId="foo")]
 
@@ -33,7 +33,7 @@ def test_get_resource_tags(realtime_instance):
 
 @pytest.mark.usefixtures("mock_rest_api")
 def test_create_session(realtime_instance):
-    config = VSphereConfig(realtime_instance, logger)
+    config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = VSphereRestAPI(config, log=logger)
 
     assert mock_api._client._http.options['headers']['vmware-api-session-id'] == "dummy-token"
@@ -43,7 +43,7 @@ def test_create_session(realtime_instance):
 @pytest.mark.parametrize(("batch_size", "number_of_batches"), [(25, 40), (100, 10), (101, 10)])
 def test_make_batch(realtime_instance, batch_size, number_of_batches):
     realtime_instance['batch_tags_collector_size'] = batch_size
-    config = VSphereConfig(realtime_instance, logger)
+    config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = VSphereRestAPI(config, log=logger)
     data_to_batch = list(range(1000))
 

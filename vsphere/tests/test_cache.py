@@ -77,7 +77,7 @@ def test_metrics_metadata_cache():
 @pytest.mark.usefixtures("mock_type", "mock_rest_api")
 def test_infrastructure_cache(realtime_instance):
     cache = InfrastructureCache(float('inf'))
-    config = VSphereConfig(realtime_instance, logger)
+    config = VSphereConfig(realtime_instance, {}, logger)
     mock_api = VSphereRestAPI(config, log=logger)
 
     mors = {MagicMock(spec=k, _moId="foo"): object() for k in ALL_RESOURCES_WITH_METRICS * 2}
