@@ -13,6 +13,7 @@ ARG TWEMPROXY_VERSION
 FROM ubuntu:14.04
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TWEMPROXY_VERSION ${TWEMPROXY_VERSION}
 
 # Install basics
 RUN apt-get update
