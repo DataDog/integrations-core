@@ -6,6 +6,7 @@ import requests
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 AIRFLOW_STATUS_OK = "OK"
+AIRFLOW_STABLE_STATUS_OK = "healthy"
 
 
 class AirflowCheck(AgentCheck):
@@ -23,26 +24,46 @@ class AirflowCheck(AgentCheck):
 
     def check(self, _):
         tags = ['url:{}'.format(self._url)] + self._tags
-        url = self._url + "/api/experimental/test"
 
-        resp = self._get_json(url)
+        url_stable = self._url + "/api/v1/health"
+        url_experimental = self._url + "/api/experimental/test"
+        can_connect_status = AgentCheck.OK
 
+        # Query the stable API first
+        resp = self._get_json(url_stable)
         if resp is None:
-            can_connect_status = AgentCheck.CRITICAL
+            resp = self._get_json(url_experimental)
+            if resp is None:
+                can_connect_status = AgentCheck.CRITICAL
+            else:
+                self._submit_healthy_metrics_experimental(resp, tags)
         else:
-            can_connect_status = AgentCheck.OK
+            self._submit_healthy_metrics_stable(resp, tags)
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
 
-        if resp is not None:
-            if resp.get('status') == AIRFLOW_STATUS_OK:
-                health_status = AgentCheck.OK
-            else:
-                health_status = AgentCheck.CRITICAL
+    def _submit_healthy_metrics_experimental(self, resp, tags):
+        if resp.get('status') == AIRFLOW_STATUS_OK:
+            health_status = AgentCheck.OK
+        else:
+            health_status = AgentCheck.CRITICAL
 
-            self.service_check('airflow.healthy', health_status, tags=tags)
-            self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
+        self.service_check('airflow.healthy', health_status, tags=tags)
+        self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
+
+    def _submit_healthy_metrics_stable(self, resp, tags):
+        metadb_status = resp.get('metadatabase', {}).get('status')
+        scheduler_status = resp.get('scheduler', {}).get('status')
+        message = "Metadatabase is {} and scheduler is {}".format(metadb_status, scheduler_status)
+
+        if metadb_status == AIRFLOW_STABLE_STATUS_OK and scheduler_status == AIRFLOW_STABLE_STATUS_OK:
+            health_status = AgentCheck.OK
+        else:
+            health_status = AgentCheck.CRITICAL
+
+        self.service_check('airflow.healthy', health_status, tags=tags, message=message)
+        self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
 
     def _parse_config(self):
         if not self._url:
