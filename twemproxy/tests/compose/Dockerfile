@@ -27,7 +27,7 @@ RUN mkdir -p /etc/confd/conf.d
 RUN mkdir -p /etc/confd/templates
 
 # Install twemproxy
-RUN curl -qL https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/twemproxy/nutcracker-0.3.0.tar.gz | tar xzf -
+RUN curl -qL https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/twemproxy/nutcracker-${TWEMPROXY_VERSION}.tar.gz | tar xzf -
 RUN cd nutcracker-0.3.0 && ./configure --enable-debug=log && make && mv src/nutcracker /twemproxy
 RUN cd / && rm -rf nutcracker-0.3.0
 
