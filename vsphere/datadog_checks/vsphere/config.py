@@ -40,7 +40,15 @@ class VSphereConfig(object):
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
         self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
-        self.rest_api_options = instance.get('rest_api_options', {})  # type: Dict[str, Any]
+
+        self.rest_api_options = {
+            'username': self.username,
+            'password': self.password,
+            'tls_ca_cert': self.ssl_capath,
+            'tls_verify': self.ssl_verify,
+            'tls_ignore_warning': self.tls_ignore_warning,
+        }
+        self.rest_api_options.update(instance.get('rest_api_options', {}))
         self.shared_rest_api_options = init_config.get('rest_api_options', {})  # type: Dict[str, Any]
 
         # vSphere options

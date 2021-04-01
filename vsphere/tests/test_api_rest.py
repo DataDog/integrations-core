@@ -7,6 +7,7 @@ import pytest
 from mock import MagicMock
 from pyVmomi import vim
 
+from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
@@ -29,6 +30,147 @@ def test_get_resource_tags(realtime_instance):
         vim.ClusterComputeResource: {},
     }
     assert expected_resource_tags == resource_tags
+
+
+@pytest.mark.parametrize(
+    'init_config, instance_config, expected_shared_rest_api_options, expected_rest_api_options',
+    [
+        pytest.param(
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+            },
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'tls_ca_cert': None,
+                'tls_ignore_warning': False,
+                'tls_verify': True,
+            },
+            id='no rest_api_options',
+        ),
+        pytest.param(
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'ssl_capath': 'abc123',
+                'ssl_verify': False,
+                'tls_ignore_warning': True,
+            },
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'tls_ca_cert': 'abc123',
+                'tls_ignore_warning': True,
+                'tls_verify': False,
+            },
+            id='existing options rest_api_options',
+        ),
+        pytest.param(
+            {
+                'rest_api_options': {
+                    'timeout': 15,
+                }
+            },
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+            },
+            {
+                'timeout': 15,
+            },
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'tls_ca_cert': None,
+                'tls_ignore_warning': False,
+                'tls_verify': True,
+            },
+            id='init rest_api_options',
+        ),
+        pytest.param(
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'rest_api_options': {
+                    'timeout': 15,
+                },
+            },
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'tls_ca_cert': None,
+                'tls_ignore_warning': False,
+                'tls_verify': True,
+                'timeout': 15,
+            },
+            id='instance rest_api_options',
+        ),
+        pytest.param(
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'rest_api_options': {
+                    'timeout': 15,
+                },
+            },
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'tls_ca_cert': None,
+                'tls_ignore_warning': False,
+                'tls_verify': True,
+                'timeout': 15,
+            },
+            id='instance rest_api_options',
+        ),
+        pytest.param(
+            {},
+            {
+                'username': 'my-username',
+                'password': 'my-password',
+                'rest_api_options': {
+                    'timeout': 15,
+                    'username': 'my-username2',
+                    'password': 'my-password2',
+                    'tls_ca_cert': 'abc',
+                    'tls_ignore_warning': True,
+                    'tls_verify': False,
+                },
+            },
+            {},
+            {
+                'username': 'my-username2',
+                'password': 'my-password2',
+                'tls_ca_cert': 'abc',
+                'tls_ignore_warning': True,
+                'tls_verify': False,
+                'timeout': 15,
+            },
+            id='rest_api_options has precedence',
+        ),
+    ],
+)
+def test_rest_api_config(init_config, instance_config, expected_shared_rest_api_options, expected_rest_api_options):
+    instance_config.update(
+        {
+            'name': 'abc',
+            'use_legacy_check_version': False,
+            'host': 'my-host',
+        }
+    )
+    check = VSphereCheck('vsphere', init_config, [instance_config])
+
+    assert check._config.rest_api_options == expected_rest_api_options
+    assert check._config.shared_rest_api_options == expected_shared_rest_api_options
 
 
 @pytest.mark.usefixtures("mock_rest_api")

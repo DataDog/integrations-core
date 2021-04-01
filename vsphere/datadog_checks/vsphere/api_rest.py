@@ -140,16 +140,8 @@ class VSphereRestClient(object):
     def __init__(self, config, log):
         # type: (VSphereConfig, CheckLoggingAdapter) -> None
         self.log = log
-        http_config = {
-            'username': config.username,
-            'password': config.password,
-            'tls_ca_cert': config.ssl_capath,
-            'tls_verify': config.ssl_verify,
-            'tls_ignore_warning': config.tls_ignore_warning,
-        }
-        http_config.update(config.rest_api_options)
         self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
-        self._http = RequestsWrapper(http_config, config.shared_rest_api_options)
+        self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None
