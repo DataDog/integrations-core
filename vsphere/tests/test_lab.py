@@ -45,7 +45,7 @@ def test_lab(aggregator):
         'collect_attributes': True,
         'rest_api_options': {
             'timeout': '5',
-        }
+        },
     }
     check = VSphereCheck('vsphere', {}, [instance])
     check.initiate_api_connection()
