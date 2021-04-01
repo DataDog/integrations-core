@@ -147,8 +147,9 @@ class VSphereRestClient(object):
             'tls_verify': config.ssl_verify,
             'tls_ignore_warning': config.tls_ignore_warning,
         }
+        http_config.update(config.rest_api_options)
         self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
-        self._http = RequestsWrapper(http_config, {})
+        self._http = RequestsWrapper(http_config, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None

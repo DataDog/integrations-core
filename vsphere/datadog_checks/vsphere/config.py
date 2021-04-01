@@ -1,11 +1,12 @@
 import re
-from typing import List
+from typing import Any, Dict, List
 
 from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.types import InitConfigType
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
@@ -28,8 +29,8 @@ from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, Met
 
 
 class VSphereConfig(object):
-    def __init__(self, instance, log):
-        # type: (InstanceConfig, CheckLoggingAdapter) -> None
+    def __init__(self, instance, init_config, log):
+        # type: (InstanceConfig, InitConfigType, CheckLoggingAdapter) -> None
         self.log = log
 
         # Connection parameters
@@ -39,6 +40,8 @@ class VSphereConfig(object):
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
         self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
+        self.rest_api_options = instance.get('rest_api_options', {})  # type: Dict[str, Any]
+        self.shared_rest_api_options = init_config.get('rest_api_options', {})  # type: Dict[str, Any]
 
         # vSphere options
         self.collection_level = instance.get("collection_level", 1)
