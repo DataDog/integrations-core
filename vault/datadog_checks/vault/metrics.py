@@ -238,3 +238,13 @@ METRIC_MAP = {
     'vault_zookeeper_delete': 'vault.zookeeper.delete',
     'vault_zookeeper_list': 'vault.zookeeper.list',
 }
+
+METRIC_ROLLBACK_COMPAT_MAP = {
+    'vault_route_rollback_auth_jwt_': 'vault.route.rollback.auth.jwt',
+    'vault_route_rollback_auth_ldap': 'vault.route.rollback.auth.ldap',
+    'vault_route_rollback_auth_token_': 'vault.route.rollback.auth.token',
+    'vault_route_rollback_cubbyhole_': 'vault.route.rollback.cubbyhole',
+    'vault_route_rollback_identity_': 'vault.route.rollback.identity',
+    'vault_route_rollback_sys_': 'vault.route.rollback.sys',
+    'vault_route_rollback_secret_': 'vault.route.rollback.secret',
+}

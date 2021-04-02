@@ -9,7 +9,7 @@ import requests
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .errors import ApiUnreachable
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP
 
 try:
     from json import JSONDecodeError
@@ -334,8 +334,17 @@ class Vault(OpenMetricsBaseCheck):
         pass
 
     def transform_route_metrics(self, metric, scraper_config, transformerkey):
+        # Backward compatibility: submit old metric
+        if metric.name in METRIC_ROLLBACK_COMPAT_MAP:
+            self.submit_openmetric(METRIC_ROLLBACK_COMPAT_MAP[metric.name], metric, scraper_config)
+
         metricname = transformerkey.replace('_', '.')[:-2]
         metrictag = metric.name[len(transformerkey) - 1 : -1]
+
+        # Remove extra vault prefix
+        if metricname.startswith('vault.'):
+            metricname = metricname[len('vault.') :]
+
         for i in metric.samples:
             i.labels['mountpoint'] = metrictag
         self.submit_openmetric(metricname, metric, scraper_config)
