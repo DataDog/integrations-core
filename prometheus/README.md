@@ -63,7 +63,7 @@ Prometheus Alertmanager alerts are automatically sent to your Datadog event stre
 The Prometheus check does not include any service checks.
 
 ## Prometheus Alertmanager
-Send Prometheus Alertmanager alerts in the event stream
+Send Prometheus Alertmanager alerts in the event stream.
 
 ### Setup
 1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
