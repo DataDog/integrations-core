@@ -10,7 +10,7 @@ This integration collects JMX metrics for the following components:
 - Connect
 - Replicator
 - Schema Registry
-- SQL Server
+- KSQLDB Server
 - Streams
 - REST Proxy
 
