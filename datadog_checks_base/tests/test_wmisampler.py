@@ -4,6 +4,7 @@
 import collections
 
 import pytest
+
 from datadog_checks.dev.testing.requirements import requires_windows
 
 try:

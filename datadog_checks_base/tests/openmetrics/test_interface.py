@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from datadog_checks.dev.testing.requirements import requires_py3
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.testing.requirements import requires_py3
 
 from .utils import get_check
 
