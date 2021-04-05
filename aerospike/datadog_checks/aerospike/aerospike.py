@@ -253,10 +253,12 @@ class AerospikeCheck(AgentCheck):
                             # Parse remote dc host and port from
                             # `ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:`
                             remote_dc = line.split(" (")[0].split(":")
-                            tags.extend([
-                                'remote_dc_host:{}'.format(remote_dc[0]),
-                                'remote_dc_port:{}'.format(remote_dc[1]),
-                            ])
+                            tags.extend(
+                                [
+                                    'remote_dc_host:{}'.format(remote_dc[0]),
+                                    'remote_dc_port:{}'.format(remote_dc[1]),
+                                ]
+                            )
                         else:
                             # Parse metrics from
                             # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
