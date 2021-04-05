@@ -189,3 +189,14 @@ for more details about how to test and develop Agent based integrations.
 [6]: http://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
+[15]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=kubernetes#examples---datadog-redis-integration
+[16]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file
+[17]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
+[18]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[19]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations
+
