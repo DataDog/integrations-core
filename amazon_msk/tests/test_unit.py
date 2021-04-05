@@ -121,7 +121,6 @@ def assert_node_metrics(aggregator, tags):
 
     for metric in sorted(expected_metrics):
         metric = 'aws.msk.{}'.format(metric)
-        aggregator.assert_metric(metric)
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)
 
@@ -137,7 +136,6 @@ def assert_jmx_metrics(aggregator, tags):
 
     for metric in sorted(expected_metrics):
         metric = 'aws.msk.{}'.format(metric)
-        aggregator.assert_metric(metric)
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)
 
