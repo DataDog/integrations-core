@@ -12,9 +12,6 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, [install the Agent][2] on your IIS servers.
 
-<!-- xxx tabs xxx -->	
-<!-- xxx tab "Host" xxx -->	
-
 #### Host
 
 To configure this check for an Agent running on a host:
@@ -76,8 +73,6 @@ Need help? Contact [Datadog support][11].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [11]: https://docs.datadoghq.com/help/
