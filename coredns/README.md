@@ -53,7 +53,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, you can also configure templates with [a file, a configmap, or a key-value store][13].
+Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][13].
 
 ```yaml
 apiVersion: v1
@@ -79,7 +79,7 @@ spec:
 
 **Notes**:
 
-- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 #### Log collection
@@ -199,4 +199,3 @@ for more details about how to test and develop Agent based integrations.
 [17]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
 [18]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [19]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations
-
