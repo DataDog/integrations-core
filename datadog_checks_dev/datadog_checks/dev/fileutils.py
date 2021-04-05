@@ -14,8 +14,8 @@ from urllib.request import urlopen
 
 from six import PY3, text_type
 
-from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import mock_context_manager
+from .structures import EnvVars
+from .utils import mock_context_manager
 
 if PY3:
 
