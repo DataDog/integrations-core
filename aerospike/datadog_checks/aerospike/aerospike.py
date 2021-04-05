@@ -237,7 +237,6 @@ class AerospikeCheck(AgentCheck):
         """
         if self._required_datacenters:
             for dc in self._required_datacenters:
-                datacenter_tags = ['datacenter:{}'.format(dc)]
                 data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
                 if not data:
                     self.log.debug("Got invalid data for dc %s", dc)
@@ -246,7 +245,7 @@ class AerospikeCheck(AgentCheck):
                     self.log.debug("Error collecting XDR metrics: %s", data)
                 self.log.debug("Got data for dc `%s`: %s", dc, data)
                 parsed_data = data.split("\n")
-                tags = list()
+                tags = ['datacenter:{}'.format(dc)]
                 for line in parsed_data:
                     line = line.strip()
                     if line:
@@ -254,10 +253,10 @@ class AerospikeCheck(AgentCheck):
                             # Parse remote dc host and port from
                             # `ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:`
                             remote_dc = line.split(" (")[0].split(":")
-                            tags = [
+                            tags.extend([
                                 'remote_dc_host:{}'.format(remote_dc[0]),
                                 'remote_dc_port:{}'.format(remote_dc[1]),
-                            ] + datacenter_tags
+                            ])
                         else:
                             # Parse metrics from
                             # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
@@ -268,6 +267,8 @@ class AerospikeCheck(AgentCheck):
                                 key = metric[0]
                                 value = metric[1]
                                 self.send(XDR_DATACENTER_METRIC_TYPE, key, value, tags)
+                            # Reset dc tag
+                            tags = ['datacenter:{}'.format(dc)]
         else:
             self.log.debug("No datacenters were specified to collect XDR metrics: %s", self._required_datacenters)
 
