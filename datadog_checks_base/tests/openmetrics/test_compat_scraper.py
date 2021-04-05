@@ -4,6 +4,8 @@
 import pytest
 from datadog_checks.dev.testing.requirements import requires_py3
 
+from datadog_checks.dev.testing.requirements import requires_py3
+
 from .utils import get_legacy_check
 
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_compat_scraper]
