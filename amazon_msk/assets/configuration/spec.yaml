@@ -9,7 +9,7 @@ files:
     options:
     - name: use_openmetrics
       description: |
-        Whether or not to use the latest version of OpenMetrics functionality for more features and performance.
+        Use the latest OpenMetrics implementation for more features and better performance.
 
         In a future release, this option will be set to `true` by default.
       value:
