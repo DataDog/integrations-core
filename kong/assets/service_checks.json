@@ -25,7 +25,7 @@
             "host",
             "endpoint"
         ],
-        "name": "OpenMetrics endpoint health status",
+        "name": "OpenMetrics endpoint health",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
     },
     {
