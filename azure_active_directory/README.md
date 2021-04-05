@@ -1,4 +1,4 @@
-# Agent Check: azure_active_directory
+# azure_active_directory
 
 ## Overview
 
