@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.2.1 / 2021-03-22
+
+* [Fixed] Fix models validation. See [#8871](https://github.com/DataDog/integrations-core/pull/8871).
+
 ## 9.2.0 / 2021-03-22
 
 * [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).

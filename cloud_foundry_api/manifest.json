@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "cloud_foundry_api",
   "metric_prefix": "cloud_foundry_api.",
-  "metric_to_check": "",
+  "metric_to_check": "cloud_foundry_api.events.count",
   "creates_events": false,
   "short_description": "Collects Cloud Foundry audit events.",
   "guid": "82e5b924-c8c3-4467-bfde-5838857b6447",

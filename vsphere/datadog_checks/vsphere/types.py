@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Pattern, Type, TypedDict
+from typing import Any, Dict, List, Optional, Pattern, Type, TypedDict
 
 # CONFIG ALIASES
 from pyVmomi import vim
@@ -40,6 +40,7 @@ InstanceConfig = TypedDict(
         'metric_filters': MetricFilterConfig,
         'collect_per_instance_filters': MetricFilterConfig,
         'include_datastore_cluster_folder_tag': bool,
+        'rest_api_options': Dict[str, Any],
     },
 )
 

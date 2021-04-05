@@ -479,6 +479,16 @@ def manifest(ctx, fix):
                     ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
+            elif metadata_in_manifest and check_name != 'snmp':
+                # if we have a metadata.csv file but no `metric_to_check` raise an error
+                metadata_file = get_metadata_file(check_name)
+                if os.path.isfile(metadata_file):
+                    for _, row in read_metadata_rows(metadata_file):
+                        # there are cases of metadata.csv files with just a header but no metrics
+                        if row:
+                            file_failures += 1
+                            display_queue.append((echo_failure, '  metric_to_check not included in manifest.json'))
+                            break
 
             # support
             if is_extras:
