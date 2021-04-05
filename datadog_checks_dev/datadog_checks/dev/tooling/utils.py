@@ -24,11 +24,13 @@ VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DOGWEB_JSON_DASHBOARDS = (
     'hdfs_datanode',
     'hdfs_namenode',
-    'mesos',
+    'mesos_master',
+    'mesos_slave'
 )
 SECONDARY_DASHBOARDS = (
     'cassandra_nodetool',  # included in cassandra
     'kafka_consumer',  # included in kafka
+    'openstack_controller',  # same as openstack
 )
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
