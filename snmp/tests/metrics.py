@@ -107,7 +107,7 @@ IP_IF_COUNTS = [
 ]
 
 # IDRAC profile metrics
-# idrac.yaml
+# _idrac.yaml
 ADAPTER_IF_COUNTS = [
     'adapterRxPackets',
     'adapterTxPackets',
@@ -120,7 +120,7 @@ ADAPTER_IF_COUNTS = [
     'adapterRxMulticast',
     'adapterCollisions',
 ]
-SYSTEM_STATUS_GAUGES = [
+IDRAC_SYSTEM_STATUS_GAUGES = [
     'systemStateChassisStatus',
     'systemStatePowerUnitStatusRedundancy',
     'systemStatePowerSupplyStatusCombined',
@@ -152,6 +152,23 @@ DRS_GAUGES = [
     'drsPowerCurrStatus',
     'drsRedCurrStatus',
     'drsGlobalSystemStatus',
+]
+
+# Dell Poweredge
+# dell-poweredge.yaml
+POWEREDGE_SYSTEM_STATUS_GAUGES = [
+    'systemStateChassisStatus',
+    'systemStatePowerUnitStatusRedundancy',
+    'systemStatePowerSupplyStatusCombined',
+    'systemStateAmperageStatusCombined',
+    'systemStateCoolingUnitStatusRedundancy',
+    'systemStateCoolingDeviceStatusCombined',
+    'systemStateTemperatureStatusCombined',
+    'systemStateMemoryDeviceStatusCombined',
+    'systemStateChassisIntrusionStatusCombined',
+    'systemStatePowerUnitStatusCombined',
+    'systemStateCoolingUnitStatusCombined',
+    'systemStateProcessorDeviceStatusCombined',
 ]
 
 # Base profile metrics for Cisco devices
