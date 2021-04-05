@@ -47,32 +47,6 @@ To configure this check for an Agent running on a host:
 
 3. [Restart the Agent][6].
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
-
-##### Metric collection
-
-| Parameter            | Value                  |
-| -------------------- | ---------------------- |
-| `<INTEGRATION_NAME>` | `iis`                  |
-| `<INIT_CONFIG>`      | blank or `{}`          |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%"}` |
-
-##### Log collection
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
-
-| Parameter      | Value                                            |
-| -------------- | ------------------------------------------------ |
-| `<LOG_CONFIG>` | `{"source": "iis", "service": "<SERVICE_NAME>"}` |
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
 ### Validation
 
 [Run the Agent's status subcommand][9] and look for `iis` under the Checks section.
