@@ -86,7 +86,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
-            'virtualenv>=20.0.8',
+            'virtualenv>=20.4.3',
             'wheel>=0.31.0',
         ]
     },
