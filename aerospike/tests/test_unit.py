@@ -71,9 +71,8 @@ def test_multiple_xdr_metrics(aggregator):
 
 def test_collect_xdr_invalid_data(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(return_value=[])
     check.log = mock.MagicMock()
-    with mock.patch('requests.get', side_effect="ERROR::XDR-not-configured"):
+    with mock.patch('datadog_checks.aerospike.aerospike.get_info', side_effect="ERROR::XDR-not-configured"):
         check.collect_xdr()
         check.log.debug.assert_called_with('Error collecting XDR metrics: ERROR::XDR-not-configured')
 
