@@ -92,7 +92,7 @@ def export(ctx, url, integration, author):
                 match = display_name
 
         if match:
-            new_file_name = file_name.replace(match, '', 1).strip()
+            new_file_name = file_name.replace(match, '', 1).strip(" - ")
             if new_file_name:
                 file_name = new_file_name
 
