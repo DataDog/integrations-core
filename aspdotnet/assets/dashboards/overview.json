@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Using this dashboard, you can get a high-level view of your Twemproxy servers, including:\n\n- client and server connections and errors\n- request and response rates\n- bytes in and out of the proxy, and more.\n\nTo learn more about our Twemproxy integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/twemproxy/?tab=host)\n\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "Monitor performance and identify failovers in your ASP.NET application. \n\nTo learn more about our ASP.NET integration, see:\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/aspdotnet/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
