@@ -9,7 +9,7 @@ import click
 from datadog_checks.dev.tooling.specs.docs import DocsSpec
 from datadog_checks.dev.tooling.specs.docs.consumers import ReadmeConsumer
 
-from ....utils import file_exists, path_join, read_file, write_file
+from ....fileutils import file_exists, path_join, read_file, write_file
 from ...utils import (
     complete_valid_checks,
     get_check_package_directory,

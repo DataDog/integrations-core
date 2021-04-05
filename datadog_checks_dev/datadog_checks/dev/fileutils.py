@@ -15,7 +15,6 @@ from urllib.request import urlopen
 from six import PY3, text_type
 
 from .structures import EnvVars
-from .utils import mock_context_manager
 
 if PY3:
 
@@ -175,7 +174,12 @@ def temp_dir():
 def chdir(d, cwd=None, env_vars=None):
     origin = cwd or os.getcwd()
     os.chdir(d)
-    env_vars = EnvVars(env_vars) if env_vars else mock_context_manager()
+    if env_vars:
+        env_vars = EnvVars(env_vars)
+    else:
+        from .utils import mock_context_manager
+
+        env_vars = mock_context_manager()
 
     try:
         with env_vars:

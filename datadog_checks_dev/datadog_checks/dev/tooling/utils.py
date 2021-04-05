@@ -14,7 +14,7 @@ import requests
 import semver
 import yaml
 
-from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
+from ..fileutils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag

@@ -18,6 +18,8 @@ from six.moves.urllib.request import urlopen
 
 from datadog_checks.dev.fileutils import basepath, file_exists, get_parent_dir, path_join, read_file
 
+from .ci import running_on_ci, running_on_windows_ci  # noqa: F401
+
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'

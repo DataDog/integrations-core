@@ -8,7 +8,7 @@ import uuid
 import click
 import jsonschema
 
-from ....utils import file_exists, read_file, write_file
+from ....fileutils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...git import content_changed
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows

@@ -9,7 +9,7 @@ from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERIT
 from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
 from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer
 
-from ....utils import basepath, file_exists, path_join, read_file, write_file
+from ....fileutils import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
     complete_valid_checks,
     get_config_files,
