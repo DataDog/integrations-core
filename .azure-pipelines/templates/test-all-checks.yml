@@ -323,7 +323,7 @@ jobs:
       displayName: Oracle Database
       os: linux
     - checkName: pdh_check
-      displayName: PDH
+      displayName: PDH (Windows)
       os: windows
     - checkName: pgbouncer
       displayName: PGBouncer
