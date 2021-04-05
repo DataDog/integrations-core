@@ -54,4 +54,3 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/integrations/iis/?tab=host#setup
-[10]: 
