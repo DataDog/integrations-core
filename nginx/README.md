@@ -42,6 +42,9 @@ NGINX Plus packages prior to release 13 include the http status module. For NGIN
 
 #### Prepare NGINX
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
 
 ```conf
@@ -101,6 +104,35 @@ Reload NGINX to enable the status or API endpoint. There's no need for a full re
 ```shell
 sudo nginx -t && sudo nginx -s reload
 ```
+
+<!-- xxx tab "Kubernetes" xxx -->
+
+The following ConfigMap defines the integration template for NGINX containers:
+
+```yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginxconfig
+  namespace: default
+data:
+  nginx.conf: |+
+    worker_processes  5;
+    events {
+      worker_connections  4096;
+    }
+    http {
+        server {
+            location /nginx_status {
+              stub_status on;
+              access_log  /dev/stdout;
+              allow all;
+            }
+        }
+    }
+```
+
+<!-- xxz tab xxx -->
 
 ### Configuration
 
@@ -234,6 +266,10 @@ metadata:
 spec:
   containers:
     - name: nginx
+  volumes:
+        - name: "config"
+          configMap:
+            name: "nginxconfig"
 ```
 
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
