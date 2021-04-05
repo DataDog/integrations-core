@@ -34,19 +34,6 @@ To configure this check for an Agent running on a host:
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
-
-| Parameter            | Value                                  |
-| -------------------- | -------------------------------------- |
-| `<INTEGRATION_NAME>` | `twemproxy`                            |
-| `<INIT_CONFIG>`      | blank or `{}`                          |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22222"}` |
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
 ##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -68,6 +55,28 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample twemproxy.d/conf.yaml][4] for all available configuration options.
    
 3. [Restart the Agent][5].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+| Parameter            | Value                                  |
+| -------------------- | -------------------------------------- |
+| `<INTEGRATION_NAME>` | `twemproxy`                            |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22222"}` |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                            |
+| -------------- | ------------------------------------------------ |
+| `<LOG_CONFIG>` | `{"source": "twemproxy", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 
 See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
