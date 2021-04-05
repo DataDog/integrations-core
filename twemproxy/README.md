@@ -77,10 +77,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-
-See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
-
-
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `twemproxy` under the Checks section.
