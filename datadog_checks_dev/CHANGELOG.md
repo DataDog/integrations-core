@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.3.0 / 2021-04-05
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+* [Added] Add "exception" unit to metadata. See [#9063](https://github.com/DataDog/integrations-core/pull/9063). Thanks [kevingosse](https://github.com/kevingosse).
+* [Added] Add command to run all validations at once. See [#9040](https://github.com/DataDog/integrations-core/pull/9040).
+* [Fixed] Raise validation error if metadata.csv but no metric_to_check. See [#9042](https://github.com/DataDog/integrations-core/pull/9042).
+* [Fixed] Ignore secondary dashboards. See [#9037](https://github.com/DataDog/integrations-core/pull/9037).
+* [Fixed] Include new and legacy openmetrics template in http validation. See [#9034](https://github.com/DataDog/integrations-core/pull/9034).
+
 ## 9.2.1 / 2021-03-22
 
 * [Fixed] Fix models validation. See [#8871](https://github.com/DataDog/integrations-core/pull/8871).
