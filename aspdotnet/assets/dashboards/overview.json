@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Monitor performance and identify failovers in your ASP.NET application. \n\nTo learn more about our ASP.NET integration, see:\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/aspdotnet/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "Monitor performance and identify failovers in your ASP.NET application. \n\nTo learn more about our ASP.NET integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/aspdotnet/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
