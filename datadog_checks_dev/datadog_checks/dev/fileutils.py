@@ -10,9 +10,9 @@ import os
 import shutil
 from contextlib import contextmanager
 from tempfile import mkdtemp
-from urllib.request import urlopen
 
 from six import PY3, text_type
+from six.moves.urllib.request import urlopen
 
 from .structures import EnvVars
 
