@@ -106,6 +106,8 @@ class TLSCheck(AgentCheck):
             self.instance.get('allowed_versions', self.init_config.get('allowed_versions', []))
         )
 
+        self._send_cert_duration = self.instance.get('send_cert_duration', False)
+
         # Global tags
         self._tags = self.instance.get('tags', [])
         if self._name:
@@ -174,6 +176,15 @@ class TLSCheck(AgentCheck):
         if cert is None:
             self.log.debug('Cannot verify certificate expiration')
             return
+
+        if self._send_cert_duration:
+            self.log.debug('Checking issued days of certificate')
+            issued_delta = cert.not_valid_after - cert.not_valid_before
+            issued_seconds = issued_delta.total_seconds()
+            issued_days = seconds_to_days(issued_seconds)
+
+            self.count('tls.issued_days', issued_days, tags=self._tags)
+            self.count('tls.issued_seconds', issued_seconds, tags=self._tags)
 
         self.log.debug('Checking age of certificate')
         delta = cert.not_valid_after - datetime.utcnow()
