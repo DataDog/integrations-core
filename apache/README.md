@@ -90,7 +90,6 @@ LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/serv
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][16].
 
