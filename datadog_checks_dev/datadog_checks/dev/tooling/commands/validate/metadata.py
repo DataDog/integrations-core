@@ -205,6 +205,7 @@ VALID_UNIT_NAMES = {
     'deciwatt',
     'decidegree celsius',
     'span',
+    'exception',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']

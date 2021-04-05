@@ -219,7 +219,7 @@ class TestBaseCheck:
         c.check(EP_INSTANCE)
 
         assert c.get_warnings() == []
-        mock_read_endpoints.assert_called_once_with("thisrecord", "myns")
+        mock_read_endpoints.assert_called_once_with("thisrecord", "myns", _request_timeout=30)
         aggregator.assert_metric("base.leader_election.transitions", value=7, tags=EP_TAGS)
         aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=EP_TAGS)
         aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=EP_TAGS)
@@ -231,7 +231,7 @@ class TestBaseCheck:
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
-        mock_read_configmap.assert_called_once_with("thisrecord", "myns")
+        mock_read_configmap.assert_called_once_with("thisrecord", "myns", _request_timeout=30)
         aggregator.assert_metric("base.leader_election.transitions", value=7, tags=CM_TAGS)
         aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=CM_TAGS)
         aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=CM_TAGS)

@@ -41,6 +41,7 @@ from .utils import (
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
+LOADER_TAG = 'loader:python'
 
 _MAX_FETCH_NUMBER = 10 ** 6
 
@@ -396,13 +397,18 @@ class SnmpCheck(AgentCheck):
         else:
             _, tags = self._check_device(config)
 
+        self.submit_telemetry_metrics(start_time, tags)
+
+    def submit_telemetry_metrics(self, start_time, tags):
+        # type: (float, List[str]) -> None
+        telemetry_tags = tags + [LOADER_TAG]
         # Performance Metrics
         # - for single device, tags contain device specific tags
         # - for network, tags contain network tags, but won't contain individual device tags
         check_duration = time.time() - start_time
-        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=tags)
-        self.gauge('datadog.snmp.check_duration', check_duration, tags=tags)
-        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=tags)
+        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=telemetry_tags)
+        self.gauge('datadog.snmp.check_duration', check_duration, tags=telemetry_tags)
+        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=telemetry_tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
@@ -458,7 +464,7 @@ class SnmpCheck(AgentCheck):
 
             # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
             # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
-            self.gauge('snmp.devices_monitored', 1, tags=tags)
+            self.gauge('snmp.devices_monitored', 1, tags=tags + [LOADER_TAG])
 
             # Report service checks
             status = self.OK
