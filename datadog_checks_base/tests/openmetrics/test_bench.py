@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.dev import get_here
-from datadog_checks.dev.testing.requirements import requires_py3
+from datadog_checks.dev.test_requirements import requires_py3
 
 from .bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVERRIDES
 
