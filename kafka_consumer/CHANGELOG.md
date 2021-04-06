@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.4 / 2021-04-05
+
+* [Fixed] Handle missing partitions and better logging. See [#9089](https://github.com/DataDog/integrations-core/pull/9089).
+* [Fixed] Add more logging. See [#8795](https://github.com/DataDog/integrations-core/pull/8795).
+
 ## 2.8.3 / 2021-03-07
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

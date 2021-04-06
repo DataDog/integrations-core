@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 2.3.1 / 2021-04-06
+
+* [Fixed] Fix no_auth support. See [#9094](https://github.com/DataDog/integrations-core/pull/9094).
+
 ## 2.3.0 / 2021-03-11
 
 * [Added] Cache API client connection. See [#8808](https://github.com/DataDog/integrations-core/pull/8808).
