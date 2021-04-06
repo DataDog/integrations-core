@@ -59,6 +59,9 @@ class MongoConfig(object):
         # Authenticate
         self.do_auth = True
         self.use_x509 = self.ssl_params and not self.password
+        if not self.username:
+            self.log.info("Disabling authentication because a username was not provided.")
+            self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))

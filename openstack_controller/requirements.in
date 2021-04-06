@@ -1,3 +1,1 @@
 openstacksdk==0.24.0
-# Pinning the transitive dependency as the latest (5.0.1) fails to install on python2.
-decorator==4.4.2; python_version < "3.0"
