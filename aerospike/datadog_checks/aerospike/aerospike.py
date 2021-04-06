@@ -241,14 +241,16 @@ class AerospikeCheck(AgentCheck):
                 if not data:
                     self.log.debug("Got invalid data for dc %s", dc)
                     continue
-                if data.startswith('ERROR:'):
-                    self.log.debug("Error collecting XDR metrics: %s", data)
                 self.log.debug("Got data for dc `%s`: %s", dc, data)
                 parsed_data = data.split("\n")
                 tags = ['datacenter:{}'.format(dc)]
                 for line in parsed_data:
                     line = line.strip()
                     if line:
+                        if line.startswith('ERROR:'):
+                            self.log.debug("Error collecting XDR metrics: %s", data)
+                            continue
+
                         if 'returned' in line:
                             # Parse remote dc host and port from
                             # `ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:`
