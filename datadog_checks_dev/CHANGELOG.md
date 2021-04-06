@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.4.1 / 2021-04-06
+
+* [Fixed] Ignore validation for marketplace. See [#9100](https://github.com/DataDog/integrations-core/pull/9100).
+
 ## 9.4.0 / 2021-04-06
 
 * [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
