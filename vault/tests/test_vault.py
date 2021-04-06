@@ -628,7 +628,7 @@ class TestVault:
 
         with mock.patch('datadog_checks.base.utils.http.requests') as r:
             r.get.return_value = mock.MagicMock(status_code=200, content=content, iter_lines=iter_lines)
-            c.process(c._scraper_config, c.METRIC_TRANSFORMERS)
+            c.process(c._scraper_config, c._metric_transformers)
 
             for quantile in [0.5, 0.9, 0.99]:
                 quantile_tag = 'quantile:{}'.format(quantile)

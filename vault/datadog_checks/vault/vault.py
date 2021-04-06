@@ -89,7 +89,7 @@ class Vault(OpenMetricsBaseCheck):
         # potential configuration errors as part of the check run phase.
         self.check_initializations.append(self.parse_config)
 
-        self.METRIC_TRANSFORMERS = {
+        self._metric_transformers = {
             'vault_route_create_*': self.transform_route_metrics,
             'vault_route_delete_*': self.transform_route_metrics,
             'vault_route_list_*': self.transform_route_metrics,
@@ -115,7 +115,7 @@ class Vault(OpenMetricsBaseCheck):
         if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
-                self.process(self._scraper_config, self.METRIC_TRANSFORMERS)
+                self.process(self._scraper_config, self._metric_transformers)
             except Exception as e:
                 error = str(e)
                 if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
