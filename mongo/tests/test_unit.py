@@ -143,6 +143,7 @@ def test_parse_server_config(check):
     assert config.hosts == ['localhost', 'localhost:27018']
     assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz'
     assert config.auth_source == 'test'
+    assert config.do_auth is True
 
 
 def test_username_no_password(check):
@@ -158,8 +159,26 @@ def test_username_no_password(check):
     assert config.username == 'john doe'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == ('mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz')
+    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz'
     assert config.auth_source == 'test'
+    assert config.do_auth is True
+
+
+def test_no_auth(check):
+    """Configuring the check without a username should be allowed to support mongo instances with access control
+    disabled."""
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'database': 'test',
+        'options': {'replicaSet': 'bar!baz'},  # Special character
+    }
+    config = check(instance)._config
+    assert config.username is None
+    assert config.db_name == 'test'
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?replicaSet=bar!baz"
+    assert config.auth_source == 'test'
+    assert config.do_auth is False
 
 
 @pytest.mark.parametrize(
