@@ -42,7 +42,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'datadog_checks_dev',
     'datadog_checks_downloader',
     'directory',  # OS
-    'dotnetclr', # No relevant logs
+    'dotnetclr',  # No relevant logs
     'external_dns',  # remote connection
     'http_check',  # Its not a service
     'linux_proc_extras',
