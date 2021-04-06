@@ -19,6 +19,11 @@ The ASP.NET check is included in the [Datadog Agent][2] package, so you don't ne
 
 2. [Restart the Agent][5]
 
+#### Log Collection
+ASP.NET uses IIS logging. Follow the [setup instructions for IIS][9] in order to view logs related to ASP.NET requests and failures. 
+
+Unhandled 500 level exceptions and events related to your ASP.NET application can be viewed via the Windows Application EventLog. 
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `aspdotnet` under the Checks section.
@@ -48,3 +53,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/integrations/iis/?tab=host#setup

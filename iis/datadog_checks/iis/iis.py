@@ -55,18 +55,12 @@ class IIS(PDHBaseCheck):
         self._remaining_data = {namespace: set() for namespace, _ in self._expected_data}
 
     def check(self, _):
-        if self.refresh_counters:
-            self.log.debug('Refreshing counters')
-            for counter, values in list(iteritems(self._missing_counters)):
-                self._make_counters(self.instance_hash, ([counter], values))
-
+        self.do_refresh_counters()
         self.reset_remaining_data()
 
         for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
-                if self.refresh_counters:
-                    counter.collect_counters()
-                counter_values = counter.get_all_values()
+                counter_values = self.get_counter_values(counter)
             except Exception as e:
                 self.log.error("Failed to get_all_values %s %s: %s", inst_name, dd_name, e)
                 continue
