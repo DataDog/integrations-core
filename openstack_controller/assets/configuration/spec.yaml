@@ -110,7 +110,7 @@ files:
           - name: openstack_cloud_name
             description: |
              Name of the cloud configuration to use.
-             If this parameter is specified, the connection to Openstack only use the configuration file specified in
+             If this parameter is specified, the connection to Openstack only uses the configuration file specified in
              openstack_config_file_path, or at the default location:
              ~/.config/openstack or /etc/openstack
             value:
