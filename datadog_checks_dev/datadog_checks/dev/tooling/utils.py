@@ -14,8 +14,11 @@ import requests
 import semver
 import yaml
 
-from datadog_checks.dev.tooling.catalog_const import DOGWEB_JSON_DASHBOARDS, SECONDARY_DASHBOARDS, \
-    INTEGRATION_LOGS_NOT_POSSIBLE
+from datadog_checks.dev.tooling.catalog_const import (
+    DOGWEB_JSON_DASHBOARDS,
+    INTEGRATION_LOGS_NOT_POSSIBLE,
+    SECONDARY_DASHBOARDS,
+)
 
 from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
