@@ -6,7 +6,7 @@ jmeter.latency.p99,gauge,10,second,,P99 value of the latency.,0,jmeter,jmeter
 jmeter.latency.p95,gauge,10,second,,P95 value of the latency.,0,jmeter,jmeter
 jmeter.latency.p90,gauge,10,second,,P90 value of the latency.,0,jmeter,jmeter
 jmeter.latency.avg,gauge,10,second,,Average value of the latency.,0,jmeter,jmeter
-jmeter.latency.count,gauge,10,request,Number of samples used to compute the latency distribution.,0,jmeter,jmeter
+jmeter.latency.count,gauge,10,request,,Number of samples used to compute the latency distribution.,0,jmeter,jmeter
 jmeter.response_time.max,gauge,10,second,,Maximum value of the response time.,0,jmeter,jmeter
 jmeter.response_time.min,gauge,10,second,,Minimum value of the response time.,0,jmeter,jmeter
 jmeter.response_time.p99,gauge,10,second,,P99 value of the response time.,0,jmeter,jmeter
