@@ -30,6 +30,8 @@ class MySQLConfig(object):
         self.charset = instance.get('charset')
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
+        self.statement_samples_config = instance.get('statement_samples', {}) or {}
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

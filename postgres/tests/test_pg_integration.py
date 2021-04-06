@@ -290,7 +290,7 @@ def test_statement_samples_collect(integration_check, dbm_instance, bob_conn, pg
     check = integration_check(dbm_instance)
     check._connect()
     # clear out any samples kept from previous runs
-    statement_samples_client._events = []
+    statement_samples_client._payloads = []
     query = "SELECT city FROM persons WHERE city = %s"
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -301,7 +301,7 @@ def test_statement_samples_collect(integration_check, dbm_instance, bob_conn, pg
     cursor = bob_conn.cursor()
     cursor.execute(query, ("hello",))
     check.check(dbm_instance)
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == expected_query]
+    matching = [e for e in statement_samples_client.get_events() if e['db']['statement'] == expected_query]
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
         # pg_monitor role exists only in version 10+
         assert len(matching) == 0, "did not expect to catch any events"
@@ -322,7 +322,7 @@ def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instan
     check = integration_check(dbm_instance)
     check._connect()
     # clear out any samples kept from previous runs
-    statement_samples_client._events = []
+    statement_samples_client._payloads = []
     query = "SELECT city FROM persons WHERE city = 'hello'"
     # leave bob's connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
@@ -333,7 +333,7 @@ def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instan
         time.sleep(1)
     cursor.close()
 
-    matching = [e for e in statement_samples_client._events if e['db']['statement'] == query]
+    matching = [e for e in statement_samples_client.get_events() if e['db']['statement'] == query]
     assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
 
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
@@ -345,11 +345,22 @@ def test_statement_samples_collection_loop_inactive_stop(aggregator, integration
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    while check.statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     check.statement_samples._collection_loop_future.result()
     aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
+
+
+def test_statement_samples_collection_loop_cancel(aggregator, integration_check, dbm_instance):
+    dbm_instance['statement_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    check.cancel()
+    # wait for it to stop and make sure it doesn't throw any exceptions
+    check.statement_samples._collection_loop_future.result()
+    assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
+    assert check.statement_samples._db is None, "db connection should be gone"
+    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
 
 
 def test_statement_samples_invalid_activity_view(aggregator, integration_check, dbm_instance):
@@ -367,8 +378,6 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    while check.statement_samples._collection_loop_future.running():
-        time.sleep(0.1)
     # make sure there were no unhandled exceptions
     check.statement_samples._collection_loop_future.result()
     aggregator.assert_metric_has_tag_prefix("dd.postgres.statement_samples.error", "error:database-")

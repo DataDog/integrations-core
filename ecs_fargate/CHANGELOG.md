@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.12.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.12.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).

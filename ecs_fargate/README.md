@@ -172,6 +172,15 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][15] page. **Note**: Some variables are not be available for Fargate.
 
+
+| Environment Variable               | Description                                    |
+|------------------------------------|------------------------------------------------|
+| `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
+| `DD_DOCKER_ENV_AS_TAGS`            | Extract docker container environment variables |
+| `DD_KUBERNETES_POD_LABELS_AS_TAGS` | Extract pod labels                             |
+| `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
+| `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
+
 For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your Docker container labels. This requires you to add the appropriate labels to your other Docker containers. Labels can be added directly in the [task definition][16].
 
 Format for the Agent container:

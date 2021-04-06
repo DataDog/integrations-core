@@ -214,5 +214,5 @@ class Github:
         raise Exception(
             'Make sure your GIT access token has one of the scope '
             + ", ".join(one_of_scopes)
-            + ' at https://github.com/settings/tokens'
+            + ' at https://github.com/settings/tokens and enable SSO on it'
         )

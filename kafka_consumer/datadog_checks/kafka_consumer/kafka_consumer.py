@@ -281,7 +281,9 @@ class KafkaCheck(AgentCheck):
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self._custom_tags)
-            if partition in self.kafka_client._client.cluster.partitions_for_topic(topic):
+
+            partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
+            if partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
@@ -315,13 +317,17 @@ class KafkaCheck(AgentCheck):
                     self.log.debug(message)
 
             else:
-                self.log.warning(
-                    "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
-                    "actually exist in the cluster so skipping reporting these offsets.",
-                    consumer_group,
-                    topic,
-                    partition,
-                )
+                if partitions is None:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
+                        "in the cluster, so skipping reporting these offsets.",
+                    )
+                else:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
+                        "included in the cluster partitions, so skipping reporting these offsets.",
+                    )
+                self.log.warning(msg, consumer_group, topic, partition)
                 self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_consumer_offsets(self):

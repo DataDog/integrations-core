@@ -1,5 +1,9 @@
 # CHANGELOG - MarkLogic
 
+## 1.1.3 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.1.2 / 2020-11-10 / Agent 7.24.0
 
 * [Fixed] Handle unavailable specific resource information. See [#7944](https://github.com/DataDog/integrations-core/pull/7944).

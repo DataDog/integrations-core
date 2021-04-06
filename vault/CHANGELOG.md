@@ -1,5 +1,10 @@
 # CHANGELOG - Vault
 
+## 2.11.0 / 2021-03-07
+
+* [Added] Rename cluster_name tag to vault_cluster. See [#8577](https://github.com/DataDog/integrations-core/pull/8577).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.10.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add new Vault 1.5+ metrics. See [#8031](https://github.com/DataDog/integrations-core/pull/8031).

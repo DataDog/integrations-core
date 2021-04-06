@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_scheduler
 
+## 1.7.0 / 2021-03-07
+
+* [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).
+* [Fixed] Bump base package requirement. See [#8770](https://github.com/DataDog/integrations-core/pull/8770).
+
 ## 1.6.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).

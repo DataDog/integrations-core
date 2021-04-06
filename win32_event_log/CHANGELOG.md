@@ -1,5 +1,11 @@
 # CHANGELOG - win32_event_log
 
+## 2.7.1 / 2021-03-07
+
+* [Fixed] Fix queries for audit success/failure. See [#8596](https://github.com/DataDog/integrations-core/pull/8596).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config specs. See [#7856](https://github.com/DataDog/integrations-core/pull/7856).

@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 2.9.3 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.9.2 / 2020-12-15 / Agent 7.25.0
 
 * [Fixed] Ensure connection failure message is shown on Python 2. See [#8197](https://github.com/DataDog/integrations-core/pull/8197).

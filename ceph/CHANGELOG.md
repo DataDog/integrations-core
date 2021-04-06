@@ -1,5 +1,10 @@
 # CHANGELOG - ceph
 
+## 2.3.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Fail more gracefully. See [#8456](https://github.com/DataDog/integrations-core/pull/8456).
+
 ## 2.3.0 / 2020-11-25 / Agent 7.25.0
 
 * [Added] Support octopus version. See [#8077](https://github.com/DataDog/integrations-core/pull/8077).

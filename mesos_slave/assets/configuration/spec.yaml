@@ -18,7 +18,6 @@ files:
           - name: master_port
             description: Port of your Mesos Master instance.
             value:
-              default: 5050
               example: 5050
               type: integer
           - name: tasks
@@ -55,3 +54,8 @@ files:
                     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
                     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
           - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/mesos/*
+            source: mesos

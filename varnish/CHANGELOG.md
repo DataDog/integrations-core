@@ -1,5 +1,10 @@
 # CHANGELOG - varnish
 
+## 1.9.2 / 2021-03-07
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.9.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Skip metrics instead of throwing exceptions. See [#8053](https://github.com/DataDog/integrations-core/pull/8053).

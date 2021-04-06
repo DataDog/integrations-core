@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.7.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.7.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Refactor and remove legacy hack for Agent 5's build system. See [#6682](https://github.com/DataDog/integrations-core/pull/6682).

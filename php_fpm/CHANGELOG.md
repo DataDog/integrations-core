@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.11.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.11.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7879](https://github.com/DataDog/integrations-core/pull/7879).

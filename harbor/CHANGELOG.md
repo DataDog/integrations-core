@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.8.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.8.0 / 2021-01-04 / Agent 7.26.0
 
 * [Added] Support v2. See [#8269](https://github.com/DataDog/integrations-core/pull/8269).

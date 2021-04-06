@@ -1,0 +1,11 @@
+name: pan.firewall
+files:
+- name: pan.firewall.yaml
+  options:
+  - template: logs
+    required: true
+    example:
+    - type: tcp
+      port: 10518
+      service: "firewall"
+      source: "pan.firewall"

@@ -38,6 +38,8 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
 
     # An extra level deep because of the context manager
     check_name = get_current_check_name(depth=2)
+    # Replace undercores as kubeadm doesn't accept them
+    check_name = check_name.replace("_", "-")
     cluster_name = 'cluster-{}-{}'.format(check_name, get_tox_env())
 
     with TempDir(cluster_name) as temp_dir:

@@ -1,5 +1,13 @@
 # CHANGELOG - iis
 
+## 2.10.5 / 2021-03-15
+
+* [Fixed] Better recreate base class refreshing strategy. See [#8821](https://github.com/DataDog/integrations-core/pull/8821).
+
+## 2.10.4 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.10.3 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Add config specs. See [#8109](https://github.com/DataDog/integrations-core/pull/8109).

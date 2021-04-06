@@ -5,6 +5,13 @@ files:
   - template: init_config
     options:
     - template: init_config/default
+    - name: rest_api_options
+      description: |
+        REST API options
+        Those options are used when making vSphere REST API calls to retrieve vSphere tags
+        when `collect_tags` instance config is enabled.
+      options:
+        - template: init_config/http
   - template: instances
     options:
       - name: host
@@ -277,6 +284,9 @@ files:
           Examples:
           - os_type:windows
           - application_name:my_app
+          Note: Tag collection works only for vSphere 6.5 and above.
+                Tag collection needs vSphere REST API Tagging and an endpoint (tagging.tag_association.object_to_tags)
+                only available from vSphere 6.5.
         value:
           type: boolean
           example: false
@@ -418,6 +428,13 @@ files:
         value:
           type: boolean
           example: true
+      - name: rest_api_options
+        description: |
+          REST API options
+          The options are used when making vSphere REST API calls to retrieve vSphere tags
+          when `collect_tags` instance config is enabled.
+        options:
+          - template: instances/http
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

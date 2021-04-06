@@ -1,5 +1,9 @@
 # CHANGELOG - Kube-dns
 
+## 2.4.2 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.4.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Use agent 6 signature. See [#6907](https://github.com/DataDog/integrations-core/pull/6907).
