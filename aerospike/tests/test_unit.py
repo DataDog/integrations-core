@@ -74,7 +74,7 @@ def test_collect_xdr_invalid_data(aggregator):
     check.log = mock.MagicMock()
     with mock.patch('datadog_checks.aerospike.AerospikeCheck.get_info', return_value="ERROR::XDR-not-configured"):
         check.collect_xdr()
-        check.log.debug.assert_called_with('Error collecting XDR metrics: ERROR::XDR-not-configured')
+        check.log.debug.assert_called_with('Error collecting XDR metrics: %s', 'ERROR::XDR-not-configured')
 
     aggregator.assert_all_metrics_covered()  # no metric
 
