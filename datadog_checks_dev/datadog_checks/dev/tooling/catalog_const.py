@@ -22,6 +22,7 @@ DASHBOARD_NOT_POSSIBLE = {
     'windows_service',  # No metrics
     'cloud_foundry_api',  # only one standard metric
     'dns_check',  # only one standard metric
+    'docker_daemon',  # agent 5 only
     'gke',  # does not emit metrics
     'ntp',  # only one standard metric
     'pivotal_pks',  # does not emit metrics
