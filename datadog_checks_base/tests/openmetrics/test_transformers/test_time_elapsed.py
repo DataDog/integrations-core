@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.base.utils.time import get_timestamp
-from datadog_checks.dev.test_requirements import requires_py3
+from datadog_checks.dev.testing import requires_py3
 
 from ..utils import get_check
 
