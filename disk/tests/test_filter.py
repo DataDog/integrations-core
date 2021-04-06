@@ -4,7 +4,6 @@
 import re
 
 from datadog_checks.dev.test_requirements import requires_windows
-
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.disk.disk import IGNORE_CASE, Disk
 
