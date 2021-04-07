@@ -123,7 +123,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `openstack.d/conf.yaml` file to start collecting your Openstack Logs:
+2. Add this configuration block to your `openstack.d/conf.yaml` file to start collecting your Openstack logs:
 
    ```yaml
    logs:
