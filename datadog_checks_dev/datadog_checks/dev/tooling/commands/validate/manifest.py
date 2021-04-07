@@ -46,11 +46,12 @@ def manifest(ctx, fix):
                 continue
 
             for validator in all_validators:
-                result = validator.validate(check_name, decoded, fix)
-                file_failures += 1 if result.failed else 0
-                file_fixed += 1 if result.fixed else 0
-                for msg_type, message in result.messages.items():
-                    display_queue.append((message_methods[msg_type], message))
+                validator.validate(check_name, decoded, fix)
+                file_failures += 1 if validator.result.failed else 0
+                file_fixed += 1 if validator.result.fixed else 0
+                for msg_type, messages in validator.result.messages.items():
+                    for message in messages:
+                        display_queue.append((message_methods[msg_type], message))
 
             if file_failures > 0:
                 failed_checks += 1

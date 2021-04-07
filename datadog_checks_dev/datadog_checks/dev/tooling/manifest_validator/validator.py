@@ -4,7 +4,6 @@
 import abc
 import os
 import uuid
-from collections import namedtuple
 from typing import Dict
 
 import jsonschema
@@ -263,20 +262,22 @@ def is_metric_in_metadata_file(metric, check):
     return False
 
 
-ValidationResult = namedtuple('ValidationResult', 'failed fixed messages')
+class ValidationResult(object):
+    def __init__(self):
+        self.failed = False
+        self.fixed = False
+        self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
 
 
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
     def __init__(self, is_extras=False, is_marketplace=False):
-        self.result = ValidationResult(
-            failed=False, fixed=False, messages={'success': [], 'warning': [], 'failure': [], 'info': []}
-        )
+        self.result = ValidationResult()
         self.is_extras = is_extras
         self.is_marketplace = is_marketplace
 
     def validate(self, check_name, manifest, should_fix):
-        # type: (str, Dict, bool) -> ValidationResult
+        # type: (str, Dict, bool) -> None
         """Validates the decoded manifest. Will perform inline changes if fix is true"""
         raise NotImplementedError
 
@@ -316,7 +317,6 @@ class GUIDValidator(ManifestValidator):
             else:
                 self.fail(output)
         elif not guid or not isinstance(guid, str):
-
             output = '  required non-null string: guid'
             if fix:
                 new_guid = uuid.uuid4()
@@ -326,7 +326,6 @@ class GUIDValidator(ManifestValidator):
             else:
                 self.fail(output)
         else:
-            self.result.failed = True
             self.all_guids[guid] = check_name
         return self.result
 
