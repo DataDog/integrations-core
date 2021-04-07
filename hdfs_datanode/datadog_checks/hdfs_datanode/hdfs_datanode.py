@@ -74,6 +74,7 @@ class HDFSDataNode(AgentCheck):
         """
         Get datanode beans data from JMX endpoint
         """
+
         response = self._rest_request_to_json(jmx_address, self.JMX_PATH, {'qry': bean_name}, tags=tags)
         beans = response.get('beans', [])
         return beans
