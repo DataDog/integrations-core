@@ -307,6 +307,7 @@ class DockerInterface(object):
 
         if self.dogstatsd:
             command.extend(['-p', f'{DEFAULT_DOGSTATSD_PORT}:{DEFAULT_DOGSTATSD_PORT}/udp'])
+        command.extend(['-p', '8126:8126'])
 
         if 'proxy' in self.metadata:
             if 'http' in self.metadata['proxy']:
