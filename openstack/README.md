@@ -132,7 +132,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
        source: openstack
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
    
 
 ### Validation
