@@ -60,7 +60,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `openstack_controller.d/conf.yaml` file to start collecting your Openstack Logs:
+2. Add this configuration block to your `openstack_controller.d/conf.yaml` file to start collecting your Openstack logs:
 
    ```yaml
    logs:
