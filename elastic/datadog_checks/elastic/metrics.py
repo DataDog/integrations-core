@@ -524,6 +524,15 @@ NODE_SYSTEM_METRICS_POST_5 = {
     'elasticsearch.process.cpu.percent': ('gauge', 'process.cpu.percent'),
 }
 
+CAT_ALLOCATION_METRICS = {
+    'elasticsearch.shards': ('gauge', 'shards'),
+    'elasticsearch.disk.indices': ('gauge', 'disk_indices'),
+    'elasticsearch.disk.used': ('gauge', 'disk_used'),
+    'elasticsearch.disk.avail': ('gauge', 'disk_avail'),
+    'elasticsearch.disk.total': ('gauge', 'disk_total'),
+    'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
+}
+
 
 def stats_for_version(version, jvm_rate=False):
     """
