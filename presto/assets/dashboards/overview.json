@@ -1,6 +1,6 @@
 {
   "author_name": "Datadog",
-  "description": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [How to monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Datadog\u2019s Presto integration docs](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+  "description": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [Monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Presto integration documentation](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
   "layout_type": "ordered",
   "template_variables": [
       {
@@ -14,7 +14,7 @@
       {
           "definition": {
               "background_color": "white",
-              "content": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [How to monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Datadog\u2019s Presto integration docs](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+              "content": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [Monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Presto integration documentation](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
               "font_size": "14",
               "has_padding": true,
               "show_tick": false,
