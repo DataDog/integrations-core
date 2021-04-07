@@ -54,7 +54,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 ##### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
