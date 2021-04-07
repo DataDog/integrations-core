@@ -10,7 +10,7 @@ parameters:
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
-  force_base_package: true
+  force_base_package: false
   pip_cache_config: null
   coverage: true
 
@@ -37,13 +37,6 @@ jobs:
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}
-
-  - ${{ if eq(parameters.validate, 'true') }}:
-    - template: './run-validations.yml'
-      parameters:
-        check: ${{ parameters.check }}
-        repo: ${{ parameters.repo }}
-        ispr: ${{ parameters.ispr }}
 
   - template: './run-tests.yml'
     parameters:

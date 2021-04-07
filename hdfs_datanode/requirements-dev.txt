@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+ddtrace==0.48.0
