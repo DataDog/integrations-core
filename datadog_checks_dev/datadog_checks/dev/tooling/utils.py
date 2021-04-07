@@ -608,8 +608,9 @@ def has_logs(check):
     readme_file = get_readme_file(check)
     if os.path.exists(readme_file):
         with open(readme_file, 'r', encoding='utf-8') as f:
-            if '# Log collection' in f.read():
+            if '# log collection' in f.read().lower():
                 return True
+    return False
 
 
 def find_legacy_signature(check):
