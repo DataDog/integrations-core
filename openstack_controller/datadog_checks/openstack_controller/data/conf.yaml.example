@@ -364,3 +364,4 @@ instances:
 #     source: openstack
 #   - type: file
 #     path: /var/log/libvirt/*.log
+#     source: openstack
