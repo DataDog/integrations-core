@@ -31,9 +31,6 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][5] to begin sending Twemproxy metrics to Datadog.
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
 ##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -55,6 +52,9 @@ To configure this check for an Agent running on a host:
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample twemproxy.d/conf.yaml][4] for all available configuration options.
    
 3. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
