@@ -4,8 +4,6 @@
 
 * [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
 * [Added] Add `native_dynamic` OpenMetrics transformer. See [#9077](https://github.com/DataDog/integrations-core/pull/9077).
-* [Fixed] Revert "Pin decorator to 4.4.2". See [#9093](https://github.com/DataDog/integrations-core/pull/9093).
-* [Fixed] Pin decorator to 4.4.2. See [#9074](https://github.com/DataDog/integrations-core/pull/9074).
 * [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
 
 ## 17.0.0 / 2021-03-30
