@@ -307,6 +307,6 @@ instances:
     ## @param oid_batch_size - integer - optional - default: 60 (core)
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
-    ## Only available for loader `core`.
+    ## Only available for corecheck implementation (`loader: core`).
     #
     # oid_batch_size: 10
