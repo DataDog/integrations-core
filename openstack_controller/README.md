@@ -67,8 +67,6 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
      - type: file
        path: "<LOG_FILE_PATH>"
        source: openstack
-       service: "<SERVICE_NAME>"
-   ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][7] for all available configuration options.
    
