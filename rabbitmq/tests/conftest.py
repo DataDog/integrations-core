@@ -24,6 +24,7 @@ def dd_environment():
     """
 
     env = {}
+
     if 'RABBITMQ_VERSION' not in os.environ:
         pytest.exit('RABBITMQ_VERSION not available')
 

@@ -18,5 +18,4 @@ def test_e2e(dd_agent_check, instance):
         aggregator.assert_metric(metric, tags=tags)
 
     aggregator.assert_all_metrics_covered()
-
     aggregator.assert_service_check('hdfs.datanode.jmx.can_connect', status=HDFSDataNode.OK, tags=tags)
