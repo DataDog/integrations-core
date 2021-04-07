@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from contextlib import contextmanager
 
@@ -227,6 +228,25 @@ class DockerInterface(object):
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
         }
+
+        # CI App stuff
+        env_vars.update({
+            'TF_BUILD': os.environ.get('TF_BUILD'),
+            'BUILD_DEFINITIONNAME': os.environ.get('BUILD_DEFINITIONNAME'),
+            'BUILD_BUILDID': os.environ.get('BUILD_BUILDID'),
+            'BUILD_SOURCESDIRECTORY': os.environ.get('BUILD_SOURCESDIRECTORY'),
+            'BUILD_REPOSITORY_URI': os.environ.get('BUILD_REPOSITORY_URI'),
+            'BUILD_SOURCEBRANCH': os.environ.get('BUILD_SOURCEBRANCH'),
+            'BUILD_SOURCEVERSION': os.environ.get('BUILD_SOURCEVERSION'),
+            'SYSTEM_TEAMFOUNDATIONSERVERURI': os.environ.get('SYSTEM_TEAMFOUNDATIONSERVERURI'),
+            'SYSTEM_TEAMPROJECT': os.environ.get('SYSTEM_TEAMPROJECT'),
+            'SYSTEM_JOBID': os.environ.get('SYSTEM_JOBID'),
+            'SYSTEM_TASKINSTANCEID': os.environ.get('SYSTEM_TASKINSTANCEID'),
+            'SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI': os.environ.get('SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI'),
+            'SYSTEM_PULLREQUEST_SOURCEBRANCH': os.environ.get('SYSTEM_PULLREQUEST_SOURCEBRANCH'),
+            'SYSTEM_PULLREQUEST_SOURCECOMMITID': os.environ.get('SYSTEM_PULLREQUEST_SOURCECOMMITID'),
+        })
+
         if self.dd_url:
             # Set custom agent intake
             env_vars['DD_DD_URL'] = self.dd_url
