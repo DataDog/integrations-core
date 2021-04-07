@@ -12,6 +12,17 @@ variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
 
+resources:
+  containers:
+    - container: dd_agent
+      image: datadog/agent:latest
+      ports:
+        - 8126:8126
+        env:
+          DD_API_KEY: $(DD_API_KEY)
+          DD_HOSTNAME: "none"
+          DD_INSIDE_CI: "true"
+
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
