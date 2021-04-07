@@ -245,7 +245,7 @@ def instance_tls_use_host_header(field, value):
 
 
 def instance_tls_verify(field, value):
-    return True
+    return False
 
 
 def instance_type_overrides(field, value):
@@ -254,6 +254,10 @@ def instance_type_overrides(field, value):
 
 def instance_use_legacy_auth_encoding(field, value):
     return True
+
+
+def instance_use_openmetrics(field, value):
+    return False
 
 
 def instance_username(field, value):

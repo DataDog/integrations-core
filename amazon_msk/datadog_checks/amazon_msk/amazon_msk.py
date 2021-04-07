@@ -4,8 +4,9 @@
 import json
 
 import boto3
+from six import PY2
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
@@ -13,6 +14,17 @@ from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, N
 class AmazonMskCheck(OpenMetricsBaseCheck):
     SERVICE_CHECK_CONNECT = 'aws.msk.can_connect'
     DEFAULT_METRIC_LIMIT = 0
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if not PY2 and is_affirmative(instance.get('use_openmetrics', False)):
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AmazonMskCheckV2
+
+            return AmazonMskCheckV2(name, init_config, instances)
+        else:
+            return super(AmazonMskCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(AmazonMskCheck, self).__init__(

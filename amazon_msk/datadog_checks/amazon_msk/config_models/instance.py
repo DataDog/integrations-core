@@ -117,6 +117,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool]
     type_overrides: Optional[Mapping[str, Any]]
     use_legacy_auth_encoding: Optional[bool]
+    use_openmetrics: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

@@ -7,6 +7,14 @@ files:
       - template: init_config/openmetrics_legacy
   - template: instances
     options:
+    - name: use_openmetrics
+      description: |
+        Use the latest OpenMetrics implementation for more features and better performance.
+
+        In a future release, this option will be set to `true` by default.
+      value:
+        example: false
+        type: boolean
     - name: cluster_arn
       description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
       required: true
@@ -46,3 +54,4 @@ files:
       overrides:
         prometheus_url.hidden: true
         prometheus_url.required: false
+        tls_verify.value.example: false

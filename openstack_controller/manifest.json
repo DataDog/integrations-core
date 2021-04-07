@@ -22,6 +22,9 @@
   "is_public": true,
   "integration_id": "openstack-controller",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",

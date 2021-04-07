@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 9.4.1 / 2021-04-06
+
+* [Fixed] Ignore validation for marketplace. See [#9100](https://github.com/DataDog/integrations-core/pull/9100).
+
+## 9.4.0 / 2021-04-06
+
+* [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
+* [Added] Upgrade virtualenv to 20.4.3. See [#9086](https://github.com/DataDog/integrations-core/pull/9086).
+* [Fixed] Ignore metric_to_check validation for extras. See [#9098](https://github.com/DataDog/integrations-core/pull/9098).
+* [Fixed] Update dashboards status. See [#9083](https://github.com/DataDog/integrations-core/pull/9083).
+* [Fixed] Better support for dashboard filename. See [#9087](https://github.com/DataDog/integrations-core/pull/9087).
+
 ## 9.3.0 / 2021-04-05
 
 * [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).

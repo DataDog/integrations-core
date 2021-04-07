@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 18.0.0 / 2021-04-07
+
+* [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
+* [Added] Add `native_dynamic` OpenMetrics transformer. See [#9077](https://github.com/DataDog/integrations-core/pull/9077).
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
 ## 17.0.0 / 2021-03-30
 
 * [Added] Add `KubeletBase` base class. See [#9051](https://github.com/DataDog/integrations-core/pull/9051).
