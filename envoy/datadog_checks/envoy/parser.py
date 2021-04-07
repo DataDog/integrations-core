@@ -74,7 +74,6 @@ def parse_metric(metric, retry=True, metric_mapping=METRIC_TREE):
         'listener.0.0.0.0_80.downstream_cx_total' ->
         ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
-    metric = 'cluster.service-foo.default.eu-west-3-prd.internal.a4d363d6-a669-b02c-a274-52c1df12bd41.consul.upstream_cx_active'
     metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build = _parse_metric(
         metric, metric_mapping
     )
@@ -86,6 +85,8 @@ def parse_metric(metric, retry=True, metric_mapping=METRIC_TREE):
                 metric, metric_mapping, skip_part
             )
             parsed_metric = '.'.join(metric_parts)
+            if parsed_metric not in METRICS:
+                raise UnknownMetric
         else:
             raise UnknownMetric
     # Rebuild any trailing tags
