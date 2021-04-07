@@ -38,6 +38,13 @@ jobs:
     parameters:
       check: ${{ parameters.check }}
 
+  - ${{ if eq(parameters.validate, 'true') }}:
+    - template: './run-validations.yml'
+      parameters:
+        check: ${{ parameters.check }}
+        repo: ${{ parameters.repo }}
+        ispr: ${{ parameters.ispr }}
+
   - template: './run-tests.yml'
     parameters:
       test_run: '${{ coalesce(parameters.job_name, parameters.check) }}.linux'
