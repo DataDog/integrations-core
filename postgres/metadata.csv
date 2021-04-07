@@ -60,6 +60,7 @@ postgresql.active_queries,gauge,,,,The number of active queries in this database
 postgresql.waiting_queries,gauge,,,,The number of waiting queries in this database.,0,postgres,transactions waiting queries
 postgresql.queries.count,count,,query,,The total count of executed queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries count
 postgresql.queries.time,count,,nanosecond,,The total query execution time per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries time
+postgresql.queries.avg_time,count,,nanosecond,,The average query execution time per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries avg time
 postgresql.queries.rows,count,,row,,The total number of rows retrieved or affected by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries rows
 postgresql.queries.shared_blks_hit,count,,block,,Total number of shared block cache hits by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks hit
 postgresql.queries.shared_blks_read,count,,block,,Total number of shared blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks read

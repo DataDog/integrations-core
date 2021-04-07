@@ -43,6 +43,7 @@ PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
 PG_STAT_STATEMENTS_METRIC_COLUMNS = {
     'calls': 'postgresql.queries.count',
     'total_time': 'postgresql.queries.time',
+    'avg_time': 'postgresql.queries.avg_time',
     'rows': 'postgresql.queries.rows',
     'shared_blks_hit': 'postgresql.queries.shared_blks_hit',
     'shared_blks_read': 'postgresql.queries.shared_blks_read',
@@ -83,6 +84,8 @@ DEFAULT_STATEMENT_METRICS_LIMITS = {
     'avg_time': (400, 0),
     'shared_blks_ratio': (0, 50),
 }
+
+TIME_COLUMNS = ['total_time', 'avg_time']
 
 
 def generate_synthetic_rows(rows):
@@ -229,7 +232,7 @@ class PostgresStatementMetrics(object):
                 if column not in row:
                     continue
                 value = row[column]
-                if column == 'total_time':
+                if column in TIME_COLUMNS:
                     # All "Deep Database Monitoring" timing metrics are in nanoseconds
                     # Postgres tracks pg_stat* timing stats in milliseconds
                     value = milliseconds_to_nanoseconds(value)
