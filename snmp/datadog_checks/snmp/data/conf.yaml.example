@@ -23,7 +23,7 @@ init_config:
   #
   # ignore_nonincreasing_oid: false
 
-  ## @param oid_batch_size - integer - optional - default: 10
+  ## @param oid_batch_size - integer - optional - default: 10 (python), 60 (core)
   ## The number of OIDs handled by each batch. Increasing this number improves performance but
   ## uses more resources.
   #
@@ -303,3 +303,10 @@ instances:
     ## - python: will use legacy python SNMP integration
     #
     # loader: core
+
+    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    ## Only available for corecheck implementation (`loader: core`).
+    #
+    # oid_batch_size: 10
