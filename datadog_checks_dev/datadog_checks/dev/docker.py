@@ -58,6 +58,14 @@ def compose_file_active(compose_file):
     return False
 
 
+def using_windows_containers():
+    """
+    Returns a `bool` indicating whether or not Docker is configured to use Windows containers.
+    """
+    os_type = run_command(['docker', 'info', '--format', '{{.OSType}}'], capture=True, check=True).stdout.strip()
+    return os_type == 'windows'
+
+
 @contextmanager
 def shared_logs(example_log_configs, mount_whitelist=None):
     log_source = example_log_configs[0].get('source', 'check')

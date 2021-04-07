@@ -19,9 +19,11 @@ from .agent import (
     get_agent_exe,
     get_agent_version_manifest,
     get_pip_exe,
+    get_python_exe,
     get_rate_flag,
 )
 from .config import config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
+from .platform import LINUX, WINDOWS
 
 
 class DockerInterface(object):
@@ -57,6 +59,8 @@ class DockerInterface(object):
         self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
+        self.container_platform = WINDOWS if self.metadata.get('docker_platform') == 'windows' else LINUX
+        self.mount_dir = 'C:\\Users\\ContainerAdministrator\\' if self.container_platform == WINDOWS else '/home/'
         self.container_name = f'dd_{self.check}_{self.env}'
         self.config_dir = locate_config_dir(check, env)
         self.config_file = locate_config_file(check, env)
@@ -77,28 +81,43 @@ class DockerInterface(object):
         return self._agent_version or DEFAULT_AGENT_VERSION
 
     @property
+    def windows_container(self):
+        return self.container_platform == WINDOWS
+
+    @property
     def check_mount_dir(self):
-        return f'/home/{self.check}'
+        return f'{self.mount_dir}{self.check}'
 
     @property
     def base_mount_dir(self):
-        return '/home/datadog_checks_base'
+        return f'{self.mount_dir}datadog_checks_base'
 
     @property
     def agent_command(self):
-        return get_agent_exe(self.agent_version)
+        return get_agent_exe(self.agent_version, platform=self.container_platform)
 
     def exec_command(self, command, **kwargs):
-        cmd = 'docker exec'
+        cmd = ['docker', 'exec']
 
         if kwargs.pop('interactive', False):
-            cmd += ' -it'
+            cmd.append('-it')
 
-        if command.startswith('pip '):
-            command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
+        cmd.append(self.container_name)
 
-        cmd += f' {self.container_name}'
-        cmd += f' {command}'
+        if isinstance(command, str):
+            if command.startswith('pip '):
+                args = get_pip_exe(self.python_version, platform=self.container_platform)
+                args[0] = f'"{args[0]}"'
+                command = command.replace('pip', ' '.join(args), 1)
+
+            cmd = f'{" ".join(cmd)} {command}'
+        else:
+            if command[0] == 'pip':
+                command = command[1:]
+                for arg in get_pip_exe(self.python_version, platform=self.container_platform):
+                    cmd.append(arg)
+
+            cmd.extend(command)
 
         return run_command(cmd, **kwargs)
 
@@ -117,35 +136,35 @@ class DockerInterface(object):
     ):
         # JMX check
         if jmx_list:
-            command = f'{self.agent_command} jmx list {jmx_list}'
+            command = [self.agent_command, 'jmx', 'list', jmx_list]
         # Classic check
         else:
-            command = f'{self.agent_command} check {self.check}'
+            command = [self.agent_command, 'check', self.check]
 
             if rate:
-                command += f' {get_rate_flag(self.agent_version)}'
+                command.append(get_rate_flag(self.agent_version))
 
             # These are only available for Agent 6+
             if times is not None:
-                command += f' --check-times {times}'
+                command.extend(['--check-times', str(times)])
 
             if pause is not None:
-                command += f' --pause {pause}'
+                command.extend(['--pause', str(pause)])
 
             if delay is not None:
-                command += f' --delay {delay}'
-
-            if as_json:
-                command += f' --json {as_json}'
-
-            if as_table:
-                command += ' --table'
+                command.extend(['--delay', str(delay)])
 
             if break_point is not None:
-                command += f' --breakpoint {break_point}'
+                command.extend(['--breakpoint', str(break_point)])
+
+            if as_json:
+                command.append('--json')
+
+            if as_table:
+                command.append('--table')
 
         if log_level is not None:
-            command += f' --log-level {log_level}'
+            command.extend(['--log-level', log_level])
 
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
@@ -172,16 +191,38 @@ class DockerInterface(object):
 
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
+            if self.windows_container:
+                self.detect_agent_version_windows()
+            else:
+                self.detect_agent_version_linux()
+
+    def detect_agent_version_windows(self):
+        container_name = f'{self.container_name}_version_detector'
+
+        try:
+            run_command(
+                [
+                    'docker',
+                    'run',
+                    '--rm',
+                    '-d',
+                    '--name',
+                    container_name,
+                    '-e',
+                    f'DD_API_KEY={self.api_key}',
+                    self.agent_build,
+                ],
+                capture=True,
+                check=True,
+            )
+
             command = [
                 'docker',
-                'run',
-                '--rm',
-                '-e',
-                f'DD_API_KEY={self.api_key}',
-                self.agent_build,
-                'head',
-                '--lines=1',
-                f"{get_agent_version_manifest('linux')}",
+                'exec',
+                container_name,
+                get_python_exe(platform=WINDOWS, python_version=self.python_version),
+                '-c',
+                f'print(next(open({get_agent_version_manifest(WINDOWS)!r})))',
             ]
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
@@ -189,16 +230,37 @@ class DockerInterface(object):
                 self._agent_version = int(match.group(1))
 
             self.metadata['agent_version'] = self.agent_version
+        finally:
+            run_command(['docker', 'stop', '-t', '0', container_name], capture=True)
+
+    def detect_agent_version_linux(self):
+        command = [
+            'docker',
+            'run',
+            '--rm',
+            '-e',
+            f'DD_API_KEY={self.api_key}',
+            self.agent_build,
+            'head',
+            '--lines=1',
+            get_agent_version_manifest(LINUX),
+        ]
+        result = run_command(command, capture=True)
+        match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
+        if match:
+            self._agent_version = int(match.group(1))
+
+        self.metadata['agent_version'] = self.agent_version
 
     def update_check(self):
         command = ['docker', 'exec', self.container_name]
-        command.extend(get_pip_exe(self.python_version))
+        command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
         command.extend(('install', '-e', f'{self.check_mount_dir}[deps]'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
-        command.extend(get_pip_exe(self.python_version))
+        command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
         command.extend(('install', '-e', self.base_mount_dir))
         command.extend(('-r', f'{self.base_mount_dir}/{REQUIREMENTS_IN}'))
         run_command(command, capture=True, check=True)
@@ -238,16 +300,21 @@ class DockerInterface(object):
         volumes = [
             # Mount the check directory
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
-            # Mount the /proc directory
-            '/proc:/host/proc',
         ]
+
+        if not self.windows_container:
+            volumes.append('/proc:/host/proc')
+
         if self.config:
             # Mount the config directory, not the file, to ensure updates are propagated
             # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-            volumes.append(f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}')
+            volumes.append(
+                f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version, self.container_platform)}'
+            )
+
         if not ON_WINDOWS:
             volumes.extend(self.metadata.get('docker_volumes', []))
-        else:
+        elif not self.windows_container:
             for volume in self.metadata.get('docker_volumes', []):
                 parts = volume.split(':')
                 possible_file = ':'.join(parts[:2])
@@ -267,10 +334,15 @@ class DockerInterface(object):
             # Ensure consistent naming
             '--name',
             self.container_name,
-            # Ensure access to host network
-            '--network',
-            'host',
         ]
+
+        # Ensure access to host network
+        #
+        # Windows containers accessing the host network must use `docker.for.win.localhost` or `host.docker.internal`:
+        # https://docs.docker.com/docker-for-windows/networking/#use-cases-and-workarounds
+        if not self.windows_container:
+            command.extend(['--network', 'host'])
+
         for volume in volumes:
             command.extend(['-v', volume])
 
@@ -304,14 +376,14 @@ class DockerInterface(object):
 
     def stop_agent(self):
         # Only error for exit code if config actually exists
-        run_command(['docker', 'stop', self.container_name], capture=True, check=self.exists())
+        run_command(['docker', 'stop', '-t', '0', self.container_name], capture=True, check=self.exists())
         run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)
 
     def shell(self):
-        return self.exec_command('/bin/bash', interactive=True)
+        return self.exec_command('cmd' if self.windows_container else '/bin/bash', interactive=True)
 
 
 def get_docker_networks():
