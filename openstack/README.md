@@ -130,7 +130,6 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
      - type: file
        path: "<LOG_FILE_PATH>"
        source: openstack
-       service: "<SERVICE_NAME>"
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
