@@ -117,7 +117,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 ##### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
