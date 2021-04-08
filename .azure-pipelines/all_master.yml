@@ -8,8 +8,6 @@ pr: none
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
-  DD_HOSTNAME: "none"
-  DD_INSIDE_CI: "true"
 
 jobs:
 - template: './templates/test-all-checks.yml'
