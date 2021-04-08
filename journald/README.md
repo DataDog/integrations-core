@@ -49,7 +49,7 @@ To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER
 
 **Note**: With Agent 7.17+, if `container_mode` is set to `true`, the default behavior changes for logs coming from Docker containers. The `source` attribute of your logs is automatically set to the corresponding short image name of the container instead of simply `docker`.
 
-Finally, [restart the Agent][2].
+[Restart the Agent][2].
 
 
 {{% /tab %}}
