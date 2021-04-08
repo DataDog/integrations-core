@@ -8,7 +8,7 @@ Datadog Backend Listener for Apache JMeter is an opensource JMeter plugin used t
 
 ### Installation
 
-The Datadog Backend Listener plugin needs to be installed manually, you can find the latest release and more detailed installation instructions on [this page][1].
+The Datadog Backend Listener plugin needs to be installed manually, you can find the latest release and more detailed installation instructions on [the repo release page][1].
 
 ### Configuration
 
