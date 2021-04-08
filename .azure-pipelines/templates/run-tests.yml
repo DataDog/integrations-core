@@ -20,9 +20,7 @@ steps:
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
-      RECORD: "none"
       PYTEST_ADDOPTS: "--ddtrace"
-      DD_PYTEST_OPERATION_NAME: "test"
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.check }}
@@ -43,9 +41,7 @@ steps:
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
-      RECORD: "none"
       PYTEST_ADDOPTS: "--ddtrace"
-      DD_PYTEST_OPERATION_NAME: "test"
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), ne(parameters.repo, 'core'))}}:
   - script: ddev env test --new-env --junit ${{ parameters.check }}
