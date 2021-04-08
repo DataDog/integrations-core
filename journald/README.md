@@ -83,7 +83,7 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 ##### Filter journal units
 
-It is possible to filter in/out specific units thanks to the following parameters:
+It's possible to filter in and out specific units by using these parameters:
 
 - `include_units`: Includes all units specified.
 - `exclude_units`: Excludes all units specified.
