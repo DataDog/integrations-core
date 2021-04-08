@@ -16,7 +16,7 @@ No additional installation is needed on your server.
 
 Journal files are, by default, owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
 
-1. [Install the Agent][3] on the instance running the journal
+1. [Install the Agent][3] on the instance running the journal.
 2. Add the `dd-agent` user to the `systemd-journal` group by running:
     ```text
      usermod -a -G systemd-journal dd-agent
