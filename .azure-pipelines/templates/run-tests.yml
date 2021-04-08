@@ -10,7 +10,7 @@ parameters:
   force_base_package: false
 
 steps:
-- script: pip install ddtrace && DD_PYTEST_SERVICE="pytest" DD_PYTEST_OPERATION_NAME="initop" pytest --ddtrace test_custom.py && docker exec dd_agent agent status
+- script: pip install ddtrace && DD_PYTEST_SERVICE="pytest" DD_PYTEST_OPERATION_NAME="initop" DD_TRACE_DEBUG=true pytest --ddtrace test_custom.py
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
   - script: ddev test --cov --junit ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
