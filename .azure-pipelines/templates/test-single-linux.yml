@@ -36,12 +36,12 @@ jobs:
 
   - template: './set-up-integrations.yml'
     parameters:
-      check: ${{ parameters.check }}
+      check: hdfs_datanode
 
   - template: './run-tests.yml'
     parameters:
       test_run: '${{ coalesce(parameters.job_name, parameters.check) }}.linux'
-      check: ${{ parameters.check }}
+      check: hdfs_datanode
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
