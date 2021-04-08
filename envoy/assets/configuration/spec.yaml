@@ -66,7 +66,7 @@ files:
         example: true
     - name: parse_unknown_metrics
       description: |
-        Enable to retry parsing for metrics that initially resulted in an UnknownMetric exception.
+        Attempt parsing of metrics that are unknown and will otherwise be skipped.
       value:
         type: boolean
         example: false
