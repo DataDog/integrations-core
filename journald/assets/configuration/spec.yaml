@@ -1,0 +1,9 @@
+name: journald
+files:
+- name: journald.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/journald.log
+      source: journald
