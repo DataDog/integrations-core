@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
+    parse_unknown_metrics: Optional[bool]
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
