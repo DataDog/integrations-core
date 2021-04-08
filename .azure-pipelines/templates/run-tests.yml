@@ -39,7 +39,7 @@ steps:
     env:
       DD_API_KEY: $(DD_API_KEY)
       DD_AGENT_HOST: datadog-agent
-      DD_ENV: prod
+      DD_ENV: staging
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
