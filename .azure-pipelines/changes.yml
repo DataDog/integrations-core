@@ -25,6 +25,8 @@ resources:
 
 jobs:
 - template: './templates/test-single-linux.yml'
+  services:
+    dd_agent: dd_agent
   parameters:
     job_name: Changed
     display: Linux
