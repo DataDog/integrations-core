@@ -4,6 +4,5 @@ files:
   options:
   - template: logs
     example:
-    - type: file
-      path: /var/log/journald.log
-      source: journald
+    - type: journald
+      container_mode: true
