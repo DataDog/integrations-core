@@ -110,7 +110,7 @@ instances:
     # cache_metrics: true
 
     ## @param parse_unknown_metrics - boolean - optional - default: false
-    ## Enable to retry parsing for metrics that initially resulted in an UnknownMetric exception.
+    ## Attempt parsing of metrics that are unknown and will otherwise be skipped.
     #
     # parse_unknown_metrics: false
 
