@@ -16,7 +16,7 @@ steps:
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
       DD_AGENT_HOST: dd_agent
-      DD_ENV: prod
+      DD_ENV: staging
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
