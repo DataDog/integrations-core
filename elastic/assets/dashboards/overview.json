@@ -4,80 +4,82 @@
   "description": "This dashboard provides a **high-level** overview of your Elasticsearch clusters, so you can track the health, performance, and resource utilization of all your nodes. \n\nFurther reading on Elasticsearch monitoring:\n\n- [Datadog's guide to key Elasticsearch metrics](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n- [How to collect Elasticsearch metrics with native and open source tools](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n- [How to monitor Elasticsearch with Datadog](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n- [How to solve 5 Elasticsearch performance and scaling problems](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n- [How to resolve unassigned shards in Elasticsearch](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)\n\n- [Datadog's Elasticsearch integration docs](https://docs.datadoghq.com/integrations/elastic/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
   "widgets": [
     {
-      "id": 0,
+      "id": 1269473067160940,
       "definition": {
-        "title": "Overview",
+        "title": "About Elasticsearch",
         "title_align": "center",
         "type": "group",
-        "background_color": "vivid_yellow",
+        "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 8,
+            "id": 7486330742399846,
+            "definition": {
+              "type": "image",
+              "url": "https://imgix.datadoghq.com/img/blog/monitor-elasticsearch-performance-metrics/160831-elasticsearch-final-a1-how-to-monitor.png?auto=format&w=1440&dpr=2",
+              "sizing": "zoom"
+            },
+            "layout": { "x": 0, "y": 0, "width": 7, "height": 2 }
+          },
+          {
+            "id": 4320908621887210,
             "definition": {
               "type": "note",
-              "content": " This dashboard provides a **high-level** overview of your Elasticsearch clusters, so you can track the health, performance, and resource utilization of all your nodes. \n\nFurther reading on Elasticsearch monitoring:\n\n- [Datadog's guide to key Elasticsearch metrics](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n- [How to collect Elasticsearch metrics with native and open source tools](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n- [How to monitor Elasticsearch with Datadog](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n- [How to solve 5 Elasticsearch performance and scaling problems](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n- [How to resolve unassigned shards in Elasticsearch](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)\n\n- [Datadog's Elasticsearch integration docs](https://docs.datadoghq.com/integrations/elastic/)",
+              "content": "This is a high-level overview of your Elasticsearch clusters, so you can track health status, search and indexing performance, and resource utilization metrics from all your nodes and be better prepared to address potential issues.\n\n##### [**Datadog Elasticsearch integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/elastic/)",
               "background_color": "transparent",
-              "font_size": "14",
+              "font_size": "18",
               "text_align": "left",
-              "vertical_align": "top",
               "show_tick": false,
               "tick_pos": "50%",
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 3 }
           },
           {
-            "id": 9,
+            "id": 2600149140365818,
             "definition": {
-              "title": "Logs",
-              "title_size": "16",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:elasticsearch $cluster_name",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": ["core_host", "core_service"],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-lg"
+              "type": "note",
+              "content": "**Elasticsearch monitoring guides**\n\n[Datadog guide to key Elasticsearch metrics&nbsp;↗](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n[How to monitor Elasticsearch with Datadog&nbsp;↗](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n[Collect metrics with native and open source tools&nbsp;↗](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n[Solve 5 performance and scaling problems&nbsp;↗](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n[Resolve unassigned shards&nbsp;↗](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 5 }
-          },
-          {
-            "id": 10,
-            "definition": {
-              "title": "Elasticsearch hosts",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "hostmap",
-              "requests": {
-                "fill": {
-                  "q": "sum:elasticsearch.fs.total.total_in_bytes{*} by {host}"
-                }
-              },
-              "node_type": "host",
-              "no_metric_hosts": false,
-              "no_group_hosts": false,
-              "group": [],
-              "style": { "palette": "Plasma", "palette_flip": false }
-            },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+            "layout": { "x": 4, "y": 2, "width": 3, "height": 3 }
           }
         ]
-      }
+      },
+      "layout": { "x": 0, "y": 0, "width": 7, "height": 6 }
     },
     {
-      "id": 1,
+      "id": 2442415135853786,
       "definition": {
-        "title": "Disk utilization",
-        "title_align": "left",
+        "title": "Overview",
+        "title_align": "center",
         "type": "group",
-        "background_color": "vivid_yellow",
+        "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 11,
+            "id": 1325288015629784,
+            "definition": {
+              "title": "Available nodes",
+              "title_size": "13",
+              "title_align": "center",
+              "type": "check_status",
+              "check": "elasticsearch.can_connect",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5589091553996584,
             "definition": {
               "title": "Disk space used",
               "title_size": "16",
@@ -85,12 +87,12 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "(1-(sum:elasticsearch.fs.total.available_in_bytes{$cluster_name} by {host}/sum:elasticsearch.fs.total.total_in_bytes{$cluster_name} by {host}))*100",
+                  "q": "(1-(sum:elasticsearch.fs.total.available_in_bytes{$cluster_name,$node_name,*,*,$url,$host}/sum:elasticsearch.fs.total.total_in_bytes{$cluster_name,$node_name,*,*,$url,$host}))*100",
                   "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<",
-                      "palette": "white_on_green",
+                      "palette": "green_on_white",
                       "value": 80
                     },
                     {
@@ -100,7 +102,7 @@
                     },
                     {
                       "comparator": ">",
-                      "palette": "white_on_red",
+                      "palette": "red_on_white",
                       "value": 90
                     }
                   ]
@@ -109,10 +111,24 @@
               "custom_unit": "%",
               "precision": 1
             },
-            "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
+            "layout": { "x": 3, "y": 0, "width": 2, "height": 2 }
           },
           {
-            "id": 12,
+            "id": 6564552811205056,
+            "definition": {
+              "title": "Nodes by cluster status",
+              "title_size": "13",
+              "title_align": "center",
+              "type": "check_status",
+              "check": "elasticsearch.cluster_health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7893840749494752,
             "definition": {
               "title": "Storage size (total)",
               "title_size": "16",
@@ -120,33 +136,60 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:elasticsearch.store.size{$cluster_name}",
+                  "q": "sum:elasticsearch.store.size{$cluster_name,$node_name,*,*,$url,$host}.rollup(avg)",
                   "aggregator": "last"
                 }
               ],
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 2, "y": 0, "width": 2, "height": 2 }
+            "layout": { "x": 3, "y": 2, "width": 2, "height": 2 }
           },
           {
-            "id": 13,
+            "id": 460411066716264,
             "definition": {
-              "title": "File descriptors (average)",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "q": "avg:elasticsearch.process.open_fd{$cluster_name,$node_name}",
-                  "aggregator": "avg"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
+              "type": "note",
+              "content": "**🟡 Yellow cluster status**\nAt least one replica shard is unallocated or missing. Search results are still complete. You may lose data if more shards disappear.",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "25%",
+              "tick_edge": "right",
+              "has_padding": false
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+            "layout": { "x": 0, "y": 4, "width": 2, "height": 1 }
           },
+          {
+            "id": 6798150754581836,
+            "definition": {
+              "type": "note",
+              "content": "**🛑 Red cluster status**\nAt least one primary shard is missing. You are missing data and searches will return partial results. You are unable to index into that shard.",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "25%",
+              "tick_edge": "right",
+              "has_padding": false
+            },
+            "layout": { "x": 2, "y": 4, "width": 2, "height": 1 }
+          }
+        ]
+      },
+      "layout": { "x": 7, "y": 0, "width": 5, "height": 6 }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "Cluster Performance",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "layout_type": "ordered",
+        "widgets": [
           {
             "id": 14,
             "definition": {
@@ -167,13 +210,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.docs.count{$cluster_name}",
+                      "query": "sum:elasticsearch.docs.count{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "dog_classic",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -181,90 +224,61 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
-          }
-        ]
-      },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 5 }
-    },
-    {
-      "id": 2,
-      "definition": {
-        "title": "Node status",
-        "title_align": "left",
-        "type": "group",
-        "background_color": "vivid_yellow",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 15,
-            "definition": {
-              "title": "Nodes by cluster status",
-              "title_size": "13",
-              "title_align": "center",
-              "type": "check_status",
-              "check": "elasticsearch.cluster_health",
-              "grouping": "cluster",
-              "group_by": [],
-              "tags": []
-            },
-            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 5, "height": 2 }
           },
-          {
-            "id": 16,
-            "definition": {
-              "type": "note",
-              "content": "A `yellow` cluster status means that at least one replica shard is **unallocated or missing**. Search results will still be complete, but you may **lose** data if more shards disappear.\n\nA `red` cluster status indicates that at least one `primary` shard is missing. This means you are **missing data** and searches will return partial results. You will also be unable to index into that shard. Consider creating a `monitor` for a `yellow` status that lasts longer than 5 minutes or a `red` status that lasts longer than 1 minute.\n",
-              "background_color": "transparent",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "25%",
-              "tick_edge": "right",
-              "has_padding": true
-            },
-            "layout": { "x": 3, "y": 0, "width": 3, "height": 4 }
-          },
-          {
-            "id": 17,
-            "definition": {
-              "title": "Available nodes",
-              "title_size": "13",
-              "title_align": "center",
-              "type": "check_status",
-              "check": "elasticsearch.can_connect",
-              "grouping": "cluster",
-              "group_by": [],
-              "tags": []
-            },
-            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
-          }
-        ]
-      },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 5 }
-    },
-    {
-      "id": 3,
-      "definition": {
-        "title": "Cluster Performance",
-        "title_align": "center",
-        "type": "group",
-        "background_color": "vivid_green",
-        "layout_type": "ordered",
-        "widgets": [
           {
             "id": 18,
             "definition": {
               "title": "Indexing latency (average)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1", "alias": "Index Time" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:elasticsearch.indexing.index.time{$cluster_name,$url,$node_name,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 2, "width": 5, "height": 2 }
+          },
+          {
+            "id": 20,
+            "definition": {
+              "title": "Pending tasks (total)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
@@ -274,17 +288,20 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
+                  "formulas": [
+                    { "formula": "query1", "alias": "Pending tasks" }
+                  ],
                   "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.indexing.index.time{$cluster_name}",
+                      "query": "sum:elasticsearch.pending_tasks_total{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "dog_classic",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -292,15 +309,15 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 4, "width": 5, "height": 2 }
           },
           {
             "id": 19,
@@ -325,18 +342,18 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.search.query.time{$cluster_name}",
+                      "query": "sum:elasticsearch.search.query.time{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:elasticsearch.search.query.total{$cluster_name}",
+                      "query": "sum:elasticsearch.search.query.total{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
                   ],
                   "style": {
-                    "palette": "cool",
+                    "palette": "warm",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -353,18 +370,18 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.search.fetch.time{$cluster_name}",
+                      "query": "sum:elasticsearch.search.fetch.time{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:elasticsearch.search.fetch.total{$cluster_name}",
+                      "query": "sum:elasticsearch.search.fetch.total{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
                   ],
                   "style": {
-                    "palette": "cool",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -372,66 +389,22 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
-          },
-          {
-            "id": 20,
-            "definition": {
-              "title": "Pending tasks (total)",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_size": "0",
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query1", "alias": "Pending tasks" }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "sum:elasticsearch.pending_tasks_total{$cluster_name}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 6, "width": 5, "height": 2 }
           },
           {
             "id": 21,
             "definition": {
               "type": "note",
-              "content": "Set an **alert** if the query latency exceeds a threshold. If it fires, look for potential resource bottlenecks and investigate whether you need to optimize your queries.\n\n`Fetch latency` should typically be much lower than `query latency`. A consistent increase in fetch latency could indicate a problem with **slow disks**, document enrichment (highlighting relevant text in search results, etc.), or requesting too many results.\n\n",
-              "background_color": "white",
+              "content": "Fetch latency should be much lower than query latency. A consistent increase in fetch latency can indicate a problem with slow disks, document enrichment[1], or requesting too many results.\n\n*Tip: set an alert if the query latency exceeds a threshold. If it fires, look for potential resource bottlenecks and investigate whether you need to optimize your queries.*\n\nFootnote: [1]Highlighting relevant text in search results, etc",
+              "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "top",
@@ -440,35 +413,21 @@
               "tick_edge": "top",
               "has_padding": true
             },
-            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 8, "width": 5, "height": 2 }
           }
         ]
-      }
+      },
+      "layout": { "x": 0, "y": 0, "width": 5, "height": 11 }
     },
     {
-      "id": 4,
+      "id": 3,
       "definition": {
         "title": "Nodes with highest activity ",
         "title_align": "center",
         "type": "group",
-        "background_color": "vivid_green",
+        "background_color": "purple",
         "layout_type": "ordered",
         "widgets": [
-          {
-            "id": 22,
-            "definition": {
-              "title": "Nodes with most queries",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "toplist",
-              "requests": [
-                {
-                  "q": "top(diff(avg:elasticsearch.search.query.total{$cluster_name} by {host}), 25, 'sum', 'desc')"
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
-          },
           {
             "id": 23,
             "definition": {
@@ -476,7 +435,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "horizontal",
+              "legend_layout": "vertical",
               "legend_columns": ["max", "avg"],
               "type": "timeseries",
               "requests": [
@@ -491,13 +450,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.search.query.total{$cluster_name} by {host}",
+                      "query": "avg:elasticsearch.search.query.total{$cluster_name,$url,$node_name,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "warm",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -514,13 +473,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.search.query.total{$cluster_name} by {host}",
+                      "query": "avg:elasticsearch.search.query.total{$cluster_name,$url,$node_name,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
                   ],
                   "style": {
-                    "palette": "cool",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -528,30 +487,52 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 0, "width": 8, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 5, "height": 5 }
           },
           {
             "id": 24,
             "definition": {
-              "title": "Nodes with most indexing activity",
+              "title": "Top indexing activity - Nodes",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
               "requests": [
                 {
-                  "q": "top(diff(avg:elasticsearch.indexing.index.total{$cluster_name} by {host}), 25, 'sum', 'desc')"
+                  "formulas": [
+                    {
+                      "formula": "diff(query1)",
+                      "limit": { "count": 25, "order": "desc" }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#f9e0ff",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:elasticsearch.indexing.index.total{$cluster_name,$url,$node_name,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
                 }
               ]
             },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
+            "layout": { "x": 5, "y": 0, "width": 2, "height": 5 }
           },
           {
             "id": 25,
@@ -560,7 +541,7 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_layout": "horizontal",
+              "legend_layout": "vertical",
               "legend_columns": ["max", "avg"],
               "type": "timeseries",
               "requests": [
@@ -572,13 +553,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.indexing.index.total{$cluster_name} by {host}",
+                      "query": "avg:elasticsearch.indexing.index.total{$cluster_name,$url,$node_name,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "warm",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -592,13 +573,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.indexing.index.total{$cluster_name} by {host}",
+                      "query": "avg:elasticsearch.indexing.index.total{$cluster_name,$url,$node_name,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "cool",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -606,21 +587,59 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 4, "y": 2, "width": 8, "height": 2 }
+            "layout": { "x": 0, "y": 5, "width": 5, "height": 5 }
+          },
+          {
+            "id": 22,
+            "definition": {
+              "title": "Top queries - Nodes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "diff(query1)",
+                      "limit": { "count": 25, "order": "desc" }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#f9e0ff",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:elasticsearch.search.query.total{$cluster_name,$url,$node_name,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": { "x": 5, "y": 5, "width": 2, "height": 5 }
           }
         ]
-      }
+      },
+      "layout": { "x": 5, "y": 0, "width": 7, "height": 11 }
     },
     {
-      "id": 5,
+      "id": 4,
       "definition": {
         "title": "Network Summary",
         "title_align": "center",
@@ -651,17 +670,17 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.transport.rx_count{$cluster_name,$node_name}",
+                      "query": "sum:elasticsearch.transport.rx_count{$cluster_name,$node_name,$url,$host}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
                   ],
                   "style": {
-                    "palette": "green",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 },
                 {
                   "formulas": [
@@ -671,23 +690,23 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.transport.tx_count{$cluster_name,$node_name}",
+                      "query": "sum:elasticsearch.transport.tx_count{$cluster_name,$node_name,$url,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "purple",
+                    "palette": "cool",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -703,7 +722,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_size": "0",
-              "legend_layout": "vertical",
+              "legend_layout": "horizontal",
               "legend_columns": ["max", "min"],
               "type": "timeseries",
               "requests": [
@@ -718,13 +737,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.transport.rx_count{$cluster_name,$node_name} by {host}",
+                      "query": "avg:elasticsearch.transport.rx_count{$cluster_name,$node_name,$url,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "green",
+                    "palette": "purple",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -738,13 +757,13 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:elasticsearch.transport.tx_count{$cluster_name,$node_name} by {host}",
+                      "query": "avg:elasticsearch.transport.tx_count{$cluster_name,$node_name,$url,$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "purple",
+                    "palette": "cool",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -752,43 +771,43 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 5 }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 28,
             "definition": {
               "type": "note",
-              "content": "Node communication is an important part of a balanced cluster.\n\nYou'll want to monitor the network to ensure it's healthy and keeping up with the demands on your cluster *(e.g. as shards are replicated or rebalanced across nodes)*.\n\n`Elasticsearch` provides transport metrics about cluster communication, but you can also look at the rate of bytes sent and received to understand **traffic** on your network.",
+              "content": "As shards are replicated or rebalanced across nodes it's important to monitor the network. Elasticsearch provides transport metrics about cluster communication. You can also look at the rate of bytes sent and received to understand traffic on your network.",
               "background_color": "transparent",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "top",
               "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
+              "tick_pos": "25%",
+              "tick_edge": "bottom",
+              "has_padding": false
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 3, "width": 12, "height": 1 }
           }
         ]
       },
       "layout": { "is_column_break": true }
     },
     {
-      "id": 6,
+      "id": 5,
       "definition": {
         "title": "HTTP Traffic",
         "title_align": "center",
         "type": "group",
-        "background_color": "vivid_blue",
+        "background_color": "blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -814,7 +833,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.get.missing.total{$cluster_name,$node_name}",
+                      "query": "sum:elasticsearch.get.missing.total{$cluster_name,$node_name,$url,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -828,9 +847,9 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -843,10 +862,10 @@
             "definition": {
               "type": "note",
               "content": "A `GET` request retrieves a document by its ID and is more straightforward than a normal search request. \n\nAn unsuccessful get-by-ID request means that the document ID was **not found**.\n\n`GET` requests are *typically* not problematic, but you may still want to know when they are unsuccessful.",
-              "background_color": "white",
+              "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
-              "vertical_align": "center",
+              "vertical_align": "top",
               "show_tick": true,
               "tick_pos": "50%",
               "tick_edge": "left",
@@ -877,7 +896,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:elasticsearch.http.total_opened{$cluster_name}",
+                      "query": "sum:elasticsearch.http.total_opened{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -891,9 +910,9 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -905,11 +924,11 @@
             "id": 32,
             "definition": {
               "type": "note",
-              "content": "Requests sent in any language (excluding `Java`) will communicate with Elasticsearch using RESTful API over HTTP.\n\nIf the number of opened HTTP connections is constantly `increasing`, your HTTP clients may not be properly establishing **persistent** connections.",
-              "background_color": "white",
+              "content": "If the number of opened HTTP connections is constantly increasing, your HTTP clients may not be properly establishing **persistent** connections.\n\nRequests sent in any language (excluding Java) will communicate with Elasticsearch using a RESTful API over HTTP.",
+              "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
-              "vertical_align": "center",
+              "vertical_align": "top",
               "show_tick": true,
               "tick_pos": "50%",
               "tick_edge": "left",
@@ -921,16 +940,16 @@
       }
     },
     {
-      "id": 7,
+      "id": 1630125732206948,
       "definition": {
         "title": "Shards",
-        "title_align": "center",
+        "title_align": "left",
         "type": "group",
         "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 33,
+            "id": 361774670041768,
             "definition": {
               "title": "Active shards",
               "title_size": "16",
@@ -938,17 +957,33 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:elasticsearch.active_shards{$cluster_name}",
+                  "q": "max:elasticsearch.active_shards{$cluster_name,$url,$node_name,$host}",
                   "aggregator": "max"
                 }
               ],
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 2, "height": 1 }
           },
           {
-            "id": 35,
+            "id": 5557246177336346,
+            "definition": {
+              "type": "note",
+              "content": "Causes for an unassigned shard value that is `>  0`\n\n**1. Purposeful delay of shard allocation**\n\n> If this is the case, a log will appear with this message `delaying allocation for [54] unassigned shards, next check in [1m]`\n\n**2. Too many shards for not enough nodes**\n\n> Make sure that every index in your cluster is initialized with fewer replicas per primary shard than the number of nodes in your cluster.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 2, "y": 0, "width": 4, "height": 4 }
+          },
+          {
+            "id": 8940003715104904,
             "definition": {
               "title": "Initializing shards",
               "title_size": "16",
@@ -956,17 +991,17 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:elasticsearch.initializing_shards{$cluster_name}",
+                  "q": "max:elasticsearch.initializing_shards{$cluster_name,$url,$node_name,$host}",
                   "aggregator": "max",
                   "conditional_formats": [
                     {
                       "comparator": ">",
-                      "palette": "white_on_red",
+                      "palette": "black_on_light_red",
                       "value": 0
                     },
                     {
                       "comparator": ">=",
-                      "palette": "white_on_green",
+                      "palette": "black_on_light_green",
                       "value": 0
                     }
                   ]
@@ -976,56 +1011,10 @@
               "custom_unit": "",
               "precision": 0
             },
-            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+            "layout": { "x": 0, "y": 1, "width": 2, "height": 1 }
           },
           {
-            "id": 36,
-            "definition": {
-              "type": "note",
-              "content": "An `unassigned shard` value that is `>  0` could be caused by:\n- **Purposeful delay** of shard allocation. If this is the case, a log with the message `delaying allocation for [54] unassigned shards, next check in [1m]` should appear.\n- **Too many shards** for not enough **nodes**. Make sure that every index in your cluster is initialised with **fewer** replicas per primary shard than the number of nodes in your cluster.\n",
-              "background_color": "transparent",
-              "font_size": "14",
-              "text_align": "left",
-              "vertical_align": "top",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 4 }
-          },
-          {
-            "id": 34,
-            "definition": {
-              "title": "Unassigned shards",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "q": "max:elasticsearch.unassigned_shards{$cluster_name}",
-                  "aggregator": "max",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_red",
-                      "value": 0
-                    },
-                    {
-                      "comparator": ">=",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 0
-            },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
-          },
-          {
-            "id": 37,
+            "id": 8680461317763444,
             "definition": {
               "title": "Relocating shards",
               "title_size": "16",
@@ -1033,17 +1022,17 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:elasticsearch.relocating_shards{$cluster_name}",
+                  "q": "max:elasticsearch.relocating_shards{$cluster_name,$url,$node_name,$host}",
                   "aggregator": "max",
                   "conditional_formats": [
                     {
                       "comparator": ">",
-                      "palette": "white_on_red",
+                      "palette": "black_on_light_red",
                       "value": 0
                     },
                     {
                       "comparator": "<=",
-                      "palette": "white_on_green",
+                      "palette": "black_on_light_green",
                       "value": 0
                     }
                   ]
@@ -1052,10 +1041,40 @@
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 4, "y": 2, "width": 2, "height": 2 }
+            "layout": { "x": 0, "y": 2, "width": 2, "height": 1 }
           },
           {
-            "id": 38,
+            "id": 6287562170317006,
+            "definition": {
+              "title": "Unassigned shards",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "max:elasticsearch.unassigned_shards{$cluster_name,$url,$node_name,$host}",
+                  "aggregator": "max",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "black_on_light_red",
+                      "value": 0
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "black_on_light_green",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": { "x": 0, "y": 3, "width": 2, "height": 1 }
+          },
+          {
+            "id": 4097357055277386,
             "definition": {
               "title": "Active shards (total and primary)",
               "title_size": "16",
@@ -1074,7 +1093,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:elasticsearch.active_shards{$cluster_name}",
+                      "query": "max:elasticsearch.active_shards{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1094,7 +1113,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:elasticsearch.active_primary_shards{$cluster_name}",
+                      "query": "max:elasticsearch.active_primary_shards{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1108,18 +1127,18 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 4, "width": 6, "height": 3 }
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
           },
           {
-            "id": 39,
+            "id": 8982651895803684,
             "definition": {
               "title": "Shards initializing, relocating, unassigned",
               "title_size": "16",
@@ -1138,7 +1157,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:elasticsearch.initializing_shards{$cluster_name}",
+                      "query": "max:elasticsearch.initializing_shards{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1158,7 +1177,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:elasticsearch.unassigned_shards{$cluster_name}",
+                      "query": "max:elasticsearch.unassigned_shards{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1178,7 +1197,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:elasticsearch.relocating_shards{$cluster_name}",
+                      "query": "max:elasticsearch.relocating_shards{$cluster_name,$url,$node_name,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1192,27 +1211,81 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 6, "y": 4, "width": 6, "height": 3 }
+            "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
           }
         ]
-      }
+      },
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 9 }
+    },
+    {
+      "id": 2309494748856468,
+      "definition": {
+        "title": "Logs",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "white",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 540207495208726,
+            "definition": {
+              "title": "Errors",
+              "title_size": "16",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:elasticsearch $cluster_name $url $node_name $host status:(error OR critical)",
+              "sort": { "column": "time", "order": "desc" },
+              "columns": [
+                "host",
+                "cluster_name",
+                "service",
+                "node_name",
+                "url"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 4 }
+          },
+          {
+            "id": 9,
+            "definition": {
+              "title": "All Logs",
+              "title_size": "16",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:elasticsearch $cluster_name $url $node_name $host",
+              "sort": { "column": "time", "order": "desc" },
+              "columns": ["core_host", "core_service"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-lg"
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 4 }
+          }
+        ]
+      },
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 9 }
     }
   ],
   "template_variables": [
     { "name": "cluster_name", "default": "*", "prefix": "cluster_name" },
-    { "name": "node_name", "default": "*", "prefix": "node_name" }
+    { "name": "node_name", "default": "*", "prefix": "node_name" },
+    { "name": "url", "default": "*", "prefix": "url" },
+    { "name": "host", "default": "*", "prefix": "host" }
   ],
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "s8v-99w-rk6"
+  "id": "hee-hag-gye"
 }
