@@ -15,7 +15,7 @@ steps:
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-      DD_AGENT_HOST: datadog-agent
+      DD_AGENT_HOST: dd_agent
       DD_ENV: prod
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
@@ -38,7 +38,7 @@ steps:
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
-      DD_AGENT_HOST: datadog-agent
+      DD_AGENT_HOST: dd_agent
       DD_ENV: staging
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
