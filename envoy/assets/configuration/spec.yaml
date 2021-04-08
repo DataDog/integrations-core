@@ -64,6 +64,12 @@ files:
       value:
         type: boolean
         example: true
+    - name: parse_unknown_metrics
+      description: |
+        Enable to retry parsing for metrics that initially resulted in an UnknownMetric exception.
+      value:
+        type: boolean
+        example: false
     - template: instances/default
     - template: instances/http
       overrides:

@@ -64,7 +64,7 @@ def _parse_metric(metric, metric_mapping, skip_part=None):
     return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build
 
 
-def parse_metric(metric, retry=True, metric_mapping=METRIC_TREE):
+def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
     # type: (str, Dict[str, Any]) -> Tuple[str, List[str], str]
     """Takes a metric formatted by Envoy and splits it into a unique
     metric name. Returns the unique metric name, a list of tags, and
@@ -80,12 +80,16 @@ def parse_metric(metric, retry=True, metric_mapping=METRIC_TREE):
     parsed_metric = '.'.join(metric_parts)
     if parsed_metric not in METRICS:
         if retry:
-            skip_part = metric_parts.pop()
-            metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build = _parse_metric(
-                metric, metric_mapping, skip_part
-            )
-            parsed_metric = '.'.join(metric_parts)
-            if parsed_metric not in METRICS:
+            # Retry parsing for metrics by skipping the last matched metric part
+            while len(metric_parts) > 1:
+                skip_part = metric_parts.pop()
+                metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build = _parse_metric(
+                    metric, metric_mapping, skip_part
+                )
+                parsed_metric = '.'.join(metric_parts)
+                if parsed_metric in METRICS:
+                    break
+            else:
                 raise UnknownMetric
         else:
             raise UnknownMetric
