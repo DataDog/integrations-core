@@ -45,7 +45,7 @@ logs:
       container_mode: true
 ```
 
-To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER` , `_SYSTEMD_UNIT` and `_COMM`and set them to the first non empty value. In order to take advantage of the integration pipelines, Datadog recommends setting the `SyslogIdentifier` parameter in the `systemd` service file directly, or in a `systemd` service override file. Their location depends on your distribution, but you can find the location of the `systemd` service file by using the command `systemctl show -p FragmentPath <unit_name>`.
+To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER` , `_SYSTEMD_UNIT` and `_COMM`and set them to the first non empty value. To take advantage of the integration pipelines, Datadog recommends setting the `SyslogIdentifier` parameter in the `systemd` service file directly, or in a `systemd` service override file. Their location depends on your distribution, but you can find the location of the `systemd` service file by using the command `systemctl show -p FragmentPath <unit_name>`.
 
 **Note**: With Agent 7.17+, if `container_mode` is set to `true`, the default behavior changes for logs coming from docker containers. The `source` attribute of your logs is automatically set to the corresponding short image name of the container instead of simply `docker`.
 
