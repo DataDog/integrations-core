@@ -31,7 +31,7 @@ Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml` with:
+Collecting logs is disabled by default in the Datadog Agent, you need to enable it in the `datadog.yaml` with:
 
 ```yaml
 logs_enabled: true
