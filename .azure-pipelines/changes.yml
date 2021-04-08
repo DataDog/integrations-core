@@ -14,7 +14,7 @@ variables:
 
 resources:
   containers:
-    - container: datadog_agent
+    - container: dd_agent
       image: datadog/agent:latest
       ports:
         - 8126:8126

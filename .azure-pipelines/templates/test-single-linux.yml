@@ -17,7 +17,7 @@ parameters:
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
   services:
-    datadog_agent: datadog_agent
+    dd_agent: dd_agent
   displayName: '${{ parameters.display }}'
 
   pool:
