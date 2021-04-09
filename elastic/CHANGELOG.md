@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 2.0.0 / 2021-04-09
+
+* [Added] Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
+* [Changed] Normalize memory stats to mebibytes. See [#9128](https://github.com/DataDog/integrations-core/pull/9128).
+
 ## 1.24.0 / 2021-02-10
 
 * [Added] Rename cluster_name tag to elastic_cluster. See [#8526](https://github.com/DataDog/integrations-core/pull/8526).
