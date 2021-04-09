@@ -3,7 +3,7 @@
 ## Overview
 
 Systemd-journald is a system service that collects and stores logging data. 
-It creates and maintains structured, indexed journals based on logging information that is received from a variety of sources.
+It creates and maintains structured, indexed journals based on logging information from a variety of sources.
 
 ## Setup
 
@@ -16,7 +16,7 @@ No additional installation is needed on your server.
 
 Journal files are, by default, owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
 
-1. [Install the Agent][3] on the instance running the journal
+1. [Install the Agent][3] on the instance running the journal.
 2. Add the `dd-agent` user to the `systemd-journal` group by running:
     ```text
      usermod -a -G systemd-journal dd-agent
@@ -31,7 +31,7 @@ Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml` with:
+Collecting logs is disabled by default in the Datadog Agent, you need to enable it in the `datadog.yaml` with:
 
 ```yaml
 logs_enabled: true
@@ -45,11 +45,11 @@ logs:
       container_mode: true
 ```
 
-To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER` , `_SYSTEMD_UNIT` and `_COMM`and set them to the first non empty value. In order to take advantage of the integration pipelines, Datadog recommends setting the `SyslogIdentifier` parameter in the `systemd` service file directly, or in a `systemd` service override file. Their location depends on your distribution, but you can find the location of the `systemd` service file by using the command `systemctl show -p FragmentPath <unit_name>`.
+To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER` , `_SYSTEMD_UNIT` and `_COMM`and set them to the first non empty value. To take advantage of the integration pipelines, Datadog recommends setting the `SyslogIdentifier` parameter in the `systemd` service file directly, or in a `systemd` service override file. Their location depends on your distribution, but you can find the location of the `systemd` service file by using the command `systemctl show -p FragmentPath <unit_name>`.
 
-**Note**: With Agent 7.17+, if `container_mode` is set to `true`, the default behavior changes for logs coming from docker containers. The `source` attribute of your logs is automatically set to the corresponding short image name of the container instead of simply `docker`.
+**Note**: With Agent 7.17+, if `container_mode` is set to `true`, the default behavior changes for logs coming from Docker containers. The `source` attribute of your logs is automatically set to the corresponding short image name of the container instead of simply `docker`.
 
-Finally, [restart the Agent][2].
+[Restart the Agent][2].
 
 
 {{% /tab %}}
@@ -83,7 +83,7 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 ##### Filter journal units
 
-It is possible to filter in/out specific units thanks to the following parameters:
+It's possible to filter in and out specific units by using these parameters:
 
 - `include_units`: Includes all units specified.
 - `exclude_units`: Excludes all units specified.
