@@ -15,13 +15,11 @@ steps:
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-      DD_AGENT_HOST: dd_agent
       DD_ENV: staging
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       DD_TRACE_DEBUG: "true"
-      PYTEST_ADDOPTS: "--ddtrace"
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.check }}
@@ -37,13 +35,11 @@ steps:
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
-      DD_AGENT_HOST: dd_agent
       DD_ENV: staging
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       DD_TRACE_DEBUG: "true"
-      PYTEST_ADDOPTS: "--ddtrace"
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), ne(parameters.repo, 'core'))}}:
   - script: ddev env test --new-env --junit ${{ parameters.check }}

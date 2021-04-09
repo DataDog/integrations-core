@@ -265,6 +265,8 @@ def construct_pytest_options(
     if test_filter:
         pytest_options += f' -k "{test_filter}"'
 
+    pytest_options += " --ddtrace"
+
     if pytest_args:
         pytest_options += f' {pytest_args}'
 
