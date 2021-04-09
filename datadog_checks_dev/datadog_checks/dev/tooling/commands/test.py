@@ -8,7 +8,7 @@ import click
 
 from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
+from ...utils import ON_WINDOWS, chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
@@ -160,6 +160,15 @@ def test(
             echo_debug(f"No envs found for: `{check}`")
             continue
 
+        ddtrace_check = ddtrace
+        if ddtrace and ON_WINDOWS and any('py2' in env for env in envs):
+            # The pytest flag --ddtrace is not available for windows-py2 env.
+            # Remvoving it so it does not fail.
+            echo_warning(
+                'ddtrace flag is not available for windows-py2 environments ; disabling the flag for this check.'
+            )
+            ddtrace_check = False
+
         # This is for ensuring proper spacing between output of multiple checks' tests.
         # Basically this avoids printing a new line before the first check's tests.
         output_separator = '\n' if tests_ran else ''
@@ -183,7 +192,7 @@ def test(
             test_filter=test_filter,
             pytest_args=pytest_args,
             e2e=e2e,
-            ddtrace=ddtrace,
+            ddtrace=ddtrace_check,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
