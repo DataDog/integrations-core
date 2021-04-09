@@ -20,7 +20,7 @@ jobs:
   displayName: '${{ parameters.display }}'
 
   services:
-    ${{ if not(eq(parameters.ddtrace_flag, '')) }}:
+    ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       dd_agent: dd_agent
 
   pool:
@@ -29,7 +29,7 @@ jobs:
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
-    ${{ if not(eq(parameters.ddtrace_flag, '')) }}:
+    ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: datadog-integrations-core
       DD_TAGS: "team:agent-integrations"
