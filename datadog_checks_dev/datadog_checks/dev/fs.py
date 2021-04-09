@@ -9,6 +9,7 @@ import inspect
 import os
 import shutil
 from contextlib import contextmanager
+from io import open
 from tempfile import mkdtemp
 
 from six import PY3, text_type
