@@ -7,7 +7,7 @@ from typing import List, Optional, Sequence, Set, Tuple
 
 import click
 
-from .....fileutils import basepath, chdir
+from .....fs import basepath, chdir
 from .....subprocess import SubprocessError, run_command
 from .....utils import get_next
 from ....config import APP_DIR

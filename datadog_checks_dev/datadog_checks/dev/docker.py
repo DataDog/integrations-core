@@ -11,7 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fileutils import create_file, file_exists
+from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command

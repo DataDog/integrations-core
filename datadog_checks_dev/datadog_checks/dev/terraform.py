@@ -11,7 +11,7 @@ import pytest
 from six import PY3
 
 from .env import environment_run
-from .fileutils import chdir, copy_dir_contents, copy_path, get_here, path_join
+from .fs import chdir, copy_dir_contents, copy_path, get_here, path_join
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
 

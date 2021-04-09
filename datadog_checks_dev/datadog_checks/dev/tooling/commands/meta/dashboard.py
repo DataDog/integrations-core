@@ -8,7 +8,7 @@ import re
 import click
 import requests
 
-from ....fileutils import ensure_dir_exists, path_join, write_file
+from ....fs import ensure_dir_exists, path_join, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_success

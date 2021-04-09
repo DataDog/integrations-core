@@ -5,7 +5,7 @@ import os
 import re
 from fnmatch import fnmatch
 
-from ..fileutils import chdir, path_join, read_file_binary, write_file_binary
+from ..fs import chdir, path_join, read_file_binary, write_file_binary
 from ..subprocess import run_command
 from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root

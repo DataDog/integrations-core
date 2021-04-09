@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
-File/path utility functions abstracting common operations, specially designed to be used
+Filesystem utility functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
 import inspect

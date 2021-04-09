@@ -6,7 +6,7 @@ from collections import defaultdict, deque
 
 import click
 
-from ....fileutils import chdir, write_file
+from ....fs import chdir, write_file
 from ....subprocess import run_command
 from ...constants import get_root
 from ...utils import load_manifest

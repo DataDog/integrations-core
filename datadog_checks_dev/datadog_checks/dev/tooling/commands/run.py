@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...fileutils import chdir
+from ...fs import chdir
 from ...subprocess import run_command
 from ..constants import get_root
 from .console import UNKNOWN_OPTIONS

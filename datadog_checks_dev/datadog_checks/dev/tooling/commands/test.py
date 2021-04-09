@@ -8,7 +8,7 @@ import click
 
 from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...ci import get_ci_env_vars, running_on_ci
-from ...fileutils import chdir, file_exists, remove_path
+from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
 from ...utils import get_next
 from ..constants import get_root
