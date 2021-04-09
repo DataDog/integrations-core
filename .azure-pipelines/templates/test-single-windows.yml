@@ -4,6 +4,7 @@ parameters:
   display: ''
   test: true
   test_e2e: false
+  ddtrace_flag: ''
   benchmark: false
   latest_metrics: false
   validate: false
@@ -18,12 +19,21 @@ jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
   displayName: '${{ parameters.display }}'
 
+  services:
+    ${{ if not(eq(parameters.ddtrace, 'true')) }}:
+      dd_agent: dd_agent
+
   pool:
     vmImage: 'windows-2019'
 
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+    ${{ if not(eq(parameters.ddtrace_flag, '')) }}:
+      DD_ENV: ci
+      DD_SERVICE: datadog-integrations-core
+      DD_TAGS: "team:agent-integrations"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
 
   steps:
   - template: './checkout-code.yml'
