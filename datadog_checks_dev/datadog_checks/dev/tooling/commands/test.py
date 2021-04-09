@@ -163,7 +163,7 @@ def test(
         ddtrace_check = ddtrace
         if ddtrace and ON_WINDOWS and any('py2' in env for env in envs):
             # The pytest flag --ddtrace is not available for windows-py2 env.
-            # Remvoving it so it does not fail.
+            # Removing it so it does not fail.
             echo_warning(
                 'ddtrace flag is not available for windows-py2 environments ; disabling the flag for this check.'
             )
