@@ -110,7 +110,7 @@ def _all_synced_with_remote(refs: Sequence[str]) -> bool:
     return all(ref not in result.stderr for ref in refs)
 
 
-def _get_and_parse_commits(base_ref: str, target_ref: str, cherry_picks:bool) -> List[Tuple[str, str]]:
+def _get_and_parse_commits(base_ref: str, target_ref: str, cherry_picks: bool) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
     # Format as '<commit_hash> <subject line>', e.g.:
@@ -216,24 +216,24 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     '--move-cards',
     is_flag=True,
     help='Do not create a card for a change, but move the existing card from '
-         + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
+    + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
 )
 @click.option(
     '--cherry-picks',
     is_flag=True,
     help='Check if commits were cherry-picked from `target_ref` onto `base_ref` and skip them.'
-         ' Command may take long if there are many commits.'
+    ' Command may take long if there are many commits.',
 )
 @click.pass_context
 def testable(
-        ctx: click.Context,
-        base_ref: str,
-        target_ref: str,
-        milestone: str,
-        dry_run: bool,
-        update_rc_builds_cards: bool,
-        move_cards: bool,
-        cherry_picks: bool
+    ctx: click.Context,
+    base_ref: str,
+    target_ref: str,
+    milestone: str,
+    dry_run: bool,
+    update_rc_builds_cards: bool,
+    move_cards: bool,
+    cherry_picks: bool,
 ) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
