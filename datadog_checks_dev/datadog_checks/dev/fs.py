@@ -6,10 +6,10 @@ Filesystem utility functions abstracting common operations, specially designed t
 by Integrations within tests.
 """
 import inspect
-from io import open
 import os
 import shutil
 from contextlib import contextmanager
+from io import open
 from tempfile import mkdtemp
 
 from six import PY3, text_type
