@@ -210,6 +210,7 @@ def construct_pytest_options(
     test_filter='',
     pytest_args='',
     e2e=False,
+    ddtrace=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -235,6 +236,9 @@ def construct_pytest_options(
     if latest_metrics:
         pytest_options += ' --run-latest-metrics'
         marker = 'latest_metrics'
+
+    if ddtrace:
+        pytest_options += ' --ddtrace'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'
