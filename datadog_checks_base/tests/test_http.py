@@ -23,8 +23,8 @@ from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
-from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
 from datadog_checks.dev.fs import read_file, write_file
+from datadog_checks.dev.utils import ON_WINDOWS, running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
