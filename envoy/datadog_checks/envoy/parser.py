@@ -83,9 +83,15 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
             # Retry parsing for metrics by skipping the last matched metric part
             while len(metric_parts) > 1:
                 skip_part = metric_parts.pop()
-                metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
-                    metric, metric_mapping, skip_part
-                )
+                (
+                    metric_parts,
+                    tag_value_builder,
+                    tag_names,
+                    tag_values,
+                    unknown_tags,
+                    tags_to_build,
+                    last_mapping,
+                ) = _parse_metric(metric, metric_mapping, skip_part)
                 parsed_metric = '.'.join(metric_parts)
                 if parsed_metric in METRICS:
                     break
