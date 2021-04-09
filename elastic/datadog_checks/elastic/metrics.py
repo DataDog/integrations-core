@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import ms_to_second, byte_to_mebibyte
+from .utils import byte_to_mebibyte, ms_to_second
 
 # Metrics definition format is a dictionary mapping:
 # datadog_metric_name --> (datadog_metric_type, es_metric_name, optional_conversion_func)
