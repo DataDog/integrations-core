@@ -142,7 +142,7 @@ def test(
             test_env_vars['TOX_TESTENV_PASSENV'] += f' {env}'
         # Used for CI app product
         test_env_vars['TOX_TESTENV_PASSENV'] += ' TF_BUILD BUILD* SYSTEM*'
-        test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'datadog-integrations-core')
+        test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'ddev-integrations')
 
     org_name = ctx.obj['org']
     org = ctx.obj['orgs'].get(org_name, {})
