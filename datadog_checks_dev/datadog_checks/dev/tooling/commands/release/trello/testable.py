@@ -160,7 +160,7 @@ def _parse_commits(commit_lines: List[str], base_ref: str, cherry_picks: bool) -
     return commits
 
 
-def _commit_cherry_picked(base_ref, commit_hash):
+def _commit_cherry_picked(base_ref, commit_hash) -> bool:
     run_command(f'git cherry-pick -n {commit_hash}', capture=True)
     result = run_command('git --no-pager diff --staged', capture=True)
     run_command('git reset --hard HEAD', capture=True)
