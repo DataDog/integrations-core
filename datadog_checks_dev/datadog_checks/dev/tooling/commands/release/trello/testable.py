@@ -144,6 +144,7 @@ def _parse_commits(commit_lines: List[str], base_ref: str, cherry_picks: bool) -
             commit_hash, _, commit_subject = line.partition(' ')
             if _commit_cherry_picked(base_ref, commit_hash):
                 # skip this commit
+                echo_warning(f'Skipping {commit_subject}, it was cherry-picked in {base_ref}.')
                 continue
             commits.append((commit_hash, commit_subject))
         # 3. delete temp branch and apply stash if needed
