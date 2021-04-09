@@ -7,8 +7,10 @@ import sys
 import click
 
 from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from ...ci import get_ci_env_vars, running_on_ci
+from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
+from ...utils import get_next
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources

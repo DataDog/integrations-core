@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
+from ...ci import get_ci_env_vars
+from ...fs import chdir, path_join
 from ...subprocess import run_command
-from ...utils import chdir, get_ci_env_vars, path_join
 from ..commands.console import echo_debug
 from ..constants import get_root
 from .format import parse_config_from_result
