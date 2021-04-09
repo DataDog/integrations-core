@@ -14,6 +14,7 @@ from datadog_checks.dev.fs import create_file
 
 from .common import get_e2e_instance, get_e2e_metadata
 
+
 class CreateQueues(LazyFunction):
     def __init__(self, data_dir):
         self.data_dir = data_dir
