@@ -20,7 +20,7 @@ jobs:
   displayName: '${{ parameters.display }}'
 
   services:
-    ${{ if not(eq(parameters.ddtrace, 'true')) }}:
+    ${{ if not(eq(parameters.ddtrace_flag, '')) }}:
       dd_agent: dd_agent
 
   pool:
