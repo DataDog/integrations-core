@@ -7,7 +7,7 @@ from io import StringIO
 
 import click
 
-from ....utils import read_file, write_file
+from ....fs import read_file, write_file
 from ...constants import get_agent_changelog, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from .common import get_changes_per_agent

@@ -8,7 +8,7 @@ from typing import Optional
 
 import requests
 
-from ..utils import basepath
+from ..fs import basepath
 from .constants import CHANGELOG_LABEL_PREFIX, get_root
 
 API_URL = 'https://api.github.com'
