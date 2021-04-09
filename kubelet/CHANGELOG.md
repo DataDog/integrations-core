@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 5.2.1 / 2021-04-09
+
+* [Fixed] Backport of #9122: Remove the `kubernetes.storage.operation.*` metrics because of a volumetry issue. See [#9123](https://github.com/DataDog/integrations-core/pull/9123).
+
 ## 5.2.0 / 2021-03-07
 
 * [Added] Add new metrics. See [#8562](https://github.com/DataDog/integrations-core/pull/8562).
