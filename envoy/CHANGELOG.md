@@ -1,5 +1,10 @@
 # CHANGELOG - Envoy
 
+## 1.21.0 / 2021-04-09
+
+* [Added] Add retry option when metric is not found. See [#9120](https://github.com/DataDog/integrations-core/pull/9120).
+* [Added] Add runtime configuration validation. See [#8912](https://github.com/DataDog/integrations-core/pull/8912).
+
 ## 1.20.2 / 2021-03-07
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
