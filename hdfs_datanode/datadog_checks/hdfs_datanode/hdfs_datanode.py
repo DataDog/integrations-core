@@ -56,6 +56,7 @@ class HDFSDataNode(AgentCheck):
         if datanode_info:
             self._collect_metadata(datanode_info)
 
+
         # Get data from JMX
         hdfs_datanode_beans = self._get_jmx_data(jmx_address, self.HDFS_DATANODE_BEAN_NAME, tags)
 
