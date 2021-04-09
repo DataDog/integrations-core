@@ -61,7 +61,7 @@ def _parse_metric(metric, metric_mapping, skip_part=None):
         else:
             tag_value_builder.append(metric_part)
             tags_to_build += 1
-    return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build
+    return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, metric_mapping
 
 
 def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
@@ -74,7 +74,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
         'listener.0.0.0.0_80.downstream_cx_total' ->
         ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
-    metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build = _parse_metric(
+    metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
         metric, metric_mapping
     )
     parsed_metric = '.'.join(metric_parts)
@@ -83,7 +83,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
             # Retry parsing for metrics by skipping the last matched metric part
             while len(metric_parts) > 1:
                 skip_part = metric_parts.pop()
-                metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build = _parse_metric(
+                metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
                     metric, metric_mapping, skip_part
                 )
                 parsed_metric = '.'.join(metric_parts)
@@ -96,7 +96,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
     # Rebuild any trailing tags
     if tag_value_builder:
         tags = next(
-            (mapped_tags for mapped_tags in metric_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
+            (mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
         )
         constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
 
