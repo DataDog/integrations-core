@@ -108,6 +108,10 @@ def instance_ntlm_domain(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_parse_unknown_metrics(field, value):
+    return False
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 
