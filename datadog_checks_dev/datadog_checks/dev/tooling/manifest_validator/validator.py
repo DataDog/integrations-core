@@ -427,13 +427,14 @@ class MetricsMetadataValidator(MaintainerValidator):
     def validate(self, check_name, decoded, fix):
         # metrics_metadata
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
-        metadata_file_exists = os.path.isfile(get_metadata_file(check_name))
+        metadata_file = get_metadata_file(check_name)
+        metadata_file_exists = os.path.isfile(metadata_file)
         if not metadata_in_manifest and metadata_file_exists:
             # There is a metadata.csv file but no entry in the manifest.json
-            self.fail('  metadata.csv exists but not defined in the manifest.json')
+            self.fail('  metadata.csv exists but not defined in the manifest.json of {}'.format(check_name))
         elif metadata_in_manifest and not metadata_file_exists:
             # There is an entry in the manifest.json file but the referenced csv file does not exist.
-            self.fail('  metrics_metadata in manifest.json references a non-existing file.')
+            self.fail('  metrics_metadata in manifest.json references a non-existing file: {}.'.format(metadata_file))
 
 
 class MetricToCheckValidator(MaintainerValidator):
