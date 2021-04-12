@@ -268,6 +268,12 @@ class ValidationResult(object):
         self.fixed = False
         self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
 
+    def __str__(self):
+        return '\n'.join(['\n'.join(messages) for messages in self.messages.values()])
+
+    def __repr__(self):
+        return str(self)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
@@ -290,6 +296,9 @@ class ManifestValidator(object):
         self.result.success_msg = solution
         self.result.fixed = True
         self.result.failed = False
+
+    def __repr__(self):
+        return str(self.result)
 
 
 class AttributesValidator(ManifestValidator):

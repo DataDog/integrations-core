@@ -37,11 +37,13 @@ def test_manifest_ok():
             "metrics_metadata": "metadata.csv",
         },
     }
-    root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
+    root = os.getenv('DDEV_ROOT')
+    if not root:
+        root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
     with mock.patch.dict(os.environ, {'DDEV_ROOT': str(root)}):
         check_root()
         validators = get_all_validators(False, False)
         for validator in validators:
             validator.validate('active_directory', manifest, False)
-            assert not validator.result.failed
+            assert not validator.result.failed, validator.result
             assert not validator.result.fixed
