@@ -90,6 +90,28 @@ def test_state_translation(check, instance):
     assert 'UNKNOWN' == get_state_name(500)
 
 
+def test_uri_fields(check, instance):
+    """
+    Unit test for functionality of parse_mongo_uri
+    """
+    server_names = (
+        (
+            "mongodb://myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017/?authSource=authDB",
+            (
+                "myDBReader",
+                "D1fficultP@ssw0rd",
+                None,
+                [('mongodb0.example.com', 27017)],
+                'mongodb://myDBReader:*****@mongodb0.example.com:27017/?authSource=authDB',
+                'authDB',
+            ),
+        ),
+    )
+
+    for server, expected_parse in server_names:
+        assert expected_parse == parse_mongo_uri(server)
+
+
 def test_server_uri_sanitization(check, instance):
     # Batch with `sanitize_username` set to False
     server_names = (
@@ -180,6 +202,7 @@ def test_no_auth(check):
     assert config.auth_source == 'test'
     assert config.do_auth is False
 
+
 def test_auth_source(check):
     """
     Configuring the check with authSource.
@@ -194,6 +217,7 @@ def test_auth_source(check):
     assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?authSource=authDB"
     assert config.auth_source == 'authDB'
     assert config.do_auth is False
+
 
 def test_no_auth_source(check):
     """
