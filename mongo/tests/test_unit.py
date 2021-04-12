@@ -209,12 +209,11 @@ def test_auth_source(check):
     """
     instance = {
         'hosts': ['localhost', 'localhost:27018'],
-        'database': 'test',
-        'options': {'authSource': 'authDB'},  # Special character
+        'options': {'authSource': 'authDB'},
     }
     config = check(instance)._config
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?authSource=authDB"
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/?authSource=authDB"
     assert config.auth_source == 'authDB'
     assert config.do_auth is False
 
@@ -230,6 +229,21 @@ def test_no_auth_source(check):
     assert config.hosts == ['localhost', 'localhost:27018']
     assert config.clean_server_name == "mongodb://localhost,localhost:27018/"
     assert config.auth_source == 'admin'
+    assert config.do_auth is False
+
+
+def test_no_auth_source_with_db(check):
+    """
+    Configuring the check without authSource but with database should default authSource to database.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'database': 'test',
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test"
+    assert config.auth_source == 'test'
     assert config.do_auth is False
 
 
