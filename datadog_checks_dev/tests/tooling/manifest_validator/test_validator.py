@@ -37,9 +37,9 @@ def test_manifest_ok():
             "metrics_metadata": "metadata.csv",
         },
     }
-    root = os.getenv('DDEV_ROOT')
-    if not root:
-        root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
+    #root = os.getenv('DDEV_ROOT')
+    #if not root:
+    root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
     with mock.patch.dict(os.environ, {'DDEV_ROOT': str(root)}):
         check_root()
         validators = get_all_validators(False, False)
