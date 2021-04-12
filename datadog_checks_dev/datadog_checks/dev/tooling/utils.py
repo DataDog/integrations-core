@@ -625,3 +625,16 @@ def find_legacy_signature(check):
                         if "__init__" in line and "agentConfig" in line:
                             return str(f), num
     return None
+
+
+def is_metric_in_metadata_file(metric, check):
+    """
+    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
+    """
+    metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
+    for _, row in read_metadata_rows(metadata_file):
+        if row['metric_name'] == metric:
+            return True
+    return False
