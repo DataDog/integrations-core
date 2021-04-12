@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from unittest import mock
 
+from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
 from datadog_checks.dev.tooling.utils import check_root
 
@@ -37,13 +38,14 @@ def test_manifest_ok():
             "metrics_metadata": "metadata.csv",
         },
     }
-    #root = os.getenv('DDEV_ROOT')
-    #if not root:
     root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
-    with mock.patch.dict(os.environ, {'DDEV_ROOT': str(root)}):
-        check_root()
+    current_root = get_root()
+    set_root(str(root))
+    try:
         validators = get_all_validators(False, False)
         for validator in validators:
             validator.validate('active_directory', manifest, False)
             assert not validator.result.failed, validator.result
             assert not validator.result.fixed
+    finally:
+        set_root(current_root)
