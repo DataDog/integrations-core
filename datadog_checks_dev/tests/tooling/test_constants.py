@@ -41,5 +41,7 @@ def test_get_agent_changelog():
 
 def test_get_root():
     assert get_root() == ''
-    set_root('foo')
-    assert get_root() == 'foo'
+    set_root('my-root')
+    assert get_root() == 'my-root'
+
+    set_root('')  # cleanup
