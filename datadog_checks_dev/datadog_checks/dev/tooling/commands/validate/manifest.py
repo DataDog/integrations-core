@@ -8,7 +8,7 @@ import click
 
 from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
 
-from ....utils import file_exists, read_file, write_file
+from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 

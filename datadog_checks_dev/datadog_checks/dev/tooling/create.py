@@ -4,7 +4,7 @@
 import os
 from uuid import uuid4
 
-from ..utils import (
+from ..fs import (
     create_file,
     dir_exists,
     ensure_parent_dir_exists,

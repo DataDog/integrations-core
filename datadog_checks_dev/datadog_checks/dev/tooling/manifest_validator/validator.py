@@ -277,10 +277,21 @@ class ValidationResult(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
-    def __init__(self, is_extras=False, is_marketplace=False):
+    def __init__(self, is_extras=False, is_marketplace=False, check_in_extras=True, check_in_marketplace=True):
         self.result = ValidationResult()
         self.is_extras = is_extras
         self.is_marketplace = is_marketplace
+        self.check_in_extras = check_in_extras
+        self.check_in_markeplace = check_in_marketplace
+
+    def should_validate(self):
+        if not self.is_extras and not self.is_marketplace:
+            return True
+        if self.is_extras and self.check_in_extras:
+            return True
+        if self.is_marketplace and self.check_in_markeplace:
+            return True
+        return False
 
     def validate(self, check_name, manifest, should_fix):
         # type: (str, Dict, bool) -> None
@@ -397,17 +408,19 @@ class ManifestVersionValidator(ManifestValidator):
 
 class MaintainerValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
-        if not self.is_extras and not self.is_marketplace:
-            correct_maintainer = 'help@datadoghq.com'
-            maintainer = decoded.get('maintainer')
-            if maintainer != correct_maintainer:
-                output = f'  incorrect `maintainer`: {maintainer}'
-                if fix:
-                    decoded['maintainer'] = correct_maintainer
+        if not self.should_validate():
+            return
 
-                    self.fix(output, f'  new `maintainer`: {correct_maintainer}')
-                else:
-                    self.fail(output)
+        correct_maintainer = 'help@datadoghq.com'
+        maintainer = decoded.get('maintainer')
+        if maintainer != correct_maintainer:
+            output = f'  incorrect `maintainer`: {maintainer}'
+            if fix:
+                decoded['maintainer'] = correct_maintainer
+
+                self.fix(output, f'  new `maintainer`: {correct_maintainer}')
+            else:
+                self.fail(output)
 
 
 class NameValidator(ManifestValidator):
@@ -423,7 +436,7 @@ class NameValidator(ManifestValidator):
                 self.fail(output)
 
 
-class MetricsMetadataValidator(MaintainerValidator):
+class MetricsMetadataValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
         # metrics_metadata
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
@@ -437,8 +450,11 @@ class MetricsMetadataValidator(MaintainerValidator):
             self.fail('  metrics_metadata in manifest.json references a non-existing file: {}.'.format(metadata_file))
 
 
-class MetricToCheckValidator(MaintainerValidator):
+class MetricToCheckValidator(ManifestValidator):
     def validate(self, check_name, decoded, _):
+        if not self.should_validate() or check_name == 'snmp':
+            return
+
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
         # metric_to_check
         metric_to_check = decoded.get('metric_to_check')
@@ -455,8 +471,7 @@ class MetricToCheckValidator(MaintainerValidator):
                     and metric not in METRIC_TO_CHECK_WHITELIST
                 ):
                     self.fail(f'  metric_to_check not in metadata.csv: {metric!r}')
-        elif metadata_in_manifest and check_name != 'snmp' and not (self.is_extras or self.is_marketplace):
-            # TODO remove exemptions for integrations-extras and marketplace in future
+        elif metadata_in_manifest:
             # if we have a metadata.csv file but no `metric_to_check` raise an error
             metadata_file = get_metadata_file(check_name)
             if os.path.isfile(metadata_file):
@@ -522,10 +537,10 @@ def get_all_validators(is_extras, is_marketplace):
         AttributesValidator(),
         GUIDValidator(),
         ManifestVersionValidator(),
-        MaintainerValidator(is_extras, is_marketplace),
+        MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
         NameValidator(),
         MetricsMetadataValidator(),
-        MetricToCheckValidator(is_extras, is_marketplace),
+        MetricToCheckValidator(is_extras, is_marketplace, check_in_marketplace=False),
         SupportValidator(is_extras, is_marketplace),
         IsPublicValidator(),
         ImmutableAttributesValidator(),

@@ -20,7 +20,7 @@ from datadog_checks.dev.tooling.catalog_const import (
     SECONDARY_DASHBOARDS,
 )
 
-from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
+from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
@@ -608,8 +608,9 @@ def has_logs(check):
     readme_file = get_readme_file(check)
     if os.path.exists(readme_file):
         with open(readme_file, 'r', encoding='utf-8') as f:
-            if '# Log collection' in f.read():
+            if '# log collection' in f.read().lower():
                 return True
+    return False
 
 
 def find_legacy_signature(check):

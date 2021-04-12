@@ -1,623 +1,994 @@
 {
-    "title": "Presto Overview",
-    "description": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [How to monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n\n- [Datadog’s Presto integration docs](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
-    "widgets": [
+  "author_name": "Datadog",
+  "description": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [Monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Presto integration documentation](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+  "layout_type": "ordered",
+  "template_variables": [
       {
-        "id": 0,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.abandoned_queries.one_minute.count{*}, 10*avg:presto.execution.abandoned_queries.one_minute.count{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Abandoned Queries - One Minute Count",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 17,
-          "y": 8,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 1,
-        "definition": {
-          "type": "image",
-          "url": "/static/images/logos/presto_large.svg",
-          "sizing": "fit"
-        },
-        "layout": {
-          "x": 1,
-          "y": 2,
-          "width": 15,
-          "height": 14
-        }
-      },
-      {
-        "id": 2,
-        "definition": {
-          "type": "note",
-          "content": "Query Manager",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 17,
-          "y": 2,
-          "width": 34,
-          "height": 5
-        }
-      },
-      {
-        "id": 3,
-        "definition": {
-          "type": "check_status",
-          "title": "Can Connect",
-          "title_size": "16",
-          "title_align": "center",
-          "check": "presto.can_connect",
-          "grouping": "cluster",
-          "group_by": [],
-          "tags": [
-            "*"
-          ]
-        },
-        "layout": {
-          "x": 1,
-          "y": 17,
-          "width": 15,
-          "height": 15
-        }
-      },
-      {
-        "id": 4,
-        "definition": {
-          "type": "note",
-          "content": "Task Executor",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 52,
-          "y": 2,
-          "width": 34,
-          "height": 5
-        }
-      },
-      {
-        "id": 5,
-        "definition": {
-          "type": "note",
-          "content": "Task Manager",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 87,
-          "y": 2,
-          "width": 34,
-          "height": 5
-        }
-      },
-      {
-        "id": 6,
-        "definition": {
-          "type": "note",
-          "content": "Memory",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "right"
-        },
-        "layout": {
-          "x": 1,
-          "y": 33,
-          "width": 15,
-          "height": 38
-        }
-      },
-      {
-        "id": 7,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.memory.assigned_queries{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Memory Assigned to Queries",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 17,
-          "y": 40,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 8,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.task_notification_executor.active_count{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Active Task Count",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 52,
-          "y": 8,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 9,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.executor.pool_size{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Executor Pool Size",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 52,
-          "y": 24,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 10,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.insufficient_resources_failures.one_minute.count{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Insufficient Resource Failures - One Minute Count",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 17,
-          "y": 24,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 11,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.executor.pool_size{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Executor Pool Size",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 87,
-          "y": 8,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 12,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.executor.queued_task_count{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Queued Task Count",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 87,
-          "y": 24,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 13,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.memory.free_bytes{*}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            },
-            {
-              "log_query": {
-                "index": "agent-qa",
-                "compute": {
-                  "aggregation": "count"
-                },
-                "search": {
-                  "query": ""
-                },
-                "group_by": []
-              },
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Available Memory",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 52,
-          "y": 40,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 14,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.memory.max_bytes{*}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Max Memory",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 52,
-          "y": 56,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 15,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.memory.nodes{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Memory Assigned to Nodes",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 87,
-          "y": 40,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 16,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(avg:presto.memory.total_distributed_bytes{*})",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Total Distributed Memory",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 87,
-          "y": 56,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 17,
-        "definition": {
-          "type": "note",
-          "content": "Latency",
-          "background_color": "gray",
-          "font_size": "18",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 122,
-          "y": 2,
-          "width": 34,
-          "height": 5
-        }
-      },
-      {
-        "id": 18,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.execution_time.all_time.avg{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "purple",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Query Execution Time - All Time Avg",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 122,
-          "y": 8,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 19,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.execution_time.all_time.max{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "purple",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Query Execution Time - All Time Max",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 122,
-          "y": 24,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 20,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.execution_time.one_minute.avg{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "purple",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Query Execution Time - One Minute Avg",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 122,
-          "y": 40,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 21,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.execution.execution_time.one_minute.max{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "purple",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Query Execution Time - One Minute Max",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 122,
-          "y": 56,
-          "width": 34,
-          "height": 15
-        }
-      },
-      {
-        "id": 22,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:presto.memory.blocked_nodes{*}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Memory Used by Blocked Nodes",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 17,
-          "y": 56,
-          "width": 34,
-          "height": 15
-        }
+          "default": "*",
+          "name": "host",
+          "prefix": "host"
       }
-    ],
-    "template_variables": [],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30277
-  }
+  ],
+  "title": "Presto Overview",
+  "widgets": [
+      {
+          "definition": {
+              "background_color": "white",
+              "content": "This dashboard provides an overview of the health of your Presto infrastructure so you can investigate failed queries and other performance issues as they arise. Further reading on Presto monitoring:\n\n- [Monitor Presto with Datadog](https://www.datadoghq.com/blog/monitor-presto-with-datadog/)\n- [Presto integration documentation](https://docs.datadoghq.com/integrations/presto/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+              "font_size": "14",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "left",
+              "tick_edge": "left",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "top"
+          },
+          "id": 4175123294797460,
+          "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "background_color": "white",
+              "layout_type": "ordered",
+              "title": "Summary",
+              "title_align": "center",
+              "type": "group",
+              "widgets": [
+                  {
+                      "definition": {
+                          "check": "presto.can_connect",
+                          "group_by": [],
+                          "grouping": "cluster",
+                          "tags": [
+                              "*"
+                          ],
+                          "title": "Check status",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "check_status"
+                      },
+                      "id": 4761216324341666,
+                      "layout": {
+                          "height": 2,
+                          "width": 2,
+                          "x": 0,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "autoscale": true,
+                          "precision": 2,
+                          "requests": [
+                              {
+                                  "aggregator": "avg",
+                                  "q": "avg:presto.failure_detector.active_count{$host}"
+                              }
+                          ],
+                          "time": {},
+                          "title": "Active nodes [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "query_value"
+                      },
+                      "id": 5634538464466654,
+                      "layout": {
+                          "height": 2,
+                          "width": 2,
+                          "x": 2,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "autoscale": true,
+                          "precision": 2,
+                          "requests": [
+                              {
+                                  "aggregator": "avg",
+                                  "q": "avg:presto.execution.cpu_input_byte_rate.all_time.avg{$host}"
+                              }
+                          ],
+                          "time": {},
+                          "title": "CPU input rate [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "query_value"
+                      },
+                      "id": 2422997504483592,
+                      "layout": {
+                          "height": 2,
+                          "width": 2,
+                          "x": 4,
+                          "y": 0
+                      }
+                  }
+              ]
+          },
+          "id": 7335848701791780,
+          "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "background_color": "white",
+              "layout_type": "ordered",
+              "title": "Tasks",
+              "title_align": "center",
+              "type": "group",
+              "widgets": [
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "bars",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "sum:presto.execution.task_notification_executor.active_count{$host}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Active task count [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 3262422418521246,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 0,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "bars",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "sum:presto.execution.executor.queued_task_count{$host}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Queued task count [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 2537377744550002,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 4,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "sum:presto.execution.executor.pool_size{$host}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Executor pool size [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 7584501032340538,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 8,
+                          "y": 0
+                      }
+                  }
+              ]
+          },
+          "id": 1805278126278290
+      },
+      {
+          "definition": {
+              "background_color": "white",
+              "layout_type": "ordered",
+              "title": "Queries",
+              "title_align": "center",
+              "type": "group",
+              "widgets": [
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "sum:presto.execution.completed_queries.one_minute.count{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Completed [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 6496784234524750,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 0,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "bars",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "sum:presto.execution.insufficient_resources_failures.one_minute.count{$host}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "warm"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Insufficient resource failures [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 1814600553718132,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 4,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "bars",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      },
+                                      {
+                                          "formula": "10 * query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.execution.abandoned_queries.one_minute.count{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "warm"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Abandoned [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 339056721290186,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 8,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.execution.execution_time.one_minute.avg{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "purple"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Average execution time [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 6642196635871524,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 0,
+                          "y": 2
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "legend_size": "0",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.execution.execution_time.one_minute.max{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "purple"
+                                  }
+                              }
+                          ],
+                          "show_legend": false,
+                          "time": {},
+                          "title": "Max execution time [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 4102420366171618,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 4,
+                          "y": 2
+                      }
+                  },
+                  {
+                      "definition": {
+                          "autoscale": true,
+                          "custom_unit": "%",
+                          "precision": 2,
+                          "requests": [
+                              {
+                                  "aggregator": "avg",
+                                  "q": "100*sum:presto.execution.completed_queries.one_minute.count{*}/(sum:presto.execution.abandoned_queries.one_minute.count{*}+sum:presto.execution.canceled_queries.one_minute.count{*}+sum:presto.execution.completed_queries.one_minute.count{*}+sum:presto.execution.failed_queries.one_minute.count{*})"
+                              }
+                          ],
+                          "time": {},
+                          "title": "Completed rate [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "query_value"
+                      },
+                      "id": 3967037173781104,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 8,
+                          "y": 2
+                      }
+                  }
+              ]
+          },
+          "id": 2520000844625818
+      },
+      {
+          "definition": {
+              "background_color": "white",
+              "layout_type": "ordered",
+              "title": "Memory",
+              "title_align": "center",
+              "type": "group",
+              "widgets": [
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.memory.assigned_queries{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Assigned queries [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 7795982828755380,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 0,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.memory.blocked_nodes{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Blocked nodes [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 6097189826775856,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 4,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.memory.nodes{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Nodes [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 6106162564130214,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 8,
+                          "y": 0
+                      }
+                  },
+                  {
+                      "definition": {
+                          "requests": [
+                              {
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">",
+                                          "palette": "white_on_green",
+                                          "value": 30
+                                      },
+                                      {
+                                          "comparator": "<=",
+                                          "palette": "white_on_yellow",
+                                          "value": 30
+                                      },
+                                      {
+                                          "comparator": "<=",
+                                          "palette": "white_on_red",
+                                          "value": 10
+                                      }
+                                  ],
+                                  "q": "top(top(100*sum:presto.memory.free_bytes{*} by {instance}/sum:presto.memory.max_bytes{*} by {instance},10,'mean','asc'),10,'mean','asc')"
+                              }
+                          ],
+                          "time": {},
+                          "title": "Bottom 10 instances by available memory",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "toplist"
+                      },
+                      "id": 5278123708058342,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 0,
+                          "y": 2
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "area",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "on_right_yaxis": false,
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.memory.free_bytes{*}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Free bytes [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 7255091144510970,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 4,
+                          "y": 2
+                      }
+                  },
+                  {
+                      "definition": {
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "legend_layout": "auto",
+                          "markers": [],
+                          "requests": [
+                              {
+                                  "display_type": "line",
+                                  "formulas": [
+                                      {
+                                          "formula": "diff(query1)"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "query": "avg:presto.memory.total_distributed_bytes{$host}"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "line_type": "solid",
+                                      "line_width": "normal",
+                                      "palette": "dog_classic"
+                                  }
+                              }
+                          ],
+                          "show_legend": true,
+                          "time": {},
+                          "title": "Distributed [$host]",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "timeseries",
+                          "yaxis": {
+                              "include_zero": true,
+                              "label": "",
+                              "max": "auto",
+                              "min": "auto",
+                              "scale": "linear"
+                          }
+                      },
+                      "id": 57584234519956,
+                      "layout": {
+                          "height": 2,
+                          "width": 4,
+                          "x": 8,
+                          "y": 2
+                      }
+                  }
+              ]
+          },
+          "id": 7360116371450254,
+          "layout": {
+              "is_column_break": true
+          }
+      },
+      {
+          "definition": {
+              "background_color": "white",
+              "layout_type": "ordered",
+              "title": "Logs",
+              "title_align": "center",
+              "type": "group",
+              "widgets": [
+                  {
+                      "definition": {
+                          "columns": [
+                              "host",
+                              "service"
+                          ],
+                          "indexes": [],
+                          "message_display": "expanded-md",
+                          "query": "source:presto",
+                          "show_date_column": true,
+                          "show_message_column": true,
+                          "sort": {
+                              "column": "time",
+                              "order": "desc"
+                          },
+                          "title": "",
+                          "title_align": "left",
+                          "title_size": "16",
+                          "type": "log_stream"
+                      },
+                      "id": 7528214616490912,
+                      "layout": {
+                          "height": 5,
+                          "width": 12,
+                          "x": 0,
+                          "y": 0
+                      }
+                  }
+              ]
+          },
+          "id": 6543305797757164
+      }
+  ]
+}

@@ -25,6 +25,9 @@
   "type": "check",
   "integration_id": "openstack",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "openstack": "assets/dashboards/openstack_dashboard.json",
