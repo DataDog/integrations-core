@@ -180,6 +180,34 @@ def test_no_auth(check):
     assert config.auth_source == 'test'
     assert config.do_auth is False
 
+def test_auth_source(check):
+    """
+    Configuring the check with authSource.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'database': 'test',
+        'options': {'authSource': 'authDB'},  # Special character
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?authSource=authDB"
+    assert config.auth_source == 'authDB'
+    assert config.do_auth is False
+
+def test_no_auth_source(check):
+    """
+    Configuring the check without authSource and without database should default authSource to 'admin'.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/"
+    assert config.auth_source == 'admin'
+    assert config.do_auth is False
+
 
 @pytest.mark.parametrize(
     'options, is_error',

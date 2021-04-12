@@ -40,7 +40,7 @@ class MongoConfig(object):
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
-            self.auth_source = self.additional_options.get('authsource') or self.db_name or 'admin'
+            self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')
