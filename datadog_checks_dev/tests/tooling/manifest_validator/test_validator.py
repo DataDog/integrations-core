@@ -3,11 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from pathlib import Path
-from unittest import mock
 
 from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
-from datadog_checks.dev.tooling.utils import check_root
 
 
 def test_manifest_ok():
