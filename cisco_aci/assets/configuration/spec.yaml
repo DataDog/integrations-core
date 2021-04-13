@@ -19,7 +19,7 @@ files:
       description: Url to query to gather metrics.
       value:
         type: string
-        example: localhost
+        example: http://localhost
       display_priority: 10
     - name: pwd
       required: true
