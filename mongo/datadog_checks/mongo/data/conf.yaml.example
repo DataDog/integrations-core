@@ -61,7 +61,7 @@ instances:
     # options: {}
 
     ## @param connection_scheme - string - optional - default: mongodb
-    ## A prefix indicating the connection string format e.g. mongodb+srv.
+    ## A prefix indicating the connection string format.
     #
     # connection_scheme: mongodb
 

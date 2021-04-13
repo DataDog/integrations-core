@@ -61,7 +61,7 @@ files:
         properties: []
     - name: connection_scheme
       description: |
-        A prefix indicating the connection string format e.g. mongodb+srv.
+        A prefix indicating the connection string format.
       value:
         example: mongodb
         type: string
