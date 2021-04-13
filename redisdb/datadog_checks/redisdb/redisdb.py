@@ -449,7 +449,7 @@ class Redis(AgentCheck):
 
         # Get all slowlog entries
 
-        slowlogs = conn.slowlog_get(max_slow_entries)
+        slowlogs = conn.slowlog_get(max_slow_entries, decode_responses=False)
 
         # Find slowlog entries between last timestamp and now using start_time
         slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]
