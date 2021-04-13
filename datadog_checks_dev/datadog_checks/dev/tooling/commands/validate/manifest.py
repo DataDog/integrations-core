@@ -11,7 +11,7 @@ import jsonschema
 from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ...git import content_changed
-from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
+from ...utils import get_metadata_file, is_metric_in_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
@@ -248,19 +248,6 @@ def get_manifest_schema():
             ],
         }
     )
-
-
-def is_metric_in_metadata_file(metric, check):
-    """
-    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
-    """
-    metadata_file = get_metadata_file(check)
-    if not os.path.isfile(metadata_file):
-        return False
-    for _, row in read_metadata_rows(metadata_file):
-        if row['metric_name'] == metric:
-            return True
-    return False
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
