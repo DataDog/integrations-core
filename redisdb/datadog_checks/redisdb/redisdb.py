@@ -449,6 +449,7 @@ class Redis(AgentCheck):
 
         # Get all slowlog entries
 
+        # https://github.com/andymccurdy/redis-py/issues/1238
         slowlogs = conn.slowlog_get(max_slow_entries, decode_responses=False)
 
         # Find slowlog entries between last timestamp and now using start_time
