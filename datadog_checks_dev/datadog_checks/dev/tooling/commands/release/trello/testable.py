@@ -113,10 +113,6 @@ def _all_synced_with_remote(refs: Sequence[str]) -> bool:
 def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
-    # Format as '<commit_hash> <subject line>', e.g.:
-    # 'a70a792f9d1775b7d6d910044522f7a0d6941ad7 Update README.md'
-    pretty_format = '%H %s'
-
     diff_command = f'git --no-pager cherry -v {base_ref} {target_ref}'
 
     try:
@@ -132,6 +128,7 @@ def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, st
     for line in reversed(lines):
         sign, commit_hash, commit_subject = line.split(' ', 2)
         if sign == '-':
+            echo_info(f'Skipping {commit_subject}, it was cherry-picked in {base_ref}')
             continue
         commits.append((commit_hash, commit_subject))
 
