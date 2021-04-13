@@ -130,10 +130,9 @@ def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, st
 
     commits = []
     for line in reversed(lines):
-        sign, _, commit = line.partition(' ')
+        sign, commit_hash, commit_subject = line.split(' ', 2)
         if sign == '-':
             continue
-        commit_hash, _, commit_subject = commit.partition(' ')
         commits.append((commit_hash, commit_subject))
 
     return commits
