@@ -7,6 +7,13 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
+DDTRACE_OPTIONS_LIST = [
+    'DD_TAGS',
+    'DD_TRACE*',
+    'DD_SERVICE',
+    'DD_AGENT_HOST',
+    'DD_ENV',
+]
 E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
