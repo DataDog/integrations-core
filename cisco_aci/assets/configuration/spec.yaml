@@ -30,7 +30,7 @@ files:
         type: string
     - name: tenant
       description: |
-        List of tenants to collect data from
+        List of tenants to collect metrics data.
       value:
         type: array
         items:
