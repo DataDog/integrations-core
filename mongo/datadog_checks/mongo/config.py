@@ -37,6 +37,7 @@ class MongoConfig(object):
             self.hosts = instance.get('hosts', [])
             self.username = instance.get('username')
             self.password = instance.get('password')
+            # Deprecated
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
@@ -48,6 +49,9 @@ class MongoConfig(object):
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
+
+        if self.scheme != 'mongodb':
+            self.log.info("connection_scheme is deprecated and shouldn't be set to a value other than 'mongodb'")
 
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
