@@ -7,7 +7,7 @@ from collections import defaultdict
 import requests
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
@@ -49,6 +49,7 @@ class Envoy(AgentCheck):
         self.excluded_metrics_cache = set()
 
         self.caching_metrics = None
+        self.parse_unknown_metrics = is_affirmative(self.instance.get('parse_unknown_metrics', False))
 
     def check(self, _):
         self._collect_metadata()
@@ -86,7 +87,7 @@ class Envoy(AgentCheck):
                 continue
 
             try:
-                metric, tags, method = parse_metric(envoy_metric)
+                metric, tags, method = parse_metric(envoy_metric, retry=self.parse_unknown_metrics)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `%s`', envoy_metric)

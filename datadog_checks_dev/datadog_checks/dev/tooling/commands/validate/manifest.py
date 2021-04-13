@@ -8,7 +8,7 @@ import uuid
 import click
 import jsonschema
 
-from ....utils import file_exists, read_file, write_file
+from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ...git import content_changed
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
@@ -479,7 +479,7 @@ def manifest(ctx, fix):
                     ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
-            elif metadata_in_manifest and check_name != 'snmp' and not (is_extras or is_marketplace):
+            elif metadata_in_manifest and check_name != 'snmp' and not is_marketplace:
                 # TODO remove exemptions for integrations-extras and marketplace in future
                 # if we have a metadata.csv file but no `metric_to_check` raise an error
                 metadata_file = get_metadata_file(check_name)

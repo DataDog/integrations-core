@@ -18,7 +18,7 @@ from securesystemslib.interface import import_rsa_privatekey_from_file
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git
 from ..subprocess import run_command
-from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
+from ..fs import chdir, ensure_dir_exists, path_join, stream_file_lines
 
 LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'

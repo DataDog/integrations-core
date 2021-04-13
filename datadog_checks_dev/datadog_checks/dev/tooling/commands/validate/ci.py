@@ -4,7 +4,7 @@
 import click
 import yaml
 
-from ....utils import file_exists, path_join, read_file, write_file
+from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
 from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
