@@ -16,7 +16,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
 
-METRIC_TO_CHECK_WHITELIST = {
+METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
@@ -475,12 +475,12 @@ def manifest(ctx, fix):
                         metric_integration_check_name = 'snmp'
                     if (
                         not is_metric_in_metadata_file(metric, metric_integration_check_name)
-                        and metric not in METRIC_TO_CHECK_WHITELIST
+                        and metric not in METRIC_TO_CHECK_EXCLUDE_LIST
                     ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
-            elif metadata_in_manifest and check_name != 'snmp' and not is_marketplace:
-                # TODO remove exemptions for integrations-extras and marketplace in future
+            elif metadata_in_manifest and check_name != 'snmp' and check_name != 'moogsoft':
+                # TODO: Remove moogsoft exception once https://github.com/DataDog/marketplace/pull/116 is merged
                 # if we have a metadata.csv file but no `metric_to_check` raise an error
                 metadata_file = get_metadata_file(check_name)
                 if os.path.isfile(metadata_file):
