@@ -27,6 +27,7 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', '-s', is_flag=True, help='Generate example configuration files based on specifications')
@@ -157,13 +158,9 @@ def validate_default_template(spec_file):
         return True
 
     for line in spec_file.split('\n'):
-        if any(
-            "init_config/{}".format(template) in line
-            for template in TEMPLATES
-        ):
+        if any("init_config/{}".format(template) in line for template in TEMPLATES):
             init_config_default = True
-        if any(
-            "instances/{}".format(template) in line for template in TEMPLATES):
+        if any("instances/{}".format(template) in line for template in TEMPLATES):
             instances_default = True
 
         if instances_default and init_config_default:
