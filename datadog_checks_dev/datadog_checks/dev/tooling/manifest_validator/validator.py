@@ -216,7 +216,7 @@ class MetricsMetadataValidator(ManifestValidator):
 
 class MetricToCheckValidator(ManifestValidator):
     def validate(self, check_name, decoded, _):
-        if not self.should_validate() or check_name == 'snmp':
+        if not self.should_validate() or check_name == 'snmp' or check_name != 'moogsoft':
             return
 
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
@@ -304,7 +304,7 @@ def get_all_validators(is_extras, is_marketplace):
         MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
         NameValidator(),
         MetricsMetadataValidator(),
-        MetricToCheckValidator(is_extras, is_marketplace, check_in_marketplace=False),
+        MetricToCheckValidator(),
         SupportValidator(is_extras, is_marketplace),
         IsPublicValidator(),
         ImmutableAttributesValidator(),

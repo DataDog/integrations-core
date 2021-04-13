@@ -84,7 +84,7 @@ files:
           * 2 for ssl.CERT_REQUIRED (required and validated)
       value:
         type: integer
-        example: 0
+        example: 2
     - name: keys
       description: |
         Enter the list of keys to collect the lengths from.
