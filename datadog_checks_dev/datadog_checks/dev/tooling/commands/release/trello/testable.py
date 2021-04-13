@@ -110,14 +110,14 @@ def _all_synced_with_remote(refs: Sequence[str]) -> bool:
     return all(ref not in result.stderr for ref in refs)
 
 
-def _get_and_parse_commits(base_ref: str, target_ref: str, cherry_picks: bool) -> List[Tuple[str, str]]:
+def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
     # Format as '<commit_hash> <subject line>', e.g.:
     # 'a70a792f9d1775b7d6d910044522f7a0d6941ad7 Update README.md'
     pretty_format = '%H %s'
 
-    diff_command = f'git --no-pager log "--pretty={pretty_format}" {base_ref}..{target_ref}'
+    diff_command = f'git --no-pager cherry -v {base_ref} {target_ref}'
 
     try:
         result = run_command(diff_command, capture=True, check=True)
@@ -127,53 +127,25 @@ def _get_and_parse_commits(base_ref: str, target_ref: str, cherry_picks: bool) -
 
     echo_success('Success!')
     lines: List[str] = result.stdout.splitlines()
-    return _parse_commits(lines, base_ref, cherry_picks)
 
-
-def _parse_commits(commit_lines: List[str], base_ref: str, cherry_picks: bool) -> List[Tuple[str, str]]:
     commits = []
-
-    if cherry_picks:
-        # 1. stash if we need to and checkout temp branch
-        need_stash = run_command('git --no-pager diff', capture=True).stdout
-        if need_stash:
-            run_command('git stash -q', capture=True)
-        run_command(f'git checkout -B ddev_testable/is-cherry {base_ref}', capture=True)
-        # 2. check if commits were cherry-picked
-        for line in reversed(commit_lines):
-            commit_hash, _, commit_subject = line.partition(' ')
-            if _commit_cherry_picked(base_ref, commit_hash):
-                # skip this commit
-                echo_warning(f'Skipping {commit_subject}, it was cherry-picked in {base_ref}.')
-                continue
-            commits.append((commit_hash, commit_subject))
-        # 3. delete temp branch and apply stash if needed
-        run_command('git checkout @{-1}', capture=True)
-        run_command('git branch -D ddev_testable/is-cherry', capture=True)
-        if need_stash:
-            run_command("git stash pop -q", capture=True)
-    else:
-        for line in reversed(commit_lines):
-            commit_hash, _, commit_subject = line.partition(' ')
-            commits.append((commit_hash, commit_subject))
+    for line in reversed(lines):
+        sign, _, commit = line.partition(' ')
+        if sign == '-':
+            continue
+        commit_hash, _, commit_subject = commit.partition(' ')
+        commits.append((commit_hash, commit_subject))
 
     return commits
 
 
-def _commit_cherry_picked(base_ref, commit_hash) -> bool:
-    run_command(f'git cherry-pick -n {commit_hash}', capture=True)
-    result = run_command('git --no-pager diff --staged', capture=True)
-    run_command('git reset --hard HEAD', capture=True)
-    return len(result.stdout) == 0
-
-
-def get_commits_between(base_ref: str, target_ref: str, cherry_picks: bool, *, root: str) -> List[Tuple[str, str]]:
+def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tuple[str, str]]:
     with chdir(root):
         if not _all_synced_with_remote((base_ref, target_ref)):
             abort(f'Your repository is not sync with the remote repository. Please run `git fetch` in {root!r} folder.')
 
         try:
-            return _get_and_parse_commits(base_ref, target_ref, cherry_picks)
+            return _get_and_parse_commits(base_ref, target_ref)
         except SubprocessError as exc:
             echo_failure(str(exc))
             echo_failure('Unable to get the diff.')
@@ -218,12 +190,6 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     help='Do not create a card for a change, but move the existing card from '
     + '`HAVE BUGS - FIXME` or `FIXED - Ready to Rebuild` to INBOX team',
 )
-@click.option(
-    '--cherry-picks',
-    is_flag=True,
-    help='Check if commits were cherry-picked from `target_ref` onto `base_ref` and skip them.'
-    ' Command may take long if there are many commits.',
-)
 @click.pass_context
 def testable(
     ctx: click.Context,
@@ -233,7 +199,6 @@ def testable(
     dry_run: bool,
     update_rc_builds_cards: bool,
     move_cards: bool,
-    cherry_picks: bool,
 ) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
@@ -284,7 +249,7 @@ def testable(
     if repo not in ('integrations-core', 'datadog-agent'):
         abort(f'Repo `{repo}` is unsupported.')
 
-    commits = get_commits_between(base_ref, target_ref, cherry_picks, root=root)
+    commits = get_commits_between(base_ref, target_ref, root=root)
     num_changes = len(commits)
 
     if not num_changes:
