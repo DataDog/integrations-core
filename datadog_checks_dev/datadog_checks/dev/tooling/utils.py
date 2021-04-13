@@ -406,8 +406,7 @@ def read_metadata_rows(metadata_file):
 
 
 def read_readme_file(check_name):
-    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
-        yield line_no, line
+    return read_file(get_readme_file(check_name))
 
 
 def read_setup_file(check_name):

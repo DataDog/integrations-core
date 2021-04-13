@@ -71,6 +71,7 @@ setup(
         'cli': [
             'appdirs>=1.4.4',
             'atomicwrites',
+            'beautifulsoup4==4.9.3',
             'click>7',
             'colorama',
             'datamodel-code-generator~=0.9.2; python_version > "3.0"',
