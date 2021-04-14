@@ -61,7 +61,7 @@ jobs:
       check: ${{ parameters.check }}
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
-      dd_flag: ${{ parameters.ddtrace_flag }}
+      ddtrace_flag: ${{ parameters.ddtrace_flag }}
       benchmark: ${{ parameters.benchmark }}
       latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}
