@@ -47,7 +47,7 @@ To configure this check for an Agent running on a host:
         pwd: <PWD>
     
         ## @param tenant - list of strings - optional
-        ## List of tenants to collect metrics data.
+        ## List of tenants to collect metrics data from.
         #
         # tenant:
         #   - <TENANT_1>
