@@ -54,7 +54,7 @@ To configure this check for an Agent running on a host:
         #   - <TENANT_2>
    ```
    
-   *NOTE*: Be sure to specify any tenants in order for the integration to collect metrics on applications, EPG, etc.
+   *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
 2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
 
