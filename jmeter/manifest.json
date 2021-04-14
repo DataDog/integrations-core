@@ -23,7 +23,9 @@
   "is_public": true,
   "integration_id": "jmeter",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "JMeter Overview": "assets/dashboards/JMeterOverview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
