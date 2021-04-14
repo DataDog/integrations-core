@@ -30,7 +30,7 @@ To configure this check for an Agent running on a host:
 
    instances:
         ## @param aci_url - string - required
-        ## Url to query to gather metrics.
+        ## URL to query to gather metrics.
         #
       - aci_url: http://localhost
     
