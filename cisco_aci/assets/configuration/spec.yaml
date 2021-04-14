@@ -16,7 +16,7 @@ files:
     options:
     - name: aci_url
       required: true
-      description: Url to query to gather metrics.
+      description: URL to query to gather metrics.
       value:
         type: string
         example: http://localhost
