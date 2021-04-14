@@ -1056,6 +1056,17 @@ def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):
     )
 
 
+def test_kubelet_check_disable_summary_rates(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{'enabled_rates': ['*unsupported_regex*']}])
+    pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
+    stats = json.loads(mock_from_file('stats_summary_windows.json'))
+
+    check.process_stats_summary(pod_list_utils, stats, [], True)  # windows/non-cadvisor case
+
+    assert len(aggregator.metrics('kubernetes.network.tx_bytes')) == 0  # rate disabled
+    assert len(aggregator.metrics('kubernetes.filesystem.usage_pct')) > 0  # gauge enabled
+
+
 def test_silent_tls_warning(caplog, monkeypatch, aggregator):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "https://example.com/"

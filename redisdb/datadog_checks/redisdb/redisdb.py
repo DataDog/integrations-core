@@ -448,8 +448,13 @@ class Redis(AgentCheck):
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
 
         # Get all slowlog entries
-
-        slowlogs = conn.slowlog_get(max_slow_entries)
+        try:
+            slowlogs = conn.slowlog_get(max_slow_entries)
+        except TypeError as e:
+            # https://github.com/andymccurdy/redis-py/issues/1475
+            self.log.exception(e)
+            self.log.error('There was an error retrieving slowlog, these metrics will be skipped')
+            slowlogs = []
 
         # Find slowlog entries between last timestamp and now using start_time
         slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]
