@@ -1,7 +1,7 @@
 {
   "title": "Active Directory",
-  "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
   "author_name": "Datadog",
+  "description": "## Active Directory\n\nThis dashboard monitors key Active Directory metrics for LDAP service, and replication inbound and outbound data sizes, objects, and properties\n\n- [Active Directory Integration](https://docs.datadoghq.com/integrations/active_directory/)\n\n\n- [Troubleshoot Active Directory Performance](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/role/active-directory-server/troubleshoot)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
   "widgets": [
     {
       "id": 5958173007320266,
@@ -23,12 +23,7 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Number of search operations"
-                    }
-                  ],
+                  "formulas": [{ "formula": "query1", "alias": "Number of search operations" }],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
@@ -55,12 +50,7 @@
               },
               "markers": []
             },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 6693916277956088,
@@ -71,6 +61,7 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -80,8 +71,6 @@
                       "alias": "Time required for the completion of the last successful LDAP binding"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:active_directory.ldap.bind_time{$env,$host} by {host}",
@@ -89,6 +78,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -105,29 +96,16 @@
                 "max": "auto"
               },
               "markers": [
+                { "label": " <15ms ", "value": "0 < y < 15", "display_type": "ok dashed" },
                 {
-                  "label": " <5ms ",
-                  "value": "0 < y < 5",
-                  "display_type": "ok dashed"
-                },
-                {
-                  "label": " 5ms to 30ms  ",
-                  "value": "5 < y < 30",
+                  "label": " 15ms to 30ms ",
+                  "value": "15 < y < 30",
                   "display_type": "warning dashed"
                 },
-                {
-                  "label": " >30ms ",
-                  "value": "y > 30",
-                  "display_type": "error dashed"
-                }
+                { "label": " >30ms ", "value": "y > 30", "display_type": "error dashed" }
               ]
             },
-            "layout": {
-              "x": 6,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 3701214856126876,
@@ -142,10 +120,7 @@
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Number of sessions of connected LDAP clients"
-                    }
+                    { "formula": "query1", "alias": "Number of sessions of connected LDAP clients" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
@@ -173,12 +148,7 @@
               },
               "markers": []
             },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 2
-            }
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
           },
           {
             "id": 6848325894216022,
@@ -224,12 +194,7 @@
               },
               "markers": []
             },
-            "layout": {
-              "x": 6,
-              "y": 3,
-              "width": 6,
-              "height": 2
-            }
+            "layout": { "x": 6, "y": 3, "width": 6, "height": 2 }
           }
         ]
       }
@@ -286,12 +251,7 @@
               },
               "markers": []
             },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 7100183879373558,
@@ -337,12 +297,7 @@
               },
               "markers": []
             },
-            "layout": {
-              "x": 6,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
           }
         ]
       }
@@ -385,12 +340,7 @@
                 }
               ]
             },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 5271031983458064,
@@ -422,22 +372,11 @@
                 }
               ]
             },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
           }
         ]
       },
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 6,
-        "height": 7,
-        "is_column_break": true
-      }
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 7, "is_column_break": true }
     },
     {
       "id": 6220753546683742,
@@ -477,12 +416,7 @@
                 }
               ]
             },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 7131306695522396,
@@ -514,21 +448,11 @@
                 }
               ]
             },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
+            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
           }
         ]
       },
-      "layout": {
-        "x": 6,
-        "y": 0,
-        "width": 6,
-        "height": 7
-      }
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 7 }
     },
     {
       "id": 6407289818729342,
@@ -542,12 +466,7 @@
         "tick_pos": "50%",
         "tick_edge": "top"
       },
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 12,
-        "height": 3
-      }
+      "layout": { "x": 0, "y": 0, "width": 12, "height": 3 }
     },
     {
       "id": 8824567418075250,
@@ -558,37 +477,21 @@
         "type": "log_stream",
         "indexes": [],
         "query": "source:(active_directory)",
-        "sort": {
-          "column": "time",
-          "order": "desc"
-        },
+        "sort": { "column": "time", "order": "desc" },
         "columns": ["host", "service"],
         "show_date_column": true,
         "show_message_column": true,
         "message_display": "expanded-lg"
       },
-      "layout": {
-        "x": 0,
-        "y": 3,
-        "width": 12,
-        "height": 5
-      }
+      "layout": { "x": 0, "y": 3, "width": 12, "height": 5 }
     }
   ],
   "template_variables": [
-    {
-      "name": "env",
-      "default": "*",
-      "prefix": "env"
-    },
-    {
-      "name": "host",
-      "default": "*",
-      "prefix": "host"
-    }
+    { "name": "env", "default": "*", "prefix": "env" },
+    { "name": "host", "default": "*", "prefix": "host" }
   ],
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed"
+  "reflow_type": "fixed",
 }
