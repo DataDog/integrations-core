@@ -545,6 +545,16 @@ def test_prometheus_filtering(monkeypatch, aggregator):
             assert sample.labels["pod_name"] != ""
 
 
+def test_ignore_metrics(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{"ignore_metrics": ["container_network_[Aa-zZ]*_bytes_total"]}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+    check._perform_kubelet_check.assert_called_once()
+
+    aggregator.assert_metric('kubernetes.network.tx_dropped')  # this metric is not filtered out by the regex
+    assert len(aggregator.metrics('kubernetes.network.rx_bytes')) == 0  # this metric is disabled
+    assert len(aggregator.metrics('kubernetes.network.tx_bytes')) == 0  # this metric is disabled
+
+
 def test_kubelet_check_instance_config(monkeypatch):
     def mock_kubelet_check_no_prom():
         check = mock_kubelet_check(monkeypatch, [{}])
@@ -1054,6 +1064,17 @@ def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):
             'pod_name:windows-server-iis-6c68545d57-gwtn9',
         ],
     )
+
+
+def test_kubelet_check_disable_summary_rates(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{'enabled_rates': ['*unsupported_regex*']}])
+    pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
+    stats = json.loads(mock_from_file('stats_summary_windows.json'))
+
+    check.process_stats_summary(pod_list_utils, stats, [], True)  # windows/non-cadvisor case
+
+    assert len(aggregator.metrics('kubernetes.network.tx_bytes')) == 0  # rate disabled
+    assert len(aggregator.metrics('kubernetes.filesystem.usage_pct')) > 0  # gauge enabled
 
 
 def test_silent_tls_warning(caplog, monkeypatch, aggregator):

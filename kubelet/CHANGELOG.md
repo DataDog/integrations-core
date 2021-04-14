@@ -1,5 +1,10 @@
 # CHANGELOG - kubelet
 
+## 6.0.0 / 2021-04-14
+
+* [Added] Add logic to enable/disable metrics collected from the summary endpoint. See [#9155](https://github.com/DataDog/integrations-core/pull/9155).
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
 ## 5.2.0 / 2021-03-07
 
 * [Added] Add new metrics. See [#8562](https://github.com/DataDog/integrations-core/pull/8562).
