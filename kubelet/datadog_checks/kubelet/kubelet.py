@@ -157,6 +157,12 @@ class KubeletCheck(
 
         cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
 
+        if len(inst.get('ignore_metrics', {})) > 0:
+            # Add entries from configuration to ignore_metrics in the cadvisor collector.
+            cadvisor_instance['ignore_metrics'].extend(
+                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
+            )
+
         # configuring the collection of some of the metrics (via the cadvisor or the summary endpoint)
         self.max_depth = inst.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = inst.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
