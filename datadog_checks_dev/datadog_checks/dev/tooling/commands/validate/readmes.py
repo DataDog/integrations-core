@@ -53,8 +53,6 @@ def readmes(ctx, integration):
 
     if files_failed:
         click.echo()
-
-    if files_failed:
         echo_failure(f'Files with errors: {files_failed}')
 
     if files_passed:
@@ -79,14 +77,14 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
         files_failed[readme_path] = True
         display_queue.append(
             lambda **kwargs: echo_failure(
-                "     readme does not contain both an Overview and Setup H2 section", **kwargs
+                "     readme is missing either an Overview or Setup H2 (##) section", **kwargs
             )
         )
 
     if "Support" not in h2s and manifest.get("support") == "partner":
         files_failed[readme_path] = True
         display_queue.append(
-            lambda **kwargs: echo_failure("     readme does not contain a Support H2 section", **kwargs)
+            lambda **kwargs: echo_failure("     readme is missing a Support H2 (##) section", **kwargs)
         )
 
     # Check all referenced images are in the `images` folder and that
@@ -106,9 +104,10 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
         else:
             display_queue.append(
                 lambda repo=repo, integration=integration, **kwargs: echo_failure(
-                    f"     This image path must be in the form: "
+                    f"     All images must be checked into the repo under a root `images` folder. "
+                    f"This image path must be in the form: "
                     f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
-                    f"or be a relative path to the `images` folder. Image currently is: {img_src}",  # noqa
+                    f"or be a relative path to the `images/` folder (without a `/` prefix). Image currently is: {img_src}",  # noqa
                     **kwargs,
                 )
             )
