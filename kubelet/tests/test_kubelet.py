@@ -545,6 +545,16 @@ def test_prometheus_filtering(monkeypatch, aggregator):
             assert sample.labels["pod_name"] != ""
 
 
+def test_ignore_metrics(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{"ignore_metrics": ["container_network_[Aa-zZ]*_bytes_total"]}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+    check._perform_kubelet_check.assert_called_once()
+
+    aggregator.assert_metric('kubernetes.network.tx_dropped')  # this metric is not filtered out by the regex
+    assert len(aggregator.metrics('kubernetes.network.rx_bytes')) == 0  # this metric is disabled
+    assert len(aggregator.metrics('kubernetes.network.tx_bytes')) == 0  # this metric is disabled
+
+
 def test_kubelet_check_instance_config(monkeypatch):
     def mock_kubelet_check_no_prom():
         check = mock_kubelet_check(monkeypatch, [{}])
