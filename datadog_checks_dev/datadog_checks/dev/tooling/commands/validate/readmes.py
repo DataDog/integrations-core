@@ -89,11 +89,14 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
+    allow_relative = False
+    if manifest.get("support") == "partner":
+        allow_relative = True
     img_srcs = [img.attrs.get("src") for img in soup.find_all("img")]
     for img_src in img_srcs:
-        if img_src.startswith("https://raw.githubusercontent") or img_src.startswith("images/"):
-            image_name = os.path.split(img_src)[-1]
-            file_path = os.path.join(get_root(), integration, "images", image_name)
+        image_name = os.path.split(img_src)[-1]
+        file_path = os.path.join(get_root(), integration, "images", image_name)
+        if img_src.startswith("https://raw.githubusercontent") or (img_src.startswith("images/") and allow_relative):
             if not os.path.exists(file_path):
                 files_failed[readme_path] = True
                 display_queue.append(
@@ -102,12 +105,13 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
                     )
                 )
         else:
-            display_queue.append(
-                lambda repo=repo, integration=integration, **kwargs: echo_failure(
-                    f"     All images must be checked into the repo under a root `images` folder. "
-                    f"This image path must be in the form: "
-                    f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
-                    f"or be a relative path to the `images/` folder (without a `/` prefix). Image currently is: {img_src}",  # noqa
-                    **kwargs,
-                )
+            error_msg = (
+                f"     All images must be checked into the repo under the `{integration}/images` folder. "
+                f"This image path must be in the form: "
+                f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
             )
+            if allow_relative:
+                error_msg += "or be a relative path to the `images/` folder (without a `/` prefix)."
+            error_msg += f" Image currently is: {img_src}"
+
+            display_queue.append(lambda repo=repo, integration=integration, **kwargs: echo_failure(error_msg, **kwargs))
