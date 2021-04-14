@@ -100,6 +100,8 @@ class Redis(AgentCheck):
         'used_cpu_sys_children': 'redis.cpu.sys_children',
         'used_cpu_user': 'redis.cpu.user',
         'used_cpu_user_children': 'redis.cpu.user_children',
+        'used_cpu_sys_main_thread': 'redis.cpu.sys_main_thread',
+        'used_cpu_user_main_thread': 'redis.cpu.user_main_thread',
         # stats
         'keyspace_hits': 'redis.stats.keyspace_hits',
         'keyspace_misses': 'redis.stats.keyspace_misses',
@@ -452,8 +454,13 @@ class Redis(AgentCheck):
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
 
         # Get all slowlog entries
-
-        slowlogs = conn.slowlog_get(max_slow_entries)
+        try:
+            slowlogs = conn.slowlog_get(max_slow_entries)
+        except TypeError as e:
+            # https://github.com/andymccurdy/redis-py/issues/1475
+            self.log.exception(e)
+            self.log.error('There was an error retrieving slowlog, these metrics will be skipped')
+            slowlogs = []
 
         # Find slowlog entries between last timestamp and now using start_time
         slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]

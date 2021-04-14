@@ -9,7 +9,7 @@ from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERIT
 from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
 from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer
 
-from ....utils import basepath, file_exists, path_join, read_file, write_file
+from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
     complete_valid_checks,
     get_config_files,
@@ -24,6 +24,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
+
+TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -156,12 +158,9 @@ def validate_default_template(spec_file):
         return True
 
     for line in spec_file.split('\n'):
-        if any(
-            template in line
-            for template in ['init_config/default', 'init_config/openmetrics_legacy', 'init_config/jmx']
-        ):
+        if any("init_config/{}".format(template) in line for template in TEMPLATES):
             init_config_default = True
-        if any(template in line for template in ['instances/default', 'instances/openmetrics_legacy', 'instances/jmx']):
+        if any("instances/{}".format(template) in line for template in TEMPLATES):
             instances_default = True
 
         if instances_default and init_config_default:

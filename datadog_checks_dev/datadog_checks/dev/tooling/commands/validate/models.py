@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....utils import (
+from ....fs import (
     chdir,
     dir_exists,
     ensure_parent_dir_exists,

@@ -17,6 +17,8 @@ client = config = None
 # will be tried in the order of the list
 ELECTION_ANNOTATION_NAMES = ["control-plane.alpha.kubernetes.io/leader"]
 
+K8S_REQUEST_TIMEOUT = 30
+
 
 class KubeLeaderElectionMixin(object):
     """
@@ -80,7 +82,7 @@ class KubeLeaderElectionMixin(object):
     @staticmethod
     def _get_record_from_lease(client, name, namespace):
         coordination_v1 = client.CoordinationV1Api()
-        obj = coordination_v1.read_namespaced_lease(name, namespace)
+        obj = coordination_v1.read_namespaced_lease(name, namespace, _request_timeout=K8S_REQUEST_TIMEOUT)
 
         return ElectionRecordLease(obj)
 
@@ -89,9 +91,9 @@ class KubeLeaderElectionMixin(object):
         v1 = client.CoreV1Api()
 
         if kind.lower() in ["endpoints", "endpoint", "ep"]:
-            obj = v1.read_namespaced_endpoints(name, namespace)
+            obj = v1.read_namespaced_endpoints(name, namespace, _request_timeout=K8S_REQUEST_TIMEOUT)
         elif kind.lower() in ["configmap", "cm"]:
-            obj = v1.read_namespaced_config_map(name, namespace)
+            obj = v1.read_namespaced_config_map(name, namespace, _request_timeout=K8S_REQUEST_TIMEOUT)
         else:
             raise ValueError("Unknown kind {}".format(kind))
 
