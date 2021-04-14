@@ -4,7 +4,7 @@
 
 * [Fixed] Fix no_auth support. See [#9094](https://github.com/DataDog/integrations-core/pull/9094).
 
-## 2.3.0 / 2021-03-11
+## 2.3.0 / 2021-03-11 / Agent 7.27.0
 
 * [Added] Cache API client connection. See [#8808](https://github.com/DataDog/integrations-core/pull/8808).
 
