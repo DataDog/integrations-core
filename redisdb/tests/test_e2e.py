@@ -112,5 +112,7 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.active_defrag.misses', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
+    aggregator.assert_metric('redis.cpu.sys_main_thread', count=1, tags=tags)
+    aggregator.assert_metric('redis.cpu.user_main_thread', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()

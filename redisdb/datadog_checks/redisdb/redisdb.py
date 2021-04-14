@@ -98,6 +98,8 @@ class Redis(AgentCheck):
         'used_cpu_sys_children': 'redis.cpu.sys_children',
         'used_cpu_user': 'redis.cpu.user',
         'used_cpu_user_children': 'redis.cpu.user_children',
+        'used_cpu_sys_main_thread': 'redis.cpu.sys_main_thread',
+        'used_cpu_user_main_thread': 'redis.cpu.user_main_thread',
         # stats
         'keyspace_hits': 'redis.stats.keyspace_hits',
         'keyspace_misses': 'redis.stats.keyspace_misses',
