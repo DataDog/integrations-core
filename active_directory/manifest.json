@@ -25,7 +25,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}":"assets/monitors/ldap_binding.json"
+    },
     "dashboards": {
       "Active Directory": "assets/dashboards/active_directory.json"
     },
