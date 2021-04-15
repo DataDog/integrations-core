@@ -1,6 +1,6 @@
 # CHANGELOG - Openstack_controller
 
-## 1.10.3 / 2021-02-11
+## 1.10.3 / 2021-02-11 / Agent 7.27.0
 
 * [Fixed] Remove SimpleApi cache. See [#8583](https://github.com/DataDog/integrations-core/pull/8583).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

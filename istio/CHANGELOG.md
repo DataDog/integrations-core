@@ -1,6 +1,6 @@
 # CHANGELOG - istio
 
-## 3.10.0 / 2021-03-07
+## 3.10.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add sidecar injection failed and skipped metrics. See [#8751](https://github.com/DataDog/integrations-core/pull/8751).
 

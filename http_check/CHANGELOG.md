@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 5.2.0 / 2021-03-07
+## 5.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 * [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).
