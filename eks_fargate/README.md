@@ -253,40 +253,9 @@ spec:
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
 ## Log Collection
-### Collecting logs with Datadog Agent as a sidecar
-
-1. Collecting logs is disabled by default in the Datadog Agent, add the following environment variables to enable log collection from your containers:
-    ```yaml
-     env:
-      [...]
-      - name: DD_LOGS_ENABLED
-        value: "true"
-      - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-        value: "true"
-   ```
-   
-2. Add the following `volumeMounts` and `volumes`:
-   ```yaml
-     volumeMounts:
-      [...]
-      - name: pointerdir
-        mountPath: /opt/datadog-agent/run
-      [...]
-    volumes:
-      [...]
-      - hostPath:
-          path: /opt/datadog-agent/run
-        name: pointerdir 
-   ```
-   
-3. Deploy (or redeploy) the manifest:
-   ```text
-    kubectl apply -f /path/to/datadog-agent.yaml
-   ```
-
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
-You can also use [Fluent Bit][25] to route EKS logs to CloudWatch Logs. 
+You can use [Fluent Bit][25] to route EKS logs to CloudWatch Logs. 
 
 1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap will specify the log group, region, prefix string, and whether to automatically create the log group.
 
