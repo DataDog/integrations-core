@@ -34,7 +34,6 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
 
@@ -84,11 +83,10 @@ spec:
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
 
-Then, set [Log Integrations][15] as pod annotations. You can also configure this with [a file, a configmap, or a key-value store][16].
+Then, set [Log Integrations][15] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][16].
 
 ```yaml
 apiVersion: v1
@@ -128,12 +126,11 @@ Set [Autodiscovery Integrations Templates][17] as Docker labels on your applicat
 
 **Notes**:
 
-- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][18].
 

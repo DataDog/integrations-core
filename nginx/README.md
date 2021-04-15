@@ -226,7 +226,6 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
 
@@ -276,7 +275,6 @@ spec:
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
 
@@ -322,7 +320,6 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
 

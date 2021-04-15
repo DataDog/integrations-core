@@ -240,7 +240,6 @@ See the [Autodiscovery template variables documentation][28] to learn how to pas
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][29].
 
@@ -288,7 +287,6 @@ See the [Autodiscovery template variables documentation][28] to learn how to pas
 
 #### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][33].
 
