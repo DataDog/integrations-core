@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    cat_allocation_stats: Optional[bool]
     cluster_stats: Optional[bool]
     connect_timeout: Optional[float]
     disable_legacy_cluster_tag: Optional[bool]
