@@ -82,6 +82,7 @@ files:
               example: true
               display_default: true
               type: boolean
+          - template: init_config/default
       - template: instances
         options:
           - name: name
