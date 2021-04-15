@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 5.4.0 / 2021-03-07
+## 5.4.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Collect postgres statement samples & execution plans for deep database monitoring. See [#8627](https://github.com/DataDog/integrations-core/pull/8627).
 * [Added] Apply default limits to Postres statement metrics. See [#8647](https://github.com/DataDog/integrations-core/pull/8647).

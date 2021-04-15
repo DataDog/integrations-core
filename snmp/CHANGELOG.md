@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.0.1 / 2021-03-10
+## 5.0.1 / 2021-03-10 / Agent 7.27.0
 
 * [Fixed] Fix snmp get bulk log. See [#8803](https://github.com/DataDog/integrations-core/pull/8803).
 

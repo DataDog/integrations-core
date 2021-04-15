@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.12.0 / 2021-03-07
+## 3.12.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add flag to convert endianness. See [#8601](https://github.com/DataDog/integrations-core/pull/8601).
 * [Fixed] Use SSL authentication if SSL params are provided. See [#8531](https://github.com/DataDog/integrations-core/pull/8531).
