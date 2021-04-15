@@ -6,7 +6,7 @@
       "id": 3779688345422708,
       "definition": {
         "type": "note",
-        "content": "![JMeter icon](/static/images/logos/jmeter_large.svg)\n\nThis dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nIf configured appropriately, the Datadog plugin for JMeter reports all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
+        "content": "![JMeter icon](/static/images/logos/jmeter_large.svg)\n\nThis dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nConfigure the Datadog plugin for JMeter to start collecting all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
         "background_color": "white",
         "font_size": "16",
         "text_align": "left",
