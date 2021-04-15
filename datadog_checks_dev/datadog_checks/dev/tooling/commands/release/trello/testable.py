@@ -113,6 +113,8 @@ def _all_synced_with_remote(refs: Sequence[str]) -> bool:
 def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
+    # Outputs as '<sign> <commit_hash> <subject line>', e.g.:
+    # '+ 32837dac944b9dcc23d6b54370657d661226c3ac Update README.md (#8778)'
     diff_command = f'git --no-pager cherry -v {base_ref} {target_ref}'
 
     try:
