@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Openstack Controller Integration",
+  "public_title": "Openstack Controller",
   "categories": [
     "cloud"
   ],
