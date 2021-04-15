@@ -26,7 +26,7 @@
 
 * [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
 
-## 16.6.1 / 2021-03-12
+## 16.6.1 / 2021-03-12 / Agent 7.27.0
 
 * [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
 
