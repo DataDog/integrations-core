@@ -191,7 +191,6 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][21].
 
@@ -252,7 +251,6 @@ metadata:
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][25].
 
@@ -312,7 +310,6 @@ Set [Autodiscovery Integrations Templates][28] as Docker labels on your applicat
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][29].
 

@@ -215,7 +215,6 @@ metadata:
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
 
@@ -275,7 +274,6 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].
 
