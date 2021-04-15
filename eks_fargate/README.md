@@ -253,6 +253,7 @@ spec:
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
 ## Log Collection
+### Collecting logs with Datadog Agent as a sidecar
 
 1. Collecting logs is disabled by default in the Datadog Agent, add the following environment variables to enable log collection from your containers:
     ```yaml
