@@ -115,7 +115,9 @@ class GUIDValidator(ManifestValidator):
 
 
 class ManifestVersionValidator(ManifestValidator):
-    root = get_root()
+    def __init__(self, *args, **kwargs):
+        super(ManifestVersionValidator, self).__init__(*args, **kwargs)
+        self.root = get_root()
 
     def validate(self, check_name, decoded, fix):
         # manifest_version
