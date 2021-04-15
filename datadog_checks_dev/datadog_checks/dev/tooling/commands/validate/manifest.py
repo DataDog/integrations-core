@@ -96,9 +96,6 @@ def manifest(ctx, fix):
                     file_fixed = True
                 else:
                     display_queue.append((echo_failure, output))
-            elif not guid.isascii():
-                file_failures += 1
-                display_queue.append((echo_failure, '  `guid` contains non-ascii character'))
             else:
                 all_guids[guid] = check_name
 
@@ -180,7 +177,7 @@ def manifest(ctx, fix):
                 correct_maintainer = 'help@datadoghq.com'
                 maintainer = decoded.get('maintainer')
                 if not maintainer.isascii():
-                    display_queue.append((echo_failure, f'  `maintainer` contains non-ascii character'))
+                    display_queue.append((echo_failure, f'  `maintainer` contains non-ascii character: {maintainer}'))
                 if maintainer != correct_maintainer:
                     file_failures += 1
                     output = f'  incorrect `maintainer`: {maintainer}'
@@ -199,8 +196,6 @@ def manifest(ctx, fix):
             # name
             correct_name = check_name
             name = decoded.get('name')
-            if not name.isascii():
-                display_queue.append((echo_failure, f'  `name` contains non-ascii character'))
             if not isinstance(name, str) or name.lower() != correct_name.lower():
                 file_failures += 1
                 output = f'  incorrect `name`: {name}'
