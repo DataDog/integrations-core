@@ -12,7 +12,7 @@
 * [Fixed] Ensure delimited identifiers in USE statements. See [#8832](https://github.com/DataDog/integrations-core/pull/8832).
 * [Fixed] Handle availability replica metrics on earlier versions. See [#8830](https://github.com/DataDog/integrations-core/pull/8830).
 
-## 2.3.7 / 2021-03-01
+## 2.3.7 / 2021-03-01 / Agent 7.27.0
 
 * [Fixed] Add availability group name tag. See [#8658](https://github.com/DataDog/integrations-core/pull/8658).
 * [Fixed] Clarify windows user and validate connection options. See [#8582](https://github.com/DataDog/integrations-core/pull/8582).

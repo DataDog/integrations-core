@@ -108,6 +108,18 @@ TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_runtime_operations_duration_seconds': 'kubelet.runtime.operations.duration',
 }
 
+DEFAULT_MAX_DEPTH = 10
+DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
+DEFAULT_ENABLED_GAUGES = [
+    'memory.cache',
+    'memory.usage',
+    'memory.swap',
+    'memory.working_set',
+    'memory.rss',
+    'filesystem.usage',
+]
+DEFAULT_POD_LEVEL_METRICS = ['network.*']
+
 log = logging.getLogger('collector')
 
 
@@ -144,6 +156,22 @@ class KubeletCheck(
         inst = instances[0] if instances else None
 
         cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
+
+        if len(inst.get('ignore_metrics', {})) > 0:
+            # Add entries from configuration to ignore_metrics in the cadvisor collector.
+            cadvisor_instance['ignore_metrics'].extend(
+                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
+            )
+
+        # configuring the collection of some of the metrics (via the cadvisor or the summary endpoint)
+        self.max_depth = inst.get('max_depth', DEFAULT_MAX_DEPTH)
+        enabled_gauges = inst.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
+        self.enabled_gauges = ["{0}.{1}".format(self.NAMESPACE, x) for x in enabled_gauges]
+        enabled_rates = inst.get('enabled_rates', DEFAULT_ENABLED_RATES)
+        self.enabled_rates = ["{0}.{1}".format(self.NAMESPACE, x) for x in enabled_rates]
+        pod_level_metrics = inst.get('pod_level_metrics', DEFAULT_POD_LEVEL_METRICS)
+        self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
+
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
         generic_instances = [cadvisor_instance, kubelet_instance]
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)

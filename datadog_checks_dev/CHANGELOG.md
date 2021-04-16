@@ -1,5 +1,18 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 10.0.0 / 2021-04-13
+
+* [Added] Add --ddtrace flag. See [#9124](https://github.com/DataDog/integrations-core/pull/9124).
+* [Added] Move function to utils. See [#9145](https://github.com/DataDog/integrations-core/pull/9145).
+* [Added] Support the `--changed` flag for E2E testing. See [#9141](https://github.com/DataDog/integrations-core/pull/9141).
+* [Added] Support running Windows containers for E2E. See [#9119](https://github.com/DataDog/integrations-core/pull/9119).
+* [Fixed] Fix default config validation to include openmetrics template. See [#9151](https://github.com/DataDog/integrations-core/pull/9151).
+* [Fixed] Enable metric to check validation on the marketplace. See [#9146](https://github.com/DataDog/integrations-core/pull/9146).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+* [Fixed] Fix open import for fs util. See [#9135](https://github.com/DataDog/integrations-core/pull/9135).
+* [Fixed] Fix integration log checking. See [#9118](https://github.com/DataDog/integrations-core/pull/9118).
+* [Changed] Split utils into fileutils and ci. See [#9023](https://github.com/DataDog/integrations-core/pull/9023).
+
 ## 9.4.1 / 2021-04-06
 
 * [Fixed] Ignore validation for marketplace. See [#9100](https://github.com/DataDog/integrations-core/pull/9100).

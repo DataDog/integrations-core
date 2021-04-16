@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 2.3.0 / 2021-03-07
+## 2.3.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Collect mysql statement samples & execution plans . See [#8629](https://github.com/DataDog/integrations-core/pull/8629).
 * [Added] Apply default limits to MySQL statement summaries. See [#8646](https://github.com/DataDog/integrations-core/pull/8646).

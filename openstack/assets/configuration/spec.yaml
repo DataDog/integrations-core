@@ -82,6 +82,7 @@ files:
               example: true
               display_default: true
               type: boolean
+          - template: init_config/default
       - template: instances
         options:
           - name: name
@@ -146,3 +147,11 @@ files:
               service.hidden: true
               min_collection_interval.hidden: true
               empty_default_hostname.hidden: true
+          - template: logs
+            example:
+              - type: file
+                path: /var/log/apache2/*.log
+                source: openstack
+              - type: file
+                path: /var/log/libvirt/*.log
+                source: openstack

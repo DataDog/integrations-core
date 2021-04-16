@@ -115,6 +115,26 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 2. [Restart the Agent][5].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `openstack.d/conf.yaml` file to start collecting your Openstack logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: "<LOG_FILE_PATH>"
+       source: openstack
+   ```
+
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
+   
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `openstack` under the Checks section.

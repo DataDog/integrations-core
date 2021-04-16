@@ -406,8 +406,7 @@ def read_metadata_rows(metadata_file):
 
 
 def read_readme_file(check_name):
-    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
-        yield line_no, line
+    return read_file(get_readme_file(check_name))
 
 
 def read_setup_file(check_name):
@@ -610,6 +609,19 @@ def has_logs(check):
         with open(readme_file, 'r', encoding='utf-8') as f:
             if '# log collection' in f.read().lower():
                 return True
+    return False
+
+
+def is_metric_in_metadata_file(metric, check):
+    """
+    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
+    """
+    metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
+    for _, row in read_metadata_rows(metadata_file):
+        if row['metric_name'] == metric:
+            return True
     return False
 
 
