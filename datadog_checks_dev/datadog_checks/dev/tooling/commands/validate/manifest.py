@@ -176,6 +176,8 @@ def manifest(ctx, fix):
             if not is_extras and not is_marketplace:
                 correct_maintainer = 'help@datadoghq.com'
                 maintainer = decoded.get('maintainer')
+                if not maintainer.isascii():
+                    display_queue.append((echo_failure, f'  `maintainer` contains non-ascii character: {maintainer}'))
                 if maintainer != correct_maintainer:
                     file_failures += 1
                     output = f'  incorrect `maintainer`: {maintainer}'
