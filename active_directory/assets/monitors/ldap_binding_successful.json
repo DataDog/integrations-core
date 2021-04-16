@@ -1,6 +1,6 @@
 {
 	"name": "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "avg(last_12h):anomalies(avg:active_directory.ldap.successful_binds_persec{*} by {host}, 'agile', 4, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='hourly') >= 1",
 	"message": "There is an anomalous number of successful LDAP bindings for host: {{host.name}} ",
 	"tags": [
