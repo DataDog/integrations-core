@@ -123,9 +123,9 @@ metadata:
           "apache_status_url": "http://%%host%%/server-status?auto"
         }
       ]
-  spec:
-    containers:
-      - name: apache
+spec:
+  containers:
+    - name: apache
 ```
 
 ##### Log collection
@@ -141,10 +141,10 @@ kind: Pod
 metadata:
   name: apache
   annotations:
-    ad.datadoghq.com/apache.logs: '[{"source":"apache","service":"<YOUR_APP_NAME>"}]'
-  spec:
-    containers:
-      - name: apache
+    ad.datadoghq.com/apache.logs: '[{"source":"apache","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: apache
 ```
 
 

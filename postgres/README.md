@@ -245,9 +245,9 @@ metadata:
           "password":"<PASSWORD>"
         }
       ]
-  spec:
-    containers:
-      - name: postgres
+spec:
+  containers:
+    - name: postgres
 ```
 
 ##### Log collection
@@ -263,10 +263,10 @@ kind: Pod
 metadata:
   name: postgres
   annotations:
-    ad.datadoghq.com/postgres.logs: '[{"source":"postgresql","service":"postgresql"}]'
-  spec:
-    containers:
-      - name: postgres
+    ad.datadoghq.com/postgres.logs: '[{"source":"postgresql","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: postgres
 ```
 
 ##### Trace collection

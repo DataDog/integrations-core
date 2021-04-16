@@ -209,9 +209,9 @@ metadata:
           "url": "https://%%host%%:9200"
         }
       ]
-  spec:
-    containers:
-      - name: elasticsearch
+spec:
+  containers:
+    - name: elasticsearch
 ```
 
 ##### Log collection
@@ -227,10 +227,10 @@ kind: Pod
 metadata:
   name: elasticsearch
   annotations:
-    ad.datadoghq.com/elasticsearch.logs: '[{"source":"elasticsearch","service":"<SERVICE_NAME"}]'
-  spec:
-    containers:
-      - name: elasticsearch
+    ad.datadoghq.com/elasticsearch.logs: '[{"source":"elasticsearch","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: elasticsearch
 ```
 
 ##### Trace collection
