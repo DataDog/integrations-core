@@ -359,7 +359,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 
 Then, set [Log Integrations][29] as Docker labels:
 
-```yaml
+```json
 {
   "containerDefinitions": [{
     "name": "mongo",
