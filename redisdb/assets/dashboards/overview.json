@@ -4,7 +4,7 @@
   "description": "This dashboard provides a high-level overview of key Redis metrics to help you monitor your Redis primary's performance and manage your Redis instance.\n\nFor more information, see:\n\n- Our [official Redis documentation](https://docs.datadoghq.com/integrations/redisdb/)\n\nOr our 3-part series blog post:\n\n- Part 1: [How to monitor Redis performance metrics](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) \n- Part 2: [Collecting Redis metrics](https://www.datadoghq.com/blog/how-to-collect-redis-metrics/)\n- Part 3: [Monitoring Redis with Datadog](https://www.datadoghq.com/blog/monitor-redis-using-datadog/)",
   "widgets": [
     {
-      "id": 3618615665109398,
+      "id": 0,
       "definition": {
         "title": "About Redis",
         "title_align": "center",
@@ -35,7 +35,7 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
           },
           {
             "id": 2021637053460700,
@@ -50,14 +50,14 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 3, "y": 2, "width": 5, "height": 2 }
+            "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
           }
         ]
       },
       "layout": { "x": 0, "y": 0, "width": 8, "height": 5 }
     },
     {
-      "id": 3116083074109624,
+      "id": 1,
       "definition": {
         "title": "Overview",
         "title_align": "center",
@@ -273,9 +273,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -293,7 +293,7 @@
               "text_align": "left",
               "vertical_align": "center",
               "show_tick": true,
-              "tick_pos": "25%",
+              "tick_pos": "50%",
               "tick_edge": "left",
               "has_padding": true
             },
@@ -306,13 +306,14 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     { "formula": "top(query1 / 1000, 10, \"mean\", \"desc\")" }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.slowlog.micros.95percentile{$scope,$host} by {name,command}",
@@ -320,8 +321,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "orange",
                     "line_type": "solid",
@@ -331,9 +330,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -348,13 +347,14 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     { "formula": "query1", "alias": "Processed commands" }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.net.commands{$scope,$host}",
@@ -362,16 +362,14 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": { "palette": "orange" },
                   "display_type": "line"
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -414,7 +412,6 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -424,6 +421,8 @@
                       "alias": "hit %"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:redis.stats.keyspace_hits{$scope,$host}",
@@ -436,8 +435,6 @@
                       "name": "query2"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -447,9 +444,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -520,9 +517,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -551,7 +548,7 @@
               "text_align": "left",
               "vertical_align": "center",
               "show_tick": true,
-              "tick_pos": "25%",
+              "tick_pos": "50%",
               "tick_edge": "left",
               "has_padding": true
             },
@@ -564,7 +561,6 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -574,6 +570,8 @@
                       "alias": "Keys evicted due to the maxmemory limit"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.keys.evicted{$scope,$host} by {host}",
@@ -581,16 +579,14 @@
                       "name": "query2"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": { "palette": "dog_classic" },
                   "display_type": "bars"
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -631,9 +627,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -703,9 +699,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -760,9 +756,9 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
@@ -785,46 +781,6 @@
               "has_padding": true
             },
             "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
-          },
-          {
-            "id": 14,
-            "definition": {
-              "title": "Rejected connections",
-              "show_legend": false,
-              "legend_size": "0",
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "diff(query1)",
-                      "alias": "Rejected connections"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "query": "sum:redis.net.rejected{$scope,$host}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": { "palette": "warm" },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "include_zero": true,
-                "scale": "linear",
-                "label": "",
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
           },
           {
             "id": 13,
@@ -857,15 +813,55 @@
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
+          },
+          {
+            "id": 14,
+            "definition": {
+              "title": "Rejected connections",
+              "show_legend": false,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "diff(query1)",
+                      "alias": "Rejected connections"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:redis.net.rejected{$scope,$host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": { "palette": "warm" },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
           },
           {
             "id": 16,
@@ -874,11 +870,12 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [{ "formula": "query1", "alias": "Total keys" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:redis.keys{$scope,$host}",
@@ -886,35 +883,27 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": { "palette": "cool" },
                   "display_type": "area"
                 }
               ],
               "yaxis": {
-                "include_zero": true,
                 "scale": "linear",
                 "label": "",
+                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 6, "width": 6, "height": 2 }
+            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
           }
         ]
       },
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 6,
-        "height": 9,
-        "is_column_break": true
-      }
+      "layout": { "is_column_break": true }
     },
     {
-      "id": 5379970967216634,
+      "id": 5,
       "definition": {
         "title": "Logs",
         "title_align": "center",
@@ -925,7 +914,23 @@
           {
             "id": 30,
             "definition": {
-              "title": "Redis Logs",
+              "title": "Error Logs",
+              "title_size": "16",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:redis $scope $host status:error",
+              "sort": { "column": "time", "order": "desc" },
+              "columns": [],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
+          },
+          {
+            "id": 5980709888086058,
+            "definition": {
+              "title": "All Logs",
               "title_size": "16",
               "type": "log_stream",
               "indexes": [],
@@ -936,11 +941,10 @@
               "show_message_column": true,
               "message_display": "expanded-md"
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 8 }
           }
         ]
-      },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 9 }
+      }
     }
   ],
   "template_variables": [
@@ -951,5 +955,5 @@
   "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "yuz-tz4-gxp"
+  "id": "c7r-k9y-t8v"
 }
