@@ -125,7 +125,7 @@ metadata:
       ]
   spec:
     containers:
-    - name: apache
+      - name: apache
 ```
 
 ##### Log collection
