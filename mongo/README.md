@@ -237,7 +237,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 Then, set [Log Integrations][21] as Docker labels:
 
 ```yaml
-LABEL "com.datadoghq.ad.logs"='[{"source":"mongodb","service":"mongo"}]'
+LABEL "com.datadoghq.ad.logs"='[{"source":"mongodb","service":"<SERVICE_NAME>"}]'
 ```
 
 ##### Trace collection
@@ -302,7 +302,7 @@ kind: Pod
 metadata:
   name: mongo
   annotations:
-    ad.datadoghq.com/mongo.logs: '[{"source":"mongodb","service":"mongo"}]'
+    ad.datadoghq.com/mongo.logs: '[{"source":"mongodb","service":"<SERVICE_NAME>"}]'
 spec:
   containers:
     - name: mongo
@@ -363,7 +363,7 @@ Then, set [Log Integrations][29] as Docker labels:
     "name": "mongo",
     "image": "mongo:latest",
     "dockerLabels": {
-      "com.datadoghq.ad.logs": "[{\"source\":\"mongodb\",\"service\":\"mongo\"}]"
+      "com.datadoghq.ad.logs": "[{\"source\":\"mongodb\",\"service\":\"<SERVICE_NAME>\"}]"
     }
   }]
 }
