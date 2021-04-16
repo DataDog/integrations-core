@@ -82,8 +82,6 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -144,8 +142,6 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
 
 Then, set [Log Integrations][21] as Docker labels:
@@ -163,7 +159,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configure with [a file, a configmap, or a key-value store][23].
+Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][23].
 
 ```yaml
 apiVersion: v1
@@ -179,8 +175,9 @@ metadata:
           "url": "https://%%host%%/admin?stats"
         }
       ]
-  labels:
-    name: haproxy
+spec:
+  containers:
+    - name: haproxy
 ```
 
 ##### Log collection
@@ -189,17 +186,18 @@ _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
 
-Then, set [Log Integrations][25] as pod annotations. This can also be configure with [a file, a configmap, or a key-value store][26].
+Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mongo
+  name: haproxy
   annotations:
     ad.datadoghq.com/mongo.logs: '[{"source":"haproxy","service":"<SERVICE_NAME>"}]'
-  labels:
-    name: mongo
+spec:
+  containers:
+    - name: haproxy
 ```
 
 <!-- xxz tab xxx -->

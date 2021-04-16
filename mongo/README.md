@@ -232,8 +232,6 @@ LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%""], "username
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
 
 Then, set [Log Integrations][21] as Docker labels:
@@ -287,17 +285,16 @@ metadata:
           "database": "<DATABASE>"
         }
       ]
-  labels:
-    name: mongo
+spec:
+  containers:
+    - name: mongo
 ```
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
 
-Then, set [Log Integrations][25] as pod annotations. This can also be configure with [a file, a configmap, or a key-value store][26].
+Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
 
 ```yaml
 apiVersion: v1
@@ -306,8 +303,9 @@ metadata:
   name: mongo
   annotations:
     ad.datadoghq.com/mongo.logs: '[{"source":"mongodb","service":"mongo"}]'
-  labels:
-    name: mongo
+spec:
+  containers:
+    - name: mongo
 ```
 
 ##### Trace collection
