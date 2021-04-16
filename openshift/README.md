@@ -48,7 +48,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 | Dogstatsd intake               | Not Supported                            | Supported                     | Supported                                             |
 | APM trace intake               | Not Supported                            | Supported                     | Supported                                             |
 | Logs network intake            | Not Supported                            | Supported                     | Supported                                             |
-| Host network metrics           | Not Supported                            | Supported                     | Supported                                             |
+| Host network metrics           | Not supported                            | Supported                     | Supported                                             |
 | Docker layer monitoring        | Not supported                            | Not supported                     | Supported                                             |
 | Container logs collection      | Not supported                            | Not supported                     | Supported                                             |
 | Live Container monitoring      | Not supported                            | Not supported                     | Supported                                             |
