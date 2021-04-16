@@ -4,7 +4,7 @@
   "description": "This dashboard provides a high-level overview of your MongoDB deployment so you can quickly identify potential slowdowns and resource limitations.\n\n The metrics that are fetched from each member depend on its role in the cluster. For example, replication lag is fetched from the primary for all members of the replica set. This means you need to configure one integration instance for each mongod service running in your cluster.\n\nIn sharded environment, you need one additional integration instance pointed to a mongos proxy.\n\nRefer to the following resources for more information:\n\n- [How to monitor MongoDB performance (WiredTiger)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) \n\n- [How to monitor MongoDB performance (MMAP)](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/)\n\n- [Collecting MongoDB metrics and statistics](https://www.datadoghq.com/blog/collecting-mongodb-metrics-and-statistics/)\n\n- [How to monitor MongoDB performance with Datadog](https://www.datadoghq.com/blog/monitor-mongodb-performance-with-datadog/)\n\n- [Datadog’s MongoDB integration docs](https://docs.datadoghq.com/integrations/mongo/#pagetitle)",
   "widgets": [
     {
-      "id": 6064493749292134,
+      "id": 0,
       "definition": {
         "title": "About MongoDB",
         "title_align": "left",
@@ -156,350 +156,6 @@
     {
       "id": 2,
       "definition": {
-        "title": "Throughput",
-        "title_align": "center",
-        "type": "group",
-        "background_color": "vivid_green",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 15,
-            "definition": {
-              "title": "Read requests per second",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query4", "alias": "Getmore Operations" },
-                    { "formula": "query6", "alias": "Queries" }
-                  ],
-                  "queries": [
-                    {
-                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}",
-                      "data_source": "metrics",
-                      "name": "query4"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}",
-                      "data_source": "metrics",
-                      "name": "query6"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "area"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
-          },
-          {
-            "id": 16,
-            "definition": {
-              "title": "Network I/O",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "horizontal",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query1", "alias": "Received network traffic" }
-                  ],
-                  "queries": [
-                    {
-                      "query": "avg:mongodb.network.bytesinps{*,*}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                },
-                {
-                  "formulas": [
-                    { "formula": "query1", "alias": "Sent network traffic" }
-                  ],
-                  "queries": [
-                    {
-                      "query": "avg:mongodb.network.bytesoutps{*,*}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "green",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
-          },
-          {
-            "id": 17,
-            "definition": {
-              "title": "Write requests per second",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query5", "alias": "Delete operations" },
-                    { "formula": "query7", "alias": "Insert operations " },
-                    { "formula": "query9", "alias": "Update operations" }
-                  ],
-                  "queries": [
-                    {
-                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}",
-                      "data_source": "metrics",
-                      "name": "query5"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}",
-                      "data_source": "metrics",
-                      "name": "query7"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}",
-                      "data_source": "metrics",
-                      "name": "query9"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "green",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "area"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
-          },
-          {
-            "id": 18,
-            "definition": {
-              "title": "Query operations per second",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    { "formula": "query8", "alias": "Total queries" },
-                    { "formula": "query10", "alias": "Delete operations" },
-                    { "formula": "query12", "alias": "Insert operations" },
-                    { "formula": "query14", "alias": "Update operations" },
-                    { "formula": "query16", "alias": "Getmore operations" },
-                    { "formula": "query18", "alias": "Commands" }
-                  ],
-                  "queries": [
-                    {
-                      "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query8"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query10"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query12"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query14"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query16"
-                    },
-                    {
-                      "query": "sum:mongodb.opcounters.commandps{$scope,$replset_name}.fill(zero)",
-                      "data_source": "metrics",
-                      "name": "query18"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
-          }
-        ]
-      },
-      "layout": { "x": 0, "y": 0, "width": 8, "height": 5 }
-    },
-    {
-      "id": 3,
-      "definition": {
-        "title": "Most Used Replica Sets",
-        "title_align": "center",
-        "type": "group",
-        "background_color": "green",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 19,
-            "definition": {
-              "title": "For reads",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {},
-              "type": "toplist",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name} by {replset_name}",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
-          },
-          {
-            "id": 20,
-            "definition": {
-              "title": "For writes",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {},
-              "type": "toplist",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name} by {replset_name}",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
-          }
-        ]
-      },
-      "layout": { "x": 8, "y": 0, "width": 4, "height": 5 }
-    },
-    {
-      "id": 4,
-      "definition": {
         "title": "Replication",
         "title_align": "center",
         "type": "group",
@@ -515,7 +171,6 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -523,6 +178,8 @@
                     { "formula": "query4", "alias": "oplog log size" },
                     { "formula": "query6", "alias": "oplog used size" }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mongodb.oplog.logsizemb{$scope,$replset_name}.fill(zero)",
@@ -535,8 +192,6 @@
                       "name": "query6"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -565,10 +220,11 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}.fill(zero).rollup(avg, 15)",
@@ -576,8 +232,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -619,7 +273,6 @@
               "title": "Maximum lag per replica set",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -629,21 +282,21 @@
                       "limit": { "count": 100, "order": "desc" }
                     }
                   ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "custom_bg_color": "#f9e0ff",
                       "comparator": ">",
                       "palette": "custom_bg",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
                     }
                   ]
                 }
@@ -652,16 +305,15 @@
             "layout": { "x": 5, "y": 2, "width": 5, "height": 2 }
           }
         ]
-      },
-      "layout": { "is_column_break": true }
+      }
     },
     {
-      "id": 5,
+      "id": 3,
       "definition": {
         "title": "Resource Utilization",
         "title_align": "left",
         "type": "group",
-        "background_color": "white",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -737,11 +389,12 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [{ "formula": "query1", "alias": "Memory used" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mongodb.mem.resident{$scope,$replset_name}.fill(zero)",
@@ -749,8 +402,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -844,10 +495,11 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mongodb.stats.datasize{$scope,$replset_name} by {replset_name}",
@@ -855,8 +507,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -880,6 +530,350 @@
       }
     },
     {
+      "id": 4,
+      "definition": {
+        "title": "Throughput",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_green",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 15,
+            "definition": {
+              "title": "Read requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "formula": "query4", "alias": "Getmore Operations" },
+                    { "formula": "query6", "alias": "Queries" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+          },
+          {
+            "id": 16,
+            "definition": {
+              "title": "Network I/O",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "formula": "query1", "alias": "Received network traffic" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.network.bytesinps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    { "formula": "query1", "alias": "Sent network traffic" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mongodb.network.bytesoutps{*,*,$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
+          },
+          {
+            "id": 17,
+            "definition": {
+              "title": "Write requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "formula": "query5", "alias": "Delete operations" },
+                    { "formula": "query7", "alias": "Insert operations " },
+                    { "formula": "query9", "alias": "Update operations" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}",
+                      "data_source": "metrics",
+                      "name": "query9"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
+          },
+          {
+            "id": 18,
+            "definition": {
+              "title": "Query operations per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "formula": "query8", "alias": "Total queries" },
+                    { "formula": "query10", "alias": "Delete operations" },
+                    { "formula": "query12", "alias": "Insert operations" },
+                    { "formula": "query14", "alias": "Update operations" },
+                    { "formula": "query16", "alias": "Getmore operations" },
+                    { "formula": "query18", "alias": "Commands" }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query10"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query12"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query14"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query16"
+                    },
+                    {
+                      "query": "sum:mongodb.opcounters.commandps{$scope,$replset_name}.fill(zero)",
+                      "data_source": "metrics",
+                      "name": "query18"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "Most Used Replica Sets",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "green",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 19,
+            "definition": {
+              "title": "For reads",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": { "count": 10, "order": "desc" }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name} by {replset_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+          },
+          {
+            "id": 20,
+            "definition": {
+              "title": "For writes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": { "count": 10, "order": "desc" }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name} by {replset_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 8, "y": 0, "width": 4, "height": 5 }
+    },
+    {
       "id": 6,
       "definition": {
         "title": "Sharding Stats",
@@ -897,13 +891,14 @@
               "show_legend": false,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     { "formula": "query1", "alias": "Session Count" }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mongodb.sessions.count{$scope,$replset_name}",
@@ -911,8 +906,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "warm",
                     "line_type": "solid",
@@ -930,7 +923,7 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
           },
           {
             "id": 32,
@@ -949,7 +942,7 @@
               "custom_unit": "chk",
               "precision": 2
             },
-            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 3, "width": 3, "height": 2 }
           },
           {
             "id": 33,
@@ -967,7 +960,7 @@
               "autoscale": true,
               "precision": 0
             },
-            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+            "layout": { "x": 3, "y": 3, "width": 3, "height": 2 }
           },
           {
             "id": 34,
@@ -982,7 +975,7 @@
               "tick_edge": "top",
               "has_padding": false
             },
-            "layout": { "x": 0, "y": 4, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 5, "width": 3, "height": 2 }
           },
           {
             "id": 35,
@@ -997,37 +990,41 @@
               "tick_edge": "top",
               "has_padding": false
             },
-            "layout": { "x": 3, "y": 4, "width": 3, "height": 2 }
+            "layout": { "x": 3, "y": 5, "width": 3, "height": 2 }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 6, "height": 7 }
+      "layout": { "x": 0, "y": 0, "width": 6, "height": 8 }
     },
     {
       "id": 7,
       "definition": {
-        "title": "Events",
+        "title": "Logs",
         "title_align": "left",
         "type": "group",
         "background_color": "white",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 36,
+            "id": 145205510521986,
             "definition": {
-              "title": "MongoDB events",
+              "title": "MongoDB Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "event_stream",
+              "type": "log_stream",
+              "indexes": [],
               "query": "source:mongodb $scope $replset_name",
-              "tags_execution": "and",
-              "event_size": "l"
+              "sort": { "column": "time", "order": "desc" },
+              "columns": ["host", "service"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 6 }
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 7 }
           }
         ]
       },
-      "layout": { "x": 6, "y": 0, "width": 6, "height": 7 }
+      "layout": { "x": 6, "y": 0, "width": 6, "height": 8 }
     }
   ],
   "template_variables": [
@@ -1038,5 +1035,5 @@
   "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
-  "id": "vy6-her-ssr"
+  "id": "iad-6qz-edn"
 }
