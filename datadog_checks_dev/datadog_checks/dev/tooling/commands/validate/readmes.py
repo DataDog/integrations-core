@@ -69,12 +69,7 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
     readme_path = get_readme_file(integration)
     read_readme = read_readme_file(integration)
     if not read_readme.isascii():
-        display_queue.append(
-            lambda **kwargs: echo_failure(
-                "     readme contains non-ascii character(s)", **kwargs
-            )
-
-        )
+        display_queue.append(lambda **kwargs: echo_failure("     readme contains non-ascii character(s)", **kwargs))
     html = markdown.markdown(read_readme)
     soup = BeautifulSoup(html, features="html.parser")
     readme_counter.add(readme_path)
