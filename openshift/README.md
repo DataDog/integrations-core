@@ -52,7 +52,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 | Docker layer monitoring        | Not Supported                            | Supported                     | Supported                                             |
 | Container logs collection      | Not Supported                            | Supported                     | Supported                                             |
 | Live Container monitoring      | Not Supported                            | Supported                     | Supported                                             |
-| Live Process monitoring        | Not Supported                            | Supported                     | Supported                                             |
+| Live Process monitoring        | Not supported                            | Not supported                     | Supported                                             |
 
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
