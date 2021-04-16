@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import time
 from datetime import datetime, timedelta
 
 import pytest
@@ -1549,6 +1550,32 @@ class TestColumnTransformers:
                 'tags': ['test:bar'],
             },
             executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_unix_time(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'unix_time'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', time.time() - 3600]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
