@@ -341,7 +341,7 @@ Required environment variables on the Agent container:
 
 See [Tracing Docker Applications][31] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container that makes requests to Postgres][32] and set `DD_AGENT_HOST` to the [EC2 private IP address][35].
+Then, [instrument your application container that makes requests to Postgres][32] and set `DD_AGENT_HOST` to the [EC2 private IP address][33].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

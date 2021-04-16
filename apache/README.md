@@ -108,7 +108,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][18] as pod annotations on your application container. Aside from this, templates can also be configure with [a file, a configmap, or a key-value store][19].
+Set [Autodiscovery Integrations Templates][18] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][19].
 
 ```yaml
 apiVersion: v1
@@ -179,7 +179,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 
 Then, set [Log Integrations][25] as Docker labels:
 
-```yaml
+```json
 {
   "containerDefinitions": [{
     "name": "apache",
