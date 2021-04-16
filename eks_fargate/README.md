@@ -42,7 +42,7 @@ To collect data from your applications running in AWS EKS Fargate over a Fargate
 
 - [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
 - [Deploy the Agent as a sidecar](#running-the-agent-as-a-side-car).
-- Set up Datadog [metrics](#metrics-collection), [events](#events-collection), and [traces](#traces-collection) collection.
+- Set up Datadog [metrics](#metrics-collection), [logs](#log-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
 To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
 
@@ -252,6 +252,30 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
+## Log Collection
+### Collecting logs from EKS on Fargate with Fluent Bit.
+
+You can use [Fluent Bit][25] to route EKS logs to CloudWatch Logs. 
+
+1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap will specify the log group, region, prefix string, and whether to automatically create the log group.
+
+   ```yaml
+    kind: ConfigMap
+    apiVersion: v1
+    metadata:
+      name: aws-logging
+      namespace: aws-observability
+    data:
+      output.conf: |
+        [OUTPUT]
+            Name cloudwatch_logs
+            Match   *
+            region us-east-1
+            log_group_name awslogs-https
+            log_stream_prefix awslogs-firelens-example
+            auto_create_group On
+   ```
+
 ## Traces Collection
 
 Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][17].
@@ -384,3 +408,4 @@ Need help? Contact [Datadog support][20].
 [22]: https://www.datadoghq.com/blog/aws-fargate-metrics/
 [23]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [24]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[25]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
