@@ -84,8 +84,7 @@ Set [Autodiscovery Integrations Templates][15] as Docker labels on your applicat
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["apache"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/server-status?auto"}
-]'
+LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/server-status?auto"}]'
 ```
 
 ##### Log collection
