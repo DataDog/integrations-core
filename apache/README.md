@@ -123,8 +123,9 @@ metadata:
           "apache_status_url": "http://%%host%%/server-status?auto"
         }
       ]
-  labels:
-    name: apache
+  spec:
+  containers:
+    - name: apache
 ```
 
 ##### Log collection
