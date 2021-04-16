@@ -4,6 +4,7 @@
 from __future__ import division
 
 import re
+import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -271,6 +272,11 @@ def get_time_elapsed(transformers, column_name, **modifiers):
         def time_elapsed(_, value, **kwargs):
             value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    elif time_format == 'unix_time':
+
+        def time_elapsed(_, value, **kwargs):
+            gauge(_, time.time() - value, **kwargs)
 
     else:
 
