@@ -124,7 +124,7 @@ metadata:
         }
       ]
   spec:
-  containers:
+    containers:
     - name: apache
 ```
 
@@ -133,7 +133,7 @@ metadata:
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][20].
 
-Then, set [Log Integrations][21] as pod annotations. This can also be configure with [a file, a configmap, or a key-value store][22].
+Then, set [Log Integrations][21] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][22].
 
 ```yaml
 apiVersion: v1
@@ -142,8 +142,9 @@ metadata:
   name: apache
   annotations:
     ad.datadoghq.com/apache.logs: '[{"source":"apache","service":"<YOUR_APP_NAME>"}]'
-  labels:
-    name: apache
+  spec:
+    containers:
+      - name: apache
 ```
 
 
