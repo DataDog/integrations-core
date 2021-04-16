@@ -5,7 +5,7 @@
 * [Fixed] Handle missing partitions and better logging. See [#9089](https://github.com/DataDog/integrations-core/pull/9089).
 * [Fixed] Add more logging. See [#8795](https://github.com/DataDog/integrations-core/pull/8795).
 
-## 2.8.3 / 2021-03-07
+## 2.8.3 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

@@ -1,6 +1,6 @@
 # CHANGELOG - Cilium
 
-## 1.5.3 / 2021-03-07
+## 1.5.3 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
 

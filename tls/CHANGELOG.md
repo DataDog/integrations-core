@@ -1,6 +1,6 @@
 # CHANGELOG - TLS
 
-## 2.3.0 / 2021-03-07
+## 2.3.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Include validate_cert in backwards compatibility remapper. See [#8543](https://github.com/DataDog/integrations-core/pull/8543).
 * [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).

@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-## 1.18.0 / 2021-03-07
+## 1.18.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Adding services_exclude config option. See [#8377](https://github.com/DataDog/integrations-core/pull/8377).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
