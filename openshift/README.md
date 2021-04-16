@@ -51,7 +51,7 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 | Host network metrics           | Not Supported                            | Supported                     | Supported                                             |
 | Docker layer monitoring        | Not Supported                            | Supported                     | Supported                                             |
 | Container logs collection      | Not Supported                            | Supported                     | Supported                                             |
-| Live Container monitoring      | Not Supported                            | Supported                     | Supported                                             |
+| Live Container monitoring      | Not supported                            | Not supported                     | Supported                                             |
 | Live Process monitoring        | Not supported                            | Not supported                     | Supported                                             |
 
 <div class="alert alert-warning">
