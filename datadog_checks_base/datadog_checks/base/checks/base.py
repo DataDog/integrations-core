@@ -375,10 +375,11 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def load_configuration_models(self):
-        # 'datadog_checks.<PACKAGE>.<MODULE>...'
-        module_parts = self.__module__.split('.')
-        package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
+    def load_configuration_models(self, package_path=None):
+        if package_path is None:
+            # 'datadog_checks.<PACKAGE>.<MODULE>...'
+            module_parts = self.__module__.split('.')
+            package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
 
         if self._config_model_shared is None:
             raw_shared_config = self._get_config_model_initialization_data()
