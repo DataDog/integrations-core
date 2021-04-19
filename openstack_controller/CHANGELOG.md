@@ -5,8 +5,6 @@
 * [Added] Openstack controller log support. See [#9115](https://github.com/DataDog/integrations-core/pull/9115).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
 * [Fixed] Add config spec for Openstack Controller. See [#9092](https://github.com/DataDog/integrations-core/pull/9092).
-* [Fixed] Revert "Pin decorator to 4.4.2". See [#9093](https://github.com/DataDog/integrations-core/pull/9093).
-* [Fixed] Pin decorator to 4.4.2. See [#9074](https://github.com/DataDog/integrations-core/pull/9074).
 
 ## 1.10.3 / 2021-02-11 / Agent 7.27.0
 
@@ -95,4 +93,3 @@
 ## 1.0.0 / 2019-02-04
 
 * [Added] OpenStack Controller. See [#2496](https://github.com/DataDog/integrations-core/pull/2496).
-
