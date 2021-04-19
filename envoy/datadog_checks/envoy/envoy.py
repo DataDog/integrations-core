@@ -87,7 +87,6 @@ class Envoy(AgentCheck):
                 continue
 
             try:
-                self.log.debug("!!Parsing....: {}".format(envoy_metric))
                 metric, tags, method = parse_metric(envoy_metric, retry=self.parse_unknown_metrics)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
@@ -101,7 +100,6 @@ class Envoy(AgentCheck):
                         self.log.debug('Unknown tag `%s` in metric `%s`', tag, envoy_metric)
                     self.unknown_tags[tag] += 1
                 continue
-            self.log.debug("!!GOT....: {}".format(metric))
 
             tags.extend(self.custom_tags)
 
