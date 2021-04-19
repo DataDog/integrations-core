@@ -1,5 +1,10 @@
 # CHANGELOG - mongo
 
+## 2.4.0 / 2021-04-19
+
+* [Fixed] Fix authSource config option.. See [#9139](https://github.com/DataDog/integrations-core/pull/9139).
+* [Deprecated] Deprecate connection_scheme. See [#9142](https://github.com/DataDog/integrations-core/pull/9142).
+
 ## 2.3.1 / 2021-04-06
 
 * [Fixed] Fix no_auth support. See [#9094](https://github.com/DataDog/integrations-core/pull/9094).

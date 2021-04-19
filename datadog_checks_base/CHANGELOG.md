@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 18.2.0 / 2021-04-19
+
+* [Added] Allow the loading of arbitrary configuration models. See [#9180](https://github.com/DataDog/integrations-core/pull/9180).
+
 ## 18.1.0 / 2021-04-16
 
 * [Added] Add unix_time format to QueryManager time_elapsed transformer. See [#9174](https://github.com/DataDog/integrations-core/pull/9174).
