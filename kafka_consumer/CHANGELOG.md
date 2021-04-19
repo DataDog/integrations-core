@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.5 / 2021-04-19
+
+* [Fixed] Fix partition check. See [#9117](https://github.com/DataDog/integrations-core/pull/9117).
+
 ## 2.8.4 / 2021-04-05
 
 * [Fixed] Handle missing partitions and better logging. See [#9089](https://github.com/DataDog/integrations-core/pull/9089).
