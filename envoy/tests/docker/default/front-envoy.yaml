@@ -63,7 +63,7 @@ static_resources:
     type: LOGICAL_DNS
     lb_policy: ROUND_ROBIN
     load_assignment:
-      cluster_name: ms-catalog-category-appli.default.eu-west-3-stg.internal.ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul
+      cluster_name: service-xdr.default.eu-west-3-stg.internal.abcd.consul
       endpoints:
       - lb_endpoints:
         - endpoint:
@@ -77,7 +77,7 @@ dynamic_resources:
       api_type: GRPC
       grpc_services:
       - envoy_grpc:
-          cluster_name: ms-catalog-category-appli.default.eu-west-3-stg.internal.ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul
+          cluster_name: service-xdr.default.eu-west-3-stg.internal.abcd.consul
       set_node_on_first_message_only: true
   lds_config:
     api_config_source:
