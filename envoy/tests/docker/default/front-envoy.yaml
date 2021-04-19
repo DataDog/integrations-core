@@ -57,7 +57,7 @@ static_resources:
               socket_address:
                 address: service2
                 port_value: 80
-  - name: ms-catalog-category-appli.default.eu-west-3-stg.internal.ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul
+  - name: xds_cluster
     http2_protocol_options: {}
     connect_timeout: 1s
     type: LOGICAL_DNS
@@ -77,14 +77,14 @@ dynamic_resources:
       api_type: GRPC
       grpc_services:
       - envoy_grpc:
-          cluster_name: service-xdr.default.eu-west-3-stg.internal.abcd.consul
+          cluster_name: xds_cluster
       set_node_on_first_message_only: true
   lds_config:
     api_config_source:
       api_type: GRPC
       grpc_services:
       - envoy_grpc:
-          cluster_name: service-xdr.default.eu-west-3-stg.internal.abcd.consul
+          cluster_name: xds_cluster
       set_node_on_first_message_only: true
 node:
   cluster: e2e-test-cluster
