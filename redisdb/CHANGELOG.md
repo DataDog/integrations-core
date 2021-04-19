@@ -5,7 +5,7 @@
 * [Added] Report io thread metrics. See [#9018](https://github.com/DataDog/integrations-core/pull/9018). Thanks [jlisam](https://github.com/jlisam).
 * [Added] Support redis 6 cpu metrics. See [#9015](https://github.com/DataDog/integrations-core/pull/9015). Thanks [jlisam](https://github.com/jlisam).
 * [Fixed] Skip slowlogs if there is an error. See [#9147](https://github.com/DataDog/integrations-core/pull/9147).
-* [Fixed] redisdb: correct default ssl_cert_reqs. See [#9048](https://github.com/DataDog/integrations-core/pull/9048). Thanks [wbobeirne](https://github.com/wbobeirne).
+* [Fixed] Correct default ssl_cert_reqs. See [#9048](https://github.com/DataDog/integrations-core/pull/9048). Thanks [wbobeirne](https://github.com/wbobeirne).
 
 ## 3.3.1 / 2021-03-07 / Agent 7.27.0
 
