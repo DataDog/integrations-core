@@ -1,5 +1,12 @@
 # CHANGELOG - TLS
 
+## 2.4.0 / 2021-04-19
+
+* [Added] Add an option to send certificate duration. See [#9067](https://github.com/DataDog/integrations-core/pull/9067). Thanks [lindleywhite](https://github.com/lindleywhite).
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Fixed] Refactor TLS check. See [#8792](https://github.com/DataDog/integrations-core/pull/8792).
+* [Fixed] Add more debug lines. See [#8787](https://github.com/DataDog/integrations-core/pull/8787).
+
 ## 2.3.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Include validate_cert in backwards compatibility remapper. See [#8543](https://github.com/DataDog/integrations-core/pull/8543).
