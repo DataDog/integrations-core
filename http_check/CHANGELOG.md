@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 5.3.0 / 2021-04-19
+
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Add runtime configuration validation. See [#8932](https://github.com/DataDog/integrations-core/pull/8932).
+
 ## 5.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
