@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 2.1.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8911](https://github.com/DataDog/integrations-core/pull/8911).
+* [Fixed] Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).
+
 ## 2.0.0 / 2021-04-09
 
 * [Added] Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
