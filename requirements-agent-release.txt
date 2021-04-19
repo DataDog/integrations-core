@@ -141,6 +141,6 @@ datadog-voltdb==1.1.0
 datadog-vsphere==5.9.0
 datadog-win32-event-log==2.8.0; sys_platform == 'win32'
 datadog-windows-service==3.1.0; sys_platform == 'win32'
-datadog-wmi-check==1.9.3; sys_platform == 'win32'
+datadog-wmi-check==1.10.0; sys_platform == 'win32'
 datadog-yarn==1.18.0
 datadog-zk==2.9.3; sys_platform != 'win32'
