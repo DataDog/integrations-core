@@ -80,9 +80,14 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
     parsed_metric = '.'.join(metric_parts)
     if parsed_metric not in METRICS:
         if retry:
+            skip_parts = []
             # Retry parsing for metrics by skipping the last matched metric part
             while len(metric_parts) > 1:
                 skip_part = metric_parts.pop()
+                if skip_part in skip_parts:
+                    raise UnknownMetric
+                else:
+                    skip_parts.append(skip_part)
                 (
                     metric_parts,
                     tag_value_builder,
