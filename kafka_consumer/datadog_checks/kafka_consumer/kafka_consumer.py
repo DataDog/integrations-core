@@ -4,6 +4,7 @@
 from collections import defaultdict
 from time import time
 
+from datadog_checks.base.errors import CheckException
 from kafka import KafkaAdminClient, KafkaClient
 from kafka import errors as kafka_errors
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
@@ -51,7 +52,10 @@ class KafkaCheck(AgentCheck):
         if instance.get('zk_connect_str') is None:
             # bury the kafka version check under the zookeeper check because if zookeeper then we should immediately use
             # the legacy code path regardless of kafka version
-            kafka_version = cls._determine_kafka_version(init_config, instance)
+            try:
+                kafka_version = cls._determine_kafka_version(init_config, instance)
+            except Exception as e:
+                raise CheckException("Could not determine kafka version. You can avoid this by specifying kafka_client_api_version option." )
             if kafka_version >= (0, 10, 2):
                 return super(KafkaCheck, cls).__new__(cls)
         return LegacyKafkaCheck_0_10_2(name, init_config, instances)
