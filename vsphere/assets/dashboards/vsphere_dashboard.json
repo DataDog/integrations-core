@@ -14,7 +14,7 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:vsphere.cpu.usage{$scope}"
+                        "q": "avg:vsphere.cpu.usage.avg{$scope}"
                     }
                 ],
                 "type": "timeseries",
@@ -25,10 +25,10 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:vsphere.cpu.ready{$scope}"
+                        "q": "avg:vsphere.cpu.ready.sum{$scope}"
                     },
                     {
-                        "q": "avg:vsphere.cpu.wait{$scope}"
+                        "q": "avg:vsphere.cpu.wait.sum{$scope}"
                     }
                 ],
                 "type": "timeseries",
@@ -39,7 +39,7 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:vsphere.net.transmitted{$scope}"
+                        "q": "avg:vsphere.net.transmitted.avg{$scope}"
                     }
                 ],
                 "type": "timeseries",
@@ -50,7 +50,7 @@
             "definition": {
                 "requests": [
                     {
-                        "q": "avg:vsphere.net.received{$scope}"
+                        "q": "avg:vsphere.net.received.avg{$scope}"
                     }
                 ],
                 "type": "timeseries",
