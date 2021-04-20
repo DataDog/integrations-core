@@ -276,6 +276,49 @@ def test_statement_metrics(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
+def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
+    pg_instance['deep_database_monitoring'] = True
+
+    # The query signature matches the normalized query returned by the mock agent and would need to be
+    # updated if the normalized query is updated
+    query = 'select * from pg_stat_activity where application_name = ANY(%s);'
+    query_signature = 'a478c1e7aaac3ff2'
+    normalized_query = 'select * from pg_stat_activity where application_name = ANY(array [ ? ])'
+
+    def obfuscate_sql(query):
+        if query.startswith('select * from pg_stat_activity where application_name'):
+            return normalized_query
+        return query
+
+    check = integration_check(pg_instance)
+    check._connect()
+    cursor = check.db.cursor()
+
+    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+    # This should result in a single metric for that query_signature having a value of 2
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        cursor.execute(query, (['app1', 'app2'],))
+        cursor.execute(query, (['app1', 'app2', 'app3'],))
+        check.check(pg_instance)
+        cursor.execute(query, (['app1', 'app2'],))
+        cursor.execute(query, (['app1', 'app2', 'app3'],))
+        check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'user:datadog',
+        'query:{}'.format(normalized_query),
+        'query_signature:{}'.format(query_signature),
+        'resource_hash:{}'.format(query_signature),
+    ]
+
+    aggregator.assert_metric('postgresql.queries.count', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.queries.count', value=2.0, tags=expected_tags)
+
+
 @pytest.fixture
 def bob_conn():
     conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")

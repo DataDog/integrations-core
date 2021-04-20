@@ -177,10 +177,11 @@ class PostgresStatementMetrics(object):
             return metrics
 
         def row_keyfunc(row):
-            # old versions of pg_stat_statements don't have a query ID so fall back to the query string itself
-            queryid = row['queryid'] if 'queryid' in row else row['query']
+            # old versions of pg_stat_statements don't have a query ID so fall back to the query signature
+            queryid = row['queryid'] if 'queryid' in row else row['query_signature']
             return (queryid, row['datname'], row['rolname'])
 
+        rows = self._normalize_query_stats(rows)
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metrics.append(('dd.postgres.queries.query_rows_raw', len(rows), []))
 
@@ -195,18 +196,8 @@ class PostgresStatementMetrics(object):
         metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
-            try:
-                normalized_query = datadog_agent.obfuscate_sql(row['query'])
-                if not normalized_query:
-                    self.log.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
-                    continue
-            except Exception as e:
-                # If query obfuscation fails, it is acceptable to log the raw query here because the
-                # pg_stat_statements table contains no parameters in the raw queries.
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-                continue
-
-            query_signature = compute_sql_signature(normalized_query)
+            normalized_query = row['normalized_query']
+            query_signature = row['query_signature']
 
             # All "Deep Database Monitoring" statement-level metrics are tagged with a `query_signature`
             # which uniquely identifies the normalized query family. Where possible, this hash should
@@ -236,3 +227,50 @@ class PostgresStatementMetrics(object):
                 metrics.append((metric_name, value, tags))
 
         return metrics
+
+    def _normalize_query_stats(self, rows):
+        """
+        Given a list of rows, generate a new list of rows with an added normalized_query and query_signature
+        columns and a merged version of stats considering all queries mapping to a given normalized string
+        """
+        queries_by_normalized = {}
+        for row in rows:
+            row_with_normalization = dict(row)
+            try:
+                normalized_query = datadog_agent.obfuscate_sql(row['query'])
+                if not normalized_query:
+                    self.log.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
+                    continue
+            except Exception as e:
+                # If query obfuscation fails, it is acceptable to log the raw query here because the
+                # pg_stat_statements table contains no parameters in the raw queries.
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                continue
+
+            row_with_normalization['normalized_query'] = normalized_query
+            row_with_normalization['query_signature'] = compute_sql_signature(normalized_query)
+            query_key = (
+                row_with_normalization['query_signature'],
+                row_with_normalization['datname'],
+                row_with_normalization['rolname'],
+            )
+
+            if query_key not in queries_by_normalized:
+                queries_by_normalized[query_key] = []
+
+            queries_by_normalized[query_key].append(row_with_normalization)
+
+        # Sum up all metric column values for all rows sharing the same query key
+        # to present a single cumulative snapshot for a given query signature
+        queries = []
+        for query_key in queries_by_normalized.keys():
+            # Treat the first query instance as the base for the results of the merge
+            query_row = queries_by_normalized[query_key][0]
+
+            for metric_column in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys():
+                for other_query in queries_by_normalized[query_key][1:]:
+                    query_row[metric_column] += other_query[metric_column]
+
+            queries.append(query_row)
+
+        return queries
