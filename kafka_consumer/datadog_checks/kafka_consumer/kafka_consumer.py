@@ -327,12 +327,12 @@ class KafkaCheck(AgentCheck):
                 if partitions is None:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
-                        "in the cluster, so skipping reporting these offsets.",
+                        "in the cluster, so skipping reporting these offsets."
                     )
                 else:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
-                        "included in the cluster partitions, so skipping reporting these offsets.",
+                        "included in the cluster partitions, so skipping reporting these offsets."
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
