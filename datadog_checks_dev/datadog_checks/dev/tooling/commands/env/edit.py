@@ -6,14 +6,14 @@ import click
 from datadog_checks.dev.tooling.e2e.config import locate_config_file
 
 from ....fs import file_exists
-from ...testing import complete_envs
-from ...utils import complete_testable_checks, get_tox_file
+from ...testing import complete_active_checks, complete_configured_envs
+from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Edit config file using default editor')
-@click.argument('check', autocompletion=complete_testable_checks)
-@click.argument('env', autocompletion=complete_envs)
+@click.argument('check', autocompletion=complete_active_checks)
+@click.argument('env', autocompletion=complete_configured_envs)
 @click.option('--editor', '-e', help='Editor to use')
 @click.pass_context
 def edit(ctx, check, env, editor):
