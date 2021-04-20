@@ -63,6 +63,24 @@ def redis_auth():
 
 
 @pytest.fixture(scope='session')
+def redis_auth_acl():
+    """
+    Start a standalone redis server with users ACL before running a
+    test and stop it afterwards.
+    If there's any problem executing docker-compose, let the exception bubble
+    up.
+    """
+    with docker_run(
+        os.path.join(HERE, 'compose', 'acl.compose'),
+        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf'),
+                  'REDIS_USERS_ACL': os.path.join(HERE, 'config', 'users.acl')},
+    ):
+        yield
+
+
+
+
+@pytest.fixture(scope='session')
 def dd_environment(master_instance):
     """
     Start a cluster with one master, one replica, and one unhealthy replica.

@@ -1,0 +1,2 @@
+user datadog-agent on -@all +ping +info +slowlog >devops-best-friend
+
