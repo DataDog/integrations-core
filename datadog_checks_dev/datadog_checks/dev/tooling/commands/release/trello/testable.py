@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-from typing import List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 import click
 
@@ -154,7 +154,7 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
             raise click.Abort
 
 
-def pick_card_member(config: dict, author: str, team: str, card_assignments: dict) -> Optional[str]:
+def pick_card_member(config: dict, author: str, team: str, card_assignments: dict) -> Tuple[Any, Any]:
     """Return a member to assign to the created issue.
     In practice, it returns one trello user which is not the PR author, for the given team.
     For it to work, you need a `trello_users_$team` table in your ddev configuration,
@@ -167,7 +167,7 @@ def pick_card_member(config: dict, author: str, team: str, card_assignments: dic
     """
     users = config.get(f'trello_users_{team}')
     if not users:
-        return None
+        return None, None
     if team not in card_assignments:
         # initialize map team -> user -> QA cards assigned
         team_members = list(users)
@@ -303,7 +303,7 @@ def testable(
     if update_rc_builds_cards:
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
-    card_assignments = {}
+    card_assignments: Dict[str, Dict[str, int]] = {}
 
     github_teams = trello.label_github_team_map.values()
     testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
