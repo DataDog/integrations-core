@@ -44,7 +44,11 @@ def test_retry_metric():
 
 def test_retry_invalid_metric():
     with pytest.raises(UnknownMetric):
-        parse_metric("cluster.internal.foo", retry=True)
+        parse_metric(
+            "cluster.ms-catalog-category-appli.default.eu-west-3-stg.internal"
+            ".ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul.http2.dropped_headers_with_underscores",
+            retry=True,
+        )
 
 
 def test_http_router_filter():
