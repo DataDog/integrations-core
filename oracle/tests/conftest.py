@@ -78,7 +78,7 @@ def dd_environment():
         conditions=[
             CheckDockerLogs(
                 COMPOSE_FILE,
-                ['Database creation complete.', 'DATABASE IS READY TO USE!', 'XDB initialized.'],
+                ['Database creation complete.', 'DATABASE IS READY TO USE!'],
                 wait=10,
                 attempts=60,
             ),
