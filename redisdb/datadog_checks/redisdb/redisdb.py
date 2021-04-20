@@ -263,10 +263,15 @@ class Redis(AgentCheck):
 
         if self.collect_client_metrics:
             # Save client connections statistics
-            clients = conn.client_list()
-            clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-            for name, count in clients_by_name.items():
-                self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            try:
+                clients = conn.client_list()
+            except redis.exceptions.NoPermissionError as e:
+                self.log.exception(e)
+                self.log.error('Missing client|list permission: will skip client metrics collection')
+            else:
+                clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+                for name, count in clients_by_name.items():
+                    self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
