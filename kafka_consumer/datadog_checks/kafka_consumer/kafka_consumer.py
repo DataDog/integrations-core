@@ -54,9 +54,10 @@ class KafkaCheck(AgentCheck):
             # the legacy code path regardless of kafka version
             try:
                 kafka_version = cls._determine_kafka_version(init_config, instance)
-            except Exception as e:
+            except Exception:
                 raise CheckException(
-                    "Could not determine kafka version. You can avoid this by specifying kafka_client_api_version option."
+                    "Could not determine kafka version. "
+                    "You can avoid this by specifying kafka_client_api_version option."
                 )
             if kafka_version >= (0, 10, 2):
                 return super(KafkaCheck, cls).__new__(cls)
