@@ -331,6 +331,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     else:
         config_message = 'Config file (copied to your clipboard): '
 
+    echo_success('To edit config file, do: ', nl=False)
+    echo_info(f'ddev env edit {check} {env}')
+
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)
 
