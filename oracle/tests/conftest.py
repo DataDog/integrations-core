@@ -80,7 +80,7 @@ def dd_environment():
                 COMPOSE_FILE,
                 ['Database creation complete.', 'DATABASE IS READY TO USE!'],
                 wait=10,
-                attempts=60,
+                attempts=120,
             ),
             WaitFor(create_user),
         ],
