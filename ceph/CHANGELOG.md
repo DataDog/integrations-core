@@ -1,6 +1,10 @@
 # CHANGELOG - ceph
 
-## 2.3.1 / 2021-03-07
+## 2.4.0 / 2021-04-19
+
+* [Added] Add Ceph Recovery metrics. See [#8261](https://github.com/DataDog/integrations-core/pull/8261). Thanks [mxmeinhold](https://github.com/mxmeinhold).
+
+## 2.3.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 * [Fixed] Fail more gracefully. See [#8456](https://github.com/DataDog/integrations-core/pull/8456).

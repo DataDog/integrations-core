@@ -247,6 +247,10 @@ SonarQube does not include any events.
 
 ## Troubleshooting
 
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
+
 Need help? Contact [Datadog support][5].
 
 [1]: https://www.sonarqube.org

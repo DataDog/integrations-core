@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-from typing import List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 import click
 
+from .....fs import basepath, chdir
 from .....subprocess import SubprocessError, run_command
-from .....utils import basepath, chdir, get_next
+from .....utils import get_next
 from ....config import APP_DIR
 from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
@@ -32,6 +33,7 @@ def create_trello_card(
     dry_run: bool,
     pr_author: str,
     config: dict,
+    card_assignments: dict,
 ) -> None:
     labels = ', '.join(f'`{label}`' for label in sorted(pr_labels))
     body = f'''\
@@ -41,8 +43,7 @@ Labels: {labels}
 
 {pr_body}'''
     for team in teams:
-        member = pick_card_member(config, pr_author, team)
-        tester_name = member
+        tester_name, member = pick_card_member(config, pr_author, team.lower(), card_assignments)
         if member is None:
             tester = _select_trello_tester(client, testerSelector, team, pr_author, pr_num, pr_url)
             if tester:
@@ -112,11 +113,9 @@ def _all_synced_with_remote(refs: Sequence[str]) -> bool:
 def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
-    # Format as '<commit_hash> <subject line>', e.g.:
-    # 'a70a792f9d1775b7d6d910044522f7a0d6941ad7 Update README.md'
-    pretty_format = '%H %s'
-
-    diff_command = f'git --no-pager log "--pretty={pretty_format}" {base_ref}..{target_ref}'
+    # Outputs as '<sign> <commit_hash> <subject line>', e.g.:
+    # '+ 32837dac944b9dcc23d6b54370657d661226c3ac Update README.md (#8778)'
+    diff_command = f'git --no-pager cherry -v {base_ref} {target_ref}'
 
     try:
         result = run_command(diff_command, capture=True, check=True)
@@ -128,9 +127,11 @@ def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, st
     lines: List[str] = result.stdout.splitlines()
 
     commits = []
-
     for line in reversed(lines):
-        commit_hash, _, commit_subject = line.partition(' ')
+        sign, commit_hash, commit_subject = line.split(' ', 2)
+        if sign == '-':
+            echo_info(f'Skipping {commit_subject}, it was cherry-picked in {base_ref}')
+            continue
         commits.append((commit_hash, commit_subject))
 
     return commits
@@ -153,7 +154,7 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
             raise click.Abort
 
 
-def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
+def pick_card_member(config: dict, author: str, team: str, card_assignments: dict) -> Tuple[Any, Any]:
     """Return a member to assign to the created issue.
     In practice, it returns one trello user which is not the PR author, for the given team.
     For it to work, you need a `trello_users_$team` table in your ddev configuration,
@@ -164,11 +165,18 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
         john = "xxxxxxxxxxxxxxxxxxxxx"
         alice = "yyyyyyyyyyyyyyyyyyyy"
     """
-    users = config.get(f'trello_users_{team.lower()}')
+    users = config.get(f'trello_users_{team}')
     if not users:
-        return None
-    member = random.choice([key for user, key in users.items() if user != author])
-    return member
+        return None, None
+    if team not in card_assignments:
+        # initialize map team -> user -> QA cards assigned
+        team_members = list(users)
+        random.shuffle(team_members)
+        card_assignments[team] = dict.fromkeys(team_members, 0)
+
+    member = min([member for member in card_assignments[team] if member != author], key=card_assignments[team].get)
+    card_assignments[team][member] += 1
+    return member, users[member]
 
 
 @click.command(
@@ -295,6 +303,8 @@ def testable(
     if update_rc_builds_cards:
         rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
+    card_assignments: Dict[str, Dict[str, int]] = {}
+
     github_teams = trello.label_github_team_map.values()
     testerSelector = create_tester_selector(trello, repo, github_teams, user_config, APP_DIR)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
@@ -397,6 +407,7 @@ def testable(
                 dry_run,
                 pr_author,
                 user_config,
+                card_assignments,
             )
             continue
 
@@ -468,6 +479,7 @@ def testable(
                     dry_run,
                     pr_author,
                     user_config,
+                    card_assignments,
                 )
 
             finished = True

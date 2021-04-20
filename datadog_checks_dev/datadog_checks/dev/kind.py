@@ -7,9 +7,10 @@ import pytest
 from six import PY3
 
 from .env import environment_run
+from .fs import create_file, file_exists, path_join
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import create_file, file_exists, get_current_check_name, get_tox_env, path_join
+from .utils import get_current_check_name, get_tox_env
 
 if PY3:
     from shutil import which

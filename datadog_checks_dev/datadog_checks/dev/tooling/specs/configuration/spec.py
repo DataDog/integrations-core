@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..utils import default_option_example, normalize_source_name
+from ..utils import normalize_source_name
+from .constants import OPENAPI_DATA_TYPES
+from .utils import default_option_example
 
 
 def spec_validator(spec, loader):
@@ -355,16 +357,6 @@ def options_validator(options, loader, file_name, *sections):
             )
 
 
-VALID_TYPES = {
-    'string',
-    'integer',
-    'number',
-    'boolean',
-    'array',
-    'object',
-}
-
-
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
     if 'anyOf' in value:
         if 'type' in value:
@@ -667,6 +659,11 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
     else:
         loader.errors.append(
             '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
-                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
+                loader.source,
+                file_name,
+                sections_display,
+                option_name,
+                value_type,
+                ' | '.join(sorted(OPENAPI_DATA_TYPES)),
             )
         )

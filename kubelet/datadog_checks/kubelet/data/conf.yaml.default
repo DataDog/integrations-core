@@ -57,3 +57,14 @@ instances:
     #
     # enabled_gauges:
     #   - filesystem.*
+
+    ## @param ignore_metrics - list of strings - optional
+    ## A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+    ## This option is only supported for the `/metrics/cadvisor` endpoint.
+    #
+    # ignore_metrics:
+    #   - <IGNORED_METRIC_NAME>
+    #   - <PREFIX_*>
+    #   - <*_SUFFIX>
+    #   - <PREFIX_*_SUFFIX>
+    #   - <*_SUBSTRING_*>

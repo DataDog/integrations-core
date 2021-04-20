@@ -8,7 +8,7 @@ from datadog_checks.dev.tooling.specs.configuration.consumers.example import DES
 
 from ..utils import get_example_consumer, normalize_yaml
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer]
+pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
 
 
 def test_option_no_section():
@@ -1490,6 +1490,9 @@ def test_option_multiple_types_nested():
                     anyOf:
                     - type: string
                     - type: object
+                      properties:
+                      - name: foo
+                        type: string
                       required:
                       - foo
         """

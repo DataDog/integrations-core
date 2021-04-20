@@ -205,6 +205,7 @@ VALID_UNIT_NAMES = {
     'deciwatt',
     'decidegree celsius',
     'span',
+    'exception',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
@@ -390,7 +391,7 @@ def metadata(check, check_duplicates, show_warnings):
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
 
             # check if there is unicode
-            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+            elif any(not content.isascii() for _, content in row.items()):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 

@@ -12,6 +12,7 @@ from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
 from .config import from_instance
 from .metrics import (
+    CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
     health_stats_for_version,
     index_stats_for_version,
@@ -36,6 +37,7 @@ class ESCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
+    CAT_ALLOC_PATH = '/_cat/allocation?v=true&format=json&bytes=b'
     SOURCE_TYPE_NAME = 'elasticsearch'
 
     def __init__(self, name, init_config, instances):
@@ -122,6 +124,10 @@ class ESCheck(AgentCheck):
                 self._get_index_metrics(admin_forwarder, version, base_tags)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
+
+        # Load the cat allocation data.
+        if self._config.cat_allocation_stats:
+            self._process_cat_allocation_data(admin_forwarder, version, base_tags)
 
         # If we're here we did not have any ES conn issues
         self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
@@ -379,6 +385,33 @@ class ESCheck(AgentCheck):
             slm_stats = slm_stats_for_version(version)
             for metric, desc in iteritems(slm_stats):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
+
+    def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
+        if version < [7, 2, 0]:
+            self.log.debug(
+                "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
+            )
+            return
+
+        self.log.debug("Collecting cat allocation metrics")
+        cat_allocation_url = self._join_url(self.CAT_ALLOC_PATH, admin_forwarder)
+        try:
+            cat_allocation_data = self._get_data(cat_allocation_url)
+        except requests.ReadTimeout as e:
+            self.log.error("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
+            return
+
+        # we need to remap metric names because the ones from elastic
+        # contain dots and that would confuse `_process_metric()` (sic)
+        data_to_collect = {'disk.indices', 'disk.used', 'disk.avail', 'disk.total', 'disk.percent', 'shards'}
+        for dic in cat_allocation_data:
+            cat_allocation_dic = {
+                k.replace('.', '_'): v for k, v in dic.items() if k in data_to_collect and v is not None
+            }
+            tags = base_tags + ['node_name:' + dic.get('node').lower()]
+            for metric in CAT_ALLOCATION_METRICS:
+                desc = CAT_ALLOCATION_METRICS[metric]
+                self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

@@ -98,6 +98,11 @@ def create_datadog_conf_file(tmp_dir):
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
+                    'tags': [
+                        "tag1:val1",
+                        "tag2:val2",
+                    ],
+                    'loader': 'core',
                 },
                 {
                     'network': '{}.0/28'.format(prefix),

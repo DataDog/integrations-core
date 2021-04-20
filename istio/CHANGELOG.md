@@ -1,6 +1,11 @@
 # CHANGELOG - istio
 
-## 3.10.0 / 2021-03-07
+## 3.11.0 / 2021-04-19
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+* [Added] Add runtime configuration validation. See [#8939](https://github.com/DataDog/integrations-core/pull/8939).
+
+## 3.10.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add sidecar injection failed and skipped metrics. See [#8751](https://github.com/DataDog/integrations-core/pull/8751).
 

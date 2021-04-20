@@ -26,7 +26,7 @@ activemq.artemis.total_messages_acknowledged,rate,,connection,,"(Artemis only) N
 activemq.artemis.total_consumer_count,rate,,,,"(Artemis only) Number of consumers consuming messages from all the queues on this server, as a rate.",0,activemq,art total consumers
 activemq.artemis.address.size,gauge,,byte,,(Artemis only) Number of estimated bytes being used by all the queue(s) bound to this address; used to control paging and blocking.,0,activemq,add size
 activemq.artemis.address.pages_count,gauge,,page,,(Artemis only) Number of pages used by this address.,0,activemq,add pages
-activemq.artemis.address.number_of_messages,gauge,,message,,"(Artemis only) The sum of messages on queue(s), including messages in delivery.",0,activemq,add num mess
+activemq.artemis.address.number_of_messages,rate,,message,,"(Artemis only) The sum of messages on queue(s), including messages in delivery.",0,activemq,add num mess
 activemq.artemis.address.bytes_per_page,gauge,,byte,,(Artemis only) Number of bytes used by each page for this address.,0,activemq,add bytes page
 activemq.artemis.address.routed_messages,rate,,message,,"(Artemis only) Number of messages routed to one or more bindings, as a rate.",0,activemq,add routed
 activemq.artemis.address.unrouted_messages,rate,,message,,"(Artemis only) Number of messages not routed to any bindings, as a rate.",0,activemq,add unrouted

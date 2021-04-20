@@ -7,51 +7,34 @@ import json
 import os
 import re
 from ast import literal_eval
+from datetime import datetime, timezone
 from json.decoder import JSONDecodeError
 
 import requests
 import semver
 import yaml
 
-from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
+from datadog_checks.dev.tooling.catalog_const import (
+    DOGWEB_JSON_DASHBOARDS,
+    INTEGRATION_LOGS_NOT_POSSIBLE,
+    SECONDARY_DASHBOARDS,
+)
+
+from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
-DOGWEB_JSON_DASHBOARDS = (
-    'hdfs_datanode',
-    'hdfs_namenode',
-    'mesos',
-)
 
-# List of integrations where is not possible or it does not make sense to have its own log integration
-INTEGRATION_LOGS_NOT_POSSIBLE = (
-    'btrfs',  # it emits to the system log
-    'datadog_checks_base',
-    'datadog_checks_dev',
-    'datadog_checks_downloader',
-    'directory',  # OS
-    'external_dns',  # remote connection
-    'http_check',  # Its not a service
-    'linux_proc_extras',
-    'ntp',  # the integration is for a remote ntp server
-    'openmetrics',  # base class
-    'pdh_check',  # base class
-    'process',  # system
-    'prometheus',  # base class
-    'sap_hana',  # see open questions in the architecture rfc
-    'snmp',  # remote connection to the devices
-    'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
-    'ssh_check',  # remote connection
-    'system_core',  # system
-    'system_swap',  # system
-    'tcp_check',  # remote connection
-    'tls',  # remote connection
-    'windows_service',  # OS
-    'wmi_check',  # base class
-)
+
+def get_license_header():
+    return (
+        '# (C) Datadog, Inc. {year}-present\n'
+        '# All rights reserved\n'
+        '# Licensed under a 3-clause BSD style license (see LICENSE)'.format(year=str(datetime.now(timezone.utc).year))
+    )
 
 
 def format_commit_id(commit_id):
@@ -307,6 +290,10 @@ def get_data_directory(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
 
 
+def get_models_location(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'config_models')
+
+
 def get_check_directory(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name)
 
@@ -419,8 +406,7 @@ def read_metadata_rows(metadata_file):
 
 
 def read_readme_file(check_name):
-    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
-        yield line_no, line
+    return read_file(get_readme_file(check_name))
 
 
 def read_setup_file(check_name):
@@ -601,10 +587,14 @@ def is_jmx_integration(check_name):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_JSON_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS or check in SECONDARY_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
+
+
+def has_config_models(check):
+    return dir_exists(get_models_location(check))
 
 
 def has_logs(check):
@@ -617,8 +607,22 @@ def has_logs(check):
     readme_file = get_readme_file(check)
     if os.path.exists(readme_file):
         with open(readme_file, 'r', encoding='utf-8') as f:
-            if '# Log collection' in f.read():
+            if '# log collection' in f.read().lower():
                 return True
+    return False
+
+
+def is_metric_in_metadata_file(metric, check):
+    """
+    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
+    """
+    metadata_file = get_metadata_file(check)
+    if not os.path.isfile(metadata_file):
+        return False
+    for _, row in read_metadata_rows(metadata_file):
+        if row['metric_name'] == metric:
+            return True
+    return False
 
 
 def find_legacy_signature(check):

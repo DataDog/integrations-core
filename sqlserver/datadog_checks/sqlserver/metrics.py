@@ -9,6 +9,11 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.time import get_precise_time
+
+from .utils import construct_use_statement
+
 # Queries
 ALL_INSTANCES = 'ALL'
 
@@ -429,16 +434,21 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         for db in cls._DATABASES:
             # use statements need to be executed separate from select queries
-            ctx = 'use {}'.format(db)
-            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-            cursor.execute(ctx)
-            logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-            cursor.execute(cls.QUERY_BASE)
+            ctx = construct_use_statement(db)
+            try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+                cursor.execute(cls.QUERY_BASE)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
 
-            data = cursor.fetchall()
             query_columns = ['database'] + [i[0] for i in cursor.description]
             if columns:
-                assert columns == query_columns
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
             else:
                 columns = query_columns
 
@@ -455,7 +465,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         # reset back to previous db
         logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute('use {}'.format(str(current_db)))
+        cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
@@ -598,23 +608,62 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
 #
 # Returns size and fragmentation information for the data and
 # indexes of the specified table or view in SQL Server.
+#
+# There are reports of this query being very slow for large datasets,
+# so debug query timing are included to help monitor it.
+# https://dba.stackexchange.com/q/76374
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
 class SqlDbFragmentation(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_index_physical_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
 
+    _DATABASES = set()
+
     QUERY_BASE = (
         "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
         "avg_fragmentation_in_percent "
-        "from {table} (null,null,null,null,null) "
+        "from {table} (DB_ID('{{db}}'),null,null,null,null) "
         "where fragment_count is not null".format(table=TABLE)
     )
 
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
+        self._DATABASES.add(self.instance)
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        return cls._fetch_generic_values(cursor, None, logger)
+        # special case to limit this query to specific databases and monitor performance
+        rows = []
+        columns = []
+
+        logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, cls._DATABASES)
+
+        for db in cls._DATABASES:
+            query = cls.QUERY_BASE.format(db=db)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+            start = get_precise_time()
+            try:
+                cursor.execute(query)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
+            elapsed = get_precise_time() - start
+
+            query_columns = [i[0] for i in cursor.description]
+            if columns:
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+            else:
+                columns = query_columns
+
+            rows.extend(data)
+            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        return rows, columns
 
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
@@ -772,13 +821,17 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
-        is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
         resource_group_name_index = columns.index('name')
         is_local_index = columns.index('is_local')
         database_name_index = columns.index('database_name')
+        try:
+            is_primary_replica_index = columns.index('is_primary_replica')
+        except ValueError:
+            # This column only supported in SQL Server 2014 and later
+            is_primary_replica_index = None
 
         for row in rows:
             is_local = row[is_local_index]
@@ -798,7 +851,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
-            is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
 
@@ -806,9 +858,14 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
                 'availability_group_name:{}'.format(str(resource_group_name)),
-                'is_primary_replica:{}'.format(str(is_primary_replica)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
             ]
+            if is_primary_replica_index is not None:
+                is_primary_replica = row[is_primary_replica_index]
+                metric_tags.append('is_primary_replica:{}'.format(str(is_primary_replica)))
+            else:
+                metric_tags.append('is_primary_replica:unknown')
+
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
 

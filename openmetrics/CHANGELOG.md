@@ -1,6 +1,10 @@
 # CHANGELOG - OpenMetrics
 
-## 1.12.1 / 2021-03-07
+## 1.13.0 / 2021-04-19
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

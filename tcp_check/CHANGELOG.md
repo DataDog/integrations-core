@@ -1,6 +1,10 @@
 # CHANGELOG - tcp_check
 
-## 2.6.1 / 2021-03-07
+## 3.0.0 / 2021-04-19
+
+* [Changed] Utilize time precision function from datadog_checks_base. See [#8841](https://github.com/DataDog/integrations-core/pull/8841).
+
+## 2.6.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

@@ -7,6 +7,7 @@ parameters:
   force_base_package: false
   coverage: true
   test_e2e: true
+  ddtrace_flag: ''
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -21,6 +22,7 @@ jobs:
       run_py2_tests: ${{ parameters.run_py2_tests }}
       force_base_package: ${{ parameters.force_base_package }}
       test_e2e: ${{ and(eq(parameters.test_e2e, 'true'), eq(check.os, 'linux')) }}  # e2e tests cannot run on windows
+      ddtrace_flag: ${{ parameters.ddtrace_flag }}
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:

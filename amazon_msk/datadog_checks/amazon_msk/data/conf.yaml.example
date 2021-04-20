@@ -45,10 +45,18 @@ init_config:
 #
 instances:
 
+  -
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ##
+    ## In a future release, this option will be set to `true` by default.
+    #
+    # use_openmetrics: false
+
     ## @param cluster_arn - string - required
     ## The Amazon Resource Name (ARN) that uniquely identifies the cluster.
     #
-  - cluster_arn: <CLUSTER_ARN>
+    cluster_arn: <CLUSTER_ARN>
 
     ## @param region_name - string - optional
     ## The name of the region to associate with the API client. By default, the region will be derived
@@ -73,6 +81,11 @@ instances:
     ## The port on which the Node Exporter serves metrics.
     #
     # node_exporter_port: 11002
+
+    ## @param prometheus_metrics_path - string - optional - default: /metrics
+    ## The path where Prometheus serves metrics.
+    #
+    # prometheus_metrics_path: /metrics
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.
@@ -373,10 +386,10 @@ instances:
     #
     # aws_service: <AWS_SERVICE>
 
-    ## @param tls_verify - boolean - optional - default: true
+    ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to validate the TLS certificate of services.
     #
-    # tls_verify: true
+    # tls_verify: false
 
     ## @param tls_use_host_header - boolean - optional - default: false
     ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).

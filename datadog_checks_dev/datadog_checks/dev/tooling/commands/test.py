@@ -6,9 +6,11 @@ import sys
 
 import click
 
-from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from ...ci import get_ci_env_vars, running_on_ci
+from ...fs import chdir, file_exists, remove_path
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, get_ci_env_vars, get_next, remove_path, running_on_ci
+from ...utils import ON_WINDOWS, get_next
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
@@ -30,6 +32,7 @@ def display_envs(check_envs):
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest-metrics', is_flag=True, help='Only verify support of new metrics')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
+@click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
@@ -56,6 +59,7 @@ def test(
     bench,
     latest_metrics,
     e2e,
+    ddtrace,
     coverage,
     junit,
     cov_missing,
@@ -135,6 +139,13 @@ def test(
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
         test_env_vars['TOX_TESTENV_PASSENV'] += f' {E2E_PARENT_PYTHON}'
 
+    if ddtrace:
+        for env in DDTRACE_OPTIONS_LIST:
+            test_env_vars['TOX_TESTENV_PASSENV'] += f' {env}'
+        # Used for CI app product
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' TF_BUILD BUILD* SYSTEM*'
+        test_env_vars['DD_SERVICE'] = os.getenv('DD_SERVICE', 'ddev-integrations')
+
     org_name = ctx.obj['org']
     org = ctx.obj['orgs'].get(org_name, {})
     api_key = org.get('api_key') or ctx.obj['dd_api_key'] or os.getenv('DD_API_KEY')
@@ -150,6 +161,15 @@ def test(
         if not envs:
             echo_debug(f"No envs found for: `{check}`")
             continue
+
+        ddtrace_check = ddtrace
+        if ddtrace and ON_WINDOWS and any('py2' in env for env in envs):
+            # The pytest flag --ddtrace is not available for windows-py2 env.
+            # Removing it so it does not fail.
+            echo_warning(
+                'ddtrace flag is not available for windows-py2 environments ; disabling the flag for this check.'
+            )
+            ddtrace_check = False
 
         # This is for ensuring proper spacing between output of multiple checks' tests.
         # Basically this avoids printing a new line before the first check's tests.
@@ -174,6 +194,7 @@ def test(
             test_filter=test_filter,
             pytest_args=pytest_args,
             e2e=e2e,
+            ddtrace=ddtrace_check,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))

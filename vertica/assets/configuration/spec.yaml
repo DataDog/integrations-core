@@ -35,13 +35,13 @@ files:
               example: 5433
           - name: metric_groups
             description: |
-              Enable metric groups for metric collection. Metric groups are based on Vertica tables. 
+              Enable metric groups for metric collection. Metric groups are based on Vertica tables.
               By default all metric groups are collected.
-            value: 
+            value:
               type: array
               items:
                 type: string
-              example: 
+              example:
                 - licenses
                 - license_audits
                 - system
@@ -53,7 +53,7 @@ files:
                 - query_metrics
                 - resource_pool_status
                 - disk_storage
-                - resource_usage          
+                - resource_usage
           - name: username
             required: true
             description: The database user to authenticate as.
@@ -124,8 +124,8 @@ files:
             value:
               type: string
               example: <CLIENT_LIB_LOG_LEVEL>
-          - template: logs
-            example:
-              - source: vertica
-                type: file
-                path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
+      - template: logs
+        example:
+          - source: vertica
+            type: file
+            path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log

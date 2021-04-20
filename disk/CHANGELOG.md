@@ -1,6 +1,10 @@
 # CHANGELOG - disk
 
-## 4.2.0 / 2021-03-07
+## 4.3.0 / 2021-03-24
+
+* [Added] Log something if a disk is excluded. See [#8829](https://github.com/DataDog/integrations-core/pull/8829).
+
+## 4.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Report read_time and write_time as a count of millis. See [#7323](https://github.com/DataDog/integrations-core/pull/7323).
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

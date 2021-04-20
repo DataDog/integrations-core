@@ -1,6 +1,10 @@
 # CHANGELOG - Vertica
 
-## 2.0.1 / 2021-03-07
+## 2.0.2 / 2021-04-19
+
+* [Fixed] Fix logs section in example config file. See [#8876](https://github.com/DataDog/integrations-core/pull/8876).
+
+## 2.0.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

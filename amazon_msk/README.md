@@ -39,6 +39,11 @@ Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. 
 **aws.msk.prometheus.health**:<br>
 Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`.
 
+When using the Agent 7+ implementation by setting `use_openmetrics` to `true`:
+
+**aws.msk.openmetrics.health**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
+
 ### Events
 
 The Amazon MSK check does not include any events.
