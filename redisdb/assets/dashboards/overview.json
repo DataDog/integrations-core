@@ -9,18 +9,10 @@
         "title": "About Redis",
         "title_align": "center",
         "type": "group",
-        "background_color": "white",
+        "banner_img": "/static/images/integration_dashboard/redis_hero_1.png",
+        "show_title": false,
         "layout_type": "ordered",
         "widgets": [
-          {
-            "id": 3591485786575510,
-            "definition": {
-              "type": "image",
-              "url": "https://imgix.datadoghq.com/img/blog/how-to-monitor-redis-performance-metrics/redis-blog-1.png?auto=format&w=1440&dpr=2",
-              "sizing": "zoom"
-            },
-            "layout": { "x": 0, "y": 0, "width": 8, "height": 2 }
-          },
           {
             "id": 8013519185925578,
             "definition": {
@@ -35,7 +27,7 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 0, "y": 2, "width": 4, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
           },
           {
             "id": 2021637053460700,
@@ -50,7 +42,7 @@
               "tick_edge": "left",
               "has_padding": true
             },
-            "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
+            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
           }
         ]
       },
