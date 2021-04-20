@@ -1,0 +1,36 @@
+{
+  "display_name": "Google Kubernetes Engine",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "gke",
+  "metric_prefix": "gke.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "GKE is a platform for running and orchestrating containerized applications.",
+  "guid": "ba0ef5a7-4507-4c99-bfa6-ab8cdaed9b91",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Google Kubernetes Engine",
+  "categories": [
+    "containers",
+    "orchestration"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "gke",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
+  }
+}
+

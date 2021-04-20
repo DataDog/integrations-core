@@ -19,6 +19,8 @@ redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys
 redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children
 redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user
 redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children
+redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread
+redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
@@ -64,5 +66,8 @@ redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries rep
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median
 redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits
 redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses
+redis.stats.io_threaded_reads_processed,gauge,,,,Number of read events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded reads processed
+redis.stats.io_threaded_writes_processed,gauge,,,,Number of write events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded writes processed
+redis.server.io_threads_active,gauge,,,,Flag indicating if I/O threads are active. This metric is only provided by redis >=6.x.,0,redis,server io threads active
 redis.command.calls,gauge,,,,"The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,cmd calls
 redis.command.usec_per_call,gauge,,,,"The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,usec per cmd

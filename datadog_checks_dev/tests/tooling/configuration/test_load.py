@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.dev import TempDir
-from datadog_checks.dev.utils import ensure_parent_dir_exists, path_join, write_file
+from datadog_checks.dev.fs import ensure_parent_dir_exists, path_join, write_file
 
 from .utils import get_spec
 

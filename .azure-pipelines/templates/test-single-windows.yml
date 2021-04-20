@@ -4,6 +4,7 @@ parameters:
   display: ''
   test: true
   test_e2e: false
+  ddtrace_flag: ''
   benchmark: false
   latest_metrics: false
   validate: false
@@ -18,12 +19,21 @@ jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
   displayName: '${{ parameters.display }}'
 
+  services:
+    ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
+      dd_agent: dd_agent
+
   pool:
     vmImage: 'windows-2019'
 
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+    ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
+      DD_ENV: ci
+      DD_SERVICE: ddev-integrations-${{ parameters.repo }}
+      DD_TAGS: "team:agent-integrations,platform:windows,check:${{ parameters.check }}"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
 
   steps:
   - template: './checkout-code.yml'
@@ -53,6 +63,7 @@ jobs:
       check: ${{ parameters.check }}
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
+      dd_flag: ${{ parameters.ddtrace_flag }}
       benchmark: ${{ parameters.benchmark }}
       latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}

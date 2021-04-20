@@ -4,14 +4,12 @@
   value:
     type: string
 - name: namespace
-  required: true
   hidden: true
   description: The namespace to be prepended to all metrics.
   value:
     type: string
     example: service
 - name: metrics
-  required: true
   hidden: true
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a

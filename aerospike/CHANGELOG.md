@@ -1,6 +1,10 @@
 # CHANGELOG - Aerospike
 
-## 1.10.1 / 2021-03-07
+## 1.11.0 / 2021-04-06
+
+* [Added] Support XDR metrics for Aerospike Enterprise 5.0+. See [#8696](https://github.com/DataDog/integrations-core/pull/8696).
+
+## 1.10.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Return empty array instead of None. See [#8532](https://github.com/DataDog/integrations-core/pull/8532).
 * [Fixed] Fix logging. See [#8515](https://github.com/DataDog/integrations-core/pull/8515).

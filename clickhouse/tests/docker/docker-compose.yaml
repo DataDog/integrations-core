@@ -16,7 +16,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8124:8123"
+      - "8127:8123"
       - "9001:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml
@@ -43,7 +43,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8125:8123"
+      - "8128:8123"
       - "9002:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml
@@ -68,7 +68,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8126:8123"
+      - "8129:8123"
       - "9003:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml
@@ -93,7 +93,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8127:8123"
+      - "8130:8123"
       - "9004:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml
@@ -118,7 +118,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8128:8123"
+      - "8131:8123"
       - "9005:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml
@@ -143,7 +143,7 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8129:8123"
+      - "8132:8123"
       - "9006:9000"
     volumes:
       - ./metrika.xml:/etc/metrika.xml

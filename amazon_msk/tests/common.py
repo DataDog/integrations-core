@@ -4,15 +4,15 @@
 import os
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.utils import read_file, stream_file_lines
+from datadog_checks.dev.utils import read_file
 
 HERE = get_here()
 FIXTURES_DIR = os.path.join(HERE, 'fixtures')
 
 
+def get_fixture_path(name):
+    return os.path.join(FIXTURES_DIR, name)
+
+
 def read_fixture(name):
-    return read_file(os.path.join(FIXTURES_DIR, name))
-
-
-def stream_fixture(name):
-    return stream_file_lines(os.path.join(FIXTURES_DIR, name))
+    return read_file(get_fixture_path(name))

@@ -29,6 +29,28 @@ def test_cds():
     assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
 
+def test_retry_metric():
+    metric = "cluster{}.upstream_cx_total"
+    untagged_metric = metric.format('')
+    tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
+    tag0 = 'service-foo.default.eu-west-3-prd.internal.a4d363d6-a669-b02c-a274-52c1df12bd41.consul'
+    tagged_metric = metric.format('.{}'.format(tag0))
+    assert parse_metric(tagged_metric, retry=True) == (
+        METRIC_PREFIX + untagged_metric,
+        ['{}:{}'.format(tags[0], tag0)],
+        METRICS[untagged_metric]['method'],
+    )
+
+
+def test_retry_invalid_metric():
+    with pytest.raises(UnknownMetric):
+        parse_metric(
+            "cluster.ms-catalog-category-appli.default.eu-west-3-stg.internal"
+            ".ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul.http2.dropped_headers_with_underscores",
+            retry=True,
+        )
+
+
 def test_http_router_filter():
     metric = 'http{}.rq_total'
     untagged_metric = metric.format('')

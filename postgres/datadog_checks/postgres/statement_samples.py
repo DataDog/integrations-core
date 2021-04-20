@@ -16,9 +16,9 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.statement_samples import statement_samples_client
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, resolve_db_host
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import get_timestamp
 
 VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
@@ -223,14 +223,14 @@ class PostgresStatementSamples(object):
         rows = self._get_new_pg_stat_activity()
         rows = self._filter_valid_statement_rows(rows)
         events = self._explain_pg_stat_activity(rows)
-        submitted_count, failed_count = statement_samples_client.submit_events(events)
+        submitted_count = 0
+        for e in events:
+            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+            submitted_count += 1
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram("dd.postgres.collect_statement_samples.time", elapsed_ms, tags=self._tags)
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count", submitted_count, tags=self._tags
-        )
-        self._check.count(
-            "dd.postgres.statement_samples.error", failed_count, tags=self._tags + ["error:submit-events"]
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
@@ -343,12 +343,18 @@ class PostgresStatementSamples(object):
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
+            event['timestamp'] = time.time() * 1000
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
                     event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
-                    event['timestamp'] = time.mktime(row['state_change'].timetuple()) * 1000
-            else:
-                event['timestamp'] = time.time() * 1000
+                    # If the transaction is idle then we have a more specific "end time" than the current time at
+                    # which we're collecting this event. According to the postgres docs, all of the timestamps in
+                    # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
+                    # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
+                    # of the event else we risk the timestamp being significantly off and the event getting dropped
+                    # during ingestion.
+                    if row['state_change'].tzinfo:
+                        event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
 
     def _explain_pg_stat_activity(self, rows):

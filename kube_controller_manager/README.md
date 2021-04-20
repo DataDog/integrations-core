@@ -4,17 +4,19 @@
 
 This check monitors the [Kubernetes Controller Manager][1], part of the Kubernetes control plane.
 
+**Note**: This check does not collect data for Amazon EKS clusters, as those services are not exposed.
+
 ## Setup
 
 ### Installation
 
-The Kube_controller_manager check is included in the [Datadog Agent][2] package, so you do not
+The Kubernetes Controller Manager check is included in the [Datadog Agent][2] package, so you do not
 need to install anything else on your server.
 
 ### Configuration
 
 This integration requires access to the controller manager's metric endpoint. It is usually not
-exposed in Container-as-a-Service clusters.
+exposed in container-as-a-service clusters.
 
 1. Edit the `kube_controller_manager.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_controller_manager performance data. See the [sample kube_controller_manager.d/conf.yaml][2] for all available configuration options.
 
@@ -37,7 +39,7 @@ Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ### Events
 
-Kube_controller_manager does not include any events.
+The Kubernetes Controller Manager check does not include any events.
 
 ## Troubleshooting
 

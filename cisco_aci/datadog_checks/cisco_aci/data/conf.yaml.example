@@ -49,9 +49,9 @@ init_config:
 instances:
 
     ## @param aci_url - string - required
-    ## Url to query to gather metrics.
+    ## URL to query to gather metrics.
     #
-  - aci_url: localhost
+  - aci_url: http://localhost
 
     ## @param username - string - required
     ## Authentication can use either a user auth or a certificate.
@@ -66,7 +66,7 @@ instances:
     pwd: <PWD>
 
     ## @param tenant - list of strings - optional
-    ## List of tenants to collect data from
+    ## List of tenants to collect metrics data from.
     #
     # tenant:
     #   - <TENANT_1>
