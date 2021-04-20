@@ -9,18 +9,10 @@
         "title": "About MongoDB",
         "title_align": "left",
         "type": "group",
-        "background_color": "white",
+        "banner_img": "/static/images/integration_dashboard/mongodb_hero_1.png",
+        "show_title": false,
         "layout_type": "ordered",
         "widgets": [
-          {
-            "id": 3670840341298898,
-            "definition": {
-              "type": "image",
-              "url": "https://imgix.datadoghq.com/img/blog/monitor-mongodb-performance-with-datadog/160427-mongodb-final-3-how-to-monitor-with-ddog.png?auto=format&w=1440&dpr=2",
-              "sizing": "zoom"
-            },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
-          },
           {
             "id": 7601198205415224,
             "definition": {
@@ -33,7 +25,7 @@
               "tick_pos": "50%",
               "tick_edge": "left"
             },
-            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
           },
           {
             "id": 7939246017097054,
@@ -47,7 +39,7 @@
               "tick_pos": "50%",
               "tick_edge": "left"
             },
-            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
           }
         ]
       },
