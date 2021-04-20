@@ -1,6 +1,6 @@
 # CHANGELOG - SonarQube
 
-## 1.1.2 / 2021-03-12
+## 1.1.2 / 2021-03-12 / Agent 7.27.0
 
 * [Fixed] Fix collection of PendingTime. See [#8817](https://github.com/DataDog/integrations-core/pull/8817).
 

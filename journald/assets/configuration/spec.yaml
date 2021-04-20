@@ -1,0 +1,8 @@
+name: journald
+files:
+- name: journald.yaml
+  options:
+  - template: logs
+    example:
+    - type: journald
+      container_mode: true

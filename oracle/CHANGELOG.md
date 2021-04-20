@@ -1,6 +1,10 @@
 # CHANGELOG - oracle
 
-## 3.2.0 / 2021-03-07
+## 3.3.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
+
+## 3.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

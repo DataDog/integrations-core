@@ -1,6 +1,6 @@
 # CHANGELOG - Scylla
 
-## 1.3.2 / 2021-03-07
+## 1.3.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Fix logs section placement in example config. See [#8605](https://github.com/DataDog/integrations-core/pull/8605).
 

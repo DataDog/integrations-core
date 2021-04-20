@@ -5,8 +5,8 @@ import pytest
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.testing import requires_py3
 
-from ..utils import requires_py3
 from .utils import get_check
 
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_interface]

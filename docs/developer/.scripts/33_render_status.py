@@ -1,5 +1,6 @@
 import os
 
+from datadog_checks.dev.tooling.catalog_const import DASHBOARD_NOT_POSSIBLE
 from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
@@ -9,6 +10,7 @@ from datadog_checks.dev.tooling.utils import (
     get_valid_integrations,
     has_logs,
     has_agent_8_check_signature,
+    has_config_models,
     has_dashboard,
     has_e2e,
     has_process_signature,
@@ -35,6 +37,7 @@ def patch(lines):
         render_config_spec_progress,
         render_docs_spec_progress,
         render_e2e_progress,
+        render_config_validation_progress,
         render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
@@ -90,20 +93,7 @@ def render_docs_spec_progress():
 
 
 def render_dashboard_progress():
-    # Integrations that either do not emit metrics or have a too customer-specific setup to have an OOTBD
-    not_possible = {
-        'agent_metrics',  # Not for the end user
-        'snmp',  # Too custom
-        'openmetrics', # No default metrics
-        'pdh_check',  # No default metrics
-        'prometheus', # No default metrics
-        'teamcity',  # No metrics
-        'windows_service',  # No metrics
-        'win32_event_log',  # No metrics
-        'wmi_check',  # No default metrics
-        'windows_service'  # No metrics
-    }
-    valid_integrations = sorted(set(get_valid_integrations()).difference(not_possible))
+    valid_integrations = sorted(set(get_valid_integrations()).difference(DASHBOARD_NOT_POSSIBLE))
     total_integrations = len(valid_integrations)
     integrations_with_dashboard = 0
 
@@ -301,4 +291,27 @@ def render_recommended_monitors_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_rm}/{total_checks}"'
+    return lines
+
+
+def render_config_validation_progress():
+    valid_checks = sorted(c for c in get_valid_checks() if os.path.isfile(get_default_config_spec(c)))
+    total_checks = len(valid_checks)
+    checks_with_config_validation = 0
+
+    lines = ['## Config validation', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if has_config_models(check):
+            status = 'X'
+            checks_with_config_validation += 1
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_config_validation / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_with_config_validation}/{total_checks}"'
     return lines

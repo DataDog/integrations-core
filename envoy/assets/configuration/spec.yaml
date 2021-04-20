@@ -64,6 +64,12 @@ files:
       value:
         type: boolean
         example: true
+    - name: parse_unknown_metrics
+      description: |
+        Attempt parsing of metrics that are unknown and will otherwise be skipped.
+      value:
+        type: boolean
+        example: false
     - template: instances/default
     - template: instances/http
       overrides:

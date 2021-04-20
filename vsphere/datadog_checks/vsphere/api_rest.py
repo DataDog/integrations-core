@@ -140,15 +140,8 @@ class VSphereRestClient(object):
     def __init__(self, config, log):
         # type: (VSphereConfig, CheckLoggingAdapter) -> None
         self.log = log
-        http_config = {
-            'username': config.username,
-            'password': config.password,
-            'tls_ca_cert': config.ssl_capath,
-            'tls_verify': config.ssl_verify,
-            'tls_ignore_warning': config.tls_ignore_warning,
-        }
         self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
-        self._http = RequestsWrapper(http_config, {})
+        self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None
@@ -193,6 +186,8 @@ class VSphereRestClient(object):
         Get all tags identifiers for a given set of objects
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag_association.list_attached_tags_on_objects-operation.html
+
+        This operation was added in vSphere API 6.5
         """
         payload = {"object_ids": [{"id": mor._moId, "type": MOR_TYPE_MAPPING_TO_STRING[type(mor)]} for mor in mors]}
         tag_associations = self._request_json(

@@ -5,8 +5,8 @@ import os
 import re
 from fnmatch import fnmatch
 
+from ..fs import chdir, path_join, read_file_binary, write_file_binary
 from ..subprocess import run_command
-from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
@@ -210,6 +210,7 @@ def construct_pytest_options(
     test_filter='',
     pytest_args='',
     e2e=False,
+    ddtrace=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -235,6 +236,9 @@ def construct_pytest_options(
     if latest_metrics:
         pytest_options += ' --run-latest-metrics'
         marker = 'latest_metrics'
+
+    if ddtrace:
+        pytest_options += ' --ddtrace'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'

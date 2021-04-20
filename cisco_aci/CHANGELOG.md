@@ -1,6 +1,10 @@
 # CHANGELOG - cisco_aci
 
-## 1.14.0 / 2021-03-07
+## 1.15.0 / 2021-04-19
+
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+
+## 1.14.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

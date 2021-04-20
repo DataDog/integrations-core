@@ -1,6 +1,12 @@
 # CHANGELOG - snmp
 
-## 5.0.1 / 2021-03-10
+## 5.1.0 / 2021-04-19
+
+* [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
+* [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).
+* [Added] [snmp] add metrics and tags to dell-rac profile. See [#8812](https://github.com/DataDog/integrations-core/pull/8812).
+
+## 5.0.1 / 2021-03-10 / Agent 7.27.0
 
 * [Fixed] Fix snmp get bulk log. See [#8803](https://github.com/DataDog/integrations-core/pull/8803).
 
