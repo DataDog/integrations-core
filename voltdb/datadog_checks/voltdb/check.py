@@ -36,16 +36,7 @@ class VoltDBCheck(AgentCheck):
             self,
             self._execute_query_raw,
             queries=[
-                queries.CPUMetrics,
-                queries.MemoryMetrics,
-                queries.SnapshotStatusMetrics,
-                queries.CommandLogMetrics,
-                queries.ProcedureMetrics,
-                queries.LatencyMetrics,
-                queries.GCMetrics,
-                queries.IOStatsMetrics,
-                queries.TableMetrics,
-                queries.IndexMetrics,
+                queries.ExportMetrics
             ],
             tags=self._config.tags,
         )
@@ -129,6 +120,7 @@ class VoltDBCheck(AgentCheck):
         response = self._client.request(procedure, parameters=parameters)
         self._raise_for_status_with_details(response)
 
+        import pdb; pdb.set_trace()
         data = response.json()
         return data['results'][0]['data']
 

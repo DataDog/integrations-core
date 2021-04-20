@@ -218,3 +218,51 @@ IndexMetrics = {
         {'name': 'index.memory_estimate', 'type': 'gauge'},
     ],
 }
+
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatexport
+# One row per export stream per partition.
+ExportMetrics = {
+    'name': 'export',
+    'query': '@Statistics:[EXPORT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        {'name': 'partition_id', 'type': 'tag'},
+        {'name': 'export_source', 'type': 'tag'},
+        {'name': 'export_target', 'type': 'tag'},
+        {'name': 'active', 'type': 'tag'},
+        {'name': 'export.records_queued', 'type': 'monotonic_count'},
+        {'name': 'export.records_pending', 'type': 'gauge'},
+        {'name': 'last_queued_ms', 'type': 'source'},
+        {'name': 'last_acked_ms', 'type': 'source'},
+        {'name': 'export.latency.avg', 'type': 'gauge'},
+        {'name': 'export.latency.max', 'type': 'gauge'},
+        {'name': 'export.queue_gap', 'type': 'gauge'},
+        {'name': 'export_status', 'type': 'tag'},
+    ],
+    'extras': [
+        {
+            'name': 'last_queued_s',
+            'expression': 'last_queued_ms / 1000',
+        },
+        {
+            'name': 'export.time_since_last_queued',
+            'type': 'time_elapsed',
+            'format': 'unix_time',
+            'source': 'last_queued_s'
+        },
+        {
+            'name': 'last_acked_s',
+            'expression': 'last_acked_ms / 1000',
+        },
+        {
+            'name': 'export.time_since_last_acked',
+            'type': 'time_elapsed',
+            'format': 'unix_time',
+            'source': 'last_acked_s'
+        },
+    ],
+}
