@@ -163,3 +163,5 @@ files:
         example: true
     - template: instances/default
     - template: instances/http
+      overrides:
+        tls_verify.value.example: false
