@@ -215,6 +215,10 @@ coverage:
         target: 75
         flags:
         - ibm_was
+      IBM_i:
+        target: 75
+        flags:
+        - ibm_i
       IIS:
         target: 75
         flags:
@@ -797,6 +801,11 @@ flags:
     paths:
     - ibm_db2/datadog_checks/ibm_db2
     - ibm_db2/tests
+  ibm_i:
+    carryforward: true
+    paths:
+    - ibm_i/datadog_checks/ibm_i
+    - ibm_i/tests
   ibm_mq:
     carryforward: true
     paths:

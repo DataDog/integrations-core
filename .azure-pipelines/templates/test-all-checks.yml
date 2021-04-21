@@ -201,6 +201,9 @@ jobs:
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
+    - checkName: ibm_i
+      displayName: IBM i
+      os: linux
     - checkName: ibm_mq
       displayName: IBM MQ
       os: linux
