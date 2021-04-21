@@ -716,6 +716,11 @@ def test_job_counts(aggregator, instance):
         tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
         value=3,
     )
+    aggregator.assert_service_check(
+        NAMESPACE + '.cronjob.complete',
+        status=check.OK,
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello'],
+    )
 
     # Test jobs
     aggregator.assert_metric(
@@ -727,6 +732,11 @@ def test_job_counts(aggregator, instance):
         NAMESPACE + '.job.succeeded',
         tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
         value=1,
+    )
+    aggregator.assert_service_check(
+        NAMESPACE + '.cronjob.complete',
+        status=check.CRITICAL,
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:test', 'job:test'],
     )
 
     # Re-run check to make sure we don't count the same jobs
@@ -871,9 +881,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=93895.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=994.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1326.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94695.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1012.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1344.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(
