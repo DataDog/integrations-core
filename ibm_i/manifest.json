@@ -1,0 +1,35 @@
+{
+  "display_name": "IBM i",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ibm_i",
+  "metric_prefix": "ibm_i.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "da389374-7541-47e5-bcd1-87cf3b88a469",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "IBM i",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "ibm-i",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
