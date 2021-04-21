@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 11.0.1 / 2021-04-21
+
+* [Fixed] Reduce ascii validation for assets. See [#9208](https://github.com/DataDog/integrations-core/pull/9208).
+* [Fixed] Fix QA card assignment to be distributed randomly and equally. See [#9190](https://github.com/DataDog/integrations-core/pull/9190).
+
 ## 11.0.0 / 2021-04-19
 
 * [Added] Include ascii validation in asset files. See [#9169](https://github.com/DataDog/integrations-core/pull/9169).
