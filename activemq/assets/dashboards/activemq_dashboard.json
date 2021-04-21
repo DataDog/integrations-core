@@ -1,5 +1,5 @@
 {
-    "title": "ActiveMQ - Overview",
+    "title": "ActiveMQ - Queue & Broker overview",
     "description": "This dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers. For more information about ActiveMQ:\n\n- [ActiveMQ architecture and key metrics](https://www.datadoghq.com/blog/activemq-architecture-and-metrics/)\n\n- [Built-in and open source tools for collecting ActiveMQ metrics](https://www.datadoghq.com/blog/collecting-activemq-metrics/)\n\n- [Monitoring ActiveMQ with Datadog](https://www.datadoghq.com/blog/monitoring-activemq-with-datadog/)\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
@@ -49,7 +49,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -59,14 +58,14 @@
                                             "alias": "Queue size"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
+                                            "query": "sum:activemq.queue.size{$host} by {queue}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.size{$host} by {queue}"
+                                            "name": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "orange"
                                     },
@@ -104,7 +103,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -114,15 +112,15 @@
                                             "alias": "Memory %"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.memory_pct{$host} by {host}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "sum:activemq.queue.memory_pct{$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "warm"
                                     },
@@ -160,7 +158,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -170,15 +167,15 @@
                                             "alias": "Enqueue count"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.enqueue_count{type:broker,$host} by {host}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "sum:activemq.queue.enqueue_count{type:broker,$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic"
                                     },
@@ -216,7 +213,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -226,15 +222,15 @@
                                             "alias": "Dequeue count"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.dequeue_count{$host} by {queue}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "sum:activemq.queue.dequeue_count{$host} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "orange"
                                     },
@@ -272,7 +268,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -282,14 +277,14 @@
                                             "alias": "Enqueue time"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
+                                            "query": "avg:activemq.queue.avg_enqueue_time{$host} by {host}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.queue.avg_enqueue_time{$host} by {host}"
+                                            "name": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -326,7 +321,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -336,15 +330,15 @@
                                             "alias": "Dispatch count"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.queue.dispatch_count{$host} by {host}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "avg:activemq.queue.dispatch_count{$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic"
                                     },
@@ -382,7 +376,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -392,15 +385,15 @@
                                             "alias": "Expired count"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.expired_count{$host}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "sum:activemq.queue.expired_count{$host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic"
                                     },
@@ -438,7 +431,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -448,15 +440,15 @@
                                             "alias": "In flight count"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.queue.in_flight_count{$host} by {host}"
-                                        }
-                                    ],
                                     "response_format": "timeseries",
                                     "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "sum:activemq.queue.in_flight_count{$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
                                     "style": {
                                         "palette": "dog_classic"
                                     },
@@ -527,7 +519,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -537,14 +528,14 @@
                                             "alias": "Memory %"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
+                                            "query": "avg:activemq.broker.memory_pct{$host}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.broker.memory_pct{$host}"
+                                            "name": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "cool"
                                     },
@@ -557,14 +548,14 @@
                                             "alias": "Store %"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
+                                            "query": "avg:activemq.broker.store_pct{$host}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.broker.store_pct{$host}"
+                                            "name": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "cool"
                                     },
@@ -577,14 +568,14 @@
                                             "alias": "Temp %"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
+                                            "query": "avg:activemq.broker.temp_pct{$host}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.broker.temp_pct{$host}"
+                                            "name": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "cool"
                                     },
@@ -626,544 +617,6 @@
                             "x": 0,
                             "y": 2,
                             "width": 2,
-                            "height": 2
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "id": 4802530185170486,
-            "definition": {
-                "title": "Topics",
-                "type": "group",
-                "background_color": "purple",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 8325019941163882,
-                        "definition": {
-                            "title": "Average number of topics",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {},
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "q": "avg:activemq.topic.count{$host} by {host}",
-                                    "aggregator": "avg"
-                                }
-                            ],
-                            "precision": 0
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 705152303186022,
-                        "definition": {
-                            "title": "Average consumers per topic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {},
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "q": "avg:activemq.topic.consumer_count{$host} by {topic}",
-                                    "aggregator": "avg"
-                                }
-                            ],
-                            "precision": 0
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8280688692033506,
-                        "definition": {
-                            "title": "Consumer count by topic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {},
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "q": "top(avg:activemq.topic.consumer_count{$host} by {topic}, 25, 'mean', 'desc')"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 6
-                        }
-                    },
-                    {
-                        "id": 7213367952618128,
-                        "definition": {
-                            "title": "Average Enqueue count by topic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Enqueue count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.topic.enqueue_count{$host} by {host,topic}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "purple"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 1862676218561470,
-                        "definition": {
-                            "title": "Average dequeue count by topic",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Dequeue count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.topic.dequeue_count{$host} by {host,topic}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "is_column_break": true
-            }
-        },
-        {
-            "id": 1411901701824308,
-            "definition": {
-                "title": "Topic subscriber",
-                "type": "group",
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 1016282785727714,
-                        "definition": {
-                            "title": "Subscriber count",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Subscriber count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.subscriber.count{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2763622061874152,
-                        "definition": {
-                            "title": "Subscriber enqueue count",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Enqueue count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.subscriber.enqueue_counter{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5776969247356280,
-                        "definition": {
-                            "title": "Subscriber pending queue size",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Pending queue size"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:activemq.subscriber.pending_queue_size{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 123828709813828,
-                        "definition": {
-                            "title": "Subscriber dequeue count",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Dequeue count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.subscriber.dequeue_counter{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 2,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6763983431943184,
-                        "definition": {
-                            "title": "Subscriber dispatched queue size",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Dispatched queue size"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.subscriber.dispatched_queue_size{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 974830986870842,
-                        "definition": {
-                            "title": "Subscriber dispatched count",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Dispatcher count"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:activemq.subscriber.dispatched_counter{$host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "on_right_yaxis": false,
-                                    "style": {
-                                        "palette": "cool"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "scale": "linear",
-                                "label": "",
-                                "include_zero": true,
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 4,
-                            "width": 6,
                             "height": 2
                         }
                     }
