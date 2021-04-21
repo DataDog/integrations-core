@@ -103,7 +103,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self.log.debug(
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
-                str(self._kafka_client.config.get('api_version') >= (0, 8, 2)),
+                str(self._kafka_client.config.get('api_version')),
                 str(instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
