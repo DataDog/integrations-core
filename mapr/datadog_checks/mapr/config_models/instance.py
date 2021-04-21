@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -23,7 +23,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     service: Optional[str]
     stream_path: Optional[str]
-    streams_count: Optional[int]
+    streams_count: Optional[StrictInt]
     tags: Optional[Sequence[str]]
     ticket_location: Optional[str]
 

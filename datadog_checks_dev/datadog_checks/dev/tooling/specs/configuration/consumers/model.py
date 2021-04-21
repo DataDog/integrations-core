@@ -8,6 +8,7 @@ import yaml
 from datamodel_code_generator.format import CodeFormatter, PythonVersion
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
+from datamodel_code_generator.types import StrictTypes, Types
 
 from ..constants import OPENAPI_SCHEMA_PROPERTIES
 from ..utils import sanitize_openapi_object_properties
@@ -240,6 +241,7 @@ class ModelConsumer:
                         strip_default_none=True,
                         # https://github.com/koxudaxi/datamodel-code-generator/pull/173
                         field_constraints=True,
+                        strict_types=[StrictTypes.int],
                     )
                     model_file_contents = parser.parse()
                 except Exception as e:

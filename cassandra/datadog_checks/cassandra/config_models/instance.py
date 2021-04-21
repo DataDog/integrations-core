@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -29,7 +29,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     name: Optional[str]
     password: Optional[str]
-    port: int
+    port: StrictInt
     process_name_regex: Optional[str]
     rmi_client_timeout: Optional[float]
     rmi_connection_timeout: Optional[float]

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -46,8 +46,8 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float]
     content_match: Optional[str]
     data: Optional[Mapping[str, Any]]
-    days_critical: Optional[int]
-    days_warning: Optional[int]
+    days_critical: Optional[StrictInt]
+    days_warning: Optional[StrictInt]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
@@ -71,8 +71,8 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     reverse_content_match: Optional[bool]
-    seconds_critical: Optional[int]
-    seconds_warning: Optional[int]
+    seconds_critical: Optional[StrictInt]
+    seconds_warning: Optional[StrictInt]
     service: Optional[str]
     skip_proxy: Optional[bool]
     ssl_server_name: Optional[str]

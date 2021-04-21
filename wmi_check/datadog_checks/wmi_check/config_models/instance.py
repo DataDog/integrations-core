@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -25,7 +25,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     namespace: Optional[str]
     password: Optional[str]
-    provider: Optional[int]
+    provider: Optional[StrictInt]
     service: Optional[str]
     tag_by: Optional[str]
     tag_queries: Optional[Sequence[Sequence[str]]]

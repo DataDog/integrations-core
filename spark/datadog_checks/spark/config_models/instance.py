@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -66,7 +66,7 @@ class InstanceConfig(BaseModel):
     spark_cluster_mode: Optional[str]
     spark_pre_20_mode: Optional[bool]
     spark_proxy_enabled: Optional[bool]
-    spark_ui_ports: Optional[Sequence[int]]
+    spark_ui_ports: Optional[Sequence[StrictInt]]
     spark_url: str
     streaming_metrics: Optional[bool]
     tags: Optional[Sequence[str]]

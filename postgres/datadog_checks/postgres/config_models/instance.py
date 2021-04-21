@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -29,10 +29,10 @@ class StatementSamples(BaseModel):
     collections_per_second: Optional[float]
     enabled: Optional[bool]
     explain_function: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
+    explained_statements_cache_maxsize: Optional[StrictInt]
+    explained_statements_per_hour_per_query: Optional[StrictInt]
+    samples_per_hour_per_query: Optional[StrictInt]
+    seen_samples_cache_maxsize: Optional[StrictInt]
 
 
 class InstanceConfig(BaseModel):
@@ -51,18 +51,18 @@ class InstanceConfig(BaseModel):
     deep_database_monitoring: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
-    max_relations: Optional[int]
+    max_relations: Optional[StrictInt]
     min_collection_interval: Optional[float]
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
-    port: Optional[int]
-    query_timeout: Optional[int]
+    port: Optional[StrictInt]
+    query_timeout: Optional[StrictInt]
     relations: Optional[Sequence[Relation]]
     service: Optional[str]
     ssl: Optional[str]
     statement_metrics_limits: Optional[Mapping[str, Any]]
     statement_samples: Optional[StatementSamples]
-    table_count_limit: Optional[int]
+    table_count_limit: Optional[StrictInt]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]
     username: str

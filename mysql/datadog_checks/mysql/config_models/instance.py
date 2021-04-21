@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -50,20 +50,20 @@ class StatementSamples(BaseModel):
     class Config:
         allow_mutation = False
 
-    collection_strategy_cache_maxsize: Optional[int]
-    collection_strategy_cache_ttl: Optional[int]
+    collection_strategy_cache_maxsize: Optional[StrictInt]
+    collection_strategy_cache_ttl: Optional[StrictInt]
     collections_per_second: Optional[float]
     enabled: Optional[bool]
     events_statements_enable_procedure: Optional[str]
-    events_statements_row_limit: Optional[int]
+    events_statements_row_limit: Optional[StrictInt]
     events_statements_table: Optional[str]
     events_statements_temp_table_name: Optional[str]
     explain_procedure: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
+    explained_statements_cache_maxsize: Optional[StrictInt]
+    explained_statements_per_hour_per_query: Optional[StrictInt]
     fully_qualified_explain_procedure: Optional[str]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
+    samples_per_hour_per_query: Optional[StrictInt]
+    seen_samples_cache_maxsize: Optional[StrictInt]
 
 
 class InstanceConfig(BaseModel):
@@ -77,7 +77,7 @@ class InstanceConfig(BaseModel):
     defaults_file: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
-    max_custom_queries: Optional[int]
+    max_custom_queries: Optional[StrictInt]
     min_collection_interval: Optional[float]
     options: Optional[Options]
     pass_: Optional[str] = Field(None, alias='pass')

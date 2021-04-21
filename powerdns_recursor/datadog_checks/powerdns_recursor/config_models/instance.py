@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -57,7 +57,7 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
-    port: int
+    port: StrictInt
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     service: Optional[str]
@@ -72,7 +72,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     username: Optional[str]
-    version: Optional[int]
+    version: Optional[StrictInt]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

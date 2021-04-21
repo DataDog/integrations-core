@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -74,7 +74,7 @@ class InstanceConfig(BaseModel):
     health_service_check: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
-    jmx_exporter_port: Optional[int]
+    jmx_exporter_port: Optional[StrictInt]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -89,7 +89,7 @@ class InstanceConfig(BaseModel):
     metrics: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     namespace: Optional[str]
-    node_exporter_port: Optional[int]
+    node_exporter_port: Optional[StrictInt]
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
