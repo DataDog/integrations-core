@@ -237,7 +237,7 @@ def manifest(ctx, fix):
                         metric_integration_check_name = 'snmp'
                     if (
                         not is_metric_in_metadata_file(metric, metric_integration_check_name)
-                        and metric not in METRIC_TO_CHECK_EXCLUDE_LIST
+                        and metric not in METRIC_TO_CHECK_EXCLUDE_LIST and not is_marketplace
                     ):
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
