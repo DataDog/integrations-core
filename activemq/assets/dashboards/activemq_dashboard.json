@@ -1,5 +1,6 @@
 {
     "title": "ActiveMQ - Queue & Broker overview",
+    "author_name": "Datadog",
     "description": "This dashboard shows trends in the number of messages enqueued, dequeued, and dispatched so you can understand the status and throughput of your message brokers. For more information about ActiveMQ:\n\n- [ActiveMQ architecture and key metrics](https://www.datadoghq.com/blog/activemq-architecture-and-metrics/)\n\n- [Built-in and open source tools for collecting ActiveMQ metrics](https://www.datadoghq.com/blog/collecting-activemq-metrics/)\n\n- [Monitoring ActiveMQ with Datadog](https://www.datadoghq.com/blog/monitoring-activemq-with-datadog/)\n\n- [ActiveMQ integration documentation](https://docs.datadoghq.com/integrations/activemq/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
