@@ -177,7 +177,7 @@ To configure this check for an Agent running on a host:
        ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
        #
        options:
-         authSource: admin
+         authsource: admin
    ```
 
 2. [Restart the Agent][5].
