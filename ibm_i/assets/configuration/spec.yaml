@@ -1,0 +1,36 @@
+name: IBM i
+files:
+- name: ibm_i.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: system
+      description: |
+        The name of the IBM i system.
+      value:
+        type: string
+    - name: username
+      description: |
+        The user profile name to use to authenticate to the system.
+      value:
+        type: string
+    - name: password
+      description: |
+        The user profile password to use to authenticate to the system.
+      value:
+        type: string
+    - name: driver
+      description: |
+        The name of the ODBC driver to use to connect to the system.
+      value:
+        type: string
+        example: iSeries Access ODBC Driver
+    - name: connection_string
+      description: |
+        The raw connection string to use to connect to the system, ignoring all of the above options.
+      value:
+        type: string
+    - template: instances/default
