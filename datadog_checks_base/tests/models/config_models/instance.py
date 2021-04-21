@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, StrictInt, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -32,7 +32,7 @@ class InstanceConfig(BaseModel):
     mapping: Optional[Mapping[str, Any]]
     obj: Optional[Obj]
     pass_: Optional[str] = Field(None, alias='pass')
-    pid: Optional[int]
+    pid: Optional[StrictInt]
     text: Optional[str]
     timeout: Optional[float]
 
