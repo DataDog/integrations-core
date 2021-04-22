@@ -2,16 +2,17 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import time
 from contextlib import closing
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
-
-from .config import MySQLConfig
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent
@@ -26,18 +27,18 @@ RowKeyFunction = Callable[[PyMysqlRow], RowKey]
 Metric = Tuple[str, int, List[str]]
 
 
-STATEMENT_METRICS = {
-    'count': 'mysql.queries.count',
-    'errors': 'mysql.queries.errors',
-    'time': 'mysql.queries.time',
-    'select_scan': 'mysql.queries.select_scan',
-    'select_full_join': 'mysql.queries.select_full_join',
-    'no_index_used': 'mysql.queries.no_index_used',
-    'no_good_index_used': 'mysql.queries.no_good_index_used',
-    'lock_time': 'mysql.queries.lock_time',
-    'rows_affected': 'mysql.queries.rows_affected',
-    'rows_sent': 'mysql.queries.rows_sent',
-    'rows_examined': 'mysql.queries.rows_examined',
+METRICS_COLUMNS = {
+    'count_star',
+    'sum_timer_wait',
+    'sum_lock_time',
+    'sum_errors',
+    'sum_rows_affected',
+    'sum_rows_sent',
+    'sum_rows_examined',
+    'sum_select_scan',
+    'sum_select_full_join',
+    'sum_no_index_used',
+    'sum_no_good_index_used',
 }
 
 # These limits define the top K and bottom K unique query rows for each metric. For each check run the
@@ -60,78 +61,49 @@ DEFAULT_STATEMENT_METRICS_LIMITS = {
 }
 
 
-def generate_synthetic_rows(rows):
-    # type: (List[PyMysqlRow]) -> List[PyMysqlRow]
-    """
-    Given a list of rows, generate a new list of rows with "synthetic" column values derived from
-    the existing row values.
-    """
-    synthetic_rows = []
-    for row in rows:
-        new = copy.copy(row)
-        new['avg_time'] = float(new['time']) / new['count'] if new['count'] > 0 else 0
-        new['rows_sent_ratio'] = float(new['rows_sent']) / new['rows_examined'] if new['rows_examined'] > 0 else 0
-
-        synthetic_rows.append(new)
-
-    return synthetic_rows
-
-
 class MySQLStatementMetrics(object):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, config):
-        # type: (MySQLConfig) -> None
-        self.config = config
+    def __init__(self, check, config):
+        # (MySql, MySQLConfig) -> None
+        self._check = check
+        self._config = config
+        self._db_hostname = resolve_db_host(self._config.host)
         self.log = get_check_logger()
         self._state = StatementMetrics()
 
-    def collect_per_statement_metrics(self, db):
-        # type: (pymysql.connections.Connection) -> List[Metric]
+    def collect_per_statement_metrics(self, db, tags):
+        # type: (pymysql.connections.Connection, List[str]) -> None
         try:
-            return self._collect_per_statement_metrics(db)
+            rows = self._collect_per_statement_metrics(db)
+            if not rows:
+                return
+            payload = {
+                'host': self._db_hostname,
+                'timestamp': time.time() * 1000,
+                'min_collection_interval': self._config.min_collection_interval,
+                'tags': tags,
+                'mysql_rows': rows,
+            }
+            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
             self.log.exception('Unable to collect statement metrics due to an error')
-            return []
 
     def _collect_per_statement_metrics(self, db):
         # type: (pymysql.connections.Connection) -> List[Metric]
         metrics = []  # type: List[Metric]
 
         def keyfunc(row):
-            return (row['schema'], row['query_signature'])
+            return (row['schema_name'], row['query_signature'])
 
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._normalize_queries(monotonic_rows)
-        rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
+        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=keyfunc)
         metrics.append(('dd.mysql.queries.query_rows_raw', len(rows), []))
 
-        rows = generate_synthetic_rows(rows)
-        rows = apply_row_limits(
-            rows,
-            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
-            tiebreaker_metric='count',
-            tiebreaker_reverse=True,
-            key=keyfunc,
-        )
-        metrics.append(('dd.mysql.queries.query_rows_limited', len(rows), []))
-
-        for row in rows:
-            tags = []
-            tags.append('digest:' + row['digest'])
-            if row['schema'] is not None:
-                tags.append('schema:' + row['schema'])
-
-            tags.append('query_signature:' + compute_sql_signature(row['query']))
-            tags.append('query:' + normalize_query_tag(row['query']).strip())
-
-            for col, name in STATEMENT_METRICS.items():
-                value = row[col]
-                metrics.append((name, value, tags))
-
-        return metrics
+        return rows
 
     def _query_summary_per_statement(self, db):
         # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
@@ -143,20 +115,20 @@ class MySQLStatementMetrics(object):
         """
 
         sql_statement_summary = """\
-            SELECT `schema_name` as `schema`,
-                `digest` as `digest`,
-                `digest_text` as `query`,
-                `count_star` as `count`,
-                `sum_timer_wait` / 1000 as `time`,
-                `sum_lock_time` / 1000 as `lock_time`,
-                `sum_errors` as `errors`,
-                `sum_rows_affected` as `rows_affected`,
-                `sum_rows_sent` as `rows_sent`,
-                `sum_rows_examined` as `rows_examined`,
-                `sum_select_scan` as `select_scan`,
-                `sum_select_full_join` as `select_full_join`,
-                `sum_no_index_used` as `no_index_used`,
-                `sum_no_good_index_used` as `no_good_index_used`
+            SELECT `schema_name`,
+                   `digest`,
+                   `digest_text`,
+                   `count_star`,
+                   `sum_timer_wait`,
+                   `sum_lock_time`,
+                   `sum_errors`,
+                   `sum_rows_affected`,
+                   `sum_rows_sent`,
+                   `sum_rows_examined`,
+                   `sum_select_scan`,
+                   `sum_select_full_join`,
+                   `sum_no_index_used`,
+                   `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
             WHERE `digest_text` NOT LIKE 'EXPLAIN %'
             ORDER BY `count_star` DESC
@@ -179,12 +151,12 @@ class MySQLStatementMetrics(object):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'])
             except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue
 
-            normalized_row['query'] = obfuscated_statement
+            normalized_row['digest_text'] = obfuscated_statement
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
             normalized_rows.append(normalized_row)
 
