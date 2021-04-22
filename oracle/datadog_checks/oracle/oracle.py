@@ -31,7 +31,6 @@ class Oracle(AgentCheck):
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
     JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
-    CX_CONNECTION_STRING = "{}/{}@//{}/{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
 
