@@ -2,8 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from collections import OrderedDict
+
+from .sql import compute_sql_signature
 
 logger = logging.getLogger(__name__)
+
+try:
+    import datadog_agent
+except ImportError:
+    from ....stubs import datadog_agent
 
 
 class StatementMetrics:
@@ -46,6 +54,7 @@ class StatementMetrics:
         new_cache = {}
         metrics = set(metrics)
 
+        rows = merge_duplicate_rows(rows, metrics, key)
         if len(rows) > 0:
             dropped_metrics = metrics - set(rows[0].keys())
             if dropped_metrics:
@@ -102,6 +111,47 @@ class StatementMetrics:
         self._previous_statements = new_cache
 
         return result
+
+
+def merge_duplicate_rows(rows, metrics, key):
+    """
+    Given a list of query rows, apply query normalization and compute query signatures to detect duplicate
+    queries_by_key and merge them into a single row.
+
+    - **rows** (_List[dict]_) - rows from current check run
+    - **metrics** (_List[str]_) - the metrics to compute for each row
+    - **key** (_callable_) - function for an ID which uniquely identifies a query row across runs
+    """
+
+    queries_by_key = OrderedDict()
+    for row in rows:
+        merged_row = dict(row)
+        try:
+            if 'query' not in row:
+                logger.warning('row missing \'query\' key')
+                continue
+
+            normalized_query = datadog_agent.obfuscate_sql(row['query'])
+            if not normalized_query:
+                logger.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
+                continue
+        except Exception as e:
+            logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+            continue
+
+        merged_row['normalized_query'] = normalized_query
+        merged_row['query_signature'] = compute_sql_signature(normalized_query)
+        query_key = key(merged_row)
+
+        if query_key in queries_by_key:
+            merged_state = queries_by_key[query_key]
+            queries_by_key[query_key] = {
+                k: merged_row[k] + merged_state[k] if k in metrics else merged_state[k] for k in merged_state.keys()
+            }
+        else:
+            queries_by_key[query_key] = merged_row
+
+    return list(queries_by_key.values())
 
 
 def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):
