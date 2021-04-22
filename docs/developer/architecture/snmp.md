@@ -200,7 +200,7 @@ helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-a
          snmp.yaml: |-
           cluster_check: true
 
-          # AD config blow is copied from: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/snmp.d/auto_conf.yaml
+          # AD config below is copied from: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/snmp.d/auto_conf.yaml
           ad_identifiers:
             - snmp
           init_config:
