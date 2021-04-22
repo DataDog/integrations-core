@@ -5,22 +5,22 @@
     "template_variables": [
         {
             "default": "*",
-            "name": "cluster_name",
+            "name": "kube_cluster_name",
             "prefix": "kube_cluster_name"
         },
         {
             "default": "*",
-            "name": "namespace",
+            "name": "kube_namespace",
             "prefix": "kube_namespace"
         },
         {
             "default": "*",
-            "name": "cronjob",
+            "name": "kube_cronjob",
             "prefix": "kube_cronjob"
         },
         {
             "default": "*",
-            "name": "job",
+            "name": "kube_job",
             "prefix": "kube_job"
         }
     ],
@@ -47,7 +47,7 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.count{$cluster_name}"
+                                    "q": "sum:kubernetes_state.job.count{$kube_cluster_name}"
                                 }
                             ],
                             "title": "Current Jobs",
@@ -87,7 +87,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$cluster_name}"
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -134,7 +134,7 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.succeeded{$cluster_name}.as_count()"
+                                    "q": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
                                 }
                             ],
                             "title": "Succeeded job pods",
@@ -175,7 +175,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.succeeded{$cluster_name}.as_count()"
+                                            "query": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -187,7 +187,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Number of succeeded Job pods",
                             "title_align": "left",
                             "title_size": "16",
@@ -223,7 +222,7 @@
                                             "value": 0
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.job.failed{$cluster_name}.as_count()"
+                                    "q": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()"
                                 }
                             ],
                             "title": "Failed Job Pods",
@@ -264,7 +263,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.failed{$cluster_name}.as_count()"
+                                            "query": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -276,7 +275,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Number of failed Job Pods",
                             "title_align": "left",
                             "title_size": "16",
@@ -329,17 +327,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.requests{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.cpu.requests{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:kubernetes.cpu.limits{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.cpu.limits{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -403,17 +401,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.memory.requests{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.memory.requests{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes.memory.rss{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.memory.rss{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:kubernetes.memory.limits{$cluster_name,$namespace,$cronjob,$job}"
+                                            "query": "sum:kubernetes.memory.limits{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -451,22 +449,21 @@
                                 {
                                     "aggregator": "avg",
                                     "alias": "Average number of jobs",
-                                    "q": "top(sum:kubernetes_state.job.count{$cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
                                 },
                                 {
                                     "aggregator": "sum",
                                     "alias": "# of succeeded job pods",
-                                    "q": "top(sum:kubernetes_state.job.succeeded{$cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.succeeded{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
                                 },
                                 {
                                     "aggregator": "sum",
                                     "alias": "# of failed job pods",
                                     "limit": 10,
                                     "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.failed{$cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.failed{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
                                 }
                             ],
-                            "time": {},
                             "title": "Number of Jobs per cluster",
                             "title_align": "left",
                             "title_size": "16",
@@ -504,7 +501,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$cluster_name} by {kube_cluster_name}"
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -544,12 +541,12 @@
                                     "alias": "Last number of jobs",
                                     "limit": 10,
                                     "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.count{$cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
                                     "alias": "Average number of jobs",
-                                    "q": "top(sum:kubernetes_state.job.count{$cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
                                 }
                             ],
                             "title": "Top Cronjobs by Job Count",
@@ -589,7 +586,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.count{$cluster_name,owner_kind:cronjob} by {owner_name}"
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -643,7 +640,7 @@
                                     ],
                                     "limit": 5,
                                     "order": "desc",
-                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -651,7 +648,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -659,7 +656,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -667,7 +664,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -675,7 +672,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -683,7 +680,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 }
                             ],
                             "title": "Jobs resources consumption",
@@ -723,7 +720,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -775,7 +772,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.memory.usage{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -832,7 +829,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.read_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -855,7 +852,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -912,7 +909,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.rx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -935,7 +932,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.tx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1002,12 +999,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.rx_errors{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                            "query": "sum:kubernetes.network.rx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes.network.tx_errors{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                            "query": "sum:kubernetes.network.tx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1062,7 +1059,7 @@
                                     ],
                                     "limit": 10,
                                     "order": "desc",
-                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -1070,7 +1067,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -1078,7 +1075,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -1086,7 +1083,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -1094,7 +1091,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
@@ -1102,7 +1099,7 @@
                                     "cell_display_mode": [
                                         "bar"
                                     ],
-                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 }
                             ],
                             "title": "CronJobs resources consumption",
@@ -1142,7 +1139,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1194,7 +1191,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.memory.usage{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1251,7 +1248,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.read_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1274,7 +1271,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1331,7 +1328,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.rx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1354,7 +1351,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.tx_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1421,12 +1418,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.network.rx_errors{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                            "query": "sum:kubernetes.network.rx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes.network.tx_errors{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                            "query": "sum:kubernetes.network.tx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
                                         }
                                     ],
                                     "response_format": "timeseries",
