@@ -76,12 +76,7 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[
-            CheckDockerLogs(
-                COMPOSE_FILE,
-                ['Database creation complete.', 'DATABASE IS READY TO USE!'],
-                wait=10,
-                attempts=120,
-            ),
+            CheckDockerLogs(COMPOSE_FILE, ['The database is ready for use'], wait=5, attempts=120),
             WaitFor(create_user),
         ],
         env_vars={'ORACLE_DATABASE_VERSION': ORACLE_DATABASE_VERSION},
