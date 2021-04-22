@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "### This dashboard allows you to monitor Kubernetes Jobs & Cronjobs.",
+    "description": "### This dashboard allows you to monitor Kubernetes Jobs & Cronjobs.\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -99,7 +99,7 @@
                                 }
                             ],
                             "show_legend": false,
-                            "title": "Jobs",
+                            "title": "Number of distinct Jobs",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -122,11 +122,11 @@
                     {
                         "definition": {
                             "autoscale": true,
-                            "custom_unit": "jobs",
+                            "custom_unit": "pods",
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "last",
+                                    "aggregator": "sum",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -137,7 +137,7 @@
                                     "q": "sum:kubernetes_state.job.succeeded{$cluster_name}.as_count()"
                                 }
                             ],
-                            "title": "Succeeded Jobs",
+                            "title": "Succeeded job pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -163,10 +163,10 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Succeeded jobs",
+                                            "alias": "Succeeded pods",
                                             "formula": "query1"
                                         }
                                     ],
@@ -187,7 +187,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Succeeded Jobs",
+                            "time": {},
+                            "title": "Number of succeeded Job pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -210,11 +211,11 @@
                     {
                         "definition": {
                             "autoscale": true,
-                            "custom_unit": "jobs",
+                            "custom_unit": "pods",
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "last",
+                                    "aggregator": "sum",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -225,7 +226,7 @@
                                     "q": "sum:kubernetes_state.job.failed{$cluster_name}.as_count()"
                                 }
                             ],
-                            "title": "Failed Jobs",
+                            "title": "Failed Job Pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -251,10 +252,10 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "line",
+                                    "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Failed jobs",
+                                            "alias": "Failed pods",
                                             "formula": "query1"
                                         }
                                     ],
@@ -275,7 +276,8 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Failed Jobs",
+                            "time": {},
+                            "title": "Number of failed Job Pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -447,16 +449,21 @@
                         "definition": {
                             "requests": [
                                 {
-                                    "aggregator": "last",
-                                    "alias": "Last number of jobs",
-                                    "limit": 10,
-                                    "order": "desc",
-                                    "q": "top(sum:kubernetes_state.job.count{$cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
-                                },
-                                {
                                     "aggregator": "avg",
                                     "alias": "Average number of jobs",
                                     "q": "top(sum:kubernetes_state.job.count{$cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
+                                },
+                                {
+                                    "aggregator": "sum",
+                                    "alias": "# of succeeded job pods",
+                                    "q": "top(sum:kubernetes_state.job.succeeded{$cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                },
+                                {
+                                    "aggregator": "sum",
+                                    "alias": "# of failed job pods",
+                                    "limit": 10,
+                                    "order": "desc",
+                                    "q": "top(sum:kubernetes_state.job.failed{$cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
                                 }
                             ],
                             "time": {},
@@ -468,7 +475,7 @@
                         "id": 7493103153404182,
                         "layout": {
                             "height": 3,
-                            "width": 5,
+                            "width": 6,
                             "x": 0,
                             "y": 8
                         }
@@ -508,8 +515,7 @@
                                     }
                                 }
                             ],
-                            "show_legend": false,
-                            "time": {},
+                            "show_legend": true,
                             "title": "Number of jobs per cluster",
                             "title_align": "left",
                             "title_size": "16",
@@ -525,8 +531,8 @@
                         "id": 3115489599066434,
                         "layout": {
                             "height": 3,
-                            "width": 7,
-                            "x": 5,
+                            "width": 6,
+                            "x": 6,
                             "y": 8
                         }
                     },
@@ -554,7 +560,7 @@
                         "id": 1511746031025034,
                         "layout": {
                             "height": 3,
-                            "width": 5,
+                            "width": 6,
                             "x": 0,
                             "y": 11
                         }
@@ -610,8 +616,8 @@
                         "id": 7620774346478920,
                         "layout": {
                             "height": 3,
-                            "width": 7,
-                            "x": 5,
+                            "width": 6,
+                            "x": 6,
                             "y": 11
                         }
                     }
@@ -680,7 +686,6 @@
                                     "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
                                 }
                             ],
-                            "time": {},
                             "title": "Jobs resources consumption",
                             "title_align": "left",
                             "title_size": "16",
@@ -862,7 +867,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Disk Usage by job",
                             "title_align": "left",
                             "title_size": "16",
@@ -943,7 +947,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Network Usage (Rx / Tx rate) by job",
                             "title_align": "left",
                             "title_size": "16",
@@ -1016,7 +1019,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Network Errors by job",
                             "title_align": "left",
                             "title_size": "16",
@@ -1103,7 +1105,6 @@
                                     "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$cluster_name,$namespace,$cronjob,$job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
                                 }
                             ],
-                            "time": {},
                             "title": "CronJobs resources consumption",
                             "title_align": "left",
                             "title_size": "16",
@@ -1285,7 +1286,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Disk Usage by CronJob",
                             "title_align": "left",
                             "title_size": "16",
@@ -1366,7 +1366,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Network Usage (Rx / Tx rate) by CronJob",
                             "title_align": "left",
                             "title_size": "16",
