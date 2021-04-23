@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "### This dashboard allows you to monitor Kubernetes Jobs & Cronjobs.\n",
+    "description": "### This dashboard allows you to monitor Kubernetes Jobs and CronJobs.\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -24,7 +24,7 @@
             "prefix": "kube_job"
         }
     ],
-    "title": "Kubernetes Jobs & Cronjobs Overview",
+    "title": "Kubernetes Jobs and CronJobs Overview",
     "widgets": [
         {
             "definition": {
@@ -137,7 +137,7 @@
                                     "q": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
                                 }
                             ],
-                            "title": "Succeeded job pods",
+                            "title": "Successful Job Pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -166,7 +166,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Succeeded pods",
+                                            "alias": "Succeeded Pods",
                                             "formula": "query1"
                                         }
                                     ],
@@ -187,7 +187,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Number of succeeded Job pods",
+                            "title": "Number of successful Job Pods",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -254,7 +254,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Failed pods",
+                                            "alias": "Failed Pods",
                                             "formula": "query1"
                                         }
                                     ],
@@ -423,7 +423,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Memory requests, limits and usage",
+                            "title": "Memory requests, limits, and usage",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -448,17 +448,17 @@
                             "requests": [
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Average number of jobs",
+                                    "alias": "Average number of Jobs",
                                     "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
                                 },
                                 {
                                     "aggregator": "sum",
-                                    "alias": "# of succeeded job pods",
+                                    "alias": "# of successful Job Pods",
                                     "q": "top(sum:kubernetes_state.job.succeeded{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
                                 },
                                 {
                                     "aggregator": "sum",
-                                    "alias": "# of failed job pods",
+                                    "alias": "# of failed job Pods",
                                     "limit": 10,
                                     "order": "desc",
                                     "q": "top(sum:kubernetes_state.job.failed{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
@@ -513,7 +513,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Number of jobs per cluster",
+                            "title": "Number of Jobs per cluster",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -538,18 +538,18 @@
                             "requests": [
                                 {
                                     "aggregator": "last",
-                                    "alias": "Last number of jobs",
+                                    "alias": "Last number of Jobs",
                                     "limit": 10,
                                     "order": "desc",
                                     "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Average number of jobs",
+                                    "alias": "Average number of Jobs",
                                     "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
                                 }
                             ],
-                            "title": "Top Cronjobs by Job Count",
+                            "title": "Top Cronjobs by Job count",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -598,7 +598,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Cronjobs by Job Count",
+                            "title": "Cronjobs by Job count",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -652,7 +652,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Network Read bytes",
+                                    "alias": "Network read bytes",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -660,7 +660,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Network Transmitted bytes",
+                                    "alias": "Network transmitted bytes",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -676,7 +676,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Disk Write",
+                                    "alias": "Disk write",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -732,7 +732,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "CPU Usage by Job",
+                            "title": "CPU usage by Job",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -784,7 +784,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Memory Usage by Job",
+                            "title": "Memory usage by Job",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -864,7 +864,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Disk Usage by job",
+                            "title": "Disk usage by Job",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -944,7 +944,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Network Usage (Rx / Tx rate) by job",
+                            "title": "Network usage (Rx / Tx rate) by Job",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1016,7 +1016,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Network Errors by job",
+                            "title": "Network errors by Job",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1045,7 +1045,7 @@
                 "background_color": "purple",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Cronjob overview",
+                "title": "CronJob overview",
                 "type": "group",
                 "widgets": [
                     {
@@ -1071,7 +1071,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Network Read bytes",
+                                    "alias": "Network read bytes",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -1079,7 +1079,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Network Transmitted bytes",
+                                    "alias": "Network transmitted bytes",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -1095,7 +1095,7 @@
                                 },
                                 {
                                     "aggregator": "avg",
-                                    "alias": "Disk Write",
+                                    "alias": "Disk write",
                                     "cell_display_mode": [
                                         "bar"
                                     ],
@@ -1151,7 +1151,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "CPU Usage by CronJob",
+                            "title": "CPU usage by CronJob",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1203,7 +1203,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Memory Usage by CronJob",
+                            "title": "Memory usage by CronJob",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1283,7 +1283,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Disk Usage by CronJob",
+                            "title": "Disk usage by CronJob",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1363,7 +1363,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Network Usage (Rx / Tx rate) by CronJob",
+                            "title": "Network usage (Rx / Tx rate) by CronJob",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
@@ -1435,7 +1435,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Network Errors by CronJob",
+                            "title": "Network errors by CronJob",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries",
