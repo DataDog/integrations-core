@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.7.0 / 2021-04-19
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
 ## 1.6.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).

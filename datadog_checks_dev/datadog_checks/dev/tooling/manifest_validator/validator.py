@@ -176,9 +176,11 @@ class MaintainerValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
         if not self.should_validate():
             return
-
         correct_maintainer = 'help@datadoghq.com'
         maintainer = decoded.get('maintainer')
+        if not maintainer.isascii():
+            self.fail(f'  `maintainer` contains non-ascii character: {maintainer}')
+            return
         if maintainer != correct_maintainer:
             output = f'  incorrect `maintainer`: {maintainer}'
             if fix:

@@ -103,7 +103,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self.log.debug(
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
-                str(self._kafka_client.config.get('api_version') >= (0, 8, 2)),
+                str(self._kafka_client.config.get('api_version')),
                 str(instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
@@ -324,12 +324,12 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 if partitions is None:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
-                        "in the cluster, so skipping reporting these offsets.",
+                        "in the cluster, so skipping reporting these offsets."
                     )
                 else:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
-                        "included in the cluster partitions, so skipping reporting these offsets.",
+                        "included in the cluster partitions, so skipping reporting these offsets."
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
                 self._kafka_client.cluster.request_update()  # force metadata update on next poll()

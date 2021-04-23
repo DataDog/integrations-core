@@ -27,7 +27,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][114]. See the [sample kafka_consumer.d/conf.yaml][113] for all available configuration options.
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample kafka_consumer.d/conf.yaml][113] for all available configuration options.
 
 2. [Restart the Agent][115].
 

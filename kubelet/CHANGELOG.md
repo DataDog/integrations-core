@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 6.1.0 / 2021-04-19
+
+* [Added] Allow configurability of the ignore_metrics option. See [#9161](https://github.com/DataDog/integrations-core/pull/9161).
+
 ## 6.0.0 / 2021-04-14
 
 * [Added] Add logic to enable/disable metrics collected from the summary endpoint. See [#9155](https://github.com/DataDog/integrations-core/pull/9155).

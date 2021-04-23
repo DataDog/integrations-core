@@ -15,6 +15,7 @@ def get_manifest_schema():
                 "display_name": {
                     "description": "The human readable name of this integration",
                     "type": "string",
+                    "pattern": "^[\u0000-\u007F]*$",
                     "minLength": 1,
                 },
                 "maintainer": {
@@ -23,23 +24,36 @@ def get_manifest_schema():
                     "format": "email",
                 },
                 "manifest_version": {"description": "The schema version of this manifest", "type": "string"},
-                "name": {"description": "The name of this integration", "type": "string", "minLength": 1},
+                "name": {
+                    "description": "The name of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[\u0000-\u007F]*$",
+                },
                 "metric_prefix": {
                     "description": "The prefix for metrics being emitted from this integration",
                     "type": "string",
+                    "pattern": "^[\u0000-\u007F]*$",
                 },
                 "metric_to_check": {
                     "description": "The metric to use to determine the health of this integration",
                     "oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                    "pattern": "^[\u0000-\u007F]*$",
                 },
                 "creates_events": {"description": "Whether or not this integration emits events", "type": "boolean"},
                 "short_description": {
                     "description": "Brief description of this integration",
                     "type": "string",
+                    "pattern": "^[\u0000-\u007F]*$",
                     "minLength": 1,
                     "maxLength": 80,
                 },
-                "guid": {"description": "A GUID for this integration", "type": "string", "minLength": 1},
+                "guid": {
+                    "description": "A GUID for this integration",
+                    "type": "string",
+                    "pattern": "^[\u0000-\u007F]*$",
+                    "minLength": 1,
+                },
                 "support": {
                     "description": "The support type for this integration, one of `core`, `contrib`, or `partner`",
                     "type": "string",
@@ -58,7 +72,7 @@ def get_manifest_schema():
                 "categories": {
                     "description": "The categories of this integration",
                     "type": "array",
-                    "items": {"type": "string"},
+                    "items": {"type": "string", "pattern": "^[\u0000-\u007F]*$"},
                 },
                 "type": {"description": "The type of this integration", "type": "string", "enum": ["check", "crawler"]},
                 "is_public": {"description": "Whether or not this integration is public", "type": "boolean"},
@@ -75,10 +89,12 @@ def get_manifest_schema():
                         "dashboards": {"type": "object"},
                         "service_checks": {
                             "type": "string",
+                            "pattern": "^[\u0000-\u007F]*$",
                             "description": "Relative path to the json file containing service check metadata",
                         },
                         "metrics_metadata": {
                             "type": "string",
+                            "pattern": "^[\u0000-\u007F]*$",
                             "description": "Relative path to the metrics metadata.csv file.",
                         },
                         "logs": {
@@ -86,6 +102,7 @@ def get_manifest_schema():
                             "properties": {
                                 "source": {
                                     "type": "string",
+                                    "pattern": "^[\u0000-\u007F]*$",
                                     "description": "The log pipeline identifier corresponding to this integration",
                                 }
                             },
@@ -120,10 +137,12 @@ def get_manifest_schema():
                                     "name": {
                                         "description": "The name of the company that owns this integration",
                                         "type": "string",
+                                        "pattern": "^[\u0000-\u007F]*$",
                                     },
                                     "homepage": {
                                         "type": "string",
                                         "description": "The homepage of the company/product for this integration",
+                                        "pattern": "^[\u0000-\u007F]*$",
                                     },
                                 },
                             },
@@ -147,11 +166,13 @@ def get_manifest_schema():
                                         "unit_label": {
                                             "description": "The friendly, human readable, description of the tag",
                                             "type": "string",
+                                            "pattern": "^[\u0000-\u007F]*$",
                                         },
                                         "metric": {"description": "The metric to use for metering", "type": "string"},
                                         "tag": {
                                             "description": ("The tag to use to count the number of billable units"),
                                             "type": "string",
+                                            "pattern": "^[\u0000-\u007F]*$",
                                         },
                                     },
                                     "allOf": [
@@ -195,6 +216,7 @@ def get_manifest_schema():
                                     "eula": {
                                         "description": "A link to a PDF file containing the EULA for this integration",
                                         "type": "string",
+                                        "pattern": "^[\u0000-\u007F]*$",
                                     },
                                     "legal_email": {
                                         "description": "Email of the partner company to use for subscription purposes",

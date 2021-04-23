@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 6.0.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8971](https://github.com/DataDog/integrations-core/pull/8971).
+* [Fixed] Fix wrong timestamp for DBM beta feature. See [#9024](https://github.com/DataDog/integrations-core/pull/9024).
+* [Changed] Submit DBM query samples via new aggregator API. See [#9045](https://github.com/DataDog/integrations-core/pull/9045).
+
 ## 5.4.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Collect postgres statement samples & execution plans for deep database monitoring. See [#8627](https://github.com/DataDog/integrations-core/pull/8627).

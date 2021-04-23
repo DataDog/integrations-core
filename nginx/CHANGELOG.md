@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.12.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8962](https://github.com/DataDog/integrations-core/pull/8962).
+
 ## 3.11.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

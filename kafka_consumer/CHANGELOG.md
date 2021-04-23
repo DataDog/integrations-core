@@ -1,5 +1,14 @@
 # CHANGELOG - kafka_consumer
 
+## 2.8.6 / 2021-04-20
+
+* [Fixed] Fix warning log format. See [#9192](https://github.com/DataDog/integrations-core/pull/9192).
+* [Fixed] Provide better error message when api version cannot be determined. See [#9186](https://github.com/DataDog/integrations-core/pull/9186).
+
+## 2.8.5 / 2021-04-19
+
+* [Fixed] Fix partition check. See [#9117](https://github.com/DataDog/integrations-core/pull/9117).
+
 ## 2.8.4 / 2021-04-05
 
 * [Fixed] Handle missing partitions and better logging. See [#9089](https://github.com/DataDog/integrations-core/pull/9089).

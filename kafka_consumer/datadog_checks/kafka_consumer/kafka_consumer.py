@@ -11,6 +11,7 @@ from kafka.structs import TopicPartition
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import CheckException
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
@@ -51,7 +52,13 @@ class KafkaCheck(AgentCheck):
         if instance.get('zk_connect_str') is None:
             # bury the kafka version check under the zookeeper check because if zookeeper then we should immediately use
             # the legacy code path regardless of kafka version
-            kafka_version = cls._determine_kafka_version(init_config, instance)
+            try:
+                kafka_version = cls._determine_kafka_version(init_config, instance)
+            except Exception:
+                raise CheckException(
+                    "Could not determine kafka version. "
+                    "You can avoid this by specifying kafka_client_api_version option."
+                )
             if kafka_version >= (0, 10, 2):
                 return super(KafkaCheck, cls).__new__(cls)
         return LegacyKafkaCheck_0_10_2(name, init_config, instances)
@@ -320,12 +327,12 @@ class KafkaCheck(AgentCheck):
                 if partitions is None:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
-                        "in the cluster, so skipping reporting these offsets.",
+                        "in the cluster, so skipping reporting these offsets."
                     )
                 else:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
-                        "included in the cluster partitions, so skipping reporting these offsets.",
+                        "included in the cluster partitions, so skipping reporting these offsets."
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()

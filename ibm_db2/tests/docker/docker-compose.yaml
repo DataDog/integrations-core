@@ -6,7 +6,6 @@ services:
     # Official image does not yet support 11.1
     image: taskana/db2:${DB2_VERSION}
     container_name: ibm_db2
-    command: ["-d"]
     ports:
       - "50000:50000"
     environment:

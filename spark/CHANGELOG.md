@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.21.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8986](https://github.com/DataDog/integrations-core/pull/8986).
+
 ## 1.20.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Rename cluster_name tag to spark_cluster. See [#8592](https://github.com/DataDog/integrations-core/pull/8592).

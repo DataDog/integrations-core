@@ -4,6 +4,8 @@
 
 This check monitors [Kubernetes Scheduler][1], part of the Kubernetes control plane.
 
+**Note**: This check does not collect data for Amazon EKS clusters, as those services are not exposed.
+
 ## Setup
 
 ### Installation
