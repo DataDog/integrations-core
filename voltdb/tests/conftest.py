@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 from typing import Iterator
 
+import mock
 import pytest
 
 from datadog_checks.dev import docker_run
@@ -55,6 +57,24 @@ def instance():
         'url': common.VOLTDB_URL,
         'username': 'doggo',
         'password': 'doggopass',  # SHA256: e81255cee7bd2c4fbb4c8d6e9d6ba1d33a912bdfa9901dc9acfb2bd7f3e8eeb1
+        'statistics_components': [
+            "COMMANDLOG",
+            "CPU",
+            "EXPORT",
+            "GC",
+            "IDLETIME",
+            "IMPORT",
+            "INDEX",
+            "IOSTATS",
+            "LATENCY",
+            "MEMORY",
+            "PROCEDURE",
+            "PROCEDUREOUTPUT",
+            "PROCEDUREPROFILE",
+            "QUEUE",
+            "SNAPSHOTSTATUS",
+            "TABLE",
+        ],
         'custom_queries': [
             {
                 'query': 'HeroStats',
@@ -73,3 +93,30 @@ def instance():
         instance['tls_ca_cert'] = common.TLS_CA_CERT
 
     return instance
+
+
+@pytest.fixture(scope='session')
+def mock_results():
+    # type: () -> None
+    with open(os.path.join(common.HERE, 'fixtures', 'mock_results.json'), 'r') as f:
+        mocked_data = json.load(f)
+
+    def mocked_response(data):
+        m = mock.MagicMock()
+        m.json = lambda: {"results": [{"data": data}]}
+        return m
+
+    def mocked_request(procedure, parameters=None):
+        if procedure == '@SystemInformation' and parameters == ['OVERVIEW']:
+            return mocked_response([["host-0", "VERSION", "8.4"]])
+        if procedure != '@Statistics':
+            raise Exception("Bad procedure name")
+        parameters = parameters.strip('[').strip(']')
+        if parameters not in mocked_data:
+            raise Exception("Invalid parameter %s" % parameters)
+
+        return mocked_response(mocked_data[parameters])
+
+    with mock.patch('datadog_checks.voltdb.check.Client') as m:
+        m.return_value.request = mocked_request
+        yield

@@ -9,7 +9,6 @@ from six import raise_from
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
-from . import queries
 from .client import Client
 from .config import Config
 from .types import Instance
@@ -35,9 +34,7 @@ class VoltDBCheck(AgentCheck):
         self._query_manager = QueryManager(
             self,
             self._execute_query_raw,
-            queries=[
-                queries.ExportMetrics
-            ],
+            queries=self._config.queries,
             tags=self._config.tags,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -120,7 +117,6 @@ class VoltDBCheck(AgentCheck):
         response = self._client.request(procedure, parameters=parameters)
         self._raise_for_status_with_details(response)
 
-        import pdb; pdb.set_trace()
         data = response.json()
         return data['results'][0]['data']
 
