@@ -245,7 +245,8 @@ PERFORMANCE_VARS = {
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
 REPLICA_VARS = {
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
+    'Seconds_Behind_Source': ('mysql.replication.seconds_behind_master', GAUGE),  # for 8 onwards
+    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),  # before 8
     'Replicas_connected': [
         ('mysql.replication.slaves_connected', GAUGE),
         ('mysql.replication.replicas_connected', GAUGE),
