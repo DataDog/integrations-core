@@ -2,16 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from collections import OrderedDict
-
-from .sql import compute_sql_signature
 
 logger = logging.getLogger(__name__)
-
-try:
-    import datadog_agent
-except ImportError:
-    from ....stubs import datadog_agent
 
 
 class StatementMetrics:
@@ -123,24 +115,10 @@ def merge_duplicate_rows(rows, metrics, key):
     - **key** (_callable_) - function for an ID which uniquely identifies a query row across runs
     """
 
-    queries_by_key = OrderedDict()
+    queries_by_key = {}
     for row in rows:
         merged_row = dict(row)
-        try:
-            if 'query' not in row:
-                logger.warning('row missing \'query\' key')
-                continue
 
-            normalized_query = datadog_agent.obfuscate_sql(row['query'])
-            if not normalized_query:
-                logger.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
-                continue
-        except Exception as e:
-            logger.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-            continue
-
-        merged_row['normalized_query'] = normalized_query
-        merged_row['query_signature'] = compute_sql_signature(normalized_query)
         query_key = key(merged_row)
 
         if query_key in queries_by_key:

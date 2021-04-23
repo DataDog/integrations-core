@@ -1,14 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import unicode_literals
 
 import copy
 
-import mock
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, merge_duplicate_rows
 
 
 def add_to_dict(a, b):
@@ -67,39 +65,21 @@ class TestStatementMetrics:
         ]
         expected = [
             # First row only incremented 'errors' which is not a tracked metric, so it is omitted from the output
-            {
-                'count': 1,
-                'time': 15,
-                'errors': 0,
-                'normalized_query': 'ROLLBACK',
-                'query': 'ROLLBACK',
-                'query_signature': 'c7143367a3417869',
-                'db': 'puppies',
-                'user': 'dog',
-            },
-            {
-                'count': 20,
-                'time': 900,
-                'errors': 0,
-                'normalized_query': 'select * from kennel',
-                'query': 'select * from kennel',
-                'query_signature': '5e9800b54915b61',
-                'db': 'puppies',
-                'user': 'rover',
-            },
+            {'count': 1, 'time': 15, 'errors': 0, 'query': 'ROLLBACK', 'db': 'puppies', 'user': 'dog'},
+            {'count': 20, 'time': 900, 'errors': 0, 'query': 'select * from kennel', 'db': 'puppies', 'user': 'rover'},
             {
                 'count': 7,
                 'time': 0.5,
                 'errors': 0,
-                'normalized_query': 'update kennel set breed="dalmatian" where id = ?',
                 'query': 'update kennel set breed="dalmatian" where id = ?',
-                'query_signature': '69d8ea328b5d1f04',
                 'db': 'puppies',
                 'user': 'rover',
             },
         ]
-        
-        assert expected == sm.compute_derivative_rows(rows2, metrics, key=key)
+
+        expected_by_query = {v['query']: v for v in expected}
+        derived_rows = {v['query']: v for v in sm.compute_derivative_rows(rows2, metrics, key=key)}
+        assert expected_by_query == derived_rows
         # No changes should produce no rows
         assert [] == sm.compute_derivative_rows(rows2, metrics, key=key)
 
@@ -133,7 +113,7 @@ class TestStatementMetrics:
         assert 1 == len(sm.compute_derivative_rows(rows3, metrics, key=key))  # only 1 row computed
         assert 2 == len(sm.compute_derivative_rows(rows4, metrics, key=key))  # both rows computed
 
-    def test_compute_derivative_rows_with_duplicates(self, datadog_agent):
+    def test_compute_derivative_rows_with_duplicates(self):
         sm = StatementMetrics()
 
         def key(row):
@@ -146,7 +126,8 @@ class TestStatementMetrics:
                 'count': 13,
                 'time': 2005,
                 'errors': 1,
-                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
                 'db': 'puppies',
                 'user': 'dog',
             },
@@ -154,7 +135,8 @@ class TestStatementMetrics:
                 'count': 25,
                 'time': 105,
                 'errors': 0,
-                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
                 'db': 'puppies',
                 'user': 'dog',
             },
@@ -165,7 +147,8 @@ class TestStatementMetrics:
                 'count': 14,
                 'time': 2006,
                 'errors': 2,
-                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
                 'db': 'puppies',
                 'user': 'dog',
             },
@@ -173,39 +156,93 @@ class TestStatementMetrics:
                 'count': 26,
                 'time': 106,
                 'errors': 1,
-                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
                 'db': 'puppies',
                 'user': 'dog',
             },
         ]
 
-        normalized_query = 'select * from table1 where id = ANY( ? )'
+        # Run a first check to initialize tracking
+        sm.compute_derivative_rows(rows1, metrics, key=key)
+        # Run the check again to compute the metrics
+        metrics = sm.compute_derivative_rows(rows2, metrics, key=key)
 
-        def obfuscate_sql(query):
-            if 'table1' in query:
-                return normalized_query
-            return query
+        expected_merged_metrics = [
+            {
+                'count': 2,
+                'time': 2,
+                'errors': 2,
+                'db': 'puppies',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'user': 'dog',
+            }
+        ]
 
-        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-            mock_agent.side_effect = obfuscate_sql
-            # Run a first check to initialize tracking
-            sm.compute_derivative_rows(rows1, metrics, key=key)
-            # Run the check again to compute the metrics
-            metrics = sm.compute_derivative_rows(rows2, metrics, key=key)
+        assert expected_merged_metrics == metrics
 
-        expected_merged_metrics = {
-            'count': 2,
-            'time': 2,
-            'errors': 2,
-            'db': 'puppies',
-            'normalized_query': normalized_query,
-            'query': rows2[0]['query'],
-            'query_signature': 'a33e13237f376bc1',
-            'user': 'dog',
-        }
+    def test_merge_duplicate_rows(self):
+        def key(row):
+            return row['query_signature']
 
-        assert 1 == len(metrics)
-        assert expected_merged_metrics == metrics[0]
+        metrics = ['count', 'time']
+
+        rows = [
+            {
+                'count': 13,
+                'time': 2005,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 25,
+                'time': 105,
+                'errors': 0,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 1,
+                'time': 100,
+                'errors': 0,
+                'query': 'SELECT * FROM table2',
+                'query_signature': 'sig2',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        ]
+
+        expected_merged_rows = [
+            {
+                'count': 38,
+                'time': 2110,
+                'errors': 1,
+                'db': 'puppies',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'user': 'dog',
+            },
+            {
+                'count': 1,
+                'time': 100,
+                'errors': 0,
+                'db': 'puppies',
+                'query': 'SELECT * FROM table2',
+                'query_signature': 'sig2',
+                'user': 'dog',
+            },
+        ]
+
+        metrics = merge_duplicate_rows(rows, metrics, key=key)
+
+        expected_by_query = {v['query']: v for v in expected_merged_rows}
+        assert expected_by_query == {v['query']: v for v in metrics}
 
     def test_apply_row_limits(self):
         def assert_any_order(a, b):
