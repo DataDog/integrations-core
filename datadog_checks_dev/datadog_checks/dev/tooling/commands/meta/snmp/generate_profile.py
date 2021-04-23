@@ -10,7 +10,7 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS
+from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
@@ -104,7 +104,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug):
 
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
-        print('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
+        echo_warning('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
         return
 
     # create a list of all mib files directories and mib names
@@ -294,12 +294,16 @@ def _load_json_module(source_directory, mib):
 
 def _load_module_or_compile(mib, source_directories, json_mib_directory):
     # try loading the json mib, if already compiled
+    echo_debug('⏳ Loading mib {}'.format(mib))
     mib_json = _load_json_module(json_mib_directory, mib)
     if mib_json is not None:
+        echo_debug('✅ Mib {} loaded'.format(mib))
         return mib_json
 
     # compile and reload
+    echo_debug('⏳ Compile mib {}'.format(mib))
     processed = _compile_mib_to_json(mib, source_directories, json_mib_directory)
+    echo_debug('✅ Mib {} compiled: {}'.format(mib, processed[mib]))
     if processed[mib] != 'missing':
         mib_json = _load_json_module(json_mib_directory, mib)
         return mib_json
