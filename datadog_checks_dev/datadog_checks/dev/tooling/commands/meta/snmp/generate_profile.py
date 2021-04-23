@@ -137,7 +137,15 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug):
         elif oid_node.node_type == 'scalar':
             _add_profile_scalar_node(profile_oid_collection, oid_node)
 
-    print(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
+    echo_info('{} metrics found'.format(len(profile_oid_collection.values())))
+    yaml_data = yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False)
+    if click.confirm('Save to file?'):
+        output_filename = 'metrics.yaml'
+        with open(output_filename, 'w') as f:
+            f.write(yaml_data)
+            echo_info('Metrics saved to {}'.format(output_filename))
+
+    echo_debug(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
 
 
 class OidNodeInvalid(Exception):
