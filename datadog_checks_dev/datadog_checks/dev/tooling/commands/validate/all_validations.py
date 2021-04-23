@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 from .agent_reqs import agent_reqs
 from .ci import ci
@@ -45,6 +46,8 @@ ALL_VALIDATIONS = (
     (service_checks, (None,)),
 )
 
+# Ignore check argument for these validations
+REPO_VALIDATIONS = {ci, codeowners, dep}
 
 FILE_INDENT = ' ' * 8
 
@@ -52,8 +55,9 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run all CI validations for a repo')
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.pass_context
-def all(ctx):
+def all(ctx, check):
     """Run all CI validations for a repo."""
     repo_choice = ctx.obj['repo_choice']
     echo_info(f'Running validations for {repo_choice} repo ...')
@@ -64,5 +68,10 @@ def all(ctx):
             echo_info(f'Skipping {validation}')
             continue
         echo_info(f'Executing validation {validation}')
-        result = ctx.invoke(validation)
+
+        if validation in REPO_VALIDATIONS:
+            result = ctx.invoke(validation)
+        else:
+            result = ctx.invoke(validation, check=check)
+
         echo_success(result)

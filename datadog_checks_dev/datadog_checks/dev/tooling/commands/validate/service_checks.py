@@ -8,7 +8,8 @@ import click
 
 from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
-from ...utils import get_valid_integrations, load_manifest, parse_version_parts
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, load_manifest, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
@@ -37,15 +38,19 @@ CHECK_TO_NAME = {
 
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
-def service_checks(sync):
+def service_checks(check, sync):
     """Validate all `service_checks.json` files."""
+
     root = get_root()
-    echo_info("Validating all service_checks.json files...")
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating service_checks.json files for {len(checks)} checks ...")
+
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in sorted(get_valid_integrations()):
+    for check_name in checks:
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)

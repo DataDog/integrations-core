@@ -16,15 +16,9 @@ from ....fs import (
 from ...constants import get_root
 from ...specs.configuration import ConfigSpec
 from ...specs.configuration.consumers import ModelConsumer
-from ...utils import (
-    complete_valid_checks,
-    get_config_spec,
-    get_license_header,
-    get_models_location,
-    get_valid_checks,
-    get_version_string,
-)
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_config_spec, get_license_header, get_models_location, get_version_string
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate configuration data models')
@@ -36,10 +30,9 @@ def models(ctx, check, sync, verbose):
     """Validate configuration data models."""
     root = get_root()
     community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
-    if check:
-        checks = [check]
-    else:
-        checks = sorted(get_valid_checks())
+
+    checks = process_checks_option(check, source='checks')
+    echo_info(f"Validating data models for {len(checks)} checks ...")
 
     specs_failed = {}
     files_failed = {}
@@ -50,7 +43,6 @@ def models(ctx, check, sync, verbose):
 
     code_formatter = ModelConsumer.create_code_formatter()
 
-    echo_waiting('Validating data models...')
     for check in checks:
         check_display_queue = []
 

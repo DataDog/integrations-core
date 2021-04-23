@@ -4,7 +4,8 @@
 
 import click
 
-from ...utils import complete_valid_checks, find_legacy_signature, get_valid_checks
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, find_legacy_signature
 from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 
@@ -16,10 +17,7 @@ from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def legacy_signature(check):
     """Validate that no integration uses the legacy signature."""
-    if check:
-        checks = [check]
-    else:
-        checks = sorted(get_valid_checks())
+    checks = process_checks_option(check)
 
     has_failed = False
 

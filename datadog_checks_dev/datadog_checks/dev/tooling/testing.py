@@ -11,7 +11,7 @@ from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
-from .utils import complete_set_root, get_testable_checks
+from .utils import complete_set_root, get_metric_sources, get_testable_checks, get_valid_checks, get_valid_integrations
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
@@ -311,3 +311,26 @@ def get_tox_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
         return int(match.group(1))
+
+
+def process_checks_option(checks, source=None):
+    # provide common function for determining which checks to run validations against
+    # `source` determines which method for gathering valid checks, default will use `get_valid_checks`
+
+    if source is None or source == 'checks':
+        get_valid = get_valid_checks
+    elif source == 'metrics':
+        get_valid = get_metric_sources
+    elif source == 'testable':
+        get_valid = get_testable_checks
+    else:
+        get_valid = get_valid_integrations
+
+    if checks is None or checks.lower() == 'all':
+        choice = sorted(get_valid())
+    elif checks.lower() == 'changed':
+        choice = sorted(get_changed_checks() & get_valid())
+    else:
+        choice = [checks]
+
+    return choice

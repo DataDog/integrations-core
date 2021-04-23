@@ -7,15 +7,9 @@ from collections import defaultdict
 
 import click
 
-from ...utils import (
-    complete_valid_checks,
-    get_metadata_file,
-    get_metric_sources,
-    load_manifest,
-    normalize_display_name,
-    read_metadata_rows,
-)
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_success, echo_warning
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -258,18 +252,12 @@ def metadata(check, check_duplicates, show_warnings):
     If `check` is specified, only the check will be validated,
     otherwise all metadata files in the repo will be.
     """
-    metric_sources = get_metric_sources()
-
-    if check:
-        if check not in metric_sources:
-            abort(f'Metadata file `{get_metadata_file(check)}` does not exist.')
-        metric_sources = [check]
-    else:
-        metric_sources = sorted(metric_sources)
+    checks = process_checks_option(check, source='metrics')
+    echo_info(f"Validating metadata for {len(checks)} checks ...")
 
     errors = False
 
-    for current_check in metric_sources:
+    for current_check in checks:
         if current_check.startswith('datadog_checks_'):
             continue
 

@@ -5,7 +5,8 @@ import re
 
 import click
 
-from ...utils import get_valid_checks, normalize_package_name, read_setup_file
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_valid_checks, normalize_package_name, read_setup_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
@@ -13,9 +14,13 @@ EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_ch
 
 
 @click.command('package', context_settings=CONTEXT_SETTINGS, short_help='Validate `setup.py` files')
-def package():
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def package(check):
     """Validate all `setup.py` files."""
-    echo_info("Validating all setup.py files...")
+
+    checks = process_checks_option(check, source='checks')
+    echo_info(f"Validating setup.py files for {len(checks)} checks ...")
+
     failed_checks = 0
     ok_checks = 0
 
