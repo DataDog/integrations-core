@@ -25,8 +25,19 @@ def get_raw_version(db):
 def is_aurora(db):
     cursor = db.cursor()
     try:
+        # This query is preferred to the one below cause it does not pollute PG logs with errors
         cursor.execute("select exists(select 1 from pg_proc where proname = 'aurora_version');")
-        return cursor.fetchone()[0]
+        result = cursor.fetchone()[0]
+        if result is not None:
+            # In some Aurora versions the above query returns None
+            return result
+    except Exception:
+        db.rollback()
+        return False
+    try:
+        # It will raise UndefinedFunction on non aurora instances (and the error will pop on PG logs)
+        cursor.execute("select AURORA_VERSION();")
+        return True
     except Exception:
         db.rollback()
         return False
