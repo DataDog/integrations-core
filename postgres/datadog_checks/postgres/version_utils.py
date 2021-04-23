@@ -39,7 +39,7 @@ class VersionUtils(object):
                 return result
         except Exception as e:
             self.log.debug(
-                "Captured exception {} while determining if the DB is aurora. Assuming is not".format(str(e))
+                "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
             )
             db.rollback()
             return False
@@ -50,7 +50,7 @@ class VersionUtils(object):
             return True
         except Exception as e:
             self.log.debug(
-                "Captured exception {} while determining if the DB is aurora. Assuming is not".format(str(e))
+                "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
             )
             db.rollback()
             return False
