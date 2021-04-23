@@ -17,8 +17,9 @@ from ...console import CONTEXT_SETTINGS
 @click.argument('mib_files', nargs=-1)
 @click.option('-f', '--filters', help='Path to OIDs filter', default=None)
 @click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
+@click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.pass_context
-def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
+def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug):
     """
     Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
     to be used as source to generate the profile, along with a filter if a device or
@@ -98,6 +99,9 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
     Return a list of SNMP metrics and copy its yaml dump to the clipboard
     Metric tags need to be added manually
     """
+    if debug:
+        set_debug()
+
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
         print('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
