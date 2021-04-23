@@ -17,7 +17,8 @@ import yaml
 from datadog_checks.dev.tooling.catalog_const import (
     DOGWEB_JSON_DASHBOARDS,
     INTEGRATION_LOGS_NOT_POSSIBLE,
-    SECONDARY_DASHBOARDS, INTEGRATION_REC_MONITORS_NOT_POSSIBLE,
+    INTEGRATION_REC_MONITORS_NOT_POSSIBLE,
+    SECONDARY_DASHBOARDS,
 )
 
 from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
@@ -388,7 +389,9 @@ def get_available_logs_integrations():
 
 
 def get_available_recommended_monitors_integrations():
-    return sorted(x for x in set(get_valid_checks()).difference(INTEGRATION_REC_MONITORS_NOT_POSSIBLE) if not is_tile_only(x))
+    return sorted(
+        x for x in set(get_valid_checks()).difference(INTEGRATION_REC_MONITORS_NOT_POSSIBLE) if not is_tile_only(x)
+    )
 
 
 def read_metric_data_file(check_name):

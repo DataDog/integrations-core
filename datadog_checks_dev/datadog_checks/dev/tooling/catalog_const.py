@@ -70,4 +70,10 @@ INTEGRATION_REC_MONITORS_NOT_POSSIBLE = {
     'go-metro',  # agent 5 only
 }
 
-PROCESS_SIGNATURE_EXCLUDE = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'snowflake', 'go-metro'}
+PROCESS_SIGNATURE_EXCLUDE = {
+    'datadog_checks_base',
+    'datadog_checks_dev',
+    'datadog_checks_downloader',
+    'snowflake',
+    'go-metro',
+}
