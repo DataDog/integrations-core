@@ -46,7 +46,7 @@ class StatementMetrics:
         new_cache = {}
         metrics = set(metrics)
 
-        rows = merge_duplicate_rows(rows, metrics, key)
+        rows = _merge_duplicate_rows(rows, metrics, key)
         if len(rows) > 0:
             dropped_metrics = metrics - set(rows[0].keys())
             if dropped_metrics:
@@ -105,10 +105,11 @@ class StatementMetrics:
         return result
 
 
-def merge_duplicate_rows(rows, metrics, key):
+def _merge_duplicate_rows(rows, metrics, key):
     """
-    Given a list of query rows, apply query normalization and compute query signatures to detect duplicate
-    queries_by_key and merge them into a single row.
+    Given a list of query rows, merge all duplicate rows as determined by the key function into a single row
+    with the sum of the stats of all duplicates. This is motivated by database integrations such as postgres
+    that can report many instances of a query that are considered the same after the agent normalization.
 
     - **rows** (_List[dict]_) - rows from current check run
     - **metrics** (_List[str]_) - the metrics to compute for each row

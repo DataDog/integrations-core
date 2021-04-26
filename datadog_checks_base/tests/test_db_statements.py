@@ -6,7 +6,7 @@ import copy
 
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, merge_duplicate_rows
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
 
 
 def add_to_dict(a, b):
@@ -146,7 +146,7 @@ class TestStatementMetrics:
             {
                 'count': 14,
                 'time': 2006,
-                'errors': 2,
+                'errors': 32,
                 'query': 'SELECT * FROM table1 where id = ANY(?)',
                 'query_signature': 'sig1',
                 'db': 'puppies',
@@ -154,7 +154,7 @@ class TestStatementMetrics:
             },
             {
                 'count': 26,
-                'time': 106,
+                'time': 125,
                 'errors': 1,
                 'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
                 'query_signature': 'sig1',
@@ -171,8 +171,8 @@ class TestStatementMetrics:
         expected_merged_metrics = [
             {
                 'count': 2,
-                'time': 2,
-                'errors': 2,
+                'time': 21,
+                'errors': 32,
                 'db': 'puppies',
                 'query': 'SELECT * FROM table1 where id = ANY(?)',
                 'query_signature': 'sig1',
@@ -181,68 +181,6 @@ class TestStatementMetrics:
         ]
 
         assert expected_merged_metrics == metrics
-
-    def test_merge_duplicate_rows(self):
-        def key(row):
-            return row['query_signature']
-
-        metrics = ['count', 'time']
-
-        rows = [
-            {
-                'count': 13,
-                'time': 2005,
-                'errors': 1,
-                'query': 'SELECT * FROM table1 where id = ANY(?)',
-                'query_signature': 'sig1',
-                'db': 'puppies',
-                'user': 'dog',
-            },
-            {
-                'count': 25,
-                'time': 105,
-                'errors': 0,
-                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
-                'query_signature': 'sig1',
-                'db': 'puppies',
-                'user': 'dog',
-            },
-            {
-                'count': 1,
-                'time': 100,
-                'errors': 0,
-                'query': 'SELECT * FROM table2',
-                'query_signature': 'sig2',
-                'db': 'puppies',
-                'user': 'dog',
-            },
-        ]
-
-        expected_merged_rows = [
-            {
-                'count': 38,
-                'time': 2110,
-                'errors': 1,
-                'db': 'puppies',
-                'query': 'SELECT * FROM table1 where id = ANY(?)',
-                'query_signature': 'sig1',
-                'user': 'dog',
-            },
-            {
-                'count': 1,
-                'time': 100,
-                'errors': 0,
-                'db': 'puppies',
-                'query': 'SELECT * FROM table2',
-                'query_signature': 'sig2',
-                'user': 'dog',
-            },
-        ]
-
-        metrics = merge_duplicate_rows(rows, metrics, key=key)
-
-        expected_by_query = {v['query']: v for v in expected_merged_rows}
-        assert expected_by_query == {v['query']: v for v in metrics}
 
     def test_apply_row_limits(self):
         def assert_any_order(a, b):
