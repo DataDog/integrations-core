@@ -17,6 +17,6 @@ files:
       description: Twemproxy port to connect to.
       required: True
       value:
-        example: 22222
+        example: 2222
         type: integer
     - template: instances/default

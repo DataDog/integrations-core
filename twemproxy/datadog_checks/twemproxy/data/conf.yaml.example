@@ -21,7 +21,7 @@ instances:
     ## @param port - integer - required
     ## Twemproxy port to connect to.
     #
-    port: 22222
+    port: 2222
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
