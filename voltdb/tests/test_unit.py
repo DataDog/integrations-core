@@ -73,9 +73,8 @@ def test_default_port(url, netloc):
     assert config.netloc == netloc
 
 
-def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance):
-    del instance['custom_queries']
-    check = VoltDBCheck('voltdb', {}, [instance])
+def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):
+    check = VoltDBCheck('voltdb', {}, [instance_all])
     dd_run_check(check)
 
     with open(os.path.join(common.HERE, 'fixtures', 'expected_metrics.json'), 'r') as f:

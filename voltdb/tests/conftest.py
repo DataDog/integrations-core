@@ -53,44 +53,47 @@ def dd_environment(instance):
 @pytest.fixture(scope='session')
 def instance():
     # type: () -> Instance
-    instance = {
-        'url': common.VOLTDB_URL,
-        'username': 'doggo',
-        'password': 'doggopass',  # SHA256: e81255cee7bd2c4fbb4c8d6e9d6ba1d33a912bdfa9901dc9acfb2bd7f3e8eeb1
-        'statistics_components': [
-            "COMMANDLOG",
-            "CPU",
-            "EXPORT",
-            "GC",
-            "IDLETIME",
-            "IMPORT",
-            "INDEX",
-            "IOSTATS",
-            "LATENCY",
-            "MEMORY",
-            "PROCEDURE",
-            "PROCEDUREOUTPUT",
-            "PROCEDUREPROFILE",
-            "QUEUE",
-            "SNAPSHOTSTATUS",
-            "TABLE",
-        ],
-        'custom_queries': [
-            {
-                'query': 'HeroStats',
-                'columns': [
-                    {'name': 'custom.heroes.count', 'type': 'gauge'},
-                    {'name': 'custom.heroes.avg_name_length', 'type': 'gauge'},
-                ],
-                'tags': ['custom:voltdb'],
-            },
-        ],
-        'tags': ['test:voltdb'],
-    }  # type: Instance
+    instance = common.BASE_INSTANCE.copy()
+    instance['custom_queries'] = [
+        {
+            'query': 'HeroStats',
+            'columns': [
+                {'name': 'custom.heroes.count', 'type': 'gauge'},
+                {'name': 'custom.heroes.avg_name_length', 'type': 'gauge'},
+            ],
+            'tags': ['custom:voltdb'],
+        },
+    ]
 
     if common.TLS_ENABLED:
         instance['tls_cert'] = common.TLS_CERT
         instance['tls_ca_cert'] = common.TLS_CA_CERT
+
+    return instance
+
+
+@pytest.fixture(scope='session')
+def instance_all(instance):
+    # type: () -> Instance
+    instance = common.BASE_INSTANCE.copy()
+    instance['statistics_components'] = [
+        "COMMANDLOG",
+        "CPU",
+        "EXPORT",
+        "GC",
+        "IDLETIME",
+        "IMPORT",
+        "INDEX",
+        "IOSTATS",
+        "LATENCY",
+        "MEMORY",
+        "PROCEDURE",
+        "PROCEDUREOUTPUT",
+        "PROCEDUREPROFILE",
+        "QUEUE",
+        "SNAPSHOTSTATUS",
+        "TABLE",
+    ]
 
     return instance
 
