@@ -251,7 +251,10 @@ REPLICA_VARS = {
         ('mysql.replication.seconds_behind_source', GAUGE),
         ('mysql.replication.seconds_behind_master', GAUGE),  # for retrocompatibility
     ],
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),  # before 8
+    'Seconds_Behind_Master': [  # before 8
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),
+    ],
     'Replicas_connected': [
         ('mysql.replication.slaves_connected', GAUGE),
         ('mysql.replication.replicas_connected', GAUGE),
