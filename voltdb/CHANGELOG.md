@@ -1,5 +1,8 @@
 # CHANGELOG - VoltDB
 
+## 1.2.0-rc.1 / 2021-04-26
+
+
 ## 1.1.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Remove code for legacy workaround. See [#8451](https://github.com/DataDog/integrations-core/pull/8451).
