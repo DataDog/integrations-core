@@ -8,6 +8,7 @@ parameters:
   benchmark: true
   latest_metrics: false
   validate: false
+  validate_codeowners: false
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
