@@ -8,11 +8,11 @@ Monitor your [Consul Connect][1] Envoy sidecar proxies with the Datadog [Envoy I
 
 ### Installation
 
-Follow the [Envoy Integration][2] steps to monitor your Consul Connect sidecar proxies.
+Follow the [Envoy Integration installation][3] steps to monitor your Consul Connect sidecar proxies.
 
 ### Configuration
 
-[Configure the Envoy Integration][3] to monitor your Consul Connect Envoy sidecar proxies and collect Envoy metrics.
+[Configure the Envoy Integration][4] to monitor your Consul Connect Envoy sidecar proxies and collect Envoy metrics.
 
 ### Validation
 
@@ -39,7 +39,7 @@ Need help? Contact [Datadog support][5].
 [1]: https://docs.datadoghq.com/integrations/consul_connect/
 [2]: https://docs.datadoghq.com/integrations/envoy/
 [3]: https://docs.datadoghq.com/integrations/envoy/?tab=host#configuration
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/integrations/envoy/?tab=host#installation
 [5]: https://docs.datadoghq.com/help/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [7]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metrics
