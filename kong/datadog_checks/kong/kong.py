@@ -9,6 +9,9 @@ from datadog_checks.base import AgentCheck
 
 
 class Kong(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
 
     METRIC_PREFIX = 'kong.'
 
