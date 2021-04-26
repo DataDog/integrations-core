@@ -38,9 +38,7 @@ class VersionUtils(object):
                 # In some Aurora versions the above query returns None
                 return result
         except Exception as e:
-            self.log.debug(
-                "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
-            )
+            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
             return False
         self.log.debug("Could not determine if the DB is aurora from pg_proc table")
@@ -49,9 +47,7 @@ class VersionUtils(object):
             cursor.execute("select AURORA_VERSION();")
             return True
         except Exception as e:
-            self.log.debug(
-                "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
-            )
+            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
             return False
 
