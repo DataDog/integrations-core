@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -57,7 +57,7 @@ class InstanceConfig(BaseModel):
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
     query_timeout: Optional[int]
-    relations: Optional[Sequence[Relation]]
+    relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
     statement_metrics_limits: Optional[Mapping[str, Any]]
