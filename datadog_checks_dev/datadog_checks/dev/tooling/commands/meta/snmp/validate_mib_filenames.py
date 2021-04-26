@@ -4,11 +4,11 @@
 import os
 import re
 from collections import namedtuple
-from tabulate import tabulate
 
 import click
+from tabulate import tabulate
 
-from ...console import CONTEXT_SETTINGS, echo_warning, echo_info
+from ...console import CONTEXT_SETTINGS, echo_info, echo_warning
 
 OPTION_ALL = '*'
 
