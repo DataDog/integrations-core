@@ -2,6 +2,7 @@ parameters:
   check: null
   repo: 'core'
   ispr: false
+  validate_codeowners: false
 
 steps:
 - ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
