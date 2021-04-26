@@ -19,6 +19,7 @@ services:
       - "8127:8123"
       - "9001:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -46,6 +47,7 @@ services:
       - "8128:8123"
       - "9002:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-02.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -71,6 +73,7 @@ services:
       - "8129:8123"
       - "9003:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-03.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -96,6 +99,7 @@ services:
       - "8130:8123"
       - "9004:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-04.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -121,6 +125,7 @@ services:
       - "8131:8123"
       - "9005:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-05.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -146,6 +151,7 @@ services:
       - "8132:8123"
       - "9006:9000"
     volumes:
+      - ./clickhouse_config.xml:/etc/clickhouse-server/config.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-06.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
