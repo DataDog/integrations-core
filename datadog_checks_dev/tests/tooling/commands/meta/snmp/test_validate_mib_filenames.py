@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 
 MIB_CONTENT_WITH_COMMENT_HEADER = '''-- *****************************************************************
 -- JNX-IF-CAPABILITY.mib: Juniper IF-MIB AGENT-CAPABILITIES
