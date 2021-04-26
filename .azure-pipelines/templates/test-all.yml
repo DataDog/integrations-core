@@ -23,6 +23,7 @@ jobs:
       force_base_package: ${{ parameters.force_base_package }}
       test_e2e: ${{ and(eq(parameters.test_e2e, 'true'), eq(check.os, 'linux')) }}  # e2e tests cannot run on windows
       ddtrace_flag: ${{ parameters.ddtrace_flag }}
+      validate_codeowners: ${{ parameters.validate_codeowners }}
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:
