@@ -58,17 +58,20 @@ def test_minimal_config(aggregator, instance_basic):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = (
-        variables.STATUS_VARS
-        + variables.VARIABLES_VARS
-        + variables.INNODB_VARS
-        + variables.BINLOG_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SYNTHETIC_VARS
-    )
+    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
 
     for mname in testable_metrics:
         aggregator.assert_metric(mname, at_least=1)
+
+    optional_metrics = (
+        variables.COMPLEX_STATUS_VARS
+        + variables.COMPLEX_VARIABLES_VARS
+        + variables.COMPLEX_INNODB_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SYNTHETIC_VARS
+    )
+    _test_optional_metrics(aggregator, optional_metrics)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
@@ -98,8 +101,11 @@ def _assert_complex_config(aggregator):
     )
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -193,8 +199,11 @@ def test_complex_config_replica(aggregator, instance_complex):
 
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
