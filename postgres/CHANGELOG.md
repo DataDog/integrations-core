@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 6.0.1 / 2021-04-26
+
+* [Fixed] Fix config validation for `relations`. See [#9242](https://github.com/DataDog/integrations-core/pull/9242).
+
 ## 6.0.0 / 2021-04-19
 
 * [Added] Add runtime configuration validation. See [#8971](https://github.com/DataDog/integrations-core/pull/8971).
