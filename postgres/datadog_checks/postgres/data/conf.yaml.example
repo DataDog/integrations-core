@@ -43,7 +43,7 @@ instances:
 
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
-    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter. 
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
     #
     # dbstrict: false
 
@@ -74,7 +74,7 @@ instances:
     #
     # query_timeout: 1000
 
-    ## @param relations - list of mappings - optional
+    ## @param relations - (list of string or mapping) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
