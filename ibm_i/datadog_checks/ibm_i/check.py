@@ -69,6 +69,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
             tags=self.config.tags,
             queries=[
                 queries.DiskUsage,
+                queries.CPUUsage,
+                queries.JobStatus
             ],
         )
         self.check_initializations.append(self._query_manager.compile_queries)
