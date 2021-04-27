@@ -19,7 +19,7 @@ Option supports:
 > 1-4 range of indexes from 1 to 4 excluded
 > 1-4:6 multiple ranges
 Example:
-1-3:6-9 
+1-3:6-9
 selects files 1,2 and 6,7,8
 2
 selects file 2
