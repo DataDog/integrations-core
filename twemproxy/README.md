@@ -26,7 +26,7 @@ To configure this check for an Agent running on a host:
 
    instances:
      - host: localhost
-       port: 22222
+       port: 2222
    ```
 
 2. [Restart the Agent][5] to begin sending Twemproxy metrics to Datadog.
