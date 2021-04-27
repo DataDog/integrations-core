@@ -38,8 +38,8 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://docs.datadoghq.com/integrations/consul_connect/
 [2]: https://docs.datadoghq.com/integrations/envoy/
-[3]: https://docs.datadoghq.com/integrations/envoy/?tab=host#configuration
-[4]: https://docs.datadoghq.com/integrations/envoy/?tab=host#installation
+[3]: https://docs.datadoghq.com/integrations/envoy/?tab=host#installation
+[4]: https://docs.datadoghq.com/integrations/envoy/?tab=host#configuration
 [5]: https://docs.datadoghq.com/help/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [7]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metrics
