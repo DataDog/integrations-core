@@ -12,16 +12,22 @@ from ...console import CONTEXT_SETTINGS, echo_info, echo_warning
 
 OPTION_ALL = '*'
 
-OPTION_HELP = '''Option supports:
+OPTION_HELP = '''Use a supported option to select all files, one single file, a range of files or multiple ranges
+Option supports:
 > * all
 > 1 single index
 > 1-4 range of indexes from 1 to 4 excluded
 > 1-4:6 multiple ranges
 Example:
-1-3:6-9
+1-3:6-9 
+selects files 1,2 and 6,7,8
 2
+selects file 2
 1:3:5-9
-1:4'''
+selects files 1,3,5,6,7,8
+1:4
+selects files 1,2,3
+'''
 
 # (
 #   (
@@ -108,7 +114,7 @@ def _extract_mib_name(mib_data):
 
 
 def _rename_mib_files(mibs, option='*'):
-    if not _is_valid_otpion(option):
+    if not _is_valid_option(option):
         echo_warning('⚠️ Invalid option')
         echo_info(OPTION_HELP)
         return
@@ -138,5 +144,5 @@ def _rename_mib_files(mibs, option='*'):
         os.rename(src=os.path.join(mib.folder, mib.base_filename), dst=os.path.join(mib.folder, dst))
 
 
-def _is_valid_otpion(option):
+def _is_valid_option(option):
     return re.fullmatch(OPTION_PATTERN, option)
