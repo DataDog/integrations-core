@@ -11,6 +11,7 @@ SECONDARY_DASHBOARDS = {
 # Integrations that either do not emit metrics or have a too customer-specific setup to have an OOTBD
 DASHBOARD_NOT_POSSIBLE = {
     'agent_metrics',  # Not for the end user
+    'amazon_eks',  # collects metrics from Kubernetes, AWS, AWS EC2 integrations
     'snmp',  # Too custom
     'openmetrics',  # No default metrics
     'pdh_check',  # No default metrics

@@ -72,7 +72,7 @@ snmp.devInterfaceRecvPkts,gauge,,packet,,[Cisco Meraki] The number of packets re
 snmp.devInterfaceSentBytes,gauge,,byte,,[Cisco Meraki] The number of bytes sent on this interface.,0,snmp,
 snmp.devInterfaceSentPkts,gauge,,packet,,[Cisco Meraki] The number of packets sent on this interface.,0,snmp,
 snmp.devStatus,gauge,,,,[Cisco Meraki] The status of the device's connection to the Meraki Cloud Controller,0,snmp,
-snmp.discovered_devices_count,gauge,,device,,The total number of devices discovered.,0,snmp,
+snmp.discovered_devices_count,gauge,,device,,"The total number of devices discovered. Metric only available using Python SNMP Autodiscovery. For Agent SNMP Autodiscovery, use `snmp.devices_monitored` instead.",0,snmp,
 snmp.enclosurePowerSupplyState,gauge,,,,[Dell iDRAC] The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable.,0,snmp,
 snmp.entSensorValue,gauge,,,,[Cisco c3850] [Cisco Nexus] The most recent measurement seen by the sensor.,0,snmp,
 snmp.fgSysCpuUsage,gauge,,percent,,[Fortinet FortiGate] The current CPU usage (percentage).,0,snmp,

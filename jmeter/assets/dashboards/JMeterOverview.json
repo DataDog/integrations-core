@@ -1,0 +1,341 @@
+{
+  "title": "JMeter Overview",
+  "description": "This dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nConfigure the Datadog plugin for JMeter to start collecting all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
+  "widgets": [
+    {
+      "id": 3779688345422708,
+      "definition": {
+        "type": "note",
+        "content": "![JMeter icon](/static/images/logos/jmeter_large.svg)\n\nThis dashboard provides an overview of your JMeter test results so you can track how well your applications perform under stress.\n\nConfigure the Datadog plugin for JMeter to start collecting all your test results as logs so you can easily filter and drill down on the results that really matter.\n\n[**Documentation ↗**](https://github.com/DataDog/jmeter-datadog-backend-listener/)",
+        "background_color": "white",
+        "font_size": "16",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": { "x": 0, "y": 0, "width": 4, "height": 6 }
+    },
+    {
+      "id": 917448088447486,
+      "definition": {
+        "title": "Summary",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4721302432311740,
+            "definition": {
+              "title": "Total requests",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:jmeter.responses_count{$sample_label}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "req",
+              "precision": 2
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 7783889698549364,
+            "definition": {
+              "title": "Failed requests",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "default_zero(query1)" }],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:jmeter.responses_count{result:ko,$sample_label}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "req",
+              "precision": 2
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 3550428849801200,
+            "definition": {
+              "title": "Error rate",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query2 / query3 * 100" }],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "black_on_light_red",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "black_on_light_yellow",
+                      "value": 30
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:jmeter.responses_count{result:ko,$sample_label}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:jmeter.responses_count{$sample_label}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 0
+            },
+            "layout": { "x": 6, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 2431746156331004,
+            "definition": {
+              "title": "Error count per sampler",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": { "count": 10, "order": "desc" }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": { "query": "source:jmeter -status:ok" },
+                      "data_source": "logs",
+                      "compute": { "aggregation": "count" },
+                      "name": "query1",
+                      "indexes": ["*"],
+                      "group_by": [
+                        {
+                          "facet": "@sampler.sample_label",
+                          "sort": { "aggregation": "count", "order": "desc" },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 8, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 4, "y": 0, "width": 8, "height": 6 }
+    },
+    {
+      "id": 8287596340995706,
+      "definition": {
+        "title": "Sampler metrics",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2435370198375322,
+            "definition": {
+              "title": "Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:jmeter.latency.avg{$sample_label} by {sample_label}",
+                      "data_source": "metrics",
+                      "name": "query"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 8326465934092174,
+            "definition": {
+              "title": "Response time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query" }],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:jmeter.response_time.avg{$sample_label} by {sample_label}",
+                      "data_source": "metrics",
+                      "name": "query"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 4, "y": 0, "width": 4, "height": 3 }
+          },
+          {
+            "id": 6235026049239840,
+            "definition": {
+              "title": "Active simultaneous threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "default_zero(query)" }],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:jmeter.active_threads.avg{*}.fill(zero).rollup(avg, 10)",
+                      "data_source": "metrics",
+                      "name": "query"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": { "x": 8, "y": 0, "width": 4, "height": 3 }
+          }
+        ]
+      }
+    },
+    {
+      "id": 6579882437787634,
+      "definition": {
+        "title": "Logs",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6520617461054292,
+            "definition": {
+              "title": "Test results",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:(jmeter)",
+              "sort": { "column": "time", "order": "desc" },
+              "columns": [
+                "@sampler.sample_label",
+                "@sampler.url_details.host",
+                "@sampler.response_code"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 7 }
+          }
+        ]
+      },
+      "layout": { "is_column_break": true }
+    }
+  ],
+  "template_variables": [
+    { "name": "sample_label", "default": "*", "prefix": "sample_label" }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "dek-ckm-y37"
+}
