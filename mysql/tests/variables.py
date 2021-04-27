@@ -91,6 +91,7 @@ SYSTEM_METRICS = ['mysql.performance.user_time', 'mysql.performance.kernel_time'
 OPTIONAL_REPLICATION_METRICS = [
     'mysql.replication.slave_running',
     'mysql.replication.seconds_behind_master',
+    'mysql.replication.seconds_behind_source',
     'mysql.replication.slaves_connected',
     'mysql.replication.replicas_connected',
 ]
