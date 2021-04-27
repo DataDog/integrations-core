@@ -27,7 +27,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, get_raw_version, is_aurora, parse_version, transform_version
+from .version_utils import V9, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -37,13 +37,14 @@ class PostgreSql(AgentCheck):
 
     SOURCE_TYPE_NAME = 'postgresql'
     SERVICE_CHECK_NAME = 'postgres.can_connect'
-    METADATA_TRANSFORMERS = {'version': transform_version}
+    METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
         self._is_aurora = None
+        self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -60,6 +61,7 @@ class PostgreSql(AgentCheck):
         self.statement_samples.cancel()
 
     def _clean_state(self):
+        self.log.debug("Cleaning state")
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
@@ -74,15 +76,15 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            raw_version = get_raw_version(self.db)
-            self._version = parse_version(raw_version)
+            raw_version = self._version_utils.get_raw_version(self.db)
+            self._version = self._version_utils.parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
 
     @property
     def is_aurora(self):
         if self._is_aurora is None:
-            self._is_aurora = is_aurora(self.db)
+            self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
 
     def _build_relations_config(self, yamlconfig):
@@ -142,7 +144,9 @@ class PostgreSql(AgentCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
-            self._is_aurora = None
+            self.log.debug("Disabling replication metrics")
+            self._is_aurora = False
+            self.metrics_cache.replication_metrics = {}
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -439,7 +443,7 @@ class PostgreSql(AgentCheck):
             self._connect()
             if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self._is_aurora))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
