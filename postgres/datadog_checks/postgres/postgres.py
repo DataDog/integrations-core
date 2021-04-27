@@ -61,6 +61,7 @@ class PostgreSql(AgentCheck):
         self.statement_samples.cancel()
 
     def _clean_state(self):
+        self.log.debug("Cleaning state")
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
@@ -143,7 +144,9 @@ class PostgreSql(AgentCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
-            self._is_aurora = None
+            self.log.debug("Disabling replication metrics")
+            self._is_aurora = False
+            self.metrics_cache.replication_metrics = {}
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -440,7 +443,7 @@ class PostgreSql(AgentCheck):
             self._connect()
             if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self._is_aurora))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:

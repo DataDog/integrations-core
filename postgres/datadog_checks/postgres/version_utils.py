@@ -35,17 +35,7 @@ class VersionUtils(object):
             cursor.execute("select exists(select 1 from pg_proc where proname = 'aurora_version');")
             result = cursor.fetchone()[0]
             if result is not None:
-                # In some Aurora versions the above query returns None
                 return result
-        except Exception as e:
-            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
-            db.rollback()
-            return False
-        self.log.debug("Could not determine if the DB is aurora from pg_proc table")
-        try:
-            # It will raise UndefinedFunction on non aurora instances (and the error will pop on PG logs)
-            cursor.execute("select AURORA_VERSION();")
-            return True
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
