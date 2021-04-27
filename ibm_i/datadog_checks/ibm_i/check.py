@@ -71,3 +71,4 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.DiskUsage,
             ],
         )
+        self.check_initializations.append(self._query_manager.compile_queries)
