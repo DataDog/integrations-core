@@ -31,7 +31,7 @@ class VersionUtils(object):
     def is_aurora(self, db):
         cursor = db.cursor()
         try:
-            # This query is preferred to the one below cause it does not pollute PG logs with errors
+            # This query will pollute PG logs in non aurora versions but is the only reliable way of detecting aurora
             cursor.execute('select AURORA_VERSION();')
             return True
         except Exception as e:
