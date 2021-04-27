@@ -25,8 +25,8 @@ def get_raw_version(db):
 def is_aurora(db):
     cursor = db.cursor()
     try:
-        cursor.execute("select exists(select 1 from pg_proc where proname = 'aurora_version');")
-        return cursor.fetchone()[0]
+        cursor.execute('select AURORA_VERSION();')
+        return True
     except Exception:
         db.rollback()
         return False
