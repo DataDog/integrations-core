@@ -288,6 +288,62 @@ def test_statement_metrics(aggregator, dbm_instance):
         )
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_agent):
+    query_one = 'select * from information_schema.processlist where state in (\'starting\')'
+    query_two = 'select * from information_schema.processlist where state in (\'starting\', \'Waiting on empty queue\')'
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
+    # The query signature should match the query and consistency of this tag has product impact. Do not change
+    # the query signature for this test unless you know what you're doing. The query digest is determined by
+    # mysql and varies across versions.
+    query_signature = '94caeb4c54f97849'
+
+    if environ.get('MYSQL_FLAVOR') == 'mariadb':
+        query_digest = '9d1281ca764113522cfddefa25171e04'
+    elif environ.get('MYSQL_VERSION') == '5.6':
+        query_digest = '8ed22fb1a4d540751208966b7e322c3b'
+    elif environ.get('MYSQL_VERSION') == '5.7':
+        query_digest = '6b5a1b14bbeef4253f3d88bd6d2f41cf'
+    else:
+        # 8.0+
+        query_digest = 'bab5dd3d1abebc38338867fb4933301115cb3c40840fea30e1d6301cc14099c5'
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+
+    def obfuscate_sql(query):
+        if 'WHERE `state`' in query:
+            return normalized_query
+        return query
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        # Run two queries that map to the same normalized one
+        run_query(query_one)
+        run_query(query_two)
+        mysql_check.check(dbm_instance)
+
+        # Run the queries again and check a second time so statement metrics are computed from the previous run using
+        # the merged stats of the two queries
+        run_query(query_one)
+        run_query(query_two)
+        mysql_check.check(dbm_instance)
+
+    expected_tags = tags.SC_TAGS + [
+        'query:{}'.format(normalized_query),
+        'query_signature:{}'.format(query_signature),
+        'digest:{}'.format(query_digest),
+    ]
+
+    aggregator.assert_metric('mysql.queries.count', count=1, tags=expected_tags)
+    aggregator.assert_metric('mysql.queries.count', value=2.0, tags=expected_tags)
+
+
 def test_generate_synthetic_rows():
     rows = [
         {
