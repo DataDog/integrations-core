@@ -64,12 +64,13 @@ def test_minimal_config(aggregator, instance_basic):
         aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
-        variables.COMPLEX_STATUS_VARS
-        + variables.COMPLEX_VARIABLES_VARS
-        + variables.COMPLEX_INNODB_VARS
-        + variables.SYSTEM_METRICS
-        + variables.SYNTHETIC_VARS
+            variables.COMPLEX_STATUS_VARS
+            + variables.COMPLEX_VARIABLES_VARS
+            + variables.COMPLEX_INNODB_VARS
+            + variables.SYSTEM_METRICS
+            + variables.SYNTHETIC_VARS
     )
+
     _test_optional_metrics(aggregator, optional_metrics)
     aggregator.assert_all_metrics_covered()
 
