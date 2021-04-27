@@ -47,6 +47,17 @@ instances:
     #
     # dbstrict: false
 
+    ## @param ignore_databases - list of strings - optional - default: ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+    ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
+    ## Each value can be a plain string or a Postgres pattern.
+    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+    #
+    # ignore_databases:
+    #   - template%
+    #   - rdsadmin
+    #   - azure_maintenance
+    #   - postgres
+
     ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:

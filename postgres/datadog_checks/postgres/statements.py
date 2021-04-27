@@ -27,8 +27,8 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE pg_database.datname = %s
-  AND query != '<insufficient privilege>'
+  WHERE query != '<insufficient privilege>'
+  {filters}
   LIMIT {limit}
 """
 
@@ -82,6 +82,7 @@ class PostgresStatementMetrics(object):
 
     def _execute_query(self, cursor, query, params=()):
         try:
+            self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
@@ -96,13 +97,11 @@ class PostgresStatementMetrics(object):
         """
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*',
-            pg_stat_statements_view=self._config.pg_stat_statements_view,
-            limit=0,
+            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
         )
         cursor = db.cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
-        colnames = [desc[0] for desc in cursor.description]
+        colnames = [desc[0] for desc in cursor.description] if cursor.description else None
         return colnames
 
     def _db_hostname_cached(self):
@@ -139,17 +138,21 @@ class PostgresStatementMetrics(object):
             )
             return []
 
-        # sort to ensure consistent column order
         query_columns = sorted(list(PG_STAT_ALL_DESIRED_COLUMNS & available_columns))
-
+        params = ()
+        filters = ""
+        if self._config.dbstrict:
+            filters = "AND pg_database.datname = %s"
+            params = (self._config.dbname,)
         return self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
                 cols=', '.join(query_columns),
                 pg_stat_statements_view=self._config.pg_stat_statements_view,
+                filters=filters,
                 limit=DEFAULT_STATEMENTS_LIMIT,
             ),
-            params=(self._config.dbname,),
+            params=params,
         )
 
     def _collect_metrics_rows(self, db):
@@ -171,6 +174,7 @@ class PostgresStatementMetrics(object):
             try:
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
+                # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
