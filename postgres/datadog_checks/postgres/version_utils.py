@@ -32,10 +32,8 @@ class VersionUtils(object):
         cursor = db.cursor()
         try:
             # This query is preferred to the one below cause it does not pollute PG logs with errors
-            cursor.execute("select exists(select 1 from pg_proc where proname = 'aurora_version');")
-            result = cursor.fetchone()[0]
-            if result is not None:
-                return result
+            cursor.execute('select AURORA_VERSION();')
+            return True
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
