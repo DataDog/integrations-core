@@ -17,3 +17,26 @@ DiskUsage = {
         {'name': 'disk.percent_used', 'type': 'gauge'},
     ],
 }
+
+CPUUsage = {
+    'name': 'cpu_usage',
+    'query': (
+        'SELECT AVERAGE_CPU_UTILIZATION FROM QSYS2.SYSTEM_STATUS_INFO'
+    ),
+    'columns': [
+        {'name': 'ibmi.system.cpu_usage', 'type': 'gauge'},
+    ],
+}
+
+JobStatus = {
+    'name': 'job_status',
+    'query': (
+        'SELECT JOB_NAME, JOB_STATUS, ELAPSED_CPU_PERCENTAGE FROM '
+        'TABLE(QSYS2.ACTIVE_JOB_INFO(\'NO\', \'\', \'\', \'\'))'
+    ),
+    'columns': [
+        {'name': 'job_name', 'type': 'tag'},
+        {'name': 'job_status', 'type': 'tag'},
+        {'name': 'ibmi.job.cpu_usage', 'type': 'gauge'},
+    ],
+}
