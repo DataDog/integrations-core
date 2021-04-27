@@ -92,7 +92,7 @@ COMPLEX_INNODB_VARS = [
 
 # Calculated from "SHOW MASTER LOGS;"
 BINLOG_VARS = [
-    # 'mysql.binlog.disk_use', Only collected if log_bin is true
+    'mysql.binlog.disk_use',  # Only collected if log_bin is true
 ]
 
 SYSTEM_METRICS = ['mysql.performance.user_time', 'mysql.performance.kernel_time', 'mysql.performance.cpu_time']
