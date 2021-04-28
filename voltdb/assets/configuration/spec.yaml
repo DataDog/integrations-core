@@ -28,9 +28,8 @@ files:
 
           - name: statistics_components
             description: |
+              List VoltDB components to collect metrics. A subset of components are collected by default.
               See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
-              The VoltDB integration does not collect metrics from all components by default, some are redundant, and
-              some can have a very high cardinality associated.
               The following components are supported:
                - COMMANDLOG
                - CPU
