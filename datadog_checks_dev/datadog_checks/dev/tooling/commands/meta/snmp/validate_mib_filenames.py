@@ -48,9 +48,9 @@ MibFile = namedtuple('MibFile', ['index', 'folder', 'base_filename', 'name', 'is
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate MIB file names')
 @click.argument('mib_files', nargs=-1)
-@click.option('--fix-silent', '-s', is_flag=False, help='Rename all invalid MIB files without prompting to confirm')
+@click.option('--interactive', '-i', is_flag=True, help='Prompt to confirm before renaming all invalid MIB files')
 @click.pass_context
-def validate_mib_filenames(ctx, mib_files, fix_silent):
+def validate_mib_filenames(ctx, mib_files, interactive):
     """
     Validate MIB file names. Frameworks used to load mib files expect MIB file names to match
     MIB name.
@@ -83,7 +83,7 @@ def validate_mib_filenames(ctx, mib_files, fix_silent):
         index += 1
 
     option = '*'
-    if not fix_silent:
+    if interactive:
         echo_info(
             tabulate(
                 [[mib.index, mib.base_filename, mib.name, mib.is_valid] for mib in mibs],
