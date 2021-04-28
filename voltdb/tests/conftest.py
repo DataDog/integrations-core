@@ -74,7 +74,7 @@ def instance():
 
 @pytest.fixture(scope='session')
 def instance_all(instance):
-    # type: () -> Instance
+    # type: (Instance) -> Instance
     instance = common.BASE_INSTANCE.copy()
     instance['statistics_components'] = [
         "COMMANDLOG",
@@ -100,7 +100,7 @@ def instance_all(instance):
 
 @pytest.fixture(scope='session')
 def mock_results():
-    # type: () -> None
+    # type: () -> Iterator
     with open(os.path.join(common.HERE, 'fixtures', 'mock_results.json'), 'r') as f:
         mocked_data = json.load(f)
 
