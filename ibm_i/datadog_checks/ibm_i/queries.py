@@ -20,9 +20,7 @@ DiskUsage = {
 
 CPUUsage = {
     'name': 'cpu_usage',
-    'query': (
-        'SELECT AVERAGE_CPU_UTILIZATION FROM QSYS2.SYSTEM_STATUS_INFO'
-    ),
+    'query': 'SELECT AVERAGE_CPU_UTILIZATION FROM QSYS2.SYSTEM_STATUS_INFO',
     'columns': [
         {'name': 'ibmi.system.cpu_usage', 'type': 'gauge'},
     ],
@@ -43,9 +41,7 @@ JobStatus = {
 
 SubsystemInfo = {
     'name': 'subsystem',
-    'query': (
-        'SELECT SUBSYSTEM_DESCRIPTION, STATUS, CURRENT_ACTIVE_JOBS FROM QSYS2.SUBSYSTEM_INFO'
-    ),
+    'query': 'SELECT SUBSYSTEM_DESCRIPTION, STATUS, CURRENT_ACTIVE_JOBS FROM QSYS2.SUBSYSTEM_INFO',
     'columns': [
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'subsystem_status', 'type': 'tag'},
