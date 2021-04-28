@@ -76,6 +76,39 @@ instances:
     #
     # password_hashed: false
 
+    ## @param statistics_components - list of strings - optional
+    ## List VoltDB components to collect metrics. A subset of components are collected by default.
+    ## See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php
+    ## The following components are supported:
+    ##  - COMMANDLOG
+    ##  - CPU
+    ##  - EXPORT
+    ##  - GC
+    ##  - IDLETIME
+    ##  - IMPORT
+    ##  - INDEX
+    ##  - IOSTATS
+    ##  - LATENCY
+    ##  - MEMORY
+    ##  - PROCEDURE
+    ##  - PROCEDUREOUTPUT
+    ##  - PROCEDUREPROFILE
+    ##  - QUEUE
+    ##  - SNAPSHOTSTATUS
+    ##  - TABLE
+    #
+    # statistics_components:
+    #   - COMMANDLOG
+    #   - CPU
+    #   - GC
+    #   - INDEX
+    #   - IOSTATS
+    #   - LATENCY
+    #   - MEMORY
+    #   - PROCEDURE
+    #   - SNAPSHOTSTATUS
+    #   - TABLE
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
