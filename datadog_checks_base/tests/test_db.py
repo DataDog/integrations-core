@@ -1230,6 +1230,37 @@ class TestSubmission:
         datadog_agent.assert_metadata_count(len(version_metadata))
         aggregator.assert_all_metrics_covered()
 
+    def test_hostname(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'count'}, {'name': 'tag', 'type': 'tag'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[3, 'tag1'], [7, 'tag2'], [5, 'tag1']]),
+            tags=['test:foo'],
+            hostname="test-hostname",
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            8,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag1'],
+            hostname="test-hostname",
+        )
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag2'],
+            hostname="test-hostname",
+        )
+        aggregator.assert_all_metrics_covered()
+
 
 class TestColumnTransformers:
     def test_tag_boolean(self, aggregator):
