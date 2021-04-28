@@ -34,7 +34,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 self.connection.close()
 
             self._connection = None
-        
+
         # TODO: Pass hostname=self._query_manager.hostname
         self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=self.config.tags)
 
@@ -78,7 +78,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.DiskUsage,
                 queries.CPUUsage,
                 queries.JobStatus,
-                queries.SubsystemInfo
+                queries.SubsystemInfo,
             ],
         )
         self.check_initializations.append(self._query_manager.compile_queries)
