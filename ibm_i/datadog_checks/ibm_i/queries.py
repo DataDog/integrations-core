@@ -12,9 +12,9 @@ DiskUsage = {
         {'name': 'asp_number', 'type': 'tag'},
         {'name': 'unit_number', 'type': 'tag'},
         {'name': 'unit_type', 'type': 'tag'},
-        {'name': 'disk.unit_storage_capacity', 'type': 'gauge'},
-        {'name': 'disk.unit_space_available', 'type': 'gauge'},
-        {'name': 'disk.percent_used', 'type': 'gauge'},
+        {'name': 'ibmi.asp.unit_storage_capacity', 'type': 'gauge'},
+        {'name': 'ibmi.asp.unit_space_available', 'type': 'gauge'},
+        {'name': 'ibmi.asp.percent_used', 'type': 'gauge'},
     ],
 }
 
