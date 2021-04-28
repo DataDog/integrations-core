@@ -18,8 +18,9 @@ from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, se
 @click.option('-f', '--filters', help='Path to OIDs filter', default=None)
 @click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
+@click.option('--interactive', '-i', help='Prompt to confirm before saving to a file', is_flag=True)
 @click.pass_context
-def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug):
+def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive):
     """
     Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
     to be used as source to generate the profile, along with a filter if a device or
@@ -139,7 +140,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug):
 
     echo_info('{} metrics found'.format(len(profile_oid_collection.values())))
     yaml_data = yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False)
-    if click.confirm('Save to file?'):
+    if not interactive or click.confirm('Save to file?'):
         output_filename = 'metrics.yaml'
         with open(output_filename, 'w') as f:
             f.write(yaml_data)
