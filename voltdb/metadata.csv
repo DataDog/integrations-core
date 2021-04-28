@@ -59,7 +59,7 @@ voltdb.table.percent_full,gauge,,percent,,Percentage of the row limit currently 
 voltdb.table.tuple_limit,gauge,,row,,"The row limit for this table. Row limits are optional and are defined in the schema as a maximum number of rows that any partition can contain. If no row limit is set, this value is null.",0,voltdb,table tuple limit
 voltdb.index.entry_count,gauge,,,,Number of index entries currently in the partition.,0,voltdb,index_entry_cnt
 voltdb.index.memory_estimate,gauge,,kibibyte,,Estimated amount of memory consumed by the current index entries.,0,voltdb,index_memory
-voltdb.export.latency.avg,gauge,,millisecond,,"The average time between when records are inserted and they are acknowledged by the target.",0,voltdb,export avg latency
+voltdb.export.latency.avg,gauge,,millisecond,,"The average time between when records are inserted and when they are acknowledged by the target.",0,voltdb,export avg latency
 voltdb.export.latency.max,gauge,,millisecond,,"The maximum time between when a record was inserted and it was acknowledged by the target.",0,voltdb,export max latency
 voltdb.export.queue_gap,gauge,,,,"The number of records missing from the queue for the current stream and partition.",0,voltdb,export queue gap
 voltdb.export.records_pending,gauge,,,,"The number of records out of TUPLE_COUNT still waiting to be written to or acknowledged by the target.",0,voltdb,export tuple pending
@@ -101,4 +101,3 @@ voltdb.queue.avg_wait,gauge,,microsecond,,"The average length of time (in micros
 voltdb.queue.current_depth,gauge,,task,,"The number of tasks currently in the queue.",0,voltdb,queue tasks depth
 voltdb.queue.max_wait,gauge,,microsecond,,"The average length of time (in microseconds) tasks were waiting in the queue in the last five seconds.",0,voltdb,queue wait max
 voltdb.queue.poll_count_per_sec,gauge,,task,second,"The number of tasks that left the queue",0,voltdb,queue task per sec
-
