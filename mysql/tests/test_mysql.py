@@ -73,7 +73,7 @@ def test_minimal_config(aggregator, instance_basic):
 
     _test_optional_metrics(aggregator, optional_metrics)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -84,7 +84,7 @@ def test_complex_config(aggregator, instance_complex):
 
     _assert_complex_config(aggregator)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
@@ -94,7 +94,8 @@ def test_e2e(dd_agent_check, instance_complex):
 
     _assert_complex_config(aggregator)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS,
+        check_submission_type=True
     )
 
 
@@ -180,7 +181,7 @@ def test_connection_failure(aggregator, instance_error):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -257,7 +258,7 @@ def test_complex_config_replica(aggregator, instance_complex):
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+        get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
