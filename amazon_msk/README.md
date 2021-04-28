@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
 
- Note : Make sure to change the file name. The default file name is conf.yaml.example change it to conf.yaml.
+**Note**: If you reuse the sample file, change the file name from `conf.yaml.example` to `conf.yaml`.
 
 2. [Restart the Agent][9].
 
