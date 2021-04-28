@@ -24,8 +24,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def check(self, _):
         try:
             self._query_manager.execute()
-        except Exception:
-            self.log.error('An error occurred, resetting IBM i connection')
+        except Exception as e:
+            self.warning('An error occurred, resetting IBM i connection: %s', e)
             with suppress(Exception):
                 self.connection.close()
 
