@@ -40,3 +40,15 @@ JobStatus = {
         {'name': 'ibmi.job.cpu_usage', 'type': 'gauge'},
     ],
 }
+
+SubsystemInfo = {
+    'name': 'subsystem',
+    'query': (
+        'SELECT SUBSYSTEM_DESCRIPTION, STATUS, CURRENT_ACTIVE_JOBS FROM QSYS2.SUBSYSTEM_INFO'
+    ),
+    'columns': [
+        {'name': 'subsystem_name', 'type': 'tag'},
+        {'name': 'subsystem_status', 'type': 'tag'},
+        {'name': 'ibmi.subsystem.active_jobs', 'type': 'gauge'},
+    ],
+}
