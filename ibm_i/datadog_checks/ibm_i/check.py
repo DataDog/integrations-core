@@ -13,6 +13,8 @@ from .config_models import ConfigMixin
 
 
 class IbmICheck(AgentCheck, ConfigMixin):
+    SERVICE_CHECK_NAME = "ibmi.can_connect"
+
     def __init__(self, name, init_config, instances):
         super(IbmICheck, self).__init__(name, init_config, instances)
 
@@ -24,12 +26,17 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def check(self, _):
         try:
             self._query_manager.execute()
+            check_status = AgentCheck.OK
         except Exception as e:
             self.warning('An error occurred, resetting IBM i connection: %s', e)
+            check_status = AgentCheck.CRITICAL
             with suppress(Exception):
                 self.connection.close()
 
             self._connection = None
+        
+        # TODO: Pass hostname=self._query_manager.hostname
+        self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=self.config.tags)
 
     def execute_query(self, query):
         # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
