@@ -24,19 +24,60 @@ class IbmICheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.set_up_query_manager)
 
     def check(self, _):
+        # If we don't have a hostname yet, try to fetch it
+        if not self._query_manager.hostname:
+            self._query_manager.hostname = self.fetch_hostname()
+
+        # Do not try to send metrics if we can't tag them with a correct hostname
+        if self._query_manager.hostname:
+            try:
+                self._query_manager.execute()
+                check_status = AgentCheck.OK
+            except Exception as e:
+                self.warning('An error occurred, resetting IBM i connection: %s', e)
+                check_status = AgentCheck.CRITICAL
+                with suppress(Exception):
+                    self.connection.close()
+
+                self._connection = None
+
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                check_status,
+                tags=self.config.tags,
+                hostname=self._query_manager.hostname
+            )
+        else:
+            self.warning('No hostname found, skipping check run')
+
+    def fetch_hostname(self):
         try:
-            self._query_manager.execute()
-            check_status = AgentCheck.OK
+            return self.hostname_query()
         except Exception as e:
-            self.warning('An error occurred, resetting IBM i connection: %s', e)
-            check_status = AgentCheck.CRITICAL
+            self.warning('An error occurred while fetching the hostname, resetting IBM i connection: %s', e)
             with suppress(Exception):
                 self.connection.close()
 
             self._connection = None
 
-        # TODO: Pass hostname=self._query_manager.hostname
-        self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=self.config.tags)
+    def hostname_query(self):
+        query = "SELECT HOST_NAME FROM SYSIBMADM.ENV_SYS_INFO"
+        results = list(self.execute_query(query)) # type: List[Tuple[str]]
+        if len(results) == 0:
+            self.log.error("Couldn't find hostname on the remote system.")
+            return None
+        if len(results) > 1:
+            self.log.error("Too many results returned by system query. Expected 1, got {}".format(
+                len(results)
+            ))
+            return None
+
+        hostname_row = results[0]
+        if len(hostname_row) != 1:
+            self.log.error("Expected 1 column in hostname query, got {}".format(len(hostname_row)))
+            return None
+
+        return hostname_row[0]
 
     def execute_query(self, query):
         # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
@@ -70,6 +111,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         return self._connection
 
     def set_up_query_manager(self):
+        hostname = self.fetch_hostname()
         self._query_manager = QueryManager(
             self,
             self.execute_query,
@@ -80,5 +122,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.JobStatus,
                 queries.SubsystemInfo,
             ],
+            hostname=hostname,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
