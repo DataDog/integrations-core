@@ -160,7 +160,7 @@ class QueryManager(object):
 
                 for name, transformer in query_extras:
                     try:
-                        result = transformer(sources, tags=tags)
+                        result = transformer(sources, tags=tags, hostname=self.hostname)
                     except Exception as e:
                         logger.error('Error transforming %s: %s', name, e)
                         continue
