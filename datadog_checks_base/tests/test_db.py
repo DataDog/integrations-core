@@ -1235,10 +1235,15 @@ class TestSubmission:
             {
                 'name': 'test query',
                 'query': 'foo',
-                'columns': [{'name': 'test.foo', 'type': 'count'}, {'name': 'tag', 'type': 'tag'}],
+                'columns': [
+                    {'name': 'test.foo', 'type': 'count'},
+                    {'name': 'tag', 'type': 'tag'},
+                    {"name": "_source", "type": "source"},
+                ],
                 'tags': ['test:bar'],
+                "extras": [{"name": "test.baz", "expression": "_source * 1000", 'submit_type': 'gauge'}],
             },
-            executor=mock_executor([[3, 'tag1'], [7, 'tag2'], [5, 'tag1']]),
+            executor=mock_executor([[3, 'tag1', 2], [7, 'tag2', 5], [5, 'tag1', 6]]),
             tags=['test:foo'],
             hostname="test-hostname",
         )
@@ -1259,6 +1264,16 @@ class TestSubmission:
             tags=['test:foo', 'test:bar', 'tag:tag2'],
             hostname="test-hostname",
         )
+
+        for val, tag in [(2000, 'tag1'), (5000, 'tag2'), (6000, 'tag1')]:
+            aggregator.assert_metric(
+                'test.baz',
+                val,
+                metric_type=aggregator.GAUGE,
+                tags=['test:foo', 'test:bar', 'tag:{}'.format(tag)],
+                hostname="test-hostname",
+            )
+
         aggregator.assert_all_metrics_covered()
 
 
