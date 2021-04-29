@@ -1,0 +1,47 @@
+{
+    "title": "Fluentd - Metrics",
+    "description": "The FluentD dashboard provides a high-level overview of your data collector, so you can see aggregated performance metrics for all of your FluentD plugins. Further reading on FluentD monitoring:\n\n- [Datadog's FluentD integration docs](https://docs.datadoghq.com/integrations/fluentd/)\n\n- [How to monitor FluentD](https://www.datadoghq.com/blog/monitor-fluentd-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "fluentd.retry_count{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Fluentd - Retry count"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "fluentd.buffer_queue_length{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Fluentd - Buffer queue length (chunks)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "fluentd.buffer_total_queued_size{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Fluentd - Buffer total size (bytes)"
+            }
+        }
+    ]
+}

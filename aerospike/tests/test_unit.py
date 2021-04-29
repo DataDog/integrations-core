@@ -36,6 +36,49 @@ def test_datacenter_metrics(aggregator):
         aggregator.assert_metric(metric)
 
 
+def test_xdr_metrics(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.get_info = mock.MagicMock(
+        return_value="lag=0;in_queue=0;in_progress=0;success=0;abandoned=0;not_found=0;filtered_out=0;"
+        "retry_no_node=0;retry_conn_reset=0;retry_dest=0;recoveries=0;recoveries_pending=0;hot_keys=0;"
+        "uncompressed_pct=0.000;compression_ratio=1.000;nodes=0;throughput=0;latency_ms=0;lap_us=1"
+    )
+    check.collect_xdr()
+
+    for metric in common.XDR_DC_METRICS:
+        aggregator.assert_metric(metric, tags=['datacenter:test'])
+
+
+def test_multiple_xdr_metrics(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.get_info = mock.MagicMock(
+        return_value="ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\nlag=0;in_queue=0;in_progress=0;"
+        "success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;"
+        "retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;"
+        "compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348    \n\nip-10-10-17-144.ec2.internal"
+        ":3000 (10.10.17.144) returned:\nlag=0;in_queue=0;in_progress=0;success=98294822;abandoned=0;"
+        "not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=813513;retry_dest=0;recoveries=293;"
+        "recoveries_pending=0;hot_keys=20286479;uncompressed_pct=0.000;compression_ratio=1.000;"
+        "throughput=0;latency_ms=14;lap_us=232\n\n"
+    )
+    check.collect_xdr()
+    for host in ['ip-10-10-17-247.ec2.internal', 'ip-10-10-17-144.ec2.internal']:
+        for metric in common.XDR_DC_METRICS:
+            aggregator.assert_metric(
+                metric, tags=['datacenter:test', 'remote_dc_port:3000', 'remote_dc_host:{}'.format(host)]
+            )
+
+
+def test_collect_xdr_invalid_data(aggregator):
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check.log = mock.MagicMock()
+    with mock.patch('datadog_checks.aerospike.AerospikeCheck.get_info', return_value="ERROR::XDR-not-configured"):
+        check.collect_xdr()
+        check.log.debug.assert_called_with('Error collecting XDR metrics: %s', 'ERROR::XDR-not-configured')
+
+    aggregator.assert_all_metrics_covered()  # no metric
+
+
 def test_connection_uses_tls():
     instance = copy.deepcopy(common.INSTANCE)
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}

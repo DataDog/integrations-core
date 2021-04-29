@@ -1,0 +1,369 @@
+{
+    "title": "Gunicorn - Overview",
+    "description": "This dashboard provides a high-level overview of Gunicorn health and performance, including request duration, resource utilization, and HTTP status code metrics, so you can keep tabs on how your web application is handling traffic. Further reading on Gunicorn monitoring:\n\n- [Datadog's Gunicorn integration docs](https://docs.datadoghq.com/integrations/gunicorn/)\n\n- [How to monitor Gunicorn with Datadog](https://www.datadoghq.com/blog/monitor-gunicorn-performance/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/gunicorn_large.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 43,
+                "height": 12
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "hostmap",
+                "requests": {
+                    "fill": {
+                        "q": "avg:gunicorn.requests{$scope} by {host}"
+                    }
+                },
+                "custom_links": [],
+                "title": "Requests per second by host",
+                "title_size": "16",
+                "title_align": "left",
+                "no_metric_hosts": false,
+                "no_group_hosts": true,
+                "group": [],
+                "scope": ["$scope"],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 21,
+                "width": 43,
+                "height": 25
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:gunicorn.request.duration.avg{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:gunicorn.request.duration.95percentile{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:gunicorn.request.duration.median{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Request duration (avg, 95th percentile, median)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 47,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "note",
+                "content": "\n\n\n\n\n\nResource utilization",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 45,
+                "y": 40,
+                "width": 43,
+                "height": 5
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "note",
+                "content": "Throughput and performance",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 43,
+                "height": 5
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100 * ( sum:gunicorn.request.status.512{$scope}.as_count() + sum:gunicorn.request.status.500{$scope}.as_count() + sum:gunicorn.request.status.504{$scope}.as_count() ) / sum:gunicorn.requests{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Percentage of 5xx errors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 45,
+                "y": 23,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:gunicorn.workers{$scope,state:idle}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:gunicorn.workers{$scope,state:working}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Busy vs. idle Gunicorn workers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 45,
+                "y": 47,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "note",
+                "content": "Successes and errors",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 45,
+                "y": 0,
+                "width": 87,
+                "height": 5
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100 * ( sum:gunicorn.request.status.200{$scope}.as_count() + sum:gunicorn.request.status.204{$scope}.as_count() + sum:gunicorn.request.status.201{$scope}.as_count() ) / sum:gunicorn.requests{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "green"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Percentage of 2xx response codes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 89,
+                "y": 7,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:gunicorn.log.critical{$scope}.as_count()",
+                        "aggregator": "sum",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Logged critical errors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 1
+            },
+            "layout": {
+                "x": 111,
+                "y": 39,
+                "width": 21,
+                "height": 12
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:gunicorn.log.exception{$scope}.as_count()",
+                        "aggregator": "sum",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Logged exceptions",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 1
+            },
+            "layout": {
+                "x": 89,
+                "y": 39,
+                "width": 21,
+                "height": 12
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100 * ( sum:gunicorn.request.status.400{$scope}.as_count() + sum:gunicorn.request.status.401{$scope}.as_count() + sum:gunicorn.request.status.403{$scope}.as_count() + sum:gunicorn.request.status.404{$scope}.as_count() + sum:gunicorn.request.status.405{$scope}.as_count() + sum:gunicorn.request.status.406{$scope}.as_count() ) / sum:gunicorn.requests{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "orange"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Percentage of 4xx errors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 45,
+                "y": 7,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "100 * ( sum:gunicorn.request.status.301{$scope}.as_count() + sum:gunicorn.request.status.302{$scope}.as_count() + sum:gunicorn.request.status.303{$scope}.as_count() + sum:gunicorn.request.status.304{$scope}.as_count() + sum:gunicorn.request.status.307{$scope}.as_count() ) / sum:gunicorn.requests{$scope}.as_count()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Percentage of 3xx response codes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 89,
+                "y": 23,
+                "width": 43,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 46
+}

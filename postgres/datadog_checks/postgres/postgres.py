@@ -9,6 +9,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
@@ -26,7 +27,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, get_raw_version, is_aurora, parse_version, transform_version
+from .version_utils import V9, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -36,13 +37,14 @@ class PostgreSql(AgentCheck):
 
     SOURCE_TYPE_NAME = 'postgresql'
     SERVICE_CHECK_NAME = 'postgres.can_connect'
-    METADATA_TRANSFORMERS = {'version': transform_version}
+    METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
         self._is_aurora = None
+        self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -52,9 +54,14 @@ class PostgreSql(AgentCheck):
         self._config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self._config)
+        self.statement_samples = PostgresStatementSamples(self, self._config)
         self._clean_state()
 
+    def cancel(self):
+        self.statement_samples.cancel()
+
     def _clean_state(self):
+        self.log.debug("Cleaning state")
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
@@ -69,15 +76,15 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            raw_version = get_raw_version(self.db)
-            self._version = parse_version(raw_version)
+            raw_version = self._version_utils.get_raw_version(self.db)
+            self._version = self._version_utils.parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
 
     @property
     def is_aurora(self):
         if self._is_aurora is None:
-            self._is_aurora = is_aurora(self.db)
+            self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
 
     def _build_relations_config(self, yamlconfig):
@@ -137,7 +144,9 @@ class PostgreSql(AgentCheck):
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
-            self._is_aurora = None
+            self.log.debug("Disabling replication metrics")
+            self._is_aurora = False
+            self.metrics_cache.replication_metrics = {}
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -286,6 +295,32 @@ class PostgreSql(AgentCheck):
 
         cursor.close()
 
+    def _new_connection(self):
+        if self._config.host == 'localhost' and self._config.password == '':
+            # Use ident method
+            connection_string = "user=%s dbname=%s application_name=%s" % (
+                self._config.user,
+                self._config.dbname,
+                self._config.application_name,
+            )
+            if self._config.query_timeout:
+                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
+            return psycopg2.connect(connection_string)
+        else:
+            args = {
+                'host': self._config.host,
+                'user': self._config.user,
+                'password': self._config.password,
+                'database': self._config.dbname,
+                'sslmode': self._config.ssl_mode,
+                'application_name': self._config.application_name,
+            }
+            if self._config.port:
+                args['port'] = self._config.port
+            if self._config.query_timeout:
+                args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            return psycopg2.connect(**args)
+
     def _connect(self):
         """Get and memoize connections to instances"""
         if self.db and self.db.closed:
@@ -297,30 +332,7 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            if self._config.host == 'localhost' and self._config.password == '':
-                # Use ident method
-                connection_string = "user=%s dbname=%s application_name=%s" % (
-                    self._config.user,
-                    self._config.dbname,
-                    self._config.application_name,
-                )
-                if self._config.query_timeout:
-                    connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-                self.db = psycopg2.connect(connection_string)
-            else:
-                args = {
-                    'host': self._config.host,
-                    'user': self._config.user,
-                    'password': self._config.password,
-                    'database': self._config.dbname,
-                    'sslmode': self._config.ssl_mode,
-                    'application_name': self._config.application_name,
-                }
-                if self._config.port:
-                    args['port'] = self._config.port
-                if self._config.query_timeout:
-                    args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
-                self.db = psycopg2.connect(**args)
+            self.db = self._new_connection()
 
     def _collect_custom_queries(self, tags):
         """
@@ -431,11 +443,13 @@ class PostgreSql(AgentCheck):
             self._connect()
             if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self._is_aurora))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
                 self._collect_per_statement_metrics(tags)
+                self.statement_samples.run_sampler(tags)
+
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()

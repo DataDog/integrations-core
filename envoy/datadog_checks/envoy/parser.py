@@ -21,16 +21,7 @@ PERCENTILE_SUFFIX = {
 }
 
 
-def parse_metric(metric, metric_mapping=METRIC_TREE):
-    # type: (str, Dict[str, Any]) -> Tuple[str, List[str], str]
-    """Takes a metric formatted by Envoy and splits it into a unique
-    metric name. Returns the unique metric name, a list of tags, and
-    the name of the submission method.
-
-    Example:
-        'listener.0.0.0.0_80.downstream_cx_total' ->
-        ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
-    """
+def _parse_metric(metric, metric_mapping, skip_part=None):
     metric_parts = []
     tag_names = []
     tag_values = []
@@ -41,7 +32,7 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
 
     # From the split metric name, any part that is not in the mapping it will become part of the tag value
     for metric_part in metric.split('.'):
-        if metric_part in metric_mapping and tags_to_build >= minimum_tag_length:
+        if metric_part in metric_mapping and metric_part != skip_part and tags_to_build >= minimum_tag_length:
             # Rebuild any built up tags whenever we encounter a known metric part.
             if tag_value_builder:
                 # Edge case where we hit a known metric part after a sequence of all unknown parts
@@ -70,15 +61,53 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
         else:
             tag_value_builder.append(metric_part)
             tags_to_build += 1
+    return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, metric_mapping
 
-    metric = '.'.join(metric_parts)
-    if metric not in METRICS:
-        raise UnknownMetric
 
+def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
+    # type: (str, Dict[str, Any]) -> Tuple[str, List[str], str]
+    """Takes a metric formatted by Envoy and splits it into a unique
+    metric name. Returns the unique metric name, a list of tags, and
+    the name of the submission method.
+
+    Example:
+        'listener.0.0.0.0_80.downstream_cx_total' ->
+        ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
+    """
+    metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, last_mapping = _parse_metric(
+        metric, metric_mapping
+    )
+    parsed_metric = '.'.join(metric_parts)
+    if parsed_metric not in METRICS:
+        if retry:
+            skip_parts = []
+            # Retry parsing for metrics by skipping the last matched metric part
+            while len(metric_parts) > 1:
+                skip_part = metric_parts.pop()
+                if skip_part in skip_parts:
+                    raise UnknownMetric
+                else:
+                    skip_parts.append(skip_part)
+                (
+                    metric_parts,
+                    tag_value_builder,
+                    tag_names,
+                    tag_values,
+                    unknown_tags,
+                    tags_to_build,
+                    last_mapping,
+                ) = _parse_metric(metric, metric_mapping, skip_part)
+                parsed_metric = '.'.join(metric_parts)
+                if parsed_metric in METRICS:
+                    break
+            else:
+                raise UnknownMetric
+        else:
+            raise UnknownMetric
     # Rebuild any trailing tags
     if tag_value_builder:
         tags = next(
-            (mapped_tags for mapped_tags in metric_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
+            (mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
         )
         constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
 
@@ -93,7 +122,7 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
 
     tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 
-    return METRIC_PREFIX + metric, tags, METRICS[metric]['method']
+    return METRIC_PREFIX + parsed_metric, tags, METRICS[parsed_metric]['method']
 
 
 def construct_tag_values(tag_builder, num_tags):

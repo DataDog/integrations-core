@@ -35,6 +35,7 @@ aws.msk.jmx.exporter.build.info,gauge,,,,A metric with a constant '1' value labe
 aws.msk.jmx.scrape.duration.seconds,gauge,,second,,"Time this JMX scrape took, in seconds.",0,amazon_kafka,
 aws.msk.jmx.scrape.error,gauge,,,,Non-zero if this scrape failed.,0,amazon_kafka,
 aws.msk.kafka.cluster.Partition.Value,gauge,,,,"Attribute exposed for management (kafka.cluster<type=Partition, name=InSyncReplicasCount, topic=test-topic-15, partition=70><>Value)",0,amazon_kafka,
+aws.msk.kafka.consumer.group.ConsumerLagMetrics.Value,gauge,,,,"Attribute exposed for management (kafka.consumer.group<type=ConsumerLagMetrics, name=EstimatedTimeLag, groupId=test-group, partition=1, topic=test-topic><>Value)",0,amazon_kafka,
 aws.msk.kafka.controller.ControllerChannelManager.50thPercentile,gauge,,,,"Attribute exposed for management (kafka.controller<type=ControllerChannelManager, name=RequestRateAndQueueTimeMs, broker-id=1><>50thPercentile)",0,amazon_kafka,
 aws.msk.kafka.controller.ControllerChannelManager.75thPercentile,gauge,,,,"Attribute exposed for management (kafka.controller<type=ControllerChannelManager, name=RequestRateAndQueueTimeMs, broker-id=1><>75thPercentile)",0,amazon_kafka,
 aws.msk.kafka.controller.ControllerChannelManager.95thPercentile,gauge,,,,"Attribute exposed for management (kafka.controller<type=ControllerChannelManager, name=RequestRateAndQueueTimeMs, broker-id=1><>95thPercentile)",0,amazon_kafka,

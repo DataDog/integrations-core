@@ -23,7 +23,9 @@ from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
-from datadog_checks.dev.utils import ON_WINDOWS, read_file, running_on_windows_ci, write_file
+from datadog_checks.dev.ci import running_on_windows_ci
+from datadog_checks.dev.fs import read_file, write_file
+from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = pytest.mark.http
 
@@ -1986,3 +1988,9 @@ class TestIntegration:
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
         with pytest.raises(requests.exceptions.Timeout):
             http.get('https://httpbin.org/delay/0.10')
+
+
+class TestAIAChasing:
+    def test_incomplete_chain(self):
+        http = RequestsWrapper({}, {})
+        http.get("https://incomplete-chain.badssl.com/")

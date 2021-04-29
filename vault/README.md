@@ -218,6 +218,9 @@ Need help? Contact [Datadog support][9].
 Additional helpful documentation, links, and articles:
 
 - [Monitor HashiCorp Vault with Datadog][10]
+- [Monitor HashiCorp Vault metrics and logs][17]
+- [Tools for HashiCorp Vault monitoring][18]
+- [How to monitor HashiCorp Vault with Datadog][19]
 
 [1]: https://www.vaultproject.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -235,3 +238,6 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
 [15]: https://www.vaultproject.io/docs/auth
 [16]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus
+[17]: https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/
+[18]: https://www.datadoghq.com/blog/vault-monitoring-tools
+[19]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog

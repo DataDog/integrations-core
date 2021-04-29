@@ -63,7 +63,7 @@ static_resources:
     type: LOGICAL_DNS
     lb_policy: ROUND_ROBIN
     load_assignment:
-      cluster_name: xds_cluster
+      cluster_name: service-xdr.default.eu-west-3-stg.internal.abcd.consul
       endpoints:
       - lb_endpoints:
         - endpoint:

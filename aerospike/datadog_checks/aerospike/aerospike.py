@@ -28,6 +28,7 @@ SERVICE_CHECK_CONNECT = '%s.can_connect' % SOURCE_TYPE_NAME
 DATACENTER_SERVICE_CHECK_CONNECT = '%s.datacenter.can_connect' % SOURCE_TYPE_NAME
 CLUSTER_METRIC_TYPE = SOURCE_TYPE_NAME
 DATACENTER_METRIC_TYPE = '%s.datacenter' % SOURCE_TYPE_NAME
+XDR_DATACENTER_METRIC_TYPE = '%s.xdr_dc' % SOURCE_TYPE_NAME
 NAMESPACE_METRIC_TYPE = '%s.namespace' % SOURCE_TYPE_NAME
 NAMESPACE_TPS_METRIC_TYPE = '%s.namespace.tps' % SOURCE_TYPE_NAME
 NAMESPACE_LATENCY_METRIC_TYPE = '%s.namespace.latency' % SOURCE_TYPE_NAME
@@ -150,21 +151,23 @@ class AerospikeCheck(AgentCheck):
             self.log.debug("Could not determine version, assuming Aerospike v5.1")
             version = V5_1
 
+        # Handle metric compatibility for latency/throughput
         if version < V5_1:
             self.collect_throughput(namespaces)
             self.collect_latency(namespaces)
-
-            if version < V5_0:
-                try:
-                    datacenters = self.get_datacenters()
-
-                    for dc in datacenters:
-                        self.collect_datacenter(dc)
-
-                except Exception as e:
-                    self.log.debug("There were no datacenters found: %s", e)
         else:
             self.collect_latencies(namespaces)
+
+        # Handle metric compatibility for xdr/dc
+        if version >= V5_0:
+            self.collect_xdr()
+        else:
+            try:
+                datacenters = self.get_datacenters()
+                for dc in datacenters:
+                    self.collect_datacenter(dc)
+            except Exception as e:
+                self.log.debug("There were no datacenters found: %s", e)
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
@@ -226,6 +229,53 @@ class AerospikeCheck(AgentCheck):
 
         return datacenters
 
+    def collect_xdr(self):
+        """
+        XDR metrics are available from the get-stats command as of Aerospike 5.0.0
+
+        https://www.aerospike.com/docs/reference/info/#get-stats
+        """
+        if self._required_datacenters:
+            for dc in self._required_datacenters:
+                data = self.get_info('get-stats:context=xdr;dc={}'.format(dc), separator=None)
+                if not data:
+                    self.log.debug("Got invalid data for dc %s", dc)
+                    continue
+                self.log.debug("Got data for dc `%s`: %s", dc, data)
+                parsed_data = data.split("\n")
+                tags = ['datacenter:{}'.format(dc)]
+                for line in parsed_data:
+                    line = line.strip()
+                    if line:
+                        if line.startswith('ERROR:'):
+                            self.log.debug("Error collecting XDR metrics: %s", data)
+                            continue
+
+                        if 'returned' in line:
+                            # Parse remote dc host and port from
+                            # `ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:`
+                            remote_dc = line.split(" (")[0].split(":")
+                            tags.extend(
+                                [
+                                    'remote_dc_host:{}'.format(remote_dc[0]),
+                                    'remote_dc_port:{}'.format(remote_dc[1]),
+                                ]
+                            )
+                        else:
+                            # Parse metrics from
+                            # lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;...
+                            xdr_metrics = line.split(';')
+                            self.log.debug("For dc host tags %s, got: %s", tags, xdr_metrics)
+                            for item in xdr_metrics:
+                                metric = item.split('=')
+                                key = metric[0]
+                                value = metric[1]
+                                self.send(XDR_DATACENTER_METRIC_TYPE, key, value, tags)
+                            # Reset dc tag
+                            tags = ['datacenter:{}'.format(dc)]
+        else:
+            self.log.debug("No datacenters were specified to collect XDR metrics: %s", self._required_datacenters)
+
     def get_client(self):
         client_config = {'hosts': [self._host]}
         if self._tls_config:
@@ -255,11 +305,13 @@ class AerospikeCheck(AgentCheck):
         except Exception as e:
             self.log.warning("Command `%s` was unsuccessful: %s", command, str(e))
             return []
+
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
+
         if not data:
             return []
 

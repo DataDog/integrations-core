@@ -33,7 +33,12 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[ElasticSearch] Unsuccessful requests rate is high": "assets/monitors/elastic_requests.json",
+      "[ElasticSearch] Query load is high": "assets/monitors/elastic_query_load_high.json",
+      "[ElasticSearch] Time spent on queries is high": "assets/monitors/elastic_query_latency_high.json",
+      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json"
+    },
     "dashboards": {
       "elasticsearch": "assets/dashboards/overview.json",
       "elasticsearch_timeboard": "assets/dashboards/metrics.json"

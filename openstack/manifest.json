@@ -1,6 +1,7 @@
 {
   "categories": [
-    "cloud"
+    "cloud",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "OpenStack",
@@ -25,13 +26,18 @@
   "type": "check",
   "integration_id": "openstack",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "openstack": "assets/dashboards/openstack_dashboard.json",
       "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "openstack"
+    },
     "metrics_metadata": "metadata.csv",
     "saved_views": {
       "openstack_processes": "assets/saved_views/openstack_processes.json"

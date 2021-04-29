@@ -15,6 +15,7 @@
 [click-github]: https://github.com/pallets/click
 [codecov-home]: https://codecov.io
 [config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/example.py
+[config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/model.py
 [config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/core.py
 [config-spec-template-init-config-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
@@ -116,6 +117,8 @@
 [python-pdb]: https://docs.python.org/3/library/pdb.html
 [requests-github]: https://github.com/psf/requests
 [requests-unixsocket-pypi]: https://pypi.org/project/requests-unixsocket/
+[release-base.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-base.yml
+[release-dev.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-dev.yml
 [root-tox-config]: https://github.com/DataDog/integrations-core/blob/master/tox.ini
 [rtloader]: https://github.com/DataDog/datadog-agent/tree/master/rtloader
 [semver-home]: https://semver.org

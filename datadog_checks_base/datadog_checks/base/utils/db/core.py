@@ -44,6 +44,7 @@ class QueryManager(object):
         queries=None,  # type: List[str]
         tags=None,  # type: List[str]
         error_handler=None,  # type: Callable[[str], str]
+        hostname=None,  # type: str
     ):  # type: (...) -> QueryManager
         """
         - **check** (_AgentCheck_) - an instance of a Check
@@ -59,6 +60,7 @@ class QueryManager(object):
         self.tags = tags or []
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
+        self.hostname = hostname  # type: str
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
@@ -154,11 +156,11 @@ class QueryManager(object):
                         submission_queue.append((transformer, value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags)
+                    transformer(sources, value, tags=tags, hostname=self.hostname)
 
                 for name, transformer in query_extras:
                     try:
-                        result = transformer(sources, tags=tags)
+                        result = transformer(sources, tags=tags, hostname=self.hostname)
                     except Exception as e:
                         logger.error('Error transforming %s: %s', name, e)
                         continue

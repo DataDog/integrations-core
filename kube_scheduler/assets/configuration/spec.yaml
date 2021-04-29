@@ -9,10 +9,22 @@ files:
     options:
     - name: leader_election
       description: |
-        Monitor the leader-election process on the kube-system:kube-scheduler endpoints.
+        Monitor the leader-election process on the kube-system:kube-scheduler.
       value:
         type: boolean
         example: true
+    - name: leader_election_kind
+      description: |
+        Kind of object to look at for the leader election.
+        Can be:
+          * auto
+          * lease
+          * endpoints
+          * configmap
+        auto makes the check try lease first and fallback to endpoints if lease isn't available
+      value:
+        type: string
+        example: auto
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:10251/metrics
@@ -45,11 +57,9 @@ files:
       description: Used to specify the path where the service account token is located.
       value:
         type: string
-        default: /var/run/secrets/kubernetes.io/serviceaccount/token
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
       value:
         type: boolean
-        default: false
         example: false

@@ -19,7 +19,6 @@ files:
     - name: url
       required: true
       value:
-        default: null
         example: http://localhost/admin?stats
         type: string
       description: |

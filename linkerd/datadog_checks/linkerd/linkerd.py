@@ -10,7 +10,8 @@ from .metrics import METRIC_MAP, TYPE_OVERRIDES
 
 class LinkerdCheck(OpenMetricsBaseCheck):
     """
-    Collect linkerd metrics from Prometheus
+    Collect linkerd metrics from Prometheus.
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
     DEFAULT_METRIC_LIMIT = 0
