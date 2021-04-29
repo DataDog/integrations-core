@@ -58,7 +58,7 @@ class StatementMetrics:
             row_key = key(row)
             if row_key in new_cache:
                 logger.error(
-                    'Collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
+                    'Unexpected collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
                     row_key,
                     row,
                     new_cache[row_key],
