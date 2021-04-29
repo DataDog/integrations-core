@@ -101,10 +101,10 @@ class MySQLStatementMetrics(object):
         metrics = []  # type: List[Metric]
 
         def keyfunc(row):
-            return (row['schema'], row['digest'])
+            return (row['schema'], row['query_signature'])
 
         monotonic_rows = self._query_summary_per_statement(db)
-        monotonic_rows = self._merge_duplicate_rows(monotonic_rows, key=keyfunc)
+        monotonic_rows = self._normalize_queries(monotonic_rows)
         rows = self._state.compute_derivative_rows(monotonic_rows, STATEMENT_METRICS.keys(), key=keyfunc)
         metrics.append(('dd.mysql.queries.query_rows_raw', len(rows), []))
 
@@ -124,38 +124,14 @@ class MySQLStatementMetrics(object):
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 
-            try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-            except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-                continue
-            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
-            tags.append('query:' + normalize_query_tag(obfuscated_statement).strip())
+            tags.append('query_signature:' + compute_sql_signature(row['query']))
+            tags.append('query:' + normalize_query_tag(row['query']).strip())
 
             for col, name in STATEMENT_METRICS.items():
                 value = row[col]
                 metrics.append((name, value, tags))
 
         return metrics
-
-    @staticmethod
-    def _merge_duplicate_rows(rows, key):
-        # type: (List[PyMysqlRow], RowKeyFunction) -> List[PyMysqlRow]
-        """
-        Merges the metrics from duplicate rows because the (schema, digest) identifier may not be
-        unique, see: https://bugs.mysql.com/bug.php?id=79533
-        """
-        merged = {}  # type: Dict[RowKey, PyMysqlRow]
-
-        for row in rows:
-            k = key(row)
-            if k in merged:
-                for m in STATEMENT_METRICS:
-                    merged[k][m] += row[m]
-            else:
-                merged[k] = copy.copy(row)
-
-        return list(merged.values())
 
     def _query_summary_per_statement(self, db):
         # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
@@ -197,3 +173,19 @@ class MySQLStatementMetrics(object):
             self.log.warning("Statement summary metrics are unavailable at this time: %s", e)
 
         return rows
+
+    def _normalize_queries(self, rows):
+        normalized_rows = []
+        for row in rows:
+            normalized_row = dict(copy.copy(row))
+            try:
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            except Exception as e:
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                continue
+
+            normalized_row['query'] = obfuscated_statement
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            normalized_rows.append(normalized_row)
+
+        return normalized_rows
