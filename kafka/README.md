@@ -25,7 +25,7 @@ The Agent's Kafka check is included in the [Datadog Agent][4] package, so you do
 
 The check collects metrics via JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][5]. You can use the same JVM that Kafka uses.
 
-**Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Please use our [Amazon MSK integration][6] instead.
+**Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Please use the [Amazon MSK integration][6] instead.
 
 ### Configuration
 
