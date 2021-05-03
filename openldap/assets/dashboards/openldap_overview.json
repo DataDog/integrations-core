@@ -26,7 +26,7 @@
     {
       "id": 5418366396402,
       "definition": {
-        "title": "Threads Metrics",
+        "title": "Remaining Threads and Incomplete Operations",
         "type": "group",
         "show_title": true,
         "layout_type": "ordered",
