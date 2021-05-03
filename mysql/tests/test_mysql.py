@@ -123,7 +123,7 @@ def _assert_complex_config(aggregator):
 
     # Test metrics
     for mname in testable_metrics:
-        # These two are currently not guaranteed outside of a Linux
+        # These three are currently not guaranteed outside of a Linux
         # environment.
         if mname == 'mysql.performance.user_time' and not Platform.is_linux():
             continue
