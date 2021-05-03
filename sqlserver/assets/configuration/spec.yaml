@@ -47,7 +47,7 @@ files:
         example: master
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Auto-discover and monitor databases. This param is supported for the metrics check. If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
         type: boolean
