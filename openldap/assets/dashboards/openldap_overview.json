@@ -1,5 +1,5 @@
 {
-  "title": "OpenLDAP - Overview (WIP)",
+  "title": "OpenLDAP - Overview",
   "description": "This dashboard provides an overview of OpenLDAP metrics from the `cn=Monitor` backend of your OpenLDAP servers. \n\nFor more information, see:\n\n- Our [official OpenLDAP documentation](https://docs.datadoghq.com/integrations/openldap/)",
   "widgets": [
     {
