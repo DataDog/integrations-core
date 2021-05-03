@@ -51,9 +51,9 @@ validate-log-integrations:
 trigger-agent-build:
   stage: trigger
   image: $VALIDATE_AGENT_BUILD
-  #only:
-    #changes:
-  #  - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  only:
+    changes:
+    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
   script:
     - python -u /trigger_agent_build.py --output-file pipeline_id.txt
   artifacts:
@@ -67,9 +67,9 @@ trigger-agent-build:
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
-  #only:
-    #changes:
-  #  - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  only:
+    changes:
+    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
   script:
     - GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text) python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt)
   tags: [ "runner:main", "size:large" ]
@@ -92,15 +92,15 @@ notify-slack:
   tags: [ "runner:main", "size:large" ]
 
 
-#notify-failed-pipeline:
-#  stage: notify
-#  image: $NOTIFIER_IMAGE
-#  when: on_failure
-#  script:
-#    - |
-#      MESSAGE="The pipeline uncountered an unexpected error."
-#      postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-#  tags: [ "runner:main", "size:large" ]
+notify-failed-pipeline:
+ stage: notify
+ image: $NOTIFIER_IMAGE
+ when: on_failure
+ script:
+   - |
+     MESSAGE="The pipeline uncountered an unexpected error."
+     postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+ tags: [ "runner:main", "size:large" ]
 
 
 release-auto:
@@ -191,8 +191,8 @@ validate-agent-build-builder:
   only:
     changes:
       - .gitlab/validate-agent-build/**
-#    refs:
-#      - master
+    refs:
+      - master
   script:
     - cd .gitlab/validate-agent-build/
     - docker build --tag $VALIDATE_AGENT_BUILD .
