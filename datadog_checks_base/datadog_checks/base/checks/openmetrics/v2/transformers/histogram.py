@@ -31,7 +31,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                         continue
 
                     submit_histogram_bucket_method(
-                        metric_name, sample.value, lower_bound, upper_bound, True, hostname, tags
+                        metric_name, sample.value, lower_bound, upper_bound, True, hostname, tags, flush_first_value=runtime_data['has_successfully_executed']
                     )
 
         else:

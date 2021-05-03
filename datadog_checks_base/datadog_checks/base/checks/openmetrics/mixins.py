@@ -1076,6 +1076,7 @@ class OpenMetricsScraperMixin(object):
             True,
             hostname,
             tags,
+            flush_first_value=scraper_config['_successfully_executed'],
         )
 
     def _submit_distribution_count(
