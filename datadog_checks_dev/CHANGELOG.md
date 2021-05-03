@@ -2,12 +2,11 @@
 
 ## 11.1.0 / 2021-05-03
 
-* [Added] [snmp] add interactive option to generate profile tool. See [#9259](https://github.com/DataDog/integrations-core/pull/9259).
+* [Added] [snmp] Add interactive option to generate profile tool. See [#9259](https://github.com/DataDog/integrations-core/pull/9259).
 * [Added] [SNMP] Invert interactive logic in validate mib files. See [#9258](https://github.com/DataDog/integrations-core/pull/9258).
 * [Added] Add `ddev env edit` command. See [#9196](https://github.com/DataDog/integrations-core/pull/9196).
 * [Added] [SNMP] Validate mib filenames in snmp tooling. See [#9228](https://github.com/DataDog/integrations-core/pull/9228).
 * [Fixed] Refactor manifest validation into a class system. See [#9111](https://github.com/DataDog/integrations-core/pull/9111).
-* [Fixed] Add amazon eks exception. See [#9195](https://github.com/DataDog/integrations-core/pull/9195).
 
 ## 11.0.1 / 2021-04-21
 
