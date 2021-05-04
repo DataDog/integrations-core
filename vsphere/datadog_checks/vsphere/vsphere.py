@@ -297,6 +297,15 @@ class VSphereCheck(AgentCheck):
         now = time.time()
         return now - self.cache_times[i_key][entity][LAST] > self.cache_times[i_key][entity][INTERVAL]
 
+    def _remove_server_instance(self,instance):
+        i_key = self._instance_key(instance)
+        if i_key in self.server_instances:
+            si = self.server_instances.pop(i_key,None)
+            connect.Disconnect(si)
+            self.log.info(u"Connection terminated for vcenter instance %s" % i_key)
+        else:
+            self.log.warning(u"Unable to terminate connection for vcenter instance %s" % i_key)
+
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
         error_config = self.error_configs.get(i_key)
@@ -740,7 +749,8 @@ class VSphereCheck(AgentCheck):
 
             return mor_properties
 
-        def _collect_metric_mors_and_attributes(server_instance,error_config,clusters):
+        def _collect_metric_mors_and_attributes(instance,error_config,clusters):
+            server_instance = self._get_server_instance(instance)
             obj_specs = createObjectSpecs(clusters)
             property_specs = createPropertySpecs(ALL_RESOURCES_WITH_METRICS)
             #Add the list of object and property specifications to the property filter specification
@@ -753,8 +763,9 @@ class VSphereCheck(AgentCheck):
             mor_attrs = collectProperties(server_instance,error_config,filter_spec,retr_opts)
             return mor_attrs
 
-        def _collect_non_metric_mors_and_attributes(server_instance,error_config):
+        def _collect_non_metric_mors_and_attributes(instance,error_config):
             mor_attrs = {}
+            server_instance = self._get_server_instance(instance)
             #collect the non metric types for parents info
             content = server_instance.content
             try:
@@ -765,6 +776,7 @@ class VSphereCheck(AgentCheck):
                 error_config.update({ERR_CODE : 'CollectionError'})
                 error_config.update({ERR_MSG : err_msg})
                 self.log.warning(err_msg)
+                self._remove_server_instance(instance)
 
             else:
                 # Specify the root object from where we collect the rest of the objects
@@ -846,7 +858,7 @@ class VSphereCheck(AgentCheck):
             all_mors = {}
             # Collect metric mors and their required attributes
             self.log.debug(u"No. of clusters %d",len(clusters))
-            metric_mors = _collect_metric_mors_and_attributes(server_instance,error_config,clusters)
+            metric_mors = _collect_metric_mors_and_attributes(instance,error_config,clusters)
             self.log.debug(u"count of metric mors %d",len(metric_mors))
 
             #extract the error config to check why collection failed
@@ -861,7 +873,7 @@ class VSphereCheck(AgentCheck):
             else:
                 all_mors.update(metric_mors)
                 # Collect non metric mors and their required attributes
-                non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance,error_config)
+                non_metric_mors = _collect_non_metric_mors_and_attributes(instance,error_config)
                 self.log.debug(u"count of non metric mors %d",len(non_metric_mors))
 
                 #extract the error config to check why collection failed
@@ -1110,6 +1122,7 @@ class VSphereCheck(AgentCheck):
             error_code = 'CollectionError'
             error_config.update({ERR_CODE : error_code,ERR_MSG : error_msg})
             self.log.warning(error_msg)
+            self._remove_server_instance(instance)
 
         else:
             if counters:
