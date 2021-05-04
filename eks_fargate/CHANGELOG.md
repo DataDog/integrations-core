@@ -1,6 +1,10 @@
 # CHANGELOG - eks_fargate
 
-## 1.4.0 / 2021-03-07
+## 2.0.0 / 2021-04-19
+
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
+## 1.4.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add pod capacity metrics. See [#8754](https://github.com/DataDog/integrations-core/pull/8754).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

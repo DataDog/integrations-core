@@ -1,5 +1,34 @@
 # CHANGELOG - datadog_checks_base
 
+## 18.3.0 / 2021-04-27
+
+* [Added] Add merging of duplicate rows in statement_metrics. See [#9227](https://github.com/DataDog/integrations-core/pull/9227).
+* [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).
+
+## 18.2.0 / 2021-04-19
+
+* [Added] Allow the loading of arbitrary configuration models. See [#9180](https://github.com/DataDog/integrations-core/pull/9180).
+
+## 18.1.0 / 2021-04-16
+
+* [Added] Add unix_time format to QueryManager time_elapsed transformer. See [#9174](https://github.com/DataDog/integrations-core/pull/9174).
+* [Added] Support new aggregator APIs for the event platform. See [#9165](https://github.com/DataDog/integrations-core/pull/9165).
+* [Fixed] Upgrade ddtrace. See [#9127](https://github.com/DataDog/integrations-core/pull/9127).
+* [Security] Upgrade lxml python package. See [#9173](https://github.com/DataDog/integrations-core/pull/9173).
+
+## 18.0.0 / 2021-04-07
+
+* [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
+* [Added] Add `native_dynamic` OpenMetrics transformer. See [#9077](https://github.com/DataDog/integrations-core/pull/9077).
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
+## 17.0.0 / 2021-03-30
+
+* [Added] Add `KubeletBase` base class. See [#9051](https://github.com/DataDog/integrations-core/pull/9051).
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Make counter refresh-related code more reusable. See [#8822](https://github.com/DataDog/integrations-core/pull/8822).
+* [Changed] Add a timeout for Kubernetes API calls. See [#9035](https://github.com/DataDog/integrations-core/pull/9035).
+
 ## 16.9.0 / 2021-03-22
 
 * [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
@@ -13,7 +42,7 @@
 
 * [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
 
-## 16.6.1 / 2021-03-12
+## 16.6.1 / 2021-03-12 / Agent 7.27.0
 
 * [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
 

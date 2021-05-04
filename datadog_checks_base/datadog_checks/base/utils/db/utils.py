@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
+import decimal
 import logging
 import socket
 import time
@@ -115,3 +117,11 @@ def resolve_db_host(db_host):
         )
 
     return db_host
+
+
+def default_json_event_encoding(o):
+    if isinstance(o, decimal.Decimal):
+        return float(o)
+    if isinstance(o, (datetime.date, datetime.datetime)):
+        return o.isoformat()
+    raise TypeError

@@ -103,7 +103,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self.log.debug(
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
-                str(self._kafka_client.config.get('api_version') >= (0, 8, 2)),
+                str(self._kafka_client.config.get('api_version')),
                 str(instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
@@ -289,7 +289,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             if 'source' in kwargs:
                 consumer_group_tags.append('source:%s' % kwargs['source'])
             consumer_group_tags.extend(self._custom_tags)
-            if partition in self._kafka_client.cluster.partitions_for_topic(topic):
+
+            partitions = self._kafka_client.cluster.partitions_for_topic(topic)
+            if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
@@ -319,13 +321,17 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     self.log.debug(message)
 
             else:
-                self.log.warning(
-                    "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
-                    "appear to exist in the cluster so skipping reporting these offsets.",
-                    consumer_group,
-                    topic,
-                    partition,
-                )
+                if partitions is None:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
+                        "in the cluster, so skipping reporting these offsets."
+                    )
+                else:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
+                        "included in the cluster partitions, so skipping reporting these offsets."
+                    )
+                self.log.warning(msg, consumer_group, topic, partition)
                 self._kafka_client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_zk_path_children(self, zk_path, name_for_error):

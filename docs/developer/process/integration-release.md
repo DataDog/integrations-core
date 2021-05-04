@@ -201,9 +201,17 @@ who, at the time of writing (28-02-2020), can trigger a build by signing [in-tot
     - `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
     - `36C0 82E7 38C7 B4A1 E169  11C0 D633 59C4 875A 1A9A`
 
+??? info "[Paul Coignet](https://api.github.com/users/coignetp/gpg_keys)"
+    - `024E 42FE 76AD F19F 5D57  7503 07E5 2EA3 88E4 08FD`
+    - `1286 0553 D1DC 93A7 2CD1  6956 2D98 DCE7 FBFF C9C2`
+
 ??? info "[Dave Coleman](https://api.github.com/users/dcoleman17/gpg_keys)"
     - `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
     - `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
+
+??? info "[Paola Ducolin](https://api.github.com/users/pducolin/gpg_keys)"
+    - `EAC5 F27E C6B1 A814 1222  1942 C4E1 549E 937E F5A2`
+    - `A40A DD71 41EB C767 BBFB  E0B8 9128 2E2F E536 C858`
 
 ??? info "[Mike Garabedian](https://api.github.com/users/mgarabed/gpg_keys)"
     - `F90C 0097 67F2 4B27 9DC2  C83D A227 6601 6CB4 CF1D`
@@ -220,6 +228,10 @@ who, at the time of writing (28-02-2020), can trigger a build by signing [in-tot
 ??? info "[Florimond Manca](https://api.github.com/users/florimondmanca/gpg_keys)"
     - `B023 B02A 0331 9CD8 D19A  4328 83ED 89A4 5548 48FC`
     - `0992 11D9 AA67 D21E 7098  7B59 7C7D CB06 C9F2 0C13`
+
+??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
+    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
+    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
 
 ??? info "[Julia Simon](https://api.github.com/users/hithwen/gpg_keys)"
     - `4A54 09A2 3361 109C 047C  C76A DC8A 42C2 8B95 0123`

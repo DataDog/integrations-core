@@ -1,6 +1,10 @@
 # CHANGELOG - powerdns_recursor
 
-## 1.8.1 / 2021-03-07
+## 1.9.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8972](https://github.com/DataDog/integrations-core/pull/8972).
+
+## 1.8.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

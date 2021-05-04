@@ -5,6 +5,13 @@ files:
   - template: init_config
     options:
     - template: init_config/default
+    - name: rest_api_options
+      description: |
+        REST API options
+        Those options are used when making vSphere REST API calls to retrieve vSphere tags
+        when `collect_tags` instance config is enabled.
+      options:
+        - template: init_config/http
   - template: instances
     options:
       - name: host
@@ -421,6 +428,13 @@ files:
         value:
           type: boolean
           example: true
+      - name: rest_api_options
+        description: |
+          REST API options
+          The options are used when making vSphere REST API calls to retrieve vSphere tags
+          when `collect_tags` instance config is enabled.
+        options:
+          - template: instances/http
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

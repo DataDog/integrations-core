@@ -71,6 +71,7 @@ setup(
         'cli': [
             'appdirs>=1.4.4',
             'atomicwrites',
+            'beautifulsoup4>=4.9.3',
             'click>7',
             'colorama',
             'datamodel-code-generator~=0.9.2; python_version > "3.0"',
@@ -81,12 +82,14 @@ setup(
             'packaging',
             'pip-tools',
             'pyperclip>=1.7.0',
+            'pysmi>=0.3.4',
             'semver',
             'setuptools>=38.6.0',
+            'tabulate>=0.8.9',
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
-            'virtualenv>=20.0.8',
+            'virtualenv>=20.4.3',
             'wheel>=0.31.0',
         ]
     },

@@ -8,7 +8,7 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don’t need to install anything else on your JBoss/WildFly host.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don't need to install anything else on your JBoss/WildFly host.
 
 ### Configuration
 

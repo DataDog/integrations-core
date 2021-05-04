@@ -8,7 +8,8 @@ import time
 import click
 import pyperclip
 
-from ....utils import dir_exists, file_exists, path_join, running_on_ci
+from ....ci import running_on_ci
+from ....fs import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
@@ -329,6 +330,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         config_message = 'Config file: '
     else:
         config_message = 'Config file (copied to your clipboard): '
+
+    echo_success('To edit config file, do: ', nl=False)
+    echo_info(f'ddev env edit {check} {env}')
 
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)

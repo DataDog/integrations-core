@@ -42,20 +42,6 @@ Due to the nature of this integration, it's possible to submit a high number of 
 
 If `send_monotonic_counter: True`, the Agent sends the deltas of the values in question, and the in-app type is set to count (this is the default behaviour). If `send_monotonic_counter: False`, the Agent sends the raw, monotonically increasing value, and the in-app type is set to gauge.
 
-#### Send Prometheus Alertmanager alerts in the event stream
-1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
-```
-receivers:
-- name: datadog
-  webhook_configs: 
-  - send_resolved: true
-    url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
-```
-2. Restart the Prometheus and Alertmanager services.
-```
-sudo systemctl restart prometheus.service alertmanager.service
-```
-
 ### Validation
 
 [Run the Agent's `status` subcommand][3] and look for `prometheus` under the Checks section.
@@ -75,6 +61,23 @@ Prometheus Alertmanager alerts are automatically sent to your Datadog event stre
 ### Service Checks
 
 The Prometheus check does not include any service checks.
+
+## Prometheus Alertmanager
+Send Prometheus Alertmanager alerts in the event stream.
+
+### Setup
+1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
+```
+receivers:
+- name: datadog
+  webhook_configs: 
+  - send_resolved: true
+    url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
+```
+2. Restart the Prometheus and Alertmanager services.
+```
+sudo systemctl restart prometheus.service alertmanager.service
+```
 
 ## Troubleshooting
 
@@ -96,4 +99,3 @@ Need help? Contact [Datadog support][4].
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
 [10]: https://docs.datadoghq.com/integrations/openmetrics/
-[11]: https://prometheus.io/docs/alerting/latest/alertmanager/

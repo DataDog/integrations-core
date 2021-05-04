@@ -49,7 +49,7 @@ instances:
 
   -
     ## @param path - string - optional
-    ## The check will subscribe to the path for events. It must the name of an Admin or Operational
+    ## The check will subscribe to the path for events. It must be the name of an Admin or Operational
     ## channel (you cannot subscribe to Analytic or Debug channels).
     ##
     ## The path is required if `legacy_mode` is set to `false`.

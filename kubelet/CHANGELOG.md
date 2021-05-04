@@ -1,6 +1,15 @@
 # CHANGELOG - kubelet
 
-## 5.2.0 / 2021-03-07
+## 6.1.0 / 2021-04-19
+
+* [Added] Allow configurability of the ignore_metrics option. See [#9161](https://github.com/DataDog/integrations-core/pull/9161).
+
+## 6.0.0 / 2021-04-14
+
+* [Added] Add logic to enable/disable metrics collected from the summary endpoint. See [#9155](https://github.com/DataDog/integrations-core/pull/9155).
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
+## 5.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add new metrics. See [#8562](https://github.com/DataDog/integrations-core/pull/8562).
 * [Fixed] Fix TypeError when retrieved pod_list is occasionally None. See [#8530](https://github.com/DataDog/integrations-core/pull/8530).

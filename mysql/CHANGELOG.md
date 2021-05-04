@@ -1,6 +1,17 @@
 # CHANGELOG - mysql
 
-## 2.3.0 / 2021-03-07
+## 3.0.1 / 2021-04-27
+
+* [Fixed] Account for name change in replica metrics. See [#9230](https://github.com/DataDog/integrations-core/pull/9230).
+
+## 3.0.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8958](https://github.com/DataDog/integrations-core/pull/8958).
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Add replication_mode tag to replication service check. See [#8753](https://github.com/DataDog/integrations-core/pull/8753).
+* [Changed] Submit DBM query samples via new aggregator API. See [#9045](https://github.com/DataDog/integrations-core/pull/9045).
+
+## 2.3.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Collect mysql statement samples & execution plans . See [#8629](https://github.com/DataDog/integrations-core/pull/8629).
 * [Added] Apply default limits to MySQL statement summaries. See [#8646](https://github.com/DataDog/integrations-core/pull/8646).

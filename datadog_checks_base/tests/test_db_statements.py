@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import copy
 
 import pytest
@@ -75,7 +76,10 @@ class TestStatementMetrics:
                 'user': 'rover',
             },
         ]
-        assert expected == sm.compute_derivative_rows(rows2, metrics, key=key)
+
+        expected_by_query = {v['query']: v for v in expected}
+        derived_rows = {v['query']: v for v in sm.compute_derivative_rows(rows2, metrics, key=key)}
+        assert expected_by_query == derived_rows
         # No changes should produce no rows
         assert [] == sm.compute_derivative_rows(rows2, metrics, key=key)
 
@@ -108,6 +112,75 @@ class TestStatementMetrics:
         assert 2 == len(sm.compute_derivative_rows(rows2, metrics, key=key))  # both rows computed
         assert 1 == len(sm.compute_derivative_rows(rows3, metrics, key=key))  # only 1 row computed
         assert 2 == len(sm.compute_derivative_rows(rows4, metrics, key=key))  # both rows computed
+
+    def test_compute_derivative_rows_with_duplicates(self):
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query_signature'], row['db'], row['user'])
+
+        metrics = ['count', 'time']
+
+        rows1 = [
+            {
+                'count': 13,
+                'time': 2005,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 25,
+                'time': 105,
+                'errors': 0,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        ]
+
+        rows2 = [
+            {
+                'count': 14,
+                'time': 2006,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        ]
+
+        # Run a first check to initialize tracking
+        sm.compute_derivative_rows(rows1, metrics, key=key)
+        # Run the check again to compute the metrics
+        metrics = sm.compute_derivative_rows(rows2, metrics, key=key)
+
+        expected_merged_metrics = [
+            {
+                'count': 2,
+                'time': 21,
+                'errors': 32,
+                'db': 'puppies',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'user': 'dog',
+            }
+        ]
+
+        assert expected_merged_metrics == metrics
 
     def test_apply_row_limits(self):
         def assert_any_order(a, b):

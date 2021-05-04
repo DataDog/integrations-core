@@ -17,7 +17,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Configuration
 
+
 1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
+
+    **Note**: If you reuse the sample file, change the file name from `conf.yaml.example` to `conf.yaml`.
 
 2. [Restart the Agent][9].
 
@@ -38,6 +41,11 @@ Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. 
 
 **aws.msk.prometheus.health**:<br>
 Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`.
+
+When using the Agent 7+ implementation by setting `use_openmetrics` to `true`:
+
+**aws.msk.openmetrics.health**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
 
 ### Events
 

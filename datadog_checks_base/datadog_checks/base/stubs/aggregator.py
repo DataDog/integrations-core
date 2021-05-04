@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import json
 import re
 from collections import OrderedDict, defaultdict
 
@@ -77,6 +78,8 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        # dict[event_type, [events]]
+        self._event_platform_events = {}
         self._histogram_buckets = defaultdict(list)
 
     @classmethod
@@ -103,6 +106,9 @@ class AggregatorStub(object):
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
+
+    def submit_event_platform_event(self, check, check_id, raw_event, event_type):
+        self._event_platform_events[event_type].append(raw_event)
 
     def submit_histogram_bucket(
         self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
@@ -149,6 +155,12 @@ class AggregatorStub(object):
         Return all events
         """
         return self._events
+
+    def get_event_platform_events(self, event_type, parse_json=True):
+        """
+        Return all event platform events for the event_type
+        """
+        return [json.loads(e) if parse_json else e for e in self._event_platform_events[event_type]]
 
     def histogram_bucket(self, name):
         """
@@ -460,6 +472,7 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._event_platform_events = defaultdict(list)
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0

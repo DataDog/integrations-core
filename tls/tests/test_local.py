@@ -120,6 +120,22 @@ def test_cert_expired(aggregator, instance_local_cert_expired):
     aggregator.assert_all_metrics_covered()
 
 
+def test_cert_send_cert_duration(aggregator, instance_local_send_cert_duration):
+    c = TLSCheck('tls', {}, [instance_local_send_cert_duration])
+    c.check(None)
+
+    aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, count=0)
+    aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_metric('tls.issued_days', count=1)
+    aggregator.assert_metric('tls.issued_seconds', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_cert_critical_days(aggregator, instance_local_cert_critical_days):
     c = TLSCheck('tls', {}, [instance_local_cert_critical_days])
     c.check(None)

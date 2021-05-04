@@ -1,6 +1,6 @@
 # CHANGELOG - haproxy
 
-## 2.17.0 / 2021-03-07
+## 2.17.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add listener stats. See [#8723](https://github.com/DataDog/integrations-core/pull/8723). Thanks [wdauchy](https://github.com/wdauchy).
 * [Added] Add metrics for sticktable. See [#8642](https://github.com/DataDog/integrations-core/pull/8642). Thanks [wdauchy](https://github.com/wdauchy).

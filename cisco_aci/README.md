@@ -29,23 +29,32 @@ To configure this check for an Agent running on a host:
    init_config:
 
    instances:
-     ## @param aci_url - string - required
-     ## Url to query to gather metrics.
-     #
-     - aci_url: localhost
-
-       ## @param username - string - required
-       ## Authentication can use either a user auth or a certificate.
-       ## If using the user auth, enter in this parameter the associated username.
-       #
-       username: datadog
-
-       ## @param pwd - string - required
-       ## Authentication can use either a user auth or a certificate.
-       ## If using the user auth, enter in this parameter the associated password.
-       #
-       pwd: datadog
+        ## @param aci_url - string - required
+        ## URL to query to gather metrics.
+        #
+      - aci_url: http://localhost
+    
+        ## @param username - string - required
+        ## Authentication can use either a user auth or a certificate.
+        ## If using the user auth, enter the `username` and `pwd` configuration.
+        #
+        username: datadog
+    
+        ## @param pwd - string - required
+        ## Authentication can use either a user auth or a certificate.
+        ## If using the user auth, enter the `username` and `pwd` configuration.
+        #
+        pwd: <PWD>
+    
+        ## @param tenant - list of strings - optional
+        ## List of tenants to collect metrics data from.
+        #
+        # tenant:
+        #   - <TENANT_1>
+        #   - <TENANT_2>
    ```
+   
+   *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
 2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
 
@@ -58,7 +67,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 | Parameter            | Value                                                                  |
 | -------------------- | ---------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `teamcity`                                                             |
+| `<INTEGRATION_NAME>` | `cisco_aci`                                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"aci_url":"%%host%%", "username":"<USERNAME>", "pwd": "<PASSWORD>"}` |
 

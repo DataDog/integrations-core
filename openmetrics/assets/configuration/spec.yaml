@@ -9,5 +9,7 @@ files:
       options:
         - template: instances/openmetrics_legacy
           overrides:
+            namespace.required: true
             namespace.hidden: false
+            metrics.required: true
             metrics.hidden: false

@@ -10,15 +10,17 @@ from tempfile import gettempdir
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS
+from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
 @click.argument('mib_files', nargs=-1)
 @click.option('-f', '--filters', help='Path to OIDs filter', default=None)
 @click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
+@click.option('--debug', '-d', help='Include debug output', is_flag=True)
+@click.option('--interactive', '-i', help='Prompt to confirm before saving to a file', is_flag=True)
 @click.pass_context
-def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
+def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive):
     """
     Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
     to be used as source to generate the profile, along with a filter if a device or
@@ -98,9 +100,12 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
     Return a list of SNMP metrics and copy its yaml dump to the clipboard
     Metric tags need to be added manually
     """
+    if debug:
+        set_debug()
+
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
-        print('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
+        echo_warning('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
         return
 
     # create a list of all mib files directories and mib names
@@ -133,7 +138,15 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases):
         elif oid_node.node_type == 'scalar':
             _add_profile_scalar_node(profile_oid_collection, oid_node)
 
-    print(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
+    echo_info('{} metrics found'.format(len(profile_oid_collection.values())))
+    yaml_data = yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False)
+    if not interactive or click.confirm('Save to file?'):
+        output_filename = 'metrics.yaml'
+        with open(output_filename, 'w') as f:
+            f.write(yaml_data)
+            echo_info('Metrics saved to {}'.format(output_filename))
+
+    echo_debug(yaml.dump({'metrics': list(profile_oid_collection.values())}, sort_keys=False))
 
 
 class OidNodeInvalid(Exception):
@@ -290,12 +303,16 @@ def _load_json_module(source_directory, mib):
 
 def _load_module_or_compile(mib, source_directories, json_mib_directory):
     # try loading the json mib, if already compiled
+    echo_debug('⏳ Loading mib {}'.format(mib))
     mib_json = _load_json_module(json_mib_directory, mib)
     if mib_json is not None:
+        echo_debug('✅ Mib {} loaded'.format(mib))
         return mib_json
 
     # compile and reload
+    echo_debug('⏳ Compile mib {}'.format(mib))
     processed = _compile_mib_to_json(mib, source_directories, json_mib_directory)
+    echo_debug('✅ Mib {} compiled: {}'.format(mib, processed[mib]))
     if processed[mib] != 'missing':
         mib_json = _load_json_module(json_mib_directory, mib)
         return mib_json

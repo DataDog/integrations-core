@@ -345,6 +345,8 @@ class SQLServer(AgentCheck):
                 self.instance_per_type_metrics[cls].append(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None):
+        if db is not None:
+            tags = tags + ['database:{}'.format(db)]
         for name, counter_name, instance_name in metrics:
             try:
                 sql_type, base_name = self.get_sql_type(counter_name)

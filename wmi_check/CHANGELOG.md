@@ -1,6 +1,11 @@
 # CHANGELOG - wmi_check
 
-## 1.9.3 / 2021-03-07
+## 1.10.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#9008](https://github.com/DataDog/integrations-core/pull/9008).
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 1.9.3 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

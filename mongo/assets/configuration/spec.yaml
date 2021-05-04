@@ -59,12 +59,6 @@ files:
       value:
         type: object
         properties: []
-    - name: connection_scheme
-      description: |
-        A prefix indicating the connection string format e.g. mongodb+srv.
-      value:
-        example: mongodb
-        type: string
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -189,7 +183,7 @@ files:
         Release: "8.0.0"
         Migration: |
           Use the following options instead:
-          hosts, username, password, database, options, connection_scheme
+          hosts, username, password, database, options
       description: |
         Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
         E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin

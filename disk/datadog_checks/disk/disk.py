@@ -115,6 +115,7 @@ class Disk(AgentCheck):
         for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
+                self.log.debug('Excluding device %s', part.device)
                 continue
 
             # Get disk metrics here to be able to exclude on total usage

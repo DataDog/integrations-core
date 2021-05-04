@@ -177,10 +177,9 @@ class PostgresStatementMetrics(object):
             return metrics
 
         def row_keyfunc(row):
-            # old versions of pg_stat_statements don't have a query ID so fall back to the query string itself
-            queryid = row['queryid'] if 'queryid' in row else row['query']
-            return (queryid, row['datname'], row['rolname'])
+            return (row['query_signature'], row['datname'], row['rolname'])
 
+        rows = self._normalize_queries(rows)
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metrics.append(('dd.postgres.queries.query_rows_raw', len(rows), []))
 
@@ -195,19 +194,6 @@ class PostgresStatementMetrics(object):
         metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
 
         for row in rows:
-            try:
-                normalized_query = datadog_agent.obfuscate_sql(row['query'])
-                if not normalized_query:
-                    self.log.warning("Obfuscation of query '%s' resulted in empty query", row['query'])
-                    continue
-            except Exception as e:
-                # If query obfuscation fails, it is acceptable to log the raw query here because the
-                # pg_stat_statements table contains no parameters in the raw queries.
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
-                continue
-
-            query_signature = compute_sql_signature(normalized_query)
-
             # All "Deep Database Monitoring" statement-level metrics are tagged with a `query_signature`
             # which uniquely identifies the normalized query family. Where possible, this hash should
             # match the hash of APM "resources" (https://docs.datadoghq.com/tracing/visualization/resource/)
@@ -215,14 +201,14 @@ class PostgresStatementMetrics(object):
             # preserves most of the original query, so we tag the `resource_hash` with the same value as the
             # `query_signature`. The `resource_hash` tag should match the *actual* APM resource hash most of
             # the time, but not always. So this is a best-effort approach to link these metrics to APM metrics.
-            tags = ['query_signature:' + query_signature, 'resource_hash:' + query_signature]
+            tags = ['query_signature:' + row['query_signature'], 'resource_hash:' + row['query_signature']]
 
             for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if column not in row:
                     continue
                 value = row[column]
                 if column == 'query':
-                    value = normalize_query_tag(normalized_query)
+                    value = normalize_query_tag(row['query'])
                 tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
             for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
@@ -236,3 +222,19 @@ class PostgresStatementMetrics(object):
                 metrics.append((metric_name, value, tags))
 
         return metrics
+
+    def _normalize_queries(self, rows):
+        normalized_rows = []
+        for row in rows:
+            normalized_row = dict(copy.copy(row))
+            try:
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            except Exception as e:
+                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                continue
+
+            normalized_row['query'] = obfuscated_statement
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            normalized_rows.append(normalized_row)
+
+        return normalized_rows

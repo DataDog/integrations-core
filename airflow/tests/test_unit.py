@@ -26,9 +26,43 @@ def test_service_checks_cannot_connect(aggregator):
     'json_resp, expected_healthy_status, expected_healthy_value',
     [({'status': 'OK'}, AgentCheck.OK, 1), ({'status': 'KO'}, AgentCheck.CRITICAL, 0), ({}, AgentCheck.CRITICAL, 0)],
 )
-def test_service_checks_healthy(aggregator, json_resp, expected_healthy_status, expected_healthy_value):
+def test_service_checks_healthy_exp(aggregator, json_resp, expected_healthy_status, expected_healthy_value):
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        mock_resp = mock.MagicMock(status_code=200)
+        mock_resp.json.side_effect = [None, json_resp]
+        req.get.return_value = mock_resp
+
+        check.check(None)
+
+    tags = ['key:my-tag', 'url:http://localhost:8080']
+
+    aggregator.assert_service_check('airflow.healthy', expected_healthy_status, tags=tags, count=1)
+    aggregator.assert_metric('airflow.healthy', expected_healthy_value, tags=tags, count=1)
+
+
+@pytest.mark.parametrize(
+    'metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value',
+    [
+        ('healthy', 'healthy', AgentCheck.OK, 1),
+        ('unhealthy', 'healthy', AgentCheck.CRITICAL, 0),
+        ('healthy', 'unhealthy', AgentCheck.CRITICAL, 0),
+    ],
+)
+def test_service_checks_healthy_stable(
+    aggregator, metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value
+):
+    instance = common.FULL_CONFIG['instances'][0]
+    check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
+
+    json_resp = {
+        'metadatabase': {
+            'status': metadb_status,
+        },
+        'scheduler': {'status': scheduler_status},
+    }
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
         mock_resp = mock.MagicMock(status_code=200)

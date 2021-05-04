@@ -6,6 +6,7 @@ import click
 from ..console import CONTEXT_SETTINGS
 from .agent_reqs import agent_reqs
 from .agent_signature import legacy_signature
+from .all_validations import all
 from .ci import ci
 from .codeowners import codeowners
 from .config import config
@@ -26,6 +27,7 @@ from .service_checks import service_checks
 
 ALL_COMMANDS = (
     agent_reqs,
+    all,
     ci,
     codeowners,
     config,
