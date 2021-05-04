@@ -76,7 +76,7 @@ class PostgresStatementMetrics(object):
     def __init__(self, check, config):
         self._check = check
         self._config = config
-        self._db_hostname = resolve_db_host(self._config.host)
+        self._db_hostname = None
         self._log = get_check_logger()
         self._state = StatementMetrics()
 
@@ -105,13 +105,19 @@ class PostgresStatementMetrics(object):
         colnames = [desc[0] for desc in cursor.description]
         return colnames
 
+    def _db_hostname_cached(self):
+        if self._db_hostname:
+            return self._db_hostname
+        self._db_hostname = resolve_db_host(self._config.host)
+        return self._db_hostname
+
     def collect_per_statement_metrics(self, db, tags):
         try:
             rows = self._collect_metrics_rows(db)
             if not rows:
                 return
             payload = {
-                'host': self._db_hostname,
+                'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._config.min_collection_interval,
                 'tags': tags,
