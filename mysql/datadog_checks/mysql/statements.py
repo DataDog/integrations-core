@@ -70,9 +70,15 @@ class MySQLStatementMetrics(object):
         # (MySql, MySQLConfig) -> None
         self._check = check
         self._config = config
-        self._db_hostname = resolve_db_host(self._config.host)
+        self._db_hostname = None
         self.log = get_check_logger()
         self._state = StatementMetrics()
+
+    def _db_hostname_cached(self):
+        if self._db_hostname:
+            return self._db_hostname
+        self._db_hostname = resolve_db_host(self._config.host)
+        return self._db_hostname
 
     def collect_per_statement_metrics(self, db, tags):
         # type: (pymysql.connections.Connection, List[str]) -> None
@@ -81,7 +87,7 @@ class MySQLStatementMetrics(object):
             if not rows:
                 return
             payload = {
-                'host': self._db_hostname,
+                'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._config.min_collection_interval,
                 'tags': tags,
