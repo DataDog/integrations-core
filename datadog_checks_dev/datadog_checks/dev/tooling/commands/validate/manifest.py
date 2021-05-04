@@ -61,6 +61,8 @@ def manifest(ctx, check, fix):
                 for msg_type, messages in validator.result.messages.items():
                     for message in messages:
                         display_queue.append((message_methods[msg_type], message))
+                # Reset results after messages are appended to display queue
+                validator.result.reset()
 
             if file_failures > 0:
                 failed_checks += 1

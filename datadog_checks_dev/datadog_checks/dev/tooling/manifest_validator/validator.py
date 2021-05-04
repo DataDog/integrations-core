@@ -38,6 +38,12 @@ class ValidationResult(object):
     def __repr__(self):
         return str(self)
 
+    def reset(self):
+        self.failed = False
+        self.fixed = False
+        self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
+
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
@@ -222,13 +228,14 @@ class MetricToCheckValidator(ManifestValidator):
     def validate(self, check_name, decoded, _):
         if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
             return
-
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
         # metric_to_check
         metric_to_check = decoded.get('metric_to_check')
         pricing = decoded.get('pricing', [])
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
+            if any(p.get('metric') in metrics_to_check for p in pricing):
+                return
             for metric in metrics_to_check:
                 metric_integration_check_name = check_name
                 # snmp vendor specific integrations define metric_to_check
@@ -238,7 +245,6 @@ class MetricToCheckValidator(ManifestValidator):
                 if (
                     not is_metric_in_metadata_file(metric, metric_integration_check_name)
                     and metric not in METRIC_TO_CHECK_EXCLUDE_LIST
-                    and not any(metric_to_check == p.get('metric') for p in pricing)
                 ):
                     self.fail(f'  metric_to_check not in metadata.csv: {metric!r}')
         elif metadata_in_manifest:
