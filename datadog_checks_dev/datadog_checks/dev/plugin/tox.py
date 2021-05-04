@@ -23,7 +23,7 @@ BLACK_DEP = 'black==20.8b1'
 FLAKE8_DEP = 'flake8==3.9.1'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
-MYPY_DEP = 'mypy==0.770'
+MYPY_DEP = 'mypy==0.812'
 PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
