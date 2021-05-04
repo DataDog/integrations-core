@@ -58,17 +58,22 @@ def test_minimal_config(aggregator, instance_basic):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = (
-        variables.STATUS_VARS
-        + variables.VARIABLES_VARS
-        + variables.INNODB_VARS
-        + variables.BINLOG_VARS
+    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+
+    for mname in testable_metrics:
+        aggregator.assert_metric(mname, at_least=1)
+
+    optional_metrics = (
+        variables.COMPLEX_STATUS_VARS
+        + variables.COMPLEX_VARIABLES_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.SYSTEM_METRICS
         + variables.SYNTHETIC_VARS
     )
 
-    for mname in testable_metrics:
-        aggregator.assert_metric(mname, at_least=0)
+    _test_optional_metrics(aggregator, optional_metrics)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
@@ -78,6 +83,9 @@ def test_complex_config(aggregator, instance_complex):
     mysql_check.check(instance_complex)
 
     _assert_complex_config(aggregator)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
 @pytest.mark.e2e
@@ -98,8 +106,11 @@ def _assert_complex_config(aggregator):
     )
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -112,7 +123,7 @@ def _assert_complex_config(aggregator):
 
     # Test metrics
     for mname in testable_metrics:
-        # These two are currently not guaranteed outside of a Linux
+        # These three are currently not guaranteed outside of a Linux
         # environment.
         if mname == 'mysql.performance.user_time' and not Platform.is_linux():
             continue
@@ -147,7 +158,9 @@ def _assert_complex_config(aggregator):
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
-    _test_optional_metrics(aggregator, optional_metrics, 1)
+    # Note, this assertion will pass even if some metrics are not present.
+    # Manual testing is required for optional metrics
+    _test_optional_metrics(aggregator, optional_metrics)
 
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
@@ -167,6 +180,7 @@ def test_connection_failure(aggregator, instance_error):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
@@ -177,8 +191,6 @@ def test_complex_config_replica(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
 
     mysql_check.check(config)
-
-    # self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
@@ -193,8 +205,11 @@ def test_complex_config_replica(aggregator, instance_complex):
 
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -235,10 +250,15 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
-    _test_optional_metrics(aggregator, optional_metrics, 1)
+    # Note, this assertion will pass even if some metrics are not present.
+    # Manual testing is required for optional metrics
+    _test_optional_metrics(aggregator, optional_metrics)
 
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
 @pytest.mark.integration
@@ -575,9 +595,9 @@ def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_stat
         assert enabled_consumers == original_enabled_consumers
 
 
-def _test_optional_metrics(aggregator, optional_metrics, at_least):
+def _test_optional_metrics(aggregator, optional_metrics):
     """
-    Check optional metrics - there should be at least `at_least` matches
+    Check optional metrics - They can either be present or not
     """
 
     before = len(aggregator.not_asserted())
@@ -588,7 +608,7 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
     # Compute match rate
     after = len(aggregator.not_asserted())
 
-    assert before - after > at_least
+    assert before > after
 
 
 @pytest.mark.unit
