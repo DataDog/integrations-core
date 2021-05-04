@@ -1,6 +1,14 @@
 # CHANGELOG - Vertica
 
-## 2.0.0 / 2021-01-25
+## 2.0.2 / 2021-04-19
+
+* [Fixed] Fix logs section in example config file. See [#8876](https://github.com/DataDog/integrations-core/pull/8876).
+
+## 2.0.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.0.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Update Vertica to use use_tls config. See [#8250](https://github.com/DataDog/integrations-core/pull/8250).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).

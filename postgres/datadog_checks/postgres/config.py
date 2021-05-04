@@ -59,12 +59,16 @@ class PostgresConfig:
         self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
 
         # Deep Database monitoring adds additional telemetry for statement metrics
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
+        # statement samples & execution plans
+        self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
+        self.statement_samples_config = instance.get('statement_samples', {}) or {}
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance

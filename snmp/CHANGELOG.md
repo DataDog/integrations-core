@@ -1,12 +1,33 @@
 # CHANGELOG - snmp
 
+## 5.1.0 / 2021-04-19
+
+* [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
+* [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).
+* [Added] [snmp] add metrics and tags to dell-rac profile. See [#8812](https://github.com/DataDog/integrations-core/pull/8812).
+
+## 5.0.1 / 2021-03-10 / Agent 7.27.0
+
+* [Fixed] Fix snmp get bulk log. See [#8803](https://github.com/DataDog/integrations-core/pull/8803).
+
+## 5.0.0 / 2021-03-07
+
+* [Added] Add BGP metrics to Juniper SRX Profile. See [#8771](https://github.com/DataDog/integrations-core/pull/8771).
+* [Added] Support for additional Juniper devices. See [#8749](https://github.com/DataDog/integrations-core/pull/8749).
+* [Fixed] Fix Juniper EX sysObjectIds . See [#8728](https://github.com/DataDog/integrations-core/pull/8728).
+* [Fixed] Better tests for generic_host_resources. See [#8266](https://github.com/DataDog/integrations-core/pull/8266).
+* [Fixed] Add extract_value_pattern  to log on failure to submit metric. See [#8693](https://github.com/DataDog/integrations-core/pull/8693).
+* [Fixed] 🐛  [snmp] use OIDPrinter to debug oids from bulks. See [#8688](https://github.com/DataDog/integrations-core/pull/8688).
+* [Fixed] Fix oids not increasing link. See [#8655](https://github.com/DataDog/integrations-core/pull/8655).
+* [Changed] Move SNMP auto_conf.yaml to agent repo. See [#8709](https://github.com/DataDog/integrations-core/pull/8709).
+
 ## 4.1.0 / 2021-02-16
 
 * [Added] Add extract value feature. See [#8622](https://github.com/DataDog/integrations-core/pull/8622).
 * [Added] Add SNMP check duration, interval, metrics count. See [#8211](https://github.com/DataDog/integrations-core/pull/8211).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-## 4.0.0 / 2021-01-25
+## 4.0.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Snmp Juniper profiles for EX (switches), MX (routers) and SRX (firewalls) series. See [#8206](https://github.com/DataDog/integrations-core/pull/8206).
 * [Fixed] Use mibless syntax for _generic-host-resources.yaml. See [#8305](https://github.com/DataDog/integrations-core/pull/8305).

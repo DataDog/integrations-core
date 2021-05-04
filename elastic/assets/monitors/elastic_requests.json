@@ -1,0 +1,28 @@
+{
+	"name": "[ElasticSearch] Unsuccessful requests rate is high",
+	"type": "query alert",
+	"query": "avg(last_5m):100 * monotonic_diff( sum:elasticsearch.get.missing.total{*} ) / monotonic_diff( sum:elasticsearch.get.total{*} ) > 15",
+	"message": "Unsuccessful requests rate is high: document is missing in {{value}}% of requests.",
+	"tags": [
+		"integration:elastic"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 15,
+			"warning": 10
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when the unsuccessful requests rate is high."
+	}
+}

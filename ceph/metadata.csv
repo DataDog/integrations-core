@@ -21,3 +21,8 @@ ceph.write_op_per_sec,gauge,,operation,second,Per-pool write operations/second,0
 ceph.num_near_full_osds,gauge,,item,,Number of nearly full osds,-1,ceph,near full osds
 ceph.num_full_osds,gauge,,item,,Number of full osds,-1,ceph,full osds
 ceph.osd.pct_used,gauge,,percent,,Percentage used of full/near full osds,-1,ceph,osd pct used
+ceph.misplaced_objects,gauge,,item,,Number of objects misplaced,-1,ceph,misplaced objects
+ceph.misplaced_total,gauge,,item,,Total number of objects if there are misplaced objects,0,ceph,misplaced objects total
+ceph.recovery_objects_per_sec,gauge,,item,second,Rate of recovered objects,0,ceph,recovery objects per sec
+ceph.recovery_bytes_per_sec,gauge,,byte,second,Rate of recovered bytes,0,ceph,recovery bytes per sec
+ceph.recovery_keys_per_sec,gauge,,item,second,Rate of recovered keys,0,ceph,recovery keys per sec

@@ -73,6 +73,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: cat_allocation_stats
+      description: |
+        Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 7.2 or higher.
+        Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+      value:
+        type: boolean
+        example: false
     - name: admin_forwarder
       description: |
         It is used to signify a URL that includes a context root

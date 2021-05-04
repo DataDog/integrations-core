@@ -1,6 +1,16 @@
 # CHANGELOG - elastic
 
-## 1.24.0 / 2021-02-10
+## 2.1.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8911](https://github.com/DataDog/integrations-core/pull/8911).
+* [Fixed] Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).
+
+## 2.0.0 / 2021-04-09
+
+* [Added] Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
+* [Changed] Normalize memory stats to mebibytes. See [#9128](https://github.com/DataDog/integrations-core/pull/9128).
+
+## 1.24.0 / 2021-02-10 / Agent 7.27.0
 
 * [Added] Rename cluster_name tag to elastic_cluster. See [#8526](https://github.com/DataDog/integrations-core/pull/8526).
 * [Fixed] Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).

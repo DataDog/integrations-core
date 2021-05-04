@@ -109,6 +109,11 @@ instances:
     #
     # cache_metrics: true
 
+    ## @param parse_unknown_metrics - boolean - optional - default: false
+    ## Attempt parsing of metrics that are unknown and will otherwise be skipped.
+    #
+    # parse_unknown_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

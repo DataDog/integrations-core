@@ -30,7 +30,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "postfix": "assets/dashboards/postfix_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "postfix"

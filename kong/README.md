@@ -33,6 +33,18 @@ To configure this check for an Agent running on a host:
      - kong_status_url: http://localhost:8001/status/
    ```
 
+   Alternatively, on Agent 7+ a more modern implementation can be used:
+
+   ```yaml
+   init_config:
+
+   instances:
+     ## @param openmetrics_endpoint - string - required
+     ## The URL exposing metrics in the OpenMetrics format.
+     #
+     - openmetrics_endpoint: http://localhost:8001/metrics
+   ```
+
 2. [Restart the Agent][4].
 
 ##### Log collection
@@ -112,6 +124,17 @@ The Kong check does not include any events.
 
 **kong.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to Kong to collect metrics, otherwise returns `OK`.
+
+When using the Agent 7+ implementation by setting `openmetrics_endpoint`:
+
+**kong.openmetrics.health**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
+
+**kong.datastore.reachable**:<br>
+Returns `CRITICAL` if Kong is unable to connect to the datastore, otherwise returns `OK`.
+
+**kong.upstream.target.health**:<br>
+Returns `CRITICAL` if the target is unhealthy, otherwise returns `OK`.
 
 ## Troubleshooting
 

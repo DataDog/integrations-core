@@ -1,0 +1,28 @@
+{
+	"name": "[ElasticSearch] Number of pending tasks is high",
+	"type": "query alert",
+	"query": "avg(last_5m):sum:elasticsearch.pending_tasks_total{*} > 15",
+	"message": "Number of pending tasks (all priority) is high: {{value}} tasks",
+	"tags": [
+		"integration:elastic"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 15,
+			"warning": 10
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when the number of pending tasks is high."
+	}
+}

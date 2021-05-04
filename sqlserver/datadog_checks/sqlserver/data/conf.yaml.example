@@ -136,7 +136,8 @@ instances:
     # include_task_scheduler_metrics: false
 
     ## @param include_db_fragmentation_metrics - boolean - optional - default: false
-    ## Include database fragmentation metrics.
+    ## Include database fragmentation metrics. Note these queries can be resource intensive on large datasets.
+    ## Recommend to limit these via autodiscovery or specific database instances.
     #
     # include_db_fragmentation_metrics: false
 

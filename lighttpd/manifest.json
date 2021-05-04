@@ -31,7 +31,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "lighttpd": "assets/dashboards/lighttpd_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "lighttpd"

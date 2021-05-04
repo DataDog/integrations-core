@@ -109,8 +109,7 @@ Additional parameters can be used to change the endpoint used in order to go thr
 - `use_ssl`: Instructs the Agent to initialize a secure TCP/SSL connection to Datadog (default value: `true`).
 - `no_ssl_validation`: Disables SSL hostname validation (default value: `false`).
 
-
-This also can be used to send logs to **Datadog EU** by setting:
+**Note**: Set `host` and `port` to your region {{< region-param key="http_endpoint" code="true" >}} {{< region-param key="http_port" code="true" >}}.
 
 ```conf
 <match datadog.**>

@@ -256,6 +256,8 @@ istio.pilot.xds.push.time.sum,gauge,,,,Sum of observed values of total time Pilo
 istio.process.virtual_memory_max_bytes,gauge,,byte,,Maximum amount of virtual memory available in bytes,0,istio,
 istio.sidecar_injection.requests_total,count,,request,,Total number of sidecar injection requests,0,istio,
 istio.sidecar_injection.success_total,count,,request,,Total number of successful sidecar injection requests,0,istio,
+istio.sidecar_injection.failure_total,count,,request,,Total number of failed sidecar injection requests,0,istio,
+istio.sidecar_injection.skip_total,count,,request,,Total number of skipped sidecar injection requests,0,istio,
 istio.mesh.request.duration.milliseconds.sum,gauge,,millisecond,,Total sum of observed values for duration of requests in ms,0,istio,
 istio.mesh.request.duration.milliseconds.count,gauge,,,,Total count of observed values for duration of requests,0,istio,
 istio.mesh.tcp.connections_closed.total,gauge,,,,Total closed connections,0,istio,

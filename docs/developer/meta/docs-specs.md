@@ -69,7 +69,7 @@ Every section has these possible attributes:
 - `parameters` - Mapping of extra parameters for string formatting in the `description`.
 - `prepend_text` - Text to insert in front of the description field. Useful for overrides.
 - `append_text` - Text to append after the description field. Useful for overrides.
-- `processor` - Reference to a Python function which should be invoked.  If the function returns `None`, 
+- `processor` - Reference to a Python function which should be invoked.  If the function returns `None`,
   the default description carries forward, otherwise the results of the function will be used for the `description`.
   Used by the `data_collected/service_checks` template, for example.
 - `hidden` - Whether or not the section should be publicly exposed. It defaults to `false`.
@@ -130,14 +130,14 @@ are included with every Integration package.
 
 ### Links
 
-As a custom with our README.md files, we use [reference style links](https://www.markdownguide.org/basic-syntax/#reference-style-links). 
+As a custom with our README.md files, we use [reference style links](https://www.markdownguide.org/basic-syntax/#reference-style-links).
 Each section description may have embedded or reference style links, and as part of the [Producer](#producer) step,
 these will be all normalized to embedded links. This ensures that any consumers can handle them as needed.  For the
 README consumer, it will translate everything to reference style as part of its output stage.
 
 ### Usage
 
-Use the `--sync` flag of the [config validation command](../ddev/cli.md#config_1) to render the README files.
+Use the `--sync` flag of the [config validation command](../ddev/cli.md#ddev-validate-readmes) to render the README files.
 
 ## API
 

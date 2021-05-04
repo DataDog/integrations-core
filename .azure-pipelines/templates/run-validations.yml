@@ -2,6 +2,7 @@ parameters:
   check: null
   repo: 'core'
   ispr: false
+  validate_codeowners: false
 
 steps:
 - ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
@@ -16,7 +17,7 @@ steps:
       ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
 
-- ${{ if eq(parameters.repo, 'extras') }}:
+- ${{ if eq(parameters.validate_codeowners, 'true') }}:
   - script: |
       echo "ddev validate codeowners"
       ddev validate codeowners
@@ -32,6 +33,11 @@ steps:
     echo "ddev validate config"
     ddev validate config
   displayName: 'Validate default configuration files'
+
+- script: |
+    echo "ddev validate models"
+    ddev validate models
+  displayName: 'Validate configuration data models'
 
 - script: |
     echo "ddev validate dashboards"

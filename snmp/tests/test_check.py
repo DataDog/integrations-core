@@ -251,6 +251,8 @@ def test_submitted_metrics_count(aggregator):
     check = common.create_check(instance)
     check.check(instance)
 
+    telemetry_tags = common.CHECK_TAGS + ['loader:python']
+
     for metric in common.SCALAR_OBJECTS:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
@@ -263,13 +265,11 @@ def test_submitted_metrics_count(aggregator):
         value=total_snmp_submitted_metrics,
         metric_type=aggregator.GAUGE,
         count=1,
-        tags=common.CHECK_TAGS,
+        tags=telemetry_tags,
     )
+    aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=telemetry_tags)
     aggregator.assert_metric(
-        'datadog.snmp.check_duration', metric_type=aggregator.GAUGE, count=1, tags=common.CHECK_TAGS
-    )
-    aggregator.assert_metric(
-        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=common.CHECK_TAGS
+        'datadog.snmp.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=telemetry_tags
     )
     common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
@@ -558,7 +558,9 @@ def test_table_v3_SHA_AES(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_bulk_table(aggregator):
+def test_bulk_table(aggregator, caplog):
+    caplog.set_level(logging.DEBUG)  # Needed to test that debug logs won't raise exceptions
+
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 5
     check = common.create_check(instance)
@@ -774,7 +776,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
-        aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
+        common.assert_common_device_metrics(aggregator, tags=tags, count=1, devices_monitored_value=1)
         common.assert_common_metrics(aggregator, tags)
         aggregator.assert_all_metrics_covered()
 
@@ -791,7 +793,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         check.check(instance)
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
-        aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
+        common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS, count=1, devices_monitored_value=1)
         common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
 
@@ -937,7 +939,7 @@ def test_discovery(aggregator):
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_metric('snmp.discovered_devices_count', tags=network_tags)
 
-    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=check_tags)
+    common.assert_common_device_metrics(aggregator, tags=check_tags)
     common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
 
@@ -974,7 +976,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
 
     for device_ip in ['192.168.0.1', '192.168.0.2']:
         tags = check_tags + ['snmp_device:{}'.format(device_ip)]
-        aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, value=1, count=1, tags=tags)
+        common.assert_common_device_metrics(aggregator, devices_monitored_value=1, count=1, tags=tags)
 
     common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()

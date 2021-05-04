@@ -38,7 +38,9 @@
       "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
     },
     "dashboards": {
-      "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
+      "NGINX Plus base overview": "assets/dashboards/plus_overview.json",
+      "NGINX-Metrics": "assets/dashboards/NGINX-Metrics_dashboard.json",
+      "NGINX-Overview": "assets/dashboards/NGINX-Overview_dashboard.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",

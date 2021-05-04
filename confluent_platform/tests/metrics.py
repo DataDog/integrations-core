@@ -71,6 +71,7 @@ BROKER_METRICS = [
     'confluent.kafka.server.replica_manager.under_min_isr_partition_count',
     'confluent.kafka.server.replica_manager.under_replicated_partitions',
     'confluent.kafka.server.request_handler_pool.avg_idle_percent.rate',
+    'confluent.kafka.server.request_handler_pool.avg_idle_percent',
     'confluent.kafka.server.session.zoo_keeper_auth_failures_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_disconnects_per_sec.rate',
     'confluent.kafka.server.session.zoo_keeper_expires_per_sec.rate',

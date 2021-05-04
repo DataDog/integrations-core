@@ -172,6 +172,15 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][15] page. **Note**: Some variables are not be available for Fargate.
 
+
+| Environment Variable               | Description                                    |
+|------------------------------------|------------------------------------------------|
+| `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
+| `DD_DOCKER_ENV_AS_TAGS`            | Extract docker container environment variables |
+| `DD_KUBERNETES_POD_LABELS_AS_TAGS` | Extract pod labels                             |
+| `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
+| `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
+
 For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your Docker container labels. This requires you to add the appropriate labels to your other Docker containers. Labels can be added directly in the [task definition][16].
 
 Format for the Agent container:
@@ -354,6 +363,9 @@ Need help? Contact [Datadog support][19].
 - Blog post: [Monitor AWS Fargate applications with Datadog][34]
 - FAQ: [Integration Setup for ECS Fargate][7]
 - Blog post: [Monitor your Fargate container logs with FireLens and Datadog][24]
+- Blog post: [Key metrics for monitoring AWS Fargate][38]
+- Blog post: [How to collect metrics and logs from AWS Fargate workloads][39]
+- Blog post: [AWS Fargate monitoring with Datadog][40]
 
 [1]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
@@ -391,3 +403,6 @@ Need help? Contact [Datadog support][19].
 [35]: https://aws.amazon.com/cloudformation/
 [36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [37]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
+[38]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/

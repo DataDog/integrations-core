@@ -27,10 +27,6 @@ STATUS_VARS = [
     # Network Metrics
     'mysql.performance.bytes_sent',
     'mysql.performance.bytes_received',
-    # Query Cache Metrics
-    'mysql.performance.qcache_hits',
-    'mysql.performance.qcache_inserts',
-    'mysql.performance.qcache_lowmem_prunes',
     # Table Lock Metrics
     'mysql.performance.table_locks_waited',
     'mysql.performance.table_locks_waited.rate',
@@ -50,14 +46,24 @@ STATUS_VARS = [
     'mysql.myisam.key_writes',
 ]
 
+COMPLEX_STATUS_VARS = [
+    # Query Cache Metrics
+    'mysql.performance.qcache_hits',
+    'mysql.performance.qcache_inserts',
+    'mysql.performance.qcache_lowmem_prunes',
+]
+
 # Possibly from SHOW GLOBAL VARIABLES
 VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',
     'mysql.performance.key_cache_utilization',
     'mysql.net.max_connections_available',
-    'mysql.performance.qcache_size',
     'mysql.performance.table_open_cache',
     'mysql.performance.thread_cache_size',
+]
+
+COMPLEX_VARIABLES_VARS = [
+    'mysql.performance.qcache_size',
 ]
 
 INNODB_VARS = [
@@ -65,13 +71,6 @@ INNODB_VARS = [
     'mysql.innodb.data_reads',
     'mysql.innodb.data_writes',
     'mysql.innodb.os_log_fsyncs',
-    'mysql.innodb.mutex_spin_waits',
-    'mysql.innodb.mutex_spin_rounds',
-    'mysql.innodb.mutex_os_waits',
-    'mysql.innodb.row_lock_waits',
-    'mysql.innodb.row_lock_time',
-    'mysql.innodb.row_lock_current_waits',
-    # 'mysql.innodb.current_row_locks', MariaDB status
     'mysql.innodb.buffer_pool_dirty',
     'mysql.innodb.buffer_pool_free',
     'mysql.innodb.buffer_pool_used',
@@ -81,9 +80,19 @@ INNODB_VARS = [
     'mysql.innodb.buffer_pool_utilization',
 ]
 
+COMPLEX_INNODB_VARS = [
+    'mysql.innodb.mutex_spin_waits',
+    'mysql.innodb.mutex_spin_rounds',
+    'mysql.innodb.mutex_os_waits',
+    'mysql.innodb.row_lock_waits',
+    'mysql.innodb.row_lock_time',
+    'mysql.innodb.row_lock_current_waits',
+    # 'mysql.innodb.current_row_locks', MariaDB status
+]
+
 # Calculated from "SHOW MASTER LOGS;"
 BINLOG_VARS = [
-    # 'mysql.binlog.disk_use', Only collected if log_bin is true
+    'mysql.binlog.disk_use',  # Only collected if log_bin is true
 ]
 
 SYSTEM_METRICS = ['mysql.performance.user_time', 'mysql.performance.kernel_time', 'mysql.performance.cpu_time']
@@ -91,6 +100,7 @@ SYSTEM_METRICS = ['mysql.performance.user_time', 'mysql.performance.kernel_time'
 OPTIONAL_REPLICATION_METRICS = [
     'mysql.replication.slave_running',
     'mysql.replication.seconds_behind_master',
+    'mysql.replication.seconds_behind_source',
     'mysql.replication.slaves_connected',
     'mysql.replication.replicas_connected',
 ]

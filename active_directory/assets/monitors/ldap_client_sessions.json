@@ -1,0 +1,33 @@
+{
+	"name": "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}",
+	"type": "query alert",
+	"query": "avg(last_12h):anomalies(avg:active_directory.ldap.client_sessions{*} by {host}, 'agile', 5, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='daily') >= 1",
+	"message": "There is an anomalous number of sessions for connected LDAP clients for host: {{host.name}} ",
+	"tags": [
+		"integration:active_directory"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"threshold_windows": {
+			"trigger_window": "last_15m",
+			"recovery_window": "last_15m"
+		}
+	},
+	"priority": null,
+    "recommended_monitor_metadata": {
+        "description": "Notifies when Active Directory number of sessions for connected LDAP clients becomes anomalous for a specific host."
+      }
+}

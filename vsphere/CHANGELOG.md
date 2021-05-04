@@ -1,6 +1,11 @@
 # CHANGELOG - vsphere
 
-## 5.8.1 / 2021-02-23
+## 5.9.0 / 2021-04-01
+
+* [Added] Add rest_api_options to expose all RequestsWrapper options. See [#9070](https://github.com/DataDog/integrations-core/pull/9070).
+* [Fixed] Tag collection only available from vSphere 6.5. See [#8864](https://github.com/DataDog/integrations-core/pull/8864).
+
+## 5.8.1 / 2021-02-23 / Agent 7.27.0
 
 * [Fixed] Add `vsphere_cluster` tag from host parent. See [#8674](https://github.com/DataDog/integrations-core/pull/8674).
 

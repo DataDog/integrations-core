@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import pytest
 
-from .utils import requires_windows
+from datadog_checks.dev.testing import requires_windows
 
 try:
     from datadog_test_libs.win.pdh_mocks import (  # noqa: F401

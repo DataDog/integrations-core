@@ -30,14 +30,15 @@ validate-log-integrations:
   only:
   - schedules
   variables:
-    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/integrations/integrations.ts
+    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/shared/integrations/integrations.ts
     LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
     INTEGRATIONS_CORE_ROOT: .
   script:
+    - cd /app
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
-    - ts-node /scripts/parse_ts.ts > logs_integrations.json
+    - ts-node parse_ts.ts > logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 /scripts/validate_log_intgs.py logs_integrations.json 2> errors.txt
+    - python3 validate_log_intgs.py logs_integrations.json 2> errors.txt
   artifacts:
     paths:
     - errors.txt
@@ -61,8 +62,19 @@ notify-slack:
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
-  when: always
   tags: [ "runner:main", "size:large" ]
+
+
+notify-failed-pipeline:
+  stage: notify
+  image: $NOTIFIER_IMAGE
+  when: on_failure
+  script:
+    - |
+      MESSAGE="The pipeline uncountered an unexpected error."
+      postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+  tags: [ "runner:main", "size:large" ]
+
 
 release-auto:
   stage: release
