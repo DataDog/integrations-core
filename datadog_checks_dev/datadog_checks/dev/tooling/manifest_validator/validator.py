@@ -226,6 +226,7 @@ class MetricToCheckValidator(ManifestValidator):
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
         # metric_to_check
         metric_to_check = decoded.get('metric_to_check')
+        pricing = decoded.get('pricing', [])
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
             for metric in metrics_to_check:
@@ -237,6 +238,7 @@ class MetricToCheckValidator(ManifestValidator):
                 if (
                     not is_metric_in_metadata_file(metric, metric_integration_check_name)
                     and metric not in METRIC_TO_CHECK_EXCLUDE_LIST
+                    and not any(metric_to_check == p.get('metric') for p in pricing)
                 ):
                     self.fail(f'  metric_to_check not in metadata.csv: {metric!r}')
         elif metadata_in_manifest:
