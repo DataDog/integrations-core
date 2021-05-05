@@ -83,7 +83,6 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self.check_initializations.append(self.init_with_connection)
         self._statement_metrics = MySQLStatementMetrics(self._config)
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
