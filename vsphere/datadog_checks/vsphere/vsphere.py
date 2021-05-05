@@ -104,7 +104,12 @@ class VSphereCheck(AgentCheck):
 
         if self._config.should_collect_tags:
             try:
-                self.api_rest = VSphereRestAPI(self._config, self.log)
+                try:
+                    # Try to connect to REST API vSphere v7
+                    self.api_rest = VSphereRestAPI(self._config, self.log, False)
+                except Exception:
+                    self.log.debug("REST API of vSphere 7 not detected, falling back to the old API.")
+                    self.api_rest = VSphereRestAPI(self._config, self.log, True)
             except Exception as e:
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 

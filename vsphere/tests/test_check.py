@@ -14,10 +14,9 @@ from tests.legacy.utils import mock_alarm_event
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
-from .common import HERE
+from .common import HERE, build_rest_api_client
 from .mocked_api import MockedAPI
 
 
@@ -100,7 +99,7 @@ def test_external_host_tags(aggregator, realtime_instance):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     config = VSphereConfig(realtime_instance, {}, MagicMock())
     check.api = MockedAPI(config)
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
 
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
@@ -303,7 +302,7 @@ def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_in
     realtime_instance.update({'collect_tags': True})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     config = VSphereConfig(realtime_instance, {}, MagicMock())
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
     check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
     check.api_rest.smart_connect = MagicMock()
 
