@@ -352,6 +352,19 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
     )
     dd_run_check(check)
 
+    aggregator.assert_metric(
+        'test.rest_client_request_latency_seconds.sum',
+        2.185820220000001,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET'],
+    )
+    aggregator.assert_metric(
+        'test.rest_client_request_latency_seconds.count',
+        755,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET'],
+    )
+
     aggregator.assert_histogram_bucket(
         'test.rest_client_request_latency_seconds',
         81,
