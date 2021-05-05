@@ -25,10 +25,10 @@ def manifest(ctx, fix):
     failed_checks = 0
     fixed_checks = 0
     message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
-    all_validators = get_all_validators(is_extras, is_marketplace)
-
     echo_info("Validating all manifest.json files...")
+
     for check_name in sorted(os.listdir(root)):
+        all_validators = get_all_validators(is_extras, is_marketplace)
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):
