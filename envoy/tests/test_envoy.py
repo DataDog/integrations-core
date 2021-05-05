@@ -223,6 +223,18 @@ def test_metadata(datadog_agent):
         check.log.debug.assert_called_with('Version not matched.')
 
 
+@pytest.mark.unit
+def test_metadata_not_collected(datadog_agent):
+    instance = INSTANCES['collect_server_info']
+    check = Envoy(CHECK_NAME, {}, [instance])
+    check.check_id = 'test:123'
+    check.log = mock.MagicMock()
+
+    datadog_agent.assert_metadata('test:123', {})
+    datadog_agent.assert_metadata_count(0)
+    check.log.assert_not_called()
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_integration(aggregator, datadog_agent):
