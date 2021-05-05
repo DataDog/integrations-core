@@ -96,14 +96,14 @@ notify-slack:
 
 
 notify-failed-pipeline:
- stage: notify
- image: $NOTIFIER_IMAGE
- when: on_failure
- script:
-   - |
-     MESSAGE="The pipeline uncountered an unexpected error."
-     postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
- tags: [ "runner:main", "size:large" ]
+  stage: notify
+  image: $NOTIFIER_IMAGE
+  when: on_failure
+  script:
+    - |
+      MESSAGE="The pipeline uncountered an unexpected error."
+      postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+  tags: [ "runner:main", "size:large" ]
 
 
 release-auto:
