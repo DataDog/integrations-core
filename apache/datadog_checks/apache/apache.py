@@ -7,6 +7,9 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 
+if AgentCheck is None:
+    raise Exception('decrease coverage')
+
 
 class Apache(AgentCheck):
     """Tracks basic connection/requests/workers metrics
