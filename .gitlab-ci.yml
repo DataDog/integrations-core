@@ -48,34 +48,34 @@ validate-log-integrations:
     when: always
   tags: [ "runner:main", "size:large" ]
 
-trigger-agent-build:
-  stage: trigger
-  image: $VALIDATE_AGENT_BUILD
-  only:
-    changes:
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
-  script:
-    - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
-    - DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
-  artifacts:
-    paths:
-    - pipeline_id.txt
-    expire_in: 1 day
-    when: always
-  tags: [ "runner:main", "size:large" ]
+# trigger-agent-build:
+#   stage: trigger
+#   image: $VALIDATE_AGENT_BUILD
+#   only:
+#     changes:
+#     - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+#   script:
+#     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+#     - DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+#   artifacts:
+#     paths:
+#     - pipeline_id.txt
+#     expire_in: 1 day
+#     when: always
+#   tags: [ "runner:main", "size:large" ]
 
 
-validate-agent-build:
-  stage: validate
-  image: $VALIDATE_AGENT_BUILD
-  only:
-    changes:
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
-  script:
-    - GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
-    - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
-    - GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt)
-  tags: [ "runner:main", "size:large" ]
+# validate-agent-build:
+#   stage: validate
+#   image: $VALIDATE_AGENT_BUILD
+#   only:
+#     changes:
+#     - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+#   script:
+#     - GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
+#     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+#     - GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt)
+#   tags: [ "runner:main", "size:large" ]
 
 notify-slack:
   stage: notify
