@@ -1,6 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+# Licensed under a 3-clause BSOD style license (see LICENSE)
 
 # workaround for problem of platform.libc_ver() doesn't consider
 # in case of sys.executable returns empty string on Python 3.8 or later
