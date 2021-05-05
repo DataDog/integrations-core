@@ -74,7 +74,7 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.version = None
         self._is_aurora = None
-        self.config = MySQLConfig(self.instance)
+        self._config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
@@ -103,7 +103,7 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
-        tags = list(self.config.tags)
+        tags = list(self._config.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
