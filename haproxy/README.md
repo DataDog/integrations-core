@@ -270,16 +270,19 @@ Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
 Returns `OK` for `maint`, `ok` and any other state.
 
 ## Troubleshooting
+### Port 514 Already in Use Error
+On systems with syslog, if the agent is listening for HAProxy logs on port 514, the following error can appear in the agent logs: 
+`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use `. This is happening becuase by default, syslog is listening on port 514. To resolve this error, syslog can be disabled, or HAProxy can be configured to forward logs to port 514 and another port the agent is listening for logs on. The port the agent listens on can be defined in the haproxy.d/conf.yaml file [here][11]
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
-- [Monitoring HAProxy performance metrics][12]
-- [How to collect HAProxy metrics][13]
-- [Monitor HAProxy with Datadog][14]
-- [HA Proxy Multi Process Configuration][15]
-- [How to collect HAProxy metrics][13]
+- [Monitoring HAProxy performance metrics][13]
+- [How to collect HAProxy metrics][14]
+- [Monitor HAProxy with Datadog][15]
+- [HA Proxy Multi Process Configuration][16]
+- [How to collect HAProxy metrics][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -291,13 +294,14 @@ Need help? Contact [Datadog support][11].
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics
-[13]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
-[14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
-[15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
-[16]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
-[17]: https://github.com/prometheus/haproxy_exporter
+[11]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
+[12] https://docs.datadoghq.com/help/
+[13] https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics
+[14] https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
+[15] https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
+[16]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
+[17]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
+[18]: https://github.com/prometheus/haproxy_exporter
 [19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
 [21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
