@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM registry.ddbuild.io/images/mirror/node:12-alpine
 RUN apk add git python3 --no-cache
 RUN pip3 install pyyaml
 RUN npm install -g ts-node
