@@ -13,7 +13,7 @@ The IBM MQ check is included in the [Datadog Agent][2] package.
 To use the IBM MQ check, you need to:
 
 1. Make sure the [IBM MQ Client][3] 9.1+ is installed (unless the IBM MQ server is already installed).
-2. Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these 2 environment variables if they don’t exist yet.) For example:
+2. Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.) For example:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
