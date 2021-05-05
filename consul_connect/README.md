@@ -2,7 +2,7 @@
 
 ## Overview
 
-Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. Although Consul Connect has support for external proxies, this setup refers to [Consul Connect configured with Envoy][3]. 
+Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. The Consul Connect integration currently only supports [Consul Connect configured with Envoy][3]. 
 
 ## Setup
 
