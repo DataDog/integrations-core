@@ -2,34 +2,59 @@
 
 ## Overview
 
-Monitor your [Consul Connect][1] Envoy sidecar proxies with the Datadog [Envoy Integration][2].
+Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy Integration][2]. Although Consul Connect has support for external proxies, this setup refers to [Consul Connect configured with Envoy][3]. 
 
 ## Setup
 
 ### Installation
 
-Follow the [Envoy Integration installation][3] steps to monitor your Consul Connect sidecar proxies.
+Install the Datadog Agent on your services running Consul Connect and follow the [Configuration](#configuration) instructions for your appropriate environment.
 
 ### Configuration
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-[Configure the Envoy Integration][4] to monitor your Consul Connect Envoy sidecar proxies and collect Envoy metrics.
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-#### Log Collection
-Follow Envoy's [host log collection steps][9] or [container log collection steps][10] in order to collect logs from your Consul Connect Envoy sidecar proxies. 
+#### Host
+
+To configure this check for an Agent running on a host:
+
+##### Metric Collection
+Use config option [`-admin-bind`][4] in Consul Connect to ensure the Envoy Admin API is exposed, then follow the [Envoy host instructions][5] to configure metric collection.
+
+##### Log Collection
+Follow the [Envoy host][6] instructions to configure log collection.  
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+Follow the [Envoy containerized instructions][7] to configure your Datadog Agent for Envoy. 
+
+##### Metric collection
+Use config option [`envoy_stats_bind_addr`][8] in Consul Connect to ensure the `/stats` endpoint is exposed on the public network, then follow the [Envoy containerized instructions][9] to configure metric collection. 
+
+##### Log collection
+Follow the [Envoy containerized instructions][10] to configure log collection.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `envoy` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `envoy` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See the [Envoy Integration documentation][7] for a list of metrics collected. 
+See the [Envoy Integration documentation][12] for a list of metrics collected. 
 
 ### Service Checks
 
-See the [Envoy Integration documentation][8] for the list of service checks collected. 
+See the [Envoy Integration documentation][13] for the list of service checks collected. 
 
 ### Events
 
@@ -37,15 +62,19 @@ Consul Connect does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][14].
 
-[1]: https://docs.datadoghq.com/integrations/consul_connect/
+[1]: https://www.consul.io/docs/connect#connect
 [2]: https://docs.datadoghq.com/integrations/envoy/
-[3]: https://docs.datadoghq.com/integrations/envoy/?tab=host#installation
-[4]: https://docs.datadoghq.com/integrations/envoy/?tab=host#configuration
-[5]: https://docs.datadoghq.com/help/
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
-[7]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metrics
-[8]: https://docs.datadoghq.com/integrations/envoy/?tab=host#service-checks
-[9]: https://docs.datadoghq.com/integrations/envoy/?tab=host#log-collection
+[3]: https://www.consul.io/docs/connect/proxies/envoy#envoy-integration
+[4]: https://www.consul.io/commands/connect/envoy#admin-bind
+[5]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metric-collection
+[6]: https://docs.datadoghq.com/integrations/envoy/?tab=host#log-collection
+[7]: https://docs.datadoghq.com/integrations/envoy/?tab=containerized#containerized
+[8]: https://www.consul.io/docs/connect/proxies/envoy#envoy_stats_bind_addr
+[9]: https://docs.datadoghq.com/integrations/envoy/?tab=containerized#metric-collection
 [10]: https://docs.datadoghq.com/integrations/envoy/?tab=containerized#log-collection
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
+[12]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metrics
+[13]: https://docs.datadoghq.com/integrations/envoy/?tab=host#service-checks
+[14]: https://docs.datadoghq.com/help/
