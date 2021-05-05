@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 11.2.0 / 2021-05-05
+
+* [Added] Avoid double periods at the end of PR titles. See [#8442](https://github.com/DataDog/integrations-core/pull/8442).
+* [Added] Bump mypy. See [#9285](https://github.com/DataDog/integrations-core/pull/9285).
+* [Fixed] Fix validator bugs. See [#9290](https://github.com/DataDog/integrations-core/pull/9290).
+
 ## 11.1.0 / 2021-05-03
 
 * [Added] [snmp] Add interactive option to generate profile tool. See [#9259](https://github.com/DataDog/integrations-core/pull/9259).
