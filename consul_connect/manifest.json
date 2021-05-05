@@ -16,7 +16,9 @@
   ],
   "public_title": "Consul Connect",
   "categories": [
-    ""
+    "network",
+    "log collection",
+    "containers"
   ],
   "type": "check",
   "is_public": true,
