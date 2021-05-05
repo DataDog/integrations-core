@@ -146,9 +146,7 @@ class Envoy(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self):
         if not self.collect_server_info:
-            self.log.debug(
-                "Skipping server info collection because collect_server_info was disabled"
-            )
+            self.log.debug("Skipping server info collection because collect_server_info was disabled")
             return
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(self.stats_url, 'server_info')
