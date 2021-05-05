@@ -79,11 +79,24 @@
               "title": "Threads",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:memcache.threads{*}",
-                  "aggregator": "avg",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:memcache.threads{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -108,11 +121,24 @@
               "title": "Items stored by server",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:memcache.curr_items{*}",
-                  "aggregator": "avg",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:memcache.curr_items{*}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -144,6 +170,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -153,8 +180,6 @@
                       "alias": "Open Connections"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.curr_connections{*}",
@@ -162,6 +187,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "grey",
                     "line_type": "solid",
@@ -176,8 +203,6 @@
                       "alias": "Allocated connection structures"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.connection_structures{*}",
@@ -185,6 +210,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -215,6 +242,7 @@
               "title": "Memcached Uptime",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -223,7 +251,6 @@
                       "formula": "query1"
                     }
                   ],
-                  "response_format": "scalar",
                   "queries": [
                     {
                       "query": "avg:memcache.uptime{*}",
@@ -231,7 +258,8 @@
                       "name": "query1",
                       "aggregator": "avg"
                     }
-                  ]
+                  ],
+                  "response_format": "scalar"
                 }
               ],
               "autoscale": true,
@@ -275,6 +303,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -284,15 +313,15 @@
                       "alias": "Write rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.bytes_written_rate{$scope}",
+                      "query": "avg:memcache.bytes_written_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -307,15 +336,15 @@
                       "alias": "Read rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.bytes_read_rate{$scope}",
+                      "query": "avg:memcache.bytes_read_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -353,6 +382,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -362,15 +392,15 @@
                       "alias": "Get rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.cmd_get_rate{$scope}",
+                      "query": "avg:memcache.cmd_get_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -385,15 +415,15 @@
                       "alias": "Set rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.cmd_set_rate{$scope}",
+                      "query": "avg:memcache.cmd_set_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -431,6 +461,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -440,15 +471,15 @@
                       "alias": "Hit rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.get_hits_rate{$scope}",
+                      "query": "avg:memcache.get_hits_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -463,15 +494,15 @@
                       "alias": "Miss rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.get_misses_rate{$scope}",
+                      "query": "avg:memcache.get_misses_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -509,6 +540,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -518,15 +550,15 @@
                       "alias": "Eviction rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:memcache.evictions_rate{$scope}",
+                      "query": "avg:memcache.evictions_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -698,7 +730,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:memcache.rusage_system_rate{$scope}",
+                      "query": "avg:memcache.rusage_system_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -721,7 +753,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:memcache.rusage_user_rate{$scope}",
+                      "query": "avg:memcache.rusage_user_rate{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -777,7 +809,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:memcache.fill_percent{$scope}",
+                      "query": "avg:memcache.fill_percent{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -890,7 +922,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:system.load.1{$scope}",
+                      "query": "avg:system.load.1{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -913,7 +945,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:system.load.5{$scope}",
+                      "query": "avg:system.load.5{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -936,7 +968,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:system.load.15{$scope}",
+                      "query": "avg:system.load.15{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -992,7 +1024,7 @@
                   ],
                   "queries": [
                     {
-                      "query": "max:system.cpu.iowait{$scope}",
+                      "query": "max:system.cpu.iowait{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1052,12 +1084,12 @@
                   ],
                   "queries": [
                     {
-                      "query": "sum:system.net.bytes_rcvd{$scope}",
+                      "query": "sum:system.net.bytes_rcvd{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:system.net.bytes_sent{$scope}",
+                      "query": "sum:system.net.bytes_sent{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1127,32 +1159,32 @@
                   ],
                   "queries": [
                     {
-                      "query": "avg:system.cpu.idle{$scope}",
+                      "query": "avg:system.cpu.idle{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:system.cpu.system{$scope}",
+                      "query": "avg:system.cpu.system{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:system.cpu.iowait{$scope}",
+                      "query": "avg:system.cpu.iowait{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:system.cpu.user{$scope}",
+                      "query": "avg:system.cpu.user{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query4"
                     },
                     {
-                      "query": "avg:system.cpu.stolen{$scope}",
+                      "query": "avg:system.cpu.stolen{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query5"
                     },
                     {
-                      "query": "avg:system.cpu.guest{$scope}",
+                      "query": "avg:system.cpu.guest{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query6"
                     }
@@ -1212,12 +1244,12 @@
                   ],
                   "queries": [
                     {
-                      "query": "sum:system.mem.usable{$scope}",
+                      "query": "sum:system.mem.usable{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:system.mem.total{$scope}",
+                      "query": "sum:system.mem.total{$scope,$env}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1280,13 +1312,11 @@
     },
     {
       "name": "host",
-      "default": "host",
-      "prefix": ""
+      "default": "*"
     },
     {
       "name": "env",
-      "default": "env",
-      "prefix": ""
+      "default": "*"
     }
   ],
   "layout_type": "ordered",
