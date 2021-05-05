@@ -1,6 +1,6 @@
 {
   "title": "Memcached - Overview",
-  "description": "",
+  "description": "Using this dashboard, you can get a high-level view of your Memcached systems and monitor performance, memory usage, and system information.\n\n**For more information on setup and use-cases, check out the following**\n\n- [Memcached integration docs](https://docs.datadoghq.com/integrations/mcache/?tab=host)\n- [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)\n- [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)",
   "widgets": [
     {
       "id": 2022561600050362,
@@ -686,16 +686,16 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "System rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.rusage_system_rate{$scope}",
@@ -703,6 +703,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -713,11 +715,10 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "User rate"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.rusage_user_rate{$scope}",
@@ -725,6 +726,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -762,16 +765,16 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Fill"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.fill_percent{$scope}",
@@ -779,6 +782,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -873,16 +878,16 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Over 1 minute"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.1{$scope}",
@@ -890,6 +895,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -900,11 +907,10 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Over 5 minutes"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.5{$scope}",
@@ -912,6 +918,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -922,11 +930,10 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Over 15 minutes"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.15{$scope}",
@@ -934,6 +941,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -971,16 +980,16 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "I/O wait"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "max:system.cpu.iowait{$scope}",
@@ -988,6 +997,8 @@
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1025,19 +1036,20 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Received"
                     },
                     {
-                      "formula": "-query2"
+                      "formula": "-query2",
+                      "alias": "Sent"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:system.net.bytes_rcvd{$scope}",
@@ -1050,6 +1062,8 @@
                       "name": "query2"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1087,6 +1101,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1110,8 +1125,6 @@
                       "formula": "query6"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.cpu.idle{$scope}",
@@ -1144,6 +1157,8 @@
                       "name": "query6"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -1181,19 +1196,20 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Allocated"
                     },
                     {
-                      "formula": "query2 - query1"
+                      "formula": "query2 - query1",
+                      "alias": "Used"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:system.mem.usable{$scope}",
@@ -1206,6 +1222,8 @@
                       "name": "query2"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1259,10 +1277,20 @@
     {
       "name": "scope",
       "default": "*"
+    },
+    {
+      "name": "host",
+      "default": "host",
+      "prefix": ""
+    },
+    {
+      "name": "env",
+      "default": "env",
+      "prefix": ""
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": false,
+  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed",
   "id": "2rq-rd7-afk"
