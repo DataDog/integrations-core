@@ -36,7 +36,7 @@ class SnowflakeCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
-        self.config = Config(self.instance)
+        self._config = Config(self.instance)
         self._conn = None
 
         self.proxy_host = self.init_config.get('proxy_host', None)
@@ -45,12 +45,12 @@ class SnowflakeCheck(AgentCheck):
         self.proxy_password = self.init_config.get('proxy_password', None)
 
         # Add default tags like account to all metrics
-        self._tags = self.config.tags + ['account:{}'.format(self.config.account)]
+        self._tags = self._config.tags + ['account:{}'.format(self._config.account)]
 
-        if self.config.password:
-            self.register_secret(self.config.password)
+        if self._config.password:
+            self.register_secret(self._config.password)
 
-        if self.config.role == 'ACCOUNTADMIN':
+        if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
@@ -58,7 +58,7 @@ class SnowflakeCheck(AgentCheck):
 
         self.metric_queries = []
         self.errors = []
-        for mgroup in self.config.metric_groups:
+        for mgroup in self._config.metric_groups:
             try:
                 self.metric_queries.extend(METRIC_GROUPS[mgroup])
             except KeyError:
@@ -100,36 +100,36 @@ class SnowflakeCheck(AgentCheck):
         self.log.debug(
             "Establishing a new connection to Snowflake: account=%s, user=%s, database=%s, schema=%s, warehouse=%s, "
             "role=%s, timeout=%s, authenticator=%s, ocsp_response_cache_filename=%s, proxy_host=%s, proxy_port=%s",
-            self.config.account,
-            self.config.user,
-            self.config.database,
-            self.config.schema,
-            self.config.warehouse,
-            self.config.role,
-            self.config.login_timeout,
-            self.config.authenticator,
-            self.config.ocsp_response_cache_filename,
+            self._config.account,
+            self._config.user,
+            self._config.database,
+            self._config.schema,
+            self._config.warehouse,
+            self._config.role,
+            self._config.login_timeout,
+            self._config.authenticator,
+            self._config.ocsp_response_cache_filename,
             self.proxy_host,
             self.proxy_port,
         )
 
         try:
             conn = sf.connect(
-                user=self.config.user,
-                password=self.config.password,
-                account=self.config.account,
-                database=self.config.database,
-                schema=self.config.schema,
-                warehouse=self.config.warehouse,
-                role=self.config.role,
-                passcode_in_password=self.config.passcode_in_password,
-                passcode=self.config.passcode,
-                client_prefetch_threads=self.config.client_prefetch_threads,
-                login_timeout=self.config.login_timeout,
-                ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
-                authenticator=self.config.authenticator,
-                token=self.config.token,
-                client_session_keep_alive=self.config.client_keep_alive,
+                user=self._config.user,
+                password=self._config.password,
+                account=self._config.account,
+                database=self._config.database,
+                schema=self._config.schema,
+                warehouse=self._config.warehouse,
+                role=self._config.role,
+                passcode_in_password=self._config.passcode_in_password,
+                passcode=self._config.passcode,
+                client_prefetch_threads=self._config.client_prefetch_threads,
+                login_timeout=self._config.login_timeout,
+                ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
+                authenticator=self._config.authenticator,
+                token=self._config.token,
+                client_session_keep_alive=self._config.client_keep_alive,
                 proxy_host=self.proxy_host,
                 proxy_port=self.proxy_port,
                 proxy_user=self.proxy_user,

@@ -8,7 +8,7 @@ from datadog_checks.dev.tooling.specs.configuration.consumers.example import DES
 
 from ..utils import get_example_consumer, normalize_yaml
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer]
+pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
 
 
 def test_option_no_section():
@@ -809,7 +809,7 @@ def test_option_string_type_not_default_example_default_value_none():
             value:
               type: string
               example: something
-              default: None
+              display_default: null
         """
     )
 
@@ -840,7 +840,7 @@ def test_option_string_type_not_default_example_default_value_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -1294,7 +1294,7 @@ def test_option_default_example_override_null():
             value:
               type: string
               example: something
-              default: null
+              display_default: null
         """
     )
 
@@ -1325,7 +1325,7 @@ def test_option_default_example_override_string():
             value:
               type: string
               example: something
-              default: bar
+              display_default: bar
         """
     )
 
@@ -1356,7 +1356,7 @@ def test_option_default_example_override_non_string():
             value:
               type: string
               example: something
-              default:
+              display_default:
                 foo: [bar, baz]
         """
     )
@@ -1443,7 +1443,7 @@ def test_option_multiple_types():
             - name: foo
               description: words
               value:
-                oneOf:
+                anyOf:
                 - type: string
                 - type: array
                   items:
@@ -1462,6 +1462,53 @@ def test_option_multiple_types():
 
           -
             ## @param foo - string or list of strings - optional
+            ## words
+            #
+            # foo: <FOO>
+        """
+    )
+
+
+def test_option_multiple_types_nested():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: foo
+              description: words
+              value:
+                anyOf:
+                - type: string
+                - type: array
+                  items:
+                    anyOf:
+                    - type: string
+                    - type: object
+                      properties:
+                      - name: foo
+                        type: string
+                      required:
+                      - foo
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param foo - string or (list of string or mapping) - optional
             ## words
             #
             # foo: <FOO>

@@ -5,6 +5,13 @@
 
 init_config:
 
+  ## @param loader - string - optional - default: python
+  ## Check loader to use for all instances. Available loaders:
+  ## - core: (recommended) will use new corecheck SNMP integration
+  ## - python: will use legacy python SNMP integration
+  #
+  loader: core
+
   ## @param mibs_folder - string - optional
   ## Specify an additional folder for your custom mib files (python format).
   #
@@ -12,11 +19,11 @@ init_config:
 
   ## @param ignore_nonincreasing_oid - boolean - optional - default: false
   ## Set to true to ignore non increasing oid.
-  ## See http://snmplabs.com/pysnmp/faq/oids-not-increasing.html?highlight=ignorenonincreasingoid
+  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
   #
   # ignore_nonincreasing_oid: false
 
-  ## @param oid_batch_size - integer - optional - default: 10
+  ## @param oid_batch_size - integer - optional - default: 10 (python), 60 (core)
   ## The number of OIDs handled by each batch. Increasing this number improves performance but
   ## uses more resources.
   #
@@ -99,8 +106,8 @@ init_config:
   #     definition_file: checkpoint-firewall.yaml
   #   isilon:
   #     definition_file: isilon.yaml
-  #   apc-ups:
-  #     definition_file: apc-ups.yaml
+  #   apc_ups:
+  #     definition_file: apc_ups.yaml
   #   fortinet-fortigate:
   #     definition_file: fortinet-fortigate.yaml
   #   netapp:
@@ -289,3 +296,17 @@ instances:
     ##         the OIDs will be refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
+
+    ## @param loader - string - optional - default: python
+    ## Check loader to use. Available loaders:
+    ## - core: (recommended) will use new corecheck SNMP integration
+    ## - python: will use legacy python SNMP integration
+    #
+    # loader: core
+
+    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    ## Only available for corecheck implementation (`loader: core`).
+    #
+    # oid_batch_size: 10

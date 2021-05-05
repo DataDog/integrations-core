@@ -28,7 +28,10 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "yarn": "assets/dashboards/yarn_dashboard.json",
+      "hadoop": "assets/dashboards/hadoop_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "yarn"

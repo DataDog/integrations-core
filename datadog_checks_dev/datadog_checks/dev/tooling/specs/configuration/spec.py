@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..utils import default_option_example, normalize_source_name
+from ..utils import normalize_source_name
+from .constants import OPENAPI_DATA_TYPES
+from .utils import default_option_example
 
 
 def spec_validator(spec, loader):
@@ -355,37 +357,27 @@ def options_validator(options, loader, file_name, *sections):
             )
 
 
-VALID_TYPES = {
-    'string',
-    'integer',
-    'number',
-    'boolean',
-    'array',
-    'object',
-}
-
-
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
-    if 'oneOf' in value:
+    if 'anyOf' in value:
         if 'type' in value:
             loader.errors.append(
-                '{}, {}, {}{}: Values must contain either a `type` or `oneOf` attribute, not both'.format(
+                '{}, {}, {}{}: Values must contain either a `type` or `anyOf` attribute, not both'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
             return
 
-        one_of = value['oneOf']
+        one_of = value['anyOf']
         if not isinstance(one_of, list):
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `oneOf` must be an array'.format(
+                '{}, {}, {}{}: Attribute `anyOf` must be an array'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
             return
         elif len(one_of) == 1:
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `oneOf` contains a single type, use the `type` attribute instead'.format(
+                '{}, {}, {}{}: Attribute `anyOf` contains a single type, use the `type` attribute instead'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
@@ -394,13 +386,13 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
         for i, type_data in enumerate(one_of, 1):
             if not isinstance(type_data, dict):
                 loader.errors.append(
-                    '{}, {}, {}{}: Type #{} of attribute `oneOf` must be a mapping'.format(
+                    '{}, {}, {}{}: Type #{} of attribute `anyOf` must be a mapping'.format(
                         loader.source, file_name, sections_display, option_name, i
                     )
                 )
                 return
 
-            value_validator(type_data, loader, file_name, sections_display, option_name)
+            value_validator(type_data, loader, file_name, sections_display, option_name, depth=depth + 1)
 
         if not depth:
             value['example'] = default_option_example(option_name)
@@ -651,9 +643,27 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
                     loader.source, file_name, sections_display, option_name, value_type
                 )
             )
+
+        if 'additionalProperties' in value:
+            additional_properties = value['additionalProperties']
+            if additional_properties is True:
+                return
+            elif not isinstance(additional_properties, dict):
+                loader.errors.append(
+                    '{}, {}, {}{}: Attribute `additionalProperties` for `type` {} must be a mapping or set '
+                    'to `true`'.format(loader.source, file_name, sections_display, option_name, value_type)
+                )
+                return
+
+            value_validator(additional_properties, loader, file_name, sections_display, option_name, depth=new_depth)
     else:
         loader.errors.append(
             '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
-                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
+                loader.source,
+                file_name,
+                sections_display,
+                option_name,
+                value_type,
+                ' | '.join(sorted(OPENAPI_DATA_TYPES)),
             )
         )

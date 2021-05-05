@@ -409,8 +409,9 @@
             "id": 14,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/amazon_msk@2x.png",
-                "sizing": "zoom"
+                "url": "/static/images/logos/amazon-msk_avatar.svg",
+                "sizing": "fit",
+                "margin": "large"
             },
             "layout": {
                 "x": 1,

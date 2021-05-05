@@ -60,6 +60,7 @@ JMX_METRICS_MAP = {
     'jmx_scrape_duration_seconds': 'jmx.scrape.duration.seconds',
     'jmx_scrape_error': 'jmx.scrape.error',
     'kafka_cluster_Partition_Value': 'kafka.cluster.Partition.Value',
+    'kafka_consumer_group_ConsumerLagMetrics_Value': 'kafka.consumer.group.ConsumerLagMetrics.Value',
     'kafka_controller_ControllerChannelManager_50thPercentile': (
         'kafka.controller.ControllerChannelManager.50thPercentile'
     ),
@@ -532,6 +533,7 @@ JMX_METRICS_MAP = {
 }
 JMX_METRICS_OVERRIDES = {
     'kafka_cluster_Partition_Value': 'gauge',
+    'kafka_consumer_group_ConsumerLagMetrics_Value': 'gauge',
     'kafka_controller_ControllerChannelManager_50thPercentile': 'gauge',
     'kafka_controller_ControllerChannelManager_75thPercentile': 'gauge',
     'kafka_controller_ControllerChannelManager_95thPercentile': 'gauge',
@@ -814,3 +816,43 @@ JMX_METRICS_OVERRIDES = {
     'kafka_utils_Throttler_MeanRate': 'gauge',
     'kafka_utils_Throttler_OneMinuteRate': 'gauge',
 }
+
+
+def construct_node_metrics_config():
+    metrics_map = NODE_METRICS_MAP.copy()
+    metrics = []
+
+    dynamic_metrics = ('go_memstats_alloc_bytes',)
+    for metric in dynamic_metrics:
+        metrics.append({metric: {'name': metrics_map[metric], 'type': 'native_dynamic'}})
+        del metrics_map[metric]
+        del metrics_map['{}_total'.format(metric)]
+
+    for raw_metric_name, metric_name in metrics_map.items():
+        if raw_metric_name.endswith('_total') and raw_metric_name not in NODE_METRICS_OVERRIDES:
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in NODE_METRICS_OVERRIDES:
+            config[raw_metric_name]['type'] = NODE_METRICS_OVERRIDES[raw_metric_name]
+
+        metrics.append(config)
+
+    return metrics
+
+
+def construct_jmx_metrics_config():
+    metrics = []
+    for raw_metric_name, metric_name in JMX_METRICS_MAP.items():
+        if raw_metric_name.endswith('_total') and raw_metric_name not in JMX_METRICS_OVERRIDES:
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in JMX_METRICS_OVERRIDES:
+            config[raw_metric_name]['type'] = JMX_METRICS_OVERRIDES[raw_metric_name]
+
+        metrics.append(config)
+
+    return metrics

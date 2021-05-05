@@ -32,5 +32,20 @@
         ],
         "name": "Amazon Kafka prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`."
+    },
+    {
+        "agent_version": "7.29.0",
+        "integration": "Amazon Kafka",
+        "check": "aws.msk.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]

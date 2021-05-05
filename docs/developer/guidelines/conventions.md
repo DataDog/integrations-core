@@ -10,6 +10,12 @@ that will be difficult to diagnose.
 
 **Never name a Python file the same as the integration's name.**
 
+## Attribute naming
+
+The base classes may freely add new attributes for new features. Therefore to avoid collisions
+it is recommended that attribute names be prefixed with underscores, especially for names that
+are generic. For an example, see [below](#stateful-checks).
+
 ## Stateful checks
 
 Since Agent v6, every instance of [AgentCheck](../base/api.md#datadog_checks.base.checks.base.AgentCheck)

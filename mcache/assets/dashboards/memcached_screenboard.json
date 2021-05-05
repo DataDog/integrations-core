@@ -12,7 +12,7 @@
       },
       "definition": {
         "type": "image",
-        "url": "/static/images/saas_logos/bot/memcached.png",
+        "url": "/static/images/logos/memcached_large.svg",
         "sizing": "zoom"
       }
     },

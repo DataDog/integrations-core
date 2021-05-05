@@ -1,5 +1,15 @@
 # CHANGELOG - consul
 
+## 1.19.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8899](https://github.com/DataDog/integrations-core/pull/8899).
+* [Fixed] Rename service_whitelist to services_include. See [#8802](https://github.com/DataDog/integrations-core/pull/8802).
+
+## 1.18.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Adding services_exclude config option. See [#8377](https://github.com/DataDog/integrations-core/pull/8377).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.17.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Add consul 1.9.0 metrics. See [#8095](https://github.com/DataDog/integrations-core/pull/8095).

@@ -26,7 +26,6 @@ files:
       description: Port to use when connecting to `url`.
       value:
         type: integer
-        default: 11211
         example: 11211
     - name: username
       description: Username for the Mcache status endpoint authentication.
@@ -71,5 +70,4 @@ files:
       enabled: true
       value:
         type: integer
-        default: 11211
         example: 11211

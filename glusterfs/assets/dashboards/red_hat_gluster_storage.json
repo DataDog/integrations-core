@@ -20,7 +20,7 @@
             "definition": {
                 "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/red_hat_gluster_storage@2x.png"
+                "url": "/static/images/logos/glusterfs_large.svg"
             },
             "id": 4299518788960180,
             "layout": {

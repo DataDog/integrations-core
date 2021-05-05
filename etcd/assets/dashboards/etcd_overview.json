@@ -6,8 +6,8 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "/static/images/screenboard/integrations/etcd.png",
-                "sizing": "zoom"
+                "url": "/static/images/logos/etcd_large.svg",
+                "sizing": "fit"
             },
             "layout": {
                 "x": 0,

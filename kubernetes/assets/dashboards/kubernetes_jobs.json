@@ -1,0 +1,1466 @@
+{
+    "author_name": "Datadog",
+    "description": "### This dashboard allows you to monitor Kubernetes Jobs and CronJobs.\n",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "kube_cluster_name",
+            "prefix": "kube_cluster_name"
+        },
+        {
+            "default": "*",
+            "name": "kube_namespace",
+            "prefix": "kube_namespace"
+        },
+        {
+            "default": "*",
+            "name": "kube_cronjob",
+            "prefix": "kube_cronjob"
+        },
+        {
+            "default": "*",
+            "name": "kube_job",
+            "prefix": "kube_job"
+        }
+    ],
+    "title": "Kubernetes Jobs and CronJobs Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "blue",
+                "layout_type": "ordered",
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "custom_unit": "jobs",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "sum:kubernetes_state.job.count{$kube_cluster_name}"
+                                }
+                            ],
+                            "title": "Current Jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 495495303234449,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Jobs",
+                                            "formula": "forecast(query1, 'seasonal', 1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Number of distinct Jobs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4633946546415220,
+                        "layout": {
+                            "height": 3,
+                            "width": 10,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "pods",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "sum",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
+                                }
+                            ],
+                            "title": "Successful Job Pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3697942345670966,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Succeeded Pods",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.succeeded{$kube_cluster_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of successful Job Pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6081756008356946,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "pods",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "sum",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()"
+                                }
+                            ],
+                            "title": "Failed Job Pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8095652452993779,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Failed Pods",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.failed{$kube_cluster_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of failed Job Pods",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2489289306317092,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU requests",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "CPU limits",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "CPU usage",
+                                            "formula": "query2 / 1000000000"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.requests{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.cpu.limits{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU requests, limits, and usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5976272967560328,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory requests",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Memory RSS",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Memory limits",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.requests{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.memory.rss{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:kubernetes.memory.limits{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory requests, limits, and usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3689528099455169,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Average number of Jobs",
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}, 25, 'last', 'desc')"
+                                },
+                                {
+                                    "aggregator": "sum",
+                                    "alias": "# of successful Job Pods",
+                                    "q": "top(sum:kubernetes_state.job.succeeded{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                },
+                                {
+                                    "aggregator": "sum",
+                                    "alias": "# of failed job Pods",
+                                    "limit": 10,
+                                    "order": "desc",
+                                    "q": "top(sum:kubernetes_state.job.failed{$kube_cluster_name} by {kube_cluster_name}.as_count(), 25, 'last', 'desc')"
+                                }
+                            ],
+                            "title": "Number of Jobs per cluster",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7493103153404182,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Jobs",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name} by {kube_cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Jobs per cluster",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3115489599066434,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "alias": "Last number of Jobs",
+                                    "limit": 10,
+                                    "order": "desc",
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Average number of Jobs",
+                                    "q": "top(sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}, 50, 'mean', 'desc')"
+                                }
+                            ],
+                            "title": "Top Cronjobs by Job count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1511746031025034,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Jobs",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.job.count{$kube_cluster_name,owner_kind:cronjob} by {owner_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Cronjobs by Job count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7620774346478920,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 11
+                        }
+                    }
+                ]
+            },
+            "id": 1458895847794888
+        },
+        {
+            "definition": {
+                "background_color": "pink",
+                "layout_type": "ordered",
+                "title": "Jobs overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "CPU usage",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "limit": 5,
+                                    "order": "desc",
+                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Memory usage",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Network read bytes",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Network transmitted bytes",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Disk read",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Disk write",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}), 10, 'mean', 'desc')"
+                                }
+                            ],
+                            "title": "Jobs resources consumption",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 5568031515431654,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU usage",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU usage by Job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false
+                            }
+                        },
+                        "id": 513833055520238,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory usage",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory usage by Job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2022201690431970,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Read bytes",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Write bytes",
+                                            "formula": "-exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Disk usage by Job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4502071610879346,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Received bytes",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Transmitted bytes",
+                                            "formula": "-exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network usage (Rx / Tx rate) by Job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6825427277535870,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [
+                                {
+                                    "display_type": "ok dashed",
+                                    "label": "y = 0",
+                                    "value": "y = 0"
+                                }
+                            ],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "RX errors",
+                                            "formula": "exclude_null(query1)"
+                                        },
+                                        {
+                                            "alias": "TX errors",
+                                            "formula": "exclude_null(query2)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_job}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network errors by Job",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7240988677557072,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 9
+                        }
+                    }
+                ]
+            },
+            "id": 5983520079327052
+        },
+        {
+            "definition": {
+                "background_color": "purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "CronJob overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "CPU usage",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "limit": 10,
+                                    "order": "desc",
+                                    "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Memory usage",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Network read bytes",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Network transmitted bytes",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Disk read",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                },
+                                {
+                                    "aggregator": "avg",
+                                    "alias": "Disk write",
+                                    "cell_display_mode": [
+                                        "bar"
+                                    ],
+                                    "q": "top(exclude_null(sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}), 10, 'mean', 'desc')"
+                                }
+                            ],
+                            "title": "CronJobs resources consumption",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4331347145875336,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU usage",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.cpu.usage.total{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU usage by CronJob",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": false
+                            }
+                        },
+                        "id": 6707953278415024,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory usage",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.memory.usage{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory usage by CronJob",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8213158952686726,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Read bytes",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.read_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Write bytes",
+                                            "formula": "-exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.write_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Disk usage by CronJob",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8375686906918214,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Received bytes",
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Transmitted bytes",
+                                            "formula": "-exclude_null(query1)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.tx_bytes{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_namespace,kube_cluster_name,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network usage (Rx / Tx rate) by CronJob",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8486397881003725,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [
+                                {
+                                    "display_type": "ok dashed",
+                                    "label": "y = 0",
+                                    "value": "y = 0"
+                                }
+                            ],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "RX errors",
+                                            "formula": "exclude_null(query1)"
+                                        },
+                                        {
+                                            "alias": "TX errors",
+                                            "formula": "exclude_null(query2)"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.network.rx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.network.tx_errors{$kube_cluster_name,$kube_namespace,$kube_cronjob,$kube_job} by {kube_cluster_name,kube_namespace,kube_cronjob}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Network errors by CronJob",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3942798973980899,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 1991208644233094,
+            "layout": {
+                "is_column_break": true
+            }
+        }
+    ]
+}

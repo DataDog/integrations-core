@@ -10,28 +10,16 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict, deque
+from collections import deque
 from os.path import basename
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    Callable,
-    DefaultDict,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import binary_type, iteritems, text_type
+from six import PY2, binary_type, iteritems, raise_from, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..errors import ConfigurationError
 from ..types import (
     AgentConfigType,
     Event,
@@ -75,6 +63,9 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     from ..ddyaml import monkey_patch_pyyaml
 
     monkey_patch_pyyaml()
+
+if not PY2:
+    from pydantic import ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -197,7 +188,6 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
-        self.metrics = defaultdict(list)  # type: DefaultDict[str, List[str]]
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -255,8 +245,15 @@ class AgentCheck(object):
         # Setup metric limits
         self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
 
+        # Lazily load and validate config
+        self._config_model_instance = None  # type: Any
+        self._config_model_shared = None  # type: Any
+
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+
+        if not PY2:
+            self.check_initializations.append(self.load_configuration_models)
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
@@ -378,6 +375,80 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
+    def load_configuration_models(self, package_path=None):
+        if package_path is None:
+            # 'datadog_checks.<PACKAGE>.<MODULE>...'
+            module_parts = self.__module__.split('.')
+            package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
+
+        if self._config_model_shared is None:
+            raw_shared_config = self._get_config_model_initialization_data()
+            raw_shared_config.update(self._get_shared_config())
+
+            shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
+            if shared_config is not None:
+                self._config_model_shared = shared_config
+
+        if self._config_model_instance is None:
+            raw_instance_config = self._get_config_model_initialization_data()
+            raw_instance_config.update(self._get_instance_config())
+
+            instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
+            if instance_config is not None:
+                self._config_model_instance = instance_config
+
+    @staticmethod
+    def load_configuration_model(import_path, model_name, config):
+        try:
+            package = importlib.import_module(import_path)
+        # TODO: remove the type ignore when we drop Python 2
+        except ModuleNotFoundError as e:  # type: ignore
+            # Don't fail if there are no models
+            if str(e).startswith('No module named '):
+                return
+
+            raise
+
+        model = getattr(package, model_name, None)
+        if model is not None:
+            try:
+                config_model = model(**config)
+            # TODO: remove the type ignore when we drop Python 2
+            except ValidationError as e:  # type: ignore
+                errors = e.errors()
+                num_errors = len(errors)
+                message_lines = [
+                    'Detected {} error{} while loading configuration model `{}`:'.format(
+                        num_errors, 's' if num_errors > 1 else '', model_name
+                    )
+                ]
+
+                for error in errors:
+                    message_lines.append(
+                        ' -> '.join(
+                            # Start array indexes at one for user-friendliness
+                            str(loc + 1) if isinstance(loc, int) else str(loc)
+                            for loc in error['loc']
+                        )
+                    )
+                    message_lines.append('  {}'.format(error['msg']))
+
+                raise_from(ConfigurationError('\n'.join(message_lines)), None)
+            else:
+                return config_model
+
+    def _get_shared_config(self):
+        # Any extra fields will be available during a config model's initial validation stage
+        return copy.deepcopy(self.init_config)
+
+    def _get_instance_config(self):
+        # Any extra fields will be available during a config model's initial validation stage
+        return copy.deepcopy(self.instance)
+
+    def _get_config_model_initialization_data(self):
+        # Allow for advanced functionality during the initial root validation stage
+        return {'__data': {'logger': self.log, 'warning': self.warning}}
+
     def register_secret(self, secret):
         # type: (str) -> None
         """
@@ -439,6 +510,20 @@ class AgentCheck(object):
             hostname,
             tags,
         )
+
+    def database_monitoring_query_sample(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+
+    def database_monitoring_query_metrics(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
@@ -866,6 +951,16 @@ class AgentCheck(object):
     def check(self, instance):
         # type: (InstanceType) -> None
         raise NotImplementedError
+
+    def cancel(self):
+        # type: () -> None
+        """
+        This method is called when the check in unscheduled by the agent. This
+        is SIGNAL that the check is being unscheduled and can be called while
+        the check is running. It's up to the python implementation to make sure
+        cancel is thread safe and won't block.
+        """
+        pass
 
     def run(self):
         # type: () -> str

@@ -194,9 +194,9 @@
         },
         {
             "definition": {
-                "sizing": "center",
+                "sizing": "zoom",
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/marklogic.png"
+                "url": "/static/images/logos/marklogic_large.svg"
             },
             "id": 3965572263080994,
             "layout": {

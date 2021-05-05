@@ -1,5 +1,18 @@
 # CHANGELOG - OpenMetrics
 
+## 1.13.0 / 2021-04-19
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.12.0 / 2021-01-25 / Agent 7.26.0
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#8440](https://github.com/DataDog/integrations-core/pull/8440).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 1.11.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

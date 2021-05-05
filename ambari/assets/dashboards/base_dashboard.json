@@ -185,7 +185,7 @@
             "id": 4,
             "definition": {
                 "type": "image",
-                "url": "https://s3.amazonaws.com/dd-integrations/ambari/configuration/tile/logo.png",
+                "url": "/static/images/logos/ambari_large.svg",
                 "sizing": "zoom"
             },
             "layout": {

@@ -1,5 +1,21 @@
 # CHANGELOG - Amazon MSK
 
+## 1.6.0 / 2021-04-19
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#9082](https://github.com/DataDog/integrations-core/pull/9082).
+* [Added] Add runtime configuration validation. See [#8883](https://github.com/DataDog/integrations-core/pull/8883).
+* [Fixed] Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).
+
+## 1.5.0 / 2021-03-24
+
+* [Added] Add `kafka_consumer_group_ConsumerLagMetrics_Value` metric. See [#9027](https://github.com/DataDog/integrations-core/pull/9027). Thanks [idarlington](https://github.com/idarlington).
+* [Added] Allow prometheus metrics path to be configurable. See [#9028](https://github.com/DataDog/integrations-core/pull/9028).
+
+## 1.4.1 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Hide auto-populated prometheus_url from config spec. See [#8330](https://github.com/DataDog/integrations-core/pull/8330).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 1.4.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add ability to assume a specified role when retrieving MSK metadata. See [#8118](https://github.com/DataDog/integrations-core/pull/8118). Thanks [garrett528](https://github.com/garrett528).

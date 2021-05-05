@@ -35,11 +35,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "zookeeper": "assets/dashboards/zookeeper_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "zookeeper"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "zookeeper_processes": "assets/saved_views/zookeeper_processes.json"
+    }
   }
 }

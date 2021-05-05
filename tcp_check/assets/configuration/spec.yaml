@@ -12,14 +12,12 @@ files:
       required: true
       value:
         type: string
-        default: null
         example: <TCP_CHECK_INSTANCE_NAME>
     - name: host
       description: Host to connect to.
       required: true
       value:
         type: string
-        default: null
         example: <TCP_HOST_TO_CONNECT_TO>
     - name: port
       description: Port of the host to connect to.

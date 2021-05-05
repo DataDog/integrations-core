@@ -21,6 +21,11 @@ elasticsearch.cache.filter.size,gauge,,byte,,The size of the filter cache.,0,ela
 elasticsearch.cluster_status,gauge,,,,"The elasticsearch cluster health as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,cluster status
 elasticsearch.docs.count,gauge,,document,,The total number of documents in the cluster across all shards.,0,elasticsearch,docs count
 elasticsearch.docs.deleted,gauge,,document,,The total number of documents deleted from the cluster across all shards.,0,elasticsearch,docs deleted
+elasticsearch.disk.avail,gauge,,byte,,The free disk space available to Elasticsearch.,0,elasticsearch,disk avail
+elasticsearch.disk.indices,gauge,,byte,,The disk space used by the node's shards.,0,elasticsearch,disk indices
+elasticsearch.disk.percent,gauge,,percent,,The total percentage of disk space in use. Calculated as disk.used / disk.total.,0,elasticsearch,disk percent
+elasticsearch.disk.total,gauge,,byte,,The total disk space for the node including in-use and available space.,0,elasticsearch,disk total
+elasticsearch.disk.used,gauge,,byte,,The total disk space in use.,0,elasticsearch,disk used
 elasticsearch.fielddata.evictions,gauge,,eviction,,The total  number of evictions from the fielddata cache.,0,elasticsearch,fielddata cache evictions
 elasticsearch.fielddata.size,gauge,,byte,,The size of the fielddata cache.,0,elasticsearch,fielddata cache size
 elasticsearch.flush.total,gauge,,flush,,The total number of index flushes to disk since start.,0,elasticsearch,total index flushes
@@ -142,6 +147,7 @@ elasticsearch.search.query.total,gauge,,query,,The total number of queries.,0,el
 elasticsearch.search.scroll.current,gauge,,query,,The number of currently active scroll queries.,0,elasticsearch,current scroll queries
 elasticsearch.search.scroll.time,gauge,,second,,The total time spent on scroll queries.,0,elasticsearch,total scroll query time
 elasticsearch.search.scroll.total,gauge,,query,,The total number of scroll queries.,0,elasticsearch,total scroll queries
+elasticsearch.shards,gauge,,shard,,Number of primary and replica shards assigned to the node.,0,elasticsearch,shards
 elasticsearch.slm.snapshot_deletion_failures,gauge,,error,,The total number of snapshot deletion failures.,0,elasticsearch,slm del fail
 elasticsearch.slm.snapshots_deleted,gauge,,,,The total number of deleted snapshots.,0,elasticsearch,slm del
 elasticsearch.slm.snapshots_failed,gauge,,error,,The total number of failed snapshots.,0,elasticsearch,slm fail

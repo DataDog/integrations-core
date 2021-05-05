@@ -70,6 +70,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.job.end"
            tags:
              job_name: "$1"
+         - match: "airflow.*_heartbeat_failure"
+           name: airflow.job.heartbeat.failure
+           tags:
+             job_name: "$1"
          - match: "airflow.operator_failures_*"
            name: "airflow.operator_failures"
            tags:
@@ -93,6 +97,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dag.loading_duration"
            tags:
              dag_file: "$1"
+         - match: "airflow.dagrun.*.first_task_scheduling_delay"
+           name: "airflow.dagrun.first_task_scheduling_delay"
+           tags:
+             dag_id: "$1"
          - match: "airflow.pool.open_slots.*"
            name: "airflow.pool.open_slots"
            tags:
@@ -337,7 +345,7 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.datadoghq.com/developers/dogstatsd/
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[11]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/_modules/airflow/providers/datadog/hooks/datadog.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration

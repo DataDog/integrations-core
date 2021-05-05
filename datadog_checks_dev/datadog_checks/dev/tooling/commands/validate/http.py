@@ -22,6 +22,8 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.options',
 }
 
+TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
+
 
 def validate_config_http(file, check):
     """Determines if integration with http wrapper class
@@ -39,18 +41,21 @@ def validate_config_http(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
-            if 'instances/http' in line or 'instances/openmetrics' in line:
+            if any('instances/{}'.format(temp) in line for temp in TEMPLATES):
                 has_instance_http = True
-            if 'init_config/http' in line or 'init_config/openmetrics' in line:
+
+            if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
                 has_init_config_http = True
 
     if not has_instance_http:
-        echo_failure(f"Detected {check} is missing `instances/http` or `instances/openmetrics` template in spec.yaml")
+        echo_failure(
+            f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
+        )
         has_failed = True
 
     if not has_init_config_http:
         echo_failure(
-            f"Detected {check} is missing `init_config/http` or `init_config/openmetrics` template in spec.yaml"
+            f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
         )
         has_failed = True
 

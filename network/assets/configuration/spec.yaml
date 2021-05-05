@@ -45,7 +45,7 @@ files:
           - name: excluded_interface_re
             description: Completely ignore any network interface matching the given regex.
             value:
-              default:
+              display_default: null
               example: <NETWORK_INTERFACE_NAME>.*
               type: string
           - name: combine_connection_states
@@ -82,7 +82,7 @@ files:
               It will be run with sudo by default, so an entry needs to be added to the sudoers file.
               By default, these metrics will not be sent.
             value:
-              default:
+              display_default: null
               example: /usr/sbin/conntrack
               type: string
           - name: use_sudo_conntrack
@@ -104,11 +104,11 @@ files:
               example:
                 - <METRIC_NAME>
                 - <METRIC_PREFIX>.*
-              default:
+              display_default:
                 - max
                 - count
               type: array
-              items: 
+              items:
                 type: string
           - name: blacklist_conntrack_metrics
             description: |
@@ -119,12 +119,12 @@ files:
               Regex expressions for the project names are supported.
               Blacklist takes precedence over whitelist in case of overlap.
             value:
-              default: []
+              display_default: []
               example:
                 - <METRIC_NAME>
                 - <METRIC_PREFIX>.*
               type: array
-              items: 
+              items:
                 type: string
           - name: collect_aws_ena_metrics
             description: |
@@ -137,7 +137,7 @@ files:
               network interfaces. To get host-level ENA metrics from a container, it needs to be executed
               with `CAP_NET_ADMIN` capability and use the `host` network mode.
             value:
-              default: false
+              display_default: false
               example: false
               type: boolean
           - template: instances/default

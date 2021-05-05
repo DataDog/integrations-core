@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import time
 from datetime import datetime, timedelta
 
 import pytest
@@ -1229,6 +1230,52 @@ class TestSubmission:
         datadog_agent.assert_metadata_count(len(version_metadata))
         aggregator.assert_all_metrics_covered()
 
+    def test_hostname(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.foo', 'type': 'count'},
+                    {'name': 'tag', 'type': 'tag'},
+                    {"name": "_source", "type": "source"},
+                ],
+                'tags': ['test:bar'],
+                "extras": [{"name": "test.baz", "expression": "_source * 1000", 'submit_type': 'gauge'}],
+            },
+            executor=mock_executor([[3, 'tag1', 2], [7, 'tag2', 5], [5, 'tag1', 6]]),
+            tags=['test:foo'],
+            hostname="test-hostname",
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            8,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag1'],
+            hostname="test-hostname",
+        )
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag2'],
+            hostname="test-hostname",
+        )
+
+        for val, tag in [(2000, 'tag1'), (5000, 'tag2'), (6000, 'tag1')]:
+            aggregator.assert_metric(
+                'test.baz',
+                val,
+                metric_type=aggregator.GAUGE,
+                tags=['test:foo', 'test:bar', 'tag:{}'.format(tag)],
+                hostname="test-hostname",
+            )
+
+        aggregator.assert_all_metrics_covered()
+
 
 class TestColumnTransformers:
     def test_tag_boolean(self, aggregator):
@@ -1549,6 +1596,32 @@ class TestColumnTransformers:
                 'tags': ['test:bar'],
             },
             executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_unix_time(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'unix_time'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', time.time() - 3600]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()

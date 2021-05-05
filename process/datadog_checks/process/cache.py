@@ -42,3 +42,7 @@ class ProcessListCache(object):
                 return True
             else:
                 return False
+
+    def reset(self):
+        """Resets the cache."""
+        self.last_ts = 0

@@ -127,6 +127,7 @@ class Oracle(AgentCheck):
 
             if use_oracle_client:
                 connection = cx_Oracle.connect(connect_string)
+                self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
                 self.log.error(
                     "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
@@ -144,6 +145,7 @@ class Oracle(AgentCheck):
                     connection = jdb.connect(
                         self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
                     )
+                    self.log.debug("Connected to Oracle DB using JDBC connector")
                 except Exception as e:
                     if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
@@ -160,7 +162,6 @@ class Oracle(AgentCheck):
                         self.log.error(msg)
                     raise
 
-            self.log.debug("Connected to Oracle DB")
             self._cached_connection = connection
 
         return self._cached_connection

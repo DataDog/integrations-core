@@ -1,5 +1,41 @@
 # CHANGELOG - postgres
 
+## 6.0.2 / 2021-04-27
+
+* [Fixed] Revert way of checking if it's aurora. See [#9224](https://github.com/DataDog/integrations-core/pull/9224).
+
+## 6.0.1 / 2021-04-26
+
+* [Fixed] Fix config validation for `relations`. See [#9242](https://github.com/DataDog/integrations-core/pull/9242).
+
+## 6.0.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8971](https://github.com/DataDog/integrations-core/pull/8971).
+* [Fixed] Fix wrong timestamp for DBM beta feature. See [#9024](https://github.com/DataDog/integrations-core/pull/9024).
+* [Changed] Submit DBM query samples via new aggregator API. See [#9045](https://github.com/DataDog/integrations-core/pull/9045).
+
+## 5.4.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Collect postgres statement samples & execution plans for deep database monitoring. See [#8627](https://github.com/DataDog/integrations-core/pull/8627).
+* [Added] Apply default limits to Postres statement metrics. See [#8647](https://github.com/DataDog/integrations-core/pull/8647).
+* [Fixed] Shutdown statement sampler thread on cancel. See [#8766](https://github.com/DataDog/integrations-core/pull/8766).
+* [Fixed] Improve orjson compatibility. See [#8767](https://github.com/DataDog/integrations-core/pull/8767).
+
+## 5.3.4 / 2021-02-19
+
+* [Fixed] Fix query syntax. See [#8661](https://github.com/DataDog/integrations-core/pull/8661).
+
+## 5.3.3 / 2021-02-19
+
+* [Fixed] Add dbstrict option to limit queries to specified databases. See [#8643](https://github.com/DataDog/integrations-core/pull/8643).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 5.3.2 / 2021-02-01 / Agent 7.26.0
+
+* [Fixed] Fix Postgres statements to remove information_schema query. See [#8498](https://github.com/DataDog/integrations-core/pull/8498).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+* [Fixed] Do not run replication metrics on newer aurora versions. See [#8492](https://github.com/DataDog/integrations-core/pull/8492).
+
 ## 5.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Removed duplicated metrics. See [#8116](https://github.com/DataDog/integrations-core/pull/8116).

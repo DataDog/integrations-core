@@ -8,7 +8,7 @@ This check monitors [VoltDB][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
-**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host — but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
+**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host - but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
 
 ### Installation
 
@@ -78,6 +78,29 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 3. [Restart the Agent][4].
 
+#### Log Collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `voltdb.d/conf.yaml` file to start collecting your VoltDB logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/voltdb.log
+        source: voltdb
+    ```
+
+  Change the `path` value based on your environment. See the [sample `voltdb.d/conf.yaml` file][3] for all available configuration options.
+
+  3. [Restart the Agent][4].
+
+  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `voltdb` under the Checks section.
@@ -101,6 +124,10 @@ This check does not include any events.
 
 Need help? Contact [Datadog support][8].
 
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://voltdb.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/voltdb/datadog_checks/voltdb/data/conf.yaml.example
@@ -109,3 +136,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/

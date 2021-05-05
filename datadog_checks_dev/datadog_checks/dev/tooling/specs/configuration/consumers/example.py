@@ -37,20 +37,24 @@ def construct_yaml(obj, **kwargs):
 
 
 def value_type_string(value):
-    if 'oneOf' in value:
-        return ' or '.join(value_type_string(type_data) for type_data in value['oneOf'])
+    if 'anyOf' in value:
+        return ' or '.join(value_type_string(type_data) for type_data in value['anyOf'])
     else:
         value_type = value['type']
         if value_type == 'object':
             return 'mapping'
         elif value_type == 'array':
-            item_type = value['items']['type']
-            if item_type == 'object':
-                return 'list of mappings'
-            elif item_type == 'array':
-                return 'list of lists'
+            items = value['items']
+            if 'anyOf' in items:
+                return f'(list of {value_type_string(items)})'
             else:
-                return f'list of {item_type}s'
+                item_type = items['type']
+                if item_type == 'object':
+                    return 'list of mappings'
+                elif item_type == 'array':
+                    return 'list of lists'
+                else:
+                    return f'list of {item_type}s'
         else:
             return value_type
 
@@ -115,8 +119,8 @@ def write_option(option, writer, indent='', start_list=False):
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if 'default' in value:
-                default = value['default']
+            if 'display_default' in value:
+                default = value['display_default']
                 default_type = type(default)
                 if default is not None and str(default).lower() != 'none':
                     if default_type is str:

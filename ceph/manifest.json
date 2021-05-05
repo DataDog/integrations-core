@@ -39,6 +39,9 @@
     "logs": {
       "source": "ceph"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "ceph_processes": "assets/saved_views/ceph_processes.json"
+    }
   }
 }

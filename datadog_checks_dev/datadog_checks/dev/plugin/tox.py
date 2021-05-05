@@ -18,12 +18,13 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort[pyproject]==5.5.1'
+ISORT_DEP = 'isort==5.8.0'
 BLACK_DEP = 'black==20.8b1'
-FLAKE8_DEP = 'flake8==3.8.3'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_DEP = 'flake8==3.9.1'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
-MYPY_DEP = 'mypy==0.770'
+MYPY_DEP = 'mypy==0.812'
+PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
 @tox.hookimpl
@@ -116,6 +117,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         FLAKE8_LOGGING_FORMAT_DEP,
         BLACK_DEP,
         ISORT_DEP,
+        PYDANTIC_DEP,
     ]
 
     commands = [

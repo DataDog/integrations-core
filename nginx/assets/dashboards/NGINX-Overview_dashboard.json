@@ -1,0 +1,321 @@
+{
+    "title": "NGINX - Overview",
+    "description": "This dashboard provides a high-level overview of your NGINX infrastructure, so you can see aggregated throughput and activity metrics from all your servers and spot issues quickly. Further reading on NGINX monitoring:\n\n- [Datadog's guide to key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n\n- [How to collect NGINX metrics using built-in tools](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/nginx_small.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 72,
+                "height": 9
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.conn_dropped_per_s{$scope}"
+                    }
+                ],
+                "custom_links": [],
+                "markers": [
+                    {
+                        "value": "y > 1",
+                        "display_type": "error dashed"
+                    }
+                ],
+                "title": "Dropped connections per second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 74,
+                "y": 17,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.request_per_s{$scope}"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Overall requests per second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 43,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "hostmap",
+                "requests": {
+                    "fill": {
+                        "q": "avg:nginx.net.request_per_s{*} by {host}"
+                    }
+                },
+                "custom_links": [],
+                "title": "Requests per second by host",
+                "title_size": "16",
+                "title_align": "left",
+                "no_metric_hosts": false,
+                "no_group_hosts": true,
+                "style": {
+                    "palette": "green_to_orange",
+                    "palette_flip": false
+                }
+            },
+            "layout": {
+                "x": 44,
+                "y": 17,
+                "width": 28,
+                "height": 24
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.connections{$scope}"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Active connections per second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 74,
+                "y": 33,
+                "width": 43,
+                "height": 16
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.reading{$scope}"
+                    },
+                    {
+                        "q": "sum:nginx.net.writing{$scope}"
+                    },
+                    {
+                        "q": "sum:nginx.net.waiting{$scope}"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Requests: reading, writing, waiting",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 33,
+                "width": 43,
+                "height": 16
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "note",
+                "content": "\n\n\n\n\n\n\nConnections",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 74,
+                "y": 0,
+                "width": 43,
+                "height": 5
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "note",
+                "content": "Requests",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 72,
+                "height": 5
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.conn_dropped_per_s{*}.as_count()",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 1,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dropped connections, last 15m",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "15m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 74,
+                "y": 7,
+                "width": 21,
+                "height": 9
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "note",
+                "content": "**Green** : low number of requests per second\n**Orange**: high number of requests per second",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top"
+            },
+            "layout": {
+                "x": 44,
+                "y": 43,
+                "width": 28,
+                "height": 6
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:nginx.net.conn_dropped_per_s{*}.as_count()",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 1,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dropped connections, last 1d",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1d"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "left"
+            },
+            "layout": {
+                "x": 96,
+                "y": 7,
+                "width": 21,
+                "height": 9
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": "host"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 21
+}

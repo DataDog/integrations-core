@@ -21,7 +21,7 @@ DATABASES = ['reachable']
 
 @pytest.fixture
 def check():
-    return Kong(common.CHECK_NAME, {}, {})
+    return Kong(common.CHECK_NAME, {}, [{}])
 
 
 @pytest.mark.usefixtures('dd_environment')

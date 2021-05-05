@@ -31,11 +31,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "solr": "assets/dashboards/solr_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "solr"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "solr_processes": "assets/saved_views/solr_processes.json"
+    }
   }
 }

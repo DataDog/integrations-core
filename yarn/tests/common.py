@@ -31,7 +31,8 @@ INSTANCE_INTEGRATION = {
     "cluster_name": CLUSTER_NAME,
 }
 
-CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
+LEGACY_CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
+YARN_CLUSTER_TAG = "yarn_cluster:{}".format(CLUSTER_NAME)
 
 EXPECTED_METRICS = [
     "yarn.metrics.apps_submitted",
@@ -90,7 +91,7 @@ EXPECTED_METRICS = [
     "yarn.node.num_containers",
 ]
 
-EXPECTED_TAGS = ['cluster_name:test']
+EXPECTED_TAGS = ['cluster_name:test', 'yarn_cluster:test']
 
 YARN_CONFIG = {
     'instances': [
@@ -225,7 +226,7 @@ YARN_CLUSTER_METRICS_VALUES = {
     'yarn.metrics.rebooted_nodes': 0,
 }
 
-YARN_CLUSTER_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME)]
+YARN_CLUSTER_METRICS_TAGS = [LEGACY_CLUSTER_TAG, YARN_CLUSTER_TAG]
 
 DEPRECATED_YARN_APP_METRICS_VALUES = {
     'yarn.apps.progress': 100,
@@ -251,7 +252,7 @@ YARN_APP_METRICS_VALUES = {
     'yarn.apps.vcore_seconds_gauge': 103,
 }
 
-YARN_APP_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'app_name:word count', 'app_queue:default']
+YARN_APP_METRICS_TAGS = ['app_name:word count', 'app_queue:default'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_NODE_METRICS_VALUES = {
     'yarn.node.last_health_update': 1324056895432,
@@ -262,7 +263,7 @@ YARN_NODE_METRICS_VALUES = {
     'yarn.node.num_containers': 0,
 }
 
-YARN_NODE_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'node_id:h2:1235']
+YARN_NODE_METRICS_TAGS = ['node_id:h2:1235'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_ROOT_QUEUE_METRICS_VALUES = {
     'yarn.queue.root.max_capacity': 100,
@@ -270,7 +271,7 @@ YARN_ROOT_QUEUE_METRICS_VALUES = {
     'yarn.queue.root.capacity': 100,
 }
 
-YARN_ROOT_QUEUE_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'queue_name:root']
+YARN_ROOT_QUEUE_METRICS_TAGS = ['queue_name:root'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_QUEUE_METRICS_VALUES = {
     'yarn.queue.num_pending_applications': 0,
@@ -297,6 +298,6 @@ YARN_QUEUE_METRICS_VALUES = {
     'yarn.queue.max_applications_per_user': 5212,
 }
 
-YARN_QUEUE_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'queue_name:clientqueue']
+YARN_QUEUE_METRICS_TAGS = ['queue_name:clientqueue'] + YARN_CLUSTER_METRICS_TAGS
 
-YARN_QUEUE_NOFOLLOW_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'queue_name:nofollowqueue']
+YARN_QUEUE_NOFOLLOW_METRICS_TAGS = ['queue_name:nofollowqueue'] + YARN_CLUSTER_METRICS_TAGS

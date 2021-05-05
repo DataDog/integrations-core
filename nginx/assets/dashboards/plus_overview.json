@@ -6,9 +6,8 @@
       "id": 8372466299201261,
       "definition": {
         "type": "image",
-        "url": "/static/images/screenboard/integrations/nginx.png",
-        "sizing": "fit",
-        "margin": "small"
+        "url": "/static/images/logos/nginx_plus_large.svg",
+        "sizing": "zoom"
       },
       "layout": {
         "x": 0,

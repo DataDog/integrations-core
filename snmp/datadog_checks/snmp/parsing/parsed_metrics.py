@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ParsedSymbolMetric(object):
-    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar', 'options')
+    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar', 'options', 'extract_value_pattern')
 
     def __init__(
         self,
@@ -22,6 +22,7 @@ class ParsedSymbolMetric(object):
         forced_type=None,  # type: str
         enforce_scalar=True,  # type: bool
         options=None,  # type: dict
+        extract_value_pattern=None,  # type: Pattern
     ):
         # type: (...) -> None
         self.name = name
@@ -29,10 +30,11 @@ class ParsedSymbolMetric(object):
         self.forced_type = forced_type
         self.enforce_scalar = enforce_scalar
         self.options = options or {}
+        self.extract_value_pattern = extract_value_pattern
 
 
 class ParsedTableMetric(object):
-    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type', 'options')
+    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type', 'options', 'extract_value_pattern')
 
     def __init__(
         self,
@@ -41,6 +43,7 @@ class ParsedTableMetric(object):
         column_tags,  # type: List[ColumnTag]
         forced_type=None,  # type: str
         options=None,  # type: dict
+        extract_value_pattern=None,  # type: Pattern
     ):
         # type: (...) -> None
         self.name = name
@@ -48,6 +51,7 @@ class ParsedTableMetric(object):
         self.column_tags = column_tags
         self.forced_type = forced_type
         self.options = options or {}
+        self.extract_value_pattern = extract_value_pattern
 
 
 ParsedMetric = Union[ParsedSymbolMetric, ParsedTableMetric]

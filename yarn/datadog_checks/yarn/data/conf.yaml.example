@@ -102,6 +102,11 @@ instances:
     #
     # collect_app_metrics: true
 
+    ## @param collect_node_metrics - boolean - optional - default: true
+    ## Set this parameter to false to remove yarn.node metrics from metric collection.
+    #
+    # collect_node_metrics: true
+
     ## @param queue_blacklist - list of strings - optional
     ## Do not emit metrics for certain yarn capacityScheduler queues.
     ## The check can send queue metrics on up to 100 queues.
@@ -118,6 +123,11 @@ instances:
     ## `app_key1: value1`, `app_key2: value2`, etc.
     #
     # split_yarn_application_tags: false
+
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `yarn_cluster`.
+    #
+    disable_legacy_cluster_tag: true
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

@@ -14595,6 +14595,34 @@ kafka_cluster_Partition_Value{name="UnderReplicated",topic="test-topic-2",partit
 kafka_cluster_Partition_Value{name="InSyncReplicasCount",topic="test-topic-11",partition="54",} 3.0
 kafka_cluster_Partition_Value{name="InSyncReplicasCount",topic="test-topic-3",partition="88",} 3.0
 kafka_cluster_Partition_Value{name="LastStableOffsetLag",topic="test-topic-13",partition="79",} 0.0
+# TYPE kafka_consumer_group_ConsumerLagMetrics_Value untyped
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="EstimatedTimeLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="SumOffsetLag",topic="test-topic"} 0.0 
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="OffsetLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="MaxOffsetLag",topic="test-topic"} 0.0 
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="EstimatedTimeLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="MaxOffsetLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="MaxOffsetLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="EstimatedMaxTimeLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="EstimatedTimeLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="OffsetLag",partition="2",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="OffsetLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="EstimatedTimeLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="OffsetLag",partition="2",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="SumOffsetLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="OffsetLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="EstimatedTimeLag",partition="2",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="EstimatedMaxTimeLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="EstimatedTimeLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-3",name="OffsetLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="EstimatedMaxTimeLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="OffsetLag",partition="2",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="OffsetLag",partition="0",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="EstimatedTimeLag",partition="2",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="SumOffsetLag",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="EstimatedTimeLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-2",name="OffsetLag",partition="1",topic="test-topic"} 0.0
+kafka_consumer_group_ConsumerLagMetrics_Value{groupId="test-group-1",name="EstimatedTimeLag",partition="2",topic="test-topic"} 0.0
 # HELP kafka_security_SimpleAclAuthorizer_MeanRate Attribute exposed for management (kafka.security<type=SimpleAclAuthorizer, name=ZooKeeperSaslAuthenticationsPerSec><>MeanRate)
 # TYPE kafka_security_SimpleAclAuthorizer_MeanRate untyped
 kafka_security_SimpleAclAuthorizer_MeanRate{name="ZooKeeperSaslAuthenticationsPerSec",} 0.0

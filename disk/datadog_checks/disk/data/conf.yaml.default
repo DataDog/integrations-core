@@ -212,3 +212,24 @@ instances:
     ## Timeout of the disk query in seconds
     #
     # timeout: 5
+
+    ## @param create_mounts - list of mappings - optional
+    ## On Windows, instruct the check to create one or more network
+    ## mounts, and have the check collect metrics for the mounted devices.
+    ##
+    ## Uses the provided username and password (if provided and necessary)
+    ## to create an SMB or NFS mount. If `type` is not specified, then
+    ## the operating system will choose the best available network filesystem
+    ## based on the other parameters. If `type` is specified, then any type
+    ## other than `nfs` will default to an SMB file share.
+    #
+    # create_mounts:
+    #   - mountpoint: 's:'
+    #     user: auser
+    #     password: somepassword
+    #     host: smbserver
+    #     share: space
+    #   - mountpoint: 'n:'
+    #     host: nfsserver
+    #     share: /mnt/nfs_share
+    #     type: nfs

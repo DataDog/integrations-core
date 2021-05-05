@@ -18,13 +18,13 @@ files:
           - name: acs_url
             description: The base ACS endpoint url if an ACS token is required to access the marathon API.
             value:
-              default: 
+              display_default: null
               example: https://<SERVER>:<PORT>
               type: string
           - name: group
             description: Enter a Specific Application group name to get only it's related metrics.
             value:
-              default: 
+              display_default: null
               example: product
               type: string
           - name: label_tags

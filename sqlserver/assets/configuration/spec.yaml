@@ -32,11 +32,11 @@ files:
         type: string
         example: <HOST>,<PORT>
     - name: username
-      description: Username for the Datadog-SQL server check user
+      description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: password
-      description: Password for the Datadog-SQL server check user
+      description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
     - name: database
@@ -137,7 +137,9 @@ files:
         type: boolean
         example: false
     - name: include_db_fragmentation_metrics
-      description: Include database fragmentation metrics.
+      description: |
+        Include database fragmentation metrics. Note these queries can be resource intensive on large datasets.
+        Recommend to limit these via autodiscovery or specific database instances.
       value:
         type: boolean
         example: false
@@ -181,7 +183,9 @@ files:
       description: |
         Specify a custom connection string to be used
         Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
-        "Trusted_Connection=yes" to use Windows Authentication
+        "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
+        with the `ddagentuser` user, you can find more information about this user
+        in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
       value:
         type: string
         example: "<CONNECTION_STRING>"

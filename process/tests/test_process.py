@@ -32,7 +32,7 @@ except Exception:
 @pytest.fixture(autouse=True)
 def reset_process_list_cache():
     # Force process list cache flush in the next test
-    ProcessCheck.process_list_cache.last_ts = -ProcessCheck.process_list_cache.cache_duration - 1
+    ProcessCheck.process_list_cache.reset()
 
 
 class MockProcess(object):
@@ -105,8 +105,9 @@ def test_process_list_cache(aggregator):
     process1 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][0]])
     process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
-    process1.check(config['instances'][0])
-    process2.check(config['instances'][1])
+    with patch('datadog_checks.process.cache.ProcessListCache.reset'):
+        process1.check(config['instances'][0])
+        process2.check(config['instances'][1])
 
     # Should always succeed
     assert process1.process_list_cache.elements[0].name() == "Process 1"

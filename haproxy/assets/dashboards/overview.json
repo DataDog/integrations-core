@@ -862,8 +862,8 @@
             "id": 25,
             "definition": {
                 "type": "image",
-                "url": "https://dd-integration-config-meta.s3.amazonaws.com/haproxy/saas_logos-bot.png",
-                "sizing": "fit"
+                "url": "/static/images/logos/haproxy_large.svg",
+                "sizing": "zoom"
             },
             "layout": {
                 "x": 0,

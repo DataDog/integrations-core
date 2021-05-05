@@ -24,6 +24,7 @@ IGNORE_TILES = {
     'rigor',
     'rookout',
     'rundeck',
+    'sqreen',
     'squadcast',
 }
 

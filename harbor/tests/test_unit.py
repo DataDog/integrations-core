@@ -11,7 +11,7 @@ from .common import HARBOR_COMPONENTS, HARBOR_VERSION, VERSION_1_5, VERSION_1_6,
 from .conftest import MockResponse
 
 
-@pytest.mark.usefixture("patch_requests")
+@pytest.mark.usefixtures("patch_requests")
 def test_check_health(aggregator, harbor_check, harbor_api):
     base_tags = ['tag1:val1', 'tag2']
     harbor_check._check_health(harbor_api, base_tags)
@@ -29,7 +29,7 @@ def test_check_health(aggregator, harbor_check, harbor_api):
         aggregator.assert_service_check('harbor.status', AgentCheck.UNKNOWN, tags=base_tags)
 
 
-@pytest.mark.usefixture("patch_requests")
+@pytest.mark.usefixtures("patch_requests")
 def test_check_registries_health(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._check_registries_health(harbor_api, tags)
@@ -37,14 +37,14 @@ def test_check_registries_health(aggregator, harbor_check, harbor_api):
     aggregator.assert_service_check('harbor.registry.status', AgentCheck.OK, tags=tags)
 
 
-@pytest.mark.usefixture("patch_requests")
+@pytest.mark.usefixtures("patch_requests")
 def test_submit_project_metrics(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_project_metrics(harbor_api, tags)
     aggregator.assert_metric('harbor.projects.count', 2, tags=tags)
 
 
-@pytest.mark.usefixture("patch_requests")
+@pytest.mark.usefixtures("patch_requests")
 def test_submit_disk_metrics(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_disk_metrics(harbor_api, tags)
@@ -52,7 +52,7 @@ def test_submit_disk_metrics(aggregator, harbor_check, harbor_api):
     aggregator.assert_metric('harbor.disk.total', 1e6, tags=tags)
 
 
-@pytest.mark.usefixture("patch_requests")
+@pytest.mark.usefixtures("patch_requests")
 @pytest.mark.skipif(HARBOR_VERSION < VERSION_1_5, reason="The registry.read_only metric is submitted for Harbor 1.5+")
 def test_submit_read_only_status(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']

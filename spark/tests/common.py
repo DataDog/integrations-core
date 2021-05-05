@@ -6,6 +6,13 @@ from datadog_checks.dev import get_docker_hostname, get_here
 HERE = get_here()
 HOST = get_docker_hostname()
 
+CLUSTER_NAME = 'SparkCluster'
+
+CLUSTER_TAGS = [
+    'spark_cluster:' + CLUSTER_NAME,
+    'cluster_name:' + CLUSTER_NAME,
+]
+
 EXPECTED_E2E_METRICS = [
     'spark.driver.total_shuffle_read',
     'spark.stage.num_active_tasks',

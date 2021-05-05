@@ -47,7 +47,6 @@ files:
       required: true
       value:
         type: boolean
-        default: false
         example: false
     - name: http_host
       description: |
