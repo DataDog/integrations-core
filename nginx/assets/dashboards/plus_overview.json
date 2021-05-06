@@ -79,9 +79,7 @@
               "check": "nginx.can_connect",
               "grouping": "cluster",
               "group_by": [],
-              "tags": [
-                "*"
-              ]
+              "tags": ["*"]
             },
             "layout": {
               "x": 0,
@@ -99,7 +97,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.connections.accepted{*}",
+                  "q": "sum:nginx.connections.accepted{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -130,7 +128,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.connections.active{*}",
+                  "q": "sum:nginx.connections.active{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -161,7 +159,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.net.waiting{*}",
+                  "q": "sum:nginx.net.waiting{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -192,7 +190,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "per_second(sum:nginx.connections.dropped{*})",
+                  "q": "per_second(sum:nginx.connections.dropped{$host})",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -222,7 +220,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.requests.total{*}",
+                  "q": "sum:nginx.requests.total{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -271,7 +269,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.net.request_per_s{*}",
+                  "q": "sum:nginx.net.request_per_s{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -320,19 +318,12 @@
               "title_align": "left",
               "type": "hostmap",
               "requests": {
-                "fill": {
-                  "q": "avg:nginx.requests.current{*} by {host}"
-                }
+                "fill": { "q": "avg:nginx.requests.current{$host} by {host}" }
               },
               "no_metric_hosts": false,
               "no_group_hosts": true,
-              "scope": [
-                "$scope"
-              ],
-              "style": {
-                "palette": "green_to_orange",
-                "palette_flip": false
-              }
+              "scope": ["$scope"],
+              "style": { "palette": "green_to_orange", "palette_flip": false }
             },
             "layout": {
               "x": 0,
@@ -380,64 +371,36 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 6706169829006038,
+            "id": 2551245092131246,
             "definition": {
-              "title": "2xx & 3xx responses per sec",
+              "title": "4xx & 5xx responses per sec",
               "title_size": "16",
               "title_align": "left",
-              "show_legend": true,
-              "legend_size": "0",
-              "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
+              "time": {},
+              "type": "query_table",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "per_second(query1)",
-                      "alias": "3xx"
-                    },
-                    {
-                      "formula": "per_second(query2)",
-                      "alias": "2xx"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
-                  "queries": [
-                    {
-                      "query": "sum:nginx.server_zone.responses.3xx{*}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    },
-                    {
-                      "query": "sum:nginx.server_zone.responses.2xx{*}",
-                      "data_source": "metrics",
-                      "name": "query2"
-                    }
-                  ],
-                  "style": {
-                    "palette": "cool",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "area"
+                  "q": "avg:nginx.server_zone.responses.total{$host} by {host}",
+                  "alias": "Total",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:nginx.server_zone.responses.4xx{$host} by {host}",
+                  "alias": "4xx",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:nginx.server_zone.responses.5xx{$host} by {host}",
+                  "alias": "5xx",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
                 }
               ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+              "has_search_bar": "auto"
             },
             "layout": {
               "x": 0,
@@ -453,42 +416,30 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_size": "0",
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "per_second(query1)",
-                      "alias": "4xx"
-                    },
-                    {
-                      "formula": "per_second(query2)",
-                      "alias": "5xx"
-                    }
+                    { "formula": "query1", "alias": "4xx" },
+                    { "formula": "query2", "alias": "5xx" }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:nginx.server_zone.responses.4xx{*}",
+                      "query": "sum:nginx.server_zone.responses.4xx{$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:nginx.server_zone.responses.5xx{*}",
+                      "query": "sum:nginx.server_zone.responses.5xx{$host} by {host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
                     "palette": "warm",
                     "line_type": "solid",
@@ -540,10 +491,7 @@
               "title_align": "left",
               "type": "query_value",
               "requests": [
-                {
-                  "q": "avg:nginx.cache.hit.bytes{*}",
-                  "aggregator": "avg"
-                }
+                { "q": "avg:nginx.cache.hit.bytes{$host}", "aggregator": "avg" }
               ],
               "autoscale": true,
               "precision": 2
@@ -564,20 +512,14 @@
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:nginx.cache.hit.bytes{*}",
+                      "query": "sum:nginx.cache.hit.bytes{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -615,40 +557,25 @@
               "show_legend": true,
               "legend_size": "0",
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Bytes Read"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Bytes Written"
-                    },
-                    {
-                      "formula": "query1 + query2",
-                      "alias": "Total"
-                    }
+                    { "formula": "query1", "alias": "Bytes Read" },
+                    { "formula": "query2", "alias": "Bytes Written" },
+                    { "formula": "query1 + query2", "alias": "Total" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:nginx.cache.bypass.bytes{*}",
+                      "query": "sum:nginx.cache.bypass.bytes{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:nginx.cache.bypass.bytes_written{*}",
+                      "query": "sum:nginx.cache.bypass.bytes_written{$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -686,7 +613,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "sum:nginx.cache.cold{*}",
+                  "q": "sum:nginx.cache.cold{$host}",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -722,36 +649,24 @@
               "show_legend": true,
               "legend_size": "0",
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Max Size - Cache"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Size - Cache"
-                    }
+                    { "formula": "query1", "alias": "Max Size - Cache" },
+                    { "formula": "query2", "alias": "Size - Cache" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:nginx.cache.max_size{*}",
+                      "query": "sum:nginx.cache.max_size{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:nginx.cache.size{*}",
+                      "query": "sum:nginx.cache.size{$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -789,40 +704,25 @@
               "show_legend": true,
               "legend_size": "0",
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Bytes Read"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Bytes Written"
-                    },
-                    {
-                      "formula": "query1 + query2",
-                      "alias": "Total"
-                    }
+                    { "formula": "query1", "alias": "Bytes Read" },
+                    { "formula": "query2", "alias": "Bytes Written" },
+                    { "formula": "query1 + query2", "alias": "Total" }
                   ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:nginx.cache.miss.bytes{*}",
+                      "query": "sum:nginx.cache.miss.bytes{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:nginx.cache.miss.bytes_written{*}",
+                      "query": "sum:nginx.cache.miss.bytes_written{$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -858,15 +758,13 @@
       }
     },
     {
-      "id": 3635493341875484,
+      "id": 97255312368554,
       "definition": {
-        "loading": false,
-        "title": true,
-        "type": "experimental",
-        "title_align": "center",
-        "reflow_type": "fixed",
-        "title_text": "Connections",
+        "title": "Connections",
+        "type": "group",
+        "background_color": "vivid_green",
         "show_title": true,
+        "layout_type": "ordered",
         "widgets": [
           {
             "id": 2973879190796108,
@@ -875,44 +773,32 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
-              "legend_size": "0",
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Active Connections"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Idle Connections"
-                    }
+                    { "formula": "query1", "alias": "Active Connections" },
+                    { "formula": "query2", "alias": "Idle Connections" }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:nginx.connections.active{*}",
+                      "query": "sum:nginx.connections.active{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:nginx.connections.idle{*}",
+                      "query": "sum:nginx.connections.idle{$host}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "style": {
-                    "palette": "dog_classic",
+                    "palette": "green",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -936,57 +822,6 @@
             }
           },
           {
-            "id": 7793443203593194,
-            "definition": {
-              "title": "Active connections",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_size": "0",
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "query": "sum:nginx.connections.active{*}",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": {
-              "x": 0,
-              "y": 2,
-              "width": 6,
-              "height": 2
-            }
-          },
-          {
             "id": 1573136620114268,
             "definition": {
               "title": "Dropped connections per second",
@@ -995,25 +830,15 @@
               "show_legend": false,
               "legend_size": "0",
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "per_second(query1)"
-                    }
-                  ],
+                  "formulas": [{ "formula": "per_second(query1)" }],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:nginx.connections.dropped{*}",
+                      "query": "sum:nginx.connections.dropped{$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1037,146 +862,92 @@
             },
             "layout": {
               "x": 0,
-              "y": 4,
+              "y": 2,
               "width": 6,
               "height": 2
             }
           }
-        ],
-        "background_color": "vivid_green",
-        "isShared": false,
-        "subtype": "group"
+        ]
       },
       "layout": {
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 7
+        "height": 5
       }
     },
     {
-      "id": 3178268671569908,
+      "id": 8519992001981460,
       "definition": {
-        "loading": false,
-        "title": true,
-        "type": "experimental",
-        "title_align": "center",
-        "reflow_type": "fixed",
-        "title_text": "SSL",
+        "title": "SSL",
+        "type": "group",
+        "background_color": "vivid_green",
         "show_title": true,
+        "layout_type": "ordered",
         "widgets": [
           {
-            "id": 536543667468084,
+            "id": 4252730268672606,
             "definition": {
-              "title": "Avg successful SSL handshakes",
+              "title": "Handshakes per hosts",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_value",
+              "type": "query_table",
               "requests": [
                 {
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_yellow",
-                      "value": 0
-                    },
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "query": "avg:nginx.ssl.handshakes_count{*}.as_count()",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "aggregator": "avg"
-                    }
-                  ]
+                  "q": "sum:nginx.ssl.handshakes_count{*} by {host}.as_count()",
+                  "alias": "Successful",
+                  "limit": 10,
+                  "order": "desc",
+                  "aggregator": "sum"
+                },
+                {
+                  "q": "sum:nginx.ssl.handshakes_failed_count{*} by {host}.as_count()",
+                  "alias": "Failed",
+                  "aggregator": "sum"
                 }
-              ],
-              "autoscale": true,
-              "precision": 2
+              ]
             },
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
-            "id": 5986151863688210,
-            "definition": {
-              "title": "Avg failed SSL handshakes",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "conditional_formats": [
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_yellow",
-                      "value": 0
-                    },
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_green",
-                      "value": 0
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "query": "avg:nginx.ssl.handshakes_failed_count{*}.as_count()",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "aggregator": "avg"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 3,
+              "width": 6,
               "height": 2
             }
           },
           {
             "id": 2773600674413166,
             "definition": {
-              "title": "Successful SSL handshakes",
+              "title": "Successful vs failed SSL handshakes",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
+                  "formulas": [{ "formula": "query1" }],
                   "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:nginx.ssl.handshakes_count{*}.as_count()",
+                      "query": "sum:nginx.ssl.handshakes_count{$host} by {host}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
                   "style": {
-                    "palette": "dog_classic",
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "q": "-sum:nginx.ssl.handshakes_failed_count{*} by {host}.as_count()",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "warm",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -1198,71 +969,18 @@
               "width": 6,
               "height": 2
             }
-          },
-          {
-            "id": 5023374867493620,
-            "definition": {
-              "title": "Failed SSL handshakes",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "response_format": "timeseries",
-                  "queries": [
-                    {
-                      "query": "avg:nginx.ssl.handshakes_failed_count{*}.as_count()",
-                      "data_source": "metrics",
-                      "name": "query1"
-                    }
-                  ],
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
-            },
-            "layout": {
-              "x": 0,
-              "y": 4,
-              "width": 6,
-              "height": 2
-            }
           }
-        ],
-        "background_color": "vivid_green",
-        "isShared": false,
-        "subtype": "group"
+        ]
       },
       "layout": {
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 7
+        "height": 5
       }
     }
   ],
-  "template_variables": [],
+  "template_variables": [{ "name": "host", "default": "*", "prefix": "host" }],
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
