@@ -36,7 +36,7 @@ def recommended_monitors(check):
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in sorted(get_valid_integrations()):
+    for check_name in checks:
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)
