@@ -62,7 +62,8 @@
         "page_reclaims": 11199,
         "page_faults": 20,
         "voluntary_context_switches": 141314,
-        "involuntary_context_switches": 82166
+        "involuntary_context_switches": 82166,
+        "heap_usage_bytes": 2562568
     },
     "globalLock": {
         "lockTime": 42,

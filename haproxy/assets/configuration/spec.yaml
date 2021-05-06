@@ -4,7 +4,7 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/openmetrics
+    - template: init_config/openmetrics_legacy
   - template: instances
     options:
     - name: use_prometheus
@@ -19,7 +19,6 @@ files:
     - name: url
       required: true
       value:
-        default: null
         example: http://localhost/admin?stats
         type: string
       description: |
@@ -174,7 +173,7 @@ files:
         haproxy reaches this many seconds.
 
         NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    - template: instances/openmetrics
+    - template: instances/openmetrics_legacy
   - template: logs
     example:
     - type: udp

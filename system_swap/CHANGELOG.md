@@ -1,5 +1,13 @@
 # CHANGELOG - system_swap
 
+## 1.10.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.10.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Add config specs. See [#7976](https://github.com/DataDog/integrations-core/pull/7976).
+
 ## 1.9.0 / 2020-09-21 / Agent 7.23.0
 
 * [Added] Upgrade psutil to 5.7.2. See [#7395](https://github.com/DataDog/integrations-core/pull/7395).

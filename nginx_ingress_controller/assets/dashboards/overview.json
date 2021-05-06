@@ -345,9 +345,8 @@
       "id": 11,
       "definition": {
         "type": "image",
-        "url": "https://static.datadoghq.com/static/images/screenboard/integrations/nginx.png",
-        "sizing": "fit",
-        "margin": "large"
+        "url": "/static/images/logos/nginx-ingress-controller_small.svg",
+        "sizing": "fit"
       },
       "layout": {
         "x": 1,

@@ -30,7 +30,7 @@ class GUnicornCheck(AgentCheck):
     # Worker state tags.
     IDLE_TAGS = ["state:idle"]
     WORKING_TAGS = ["state:working"]
-    SVC_NAME = "gunicorn.is_running"
+    IS_RUNNING_SVC = "gunicorn.is_running"
 
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
@@ -51,23 +51,34 @@ class GUnicornCheck(AgentCheck):
 
         # Load the gunicorn master procedure.
         proc_name = instance.get(self.PROC_NAME)
-        master_procs = self._get_master_proc_by_name(proc_name, custom_tags)
+        master_procs = self._get_master_proc_by_name(proc_name)
 
-        # Fetch the worker procs and count their states.
-        worker_procs = self._get_workers_from_procs(master_procs)
-        working, idle = self._count_workers(worker_procs)
+        if master_procs:
+            # Fetch the worker procs and count their states.
+            worker_procs = self._get_workers_from_procs(master_procs)
+            working, idle = self._count_workers(worker_procs)
 
-        # if no workers are running, alert CRITICAL, otherwise OK
-        msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
-        status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
-        tags = ['app:' + proc_name] + custom_tags
+            # if no workers are running, alert CRITICAL, otherwise OK
+            msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
+            status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
+            tags = ['app:' + proc_name] + custom_tags
 
-        self.service_check(self.SVC_NAME, status, tags=tags, message=msg)
+            self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
 
-        # Submit the data.
-        self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)
-        self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
-        self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
+            # Submit the data.
+            self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)
+            self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
+            self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
+        else:
+            # process not found, it's dead.
+            msg = "No gunicorn process with name %s found, skipping worker metrics" % proc_name
+            self.service_check(
+                self.IS_RUNNING_SVC,
+                AgentCheck.CRITICAL,
+                tags=['app:' + proc_name] + custom_tags,
+                message=msg,
+            )
+            self.warning(msg)
 
         self._collect_metadata()
 
@@ -117,7 +128,7 @@ class GUnicornCheck(AgentCheck):
 
         return working, idle
 
-    def _get_master_proc_by_name(self, name, tags):
+    def _get_master_proc_by_name(self, name):
         """ Return a psutil process for the master gunicorn process with the given name. """
         master_name = GUnicornCheck._get_master_proc_name(name)
         master_procs = []
@@ -127,18 +138,8 @@ class GUnicornCheck(AgentCheck):
                     master_procs.append(p)
             except (IndexError, psutil.Error) as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
-        if len(master_procs) == 0:
-            # process not found, it's dead.
-            self.service_check(
-                self.SVC_NAME,
-                AgentCheck.CRITICAL,
-                tags=['app:' + name] + tags,
-                message="No gunicorn process with name %s found" % name,
-            )
-            raise GUnicornCheckError("Found no master process with name: %s" % master_name)
-        else:
-            self.log.debug("There exist %s master process(es) with the name %s", len(master_procs), name)
-            return master_procs
+        self.log.debug("There are %s master process(es) with the name %s", len(master_procs), name)
+        return master_procs
 
     @staticmethod
     def _get_master_proc_name(name):

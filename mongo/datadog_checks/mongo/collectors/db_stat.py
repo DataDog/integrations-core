@@ -1,4 +1,5 @@
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 
 
 class DbStatCollector(MongoCollector):
@@ -11,8 +12,20 @@ class DbStatCollector(MongoCollector):
         super(DbStatCollector, self).__init__(check, tags)
         self.db_name = db_name
 
-    def collect(self, client):
-        db = client[self.db_name]
+    def compatible_with(self, deployment):
+        # Can theoretically be run on any node as long as it contains data.
+        # i.e Arbiters are ruled out
+        if self.db_name == 'local':
+            if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+                return False
+            if isinstance(deployment, MongosDeployment):
+                return False
+            return True
+        else:
+            return deployment.is_principal()
+
+    def collect(self, api):
+        db = api[self.db_name]
         # Submit the metric
         additional_tags = [
             u"cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility

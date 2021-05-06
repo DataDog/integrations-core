@@ -6,13 +6,19 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .conftest import CHECK_NAME
 
 PROXY_CONFIG = {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}
 INVALID_PROXY = {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}
+INVALID_CONFIG = {
+    "account": "test_acct.us-central1.gcp",
+    "database": "SNOWFLAKE",
+    "schema": "ACCOUNT_USAGE",
+    'role': "ACCOUNTADMIN",
+    "authenticator": "oauth",
+}
 
 
 def test_config():
@@ -26,23 +32,28 @@ def test_config():
 
     # Test missing user and pass
     account_config = {'account': 'TEST123'}
-    with pytest.raises(Exception, match='Must specify a user and password'):
+    with pytest.raises(Exception, match='Must specify a user'):
         SnowflakeCheck(CHECK_NAME, {}, [account_config])
 
 
 def test_default_authentication(instance):
     # Test default auth
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.authenticator == 'snowflake'
+    assert check._config.authenticator == 'snowflake'
 
 
-def test_invalid_auth(instance):
-    # Test oauth
-    oauth_inst = copy.deepcopy(instance)
-    oauth_inst['authenticator'] = 'oauth'
+def test_invalid_oauth(oauth_instance):
+    # Test oauth without user
+    with pytest.raises(Exception, match='Must specify a user'):
+        SnowflakeCheck(CHECK_NAME, {}, [INVALID_CONFIG])
+
+    # Test oauth without token
+    no_token_config = copy.deepcopy(INVALID_CONFIG)
+    no_token_config['user'] = "test_user"
     with pytest.raises(Exception, match='If using OAuth, you must specify a token'):
-        SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
+        SnowflakeCheck(CHECK_NAME, {}, [no_token_config])
 
+    oauth_inst = copy.deepcopy(oauth_instance)
     oauth_inst['authenticator'] = 'testauth'
     with pytest.raises(Exception, match='The Authenticator method set is invalid: testauth'):
         SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
@@ -71,14 +82,16 @@ def test_default_auth(instance):
             authenticator='snowflake',
             token=None,
             client_session_keep_alive=False,
+            proxy_host=None,
+            proxy_port=None,
+            proxy_user=None,
+            proxy_password=None,
         )
 
 
-def test_oauth_auth(instance):
+def test_oauth_auth(oauth_instance):
     # Test oauth
-    oauth_inst = copy.deepcopy(instance)
-    oauth_inst['authenticator'] = 'oauth'
-    oauth_inst['token'] = 'testtoken'
+    oauth_inst = copy.deepcopy(oauth_instance)
 
     with mock.patch('datadog_checks.snowflake.check.sf') as sf:
         check = SnowflakeCheck(CHECK_NAME, {}, [oauth_inst])
@@ -87,7 +100,7 @@ def test_oauth_auth(instance):
         check.check(oauth_inst)
         sf.connect.assert_called_with(
             user='testuser',
-            password='pass',
+            password=None,
             account='test_acct.us-central1.gcp',
             database='SNOWFLAKE',
             schema='ACCOUNT_USAGE',
@@ -101,12 +114,52 @@ def test_oauth_auth(instance):
             authenticator='oauth',
             token='testtoken',
             client_session_keep_alive=False,
+            proxy_host=None,
+            proxy_port=None,
+            proxy_user=None,
+            proxy_password=None,
+        )
+
+
+def test_proxy_settings(instance):
+    init_config = {
+        'proxy_host': 'testhost',
+        'proxy_port': 8000,
+        'proxy_user': 'proxyuser',
+        'proxy_password': 'proxypass',
+    }
+
+    with mock.patch('datadog_checks.snowflake.check.sf') as sf:
+        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager = mock.MagicMock()
+        check.check(instance)
+        sf.connect.assert_called_with(
+            user='testuser',
+            password='pass',
+            account='test_acct.us-central1.gcp',
+            database='SNOWFLAKE',
+            schema='ACCOUNT_USAGE',
+            warehouse=None,
+            role='ACCOUNTADMIN',
+            passcode_in_password=False,
+            passcode=None,
+            client_prefetch_threads=4,
+            login_timeout=60,
+            ocsp_response_cache_filename=None,
+            authenticator='snowflake',
+            token=None,
+            client_session_keep_alive=False,
+            proxy_host='testhost',
+            proxy_port=8000,
+            proxy_user='proxyuser',
+            proxy_password='proxypass',
         )
 
 
 def test_default_metric_groups(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == [
+    assert check._config.metric_groups == [
         'snowflake.query',
         'snowflake.billing',
         'snowflake.storage',
@@ -134,7 +187,7 @@ def test_additional_metric_groups(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['snowflake.logins', 'snowflake.data_transfer']
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
+    assert check._config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
 
     assert check.metric_queries == [
         queries.LoginMetrics,
@@ -151,41 +204,3 @@ def test_metric_group_exceptions(instance):
         check.log.warning.assert_called_once_with(
             "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
         )
-
-
-def test_no_proxy_config():
-    instance = {}
-    init_config = {}
-    http = RequestsWrapper(instance, init_config)
-
-    assert http.options['proxies'] is None
-    assert http.no_proxy_uris is None
-
-
-def test_proxy_agent_config(instance):
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=PROXY_CONFIG):
-        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-
-        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
-        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
-        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
-
-
-def test_proxy_init_config_override(instance):
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=INVALID_PROXY):
-        init_config = {'proxy': PROXY_CONFIG}
-        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
-        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
-        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
-        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']
-
-
-def test_proxy_instance_override(instance):
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.get_config', return_value=INVALID_PROXY):
-        instance = copy.deepcopy(instance)
-        instance['proxy'] = PROXY_CONFIG
-        init_config = {'proxy': INVALID_PROXY}
-        check = SnowflakeCheck(CHECK_NAME, init_config, [instance])
-        assert check.http.options['proxies'] == {'http': 'http_host', 'https': 'https_host'}
-        assert check._proxies == {'http': 'http_host', 'https': 'https_host'}
-        assert check.http.no_proxy_uris == ['uri1', 'uri2', 'uri3', 'uri4']

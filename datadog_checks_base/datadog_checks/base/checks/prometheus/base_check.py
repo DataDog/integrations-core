@@ -18,6 +18,7 @@ class PrometheusScraper(PrometheusScraperMixin):
     def __init__(self, check):
         super(PrometheusScraper, self).__init__()
         self.check = check
+        self._http_handlers = {}
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """

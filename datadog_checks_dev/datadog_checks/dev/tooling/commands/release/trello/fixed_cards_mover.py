@@ -17,7 +17,6 @@ class FixedCardsMover:
         self.__client = client
         self.__ids_by_url: Dict[str, List[str]] = {}
         self.__ids_by_url_from_comment: Dict[str, List[str]] = {}
-        self.__card_links_by_unhandled_pr: Dict[str, List[str]] = {}
         self.__dry_run = dry_run
 
         for column in [
@@ -39,10 +38,9 @@ class FixedCardsMover:
                 dict[key] = []
             dict[key].append(value)
 
-    def on_new_pr(self, github_url: str):
+    def try_move_card(self, github_url: str) -> bool:
         card_ids = self.__get_matching_card_ids(github_url)
-        if len(card_ids) != 1 or not self.__try_move_card(card_ids[0], github_url):
-            self.__unhandled_pr(github_url, card_ids)
+        return len(card_ids) == 1 and self.__try_move_card(card_ids[0], github_url)
 
     def __get_matching_card_ids(self, github_url: str) -> List[str]:
         if github_url in self.__ids_by_url:
@@ -76,25 +74,6 @@ class FixedCardsMover:
             id_list = self.__client.get_id_list_from_team_name(team_name)
             return team_name, id_list
         return '', ''
-
-    def __unhandled_pr(self, github_url: str, card_ids: List[str]):
-        if github_url not in self.__card_links_by_unhandled_pr:
-            self.__card_links_by_unhandled_pr[github_url] = []
-
-        for card_id in card_ids:
-            card = self.__client.get_card(card_id)
-            url = card['url']
-            self.__card_links_by_unhandled_pr[github_url].append(url)
-
-    def get_message(self) -> str:
-        message = 'No Trello card found for:\n'
-        for github_url, card_links in self.__card_links_by_unhandled_pr.items():
-            message += f'\t- {github_url}'
-            if len(card_links) == 0:
-                message += '\n'
-            else:
-                message += f': Can be {", ".join(card_links)}\n'
-        return message
 
     def __get_github_pull_requests_urls(self, card_id: str) -> List[str]:
         urls = set([])

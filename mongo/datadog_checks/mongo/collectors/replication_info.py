@@ -2,15 +2,26 @@ import pymongo
 
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 
 class ReplicationOpLogCollector(MongoCollector):
     """Additional replication metrics regarding the operation log. Useful to check how backed up is a secondary
     compared to the primary."""
 
-    def collect(self, client):
+    def compatible_with(self, deployment):
+        # Can only be run on mongod node that is part of a replica set. Not possible on arbiters.
+        if not isinstance(deployment, ReplicaSetDeployment):
+            return False
+
+        if deployment.is_arbiter:
+            return False
+
+        return True
+
+    def collect(self, api):
         # Fetch information analogous to Mongo's db.getReplicationInfo()
-        localdb = client["local"]
+        localdb = api["local"]
 
         oplog_data = {}
         try:
@@ -19,7 +30,7 @@ class ReplicationOpLogCollector(MongoCollector):
                 if ol_options:
                     break
         except pymongo.errors.OperationFailure as e:
-            # In theory this error should only happen when connected to mongos.
+            # In theory this error should only happen when connected to mongos or arbiter.
             self.log.debug("Unable to collect oplog metrics from replica set member. Error is: %s", e)
             return
 

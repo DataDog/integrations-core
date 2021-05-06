@@ -54,3 +54,11 @@ EDGE_AGENT_METRICS = [
         'edgeAgent_iotedged_uptime_seconds': 'iotedged_uptime_seconds',
     },
 ]
+
+EDGE_AGENT_TYPE_OVERRIDES = {
+    # Prometheus endpoint sends these as 'gauge', but the values represent monotonic counts.
+    'edgeAgent_total_network_in_bytes': 'counter',
+    'edgeAgent_total_network_out_bytes': 'counter',
+    'edgeAgent_total_disk_read_bytes': 'counter',
+    'edgeAgent_total_disk_write_bytes': 'counter',
+}

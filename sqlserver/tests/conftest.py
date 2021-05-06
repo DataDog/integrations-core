@@ -21,6 +21,7 @@ from .common import (
     INSTANCE_DOCKER,
     INSTANCE_E2E,
     INSTANCE_SQL2017,
+    INSTANCE_SQL2017_DEFAULTS,
     get_local_driver,
 )
 
@@ -43,6 +44,11 @@ def init_config_object_name():
 @pytest.fixture
 def init_config_alt_tables():
     return deepcopy(INIT_CONFIG_ALT_TABLES)
+
+
+@pytest.fixture
+def instance_sql2017_defaults():
+    return deepcopy(INSTANCE_SQL2017_DEFAULTS)
 
 
 @pytest.fixture
@@ -95,7 +101,7 @@ def instance_ao_docker_secondary():
 def instance_autodiscovery():
     instance = deepcopy(INSTANCE_DOCKER)
     instance['database_autodiscovery'] = True
-    return instance
+    return deepcopy(instance)
 
 
 @pytest.fixture(scope='session')

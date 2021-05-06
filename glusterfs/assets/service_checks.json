@@ -1,0 +1,49 @@
+[
+    {
+        "agent_version": "7.26.0",
+        "integration": "GlusterFS",
+        "check": "glusterfs.brick.health",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "groups": [
+            "host",
+            "vol_name"
+        ],
+        "name": "Brick health",
+        "description": "Returns `CRITICAL` if the sub volume is 'degraded'. Returns `OK` if 'up'."
+    },
+    {
+        "agent_version": "7.26.0",
+        "integration": "GlusterFS",
+        "check": "glusterfs.volume.health",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "groups": [
+            "host",
+            "vol_name"
+        ],
+        "name": "Volume health",
+        "description": "Returns `CRITICAL` if the volume is 'degraded'. Returns `OK` if 'up'."
+    },
+    {
+        "agent_version": "7.26.0",
+        "integration": "GlusterFS",
+        "check": "glusterfs.cluster.health",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "groups": [
+            "host"
+        ],
+        "name": "Cluster health",
+        "description": "Returns `CRITICAL` if the volume is 'degraded'. Returns `OK` otherwise."
+    }
+]

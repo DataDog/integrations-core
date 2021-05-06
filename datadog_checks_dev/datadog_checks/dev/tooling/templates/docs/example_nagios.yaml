@@ -1,0 +1,87 @@
+name: Nagios
+options:
+  autodiscovery: true
+
+files:
+  - name: README.md
+    sections:
+      - template: overview
+        overrides:
+          description: |
+            Send events from your Nagios-monitored infrastructure to Datadog for richer alerting and to help correlate Nagios events with metrics from your Datadog-monitored infrastructure.
+
+            This check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. This check can also send Nagios performance data as metrics to Datadog.
+      - template: setup
+        overrides:
+          description: |
+            Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+      - template: setup/installation
+      - template: setup/configuration
+        overrides:
+          description: |
+            See speficic installation instructions depending on your environment below.
+      - template: setup/configuration/host
+        overrides:
+          description: |
+            To configure this check for an Agent running on a host:
+
+            1. Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][1]. See the [sample nagios.d/conf.yaml][2] for all available configuration options.
+
+            2. [Restart the Agent][3] to start sending Nagios events and (optionally) performance data metrics to Datadog.
+
+            **Note**: The Nagios check can potentially emit [custom metrics][4], which may impact your [billing][5].
+
+            [1]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+            [2]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
+            [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+            [4]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+            [5]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+      - template: setup/configuration/containerized
+        overrides:
+          description: |
+            For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+            | Parameter            | Value                                        |
+            | -------------------- | -------------------------------------------- |
+            | `<INTEGRATION_NAME>` | `nagios`                                     |
+            | `<INIT_CONFIG>`      | blank or `{{}}`                                |
+            | `<INSTANCE_CONFIG>`  | `{{"nagios_conf": "/etc/nagios3/nagios.cfg"}}` |
+
+            **Note**: The containerized Agent should be able to access the `/etc/nagios3/nagios.cfg` file to enable the Datadog-Nagios integration.
+
+            [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+
+      - template: setup/configuration/log_collection
+        # could also just omit the section
+        overrides:
+          hidden: true
+      - template: setup/validation
+      - template: data_collected
+      - template: data_collected/metrics
+        overrides:
+          description: |
+            With the default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for Nagios performance data and submits it as gauge metrics to Datadog.
+
+      - template: data_collected/events
+        overrides:
+          description: |
+            The check watches the Nagios events log for log lines containing these strings, emitting an event for each line:
+
+            - SERVICE FLAPPING ALERT
+            - ACKNOWLEDGE_SVC_PROBLEM
+            - SERVICE ALERT
+            - HOST ALERT
+            - ACKNOWLEDGE_HOST_PROBLEM
+            - SERVICE NOTIFICATION
+            - HOST DOWNTIME ALERT
+            - PROCESS_SERVICE_CHECK_RESULT
+            - SERVICE DOWNTIME ALERT
+
+      - template: data_collected/service_checks
+      - template: troubleshooting
+      - template: further_reading
+        overrides:
+          description: |
+            - [Understand your Nagios alerts with Datadog][1]
+
+            [1]: https://www.datadoghq.com/blog/nagios-monitoring

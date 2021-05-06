@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import copy
 import re
 import socket
-import ssl
 import time
 from datetime import datetime
 
@@ -237,9 +236,7 @@ class HTTPCheck(AgentCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, seconds_left, msg = self.check_cert_expiration(
-                instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key
-            )
+            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             tags_list.append("instance:{}".format(instance_name))
@@ -280,9 +277,7 @@ class HTTPCheck(AgentCheck):
 
         self.service_check(sc_name, status, tags=tags, message=msg)
 
-    def check_cert_expiration(
-        self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
-    ):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs):
         # thresholds expressed in seconds take precedence over those expressed in days
         seconds_warning = (
             int(instance.get('seconds_warning', 0))
@@ -305,28 +300,24 @@ class HTTPCheck(AgentCheck):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(float(timeout))
             sock.connect((host, port))
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-            context.verify_mode = ssl.CERT_REQUIRED
-            context.check_hostname = check_hostname
-            context.load_verify_locations(instance_ca_certs)
 
-            if client_cert and client_key:
-                context.load_cert_chain(client_cert, keyfile=client_key)
+            context = self.get_tls_context()
+            context.load_verify_locations(instance_ca_certs)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
             msg = str(e)
-            if 'expiration' in msg:
+            if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                return AgentCheck.UNKNOWN, None, None, msg
             else:
-                self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-                return AgentCheck.CRITICAL, 0, 0, msg
+                self.log.debug("Unable to connect to site to get cert expiration: %s", e)
+                return AgentCheck.UNKNOWN, None, None, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()

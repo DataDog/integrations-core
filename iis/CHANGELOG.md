@@ -1,5 +1,22 @@
 # CHANGELOG - iis
 
+## 2.11.0 / 2021-04-19
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+* [Fixed] reuse base package refreshing. See [#8823](https://github.com/DataDog/integrations-core/pull/8823).
+
+## 2.10.5 / 2021-03-15
+
+* [Fixed] Better recreate base class refreshing strategy. See [#8821](https://github.com/DataDog/integrations-core/pull/8821).
+
+## 2.10.4 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.10.3 / 2020-12-11 / Agent 7.25.0
+
+* [Fixed] Add config specs. See [#8109](https://github.com/DataDog/integrations-core/pull/8109).
+
 ## 2.10.2 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Fix metrics collection on non-english systems. See [#7875](https://github.com/DataDog/integrations-core/pull/7875).

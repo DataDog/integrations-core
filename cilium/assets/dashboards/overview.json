@@ -267,7 +267,7 @@
             "id": 10,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/cilium.png",
+                "url": "/static/images/logos/cilium_small.svg",
                 "sizing": "fit"
             },
             "layout": {

@@ -1,0 +1,180 @@
+{
+    "title": "Memcached - Metrics",
+    "description": "This dashboard shows work metrics to help you understand the memory needs of your Memcached cluster, and resource metrics to help explain how your infrastructure affects its performance. For more information, see:\n\n- [Datadog's Memcached integration documentation](https://docs.datadoghq.com/integrations/mcache/)\n\n- [Memcached monitoring guide](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.curr_connections{$scope}"
+                    },
+                    {
+                        "q": "memcache.connection_structures{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Memcached connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.bytes_read_rate{$scope}"
+                    },
+                    {
+                        "q": "memcache.bytes_written_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Memcached reads and writes (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.cmd_set_rate{$scope}"
+                    },
+                    {
+                        "q": "memcache.cmd_get_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Memcached gets and sets (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.get_hits_rate{$scope}"
+                    },
+                    {
+                        "q": "memcache.get_misses_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Memcached hits and misses (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.rusage_system_rate{$scope}"
+                    },
+                    {
+                        "q": "memcache.rusage_user_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Memcached load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.fill_percent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Memcached filling percentage"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "memcache.evictions_rate{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Memcached evictions rate (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

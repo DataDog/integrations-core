@@ -5,44 +5,26 @@ files:
   - template: init_config
     options:
       - template: init_config/db
-      - name: proxy
+      - name: proxy_host
+        description: The host of your proxy server.
         value:
-          example:
-            http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
-            https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
-            no_proxy:
-              - <HOSTNAME_1>
-              - <HOSTNAME_2>
-          type: object
-          properties:
-            - name: http
-              type: string
-            - name: https
-              type: string
-            - name: no_proxy
-              type: array
-              items:
-                type: string
-        description: |
-          Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
-          to specify hosts that must bypass proxies.
-
-          The SOCKS protocol is also supported like so:
-
-            socks5://user:pass@host:port
-
-          Using the scheme `socks5` causes the DNS resolution to happen on the
-          client, rather than on the proxy server. This is in line with `curl`,
-          which uses the scheme to decide whether to do the DNS resolution on
-          the client or proxy. If you want to resolve the domains on the proxy
-          server, use `socks5h` as the scheme.
-      - name: skip_proxy
+          type: string
+          example: <PROXY_HOST>
+      - name: proxy_port
+        description: The port of your proxy server.
         value:
-          example: false
-          type: boolean
-        description: |
-          If set to `true`, this makes the check bypass any proxy
-          settings enabled and attempt to reach services directly.
+          type: integer
+          value: <PROXY_PORT>
+      - name: proxy_user
+        description: The username to authenticate your proxy server.
+        value:
+          type: string
+          value: <PROXY_USER>
+      - name: proxy_password
+        description: The password to authenticate your proxy server.
+        value:
+          type: string
+          value: <PROXY_PASSWORD>
       - template: init_config/default
   - template: instances
     options:
@@ -120,7 +102,7 @@ files:
           Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
         value:
           type: string
-          default: snowflake
+          display_default: snowflake
       - name: token
         description: Token used for OAuth connection to Snowflake.
         value:
@@ -170,48 +152,6 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
-      - name: proxy
-        value:
-          example:
-            http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
-            https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
-            no_proxy:
-              - <HOSTNAME_1>
-              - <HOSTNAME_2>
-          type: object
-          properties:
-            - name: http
-              type: string
-            - name: https
-              type: string
-            - name: no_proxy
-              type: array
-              items:
-                type: string
-        description: |
-          This overrides the `proxy` setting in `init_config`.
-
-          Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
-          to specify hosts that must bypass proxies.
-
-          The SOCKS protocol is also supported, for example:
-
-            socks5://user:pass@host:port
-
-          Using the scheme `socks5` causes the DNS resolution to happen on the
-          client, rather than on the proxy server. This is in line with `curl`,
-          which uses the scheme to decide whether to do the DNS resolution on
-          the client or proxy. If you want to resolve the domains on the proxy
-          server, use `socks5h` as the scheme.
-      - name: skip_proxy
-        value:
-          example: false
-          type: boolean
-        description: |
-          This overrides the `skip_proxy` setting in `init_config`.
-
-          If set to `true`, this makes the check bypass any proxy
-          settings enabled and attempt to reach services directly.
       - template: instances/default
         overrides:
           min_collection_interval.description: |
@@ -222,6 +162,6 @@ files:
             so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
 
             Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
-          min_collection_interval.default: 3600
+          min_collection_interval.display_default: 3600
           min_collection_interval.value.example: 3600
           min_collection_interval.enabled: 3600

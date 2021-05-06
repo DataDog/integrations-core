@@ -12,12 +12,13 @@ securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
 from securesystemslib.gpg.constants import GPG_COMMAND
 
-from in_toto import runlib, util
+from in_toto import runlib
+from securesystemslib.interface import import_rsa_privatekey_from_file
 
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git
 from ..subprocess import run_command
-from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
+from ..fs import chdir, ensure_dir_exists, path_join, stream_file_lines
 
 LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'
@@ -109,7 +110,7 @@ def update_link_metadata(checks, core_workflow=True):
         options = {'gpg_keyid': key_id, 'normalize_line_endings': True}
     else:
         signing_key_path = os.getenv('IN_TOTO_SIGNING_KEY_PATH', '')
-        signing_key = util.import_rsa_key_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
+        signing_key = import_rsa_privatekey_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
 
         # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
         # the latter of which we assume is the key filename.

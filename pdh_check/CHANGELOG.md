@@ -1,5 +1,18 @@
 # CHANGELOG - pdh_check
 
+## 1.13.0 / 2021-04-19
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 1.12.3 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.12.2 / 2020-12-11 / Agent 7.25.0
+
+* [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
+* [Fixed] Fix pdh configuration spec. See [#8106](https://github.com/DataDog/integrations-core/pull/8106).
+
 ## 1.12.1 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Upgrade isort. See [#7539](https://github.com/DataDog/integrations-core/pull/7539).

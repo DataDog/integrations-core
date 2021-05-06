@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from packaging.requirements import InvalidRequirement, Requirement
 
-from ..utils import stream_file_lines
+from ..fs import stream_file_lines
 from .constants import get_agent_requirements, get_root
 from .utils import get_valid_checks
 
@@ -17,6 +17,9 @@ class DependencyDefinition:
         self.file_path = file_path
         self.line_number = line_number
         self.check_name = check_name
+
+    def __repr__(self):
+        return f'<DependencyDefinition name={self.name} check_name={self.check_name} requirement={self.requirement}'
 
 
 def create_dependency_data():
@@ -40,14 +43,52 @@ def load_dependency_data(req_file, dependencies, errors, check_name=None):
         dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
 
 
-def read_check_dependencies():
+def load_base_check(req_file, dependencies, errors, check_name=None):
+    for i, line in enumerate(stream_file_lines(req_file)):
+        line = line.strip()
+        if line.startswith('CHECKS_BASE_REQ'):
+            try:
+                dep = line.split(' = ')[1]
+                req = Requirement(dep.strip("'"))
+            except (IndexError, InvalidRequirement) as e:
+                errors.append(f'File `{req_file}` has an invalid base check dependency: `{line}`\n{e}')
+                return
+
+            name = req.name.lower()
+            dependency = dependencies[name][req.specifier]
+            dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
+            return
+
+    # no `CHECKS_BASE_REQ` found in setup.py file ..
+    errors.append(f'File `{req_file}` missing base check dependency `CHECKS_BASE_REQ`')
+
+
+def read_check_dependencies(check=None):
     root = get_root()
     dependencies = create_dependency_data()
     errors = []
 
-    for check_name in get_valid_checks():
+    checks = sorted(get_valid_checks()) if check is None else [check]
+
+    for check_name in checks:
         req_file = os.path.join(root, check_name, 'requirements.in')
         load_dependency_data(req_file, dependencies, errors, check_name)
+
+    return dependencies, errors
+
+
+def read_check_base_dependencies(check=None):
+    root = get_root()
+    dependencies = create_dependency_data()
+    errors = []
+
+    checks = sorted(get_valid_checks()) if check is None else [check]
+
+    for check_name in checks:
+        if check_name.startswith('datadog_checks_'):
+            continue
+        req_file = os.path.join(root, check_name, 'setup.py')
+        load_base_check(req_file, dependencies, errors, check_name)
 
     return dependencies, errors
 

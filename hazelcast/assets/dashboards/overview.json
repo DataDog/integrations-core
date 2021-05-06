@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/hazelcast@2x.png",
+                "url": "/static/images/logos/hazelcast_large.svg",
                 "sizing": "zoom"
             },
             "layout": {

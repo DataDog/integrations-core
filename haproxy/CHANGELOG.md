@@ -1,6 +1,29 @@
 # CHANGELOG - haproxy
 
-## 2.14.1 / 2020-11-24
+## 2.17.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Add listener stats. See [#8723](https://github.com/DataDog/integrations-core/pull/8723). Thanks [wdauchy](https://github.com/wdauchy).
+* [Added] Add metrics for sticktable. See [#8642](https://github.com/DataDog/integrations-core/pull/8642). Thanks [wdauchy](https://github.com/wdauchy).
+* [Added] haproxy: prepare v2.4 release. See [#8623](https://github.com/DataDog/integrations-core/pull/8623). Thanks [wdauchy](https://github.com/wdauchy).
+* [Added] Add build_info metric. See [#8554](https://github.com/DataDog/integrations-core/pull/8554). Thanks [wdauchy](https://github.com/wdauchy).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.16.0 / 2021-01-24 / Agent 7.26.0
+
+* [Added] Revert "Update base package pin (#8426)". See [#8436](https://github.com/DataDog/integrations-core/pull/8436).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
+## 2.15.0 / 2021-01-22
+
+* [Added] Update base package pin. See [#8426](https://github.com/DataDog/integrations-core/pull/8426).
+* [Fixed] Adding support for v2.3. See [#8325](https://github.com/DataDog/integrations-core/pull/8325). Thanks [wdauchy](https://github.com/wdauchy).
+
+## 2.14.2 / 2021-01-11
+
+* [Fixed] Fix typo for ssl reuse metric. See [#8203](https://github.com/DataDog/integrations-core/pull/8203). Thanks [wdauchy](https://github.com/wdauchy).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
+## 2.14.1 / 2020-11-24 / Agent 7.25.0
 
 * [Fixed] Increase robustness of parsing of Unix socket responses in legacy implementation. See [#8080](https://github.com/DataDog/integrations-core/pull/8080).
 

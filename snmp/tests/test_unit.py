@@ -193,6 +193,11 @@ def test_parse_metrics(lcd_mock, caplog):
     assert column_tag.column == 'baz'
     assert column_tag.parsed_metric_tag.name == 'test'
 
+    # Invalid extract value pattern
+    metrics = [{"MIB": "foo_mib", "symbol": {"OID": "1.2.3", "name": "hey", "extract_value": "[aa-"}}]
+    with pytest.raises(Exception, match="Failed to compile regular expression"):
+        config.parse_metrics(metrics)
+
 
 def test_ignore_ip_addresses():
     # type: () -> None
@@ -581,3 +586,103 @@ def test_batches(items, size, output):
 def test_batches_size_must_be_strictly_positive(size):
     with pytest.raises(ValueError):
         list(batches([1, 2, 3], size=size))
+
+
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric():
+    instance = common.generate_instance_config([])
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+    results = {
+        'ifHighSpeed': {
+            ('1', '2'): 80,
+        },
+        'ifHCInOctets': {
+            ('1', '2'): 5000000,
+        },
+        'ifHCOutOctets': {
+            ('1', '2'): 1000000,
+        },
+    }
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
+    # ((5000000 * 8) / (80 * 1000000)) * 100 = 50.0
+    check.rate.assert_called_with('snmp.ifBandwidthInUsage.rate', 50.0, ['foo', 'bar'])
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
+    # ((1000000 * 8) / (80 * 1000000)) * 100 = 10.0
+    check.rate.assert_called_with('snmp.ifBandwidthOutUsage.rate', 10.0, ['foo', 'bar'])
+
+
+@pytest.mark.parametrize(
+    "results, metric_name, error_messages",
+    [
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCInOctets',
+            ['missing `ifHCInOctets`'],
+            id="missing ifHCInOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHCOutOctets`'],
+            id="missing ifHCOutOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 0,
+                },
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['Zero value at ifHighSpeed, skipping'],
+            id="zero ifHighSpeed",
+        ),
+        pytest.param(
+            {
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHighSpeed` metric'],
+            id="missing ifHighSpeed",
+        ),
+    ],
+)
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors(results, metric_name, error_messages, caplog):
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+
+    check.rate = mock.Mock()
+    with caplog.at_level(logging.DEBUG):
+        check.try_submit_bandwidth_usage_metric_if_bandwidth_metric(metric_name, index, results, tags)
+
+    check.rate.assert_not_called()
+    for msg in error_messages:
+        assert msg in caplog.text

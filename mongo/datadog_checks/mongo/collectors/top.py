@@ -1,6 +1,7 @@
 from six import iteritems
 
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.metrics import TOP_METRICS
 
 
@@ -9,8 +10,16 @@ class TopCollector(MongoCollector):
     section of the configuration.
     Can only be fetched from a mongod service."""
 
-    def collect(self, client):
-        dbtop = client["admin"].command('top')
+    def compatible_with(self, deployment):
+        # Can only be run on mongod nodes, and not on arbiters.
+        if isinstance(deployment, MongosDeployment):
+            return False
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            return False
+        return True
+
+    def collect(self, api):
+        dbtop = api["admin"].command('top')
         for ns, ns_metrics in iteritems(dbtop['totals']):
             if "." not in ns:
                 continue

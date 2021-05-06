@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS
+from .common import LATENCIES_METRICS, LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS, TPS_METRICS, VERSION
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -62,14 +62,23 @@ def _test_check(aggregator):
     for metric in NAMESPACE_METRICS:
         aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
+    if VERSION == '5.3.0.6':
+        for metric in LATENCIES_METRICS:
+            aggregator.assert_metric(metric)
+        aggregator.assert_metric('aerospike.set.device_data_bytes')
+
+    else:
+        for metric in TPS_METRICS:
+            aggregator.assert_metric("aerospike.namespace.{}".format(metric))
+
+        for metric in LAZY_METRICS:
+            aggregator.assert_metric(metric)
+
     for metric in STATS_METRICS:
         aggregator.assert_metric("aerospike.{}".format(metric))
 
     for metric in SET_METRICS:
         aggregator.assert_metric("aerospike.set.{}".format(metric))
-
-    for metric in LAZY_METRICS:
-        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
 

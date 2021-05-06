@@ -18,9 +18,13 @@ class CollStatsCollector(MongoCollector):
         self.coll_names = coll_names
         self.db_name = db_name
 
-    def collect(self, client):
+    def compatible_with(self, deployment):
+        # Can only be run once per cluster.
+        return deployment.is_principal()
+
+    def collect(self, api):
         # Ensure that you're on the right db
-        db = client[self.db_name]
+        db = api[self.db_name]
         # Loop through the collections
         for coll_name in self.coll_names:
             # Grab the stats from the collection

@@ -310,11 +310,11 @@ MODULES = [
 MODULE_METRICS = [
     (
         'azure.iot_edge.edge_agent.total_network_in_bytes',
-        AggregatorStub.GAUGE,
+        AggregatorStub.MONOTONIC_COUNT,
     ),
-    ('azure.iot_edge.edge_agent.total_network_out_bytes', AggregatorStub.GAUGE),
-    ('azure.iot_edge.edge_agent.total_disk_read_bytes', AggregatorStub.GAUGE),
-    ('azure.iot_edge.edge_agent.total_disk_write_bytes', AggregatorStub.GAUGE),
+    ('azure.iot_edge.edge_agent.total_network_out_bytes', AggregatorStub.MONOTONIC_COUNT),
+    ('azure.iot_edge.edge_agent.total_disk_read_bytes', AggregatorStub.MONOTONIC_COUNT),
+    ('azure.iot_edge.edge_agent.total_disk_write_bytes', AggregatorStub.MONOTONIC_COUNT),
     ('azure.iot_edge.edge_agent.total_disk_space_bytes', AggregatorStub.GAUGE),
     ('azure.iot_edge.edge_agent.created_pids_total', AggregatorStub.GAUGE),
     ('azure.iot_edge.edge_agent.total_time_expected_running_seconds', AggregatorStub.GAUGE),

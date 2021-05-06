@@ -6,7 +6,7 @@ import os
 
 import click
 
-from ....utils import file_exists, read_file, write_file
+from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success

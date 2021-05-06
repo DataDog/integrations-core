@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import ms_to_second
+from .utils import byte_to_mebibyte, ms_to_second
 
 # Metrics definition format is a dictionary mapping:
 # datadog_metric_name --> (datadog_metric_type, es_metric_name, optional_conversion_func)
@@ -235,6 +235,7 @@ ADDITIONAL_METRICS_PRE_5_0_0 = {
 # Metrics for index level
 INDEX_STATS_METRICS = {
     'elasticsearch.index.health': ('gauge', 'health'),
+    'elasticsearch.index.health.reverse': ('gauge', 'health_reverse'),
     'elasticsearch.index.docs.count': ('gauge', 'docs_count'),
     'elasticsearch.index.docs.deleted': ('gauge', 'docs_deleted'),
     'elasticsearch.index.primary_shards': ('gauge', 'primary_shards'),
@@ -485,19 +486,26 @@ CLUSTER_PENDING_TASKS = {
     'elasticsearch.pending_tasks_time_in_queue': ('gauge', 'pending_tasks_time_in_queue'),
 }
 
+SLM_POLICY_METRICS = {
+    'elasticsearch.slm.snapshot_deletion_failures': ('gauge', 'stats.snapshot_deletion_failures'),
+    'elasticsearch.slm.snapshots_deleted': ('gauge', 'stats.snapshots_deleted'),
+    'elasticsearch.slm.snapshots_failed': ('gauge', 'stats.snapshots_failed'),
+    'elasticsearch.slm.snapshots_taken': ('gauge', 'stats.snapshots_taken'),
+}
+
 NODE_SYSTEM_METRICS = {
-    'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
-    'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
-    'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
-    'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
-    'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
+    'system.mem.free': ('gauge', 'os.mem.free_in_bytes', lambda b: byte_to_mebibyte(b)),
+    'system.mem.usable': ('gauge', 'os.mem.free_in_bytes', lambda b: byte_to_mebibyte(b)),
+    'system.mem.used': ('gauge', 'os.mem.used_in_bytes', lambda b: byte_to_mebibyte(b)),
+    'system.swap.free': ('gauge', 'os.swap.free_in_bytes', lambda b: byte_to_mebibyte(b)),
+    'system.swap.used': ('gauge', 'os.swap.used_in_bytes', lambda b: byte_to_mebibyte(b)),
     'system.net.bytes_rcvd': ('gauge', 'transport.rx_size_in_bytes'),
     'system.net.bytes_sent': ('gauge', 'transport.tx_size_in_bytes'),
 }
 
 NODE_SYSTEM_METRICS_POST_1 = {
-    'system.mem.total': ('gauge', 'os.mem.total_in_bytes'),
-    'system.swap.total': ('gauge', 'os.swap.total_in_bytes'),
+    'system.mem.total': ('gauge', 'os.mem.total_in_bytes', lambda b: byte_to_mebibyte(b)),
+    'system.swap.total': ('gauge', 'os.swap.total_in_bytes', lambda b: byte_to_mebibyte(b)),
 }
 
 NODE_SYSTEM_METRICS_POST_5 = {
@@ -505,6 +513,24 @@ NODE_SYSTEM_METRICS_POST_5 = {
     'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
     'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
     'system.load.15': ('gauge', 'os.cpu.load_average.15m'),
+    'elasticsearch.cgroup.cpu.stat.number_of_elapsed_periods': (
+        'gauge',
+        'os.cgroup.cpu.stat.number_of_elapsed_periods',
+    ),
+    'elasticsearch.cgroup.cpu.stat.number_of_times_throttled': (
+        'gauge',
+        'os.cgroup.cpu.stat.number_of_times_throttled',
+    ),
+    'elasticsearch.process.cpu.percent': ('gauge', 'process.cpu.percent'),
+}
+
+CAT_ALLOCATION_METRICS = {
+    'elasticsearch.shards': ('gauge', 'shards'),
+    'elasticsearch.disk.indices': ('gauge', 'disk_indices'),
+    'elasticsearch.disk.used': ('gauge', 'disk_used'),
+    'elasticsearch.disk.avail': ('gauge', 'disk_avail'),
+    'elasticsearch.disk.total': ('gauge', 'disk_total'),
+    'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
 }
 
 
@@ -599,6 +625,17 @@ def health_stats_for_version(version):
         cluster_health_metrics.update(CLUSTER_HEALTH_METRICS_POST_2_4)
 
     return cluster_health_metrics
+
+
+def slm_stats_for_version(version):
+    """
+    Get the proper set of SLM metrics for the specified ES version
+    """
+    slm_health_metrics = {}
+    if version >= [7, 4, 0]:
+        slm_health_metrics.update(dict(SLM_POLICY_METRICS))
+
+    return slm_health_metrics
 
 
 def index_stats_for_version(version):

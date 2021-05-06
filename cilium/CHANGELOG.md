@@ -1,5 +1,17 @@
 # CHANGELOG - Cilium
 
+## 1.5.3 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 1.5.2 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
+## 1.5.1 / 2020-12-11 / Agent 7.25.0
+
+* [Fixed] Fix openmetrics integrations config specs. See [#8000](https://github.com/DataDog/integrations-core/pull/8000).
+
 ## 1.5.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

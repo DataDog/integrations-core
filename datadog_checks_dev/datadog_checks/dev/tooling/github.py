@@ -8,7 +8,7 @@ from typing import Optional
 
 import requests
 
-from ..utils import basepath
+from ..fs import basepath
 from .constants import CHANGELOG_LABEL_PREFIX, get_root
 
 API_URL = 'https://api.github.com'
@@ -214,5 +214,5 @@ class Github:
         raise Exception(
             'Make sure your GIT access token has one of the scope '
             + ", ".join(one_of_scopes)
-            + ' at https://github.com/settings/tokens'
+            + ' at https://github.com/settings/tokens and enable SSO on it'
         )

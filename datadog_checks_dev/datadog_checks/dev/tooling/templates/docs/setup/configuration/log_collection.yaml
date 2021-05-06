@@ -1,0 +1,27 @@
+name: Log collection
+header_level: 4
+description: |
+
+  1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+      ```yaml
+      logs_enabled: true
+      ```
+
+  2. Edit this configuration block in your `{check_conf_path}` file to start collecting your {display_name} logs:
+
+  {check_log_conf_snippet:4i}
+
+      Change the `path` parameter value based on your environment. See the [sample conf.yaml]({check_conf_link}) for all available configuration options.
+
+  3. [Restart the Agent][1].
+
+  See [Datadog's documentation][2] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+  [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+  [2]: https://docs.datadoghq.com/agent/kubernetes/log/
+
+parameters:
+  check_conf_path: "{integration_id}.d/conf.yaml"
+  check_log_conf_snippet:
+  check_conf_link: "https://github.com/DataDog/integrations-core/blob/master/{integration_id}/datadog_checks/{integration_id}/data/conf.yaml.example"

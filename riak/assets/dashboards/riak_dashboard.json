@@ -1,0 +1,133 @@
+{
+    "title": "Riak - Metrics",
+    "description": "This dashboard provides a high-level overview of your Riak databases, so you can track database performance and vnode throughput. Further reading on Riak monitoring:\n\n- [Datadog's Riak integration docs](https://docs.datadoghq.com/integrations/riak)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:riak.node_gets{$scope},sum:riak.node_puts{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak node GET / PUT"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:riak.vnode_gets{$scope},sum:riak.vnode_puts{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak vnode GET / PUT"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:riak.vnode_index_reads{$scope},sum:riak.vnode_index_writes{$scope},sum:riak.vnode_index_deletes{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak vnode index"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riak.memory_processes{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak processes memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "riak.memory_total{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak total memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:riak.pbc_active{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Riak active connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

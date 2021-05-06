@@ -4,6 +4,7 @@
 import logging
 import os
 import ssl
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict
 
 from six import iteritems
@@ -35,9 +36,17 @@ STANDARD_FIELDS = {
 class TlsContextWrapper(object):
     __slots__ = ('logger', 'config', 'tls_context')
 
-    def __init__(self, instance, remapper=None):
-        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]]) -> None
+    def __init__(self, instance, remapper=None, overrides=None):
+        # type: (InstanceType, Dict[AnyStr, Dict[AnyStr, Any]], Dict[AnyStr, Any]) -> None
         default_fields = dict(STANDARD_FIELDS)
+
+        # Override existing config options if there exists any overrides
+        instance = deepcopy(instance)
+
+        if overrides:
+            for overridden_field, data in iteritems(overrides):
+                if instance.get(overridden_field):
+                    instance[overridden_field] = data
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}

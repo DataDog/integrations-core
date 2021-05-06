@@ -18,7 +18,7 @@ files:
         used to collect the Gitlab version.
       value:
         type: string
-    - template: instances/openmetrics
+    - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://<GITLAB_URL>/-/metrics
         send_distribution_counts_as_monotonic.enabled: true
@@ -27,7 +27,7 @@ files:
         send_monotonic_counter.value.example: true
   - template: init_config
     options:
-      - template: init_config/openmetrics
+      - template: init_config/openmetrics_legacy
       - name: allowed_metrics
         description: The list of legacy metrics to extract from Prometheus.
         value:

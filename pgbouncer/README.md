@@ -24,6 +24,17 @@ This check needs an associated user to query your PgBouncer instance:
    "datadog" "<PASSWORD>"
    ```
 
+3. To verify the credentials, run the following command:
+
+   ```shell
+   psql -h localhost -U datadog -p 6432 pgbouncer -c \
+   "SHOW VERSION;" \
+   && echo -e "\e[0;32mpgBouncer connection - OK\e[0m" \
+   || echo -e "\e[0;31mCannot connect to pgBouncer\e[0m"
+   ```
+
+   When it prompts for a password, enter the password you added to the `userlist.txt`.
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -42,10 +53,12 @@ To configure this check for an Agent running on a host:
 
    instances:
      ## @param database_url - string - required
-     ## `database_url` parameter should point to PgBouncer stats database url
+     ## `database_url` parameter should point to PgBouncer stats database url (ie. "pgbouncer")
      #
      - database_url: "postgresql://datadog:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require"
    ```
+
+   **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For more information on SSL support, see the [Postgres documentation][10].
 
 2. [Restart the Agent][4].
 
@@ -69,7 +82,7 @@ _Available for Agent versions >6.0_
        service: "<SERVICE_NAME>"
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample pgbouncer.d/conf.yaml][3] for all available configuration options.
+   Change the `path` and `service` parameter values and configure them for your environment. See the [sample pgbouncer.d/conf.yaml][3] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -84,7 +97,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `pgbouncer`                                                                                               |
+| `<INTEGRATION_NAME>` | `pgbouncer`                                                                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                          |
 | `<INSTANCE_CONFIG>`  | `{"database_url": "postgresql://datadog:<PASSWORD>@%%host%%:%%port%%/<DATABASE_URL>?sslmode=require"}` |
 
@@ -135,3 +148,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.postgresql.org/docs/9.1/libpq-ssl.html

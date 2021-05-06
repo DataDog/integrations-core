@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<deployment>
+    <!--
+    NOTE: if the number of nodes, sites and the K-factor aren't appropriate, the cluster won't start.
+    Rule of thumb: "num_nodes * sitesperhost (= total number of partitions) must be a multiple of K.""
+    See: https://docs.voltdb.com/UsingVoltDB/KSafeEnable.php#KSafeCalculate
+
+    Let's check:
+    * 3 nodes (see docker-compose.yaml), 2 sites per host => total number of partitions = 3*2 = 6
+    * K=1 => number of copies = K+1 = 2
+    * 6 is a multiple of 2
+    * => OK
+    -->
+    <cluster sitesperhost="2" kfactor="1" />
+
+    <!-- Not supported in community edition. -->
+    <!-- <commandlog enabled="true" /> -->
+
+    <httpd enabled="true">
+        <jsonapi enabled="true" />
+    </httpd>
+
+    <security enabled="true" />
+    <users>
+        <!-- Hashes generated using `voltdb mask`, see: https://docs.voltdb.com/UsingVoltDB/clivoltdb.php -->
+        <user name="admin" password="D033E22AE348AEB5660FC2140AEC35850C4DA9978C6976E5B5410415BDE908BD4DEE15DFB167A9C873FC4BB8A81F6F2AB448A918" plaintext="false" roles="administrator" />
+        <user name="doggo" password="5F0CBA0F956DFAEEDCB2778E494E6CE0CAEE5B5CE81255CEE7BD2C4FBB4C8D6E9D6BA1D33A912BDFA9901DC9ACFB2BD7F3E8EEB1" plaintext="false" roles="user" />
+    </users>
+
+    <!-- See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php -->
+    <ssl enabled="true" external="true">
+        <keystore path="/tmp/certs/voltdb_key.jks" password="tlspass"/>
+        <truststore path="/tmp/certs/voltdb_trust.jks" password="tlspass"/>
+    </ssl>
+</deployment>

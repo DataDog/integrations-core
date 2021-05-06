@@ -288,6 +288,12 @@ class Win32EventLogCheck(AgentCheck):
             while True:
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext
                 # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtNext_meth.html
+                #
+                # An error saying EvtNext: The operation identifier is not valid happens
+                # when you call the method and there are no events to read (i.e. polling).
+                # There is an unreleased upstream contribution to return
+                # an empty tuple instead https://github.com/mhammond/pywin32/pull/1648
+                # For the moment is logged as a debug line.
                 try:
                     events = win32evtlog.EvtNext(self._subscription, self._payload_size)
                 except pywintypes.error as e:

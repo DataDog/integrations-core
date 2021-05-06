@@ -25,6 +25,9 @@ instances:
     ##   - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
     ##
     ## If the port number is not specified, the default port 27017 is used.
+    ##
+    ## Even if the host is an arbiter node, you still need to provide authentication credentials
+    ## as the check will create an additional connection to the primary in this specific case.
     #
   - hosts:
       - <HOST_1>
@@ -56,11 +59,6 @@ instances:
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
-
-    ## @param connection_scheme - string - optional - default: mongodb
-    ## A prefix indicating the connection string format e.g. mongodb+srv.
-    #
-    # connection_scheme: mongodb
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -164,7 +162,7 @@ instances:
     ##
     ## Release: 8.0.0
     ## Migration: Use the following options instead:
-    ##            hosts, username, password, database, options, connection_scheme
+    ##            hosts, username, password, database, options
     #
     # server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
 

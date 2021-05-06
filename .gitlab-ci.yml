@@ -2,6 +2,7 @@ variables:
   REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
+  VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
@@ -19,6 +20,7 @@ variables:
 
 stages:
   - build
+  - trigger
   - validate
   - release
   - notify
@@ -30,14 +32,15 @@ validate-log-integrations:
   only:
   - schedules
   variables:
-    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/integrations/integrations.ts
+    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/shared/integrations/integrations.ts
     LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
     INTEGRATIONS_CORE_ROOT: .
   script:
+    - cd /app
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
-    - ts-node /scripts/parse_ts.ts > logs_integrations.json
+    - ts-node parse_ts.ts > logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 /scripts/validate_log_intgs.py logs_integrations.json 2> errors.txt
+    - python3 validate_log_intgs.py logs_integrations.json 2> errors.txt
   artifacts:
     paths:
     - errors.txt
@@ -45,6 +48,34 @@ validate-log-integrations:
     when: always
   tags: [ "runner:main", "size:large" ]
 
+# trigger-agent-build:
+#   stage: trigger
+#   image: $VALIDATE_AGENT_BUILD
+#   only:
+#     changes:
+#     - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+#   script:
+#     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+#     - DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+#   artifacts:
+#     paths:
+#     - pipeline_id.txt
+#     expire_in: 1 day
+#     when: always
+#   tags: [ "runner:main", "size:large" ]
+
+
+# validate-agent-build:
+#   stage: validate
+#   image: $VALIDATE_AGENT_BUILD
+#   only:
+#     changes:
+#     - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+#   script:
+#     - GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
+#     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+#     - GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt)
+#   tags: [ "runner:main", "size:large" ]
 
 notify-slack:
   stage: notify
@@ -61,8 +92,19 @@ notify-slack:
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
-  when: always
   tags: [ "runner:main", "size:large" ]
+
+
+notify-failed-pipeline:
+  stage: notify
+  image: $NOTIFIER_IMAGE
+  when: on_failure
+  script:
+    - |
+      MESSAGE="The pipeline uncountered an unexpected error."
+      postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+  tags: [ "runner:main", "size:large" ]
+
 
 release-auto:
   stage: release
@@ -144,4 +186,19 @@ validate-log-intgs-builder:
     - docker build --tag $VALIDATE_LOG_INTGS .
     - docker images $VALIDATE_LOG_INTGS
     - docker push $VALIDATE_LOG_INTGS
+  tags: [ "runner:docker", "size:large" ]
+
+validate-agent-build-builder:
+  stage: build
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  only:
+    changes:
+      - .gitlab/validate-agent-build/**
+    refs:
+      - master
+  script:
+    - cd .gitlab/validate-agent-build/
+    - docker build --tag $VALIDATE_AGENT_BUILD .
+    - docker images $VALIDATE_AGENT_BUILD
+    - docker push $VALIDATE_AGENT_BUILD
   tags: [ "runner:docker", "size:large" ]

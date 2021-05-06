@@ -1,5 +1,18 @@
 # CHANGELOG - Confluent Platform
 
+## 1.4.0 / 2021-03-30
+
+* [Added] Add 'DelayQueueSize'. See [#9033](https://github.com/DataDog/integrations-core/pull/9033).
+* [Added] Add 'RequestHandlerAvgIdlePercent' as a 'OneMinuteRate'. See [#9032](https://github.com/DataDog/integrations-core/pull/9032).
+
+## 1.3.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.3.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+
 ## 1.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

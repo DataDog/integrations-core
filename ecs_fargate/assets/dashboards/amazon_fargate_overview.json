@@ -6,8 +6,9 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/amazon_fargate@2x.png",
-                "sizing": "zoom"
+                "url": "/static/images/logos/aws-fargate_avatar.svg",
+                "sizing": "fit",
+                "margin":"small"
             },
             "layout": {
                 "x": 1,

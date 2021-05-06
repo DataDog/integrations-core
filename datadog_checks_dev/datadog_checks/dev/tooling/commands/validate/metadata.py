@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from collections import defaultdict
 
@@ -14,7 +15,7 @@ from ...utils import (
     normalize_display_name,
     read_metadata_rows,
 )
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -181,18 +182,33 @@ VALID_UNIT_NAMES = {
     'exacore',
     'build',
     'prediction',
+    'heap',
+    'volume',
     'watt',
     'kilowatt',
     'megawatt',
     'gigawatt',
     'terawatt',
-    'heap',
-    'volume',
+    'view',
+    'microdollar',
+    'euro',
+    'pound',
+    'penny',
+    'yen',
     'milliwatt',
     'microwatt',
     'nanowatt',
+    'ampere',
+    'milliampere',
+    'volt',
+    'millivolt',
+    'deciwatt',
+    'decidegree celsius',
+    'span',
+    'exception',
 }
 
+ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
@@ -267,6 +283,7 @@ def metadata(check, check_duplicates, show_warnings):
         display_name = manifest['display_name']
 
         metadata_file = get_metadata_file(current_check)
+        echo_debug(f"Checking {metadata_file}")
 
         # To make logging less verbose, common errors are counted for current check
         metric_prefix_count = defaultdict(int)
@@ -277,6 +294,9 @@ def metadata(check, check_duplicates, show_warnings):
         duplicate_description_set = set()
 
         metric_prefix_error_shown = False
+        if os.stat(metadata_file).st_size == 0:
+            errors = True
+            echo_failure(f"{current_check} metadata file is empty. This file needs the header row at minimum")
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
@@ -318,9 +338,10 @@ def metadata(check, check_duplicates, show_warnings):
 
             # metric_name header
             if metric_prefix:
-                if not row['metric_name'].startswith(metric_prefix):
-                    prefix = row['metric_name'].split('.')[0]
-                    metric_prefix_count[prefix] += 1
+                prefix = row['metric_name'].split('.')[0]
+                if prefix not in ALLOWED_PREFIXES:
+                    if not row['metric_name'].startswith(metric_prefix):
+                        metric_prefix_count[prefix] += 1
             else:
                 errors = True
                 if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
@@ -370,7 +391,7 @@ def metadata(check, check_duplicates, show_warnings):
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
 
             # check if there is unicode
-            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+            elif any(not content.isascii() for _, content in row.items()):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 
@@ -389,17 +410,15 @@ def metadata(check, check_duplicates, show_warnings):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
+        for prefix, count in metric_prefix_count.items():
+            echo_failure(
+                f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                "defined in the manifest."
+            )
+
         if show_warnings:
             for header, count in empty_warning_count.items():
                 echo_warning(f'{current_check}: {header} is empty in {count} rows.')
-
-            for prefix, count in metric_prefix_count.items():
-                # Don't spam this warning when we're validating everything
-                if check:
-                    echo_warning(
-                        f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                        "defined in the manifest."
-                    )
 
     if errors:
         abort()

@@ -16,6 +16,7 @@ class TrelloClient:
     MEMBER_ENPOINT = API_URL + '/1/members'
     HAVE_BUG_FIXE_ME_COLUMN = '58f0c271cbf2d534bd626916'
     FIXED_READY_TO_REBUILD_COLUMN = '5d5a8a50ca7a0189ae8ac5ac'
+    RC_BUILDS_COLUMN = '5727778db5367f8b4cb520ca'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -31,7 +32,7 @@ class TrelloClient:
             'Trace': '5bcf3ffbe0651642ae029038',
             'Tools and Libraries': '5ef373fb33b7b805120d5011',
             'Runtime-Security': '5f3148683b7428276f0f2133',
-            'Infra Integrations': '5f9f9e09af18c18c628d80ee',
+            'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
@@ -45,7 +46,7 @@ class TrelloClient:
             'team/logs': 'Logs',
             'team/intg-tools-libs': 'Tools and Libraries',
             'team/agent-security': 'Runtime-Security',
-            'team/infra-integrations': 'Infra Integrations',
+            'team/infra-integrations': 'Infra-Integrations',
         }
 
         self.label_github_team_map = {
@@ -75,13 +76,13 @@ class TrelloClient:
             'Trace': '5c050640ecb34f0915ec589a',
             'Tools and Libraries': '5ab12740841642c2a8829053',
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
-            'Infra Integrations': '5f9fa48537fb6633584b0e3e',
+            'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
         }
         self.progress_columns = {
-            '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
+            '600ec7ad2b78475e13c04cfc': 'In Progress',  # INPROGRESS
             self.HAVE_BUG_FIXE_ME_COLUMN: 'Issues Found',  # HAVE BUGS
             self.FIXED_READY_TO_REBUILD_COLUMN: 'Awaiting Build',  # WAITING
-            '5dfb4eef503607473af708ab': 'Done',
+            '600eab615842d6560f6ce898': 'Done',
         }
 
         self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
@@ -150,18 +151,23 @@ class TrelloClient:
         cards = requests.get(self.BOARD_ENDPOINT, params=self.auth)
         for card in cards.json():
             labels = card.get('labels', [])
+            team_found = False
             for label in labels:
                 if label['name'] in self.label_map:
                     team = label['name']
                     id_list = card['idList']
-
                     if id_list in map_team_list:
                         counts[team]['Total'] += 1
                         counts[team]['Inbox'] += 1
                     elif id_list in self.progress_columns:
                         counts[team]['Total'] += 1
                         counts[team][self.progress_columns[id_list]] += 1
-
+                    team_found = True
+            if not team_found and len(labels) >= 1 and card['idList'] != self.RC_BUILDS_COLUMN:
+                label_names = list(map(lambda label: label['name'], labels))
+                raise Exception(
+                    f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?'
+                )
         return counts
 
     def get_card(self, card_id):

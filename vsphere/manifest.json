@@ -30,7 +30,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "vsphere-overview": "assets/dashboards/vsphere_overview.json"
+      "vsphere-overview": "assets/dashboards/vsphere_overview.json",
+      "vsphere": "assets/dashboards/vsphere_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {},

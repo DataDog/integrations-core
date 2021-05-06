@@ -1,5 +1,36 @@
 # CHANGELOG - elastic
 
+## 2.1.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8911](https://github.com/DataDog/integrations-core/pull/8911).
+* [Fixed] Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).
+
+## 2.0.0 / 2021-04-09
+
+* [Added] Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
+* [Changed] Normalize memory stats to mebibytes. See [#9128](https://github.com/DataDog/integrations-core/pull/9128).
+
+## 1.24.0 / 2021-02-10 / Agent 7.27.0
+
+* [Added] Rename cluster_name tag to elastic_cluster. See [#8526](https://github.com/DataDog/integrations-core/pull/8526).
+* [Fixed] Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.23.0 / 2021-01-15
+
+* [Added] Add SLM metrics. See [#8335](https://github.com/DataDog/integrations-core/pull/8335).
+* [Added] Add index.health.reverse metric. See [#8362](https://github.com/DataDog/integrations-core/pull/8362).
+* [Added] Add additional node metrics to monitor cpu throttling. See [#8290](https://github.com/DataDog/integrations-core/pull/8290). Thanks [onurdialpad](https://github.com/onurdialpad).
+
+## 1.22.1 / 2020-12-17 / Agent 7.25.0
+
+* [Fixed] Fix tags memory leak. See [#8213](https://github.com/DataDog/integrations-core/pull/8213).
+
+## 1.22.0 / 2020-12-11
+
+* [Added] Submit jvm.gc.collectors metrics as rate. See [#7924](https://github.com/DataDog/integrations-core/pull/7924).
+* [Fixed] Update check signature. See [#8114](https://github.com/DataDog/integrations-core/pull/8114).
+
 ## 1.21.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

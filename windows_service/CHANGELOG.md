@@ -1,5 +1,21 @@
 # CHANGELOG - windows_service
 
+## 3.1.0 / 2021-04-19
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 3.0.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 3.0.0 / 2021-01-25 / Agent 7.26.0
+
+* [Changed] Report UNKNOWN instead of CRITICAL if no Windows service matches the query. See [#8171](https://github.com/DataDog/integrations-core/pull/8171).
+
+## 2.8.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] windows service config specs. See [#7974](https://github.com/DataDog/integrations-core/pull/7974).
+
 ## 2.7.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

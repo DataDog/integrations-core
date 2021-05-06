@@ -62,6 +62,8 @@ class OpenMetricsScraperMixin(object):
 
         A default mixin configuration will be returned if there is no instance.
         """
+        if 'openmetrics_endpoint' in instance:
+            raise CheckException('The setting `openmetrics_endpoint` is only available for Agent version 7 or later')
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:
@@ -497,7 +499,10 @@ class OpenMetricsScraperMixin(object):
             # Garbage collect unused mapping and reset active labels
             for metric, mapping in list(iteritems(scraper_config['_label_mapping'])):
                 for key in list(mapping):
-                    if key not in scraper_config['_active_label_mapping'][metric]:
+                    if (
+                        metric in scraper_config['_active_label_mapping']
+                        and key not in scraper_config['_active_label_mapping'][metric]
+                    ):
                         del scraper_config['_label_mapping'][metric][key]
             scraper_config['_active_label_mapping'] = {}
         finally:
@@ -728,6 +733,10 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
+            # check for wilcards in transformers
+            for transformer_name, transformer in iteritems(metric_transformers):
+                if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
+                    transformer(metric, scraper_config, transformer_name)
 
             # try matching wildcards
             if scraper_config['_wildcards_re'] and scraper_config['_wildcards_re'].search(metric.name):

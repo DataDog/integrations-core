@@ -409,8 +409,11 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
+**mysql.replication.replica_running**:<br>
+Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
+
 **mysql.replication.slave_running**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance, otherwise returns `OK`. See [this][16] for more details.
+Deprecated in favor of `mysql.replication.replica_running`. Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
 
 **mysql.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, otherwise returns `OK`.

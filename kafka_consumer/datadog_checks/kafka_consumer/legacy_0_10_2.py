@@ -93,11 +93,20 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
+                self.log.debug('Collecting consumer offsets')
                 self._get_kafka_consumer_offsets(contexts_limit)
                 contexts_limit -= len(self._kafka_consumer_offsets)
             except Exception:
                 self.log.exception("There was a problem collecting consumer offsets from Kafka.")
                 # don't raise because we might get valid broker offsets
+        else:
+            self.log.debug(
+                'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
+                ' Skipping consumer offset collection',
+                str(self._kafka_client.config.get('api_version')),
+                str(instance.get('kafka_consumer_offsets')),
+                str(self._zk_hosts_ports),
+            )
 
         # Fetch the broker highwater offsets
         try:
@@ -200,7 +209,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         for broker in self._kafka_client.cluster.brokers():
             if len(self._highwater_offsets) >= contexts_limit:
-                self.log.debug("Context limit reached. Skipping highwater offsets collection.")
+                self.warning("Context limit reached. Skipping highwater offsets collection.")
                 return
             broker_led_partitions = self._kafka_client.cluster.partitions_for_broker(broker.nodeId)
             if broker_led_partitions is None:
@@ -237,7 +246,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
                     if len(self._highwater_offsets) >= contexts_limit:
-                        self.log.debug("Context limit reached. Skipping highwater offsets processing.")
+                        self.warning("Context limit reached. Skipping highwater offsets processing.")
                         return
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
@@ -280,7 +289,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             if 'source' in kwargs:
                 consumer_group_tags.append('source:%s' % kwargs['source'])
             consumer_group_tags.extend(self._custom_tags)
-            if partition in self._kafka_client.cluster.partitions_for_topic(topic):
+
+            partitions = self._kafka_client.cluster.partitions_for_topic(topic)
+            if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
@@ -310,13 +321,17 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     self.log.debug(message)
 
             else:
-                self.log.warning(
-                    "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
-                    "appear to exist in the cluster so skipping reporting these offsets.",
-                    consumer_group,
-                    topic,
-                    partition,
-                )
+                if partitions is None:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
+                        "in the cluster, so skipping reporting these offsets."
+                    )
+                else:
+                    msg = (
+                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
+                        "included in the cluster partitions, so skipping reporting these offsets."
+                    )
+                self.log.warning(msg, consumer_group, topic, partition)
                 self._kafka_client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_zk_path_children(self, zk_path, name_for_error):
@@ -374,7 +389,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         self._zk_consumer_offsets[key] = consumer_offset
 
                         if len(self._zk_consumer_offsets) >= contexts_limit:
-                            self.log.debug("Context limit reached. Skipping zk consumer offsets collection.")
+                            self.warning("Context limit reached. Skipping zk consumer offsets collection.")
                             return
                     except NoNodeError:
                         self.log.info('No zookeeper node at %s', zk_path)
@@ -424,7 +439,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                             self._kafka_consumer_offsets[key] = offset
 
                             if len(self._kafka_consumer_offsets) >= contexts_limit:
-                                self.log.debug("Context limit reached. Skipping kafka consumer offsets collection.")
+                                self.warning("Context limit reached. Skipping kafka consumer offsets collection.")
                                 return
                 else:
                     self.log.info("unable to find group coordinator for %s", consumer_group)

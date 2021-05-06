@@ -3,7 +3,11 @@ from copy import deepcopy
 import pymongo
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import ALLOWED_CUSTOM_METRICS_TYPES, ALLOWED_CUSTOM_QUERIES_COMMANDS
+from datadog_checks.mongo.common import (
+    ALLOWED_CUSTOM_METRICS_TYPES,
+    ALLOWED_CUSTOM_QUERIES_COMMANDS,
+    ReplicaSetDeployment,
+)
 
 
 class CustomQueriesCollector(MongoCollector):
@@ -13,6 +17,13 @@ class CustomQueriesCollector(MongoCollector):
         super(CustomQueriesCollector, self).__init__(check, tags)
         self.custom_queries = custom_queries
         self.db_name = db_name
+
+    def compatible_with(self, deployment):
+        # Can theoretically be run on any node as long as it contains data.
+        # i.e Arbiters are ruled out
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            return False
+        return True
 
     @staticmethod
     def _extract_command_from_mongo_query(mongo_query):
@@ -32,10 +43,10 @@ class CustomQueriesCollector(MongoCollector):
             raise ValueError('Metric type {} is not one of {}.'.format(method_name, ALLOWED_CUSTOM_METRICS_TYPES))
         return getattr(self.check, method_name)
 
-    def _collect_custom_metrics_for_query(self, client, raw_query):
+    def _collect_custom_metrics_for_query(self, api, raw_query):
         """Validates the raw_query object, executes the mongo query then submits the metrics to Datadog"""
         db_name = raw_query.get('database', self.db_name)
-        db = client[db_name]
+        db = api[db_name]
         tags = self.base_tags + ["db:{}".format(db_name)]
         metric_prefix = raw_query.get('metric_prefix')
         if not metric_prefix:  # no cov
@@ -133,10 +144,10 @@ class CustomQueriesCollector(MongoCollector):
         if empty_result_set:
             raise Exception('Custom query returned an empty result set.')
 
-    def collect(self, client):
+    def collect(self, api):
         for raw_query in self.custom_queries:
             try:
-                self._collect_custom_metrics_for_query(client, raw_query)
+                self._collect_custom_metrics_for_query(api, raw_query)
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)

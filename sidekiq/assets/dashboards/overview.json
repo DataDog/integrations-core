@@ -5,7 +5,7 @@
 		"id": 0,
 		"definition": {
 			"type": "image",
-			"url": "https://static.datadoghq.com/static/images/saas_logos/bot/sidekiq@2x.png",
+			"url": "/static/images/logos/sidekiq_large.svg",
 			"sizing": "zoom"
 		},
 		"layout": {

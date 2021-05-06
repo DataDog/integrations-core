@@ -1,5 +1,15 @@
 # CHANGELOG - couchbase
 
+## 1.17.0 / 2021-03-01 / Agent 7.27.0
+
+* [Added] Add support for Sync Gateway metrics. See [#8691](https://github.com/DataDog/integrations-core/pull/8691).
+* [Added] Refactor and use new Agent signature. See [#8712](https://github.com/DataDog/integrations-core/pull/8712).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.16.1 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Fix error log message. See [#8271](https://github.com/DataDog/integrations-core/pull/8271).
+
 ## 1.16.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

@@ -23,20 +23,21 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
-    def check(self, instance):
-        base_url = instance.get("url", "")
-        base_tags = instance.get("tags", [])
-        whitelisted_services = instance.get("services", [])
+    def __init__(self, name, init_config, instances):
+        super(AmbariCheck, self).__init__(name, init_config, instances)
 
-        clusters = self.get_clusters(base_url, base_tags)
-        self.get_host_metrics(base_url, clusters, base_tags)
+        self.base_url = self.instance.get("url", "")
+        self.base_tags = self.instance.get("tags", [])
+        self.included_services = self.instance.get("services", [])
+
+    def check(self, _):
+        clusters = self.get_clusters()
+        self.get_host_metrics(clusters)
 
         collect_service_metrics = self._should_collect_service_metrics()
         collect_service_status = self._should_collect_service_status()
         if collect_service_metrics or collect_service_status:
-            self.get_service_status_and_metrics(
-                base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
-            )
+            self.get_service_status_and_metrics(clusters, collect_service_metrics, collect_service_status)
 
     def _should_collect_service_metrics(self):
         return self.init_config.get("collect_service_metrics", True)
@@ -44,9 +45,9 @@ class AmbariCheck(AgentCheck):
     def _should_collect_service_status(self):
         return self.init_config.get("collect_service_status", False)
 
-    def get_clusters(self, base_url, tags):
-        clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
-        service_check_tags = tags + ["url:{}".format(base_url)]
+    def get_clusters(self):
+        clusters_endpoint = common.CLUSTERS_URL.format(base_url=self.base_url)
+        service_check_tags = self.base_tags + ["url:{}".format(self.base_url)]
         resp = self._make_request(clusters_endpoint)
         if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, service_check_tags)
@@ -71,12 +72,11 @@ class AmbariCheck(AgentCheck):
 
         return clusters
 
-    def get_host_metrics(self, base_url, clusters, base_tags=None):
-        base_tags = base_tags or []
+    def get_host_metrics(self, clusters):
         external_tags = []
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
-            hosts_list = self._get_hosts_info(base_url, cluster)
+            hosts_list = self._get_hosts_info(cluster)
 
             for host in hosts_list:
                 h = host.get('Hosts')
@@ -96,32 +96,30 @@ class AmbariCheck(AgentCheck):
 
                 metrics = self.flatten_host_metrics(host_metrics)
                 for metric_name, value in iteritems(metrics):
-                    metric_tags = base_tags + [cluster_tag]
+                    metric_tags = self.base_tags + [cluster_tag]
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags, hostname)
                     else:
                         self.warning("Expected a float for %s, received %s", metric_name, value)
         self.set_external_tags(external_tags)
 
-    def get_service_status_and_metrics(
-        self, base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
-    ):
-        if not whitelisted_services:
-            self.log.warning("Service metrics or status collection activated but no services have been whitelisted")
+    def get_service_status_and_metrics(self, clusters, collect_service_metrics, collect_service_status):
+        if not self.included_services:
+            self.log.warning("Service metrics or status collection activated but no services have been included")
             return
 
         for cluster in clusters:
-            tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
-            for service, components in iteritems(whitelisted_services):
+            tags = self.base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
+            for service, components in iteritems(self.included_services):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
 
                 if collect_service_metrics:
-                    self.get_component_metrics(base_url, cluster, service, service_tags, components)
+                    self.get_component_metrics(cluster, service, service_tags, components)
                 if collect_service_status:
-                    self.get_service_checks(base_url, cluster, service, service_tags)
+                    self.get_service_checks(cluster, service, service_tags)
 
-    def get_service_checks(self, base_url, cluster, service, service_tags):
-        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
+    def get_service_checks(self, cluster, service, service_tags):
+        service_check_endpoint = common.create_endpoint(self.base_url, cluster, service, SERVICE_INFO_QUERY)
         service_resp = self._make_request(service_check_endpoint)
         if service_resp is None:
             self._submit_service_checks("state", self.CRITICAL, service_tags)
@@ -132,14 +130,14 @@ class AmbariCheck(AgentCheck):
                 "state", common.status_to_service_check(state), service_tags + ['state:%s' % state], message=state
             )
 
-    def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
-        if not component_whitelist:
-            self.log.warning("Service metrics collection activated but no components have been whitelisted")
+    def get_component_metrics(self, cluster, service, base_tags, component_included):
+        if not component_included:
+            self.log.warning("Service metrics collection activated but no components have been included")
             return
 
-        component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
+        component_metrics_endpoint = common.create_endpoint(self.base_url, cluster, service, COMPONENT_METRICS_QUERY)
         components_response = self._make_request(component_metrics_endpoint)
-        component_whitelist = {k.upper(): v for k, v in iteritems(component_whitelist)}
+        component_included = {k.upper(): v for k, v in iteritems(component_included)}
 
         if components_response is None or 'items' not in components_response:
             self.log.warning("No components found for service %s.", service)
@@ -148,8 +146,8 @@ class AmbariCheck(AgentCheck):
         for component in components_response['items']:
             component_name = component['ServiceComponentInfo']['component_name']
 
-            if component_name not in component_whitelist:
-                self.log.debug('Component %s not whitelisted', component_name)
+            if component_name not in component_included:
+                self.log.debug('Component %s not included', component_name)
                 continue
             component_metrics = component.get(METRICS_FIELD)
             if component_metrics is None:
@@ -157,7 +155,7 @@ class AmbariCheck(AgentCheck):
                 self.log.debug("No metrics found for component %s for service %s", component_name, service)
                 continue
 
-            for header in component_whitelist[component_name]:
+            for header in component_included[component_name]:
                 if header not in component_metrics:
                     self.log.warning(
                         "No %s metrics found for component %s for service %s", header, component_name, service
@@ -173,8 +171,8 @@ class AmbariCheck(AgentCheck):
                     else:
                         self.warning("Expected a float for %s, received %s", metric_name, value)
 
-    def _get_hosts_info(self, base_url, cluster):
-        hosts_endpoint = common.HOST_METRICS_URL.format(base_url=base_url, cluster_name=cluster)
+    def _get_hosts_info(self, cluster):
+        hosts_endpoint = common.HOST_METRICS_URL.format(base_url=self.base_url, cluster_name=cluster)
         resp = self._make_request(hosts_endpoint)
 
         return resp.get('items')

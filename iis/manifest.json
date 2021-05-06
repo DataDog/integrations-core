@@ -25,7 +25,11 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[IIS] Anomalous amount of requests for site: {{site.name}}": "assets/monitors/req.json",
+      "[IIS] Increase of not found error per second for site: {{site.name}}": "assets/monitors/err.json",
+      "[IIS] Increase of locked error per second for site: {{site.name}}": "assets/monitors/lock.json"
+    },
     "dashboards": {
       "iis": "assets/dashboards/iis_dashboard.json",
       "IIS-Overview": "assets/dashboards/iis_overview.json"

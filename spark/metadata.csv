@@ -80,3 +80,9 @@ spark.streaming.statistics.num_received_records,count,,record,,Number of receive
 spark.streaming.statistics.num_receivers,gauge,,object,,Number of streaming application's receivers,0,spark,num receivers
 spark.streaming.statistics.num_retained_completed_batches,count,,job,,Number of retained completed application's streaming batches,0,spark,num retained completed batches
 spark.streaming.statistics.num_total_completed_batches,count,,job,,Total number of completed application's streaming batches,0,spark,num total completed batches
+spark.structured_streaming.input_rate,gauge,,record,second,Average streaming input data rate,0,spark,num received records
+spark.structured_streaming.latency,gauge,,millisecond,,Average latency for the structured streaming application.,0,spark,num received records
+spark.structured_streaming.processing_rate,gauge,,row,second,Number of received streaming records per second,0,spark,num received records
+spark.structured_streaming.rows_count,gauge,,row,,Count of rows.,0,spark,num received records
+spark.structured_streaming.used_bytes,gauge,,byte,,Number of bytes used in memory.,0,spark,num received records
+

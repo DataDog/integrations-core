@@ -179,7 +179,7 @@
             "id": 6,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/envoy.png",
+                "url": "/static/images/logos/envoy_small.svg",
                 "sizing": "zoom"
             },
             "layout": {

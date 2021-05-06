@@ -28,6 +28,12 @@ envoy.vhost.vcluster.upstream_rq_2xx,count,,response,,Aggregate HTTP 2xx respons
 envoy.vhost.vcluster.upstream_rq_3xx,count,,response,,Aggregate HTTP 3xx response codes,0,envoy,vhost 3xx response codes
 envoy.vhost.vcluster.upstream_rq_4xx,count,,response,,Aggregate HTTP 4xx response codes,-1,envoy,vhost 4xx response codes
 envoy.vhost.vcluster.upstream_rq_5xx,count,,response,,Aggregate HTTP 5xx response codes,-1,envoy,vhost 5xx response codes
+envoy.vhost.vcluster.upstream_rq_retry,count,,request,,Total request retries,-1,envoy,vhost request retries
+envoy.vhost.vcluster.upstream_rq_retry_limit_exceeded,count,,request,,Total requests not retried due to exceeding the configured number of maximum retries,-1,envoy,vhost request retries exceeded
+envoy.vhost.vcluster.upstream_rq_retry_overflow,count,,request,,Total requests not retried due to circuit breaking or exceeding the retry budgets,-1,envoy,vhost request retries over budget
+envoy.vhost.vcluster.upstream_rq_retry_success,count,,request,,Total request retry successes,0,envoy,vhost request retries succeeded
+envoy.vhost.vcluster.upstream_rq_timeout,count,,request,,Total requests that timed out waiting for a response,-1,envoy,vhost requests timed out
+envoy.vhost.vcluster.upstream_rq_total,count,,request,,Total requests initiated by the router to the upstream,0,envoy,vhost requests total
 envoy.cluster.ratelimit.ok,count,,response,,Total under limit responses from the rate limit service,1,envoy,
 envoy.cluster.ratelimit.error,count,,response,,Total errors contacting the rate limit service,-1,envoy,
 envoy.cluster.ratelimit.over_limit,count,,response,,Total over limit responses from the rate limit service,-1,envoy,

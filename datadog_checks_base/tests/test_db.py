@@ -2,14 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import time
 from datetime import datetime, timedelta
 
 import pytest
-import pytz
+from dateutil.tz import gettz
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.time import UTC
 
 pytestmark = pytest.mark.db
 
@@ -995,6 +997,27 @@ class TestSubmission:
         aggregator.assert_metric('test.foo', 7, metric_type=aggregator.COUNT, tags=['test:foo', 'tag:tag2'])
         aggregator.assert_all_metrics_covered()
 
+    def test_runtime_tags(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'count'}, {'name': 'tag', 'type': 'tag'}],
+            },
+            executor=mock_executor([[3, 'tag1'], [7, 'tag2'], [5, 'tag1']]),
+            tags=['test:init'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute(extra_tags=['test:runtime'])
+
+        aggregator.assert_metric(
+            'test.foo', 8, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag1']
+        )
+        aggregator.assert_metric(
+            'test.foo', 7, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag2']
+        )
+        aggregator.assert_all_metrics_covered()
+
     def test_kwarg_passing(self, aggregator):
         class MyCheck(AgentCheck):
             __NAMESPACE__ = 'test_check'
@@ -1205,6 +1228,52 @@ class TestSubmission:
 
         datadog_agent.assert_metadata('test:instance', version_metadata)
         datadog_agent.assert_metadata_count(len(version_metadata))
+        aggregator.assert_all_metrics_covered()
+
+    def test_hostname(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.foo', 'type': 'count'},
+                    {'name': 'tag', 'type': 'tag'},
+                    {"name": "_source", "type": "source"},
+                ],
+                'tags': ['test:bar'],
+                "extras": [{"name": "test.baz", "expression": "_source * 1000", 'submit_type': 'gauge'}],
+            },
+            executor=mock_executor([[3, 'tag1', 2], [7, 'tag2', 5], [5, 'tag1', 6]]),
+            tags=['test:foo'],
+            hostname="test-hostname",
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            8,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag1'],
+            hostname="test-hostname",
+        )
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.COUNT,
+            tags=['test:foo', 'test:bar', 'tag:tag2'],
+            hostname="test-hostname",
+        )
+
+        for val, tag in [(2000, 'tag1'), (5000, 'tag2'), (6000, 'tag1')]:
+            aggregator.assert_metric(
+                'test.baz',
+                val,
+                metric_type=aggregator.GAUGE,
+                tags=['test:foo', 'test:bar', 'tag:{}'.format(tag)],
+                hostname="test-hostname",
+            )
+
         aggregator.assert_all_metrics_covered()
 
 
@@ -1503,7 +1572,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1526,7 +1595,33 @@ class TestColumnTransformers:
                 'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'time_elapsed'}],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(UTC) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_unix_time(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'unix_time'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', time.time() - 3600]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1553,7 +1648,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', (datetime.now(pytz.utc) + timedelta(hours=-1)).strftime(time_format)]]),
+            executor=mock_executor([['tag1', (datetime.now(UTC) + timedelta(hours=-1)).strftime(time_format)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -1605,7 +1700,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(pytz.timezone('EST')) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(gettz('EST')) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()

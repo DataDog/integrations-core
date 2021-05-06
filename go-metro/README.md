@@ -58,7 +58,7 @@ instances:
       - app.datadoghq.com
 ```
 
-*NOTE*: for go metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
+*NOTE*: for go-metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
 ```
 # Install required libraries
 $ sudo apt-get install libcap  # debian
@@ -67,7 +67,7 @@ $ sudo yum install libcap  # redhat
 $ sudo yum install compat-libcap1  # redhat alternative
 
 # Set capabilities
-$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro`
+$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ```
 
 Because of different package names for different distros, if the instructions above
@@ -75,11 +75,11 @@ don't work for you, please issue an `apt-cache search libcap` or `yum search lib
 should get a shortlist of packages that might provide the binary. Feel free to reach out
 should you require assistance.
 
-Also, please note that go-metro logs to its own file - found in /var/log/datadog/go-metro.log.
-Additionally, go-mtro runs standalone so it will *NOT* currently appear on the agent's info page.
+Also, please note that go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`.
+Additionally, go-metro runs standalone so it will *NOT* currently appear on the Agent's info page.
 
 Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the
-datadog-agent, it is only available in those packaged versions (ie. go-metro is currently
+Datadog Agent, it is only available in those packaged versions (i.e. go-metro is currently
 unavailable with the source install or the 32-bit packages).
 
 ### Validation
@@ -87,18 +87,18 @@ unavailable with the source install or the 32-bit packages).
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][4], you should see something similar to the following:
 
 ```text
-● datadog-agent.service - "Datadog Agent"
+ datadog-agent.service - "Datadog Agent"
     Loaded: loaded (/lib/...datadog-agent.service; enabled; vendor preset: enabled)
     Active: active (running) since Thu 2016-03-31 20:35:27 UTC; 42min ago
   Process: 10016 ExecStop=/opt/.../supervisorctl -c /etc/dd-....conf shutdown (code=exited, status=0/SUCCESS)
   Process: 10021 ExecStart=/opt/.../start_agent.sh (code=exited, status=0/SUCCESS)
   Main PID: 10025 (supervisord)
     CGroup: /system.slice/datadog-agent.service
-            ├─10025 /opt/datadog-...python /opt/datadog-agent/bin/supervisord -c /etc/dd-agent/supervisor.conf
-            ├─10043 /opt/datadog-...python /opt/datadog-agent/agent/dogstatsd.py --use-local-forwarder
-            ├─10044 /opt/datadog-agent/bin/go-metro -cfg=/etc/dd-agent/conf.d/go-metro.yaml
-            ├─10046 /opt/datadog-.../python /opt/datadog-agent/agent/ddagent.py
-            └─10047 /opt/datadog-.../python /opt/datadog-agent/agent/agent.py foreground --use-local-forwarder
+            |_10025 /opt/datadog-...python /opt/datadog-agent/bin/supervisord -c /etc/dd-agent/supervisor.conf
+            |_10043 /opt/datadog-...python /opt/datadog-agent/agent/dogstatsd.py --use-local-forwarder
+            |_10044 /opt/datadog-agent/bin/go-metro -cfg=/etc/dd-agent/conf.d/go-metro.yaml
+            |_10046 /opt/datadog-.../python /opt/datadog-agent/agent/ddagent.py
+            |_10047 /opt/datadog-.../python /opt/datadog-agent/agent/agent.py foreground --use-local-forwarder
 ```
 
 If the TCP RTT check has started you should see something similar to the go-metro line above.

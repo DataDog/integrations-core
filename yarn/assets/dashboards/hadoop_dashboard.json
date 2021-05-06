@@ -1,0 +1,1656 @@
+{
+    "title": "Hadoop - Overview",
+    "description": "This overview dashboard brings together metrics from a number of components in the Hadoop ecosystem, each of which also has a specialized dashboard in Datadog: [YARN](https://app.datadoghq.com/screen/integration/89/yarn---overview), HDFS ([DataNodes](https://app.datadoghq.com/screen/integration/41/hdfs-data-node---overview) and [NameNodes](https://app.datadoghq.com/screen/integration/42/hdfs-name-node---overview)), [MapReduce](https://app.datadoghq.com/screen/integration/88/mapreduce---overview), and [Spark](https://app.datadoghq.com/screen/integration/95/spark---overview). Further reading on monitoring all the components of a Hadoop cluster:\n\n- [An architectural overview of Hadoop](https://www.datadoghq.com/blog/hadoop-architecture-overview/)\n\n- [Datadog's guide to key metrics for Hadoop monitoring](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)\n\n- [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)\n\n- [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)\n\n- [Datadog's blog post announcing Hadoop monitoring support](https://www.datadoghq.com/blog/monitoring-spark/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "note",
+                "content": "Nodes",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 131,
+                "y": 0,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.node.used_memory_mb{$node} by {node_id}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 131,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.node.used_virtual_cores{$node} by {node_id}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Virtual Core usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 131,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.lost_nodes{$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Lost",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 167,
+                "y": 17,
+                "width": 11,
+                "height": 10
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.unhealthy_nodes{$cluster}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Sick",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 155,
+                "y": 17,
+                "width": 11,
+                "height": 10
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.containers_allocated{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Container usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 83,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.allocated_virtual_cores{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:yarn.metrics.total_virtual_cores{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Virtual Core usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 83,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.allocated_mb{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:yarn.metrics.total_mb{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 83,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "100 * ( sum:yarn.metrics.allocated_mb{*} / sum:yarn.metrics.total_mb{*} )",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 80,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 80,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": 2
+            },
+            "layout": {
+                "x": 83,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.total_virtual_cores{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total vCores",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 99,
+                "y": 6,
+                "width": 15,
+                "height": 10
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_submitted{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Submitted",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 22,
+                "y": 17,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_completed{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Completed",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 22,
+                "y": 33,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_pending{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Pending",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 35,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_running{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Running",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 22,
+                "y": 6,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_failed{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Failed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 68,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.apps_killed{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Killed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 51,
+                "y": 6,
+                "width": 15,
+                "height": 10
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "note",
+                "content": "Applications",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 22,
+                "y": 0,
+                "width": 60,
+                "height": 5
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:yarn.apps.progress{*} by {app_name}, 10, 'max', 'desc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Progress",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 22,
+                "y": 49,
+                "width": 60,
+                "height": 15
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "note",
+                "content": "Cluster",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 83,
+                "y": 0,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.apps.allocated_mb{$application} by {app_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocated Memory/App",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 35,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:yarn.apps.allocated_vcores{$application} by {app_name}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Allocated vCores/App",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 35,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.total_nodes{$cluster}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "value": 3,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 3,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 131,
+                "y": 17,
+                "width": 11,
+                "height": 10
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.active_nodes{$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Active",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 143,
+                "y": 17,
+                "width": 11,
+                "height": 10
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.metrics.containers_allocated{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Containers",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "custom_unit": " ",
+                "precision": 0
+            },
+            "layout": {
+                "x": 116,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.num_live_data_nodes{$cluster}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "value": 3,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 70,
+                "y": 75,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 25,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.capacity_total{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:hdfs.namenode.capacity_used{$cluster} by {cluster_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "HDFS Disk usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 22,
+                "y": 75,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.under_replicated_blocks{$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Under replicated blocks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 46,
+                "y": 66,
+                "width": 23,
+                "height": 8
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.num_dead_data_nodes{$cluster}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Dead nodes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 70,
+                "y": 91,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 28,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.blocks_total{$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Blocks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 70,
+                "y": 66,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 29,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.datanode.dfs_remaining{$cluster} by {cluster_name}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "HDFS remaining/node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 22,
+                "y": 91,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 30,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hdfs.namenode.volume_failures_total{*}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Volume failures",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 22,
+                "y": 66,
+                "width": 23,
+                "height": 8
+            }
+        },
+        {
+            "id": 31,
+            "definition": {
+                "type": "note",
+                "content": "HDFS",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 66,
+                "width": 20,
+                "height": 40
+            }
+        },
+        {
+            "id": 32,
+            "definition": {
+                "type": "note",
+                "content": "MapReduce",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 108,
+                "width": 20,
+                "height": 47
+            }
+        },
+        {
+            "id": 33,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:mapreduce.job.maps_running{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "avg:mapreduce.job.maps_completed{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Maps running/completed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 22,
+                "y": 108,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 34,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:mapreduce.job.reduces_running{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "avg:mapreduce.job.reduces_completed{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Reduces running/completed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 22,
+                "y": 140,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 35,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:mapreduce.job.maps_pending{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "avg:mapreduce.job.reduces_pending{$cluster,$job} by {job_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Pending maps/reduces",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 22,
+                "y": 124,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 36,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/hdfs_large.svg",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 20,
+                "height": 11
+            }
+        },
+        {
+            "id": 37,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/mapreduce_large.svg",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 20,
+                "height": 11
+            }
+        },
+        {
+            "id": 38,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/spark_large.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 39,
+                "width": 20,
+                "height": 12
+            }
+        },
+        {
+            "id": 39,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/yarn_large.svg",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 20,
+                "height": 11
+            }
+        },
+        {
+            "id": 40,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.rdd.memory_used{$cluster,$application} by {cluster_name}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "sum:spark.rdd.disk_used{$cluster,$application} by {cluster_name}",
+                        "display_type": "area"
+                    }
+                ],
+                "custom_links": [],
+                "title": "RDD Memory | Disk usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 180,
+                "y": 49,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 41,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.input_bytes{$cluster,$application} by {app_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.stage.output_bytes{$cluster,$application} by {app_name}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Input/Output bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 228,
+                "y": 33,
+                "width": 46,
+                "height": 15
+            }
+        },
+        {
+            "id": 42,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.num_completed_stages{$cluster,$application} by {cluster_name}, sum:spark.job.num_active_stages{$cluster,$application} by {cluster_name}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:spark.stage.count{$cluster,$application} by {cluster_name} - ( sum:spark.job.num_active_stages{$cluster,$application} by {cluster_name} + sum:spark.job.num_completed_stages{$cluster,$application} by {cluster_name} )",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_failed_stages{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_skipped_stages{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Spark Stages: Running, Completed, Skipped, Failed, Pending",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 228,
+                "y": 17,
+                "width": 46,
+                "height": 15
+            }
+        },
+        {
+            "id": 43,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.num_skipped_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_failed_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_completed_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_tasks{*} - ( sum:spark.job.num_completed_tasks{*} + sum:spark.job.num_active_tasks{*} )",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.num_active_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Spark Tasks: Running, Completed, Skipped, Failed, Pending",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 180,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 44,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:running,$cluster,$application} by {cluster_name}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "sum:spark.job.count{status:succeeded,$cluster,$application} by {cluster_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:spark.job.count{status:failed,$cluster,$application} by {cluster_name}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Spark Jobs : Running, Succeeded, Failed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 180,
+                "y": 33,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 45,
+            "definition": {
+                "type": "note",
+                "content": "Spark",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 180,
+                "y": 0,
+                "width": 94,
+                "height": 5
+            }
+        },
+        {
+            "id": 46,
+            "definition": {
+                "type": "event_stream",
+                "query": "spark has status",
+                "tags_execution": "and",
+                "event_size": "s",
+                "title": "",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1w"
+                }
+            },
+            "layout": {
+                "x": 228,
+                "y": 49,
+                "width": 46,
+                "height": 41
+            }
+        },
+        {
+            "id": 47,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.executor.count{$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Executors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 180,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 48,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:running,$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Running",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 196,
+                "y": 6,
+                "width": 15,
+                "height": 10
+            }
+        },
+        {
+            "id": 49,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.stage.count{status:active,$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Stages",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 213,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 50,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:spark.job.num_tasks{status:running,$cluster}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "custom_unit": " ",
+                "precision": 2
+            },
+            "layout": {
+                "x": 260,
+                "y": 6,
+                "width": 14,
+                "height": 10
+            }
+        },
+        {
+            "id": 51,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:failed,$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Failed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 228,
+                "y": 6,
+                "width": 13,
+                "height": 10
+            }
+        },
+        {
+            "id": 52,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:spark.job.count{status:succeeded,$cluster}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Succeeded",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 243,
+                "y": 6,
+                "width": 15,
+                "height": 10
+            }
+        },
+        {
+            "id": 53,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.node.num_containers{$node}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avg containers/node",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 131,
+                "y": 6,
+                "width": 17,
+                "height": 10
+            }
+        },
+        {
+            "id": 54,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.node.available_virtual_cores{$node}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Avail cores",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 165,
+                "y": 6,
+                "width": 13,
+                "height": 10
+            }
+        },
+        {
+            "id": 55,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:yarn.node.used_virtual_cores{$node}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Used cores",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 150,
+                "y": 6,
+                "width": 13,
+                "height": 10
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "cluster",
+            "default": "*",
+            "prefix": "cluster_name"
+        },
+        {
+            "name": "node",
+            "default": "*",
+            "prefix": "node_id"
+        },
+        {
+            "name": "application",
+            "default": "*",
+            "prefix": "app_name"
+        },
+        {
+            "name": "job",
+            "default": "*",
+            "prefix": "job_name"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 90
+}

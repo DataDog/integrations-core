@@ -312,8 +312,9 @@ files:
       value:
         type: boolean
         example: false
-    # Try uncommenting this template to see what happens!
-    #- template: instances/default
+    # Try transposing these templates to see what happens!
+    #- template: instances/http
+    - template: instances/default
 ```
 
 Generate `conf.yaml.example` using `ddev`:

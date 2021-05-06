@@ -7,9 +7,9 @@ import collections
 import mock
 
 # project
-from datadog_checks.btrfs import BTRFS
+import datadog_checks.btrfs
 
-btrfs_check = BTRFS('btrfs', {}, [{}])
+btrfs_check = datadog_checks.btrfs.BTRFS('btrfs', {}, [{}])
 
 
 def mock_get_usage():
@@ -53,3 +53,32 @@ def test_check(mock_get_usage, mock_device_list, aggregator):
     aggregator.assert_metric('system.disk.btrfs.unallocated', count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+class MockStruct:
+    def __init__(self, side_effects, size):
+        self.counter = 0
+        self.side_effects = side_effects
+        self.size = size
+
+    def unpack(self, data):
+        ret = self.side_effects[self.counter]
+        self.counter += 1
+        return ret
+
+    def unpack_from(self, data, _):
+        return self.unpack(data)
+
+    def pack_into(self, *v):
+        pass
+
+
+@mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
+@mock.patch('datadog_checks.btrfs.btrfs.fcntl.ioctl')
+def test_get_usage(mock_ioctl, mock_device_list):
+    datadog_checks.btrfs.btrfs.TWO_LONGS_STRUCT = MockStruct([(0, 4), (0, 4)], 2)
+    datadog_checks.btrfs.btrfs.THREE_LONGS_STRUCT = MockStruct(mock_get_usage(), 2)
+
+    usage = btrfs_check.get_usage('/')
+
+    assert usage == mock_get_usage()

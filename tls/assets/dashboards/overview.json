@@ -6,7 +6,7 @@
 		"id": 0,
 		"definition": {
 		  "type": "image",
-		  "url": "https://s3.amazonaws.com/dd-integrations/tls/configuration/tile/logo.png",
+		  "url": "/static/images/logos/tls_large.svg",
 		  "sizing": "zoom"
 		},
 		"layout": {

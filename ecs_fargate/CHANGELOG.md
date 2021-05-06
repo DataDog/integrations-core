@@ -1,5 +1,18 @@
 # CHANGELOG - ECS Fargate
 
+## 2.12.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.12.0 / 2021-01-25 / Agent 7.26.0
+
+* [Added] Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
+## 2.11.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Amazon fargate config specs. See [#8003](https://github.com/DataDog/integrations-core/pull/8003).
+
 ## 2.10.0 / 2020-08-10 / Agent 7.22.0
 
 * [Added] Support include/exclude containers in ECS Fargate. See [#7165](https://github.com/DataDog/integrations-core/pull/7165).

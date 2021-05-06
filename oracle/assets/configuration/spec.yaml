@@ -44,4 +44,4 @@ files:
         type: boolean
         example: false
     - template: instances/db
-    - template: init_config/default
+    - template: instances/default

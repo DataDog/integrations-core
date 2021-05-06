@@ -1,6 +1,23 @@
 # CHANGELOG - nginx
 
-## 3.10.1 / 2020-11-16
+## 3.12.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8962](https://github.com/DataDog/integrations-core/pull/8962).
+
+## 3.11.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 3.11.1 / 2021-01-26 / Agent 7.26.0
+
+* [Fixed] Lower log level for version metadata submission. See [#8448](https://github.com/DataDog/integrations-core/pull/8448).
+
+## 3.11.0 / 2021-01-25
+
+* [Added] Add support for nginx API v3. See [#8392](https://github.com/DataDog/integrations-core/pull/8392).
+
+## 3.10.1 / 2020-11-16 / Agent 7.25.0
 
 * [Fixed] Fix version metadata collection. See [#7972](https://github.com/DataDog/integrations-core/pull/7972).
 

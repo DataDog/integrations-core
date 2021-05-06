@@ -1,5 +1,14 @@
 # CHANGELOG - nagios
 
+## 1.7.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.7.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Add log support. See [#8100](https://github.com/DataDog/integrations-core/pull/8100).
+* [Added] Add config specs. See [#7978](https://github.com/DataDog/integrations-core/pull/7978).
+
 ## 1.6.2 / 2020-09-04 / Agent 7.23.0
 
 * [Fixed] Fix tailer on missing file. See [#7447](https://github.com/DataDog/integrations-core/pull/7447).

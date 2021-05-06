@@ -91,6 +91,8 @@ The Agent submits this service check for each Windows service configured in `ser
 | Paused           | WARNING               |
 | Unknown          | UNKNOWN               |
 
+If the service cannot be accessed by the Agent due to a permission restriction or an incorrect name, the service check reports `UNKNOWN`.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].

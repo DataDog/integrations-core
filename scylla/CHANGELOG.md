@@ -1,5 +1,13 @@
 # CHANGELOG - Scylla
 
+## 1.3.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Fix logs section placement in example config. See [#8605](https://github.com/DataDog/integrations-core/pull/8605).
+
+## 1.3.1 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 1.3.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

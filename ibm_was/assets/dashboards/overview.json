@@ -6,7 +6,7 @@
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "https://dd-integration-config-meta.s3.amazonaws.com/ibm_was/saas_logos-bot.png",
+        "url": "/static/images/logos/ibm-was_large.svg",
         "sizing": "fit"
       },
       "layout": {

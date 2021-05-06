@@ -1,5 +1,21 @@
 # CHANGELOG - exchange_server
 
+## 1.9.0 / 2021-04-19
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 1.8.3 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.8.2 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
+## 1.8.1 / 2020-12-11 / Agent 7.25.0
+
+* [Fixed] Fix line wrap in conf.yaml. See [#8016](https://github.com/DataDog/integrations-core/pull/8016).
+
 ## 1.8.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).

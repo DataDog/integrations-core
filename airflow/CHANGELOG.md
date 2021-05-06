@@ -1,5 +1,17 @@
 # CHANGELOG - Airflow
 
+## 1.8.0 / 2021-04-19
+
+* [Added] Add support for Airflow 2. See [#9064](https://github.com/DataDog/integrations-core/pull/9064).
+
+## 1.7.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.7.1 / 2020-12-11 / Agent 7.25.0
+
+* [Fixed] Update check signature. See [#8175](https://github.com/DataDog/integrations-core/pull/8175).
+
 ## 1.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

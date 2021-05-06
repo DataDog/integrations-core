@@ -18,12 +18,13 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort[pyproject]==5.5.1'
+ISORT_DEP = 'isort==5.8.0'
 BLACK_DEP = 'black==20.8b1'
-FLAKE8_DEP = 'flake8==3.8.3'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_DEP = 'flake8==3.9.1'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
-MYPY_DEP = 'mypy==0.770'
+MYPY_DEP = 'mypy==0.812'
+PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
 @tox.hookimpl
@@ -70,6 +71,41 @@ def tox_configure(config):
             if E2E_READY_CONDITION in cfg.description:
                 cfg.description = description
 
+    # Next two sections hack the sequencing of Tox's package installation.
+    #
+    # Tox package installation order:
+    #   1. Install `deps`, which typically looks like:
+    #        deps =
+    #            -e../datadog_checks_base[deps]
+    #            -rrequirements-dev.txt
+    #   2. Install check package, editable mode
+    #   3. Execute `commands` which typically looks like:
+    #        commands =
+    #            pip install -r requirements.in
+    #            pytest -v {posargs} --benchmark-skip
+
+    # Forcibly remove any dependencies from the `tox.ini` deps that are meant to be unpinned
+    # This should have the effect of relying on a package's setup.py for installation
+    # We manually pip install `datadog_checks_base[deps]` to ensure that test dependencies are installed,
+    # but this should have no effect on the version of the base package.
+    force_unpinned = os.getenv('TOX_FORCE_UNPINNED', None)
+    if force_unpinned:
+        for env in config.envlist:
+            deps = [d for d in config.envconfigs[env].deps if force_unpinned not in d.name]
+            config.envconfigs[env].deps = deps
+            config.envconfigs[env].commands.insert(0, 'pip install datadog_checks_base[deps]'.split())
+
+    # Workaround for tox's `--force-dep` having limited functionality when package is already installed.
+    # Primarily meant for pinning datadog-checks-base to a specific version, but could be
+    # applied to other packages in the future. Since we typically install checks base via
+    # editable mode, we need to force the reinstall to ensure that the PyPI package installs.
+    force_install = os.getenv('TOX_FORCE_INSTALL', None)
+    if force_install:
+        command = f'pip install --force-reinstall {force_install}'.split()
+
+        for env in config.envlist:
+            config.envconfigs[env].commands.insert(0, command)
+
 
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
@@ -81,6 +117,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         FLAKE8_LOGGING_FORMAT_DEP,
         BLACK_DEP,
         ISORT_DEP,
+        PYDANTIC_DEP,
     ]
 
     commands = [

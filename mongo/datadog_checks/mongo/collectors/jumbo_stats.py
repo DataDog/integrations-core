@@ -1,5 +1,6 @@
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.collectors import MongoCollector
+from datadog_checks.mongo.common import MongosDeployment
 
 
 class JumboStatsCollector(MongoCollector):
@@ -8,8 +9,12 @@ class JumboStatsCollector(MongoCollector):
     or number of documents.
     Sometimes, chunks grow beyond their maximum size but cannot be split they are considered 'jumbo'."""
 
-    def collect(self, client):
-        chunks = client['config']['chunks']
+    def compatible_with(self, deployment):
+        # Can only be run on mongos nodes.
+        return isinstance(deployment, MongosDeployment)
+
+    def collect(self, api):
+        chunks = api['config']['chunks']
         total_chunks_count = chunks.count_documents({})
         jumbo_chunks_count = chunks.count_documents({'jumbo': True})
 

@@ -12,28 +12,55 @@ To install the Agent, refer to the [Agent installation instructions][2] for kube
 
 ### Configuration
 
-Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
+
+If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include SCC (Security Context Constraints) for the Agent to collect data. Follow the instructions below as they relate to your deployment. 
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Helm" xxx -->
+
+The SCC can be applied directly within your Datadog agent's `values.yaml`. Add the following block underneath the `agents:` section in the file. 
+
+```yaml
+...
+agents:
+...
+  podSecurity:
+    securityContextConstraints:
+      create: true
+...
+```
+
+You can apply this when you initially deploy the Agent. Or, you can execute a `helm upgrade` after making this change to apply the SCC. 
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Daemonset" xxx -->
+
+Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
 - [Restricted SCC operations](#restricted-scc-operations)
 - [Host network SCC operations](#host)
 - [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
 
 | Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host) | [Custom](#custom-datadog-scc-for-all-features) |
-| ------------------------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
-| Kubernetes layer monitoring    | ✅                                       | ✅                                           | ✅                                             |
-| Kubernetes-based Autodiscovery | ✅                                       | ✅                                           | ✅                                             |
-| Dogstatsd intake               | 🔶                                       | ✅                                           | ✅                                             |
-| APM trace intake               | 🔶                                       | ✅                                           | ✅                                             |
-| Logs network intake            | 🔶                                       | ✅                                           | ✅                                             |
-| Host network metrics           | ❌                                       | ❌                                           | ✅                                             |
-| Docker layer monitoring        | ❌                                       | ❌                                           | ✅                                             |
-| Container logs collection      | ❌                                       | ❌                                           | ✅                                             |
-| Live Container monitoring      | ❌                                       | ❌                                           | ✅                                             |
-| Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
+|--------------------------------|------------------------------------------|-----------------------|------------------------------------------------|
+| Kubernetes layer monitoring    | Supported                                | Supported             | Supported                                             |
+| Kubernetes-based Autodiscovery | Supported                                | Supported             | Supported                                             |
+| Dogstatsd intake               | Not supported                            | Supported             | Supported                                             |
+| APM trace intake               | Not supported                            | Supported             | Supported                                             |
+| Logs network intake            | Not supported                            | Supported             | Supported                                             |
+| Host network metrics           | Not supported                            | Supported             | Supported                                             |
+| Docker layer monitoring        | Not supported                            | Not supported         | Supported                                             |
+| Container logs collection      | Not supported                            | Not supported         | Supported                                             |
+| Live Container monitoring      | Not supported                            | Not supported         | Supported                                             |
+| Live Process monitoring        | Not supported                            | Not supported         | Supported                                             |
 
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
 </div>
+
+[3]: https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx --> 
 
 #### Log collection
 
@@ -76,7 +103,7 @@ Do not forget to add a <a href="https://docs.datadoghq.com/agent/kubernetes/daem
 </div>
 
 <div class="alert alert-warning">
-<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>allowHostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
+<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>allowHostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the Pod network is otherwise restricted.
 </div>
 
 **Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To run the Agent process as a root user, you can configure your SCC with the following:
@@ -110,7 +137,6 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes/
-[3]: https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions
 [6]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/agent-kubelet-only.yaml
@@ -119,4 +145,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset

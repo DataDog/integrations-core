@@ -758,7 +758,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment}",
+                        "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_cluster_name,kube_namespace,kube_deployment})",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -800,7 +800,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name}",
+                        "q": "exclude_null(avg:kubernetes.memory.usage{$kube_namespace,$kube_deployment,$scope,$kube_cluster_name} by {kube_deployment,kube_namespace,kube_cluster_name})",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",

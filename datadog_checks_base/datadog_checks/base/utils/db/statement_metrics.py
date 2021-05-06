@@ -46,6 +46,7 @@ class StatementMetrics:
         new_cache = {}
         metrics = set(metrics)
 
+        rows = _merge_duplicate_rows(rows, metrics, key)
         if len(rows) > 0:
             dropped_metrics = metrics - set(rows[0].keys())
             if dropped_metrics:
@@ -56,8 +57,8 @@ class StatementMetrics:
         for row in rows:
             row_key = key(row)
             if row_key in new_cache:
-                logger.debug(
-                    'Collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
+                logger.error(
+                    'Unexpected collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
                     row_key,
                     row,
                     new_cache[row_key],
@@ -102,6 +103,34 @@ class StatementMetrics:
         self._previous_statements = new_cache
 
         return result
+
+
+def _merge_duplicate_rows(rows, metrics, key):
+    """
+    Given a list of query rows, merge all duplicate rows as determined by the key function into a single row
+    with the sum of the stats of all duplicates. This is motivated by database integrations such as postgres
+    that can report many instances of a query that are considered the same after the agent normalization.
+
+    - **rows** (_List[dict]_) - rows from current check run
+    - **metrics** (_List[str]_) - the metrics to compute for each row
+    - **key** (_callable_) - function for an ID which uniquely identifies a query row across runs
+    """
+
+    queries_by_key = {}
+    for row in rows:
+        merged_row = dict(row)
+
+        query_key = key(merged_row)
+
+        if query_key in queries_by_key:
+            merged_state = queries_by_key[query_key]
+            queries_by_key[query_key] = {
+                k: merged_row[k] + merged_state[k] if k in metrics else merged_state[k] for k in merged_state.keys()
+            }
+        else:
+            queries_by_key[query_key] = merged_row
+
+    return list(queries_by_key.values())
 
 
 def apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):

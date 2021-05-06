@@ -1,5 +1,17 @@
 # CHANGELOG - External DNS
 
+## 1.2.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.2.1 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
+## 1.2.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Add config specs. See [#7992](https://github.com/DataDog/integrations-core/pull/7992).
+
 ## 1.1.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

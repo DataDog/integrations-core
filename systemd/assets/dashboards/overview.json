@@ -6,7 +6,7 @@
       "id": 0,
       "definition": {
         "type": "image",
-        "url": "https://s3.amazonaws.com/dd-integrations/systemd/configuration/tile/logo.png",
+        "url": "/static/images/logos/systemd_large.svg",
         "sizing": "zoom"
       },
       "layout": {
