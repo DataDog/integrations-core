@@ -29,13 +29,19 @@ CPUUsage = {
 JobStatus = {
     'name': 'job_status',
     'query': (
-        'SELECT JOB_NAME, JOB_STATUS, ELAPSED_CPU_PERCENTAGE FROM '
+        # CPU_TIME is in milliseconds
+        # -> / 1000 to convert into seconds
+        # -> * 100 to convert the resulting rate into a percentage
+        # TODO: figure out why there a x4 difference with the value
+        # given by ELAPSED_CPU_PERCENTAGE
+        'SELECT JOB_NAME, JOB_STATUS, CPU_TIME / 10, 1 FROM '
         'TABLE(QSYS2.ACTIVE_JOB_INFO(\'NO\', \'\', \'\', \'\'))'
     ),
     'columns': [
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
-        {'name': 'ibmi.job.cpu_usage', 'type': 'gauge'},
+        {'name': 'ibmi.job.cpu_usage', 'type': 'rate'},
+        {'name': 'ibmi.job.active', 'type': 'gauge'}
     ],
 }
 
