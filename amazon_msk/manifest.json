@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Amazon Managed Streaming for Apache Kafka (Amazon MSK) Integration",
+  "public_title": "Amazon Managed Streaming for Apache Kafka (Amazon MSK) Agent Integration",
   "categories": [
     "aws",
     "messaging",
