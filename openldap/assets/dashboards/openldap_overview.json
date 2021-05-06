@@ -488,7 +488,7 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "q": "top(avg:openldap.operations.completed.total{$host,$url} by {host,url}.as_count(), 10, 'sum', 'desc')-top(avg:openldap.operations.initiated.total{$host,$url} by {host,url}.as_count(), 10, 'sum', 'desc')",
+                  "q": "top(avg:openldap.operations.initiated.total{$host,$url} by {host,url}.as_count(), 10, 'sum', 'desc')-top(avg:openldap.operations.completed.total{$host,$url} by {host,url}.as_count(), 10, 'sum', 'desc')",
                   "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
