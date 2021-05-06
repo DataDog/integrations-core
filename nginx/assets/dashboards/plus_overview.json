@@ -376,7 +376,6 @@
               "title": "4xx & 5xx responses per sec",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -445,7 +444,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "bars"
                 }
               ],
               "yaxis": {
@@ -775,7 +774,6 @@
               "show_legend": true,
               "legend_layout": "horizontal",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
