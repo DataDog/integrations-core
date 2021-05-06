@@ -156,8 +156,16 @@ def instance_log_requests(field, value):
     return False
 
 
+def instance_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_namespace(field, value):
+    return 'service'
 
 
 def instance_ntlm_domain(field, value):
