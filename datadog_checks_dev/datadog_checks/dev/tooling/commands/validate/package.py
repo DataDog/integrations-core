@@ -6,7 +6,7 @@ import re
 import click
 
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_valid_checks, normalize_package_name, read_setup_file
+from ...utils import complete_valid_checks, normalize_package_name, read_setup_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
