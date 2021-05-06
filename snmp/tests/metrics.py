@@ -37,7 +37,14 @@ IF_COUNTS = [
     'ifHCOutMulticastPkts',
     'ifHCOutBroadcastPkts',
 ]
-IF_RATES = ['ifHCInOctets.rate', 'ifHCOutOctets.rate']
+IF_RATES = [
+    'ifHCInOctets.rate',
+    'ifHCOutOctets.rate',
+    'ifInErrors.rate',
+    'ifInDiscards.rate',
+    'ifOutErrors.rate',
+    'ifOutDiscards.rate',
+]
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
 IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
