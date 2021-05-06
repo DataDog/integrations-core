@@ -92,7 +92,6 @@
               "title": "Total Connections",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -226,7 +225,7 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 7,
+              "width": 6,
               "height": 5
             }
           },
@@ -270,9 +269,9 @@
               ]
             },
             "layout": {
-              "x": 7,
+              "x": 6,
               "y": 0,
-              "width": 5,
+              "width": 6,
               "height": 5
             }
           }
@@ -467,7 +466,7 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 6,
+              "width": 4,
               "height": 4
             }
           },
@@ -509,9 +508,30 @@
               "markers": []
             },
             "layout": {
-              "x": 6,
+              "x": 4,
               "y": 0,
-              "width": 6,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 6915102480834804,
+            "definition": {
+              "type": "note",
+              "content": "**Incomplete Operations** displays the difference between initiated and completed operations to help provide an indicator for failures or errors.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
               "height": 4
             }
           }
