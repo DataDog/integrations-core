@@ -20,7 +20,11 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
 def manifest(ctx, check, fix):
-    """Validate `manifest.json` files."""
+    """Validate `manifest.json` files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
     is_marketplace = ctx.obj['repo_choice'] == 'marketplace'

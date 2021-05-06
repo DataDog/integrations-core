@@ -41,8 +41,8 @@ PROCESS_OPTIONS = {"sort", "graph_options", "view_options", "filter", "selected_
 def saved_views(check):
     """Validates saved view files
 
-    If `check` is specified, only the check will be validated,
-    otherwise all saved views files in the repo will be.
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
     """
     errors = False
 

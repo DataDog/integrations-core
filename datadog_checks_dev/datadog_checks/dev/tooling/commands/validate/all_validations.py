@@ -58,7 +58,11 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.pass_context
 def all(ctx, check):
-    """Run all CI validations for a repo."""
+    """Run all CI validations for a repo.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     repo_choice = ctx.obj['repo_choice']
     echo_info(f'Running validations for {repo_choice} repo ...')
 

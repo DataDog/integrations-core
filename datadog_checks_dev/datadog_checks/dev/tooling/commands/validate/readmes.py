@@ -20,10 +20,10 @@ IMAGE_EXTENSIONS = {".png", ".jpg"}
 @click.pass_context
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def readmes(ctx, check):
-    """Validates README files
+    """Validates README files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
-    checks, 'all' or empty `check` value will validate all README files.
+    checks, an 'all' or empty `check` value will validate all README files.
     """
 
     repo = ctx.obj['repo_name']

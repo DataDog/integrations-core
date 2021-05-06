@@ -17,7 +17,11 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 def jmx_metrics(check, verbose):
-    """Validate all default JMX metrics definitions."""
+    """Validate all default JMX metrics definitions.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     checks = process_checks_option(check, source='integrations')
     integrations = sorted(check for check in checks if is_jmx_integration(check))

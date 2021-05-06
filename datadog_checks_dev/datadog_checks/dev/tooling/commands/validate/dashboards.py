@@ -31,7 +31,11 @@ def _is_dashboard_format(payload):
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def dashboards(check):
-    """Validate all Dashboard definition files."""
+    """Validate all Dashboard definition files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     failed_checks = 0
     ok_checks = 0
 

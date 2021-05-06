@@ -24,7 +24,11 @@ ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
 )
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def recommended_monitors(check):
-    """Validate all recommended monitors definition files."""
+    """Validate all recommended monitors definition files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     checks = process_checks_option(check, source='integrations')
     echo_info(f"Validating recommended monitors for {len(checks)} checks ...")

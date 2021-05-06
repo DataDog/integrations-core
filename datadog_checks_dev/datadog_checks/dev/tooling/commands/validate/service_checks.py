@@ -41,7 +41,11 @@ CHECK_TO_NAME = {
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 def service_checks(check, sync):
-    """Validate all `service_checks.json` files."""
+    """Validate all `service_checks.json` files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     root = get_root()
     checks = process_checks_option(check, source='integrations')

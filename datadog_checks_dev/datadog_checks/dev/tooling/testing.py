@@ -298,11 +298,20 @@ def testable_files(files):
 
 
 def get_changed_checks():
+    """Return set of check names that have changes in testable code."""
+
     # Get files that changed compared to `master`
     changed_files = files_changed()
 
     # Filter by files that can influence the testing of a check
     changed_files[:] = testable_files(changed_files)
+
+    return {line.split('/')[0] for line in changed_files}
+
+
+def get_changed_directories():
+    """Return set of check names that have any changes at all."""
+    changed_files = files_changed()
 
     return {line.split('/')[0] for line in changed_files}
 
@@ -323,13 +332,15 @@ def process_checks_option(checks, source=None):
         get_valid = get_metric_sources
     elif source == 'testable':
         get_valid = get_testable_checks
+    elif source == 'integrations':
+        get_valid = get_valid_integrations
     else:
         get_valid = get_valid_integrations
 
     if checks is None or checks.lower() == 'all':
         choice = sorted(get_valid())
     elif checks.lower() == 'changed':
-        choice = sorted(get_changed_checks() & get_valid())
+        choice = sorted(get_changed_directories() & get_valid())
     else:
         choice = [checks]
 

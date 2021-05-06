@@ -27,7 +27,11 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def models(ctx, check, sync, verbose):
-    """Validate configuration data models."""
+    """Validate configuration data models.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     root = get_root()
     community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
 
