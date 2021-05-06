@@ -21,9 +21,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 To configure this check for an Agent running on a host:
 
 ##### Metric Collection
-Follow the [Envoy host instructions][4] to configure metric collection.
+1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API will be exposed.
 
-**Note:** Use config option [`-admin-bind`][5] in Consul Connect to configure the port where the Envoy Admin API will be exposed.
+2. Enable the [Envoy integration][4] to configure metric collection.
 
 ##### Log Collection
 Follow the [Envoy host][6] instructions to configure log collection.  
