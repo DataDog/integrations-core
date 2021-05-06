@@ -72,8 +72,8 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:openldap.connections.current{$host,$url}",
-                  "aggregator": "max"
+                  "q": "sum:openldap.connections.current{$host,$url}",
+                  "aggregator": "last"
                 }
               ],
               "custom_unit": "conn",
