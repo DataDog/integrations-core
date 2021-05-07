@@ -60,7 +60,7 @@ files:
           - rdsadmin
           - azure_maintenance
           - postgres
-        display_default:
+        default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
