@@ -71,7 +71,7 @@ def all(ctx, check):
         if repos[0] is not None and repo_choice not in repos:
             echo_info(f'Skipping {validation}')
             continue
-        echo_info(f'Executing validation {validation}')
+        echo_info(f'Executing validation {validation.name}')
 
         if validation in REPO_VALIDATIONS:
             result = ctx.invoke(validation)
