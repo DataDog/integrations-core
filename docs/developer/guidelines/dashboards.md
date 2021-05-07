@@ -83,7 +83,7 @@ _(perfectly symmetrical)_
 
 ![Symmetrical example 2](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/symmetrical_example_2.png)
 
-_(pretty close)_
+_(close enough)_
 
 8. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters.
 
