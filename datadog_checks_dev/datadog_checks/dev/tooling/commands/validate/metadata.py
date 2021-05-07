@@ -252,8 +252,12 @@ def metadata(check, check_duplicates, show_warnings):
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
     """
-    checks = process_checks_option(check, source='metrics')
+    checks = process_checks_option(check, source='metrics', validate=True)
     echo_info(f"Validating metadata for {len(checks)} checks ...")
+
+    # If a check is specified, abort if it doesn't have a metadata file
+    if check not in ('all', 'changed') and not checks:
+        abort(f'Metadata file for {check} not found.')
 
     errors = False
 

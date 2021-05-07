@@ -322,11 +322,13 @@ def get_tox_env_python_version(env):
         return int(match.group(1))
 
 
-def process_checks_option(checks, source=None):
-    # provide common function for determining which checks to run validations against
-    # `source` determines which method for gathering valid checks, default will use `get_valid_checks`
+def process_checks_option(check, source=None, validate=False):
+    # provide common function for determining which check to run validations against
+    # `source` determines which method for gathering valid check, default will use `get_valid_checks`
+    # `validate` gets applied for specific check names, ensuring the check is included in the default
+    #   collection specified by `source`.  If not, it returns an empty list.
 
-    if source is None or source == 'checks':
+    if source is None or source == 'valid_checks':
         get_valid = get_valid_checks
     elif source == 'metrics':
         get_valid = get_metric_sources
@@ -337,11 +339,14 @@ def process_checks_option(checks, source=None):
     else:
         get_valid = get_valid_integrations
 
-    if checks is None or checks.lower() == 'all':
+    if check is None or check.lower() == 'all':
         choice = sorted(get_valid())
-    elif checks.lower() == 'changed':
+    elif check.lower() == 'changed':
         choice = sorted(get_changed_directories() & get_valid())
     else:
-        choice = [checks]
+        if validate:
+            choice = [check] if check in get_valid() else []
+        else:
+            choice = [check]
 
     return choice

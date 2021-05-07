@@ -35,7 +35,7 @@ def models(ctx, check, sync, verbose):
     root = get_root()
     community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
 
-    checks = process_checks_option(check, source='checks')
+    checks = process_checks_option(check, source='valid_checks')
     echo_info(f"Validating data models for {len(checks)} checks ...")
 
     specs_failed = {}

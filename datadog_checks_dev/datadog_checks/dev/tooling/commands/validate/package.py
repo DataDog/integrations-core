@@ -22,7 +22,7 @@ def package(check):
     checks, an 'all' or empty `check` value will validate all README files.
     """
 
-    checks = process_checks_option(check, source='checks')
+    checks = process_checks_option(check, source='valid_checks', validate=True)
     echo_info(f"Validating setup.py files for {len(checks)} checks ...")
 
     failed_checks = 0
