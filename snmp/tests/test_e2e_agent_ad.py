@@ -133,14 +133,19 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     common_tags = [
         'snmp_device:{}'.format(snmp_device),
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+        'snmp_host:41ba948911b9',
+        'snmp_profile:generic-router',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
 
     # test ignored IPs
     tags = [
         'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+        'snmp_host:41ba948911b9',
+        'snmp_profile:generic-router',
     ]
     aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
 
