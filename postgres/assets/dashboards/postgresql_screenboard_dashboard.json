@@ -1356,47 +1356,30 @@
               "title": "Max replication delay",
               "title_size": "16",
               "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
+              "time": {},
+              "type": "toplist",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Replication delay"
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "max:postgresql.replication_delay{$scope,$host} by {host}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "aggregator": "avg"
                     }
                   ],
-                  "style": {
-                    "palette": "orange"
-                  },
-                  "display_type": "bars"
+                  "response_format": "scalar"
                 }
-              ],
-              "yaxis": {
-                "scale": "linear",
-                "label": "",
-                "include_zero": true,
-                "min": "auto",
-                "max": "auto"
-              },
-              "markers": []
+              ]
             },
             "layout": {
               "x": 6,
