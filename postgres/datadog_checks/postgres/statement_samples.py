@@ -67,7 +67,6 @@ class PostgresStatementSamples(object):
         self._cancel_event = threading.Event()
         self._tags = None
         self._tags_str = None
-        self._service = "postgres"
         self._db_hostname = resolve_db_host(self._config.host)
         self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', False))
         self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
@@ -106,9 +105,6 @@ class PostgresStatementSamples(object):
             return
         self._tags = tags
         self._tags_str = ','.join(self._tags)
-        for t in self._tags:
-            if t.startswith('service:'):
-                self._service = t[len('service:') :]
         self._last_check_run = time.time()
         if self._run_sync or is_affirmative(os.environ.get('DBM_STATEMENT_SAMPLER_RUN_SYNC', "false")):
             self._log.debug("Running statement sampler synchronously")
@@ -322,7 +318,6 @@ class PostgresStatementSamples(object):
             self._seen_samples_cache[statement_plan_sig] = True
             event = {
                 "host": self._db_hostname,
-                "service": self._service,
                 "ddsource": "postgres",
                 "ddtags": self._tags_str,
                 "network": {
