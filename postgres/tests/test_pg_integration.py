@@ -352,7 +352,6 @@ def dbm_instance(pg_instance):
     pg_instance['deep_database_monitoring'] = True
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    # pg_instance['pg_stat_statements_view'] = "datadog.pg_stat_statements()"
     pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}
     return pg_instance
 
