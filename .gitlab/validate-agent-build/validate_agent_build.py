@@ -33,15 +33,12 @@ def get_remaining_jobs(pipeline_id):
     for scope in scopes:
         all_jobs.extend(_get_jobs(pipeline_id, scope=scope))
 
-    jobs = [j for j in all_jobs if j['stage'] in STAGES_TO_CHECK]
+    jobs = [j for j in all_jobs if not j['allow_failure'] and j['stage'] in STAGES_TO_CHECK]
     return jobs
 
 
 def get_failed_jobs(pipeline_id):
-    scopes = ['failed', 'canceled']
-    jobs = []
-    for scope in scopes:
-        jobs.extend(_get_jobs(pipeline_id, scope=scope))
+    jobs = _get_jobs(pipeline_id, scope='failed')
 
     jobs = [j for j in jobs if not j['allow_failure'] and j['stage'] in STAGES_TO_CHECK]
     return jobs
@@ -61,6 +58,7 @@ def retry_failed_jobs(pipeline_id):
 
 
 if __name__ == '__main__':
+    t0 = time.time()
     parser = argparse.ArgumentParser(description='Wait for (and retry if needed) a given agent build pipeline.')
     parser.add_argument('-p', '--pipeline-id', dest='pipeline_id', action='store',
                         help='The pipeline id to watch for.', required=True)
@@ -72,7 +70,9 @@ if __name__ == '__main__':
     retry_failed_jobs(pipeline_id)
 
     # Wait for jobs to end and exit immediately if any failure.
-    while True:
+    # If it takes more than 55 minutes, cancel the job. Otherwise gitlab will cancel the job on its own without
+    # notifying the author.
+    while (time.time() - t0) / 60 < 55:
         remaining_jobs = get_remaining_jobs(pipeline_id)
         if not remaining_jobs:
             print("Success, pipeline has built the agent correctly.")
@@ -81,9 +81,7 @@ if __name__ == '__main__':
         print(f"Still {len(remaining_jobs)} are pending...")
         failed_jobs = [
             j for j in remaining_jobs if
-            j['status'] in ['failed', 'canceled'] and
-            j['stage'] in STAGES_TO_CHECK and
-            not j['allow_failure']
+            j['status'] in ['failed', 'canceled']
         ]
         if failed_jobs:
             for job in failed_jobs:

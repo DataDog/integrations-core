@@ -59,6 +59,14 @@ trigger-agent-build:
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+
+          # Get slack user
+          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
+          if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+
+          MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
+          postmessage "$SLACK_AUTHOR" "$MESSAGE"
       else
           echo "Nothing to run, skipping job."
       fi
@@ -85,9 +93,6 @@ validate-agent-build:
           if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
           if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
-
-          MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
-          postmessage "$SLACK_AUTHOR" "$MESSAGE"
 
           # Wait for the agent build to complete
           export BUILD_SUCCESS="true"
@@ -223,11 +228,11 @@ validate-log-intgs-builder:
 validate-agent-build-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  only:
-    changes:
-      - .gitlab/validate-agent-build/**
-    refs:
-      - master
+#  only:
+#    changes:
+#      - .gitlab/validate-agent-build/**
+#    refs:
+#      - master
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
