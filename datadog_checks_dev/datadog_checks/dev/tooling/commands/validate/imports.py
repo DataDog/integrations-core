@@ -50,7 +50,11 @@ def validate_import(filepath, check, autofix):
 @click.option('--autofix', is_flag=True, help='Apply suggested fix')
 @click.pass_context
 def imports(ctx, check, autofix):
-    """Validate proper imports in checks."""
+    """Validate proper imports in checks.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     validation_fails = {}
 

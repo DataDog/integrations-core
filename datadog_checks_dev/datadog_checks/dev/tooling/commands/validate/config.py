@@ -34,13 +34,17 @@ TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def config(ctx, check, sync, verbose):
-    """Validate default configuration files."""
+    """Validate default configuration files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     repo_choice = ctx.obj['repo_choice']
     if repo_choice == 'agent':
         checks = ['agent']
     else:
-        checks = process_checks_option(check, source='checks')
+        checks = process_checks_option(check, source='valid_checks')
 
     files_failed = {}
     files_warned = {}
