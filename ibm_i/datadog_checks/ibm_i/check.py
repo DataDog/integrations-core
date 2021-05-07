@@ -120,6 +120,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.DiskUsage,
                 queries.CPUUsage,
                 queries.JobStatus,
+                queries.JobMemoryUsage,
+                queries.MemoryInfo,
                 queries.SubsystemInfo,
             ],
             hostname=hostname,
