@@ -129,7 +129,7 @@ _(close enough)_
 
 ![Note styles](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/note_styles.png)
 
-2. Use colors to highlight important relationships and to improve readability, not for style. If several groups are related, apply the same group header color to all of them. If you’ve applied a green header color to a group, try making its notes green as well. If two groups are related, but one is more important, try using the “vivid” color on the important group and the “light” color on the less important group. Be careful not to overuse color e.g. don’t make every group on a dashboard vivid blue. 
+2. Use colors to highlight important relationships and to improve readability, not for style. If several groups are related, apply the same group header color to all of them. If you’ve applied a green header color to a group, try making its notes green as well. If two groups are related, but one is more important, try using the “vivid” color on the important group and the “light” color on the less important group. Don’t be afraid to leave groups with white headers, and be careful not to overuse color e.g. don’t make every group on a dashboard vivid blue. Also avoid using gray headers.
 
 ![Header color usage](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/header_color_usage.png)
 
