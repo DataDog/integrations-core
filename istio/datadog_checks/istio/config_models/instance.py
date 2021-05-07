@@ -87,7 +87,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
-    metrics: Optional[Sequence[str]]
+    metrics: Optional[Sequence[Mapping[str, str]]]
     min_collection_interval: Optional[float]
     mixer_endpoint: Optional[str]
     namespace: Optional[str]
