@@ -215,7 +215,9 @@ Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, othe
 ### Common Problems
 
 #### Endpoint `/server_info` unreachable
-- Disable the `collect_server_info` option in your Envoy configuration if the endpoint is not available in your Envoy environment to minimize error logs. Note that Envoy version data will not be collected.
+- Disable the `collect_server_info` option in your Envoy configuration, if the endpoint is not available in your Envoy environment, to minimize error logs.
+
+**Note**: Envoy version data will not be collected.
 
 Need help? Contact [Datadog support][15].
 
