@@ -88,7 +88,7 @@ _(close enough)_
 8. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters.
 
 !!! tip
-    Adding `*=scope` as a tempoate variable is useful since users can access all their own tags.
+    Adding `*=scope` as a template variable is useful since users can access all their own tags.
 
 ### Copy
 
