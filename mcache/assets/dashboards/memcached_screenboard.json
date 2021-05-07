@@ -79,7 +79,6 @@
               "title": "Threads",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -88,20 +87,20 @@
                       "formula": "query1"
                     }
                   ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:memcache.threads{*}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">",
                       "palette": "white_on_green",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:memcache.threads{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
                     }
                   ]
                 }
@@ -121,7 +120,6 @@
               "title": "Items stored by server",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -130,20 +128,20 @@
                       "formula": "query1"
                     }
                   ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:memcache.curr_items{*}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
                   "conditional_formats": [
                     {
                       "comparator": ">",
                       "palette": "white_on_green",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:memcache.curr_items{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
                     }
                   ]
                 }
@@ -170,7 +168,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -180,6 +177,8 @@
                       "alias": "Open Connections"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.curr_connections{*}",
@@ -187,8 +186,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "grey",
                     "line_type": "solid",
@@ -203,6 +200,8 @@
                       "alias": "Allocated connection structures"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.connection_structures{*}",
@@ -210,8 +209,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -242,7 +239,6 @@
               "title": "Memcached Uptime",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -251,6 +247,7 @@
                       "formula": "query1"
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
                       "query": "avg:memcache.uptime{*}",
@@ -258,8 +255,7 @@
                       "name": "query1",
                       "aggregator": "avg"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ],
               "autoscale": true,
@@ -303,7 +299,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -313,6 +308,8 @@
                       "alias": "Write rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.bytes_written_rate{$scope,$host}",
@@ -320,8 +317,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -336,6 +331,8 @@
                       "alias": "Read rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.bytes_read_rate{$scope,$host}",
@@ -343,8 +340,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -382,7 +377,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -392,6 +386,8 @@
                       "alias": "Get rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.cmd_get_rate{$scope,$host}",
@@ -399,8 +395,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -415,6 +409,8 @@
                       "alias": "Set rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.cmd_set_rate{$scope,$host}",
@@ -422,8 +418,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -461,7 +455,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -471,6 +464,8 @@
                       "alias": "Hit rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.get_hits_rate{$scope,$host}",
@@ -478,8 +473,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -494,6 +487,8 @@
                       "alias": "Miss rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.get_misses_rate{$scope,$host}",
@@ -501,8 +496,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -540,7 +533,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -550,6 +542,8 @@
                       "alias": "Eviction rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.evictions_rate{$scope,$host}",
@@ -557,8 +551,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -718,7 +710,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -728,6 +719,8 @@
                       "alias": "System rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.rusage_system_rate{$scope,$host}",
@@ -735,8 +728,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -751,6 +742,8 @@
                       "alias": "User rate"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.rusage_user_rate{$scope,$host}",
@@ -758,8 +751,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "cool",
                     "line_type": "solid",
@@ -797,7 +788,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -807,6 +797,8 @@
                       "alias": "Fill"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:memcache.fill_percent{$scope,$host}",
@@ -814,8 +806,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -910,7 +900,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -920,6 +909,8 @@
                       "alias": "Over 1 minute"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.1{$scope,$env}",
@@ -927,8 +918,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -943,6 +932,8 @@
                       "alias": "Over 5 minutes"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.5{$scope,$env}",
@@ -950,8 +941,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -966,6 +955,8 @@
                       "alias": "Over 15 minutes"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:system.load.15{$scope,$env}",
@@ -973,8 +964,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -1012,7 +1001,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1022,6 +1010,8 @@
                       "alias": "I/O wait"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "max:system.cpu.iowait{$scope,$env}",
@@ -1029,8 +1019,6 @@
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1068,7 +1056,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1082,6 +1069,8 @@
                       "alias": "Sent"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:system.net.bytes_rcvd{$scope,$env}",
@@ -1094,8 +1083,6 @@
                       "name": "query2"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -1139,22 +1126,28 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "alias": "Idle"
                     },
                     {
-                      "formula": "query2"
+                      "formula": "query2",
+                      "alias": "System"
                     },
                     {
-                      "formula": "query3"
+                      "formula": "query3",
+                      "alias": "I/O Wait"
                     },
                     {
-                      "formula": "query4"
+                      "formula": "query4",
+                      "alias": "User"
                     },
                     {
-                      "formula": "query5"
+                      "formula": "query5",
+                      "alias": "Stolen"
                     },
                     {
-                      "formula": "query6"
+                      "formula": "query6",
+                      "alias": "Guest"
                     }
                   ],
                   "queries": [
@@ -1228,7 +1221,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1242,6 +1234,8 @@
                       "alias": "Used"
                     }
                   ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "sum:system.mem.usable{$scope,$env}",
@@ -1254,8 +1248,6 @@
                       "name": "query2"
                     }
                   ],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
