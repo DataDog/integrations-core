@@ -1356,19 +1356,19 @@
               "title": "Max replication delay",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
                   "formulas": [
                     {
+                      "formula": "query1",
                       "limit": {
                         "count": 10,
                         "order": "desc"
-                      },
-                      "formula": "query1"
+                      }
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
                       "query": "max:postgresql.replication_delay{$scope,$host} by {host}",
@@ -1376,8 +1376,7 @@
                       "name": "query1",
                       "aggregator": "avg"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ]
             },
