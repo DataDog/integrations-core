@@ -45,6 +45,35 @@ JobStatus = {
     ],
 }
 
+JobMemoryUsage = {
+    'name': 'job_memory_usage',
+    'query': (
+        'SELECT JOB_NAME, JOB_STATUS, MEMORY_POOL, TEMPORARY_STORAGE FROM '
+        'TABLE(QSYS2.ACTIVE_JOB_INFO(\'NO\', \'\', \'\', \'\'))'
+    ),
+    'columns': [
+        {'name': 'job_name', 'type': 'tag'},
+        {'name': 'job_status', 'type': 'tag'},
+        {'name': 'memory_pool', 'type': 'tag'},
+        {'name': 'ibmi.job.temp_storage', 'type': 'gauge'},
+    ],
+}
+
+MemoryInfo = {
+    'name': 'memory_info',
+    'query': (
+        'SELECT POOL_NAME, SUBSYSTEM_NAME, CURRENT_SIZE, RESERVED_SIZE, DEFINED_SIZE FROM '
+        'QSYS2.MEMORY_POOL_INFO'
+    ),
+    'columns': [
+        {'name': 'pool_name', 'type': 'tag'},
+        {'name': 'subsystem_name', 'type': 'tag'},
+        {'name': 'ibmi.pool.size', 'type': 'gauge'},
+        {'name': 'ibmi.pool.reserved_size', 'type': 'gauge'},
+        {'name': 'ibmi.pool.defined_size', 'type': 'gauge'}
+    ],
+}
+
 SubsystemInfo = {
     'name': 'subsystem',
     'query': (
