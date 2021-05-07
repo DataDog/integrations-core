@@ -10,7 +10,7 @@ from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
 from six import iteritems
-from tests.common import HERE
+from tests.common import HERE, VSPHERE_VERSION
 
 from datadog_checks.vsphere.api import VersionInfo
 
@@ -36,9 +36,9 @@ class MockedAPI(object):
 
     def get_version(self):
         about = MagicMock(
-            version='6.7.0',
+            version=VSPHERE_VERSION,
             build='123456789',
-            fullName='VMware vCenter Server 6.7.0 build-14792544',
+            fullName='VMware vCenter Server {} build-14792544'.format(VSPHERE_VERSION),
             apiType='VirtualCenter',
         )
         return VersionInfo(about)

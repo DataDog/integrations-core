@@ -16,7 +16,7 @@ from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
 
-from .common import HERE, build_rest_api_client
+from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
 
 
@@ -400,13 +400,15 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.check_id = 'test:123'
     dd_run_check(check)
+
+    major, minor, patch = VSPHERE_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '6',
-        'version.minor': '7',
-        'version.patch': '0',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
         'version.build': '123456789',
-        'version.raw': '6.7.0+123456789',
+        'version.raw': '{}+123456789'.format(VSPHERE_VERSION),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
