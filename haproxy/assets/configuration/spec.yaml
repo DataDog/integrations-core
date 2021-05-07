@@ -17,10 +17,12 @@ files:
 
         Prometheus-related options take effect only when this is set to `true`.
     - name: url
-      required: true
+      required: false
+      enabled: true
       value:
         example: http://localhost/admin?stats
         type: string
+        display_default: null
       description: |
         Haproxy URL to connect to gather metrics.
         Set the according <USERNAME> and <PASSWORD> or use directly a unix stats

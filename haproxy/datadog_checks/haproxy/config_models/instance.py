@@ -124,7 +124,7 @@ class InstanceConfig(BaseModel):
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     type_overrides: Optional[Mapping[str, Any]]
-    url: str
+    url: Optional[str]
     use_legacy_auth_encoding: Optional[bool]
     use_prometheus: Optional[bool]
     username: Optional[str]
