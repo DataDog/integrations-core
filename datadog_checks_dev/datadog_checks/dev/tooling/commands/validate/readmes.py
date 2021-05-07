@@ -9,7 +9,8 @@ from bs4 import BeautifulSoup
 
 from datadog_checks.dev.tooling.constants import get_root
 
-from ...utils import complete_valid_checks, get_readme_file, get_valid_integrations, load_manifest, read_readme_file
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_readme_file, load_manifest, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
@@ -17,12 +18,12 @@ IMAGE_EXTENSIONS = {".png", ".jpg"}
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
-@click.argument('integration', autocompletion=complete_valid_checks, required=False)
-def readmes(ctx, integration):
-    """Validates README files
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def readmes(ctx, check):
+    """Validates README files.
 
-    If `check` is specified, only the check will be validated,
-    otherwise all README files in the repo will be.
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
     """
 
     repo = ctx.obj['repo_name']
@@ -30,10 +31,7 @@ def readmes(ctx, integration):
     files_failed = {}
     readme_counter = set()
 
-    if integration:
-        integrations = [integration]
-    else:
-        integrations = sorted(get_valid_integrations())
+    integrations = process_checks_option(check, source='integrations')
 
     for integration in integrations:
         display_queue = []
