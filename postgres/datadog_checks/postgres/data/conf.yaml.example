@@ -47,7 +47,7 @@ instances:
     #
     # dbstrict: false
 
-    ## @param ignore_databases - list of strings - optional - default: ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+    ## @param ignore_databases - list of strings - optional
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
