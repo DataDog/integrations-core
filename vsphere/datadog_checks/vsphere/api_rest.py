@@ -160,16 +160,7 @@ class VSphereRestClient(object):
         if deprecated_api:
             self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
             self.endpoints = self.API_ENDPOINTS['deprecated']
-        http_config = {
-            'username': config.username,
-            'password': config.password,
-            'tls_ca_cert': config.ssl_capath,
-            'tls_verify': config.ssl_verify,
-            'tls_ignore_warning': config.tls_ignore_warning,
-        }
-        self._http = RequestsWrapper(
-            http_config, {}
-        )  # self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
+        self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None
