@@ -13,6 +13,7 @@ from semver import VersionInfo
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
@@ -25,22 +26,6 @@ ACTIVITY_METRICS = [
     'postgresql.transactions.idle_in_transaction',
     'postgresql.active_queries',
     'postgresql.waiting_queries',
-]
-
-STATEMENT_METRICS = [
-    'postgresql.queries.count',
-    'postgresql.queries.time',
-    'postgresql.queries.rows',
-    'postgresql.queries.shared_blks_hit',
-    'postgresql.queries.shared_blks_read',
-    'postgresql.queries.shared_blks_dirtied',
-    'postgresql.queries.shared_blks_written',
-    'postgresql.queries.local_blks_hit',
-    'postgresql.queries.local_blks_read',
-    'postgresql.queries.local_blks_dirtied',
-    'postgresql.queries.local_blks_written',
-    'postgresql.queries.temp_blks_read',
-    'postgresql.queries.temp_blks_written',
 ]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -262,18 +247,26 @@ def test_statement_metrics(aggregator, integration_check, pg_instance):
     cursor.execute(QUERY)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'user:datadog',
-        'query:{}'.format(QUERY),
-        'query_signature:{}'.format(QUERY_SIGNATURE),
-        'resource_hash:{}'.format(QUERY_SIGNATURE),
-    ]
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
 
-    for name in STATEMENT_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+    assert event['host'] == 'stubbed.hostname'
+    assert event['timestamp'] > 0
+    assert event['min_collection_interval'] == 15
+    assert set(event['tags']) == {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test'}
+
+    matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == QUERY_SIGNATURE]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
+
+    assert row['datname'] == 'datadog_test'
+    assert row['rolname'] == 'datadog'
+    assert row['query'] == QUERY
+    assert row['query_signature'] == QUERY_SIGNATURE
+
+    for col in PG_STAT_STATEMENTS_METRICS_COLUMNS:
+        assert type(row[col]) in (float, int)
 
 
 def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
@@ -305,18 +298,14 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_ins
         cursor.execute(query, (['app1', 'app2', 'app3'],))
         check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'user:datadog',
-        'query:{}'.format(normalized_query),
-        'query_signature:{}'.format(query_signature),
-        'resource_hash:{}'.format(query_signature),
-    ]
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
 
-    aggregator.assert_metric('postgresql.queries.count', count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.queries.count', value=2.0, tags=expected_tags)
+    matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
+    assert len(matching) == 1
+    row = matching[0]
+    assert row['calls'] == 2
 
 
 @pytest.fixture

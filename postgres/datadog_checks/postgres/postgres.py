@@ -53,7 +53,7 @@ class PostgreSql(AgentCheck):
             )
         self._config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self._clean_state()
 
@@ -430,11 +430,6 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
-    def _collect_per_statement_metrics(self, tags):
-        metrics = self.statement_metrics.collect_per_statement_metrics(self.db)
-        for metric_name, metric_value, metrics_tags in metrics:
-            self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
-
     def check(self, _):
         tags = copy.copy(self._config.tags)
         # Collect metrics
@@ -447,7 +442,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
-                self._collect_per_statement_metrics(tags)
+                self.statement_metrics.collect_per_statement_metrics(self.db, tags)
                 self.statement_samples.run_sampler(tags)
 
         except Exception as e:
