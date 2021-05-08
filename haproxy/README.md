@@ -272,7 +272,9 @@ Returns `OK` for `maint`, `ok` and any other state.
 ## Troubleshooting
 ### Port 514 Already in Use Error
 On systems with syslog, if the agent is listening for HAProxy logs on port 514, the following error can appear in the agent logs: 
-`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use `. This is happening becuase by default, syslog is listening on port 514. To resolve this error, syslog can be disabled, or HAProxy can be configured to forward logs to port 514 and another port the agent is listening for logs on. The port the agent listens on can be defined in the haproxy.d/conf.yaml file [here][11]
+`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use `. 
+
+This is happening because by default, syslog is listening on port 514. To resolve this error, syslog can be disabled, or HAProxy can be configured to forward logs to port 514 and another port the agent is listening for logs on. The port the agent listens on can be defined in the haproxy.d/conf.yaml file [here][11]
 
 Need help? Contact [Datadog support][12].
 
