@@ -54,7 +54,7 @@ JobMemoryUsage = {
     'columns': [
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
-        {'name': 'memory_pool', 'type': 'tag'},
+        {'name': 'memory_pool_name', 'type': 'tag'},
         {'name': 'ibmi.job.temp_storage', 'type': 'gauge'},
     ],
 }
