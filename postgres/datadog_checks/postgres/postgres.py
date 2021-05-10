@@ -295,12 +295,12 @@ class PostgreSql(AgentCheck):
 
         cursor.close()
 
-    def _new_connection(self):
+    def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "user=%s dbname=%s application_name=%s" % (
                 self._config.user,
-                self._config.dbname,
+                dbname,
                 self._config.application_name,
             )
             if self._config.query_timeout:
@@ -311,7 +311,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': self._config.password,
-                'database': self._config.dbname,
+                'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -332,7 +332,7 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            self.db = self._new_connection()
+            self.db = self._new_connection(self._config.dbname)
 
     def _collect_custom_queries(self, tags):
         """
