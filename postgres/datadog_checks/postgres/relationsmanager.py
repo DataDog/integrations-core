@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from typing import Dict, List, Union
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 
 ALL_SCHEMAS = object()
@@ -146,40 +146,41 @@ class RelationsManager(object):
 
         return ' OR '.join(relations_filter)
 
-    def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility"""
-        config = {}
-
+    def validate_relations_config(self, yamlconfig):
+        # type: (Dict) -> None
         for element in yamlconfig:
-            if isinstance(element, str):
-                config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
-            elif isinstance(element, dict):
+            if isinstance(element, dict):
                 if not (RELATION_NAME in element or RELATION_REGEX in element):
-                    self.log.warning(
+                    raise ConfigurationError(
                         "Parameter '%s' or '%s' is required for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                    continue
                 if RELATION_NAME in element and RELATION_REGEX in element:
-                    self.log.warning(
+                    raise ConfigurationError(
                         "Expecting only of parameters '%s', '%s' for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                    continue
+                if not isinstance(element.get(SCHEMAS, []), list):
+                    raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
+            else:
+                raise ConfigurationError('Unhandled relations config type: %s', element)
 
+    def _build_relations_config(self, yamlconfig):
+        """Builds a dictionary from relations configuration while maintaining compatibility"""
+        config = {}
+        for element in yamlconfig:
+            if isinstance(element, str):
+                config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
+            elif isinstance(element, dict):
+                relname = element.get(RELATION_NAME)
+                rel_regex = element.get(RELATION_REGEX)
                 schemas = element.get(SCHEMAS, [])
-                if not isinstance(schemas, list):
-                    self.log.warning("Expected '%s' to be a list for %s", SCHEMAS, element)
-                    continue
-
-                name = element.get(RELATION_NAME) or element[RELATION_REGEX]
+                name = relname or rel_regex
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]
-            else:
-                self.log.warning('Unhandled relations config type: %s', element)
         return config

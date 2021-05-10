@@ -52,6 +52,9 @@ class PostgreSql(AgentCheck):
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
+        self.check_initializations.append(
+            lambda: self._relations_manager.validate_relations_config(self._config.relations)
+        )
 
     def cancel(self):
         self.statement_samples.cancel()
