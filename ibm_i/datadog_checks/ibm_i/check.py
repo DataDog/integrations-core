@@ -26,12 +26,12 @@ class IbmICheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         check_start = datetime.now()
-        # If we don't have a hostname yet, try to fetch it
-        if not self._query_manager.hostname:
-            self._query_manager.hostname = self.fetch_hostname()
+        # If we don't have a query manager yet, try to set it up
+        if not self._query_manager:
+            self.set_up_query_manager()
 
         # Do not try to send metrics if we can't tag them with a correct hostname
-        if self._query_manager.hostname:
+        if self._query_manager:
             try:
                 self._query_manager.execute()
                 check_status = AgentCheck.OK
@@ -55,35 +55,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
         check_end = datetime.now()
         check_duration = check_end - check_start
         self.log.debug("Check duration: {}".format(check_duration))
-
-    def fetch_hostname(self):
-        try:
-            return self.hostname_query()
-        except Exception as e:
-            self.warning('An error occurred while fetching the hostname, resetting IBM i connection: %s', e)
-            with suppress(Exception):
-                self.connection.close()
-
-            self._connection = None
-
-    def hostname_query(self):
-        query = "SELECT HOST_NAME FROM SYSIBMADM.ENV_SYS_INFO"
-        results = list(self.execute_query(query)) # type: List[Tuple[str]]
-        if len(results) == 0:
-            self.log.error("Couldn't find hostname on the remote system.")
-            return None
-        if len(results) > 1:
-            self.log.error("Too many results returned by system query. Expected 1, got {}".format(
-                len(results)
-            ))
-            return None
-
-        hostname_row = results[0]
-        if len(hostname_row) != 1:
-            self.log.error("Expected 1 column in hostname query, got {}".format(len(hostname_row)))
-            return None
-
-        return hostname_row[0]
 
     def execute_query(self, query):
         # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
@@ -117,20 +88,66 @@ class IbmICheck(AgentCheck, ConfigMixin):
         return self._connection
 
     def set_up_query_manager(self):
-        hostname = self.fetch_hostname()
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query,
-            tags=self.config.tags,
-            queries=[
+        system_info = self.fetch_system_info()
+        if system_info:
+            query_list = [
                 queries.DiskUsage,
                 queries.CPUUsage,
                 queries.JobStatus,
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
-                queries.SubsystemInfo,
                 queries.JobQueueInfo,
-            ],
-            hostname=hostname,
-        )
-        self.check_initializations.append(self._query_manager.compile_queries)
+            ]
+            if system_info['os_version'] > 7 or (system_info['os_version'] == 7 and system_info['os_release'] >= 3):
+                query_list.append(queries.SubsystemInfo)
+
+            self._query_manager = QueryManager(
+                self,
+                self.execute_query,
+                tags=self.config.tags,
+                queries=query_list,
+                hostname=system_info['hostname'],
+            )
+            self._query_manager.compile_queries()
+
+    def fetch_system_info(self):
+        try:
+            return self.system_info_query()
+        except Exception as e:
+            self.warning('An error occurred while fetching system information, resetting IBM i connection: %s', e)
+            with suppress(Exception):
+                self.connection.close()
+
+            self._connection = None
+
+    def system_info_query(self):
+        query = "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO"
+        results = list(self.execute_query(query)) # type: List[Tuple[str]]
+        if len(results) == 0:
+            self.log.error("Couldn't find hostname on the remote system.")
+            return None
+        if len(results) > 1:
+            self.log.error("Too many results returned by system query. Expected 1, got {}".format(
+                len(results)
+            ))
+            return None
+
+        info_row = results[0]
+        if len(info_row) != 3:
+            self.log.error("Expected 3 columns in system info query, got {}".format(len(hostname_row)))
+            return None
+
+        hostname = info_row[0]
+        try:
+            os_version = int(info_row[1])
+        except ValueError:
+            self.log.error("Expected integer for OS version, got {}".format(len(info_row[1])))
+            return None
+
+        try:
+            os_release = int(info_row[2])
+        except ValueError:
+            self.log.error("Expected integer for OS release, got {}".format(len(info_row[2])))
+            return None
+
+        return { "hostname": hostname, "os_version": os_version, "os_release": os_release }
