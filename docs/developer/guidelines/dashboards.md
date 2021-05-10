@@ -40,7 +40,7 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 ### General
 
-1. When creating a new dashboard, select the default dashboard type (internally called multisize layout.)
+1. When creating a new dashboard, select the default dashboard type (internally called multisize layout).
 
 1. Dashboard titles should contain the integration name. Some examples of a good dashboard title are `Syclla` and `Cilium Overview`.
 
@@ -49,7 +49,6 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 1. Research the metrics supported by the integration and consider grouping them in relevant categories.
 Important metrics that are key to the performance and overview of the integration should be at the top.
 
-### Rules of Thumb
 
 1. Always include an “about” group for the integration containing a brief description and helpful links. Also include an “overview” group of a few of the most important metrics at the top of a dashboard. Use a group banner image for the “about” section if one is available. We store banner images [here](https://github.com/DataDog/web-ui/tree/preprod/public/static/images/integration_dashboard) and link to them with relative links in the dashboard. The “about” section should contain content, not data; the “overview” section should contain data. Avoid making the “about” section full-width.
 
@@ -63,11 +62,11 @@ Important metrics that are key to the performance and overview of the integratio
 
 ![Squished timeseries](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/squished_timeseries.png)
 
-4. Stream widgets should be at least 6 columns wide for readability (half the dashboard width.) Avoid placing full-width stream widgets in the middle of a dashboard as they’ll “trap” scroll events. It’s also useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
+4. Stream widgets should be at least 6 columns wide (half the dashboard width) for readability. Avoid placing full-width stream widgets in the middle of a dashboard as they’ll “trap” scroll events. It’s also useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
 
 ![Stream widgets](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/stream_widgets.png)
 
-5. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you’re confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. There are different types of metric widgets. The most commonly used are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
+5. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you’re confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. The most commonly used metric widgets are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
 
 ![Variety of widgets](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/variety.png)
 
@@ -110,13 +109,13 @@ _(close enough)_
 
 4. Group titles should be title case. Widget titles should be sentence case.
 
-5. If you’re showing a legend, make sure the aliases are easy to understand
+5. If you’re showing a legend, make sure the aliases are easy to understand.
 
 6. Graph titles should summarize the queried metric. Do not indicate the unit in the graph title because unit types are displayed automatically from metadata. An exception to this is if the calculation of the query represents a different type of unit.
 
 ### QA
 
-1. Always check a dashboard at 1280px wide and 2560px wide to see how it looks on a smaller laptop and a larger monitor. The most common screen widths for dashboards are 1920, 1680, 1440, 2560, and 1280px respectively. They make up more than half of all dashboard page views combined.
+1. Always check a dashboard at 1280px wide and 2560px wide to see how it looks on a smaller laptop and a larger monitor. The most common screen widths for dashboards are 1920, 1680, 1440, 2560, and 1280px, making up more than half of all dashboard page views combined.
 
 ![QA at different widths](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/qa_widths.png)
 
@@ -157,7 +156,7 @@ Elasticsearch
 
 - [x] Attention-grabbing “about” section with a banner image, concise copy, useful links, and a good typography hierarchy
 - [x] A brief, annotated “overview” section with the most important statistics, right at the top
-- [x] Simple graph titles. Group titles in title-case.
+- [x] Simple graph titles. Group titles in title-case
 - [x] Close to symmetrical in high density mode
 - [x] Well formatted, concise notes
 - [x] Color coordination between related groups, notes within groups, and graphs within groups
