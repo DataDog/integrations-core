@@ -83,7 +83,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self._statement_metrics = MySQLStatementMetrics(self._config)
+        self._statement_metrics = MySQLStatementMetrics(self, self._config)
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
@@ -120,8 +120,8 @@ class MySql(AgentCheck):
                 self._collect_metrics(db, tags=tags)
                 self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
-                    self._collect_statement_metrics(db, tags)
-                    self._statement_samples.run_sampler(tags)
+                    self._statement_metrics.collect_per_statement_metrics(db, self.service_check_tags)
+                    self._statement_samples.run_sampler(self.service_check_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -390,12 +390,6 @@ class MySql(AgentCheck):
         # deprecated in favor of service_check("mysql.replication.replica_running")
         self.service_check(self.SLAVE_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
         self.service_check(self.REPLICA_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
-
-    def _collect_statement_metrics(self, db, tags):
-        tags = self.service_check_tags + tags
-        metrics = self._statement_metrics.collect_per_statement_metrics(db)
-        for metric_name, metric_value, metric_tags in metrics:
-            self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
 
     def _is_source_host(self, replicas, results):
         # type: (float, Dict[str, Any]) -> bool

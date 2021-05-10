@@ -18,7 +18,9 @@ class Relation(BaseModel):
         allow_mutation = False
 
     relation_name: Optional[str]
+    relation_regex: Optional[str]
     relation_schema: Optional[str]
+    relkind: Optional[Sequence[str]]
     schemas: Optional[Sequence[str]]
 
 

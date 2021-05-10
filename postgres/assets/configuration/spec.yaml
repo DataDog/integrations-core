@@ -119,14 +119,14 @@ files:
                   type: string
               - name: relation_regex
                 type: string
-              - name: relation_kinds
+              - name: relkind
                 type: array
                 items:
                     type: string
         example:
           - relation_name: <TABLE_NAME>
             schemas:
-               - <SCHEMA_NAME1>
+              - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
             relation_kinds:
               - r
