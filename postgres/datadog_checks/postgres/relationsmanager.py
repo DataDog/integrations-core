@@ -10,6 +10,8 @@ ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
 RELATION_REGEX = 'relation_regex'
 SCHEMAS = 'schemas'
+RELKIND = 'relkind'
+
 
 LOCK_METRICS = {
     'descriptors': [
