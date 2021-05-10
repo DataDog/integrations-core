@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, suppress
+from datetime import datetime
 
 import pyodbc
 
@@ -24,6 +25,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.set_up_query_manager)
 
     def check(self, _):
+        check_start = datetime.now()
         # If we don't have a hostname yet, try to fetch it
         if not self._query_manager.hostname:
             self._query_manager.hostname = self.fetch_hostname()
@@ -49,6 +51,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
             )
         else:
             self.warning('No hostname found, skipping check run')
+
+        check_end = datetime.now()
+        check_duration = check_end - check_start
+        self.log.debug("Check duration: {}".format(check_duration))
 
     def fetch_hostname(self):
         try:
