@@ -107,10 +107,12 @@ files:
                 type: array
                 items:
                   type: string
+              - name: relation_regex
+                type: string
         example:
           - relation_name: <TABLE_NAME>
             schemas:
-               - <SCHEMA_NAME1>
+              - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
     - name: max_relations
       description: Determines the maximum number of relations to fetch.
