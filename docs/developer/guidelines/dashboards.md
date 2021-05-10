@@ -42,39 +42,39 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 1. When creating a new dashboard, select the default dashboard type (internally called multisize layout).
 
-1. Dashboard titles should contain the integration name. Some examples of a good dashboard title are `Syclla` and `Cilium Overview`.
+2. Dashboard titles should contain the integration name. Some examples of a good dashboard title are `Syclla` and `Cilium Overview`.
 
     **Note:** Avoid using `-` in the dashboard title as the dashboard URL is generated from the title.
 
-1. Research the metrics supported by the integration and consider grouping them in relevant categories.
+3. Research the metrics supported by the integration and consider grouping them in relevant categories.
 Important metrics that are key to the performance and overview of the integration should be at the top.
 
 
-1. Always include an “about” group for the integration containing a brief description and helpful links. Also include an “overview” group of a few of the most important metrics at the top of a dashboard. Use a group banner image for the “about” section if one is available. We store banner images [here](https://github.com/DataDog/web-ui/tree/preprod/public/static/images/integration_dashboard) and link to them with relative links in the dashboard. The “about” section should contain content, not data; the “overview” section should contain data. Avoid making the “about” section full-width.
+4. Always include an “about” group for the integration containing a brief description and helpful links. Also include an “overview” group of a few of the most important metrics at the top of a dashboard. Use a group banner image for the “about” section if one is available. We store banner images [here](https://github.com/DataDog/web-ui/tree/preprod/public/static/images/integration_dashboard) and link to them with relative links in the dashboard. The “about” section should contain content, not data; the “overview” section should contain data. Avoid making the “about” section full-width.
 
 ![Elasticsearch dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/example_dashboard.png)
 
-2. Use Group widgets to title and group sections, rather than note widgets as you might on a screenboard. Use partial width groups to display groups side-by-side. Most dashboards should display every widget within a group.
+5. Use Group widgets to title and group sections, rather than note widgets as you might on a screenboard. Use partial width groups to display groups side-by-side. Most dashboards should display every widget within a group.
 
 ![Group titles](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/group_titles.png)
 
-3. Timeseries widgets should be at least 4 columns wide in order not to appear squashed on smaller displays
+6. Timeseries widgets should be at least 4 columns wide in order not to appear squashed on smaller displays
 
 ![Squished timeseries](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/squished_timeseries.png)
 
-4. Stream widgets should be at least 6 columns wide (half the dashboard width) for readability. Avoid placing full-width stream widgets in the middle of a dashboard as they’ll “trap” scroll events. It’s also useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
+7. Stream widgets should be at least 6 columns wide (half the dashboard width) for readability. Avoid placing full-width stream widgets in the middle of a dashboard as they’ll “trap” scroll events. It’s also useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
 
 ![Stream widgets](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/stream_widgets.png)
 
-5. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you’re confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. The most commonly used metric widgets are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
+8. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you’re confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. The most commonly used metric widgets are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
 
 ![Variety of widgets](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/variety.png)
 
-6. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists here and the integration_id matches the icon name. That means it will only appear when the dashboard your working on is made into the official integration board.
+9. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists here and the integration_id matches the icon name. That means it will only appear when the dashboard your working on is made into the official integration board.
 
 ![Logo in header](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/logo_header.png)
 
-7. Try to make the left and right halves of your dashboard symmetrical in high density mode. Users with large monitors will see your dashboard in high density mode by default, so it’s important to make sure the group relationships make sense, and the dashboard looks good. You can adjust group heights to achieve this, and move groups between the left and right halves.
+10. Try to make the left and right halves of your dashboard symmetrical in high density mode. Users with large monitors will see your dashboard in high density mode by default, so it’s important to make sure the group relationships make sense, and the dashboard looks good. You can adjust group heights to achieve this, and move groups between the left and right halves.
 
 ![Symmetrical example 1](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/symmetrical_example_1.png)
 
@@ -84,7 +84,7 @@ _(perfectly symmetrical)_
 
 _(close enough)_
 
-8. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters.
+11. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters.
 
 !!! tip
     Adding `*=scope` as a template variable is useful since users can access all their own tags.
