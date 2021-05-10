@@ -60,6 +60,8 @@ class Redis(AgentCheck):
         'blocked_clients': 'redis.clients.blocked',
         'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
         'client_longest_output_list': 'redis.clients.longest_output_list',
+        'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
+        'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
         # Keys
         'evicted_keys': 'redis.keys.evicted',
         'expired_keys': 'redis.keys.expired',
