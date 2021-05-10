@@ -128,7 +128,7 @@ files:
             schemas:
               - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
-            relation_kinds:
+            relkind:
               - r
               - p
     - name: max_relations
