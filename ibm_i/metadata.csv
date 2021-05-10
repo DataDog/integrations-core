@@ -1,1 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+ibmi.asp.unit_storage_capacity,gauge,,byte,,Storage capacity of the unit,0,ibmi,asp capacity
+ibmi.asp.unit_space_available,gauge,,byte,,Space available on the unit for use,0,ibmi,asp available
+ibmi.asp.percent_used,gauge,,percent,,Percentage that has been consumed from the disk unit,0,ibmi,asp percent
