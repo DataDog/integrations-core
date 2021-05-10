@@ -154,24 +154,29 @@ class RelationsManager(object):
             if isinstance(element, str):
                 config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                if not (RELATION_NAME in element or 'relation_regex' in element):
+                if not (RELATION_NAME in element or RELATION_REGEX in element):
                     self.log.warning(
-                        "Parameter RELATION_NAME or 'relation_regex' is required for relation element %s", element
+                        "Parameter '%s' or '%s' is required for relation element %s",
+                        RELATION_NAME,
+                        RELATION_REGEX,
+                        element,
                     )
                     continue
-                if RELATION_NAME in element and 'relation_regex' in element:
+                if RELATION_NAME in element and RELATION_REGEX in element:
                     self.log.warning(
-                        "Expecting only of parameters RELATION_NAME, 'relation_regex' for relation element %s",
+                        "Expecting only of parameters '%s', '%s' for relation element %s",
+                        RELATION_NAME,
+                        RELATION_REGEX,
                         element,
                     )
                     continue
 
                 schemas = element.get(SCHEMAS, [])
                 if not isinstance(schemas, list):
-                    self.log.warning("Expected a list of schemas for %s", element)
+                    self.log.warning("Expected '%s' to be a list for %s", SCHEMAS, element)
                     continue
 
-                name = element.get(RELATION_NAME) or element['relation_regex']
+                name = element.get(RELATION_NAME) or element[RELATION_REGEX]
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]
