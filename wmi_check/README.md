@@ -64,7 +64,7 @@ The metrics definitions include three components:
 - Metric name as it appears in Datadog.
 - The metric type.
 
-Another sample configuration can be found below, which will populate many more metrics on a Windows 2012 server.
+The following sample configuration populates many more metrics on a Windows 2012 server.
 ```yaml
 init_config:
 
