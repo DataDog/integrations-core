@@ -86,3 +86,21 @@ SubsystemInfo = {
         {'name': 'ibmi.subsystem.active_jobs', 'type': 'gauge'},
     ],
 }
+
+JobQueueInfo = {
+    'name': 'job_queue',
+    'query':  (
+        'SELECT JOB_QUEUE_NAME, JOB_QUEUE_STATUS, SUBSYSTEM_NAME,'
+        'NUMBER_OF_JOBS, RELEASED_JOBS, SCHEDULED_JOBS, HELD_JOBS '
+        'FROM QSYS2.JOB_QUEUE_INFO'
+    ),
+    'columns': [
+        {'name': 'job_queue_name', 'type': 'tag'},
+        {'name': 'job_queue_status', 'type': 'tag'},
+        {'name': 'subsystem_name', 'type': 'tag'},
+        {'name': 'ibmi.job_queue.size', 'type': 'gauge'},
+        {'name': 'ibmi.job_queue.released_size', 'type': 'gauge'},
+        {'name': 'ibmi.job_queue.scheduled_size', 'type': 'gauge'},
+        {'name': 'ibmi.job_queue.held_size', 'type': 'gauge'},
+    ],
+}

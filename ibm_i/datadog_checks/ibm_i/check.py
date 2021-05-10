@@ -129,6 +129,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
                 queries.SubsystemInfo,
+                queries.JobQueueInfo,
             ],
             hostname=hostname,
         )
