@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, suppress
 from datetime import datetime
+from typing import List, Tuple
 
 import pyodbc
 
@@ -66,7 +67,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
 
         check_end = datetime.now()
         check_duration = check_end - check_start
-        self.log.debug("Check duration: {}".format(check_duration))
+        self.log.debug("Check duration: %s", check_duration)
 
     def execute_query(self, query):
         # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
@@ -136,25 +137,25 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.log.error("Couldn't find hostname on the remote system.")
             return None
         if len(results) > 1:
-            self.log.error("Too many results returned by system query. Expected 1, got {}".format(len(results)))
+            self.log.error("Too many results returned by system query. Expected 1, got %d", len(results))
             return None
 
         info_row = results[0]
         if len(info_row) != 3:
-            self.log.error("Expected 3 columns in system info query, got {}".format(len(hostname_row)))
+            self.log.error("Expected 3 columns in system info query, got %d", len(info_row))
             return None
 
         hostname = info_row[0]
         try:
             os_version = int(info_row[1])
         except ValueError:
-            self.log.error("Expected integer for OS version, got {}".format(len(info_row[1])))
+            self.log.error("Expected integer for OS version, got %d", info_row[1])
             return None
 
         try:
             os_release = int(info_row[2])
         except ValueError:
-            self.log.error("Expected integer for OS release, got {}".format(len(info_row[2])))
+            self.log.error("Expected integer for OS release, got %s", info_row[2])
             return None
 
         return {"hostname": hostname, "os_version": os_version, "os_release": os_release}
