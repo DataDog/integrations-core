@@ -41,7 +41,7 @@ JobStatus = {
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
         {'name': 'ibmi.job.cpu_usage', 'type': 'rate'},
-        {'name': 'ibmi.job.active', 'type': 'gauge'}
+        {'name': 'ibmi.job.active', 'type': 'gauge'},
     ],
 }
 
@@ -62,15 +62,14 @@ JobMemoryUsage = {
 MemoryInfo = {
     'name': 'memory_info',
     'query': (
-        'SELECT POOL_NAME, SUBSYSTEM_NAME, CURRENT_SIZE, RESERVED_SIZE, DEFINED_SIZE FROM '
-        'QSYS2.MEMORY_POOL_INFO'
+        'SELECT POOL_NAME, SUBSYSTEM_NAME, CURRENT_SIZE, RESERVED_SIZE, DEFINED_SIZE FROM QSYS2.MEMORY_POOL_INFO'
     ),
     'columns': [
         {'name': 'pool_name', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'ibmi.pool.size', 'type': 'gauge'},
         {'name': 'ibmi.pool.reserved_size', 'type': 'gauge'},
-        {'name': 'ibmi.pool.defined_size', 'type': 'gauge'}
+        {'name': 'ibmi.pool.defined_size', 'type': 'gauge'},
     ],
 }
 
@@ -89,7 +88,7 @@ SubsystemInfo = {
 
 JobQueueInfo = {
     'name': 'job_queue',
-    'query':  (
+    'query': (
         'SELECT JOB_QUEUE_NAME, JOB_QUEUE_STATUS, SUBSYSTEM_NAME,'
         'NUMBER_OF_JOBS, RELEASED_JOBS, SCHEDULED_JOBS, HELD_JOBS '
         'FROM QSYS2.JOB_QUEUE_INFO'
