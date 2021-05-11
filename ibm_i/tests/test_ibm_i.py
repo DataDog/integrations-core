@@ -10,6 +10,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_i import IbmICheck
 from datadog_checks.ibm_i.check import SystemInfo
 
+
 def test_check(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = IbmICheck('ibm_i', {}, [instance])
@@ -22,8 +23,8 @@ def test_check(aggregator, instance):
 def test_fetch_system_info(aggregator, instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
-    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=["hostname", "7", "3"]), mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.__delete_connection'
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[("hostname", "7", "3")]), mock.patch(
+        'datadog_checks.ibm_i.IbmICheck._delete_connection'
     ) as delete_conn:
         system_info = check.fetch_system_info()
 
