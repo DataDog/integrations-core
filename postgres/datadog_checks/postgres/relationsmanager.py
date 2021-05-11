@@ -5,6 +5,7 @@ from typing import Dict, List, Union
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.postgres.util import get_schema_field
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -118,18 +119,20 @@ SELECT relname,
     'relation': True,
 }
 
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+
 
 class RelationsManager(object):
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
+        self.has_relations = len(self.config) > 0
 
-    def build_relations_filter(self, schema_field):
+    def build_relations_filter(self, descriptors):
         # type (str) -> str
         """Build a WHERE clause filtering relations based on relations_config."""
         relations_filter = []
-
         for r in self.config.values():
             relation_filter = []
             if r.get(RELATION_NAME):
@@ -138,6 +141,7 @@ class RelationsManager(object):
                 relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
+                schema_field = get_schema_field(descriptors)
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
