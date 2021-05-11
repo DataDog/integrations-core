@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, suppress
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, NamedTuple, Tuple
 
 import pyodbc
 
@@ -12,6 +12,8 @@ from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
 from .config_models import ConfigMixin
+
+SystemInfo = NamedTuple('SystemInfo', [('hostname', str), ('os_version', int), ('os_release', int)])
 
 
 class IbmICheck(AgentCheck, ConfigMixin):
@@ -114,7 +116,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.MemoryInfo,
                 queries.JobQueueInfo,
             ]
-            if system_info['os_version'] > 7 or (system_info['os_version'] == 7 and system_info['os_release'] >= 3):
+            if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
                 query_list.append(queries.SubsystemInfo)
 
             self._query_manager = QueryManager(
@@ -122,7 +124,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 self.execute_query,
                 tags=self.config.tags,
                 queries=query_list,
-                hostname=system_info['hostname'],
+                hostname=system_info.hostname,
                 error_handler=self.handle_query_error,
             )
             self._query_manager.compile_queries()
@@ -161,4 +163,4 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.log.error("Expected integer for OS release, got %s", info_row[2])
             return None
 
-        return {"hostname": hostname, "os_version": os_version, "os_release": os_release}
+        return SystemInfo(hostname=hostname, os_version=os_version, os_release=os_release)
