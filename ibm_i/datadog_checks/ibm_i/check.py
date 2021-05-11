@@ -31,7 +31,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         self._current_errors += 1
         return error
 
-    def __delete_connection(self, e):
+    def _delete_connection(self, e):
         if self._connection:
             self.warning('An error occurred, resetting IBM i connection: %s', e)
             with suppress(Exception):
