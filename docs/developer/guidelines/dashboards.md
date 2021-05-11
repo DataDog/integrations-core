@@ -70,7 +70,7 @@ Important metrics that are key to the performance and overview of the integratio
 
 ![Variety of widgets](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/variety.png)
 
-9. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists here and the integration_id matches the icon name. That means it will only appear when the dashboard your working on is made into the official integration board.
+9. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.us1.prod.dog/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you’re working on is made into the official integration board.
 
 ![Logo in header](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/logo_header.png)
 
