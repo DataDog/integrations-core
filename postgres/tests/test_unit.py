@@ -11,8 +11,6 @@ from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
 
-from .common import SCHEMA_NAME
-
 pytestmark = pytest.mark.unit
 
 
@@ -231,24 +229,6 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(metric_name, 13, app2_tags)
 
     aggregator.assert_all_metrics_covered()
-
-
-def test_relation_filter():
-    relations_config = {'breed': {'relation_name': 'breed', 'schemas': ['public']}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
-
-
-def test_relation_filter_no_schemas():
-    relations_config = {'persons': {'relation_name': 'persons', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'persons' )"
-
-
-def test_relation_filter_regex():
-    relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname ~ 'b.*' )"
 
 
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
