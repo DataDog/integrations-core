@@ -21,11 +21,23 @@ class IbmICheck(AgentCheck, ConfigMixin):
 
         self._connection = None
         self._query_manager = None
-
+        self._current_errors = 0
         self.check_initializations.append(self.set_up_query_manager)
+
+    def handle_query_error(self, error):
+        self._current_errors += 1
+        return error
+
+    def __delete_connection(self, e):
+        if self._connection:
+            self.warning('An error occurred, resetting IBM i connection: %s', e)
+            with suppress(Exception):
+                self.connection.close()
+            self._connection = None
 
     def check(self, _):
         check_start = datetime.now()
+        self._current_errors = 0
         # If we don't have a query manager yet, try to set it up
         if not self._query_manager:
             self.set_up_query_manager()
@@ -36,18 +48,18 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 self._query_manager.execute()
                 check_status = AgentCheck.OK
             except Exception as e:
-                self.warning('An error occurred, resetting IBM i connection: %s', e)
+                self.__delete_connection(e)
                 check_status = AgentCheck.CRITICAL
-                with suppress(Exception):
-                    self.connection.close()
 
-                self._connection = None
+            if self._current_errors:
+                self.__delete_connection("query error")
+                check_status = AgentCheck.CRITICAL
 
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 check_status,
                 tags=self.config.tags,
-                hostname=self._query_manager.hostname
+                hostname=self._query_manager.hostname,
             )
         else:
             self.warning('No hostname found, skipping check run')
@@ -107,6 +119,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 tags=self.config.tags,
                 queries=query_list,
                 hostname=system_info['hostname'],
+                error_handler=self.handle_query_error,
             )
             self._query_manager.compile_queries()
 
@@ -114,22 +127,16 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             return self.system_info_query()
         except Exception as e:
-            self.warning('An error occurred while fetching system information, resetting IBM i connection: %s', e)
-            with suppress(Exception):
-                self.connection.close()
-
-            self._connection = None
+            self.__delete_connection(e)
 
     def system_info_query(self):
         query = "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO"
-        results = list(self.execute_query(query)) # type: List[Tuple[str]]
+        results = list(self.execute_query(query))  # type: List[Tuple[str]]
         if len(results) == 0:
             self.log.error("Couldn't find hostname on the remote system.")
             return None
         if len(results) > 1:
-            self.log.error("Too many results returned by system query. Expected 1, got {}".format(
-                len(results)
-            ))
+            self.log.error("Too many results returned by system query. Expected 1, got {}".format(len(results)))
             return None
 
         info_row = results[0]
@@ -150,4 +157,4 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.log.error("Expected integer for OS release, got {}".format(len(info_row[2])))
             return None
 
-        return { "hostname": hostname, "os_version": os_version, "os_release": os_release }
+        return {"hostname": hostname, "os_version": os_version, "os_release": os_release}
