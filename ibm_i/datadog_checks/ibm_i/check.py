@@ -39,31 +39,28 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def check(self, _):
         check_start = datetime.now()
         self._current_errors = 0
-        # If we don't have a query manager yet, try to set it up
-        if not self._query_manager:
-            self.set_up_query_manager()
 
-        # Do not try to send metrics if we can't tag them with a correct hostname
-        if self._query_manager:
-            try:
-                self._query_manager.execute()
-                check_status = AgentCheck.OK
-            except Exception as e:
-                self.__delete_connection(e)
-                check_status = AgentCheck.CRITICAL
+        try:
+            self.query_manager.execute()
+            check_status = AgentCheck.OK
+        except AttributeError:
+            self.warning('Could not set up query manager, skipping check run')
+            check_status = None
+        except Exception as e:
+            self.__delete_connection(e)
+            check_status = AgentCheck.CRITICAL
 
-            if self._current_errors:
-                self.__delete_connection("query error")
-                check_status = AgentCheck.CRITICAL
+        if self._current_errors:
+            self.__delete_connection("query error")
+            check_status = AgentCheck.CRITICAL
 
+        if check_status is not None:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 check_status,
                 tags=self.config.tags,
                 hostname=self._query_manager.hostname,
             )
-        else:
-            self.warning('No hostname found, skipping check run')
 
         check_end = datetime.now()
         check_duration = check_end - check_start
@@ -99,6 +96,12 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self._connection = pyodbc.connect(connection_string)
 
         return self._connection
+
+    @property
+    def query_manager(self):
+        if self._query_manager is None:
+            self.set_up_query_manager()
+        return self._query_manager
 
     def set_up_query_manager(self):
         system_info = self.fetch_system_info()
