@@ -74,7 +74,7 @@ setup(
             'beautifulsoup4>=4.9.3',
             'click>7',
             'colorama',
-            'datamodel-code-generator~=0.9.2; python_version > "3.0"',
+            'datamodel-code-generator~=0.11.4; python_version > "3.0"',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'jsonschema',
