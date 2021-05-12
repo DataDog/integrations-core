@@ -164,7 +164,7 @@ class SupervisordCheck(AgentCheck):
     def _connect(instance):
         sock = instance.get('socket')
         user = instance.get('user')
-        password = instance.get('pass')
+        password = instance.get('pass') or instance.get('password')
         if sock is not None:
             host = instance.get('host', DEFAULT_SOCKET_IP)
             transport = supervisor.xmlrpc.SupervisorTransport(user, password, sock)
