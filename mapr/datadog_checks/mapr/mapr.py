@@ -56,7 +56,7 @@ class MaprCheck(AgentCheck):
         self.base_tags = self.instance.get('tags', [])
         self.has_ever_submitted_metrics = False
 
-        auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
+        self.auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
 
         if not auth_ticket:
             self.log.warning(
@@ -64,14 +64,14 @@ class MaprCheck(AgentCheck):
                 "cause authentication issues if your cluster requires authenticated requests.",
                 TICKET_LOCATION_ENV_VAR,
             )
-        elif not os.access(auth_ticket, os.R_OK):
+        elif not os.access(self.auth_ticket, os.R_OK):
             raise CheckException(
                 "MapR authentication ticket located at %s is not readable by the dd-agent "
                 "user. Please update the file permissions.",
-                auth_ticket,
+                self.auth_ticket,
             )
 
-        os.environ[TICKET_LOCATION_ENV_VAR] = auth_ticket
+        os.environ[TICKET_LOCATION_ENV_VAR] = self.auth_ticket
 
     def check(self, _):
         if ck is None:
