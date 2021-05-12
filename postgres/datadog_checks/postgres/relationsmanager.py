@@ -194,6 +194,8 @@ class RelationsManager(object):
                     )
                 if not isinstance(element.get(SCHEMAS, []), list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
+                if not isinstance(element.get(RELKIND, []), list):
+                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
             else:
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 

@@ -86,7 +86,7 @@ class PostgreSql(AgentCheck):
             log_func = self.log.warning
 
         results = None
-        is_relations = scope.get('relations') and self._relations_manager.has_relations
+        is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last

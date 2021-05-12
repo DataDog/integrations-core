@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, IDX_METRICS, RelationsManager, LOCK_METRICS
+from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, IDX_METRICS, LOCK_METRICS, RelationsManager
 
 from .common import SCHEMA_NAME
 

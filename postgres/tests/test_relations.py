@@ -149,10 +149,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute('LOCK persons')
-            check.check(pg_instance)
+    check_with_lock(check, pg_instance)
 
     expected_tags = pg_instance['tags'] + [
         'server:{}'.format(HOST),
@@ -167,21 +164,27 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
 
 
-def test_relkind_filter(aggregator, integration_check, pg_instance):
-    pg_instance['relations'] = ['breed']
-    pg_instance['dbname'] = 'dogs'
+def test_locks_relkind_match(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['r']}]
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
-    posgres_check = integration_check(pg_instance)
-    posgres_check.check(pg_instance)
+    check = integration_check(pg_instance)
+    check_with_lock(check, pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(pg_instance['host']),
-        'port:{}'.format(pg_instance['port']),
-        'db:dogs',
-        'table:breed',
-        'index:breed_names',
-        'schema:public',
-    ]
+    aggregator.assert_metric('postgresql.locks', count=1)
 
-    for name in IDX_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+def test_locks_metrics_no_relkind_match(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['i']}]
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
+
+    check = integration_check(pg_instance)
+    check_with_lock(check, pg_instance)
+    aggregator.assert_metric('postgresql.locks', count=0)
+
+
+def check_with_lock(check, instance):
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute('LOCK persons')
+            check.check(instance)
