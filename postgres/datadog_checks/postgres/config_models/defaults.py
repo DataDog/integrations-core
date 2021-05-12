@@ -52,6 +52,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_ignore_databases(field, value):
+    return ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+
+
 def instance_max_relations(field, value):
     return 300
 

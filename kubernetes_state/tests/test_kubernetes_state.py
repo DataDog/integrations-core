@@ -26,6 +26,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_capacity',
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
+    NAMESPACE + '.node.by_condition',
     # deployments
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
@@ -130,6 +131,17 @@ TAGS = {
         'status:true',
         'status:false',
         'status:unknown',
+    ],
+    NAMESPACE
+    + '.node.by_condition': [
+        'condition:memorypressure',
+        'condition:diskpressure',
+        'condition:outofdisk',
+        'condition:ready',
+        'status:true',
+        'status:false',
+        'status:unknown',
+        'node:minikube',
     ],
     NAMESPACE
     + '.pod.status_phase': [

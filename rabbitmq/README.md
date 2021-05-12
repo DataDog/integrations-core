@@ -51,17 +51,6 @@ To configure this check for an Agent running on a host:
 
 1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
 
-   ```yaml
-   init_config:
-
-   instances:
-     ## @param rabbit_api_url - string - required
-     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-     ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
-     #
-     - rabbitmq_api_url: http://localhost:15672/api/
-   ```
-
     **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
 
 2. [Restart the Agent][8].
@@ -83,7 +72,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
+3. Edit the `logs` section of your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
    ```yaml
    logs:
