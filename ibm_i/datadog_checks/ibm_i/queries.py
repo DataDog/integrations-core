@@ -103,3 +103,29 @@ JobQueueInfo = {
         {'name': 'ibmi.job_queue.held_size', 'type': 'gauge'},
     ],
 }
+
+MessageQueueInfo = {
+    'name': 'message_queue_info',
+    'query': (
+        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*) AS COUNT FROM QSYS2.MESSAGE_QUEUE_INFO '
+        'GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+    ),
+    'columns': [
+        {'name': 'message_queue_name', 'type': 'tag'},
+        {'name': 'message_queue_library', 'type': 'tag'},
+        {'name': 'ibmi.message_queue.size', 'type': 'gauge'},
+    ],
+}
+
+MessageQueueCriticalInfo = {
+    'name': 'message_queue_critical_info',
+    'query': (
+        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*) AS COUNT FROM QSYS2.MESSAGE_QUEUE_INFO '
+        'WHERE SEVERITY >= 70 GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+    ),
+    'columns': [
+        {'name': 'message_queue_name', 'type': 'tag'},
+        {'name': 'message_queue_library', 'type': 'tag'},
+        {'name': 'ibmi.message_queue.critical_size', 'type': 'gauge'},
+    ],
+}
