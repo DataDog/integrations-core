@@ -49,11 +49,11 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.warning('Could not set up query manager, skipping check run')
             check_status = None
         except Exception as e:
-            self.__delete_connection(e)
+            self._delete_connection(e)
             check_status = AgentCheck.CRITICAL
 
         if self._current_errors:
-            self.__delete_connection("query error")
+            self._delete_connection("query error")
             check_status = AgentCheck.CRITICAL
 
         if check_status is not None:
@@ -133,7 +133,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             return self.system_info_query()
         except Exception as e:
-            self.__delete_connection(e)
+            self._delete_connection(e)
 
     def system_info_query(self):
         query = "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO"
