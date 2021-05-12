@@ -163,7 +163,7 @@ class SupervisordCheck(AgentCheck):
     @staticmethod
     def _connect(instance):
         sock = instance.get('socket')
-        user = instance.get('user')
+        user = instance.get('user') or instance.get('username')
         password = instance.get('pass') or instance.get('password')
         if sock is not None:
             host = instance.get('host', DEFAULT_SOCKET_IP)

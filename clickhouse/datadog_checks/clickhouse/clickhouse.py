@@ -21,7 +21,7 @@ class ClickhouseCheck(AgentCheck):
         self._server = self.instance.get('server', '')
         self._port = self.instance.get('port')
         self._db = self.instance.get('db', 'default')
-        self._user = self.instance.get('user', 'default')
+        self._user = self.instance.get('user', self.instance.get('username', 'default'))
         self._password = self.instance.get('password', '')
         self._connect_timeout = float(self.instance.get('connect_timeout', 10))
         self._read_timeout = float(self.instance.get('read_timeout', 10))

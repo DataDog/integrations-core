@@ -37,7 +37,7 @@ class Oracle(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Oracle, self).__init__(name, init_config, instances)
         self._server = self.instance.get('server')
-        self._user = self.instance.get('user')
+        self._user = self.instance.get('user') or self.instance.get('username')
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
