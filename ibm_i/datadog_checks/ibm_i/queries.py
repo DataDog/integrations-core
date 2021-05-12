@@ -120,8 +120,11 @@ MessageQueueInfo = {
 MessageQueueCriticalInfo = {
     'name': 'message_queue_critical_info',
     'query': (
-        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*) AS COUNT FROM QSYS2.MESSAGE_QUEUE_INFO '
-        'WHERE SEVERITY >= 70 GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+        # This is faster, and doesn't send data for queues with no critical messages
+        # 'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*) AS COUNT FROM QSYS2.MESSAGE_QUEUE_INFO '
+        # 'WHERE SEVERITY > 70 GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, SUM(CASE WHEN SEVERITY > 70 THEN 1 ELSE 0 END) FROM QSYS2.MESSAGE_QUEUE_INFO '
+        'GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
     ),
     'columns': [
         {'name': 'message_queue_name', 'type': 'tag'},
