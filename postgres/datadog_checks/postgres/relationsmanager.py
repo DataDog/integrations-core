@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
@@ -119,17 +119,20 @@ SELECT relname,
 }
 
 
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+
+
 class RelationsManager(object):
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
+        self.has_relations = len(self.config) > 0
 
     def build_relations_filter(self, schema_field):
         # type (str) -> str
         """Build a WHERE clause filtering relations based on relations_config."""
         relations_filter = []
-
         for r in self.config.values():
             relation_filter = []
             if r.get(RELATION_NAME):
@@ -146,7 +149,8 @@ class RelationsManager(object):
 
         return ' OR '.join(relations_filter)
 
-    def validate_relations_config(self, yamlconfig):
+    @staticmethod
+    def validate_relations_config(yamlconfig):
         # type: (Dict) -> None
         for element in yamlconfig:
             if isinstance(element, dict):
@@ -169,17 +173,19 @@ class RelationsManager(object):
             else:
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
-    def _build_relations_config(self, yamlconfig):
+    @staticmethod
+    def _build_relations_config(yamlconfig):
+        # type:  (List[Union[str, Dict]]) -> Dict[str, Dict[str, Any]]
         """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
         for element in yamlconfig:
             if isinstance(element, str):
                 config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                relname = element.get(RELATION_NAME)
-                rel_regex = element.get(RELATION_REGEX)
-                schemas = element.get(SCHEMAS, [])
-                name = relname or rel_regex
+                relname = str(element.get(RELATION_NAME))  # type: str
+                rel_regex = str(element.get(RELATION_REGEX))  # type: str
+                schemas = element.get(SCHEMAS, [])  # type: List
+                name = relname or rel_regex  # type: str
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]
