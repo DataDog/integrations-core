@@ -239,7 +239,7 @@ ISTIOD_METRICS = {
     'pilot_xds_push_timeout': 'pilot.xds.push.timeout',
     'pilot_xds_push_timeout_failures': 'pilot.xds.push.timeout_failures',
     'pilot_xds_pushes': 'pilot.xds.pushes',
-    'pilot_xds_write_timeout': 'pilot.xds.write_timeout',,
+    'pilot_xds_write_timeout': 'pilot.xds.write_timeout',
     'pilot_xds_rds_reject': 'pilot.xds.rds_reject',
     'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
     'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
