@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
@@ -201,7 +201,7 @@ class RelationsManager(object):
 
     @staticmethod
     def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> Dict
+        # type:  (List[Union[str, Dict]]) -> Dict[str, Dict[str, Any]]
         """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
         for element in yamlconfig:
