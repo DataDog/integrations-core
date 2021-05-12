@@ -58,7 +58,7 @@ class MaprCheck(AgentCheck):
 
         self.auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
 
-        if not auth_ticket:
+        if not self.auth_ticket:
             self.log.warning(
                 "Neither `ticket_location` (in the config.yaml) or the %s environment variable is set. This will"
                 "cause authentication issues if your cluster requires authenticated requests.",
