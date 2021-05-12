@@ -98,7 +98,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     persist_connections: Optional[bool]
     prometheus_metrics_prefix: Optional[str]
-    prometheus_url: str
+    prometheus_url: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     send_distribution_buckets: Optional[bool]
