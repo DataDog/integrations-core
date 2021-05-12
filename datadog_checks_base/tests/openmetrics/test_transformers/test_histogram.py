@@ -453,3 +453,149 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_check, mock_http_response):
+    payload = """
+        # HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+        # TYPE rest_client_request_latency_seconds histogram
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.004"} 702
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.001"} 254
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.002"} 621
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.008"} 727
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.016"} 738
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.032"} 744
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.064"} 748
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.128"} 754
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.256"} 755
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.512"} 755
+        rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="+Inf"} 755
+        rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
+        rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
+        """
+    mock_http_response(payload)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'collect_counters_with_distributions': True,
+            # Implicitly activated
+            'histogram_buckets_as_distributions': False,
+            'collect_histogram_buckets': False,
+        }
+    )
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.rest_client_request_latency_seconds.sum',
+        2.185820220000001,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET'],
+    )
+    aggregator.assert_metric(
+        'test.rest_client_request_latency_seconds.count',
+        755,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET'],
+    )
+
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        81,
+        0.002,
+        0.004,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.004', 'lower_bound:0.002'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        254,
+        0,
+        0.001,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.001', 'lower_bound:0'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        367,
+        0.001,
+        0.002,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.002', 'lower_bound:0.001'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        25,
+        0.004,
+        0.008,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.008', 'lower_bound:0.004'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        11,
+        0.008,
+        0.016,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.016', 'lower_bound:0.008'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        6,
+        0.016,
+        0.032,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.032', 'lower_bound:0.016'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        4,
+        0.032,
+        0.064,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.064', 'lower_bound:0.032'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        6,
+        0.064,
+        0.128,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.128', 'lower_bound:0.064'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        1,
+        0.128,
+        0.256,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.256', 'lower_bound:0.128'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        0,
+        0.256,
+        0.512,
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.512', 'lower_bound:0.256'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.rest_client_request_latency_seconds',
+        0,
+        0.512,
+        float('Inf'),
+        True,
+        check.hostname,
+        ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:inf', 'lower_bound:0.512'],
+    )
+
+    aggregator.assert_all_metrics_covered()

@@ -82,17 +82,16 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname "
-            "WHERE psd.datname not ilike 'template%%' "
-            "  AND psd.datname not ilike 'rdsadmin' "
-            "  AND psd.datname not ilike 'azure_maintenance' ",
+            "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
         }
 
-        if not self.config.collect_default_db:
-            res["query"] += "  AND psd.datname not ilike 'postgres'"
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
+
         if self.config.dbstrict:
-            res["query"] += "  AND psd.datname in('{}')".format(self.config.dbname)
+            res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
 
         return res
 

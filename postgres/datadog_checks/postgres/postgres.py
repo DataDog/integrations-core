@@ -14,7 +14,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt
+from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
@@ -45,9 +45,7 @@ class PostgreSql(AgentCheck):
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
-        self.check_initializations.append(
-            lambda: self._relations_manager.validate_relations_config(self._config.relations)
-        )
+        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
 
     def cancel(self):
         self.statement_samples.cancel()
@@ -93,7 +91,8 @@ class PostgreSql(AgentCheck):
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if is_relations:
-                relations_filter = self._relations_manager.build_relations_filter(descriptors)
+                schema_field = get_schema_field(descriptors)
+                relations_filter = self._relations_manager.build_relations_filter(schema_field)
                 self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
                 cursor.execute(query.format(relations=relations_filter))
             else:
@@ -151,9 +150,7 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
-        is_relations = scope['relation'] and self._relations_manager.has_relations
-
-        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors, is_relations)
+        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
         if not results:
             return None
 
@@ -252,12 +249,12 @@ class PostgreSql(AgentCheck):
 
         cursor.close()
 
-    def _new_connection(self):
+    def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "user=%s dbname=%s application_name=%s" % (
                 self._config.user,
-                self._config.dbname,
+                dbname,
                 self._config.application_name,
             )
             if self._config.query_timeout:
@@ -268,7 +265,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': self._config.password,
-                'database': self._config.dbname,
+                'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -289,7 +286,7 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            self.db = self._new_connection()
+            self.db = self._new_connection(self._config.dbname)
 
     def _collect_custom_queries(self, tags):
         """

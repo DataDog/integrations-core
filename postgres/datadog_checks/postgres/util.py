@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import string
+from typing import Any, List, Tuple
 
 from datadog_checks.base import AgentCheck
 
@@ -26,7 +27,8 @@ def milliseconds_to_nanoseconds(value):
 
 
 def get_schema_field(descriptors):
-    """Return column containg the schema name for that query."""
+    # type: (List[Tuple[Any, str]]) -> str
+    """Return column containig the schema name for that query."""
     for column, name in descriptors:
         if name == 'schema':
             return column

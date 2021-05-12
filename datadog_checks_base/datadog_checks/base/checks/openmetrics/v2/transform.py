@@ -17,7 +17,10 @@ class MetricTransformer:
         self.check = check
         self.logger = check.log
         self.cache_metric_wildcards = is_affirmative(config.get('cache_metric_wildcards', True))
-        self.histogram_buckets_as_distributions = is_affirmative(
+        self.collect_counters_with_distributions = is_affirmative(
+            config.get('collect_counters_with_distributions', False)
+        )
+        self.histogram_buckets_as_distributions = self.collect_counters_with_distributions or is_affirmative(
             config.get('histogram_buckets_as_distributions', False)
         )
         self.collect_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
@@ -29,6 +32,7 @@ class MetricTransformer:
 
         # Accessible to every transformer
         self.global_options = {
+            'collect_counters_with_distributions': self.collect_counters_with_distributions,
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,

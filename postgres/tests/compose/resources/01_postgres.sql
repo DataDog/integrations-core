@@ -7,3 +7,5 @@ CREATE DATABASE datadog_test;
 GRANT ALL PRIVILEGES ON DATABASE datadog_test TO datadog;
 CREATE DATABASE dogs;
 GRANT USAGE on SCHEMA public to bob;
+CREATE DATABASE dogs_nofunc;
+CREATE DATABASE dogs_noschema;
