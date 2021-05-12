@@ -5,6 +5,7 @@ import string
 from typing import Any, List, Tuple
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 
 
 class PartialFormatter(string.Formatter):
@@ -32,6 +33,7 @@ def get_schema_field(descriptors):
     for column, name in descriptors:
         if name == 'schema':
             return column
+    raise CheckException("The descriptors are missing a schema field")
 
 
 fmt = PartialFormatter()

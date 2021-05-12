@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
@@ -175,17 +175,17 @@ class RelationsManager(object):
 
     @staticmethod
     def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> Dict
+        # type:  (List[Union[str, Dict]]) -> Dict[str, Dict[str, Any]]
         """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
         for element in yamlconfig:
             if isinstance(element, str):
                 config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                relname = element.get(RELATION_NAME)
-                rel_regex = element.get(RELATION_REGEX)
-                schemas = element.get(SCHEMAS, [])
-                name = relname or rel_regex
+                relname = str(element.get(RELATION_NAME))  # type: str
+                rel_regex = str(element.get(RELATION_REGEX))  # type: str
+                schemas = element.get(SCHEMAS, [])  # type: List
+                name = relname or rel_regex  # type: str
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]
