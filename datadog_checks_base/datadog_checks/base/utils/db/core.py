@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime
 from itertools import chain
 from typing import Callable, Iterable, List, Sequence, Union
 
@@ -104,8 +105,12 @@ class QueryManager(object):
             query_tags = query.tags
             num_columns = len(query_columns)
 
+            telemetry_tags = list(global_tags) + ["check_id:{}".format(self.check.check_id), "query_id:{}".format(query_name)]
             try:
+                query_start = datetime.now()
                 rows = self.execute_query(query.query)
+                query_duration = datetime.now() - query_start
+                self.check.gauge("ibmi.check.query_duration", query_duration.total_seconds(), telemetry_tags, hostname=self.hostname)
             except Exception as e:
                 if self.error_handler:
                     logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
@@ -114,6 +119,7 @@ class QueryManager(object):
 
                 continue
 
+            transformation_start = datetime.now()
             for row in rows:
                 if not row:
                     logger.debug('Query %s returned an empty result', query_name)
@@ -167,6 +173,9 @@ class QueryManager(object):
                     else:
                         if result is not None:
                             sources[name] = result
+
+            transformation_duration = datetime.now() - transformation_start
+            self.check.gauge("ibmi.check.transformation_duration", transformation_duration.total_seconds(), telemetry_tags, hostname=self.hostname)
 
     def execute_query(self, query):
         """
