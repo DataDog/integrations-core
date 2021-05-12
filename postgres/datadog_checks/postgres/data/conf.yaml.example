@@ -95,8 +95,11 @@ instances:
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
     ##
-    ## By default all relations are included. To track relations of a specific kind only,
-    ## you can specify the `relation_kinds` attribute. Relation kinds should be a list of the following:
+    ## Size metrics are collected only for ordinary tables, index metrics are collected for user indexes the rest of
+    ## metrics are collected for user tables except lock metrics that are collected for all relation types
+    ## (table, index , view, etc.).
+    ## To track lock metrics for  relations of a specific kind only, you can specify the `relation_kinds` attribute.
+    ## Relation kinds should be a list of the following:
     ## * r = ordinary table
     ## * i = index
     ## * S = sequence
@@ -105,10 +108,6 @@ instances:
     ## * c = composite type
     ## * f = foreign table
     ## * p = partitioned table
-    ##
-    ## Note: Relkind filter only applies to lock metrics. Size metrics are only collected for ordinary tables.
-    ## The rest of relation metrics are collected only for user tables except index metrics that collect metrics
-    ## about user indexes.
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
     ## the list of table names. All schemas are included and regex are not supported.
