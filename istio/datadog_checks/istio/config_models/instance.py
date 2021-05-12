@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -87,7 +87,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
-    metrics: Optional[Sequence[Mapping[str, str]]]
+    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
     mixer_endpoint: Optional[str]
     namespace: Optional[str]

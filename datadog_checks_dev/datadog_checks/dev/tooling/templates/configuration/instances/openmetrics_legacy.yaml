@@ -21,7 +21,11 @@
       - memory:mem
       - io
     items:
-      type: string
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          type: string
 - name: prometheus_metrics_prefix
   description: Removes a given <PREFIX> from exposed Prometheus metrics.
   value:
