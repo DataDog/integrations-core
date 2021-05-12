@@ -1,4 +1,7 @@
-comment: false
+comment:
+  layout: flags, files
+  behavior: default
+  branches: null
 coverage:
   range: 50..100
   round: down

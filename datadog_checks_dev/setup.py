@@ -72,9 +72,10 @@ setup(
             'appdirs>=1.4.4',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
-            'click>7',
+            # click 8.0.0 breaks with ddev --version
+            'click==7.1.2',
             'colorama',
-            'datamodel-code-generator~=0.9.2; python_version > "3.0"',
+            'datamodel-code-generator~=0.11.4; python_version > "3.0"',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'jsonschema',
@@ -89,7 +90,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
-            'virtualenv>=20.4.3',
+            'virtualenv>=20.4.6',
             'wheel>=0.31.0',
         ]
     },

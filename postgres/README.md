@@ -36,8 +36,6 @@ create user datadog with password '<PASSWORD>';
 grant SELECT ON pg_stat_database to datadog;
 ```
 
-**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `CONNECT` permission on those tables to the `datadog` user.
-
 To verify the permissions are correct, run the following command:
 
 ```shell
@@ -62,6 +60,8 @@ grant SELECT ON pg_stat_activity_dd to datadog;
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
+
+**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section](#faq) for more information.
 
 #### Host
 

@@ -12,6 +12,7 @@ SECONDARY_DASHBOARDS = {
 DASHBOARD_NOT_POSSIBLE = {
     'agent_metrics',  # Not for the end user
     'amazon_eks',  # collects metrics from Kubernetes, AWS, AWS EC2 integrations
+    'go-metro',  # for agent 5 only
     'snmp',  # Too custom
     'openmetrics',  # No default metrics
     'pdh_check',  # No default metrics
@@ -37,7 +38,7 @@ DASHBOARD_NOT_POSSIBLE = {
 
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
-INTEGRATION_LOGS_NOT_POSSIBLE = (
+INTEGRATION_LOGS_NOT_POSSIBLE = {
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',
@@ -45,6 +46,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'directory',  # OS
     'dotnetclr',  # No relevant logs
     'external_dns',  # remote connection
+    'go-metro',  # for agent 5 only
     'http_check',  # Its not a service
     'linux_proc_extras',
     'ntp',  # the integration is for a remote ntp server
@@ -62,4 +64,17 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'tls',  # remote connection
     'windows_service',  # OS
     'wmi_check',  # base class
-)
+}
+
+
+INTEGRATION_REC_MONITORS_NOT_POSSIBLE = {
+    'go-metro',  # agent 5 only
+}
+
+PROCESS_SIGNATURE_EXCLUDE = {
+    'datadog_checks_base',
+    'datadog_checks_dev',
+    'datadog_checks_downloader',
+    'snowflake',
+    'go-metro',
+}
