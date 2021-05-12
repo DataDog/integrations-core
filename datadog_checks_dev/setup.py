@@ -72,8 +72,7 @@ setup(
             'appdirs>=1.4.4',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
-            # click 8.0.0 breaks with ddev --version
-            'click==7.1.2',
+            'click~=8.0; python_version > "3.0"',
             'colorama',
             'datamodel-code-generator~=0.11.4; python_version > "3.0"',
             'docker-compose>=1.25',
