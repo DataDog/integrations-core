@@ -9,3 +9,5 @@ def initialize_instance(values, **kwargs):
             raise ValueError('Field `prometheus_url` is required')
     elif 'url' not in values:
         raise ValueError('Field `url` is required')
+
+    return values
