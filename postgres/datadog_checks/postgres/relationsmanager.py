@@ -126,6 +126,7 @@ RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO
 
 class RelationsManager(object):
     """Builds queries to collect metrics about relations"""
+
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
@@ -147,7 +148,7 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
-            if r.get(RELKIND) and RELKIND not in query:  # SIZE_METRICS already filters by relkind
+            if r.get(RELKIND) and RELKIND not in query.lower():  # SIZE_METRICS already filters by relkind
                 relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 

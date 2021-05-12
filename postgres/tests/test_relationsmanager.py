@@ -16,7 +16,9 @@ def test_relation_filter():
     relations = RelationsManager(relations_config)
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert query_filter == "Select foo from bar where ( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
+    assert (
+        query_filter == "Select foo from bar where ( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
+    )
 
 
 def test_relation_filter_no_schemas():
@@ -44,3 +46,12 @@ def test_relation_filter_relkind():
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
     assert query_filter == "Select foo from bar where ( relname ~ 'b.*' AND relkind = ANY(array['r' ,'t']) )"
+
+
+def test_relkind_does_not_override():
+    query = "Select foo from bar where relkind = 's' AND {relations}"
+    relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r', 't']}]
+    relations = RelationsManager(relations_config)
+
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert query_filter == "Select foo from bar where relkind = 's' AND ( relname ~ 'b.*' )"
