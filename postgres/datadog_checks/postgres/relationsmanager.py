@@ -208,10 +208,10 @@ class RelationsManager(object):
             if isinstance(element, str):
                 config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                relname = element.get(RELATION_NAME)
-                rel_regex = element.get(RELATION_REGEX)
-                schemas = element.get(SCHEMAS, [])
-                name = relname or rel_regex
+                relname = str(element.get(RELATION_NAME))  # type: str
+                rel_regex = str(element.get(RELATION_REGEX))  # type: str
+                schemas = element.get(SCHEMAS, [])  # type: List
+                name = relname or rel_regex  # type: str
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]
