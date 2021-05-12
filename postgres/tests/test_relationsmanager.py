@@ -11,24 +11,36 @@ pytestmark = pytest.mark.unit
 
 
 def test_relation_filter():
+    query = "Select foo from bar where {relations}"
     relations_config = [{'relation_name': 'breed', 'schemas': ['public']}]
     relations = RelationsManager(relations_config)
 
-    query_filter = relations.build_relations_filter(SCHEMA_NAME)
-    assert query_filter == "( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert query_filter == "Select foo from bar where ( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
 
 
 def test_relation_filter_no_schemas():
+    query = "Select foo from bar where {relations}"
     relations_config = [{'relation_name': 'persons', 'schemas': [ALL_SCHEMAS]}]
     relations = RelationsManager(relations_config)
 
-    query_filter = relations.build_relations_filter(SCHEMA_NAME)
-    assert query_filter == "( relname = 'persons' )"
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert query_filter == "Select foo from bar where ( relname = 'persons' )"
 
 
 def test_relation_filter_regex():
+    query = "Select foo from bar where {relations}"
     relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS]}]
     relations = RelationsManager(relations_config)
 
-    query_filter = relations.build_relations_filter(SCHEMA_NAME)
-    assert query_filter == "( relname ~ 'b.*' )"
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert query_filter == "Select foo from bar where ( relname ~ 'b.*' )"
+
+
+def test_relation_filter_relkind():
+    query = "Select foo from bar where {relations}"
+    relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r', 't']}]
+    relations = RelationsManager(relations_config)
+
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert query_filter == "Select foo from bar where ( relname ~ 'b.*' AND relkind = ANY(array['r' ,'t']) )"

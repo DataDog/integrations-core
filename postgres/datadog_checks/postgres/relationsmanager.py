@@ -125,15 +125,16 @@ RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO
 
 
 class RelationsManager(object):
+    """Builds queries to collect metrics about relations"""
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
         self.has_relations = len(self.config) > 0
 
-    def build_relations_filter(self, schema_field):
-        # type (str) -> str
-        """Build a WHERE clause filtering relations based on relations_config."""
+    def filter_relation_query(self, query, schema_field):
+        # type (str, str) -> str
+        """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config.values():
             relation_filter = []
@@ -146,10 +147,16 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
+            if r.get(RELKIND) and RELKIND not in query:  # SIZE_METRICS already filters by relkind
+                relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
+                relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
+
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        return ' OR '.join(relations_filter)
+        relations_filter = ' OR '.join(relations_filter)
+        self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
+        return query.format(relations=relations_filter)
 
     @staticmethod
     def validate_relations_config(yamlconfig):
