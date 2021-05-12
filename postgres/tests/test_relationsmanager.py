@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, RelationsManager
+from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, IDX_METRICS, RelationsManager
 
 from .common import SCHEMA_NAME
 
@@ -55,3 +55,12 @@ def test_relkind_does_not_override():
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
     assert query_filter == "Select foo from bar where relkind = 's' AND ( relname ~ 'b.*' )"
+
+
+def test_relkind_does_not_apply_to_index_metrics():
+    query = IDX_METRICS['query'].replace('{metrics_columns}', '(a, b)')
+    relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r']}]
+    relations = RelationsManager(relations_config)
+
+    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
+    assert 'relkind' not in query_filter

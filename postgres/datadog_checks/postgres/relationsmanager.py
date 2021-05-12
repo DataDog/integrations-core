@@ -61,6 +61,8 @@ SELECT relname,schemaname,{metrics_columns}
     'relation': True,
 }
 
+
+# only indexes on user tables are shown.
 IDX_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
     'metrics': {
@@ -148,7 +150,7 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
-            if r.get(RELKIND) and RELKIND not in query.lower():  # SIZE_METRICS already filters by relkind
+            if r.get(RELKIND) and RELKIND not in query.lower() and 'FROM pg_stat_user_indexes' not in query:
                 relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
