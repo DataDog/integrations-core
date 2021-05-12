@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, cast
 
 import click
 
@@ -292,7 +292,7 @@ def testable(
     options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in options.items())
 
     commit_ids: Set[str] = set()
-    user_config = ctx.obj
+    user_config = cast(Dict[Any, Any], ctx.obj)
     trello = TrelloClient(user_config)
 
     fixed_cards_mover = None
