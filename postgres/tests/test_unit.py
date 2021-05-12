@@ -9,7 +9,7 @@ from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
-from datadog_checks.postgres import util
+from datadog_checks.postgres import PostgreSql, util
 
 pytestmark = pytest.mark.unit
 
@@ -65,17 +65,20 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
     assert res['metrics'] == expected
 
 
-def test_get_instance_with_default(check):
+@pytest.mark.parametrize("collect_default_database", [True, False])
+def test_get_instance_with_default(pg_instance, collect_default_database):
     """
-    Test the contents of the query string with different `collect_default_db` values
+    Test the contents of the query string with different `collect_default_database` values
     """
-    version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" in res['query']
-
-    check._config.collect_default_db = True
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" not in res['query']
+    pg_instance['collect_default_database'] = collect_default_database
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check._version)
+    dbfilter = " AND psd.datname not ilike 'postgres'"
+    if collect_default_database:
+        assert dbfilter not in res['query']
+    else:
+        assert dbfilter in res['query']
 
 
 def test_malformed_get_custom_queries(check):

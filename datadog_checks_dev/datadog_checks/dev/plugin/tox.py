@@ -59,17 +59,28 @@ def tox_configure(config):
                 env_config.envlogdir = env_config.envdir / 'log'
                 env_config.envtmpdir = env_config.envdir / 'tmp'
 
-    # Conditionally set 'e2e ready' depending on env variables
-    description = base_testenv.get('description')
-    if description and E2E_READY_CONDITION in description:
-        data, var = description.split(' if ')
+    # Conditionally set 'e2e ready' depending on env variables or environment markers
+    for cfg in config.envconfigs.values():
+        if E2E_READY_CONDITION not in cfg.description:
+            continue
+
+        data, var = cfg.description.split(' if ')
+        var = var.strip()
+
         if var in os.environ:
-            description = data
+            cfg.description = data
         else:
-            description = '{} is missing'.format(var)
-        for cfg in config.envconfigs.values():
-            if E2E_READY_CONDITION in cfg.description:
-                cfg.description = description
+            from packaging.markers import InvalidMarker, Marker
+
+            try:
+                marker = Marker(var)
+            except InvalidMarker:
+                cfg.description = '{} is missing'.format(var)
+            else:
+                if marker.evaluate():
+                    cfg.description = data
+                else:
+                    cfg.description = 'environment does not match: {}'.format(var)
 
     # Next two sections hack the sequencing of Tox's package installation.
     #

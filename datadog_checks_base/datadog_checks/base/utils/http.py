@@ -440,7 +440,7 @@ class RequestsWrapper(object):
                 ExtensionOID.AUTHORITY_INFORMATION_ACCESS
             )
         except ExtensionNotFound:
-            self.log.debug(
+            self.logger.debug(
                 'No Authority Information Access extension found, skipping discovery of intermediate certificates'
             )
             return

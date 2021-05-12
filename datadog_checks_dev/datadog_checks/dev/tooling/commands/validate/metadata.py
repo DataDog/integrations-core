@@ -200,6 +200,7 @@ VALID_UNIT_NAMES = {
     'decidegree celsius',
     'span',
     'exception',
+    'run',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
