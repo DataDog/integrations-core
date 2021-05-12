@@ -106,7 +106,9 @@ instances:
     ## * f = foreign table
     ## * p = partitioned table
     ##
-    ## Note: Size and index metrics are collected only for ordinary tables so this filter will not apply to them.
+    ## Note: Relkind filter only applies to lock metrics. Size metrics are only collected for ordinary tables.
+    ## The rest of relation metrics are collected only for user tables except index metrics that collect metrics
+    ## about user indexes.
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
     ## the list of table names. All schemas are included and regex are not supported.

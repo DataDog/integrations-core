@@ -12,7 +12,7 @@ RELATION_REGEX = 'relation_regex'
 SCHEMAS = 'schemas'
 RELKIND = 'relkind'
 
-
+# The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
     'descriptors': [
         ('mode', 'lock_mode'),
@@ -40,6 +40,9 @@ SELECT mode,
     'relation': True,
 }
 
+# The pg_stat_all_tables contain one row for each table in the current database,
+# showing statistics about accesses to that specific table.
+# pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -62,7 +65,9 @@ SELECT relname,schemaname,{metrics_columns}
 }
 
 
-# only indexes on user tables are shown.
+# The pg_stat_all_indexes view will contain one row for each index in the current database,
+# showing statistics about accesses to that specific index.
+# The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
 IDX_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
     'metrics': {
@@ -80,6 +85,9 @@ SELECT relname,
     'relation': True,
 }
 
+
+# The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
+# For this integration we are restricting the query to ordinary tables.
 SIZE_METRICS = {
     'descriptors': [('nspname', 'schema'), ('relname', 'table')],
     'metrics': {
@@ -101,6 +109,10 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   {relations}""",
 }
 
+
+# The pg_statio_all_tables view will contain one row for each table in the current database,
+# showing statistics about I/O on that specific table. The pg_statio_user_tables views contain the same information,
+# but filtered to only show user tables.
 STATIO_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -150,7 +162,7 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
-            if r.get(RELKIND) and RELKIND not in query.lower() and 'FROM pg_stat_user_indexes' not in query:
+            if r.get(RELKIND) and 'FROM pg_locks' in query:
                 relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 

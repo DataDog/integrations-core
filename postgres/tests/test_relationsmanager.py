@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, IDX_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import ALL_SCHEMAS, IDX_METRICS, RelationsManager, LOCK_METRICS
 
 from .common import SCHEMA_NAME
 
@@ -40,25 +40,16 @@ def test_relation_filter_regex():
 
 
 def test_relation_filter_relkind():
-    query = "Select foo from bar where {relations}"
+    query = LOCK_METRICS['query'].replace('{metrics_columns}', 'foo')
     relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r', 't']}]
     relations = RelationsManager(relations_config)
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert query_filter == "Select foo from bar where ( relname ~ 'b.*' AND relkind = ANY(array['r' ,'t']) )"
-
-
-def test_relkind_does_not_override():
-    query = "Select foo from bar where relkind = 's' AND {relations}"
-    relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r', 't']}]
-    relations = RelationsManager(relations_config)
-
-    query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert query_filter == "Select foo from bar where relkind = 's' AND ( relname ~ 'b.*' )"
+    assert "AND relkind = ANY(array['r' ,'t'])" in query_filter
 
 
 def test_relkind_does_not_apply_to_index_metrics():
-    query = IDX_METRICS['query'].replace('{metrics_columns}', '(a, b)')
+    query = IDX_METRICS['query'].replace('{metrics_columns}', 'foo')
     relations_config = [{'relation_regex': 'b.*', 'schemas': [ALL_SCHEMAS], 'relkind': ['r']}]
     relations = RelationsManager(relations_config)
 
