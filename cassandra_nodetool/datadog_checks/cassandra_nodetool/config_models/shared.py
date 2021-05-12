@@ -17,7 +17,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    nodetool: str
+    nodetool: Optional[str]
     service: Optional[str]
 
     @root_validator(pre=True)
