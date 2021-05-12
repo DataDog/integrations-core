@@ -56,6 +56,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self._delete_connection("query error")
             check_status = AgentCheck.CRITICAL
 
+
         if check_status is not None:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
@@ -67,6 +68,12 @@ class IbmICheck(AgentCheck, ConfigMixin):
         check_end = datetime.now()
         check_duration = check_end - check_start
         self.log.debug("Check duration: %s", check_duration)
+
+        if check_status is not None:
+            # The list() conversion is needed as self.config.tags is a tuple
+            check_duration_tags = list(self.config.tags) + ["check_id:{}".format(self.check_id)]
+            self.gauge("ibmi.check.duration", check_duration.total_seconds(), check_duration_tags, hostname=self._query_manager.hostname)
+
 
     def execute_query(self, query):
         # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
