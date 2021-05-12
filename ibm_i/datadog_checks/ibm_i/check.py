@@ -115,6 +115,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
                 queries.JobQueueInfo,
+                queries.MessageQueueInfo,
+                queries.MessageQueueCriticalInfo,
             ]
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
                 query_list.append(queries.SubsystemInfo)
