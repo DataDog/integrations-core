@@ -68,7 +68,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][11].
 
-Then, set [Log Integrations][12] as Docker labels:
+Then, set [log integrations][12] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source": "cockroachdb", "service": "<SERVICE_NAME>"}]'
