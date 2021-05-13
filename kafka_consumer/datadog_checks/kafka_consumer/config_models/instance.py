@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -21,7 +21,7 @@ class InstanceConfig(BaseModel):
     consumer_groups: Optional[Mapping[str, Any]]
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]
-    kafka_connect_str: Sequence[str]
+    kafka_connect_str: Union[str, Sequence[str]]
     kafka_consumer_offsets: Optional[bool]
     min_collection_interval: Optional[float]
     monitor_all_broker_highwatermarks: Optional[bool]
