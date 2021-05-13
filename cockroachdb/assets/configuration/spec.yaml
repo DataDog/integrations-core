@@ -18,4 +18,4 @@ files:
       log_processing_rules:
       - type: multi_line
         name: new_log_start_with_status_and_date
-        pattern: [A-Z]\d{6}\s\d+\:\d+\:\d+\.\d+
+        pattern: \[A-Z]\d{6}\s\d+\:\d+\:\d+\.\d+
