@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     host: Optional[str]
     keyspaces: Sequence[str]
     min_collection_interval: Optional[float]
+    nodetool: Optional[str]
     password: Optional[str]
     port: Optional[int]
     service: Optional[str]
