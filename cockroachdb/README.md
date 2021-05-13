@@ -33,7 +33,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `cockroachdb.d/conf.yaml` file to start collecting your CockroachDB Logs:
+2. Add this configuration block to your `cockroachdb.d/conf.yaml` file to start collecting your CockroachDB logs:
 
    ```yaml
    logs:
