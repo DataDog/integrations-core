@@ -27,6 +27,14 @@ services:
       - network1
     command: redis-server --port 6381 --slaveof redis-master 1234
 
+  redis-slave-users-acl:
+    image: "redis:${REDIS_VERSION}"
+    ports:
+      - "6383:6383"
+    networks:
+      - network1
+    command: redis-server --port 6383
+
 networks:
   network1:
     name: 1m-2s_default

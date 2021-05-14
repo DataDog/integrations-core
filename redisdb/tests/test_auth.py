@@ -56,7 +56,8 @@ def test_redis_auth_acl_good(aggregator, redis_auth_acl):
     """
     Test the check with ACL without collect client metrics
     """
-    instance = {'host': HOST, 'port': PORT_ACL_INSTANCE, 'username': USERNAME, 'password': PASSWORD, 'collect_client_metrics': False}
+    instance = {'host': HOST, 'port': PORT_ACL_INSTANCE, 'username': USERNAME, 'password': PASSWORD,
+                'collect_client_metrics': False}
     redis = Redis('redisdb', {}, [instance])
 
     redis.check(instance)
@@ -68,7 +69,8 @@ def test_redis_auth_acl_bad(aggregator, redis_auth_acl):
     """
     Test the check with ACL not allowing collect client metrics: should log an error and continue without raising
     """
-    instance = {'host': HOST, 'port': PORT_ACL_INSTANCE, 'username': USERNAME, 'password': PASSWORD, 'collect_client_metrics': True}
+    instance = {'host': HOST, 'port': PORT_ACL_INSTANCE, 'username': USERNAME, 'password': PASSWORD,
+                'collect_client_metrics': True}
     redis = Redis('redisdb', {}, [instance])
 
     redis.check(instance)  # should not raise
