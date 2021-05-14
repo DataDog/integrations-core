@@ -7,7 +7,7 @@ services:
       - ${REDIS_CONFIG}:/etc/redis.conf
       - ${REDIS_USERS_ACL}:/etc/users.acl
     ports:
-      - "6383:6379"
+      - "6384:6379"
     networks:
       - network1
     command: redis-server /etc/redis.conf --aclfile /etc/users.acl
