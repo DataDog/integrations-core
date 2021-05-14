@@ -23,7 +23,7 @@ BLACK_DEP = 'black==20.8b1'
 FLAKE8_DEP = 'flake8==3.9.1'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
-MYPY_DEP = 'mypy==0.770'
+MYPY_DEP = 'mypy==0.812'
 PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
@@ -59,17 +59,28 @@ def tox_configure(config):
                 env_config.envlogdir = env_config.envdir / 'log'
                 env_config.envtmpdir = env_config.envdir / 'tmp'
 
-    # Conditionally set 'e2e ready' depending on env variables
-    description = base_testenv.get('description')
-    if description and E2E_READY_CONDITION in description:
-        data, var = description.split(' if ')
+    # Conditionally set 'e2e ready' depending on env variables or environment markers
+    for cfg in config.envconfigs.values():
+        if E2E_READY_CONDITION not in cfg.description:
+            continue
+
+        data, var = cfg.description.split(' if ')
+        var = var.strip()
+
         if var in os.environ:
-            description = data
+            cfg.description = data
         else:
-            description = '{} is missing'.format(var)
-        for cfg in config.envconfigs.values():
-            if E2E_READY_CONDITION in cfg.description:
-                cfg.description = description
+            from packaging.markers import InvalidMarker, Marker
+
+            try:
+                marker = Marker(var)
+            except InvalidMarker:
+                cfg.description = '{} is missing'.format(var)
+            else:
+                if marker.evaluate():
+                    cfg.description = data
+                else:
+                    cfg.description = 'environment does not match: {}'.format(var)
 
     # Next two sections hack the sequencing of Tox's package installation.
     #

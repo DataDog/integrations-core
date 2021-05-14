@@ -41,11 +41,30 @@ files:
     - name: dbstrict
       description: |
         Whether to restrict the scope of the check to just the database in question.
-        Set to `true` if you only want to gather metrics from the database provided in the dbname parameter. 
+        Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
       value:
         type: boolean
         display_default: false
         example: false
+    - name: ignore_databases
+      description: |
+        A list of database to ignore. No metrics or statement samples will be collected for these databases.
+        Each value can be a plain string or a Postgres pattern.
+        For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'template%'
+          - rdsadmin
+          - azure_maintenance
+          - postgres
+        default:
+          - 'template%'
+          - rdsadmin
+          - azure_maintenance
+          - postgres
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -95,20 +114,24 @@ files:
       value:
         type: array
         items:
-          type: object
-          properties:
-            - name: relation_name
-              type: string
-            - name: relation_schema
-              type: string
-            - name: schemas
-              type: array
-              items:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+              - name: relation_name
+                type: string
+              - name: relation_schema
+                type: string
+              - name: schemas
+                type: array
+                items:
+                  type: string
+              - name: relation_regex
                 type: string
         example:
           - relation_name: <TABLE_NAME>
             schemas:
-               - <SCHEMA_NAME1>
+              - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
     - name: max_relations
       description: Determines the maximum number of relations to fetch.

@@ -162,7 +162,7 @@ instances:
     ##
     ## Release: 8.0.0
     ## Migration: Use the following options instead:
-    ##            hosts, username, password, database, options, connection_scheme
+    ##            hosts, username, password, database, options
     #
     # server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
 

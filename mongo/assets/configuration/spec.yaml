@@ -183,7 +183,7 @@ files:
         Release: "8.0.0"
         Migration: |
           Use the following options instead:
-          hosts, username, password, database, options, connection_scheme
+          hosts, username, password, database, options
       description: |
         Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
         E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin

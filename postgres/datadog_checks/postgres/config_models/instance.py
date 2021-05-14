@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -18,6 +18,7 @@ class Relation(BaseModel):
         allow_mutation = False
 
     relation_name: Optional[str]
+    relation_regex: Optional[str]
     relation_schema: Optional[str]
     schemas: Optional[Sequence[str]]
 
@@ -51,13 +52,14 @@ class InstanceConfig(BaseModel):
     deep_database_monitoring: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
+    ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
     min_collection_interval: Optional[float]
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
     query_timeout: Optional[int]
-    relations: Optional[Sequence[Relation]]
+    relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
     statement_metrics_limits: Optional[Mapping[str, Any]]

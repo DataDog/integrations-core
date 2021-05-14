@@ -77,7 +77,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 By default the Agent looks for the journal at the following locations:
 
 - `/var/log/journal`
-- `/var/run/journal`
+- `/run/log/journal`
 
 If your journal is located elsewhere, add a `path` parameter with the corresponding journal path.
 

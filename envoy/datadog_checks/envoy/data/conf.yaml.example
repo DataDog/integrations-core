@@ -114,6 +114,12 @@ instances:
     #
     # parse_unknown_metrics: false
 
+    ## @param collect_server_info - boolean - optional - default: true
+    ## Collect Envoy version by accessing the `/server_info` endpoint.
+    ## Disable this if this endpoint is not reachable by the agent.
+    #
+    # collect_server_info: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

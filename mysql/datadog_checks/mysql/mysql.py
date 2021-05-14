@@ -42,6 +42,8 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_REPLICATION_ROLE_AWS_AURORA,
+    SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
@@ -71,16 +73,17 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
+        self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._config.tags)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self._statement_metrics = MySQLStatementMetrics(self._config)
+        self._statement_metrics = MySQLStatementMetrics(self, self._config)
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
@@ -99,27 +102,32 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        tags = list(self._config.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
                 self._conn = db
+
+                if self._get_is_aurora(db):
+                    tags.extend(self._get_runtime_aurora_tags(db))
+                    tags = list(set(tags))
 
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db)
-                self._collect_system_metrics(self._config.host, db, self._config.tags)
+                self._collect_metrics(db, tags=tags)
+                self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
-                    self._collect_statement_metrics(db, self._config.tags)
+                    self._statement_metrics.collect_per_statement_metrics(db, self.service_check_tags)
                     self._statement_samples.run_sampler(self.service_check_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
 
                 # Custom queries
-                self._query_manager.execute()
+                self._query_manager.execute(extra_tags=tags)
 
             except Exception as e:
                 self.log.exception("error!")
@@ -202,7 +210,7 @@ class MySql(AgentCheck):
             if db:
                 db.close()
 
-    def _collect_metrics(self, db):
+    def _collect_metrics(self, db, tags):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
@@ -296,13 +304,13 @@ class MySql(AgentCheck):
             if src in results:
                 results[dst] = results[src]
 
-        self._submit_metrics(metrics, results, self._config.tags)
+        self._submit_metrics(metrics, results, tags)
 
         # Collect custom query metrics
         # Max of 20 queries allowed
         if isinstance(self._config.queries, list):
             for check in self._config.queries[: self._config.max_custom_queries]:
-                total_tags = self._config.tags + check.get('tags', [])
+                total_tags = tags + check.get('tags', [])
                 self._collect_dict(
                     check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
                 )
@@ -383,12 +391,6 @@ class MySql(AgentCheck):
         self.service_check(self.SLAVE_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
         self.service_check(self.REPLICA_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
 
-    def _collect_statement_metrics(self, db, tags):
-        tags = self.service_check_tags + tags
-        metrics = self._statement_metrics.collect_per_statement_metrics(db)
-        for metric_name, metric_value, metric_tags in metrics:
-            self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
-
     def _is_source_host(self, replicas, results):
         # type: (float, Dict[str, Any]) -> bool
         # master uuid only collected in replicas
@@ -463,6 +465,21 @@ class MySql(AgentCheck):
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
 
+    def _get_runtime_aurora_tags(self, db):
+        runtime_tags = []
+
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
+                replication_role = cursor.fetchone()[0]
+
+                if replication_role in {'writer', 'reader'}:
+                    runtime_tags.append('replication_role:' + replication_role)
+        except Exception:
+            self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
+
+        return runtime_tags
+
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
@@ -529,6 +546,31 @@ class MySql(AgentCheck):
                     self.log.exception("Error while fetching mysql pid from psutil")
 
         return pid
+
+    def _get_is_aurora(self, db):
+        """
+        Tests if the instance is an AWS Aurora database and caches the result.
+        """
+        if self._is_aurora is not None:
+            return self._is_aurora
+
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_SERVER_ID_AWS_AURORA)
+                if len(cursor.fetchall()) > 0:
+                    self._is_aurora = True
+                else:
+                    self._is_aurora = False
+
+        except Exception:
+            self.warning(
+                "Unable to determine if server is Aurora. If this is an Aurora database, some "
+                "information may be unavailable: %s",
+                traceback.format_exc(),
+            )
+            return False
+
+        return self._is_aurora
 
     @classmethod
     def _get_stats_from_status(cls, db):

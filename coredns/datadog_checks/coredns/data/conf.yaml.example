@@ -60,7 +60,7 @@ instances:
     tags:
       - dns-pod:%%host%%
 
-    ## @param metrics - list of strings - optional
+    ## @param metrics - (list of string or mapping) - optional
     ## List of metrics to be fetched from the prometheus endpoint, if there's a
     ## value it'll be renamed. This list should contain at least one metric.
     #

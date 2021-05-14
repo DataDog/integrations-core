@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM registry.ddbuild.io/images/mirror/ubuntu:20.04
 
 # Update sources and install required packages
 RUN apt-get update \
