@@ -29,30 +29,50 @@ CPUUsage = {
 JobStatus = {
     'name': 'job_status',
     'query': (
-        # CPU_TIME is in milliseconds
-        # -> / 1000 to convert into seconds
+        # We prefer using ELAPSED_CPU_TIME / ELAPSED_TIME over ELAPSED_CPU_PERCENTAGE
+        # because the latter only has a precision of one decimal.
+        # ELAPSED_CPU_TIME is in milliseconds, while ELAPSED_TIME is in seconds
+        # -> / 1000 to convert into seconds / seconds
         # -> * 100 to convert the resulting rate into a percentage
         # TODO: figure out why there a x4 difference with the value
-        # given by ELAPSED_CPU_PERCENTAGE
-        'SELECT JOB_NAME, JOB_STATUS, CPU_TIME / 10, 1 FROM '
-        'TABLE(QSYS2.ACTIVE_JOB_INFO(\'NO\', \'\', \'\', \'\'))'
+        # given by ELAPSED_CPU_PERCENTAGE.
+        # TODO: try to move the JOB_NAME split logic to Python
+        "SELECT SUBSTR(A.JOB_NAME,1,POSSTR(A.JOB_NAME,'/')-1) AS JOB_ID, "
+        "SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1,POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "
+        "SUBSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "
+        "A.SUBSYSTEM, A.JOB_STATUS, 1, "
+        "CASE WHEN A.ELAPSED_TIME = 0 THEN 0 ELSE A.ELAPSED_CPU_TIME / (10 * A.ELAPSED_TIME) END AS CPU_RATE "
+        # Two queries: one to fetch the stats, another to reset them
+        "FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', '')) A INNER JOIN TABLE(QSYS2.ACTIVE_JOB_INFO('YES', '', '', '')) B "
+        # Assumes that INTERNAL_JOB_ID is unique, which should be the case
+        "ON A.INTERNAL_JOB_ID = B.INTERNAL_JOB_ID"
     ),
     'columns': [
+        {'name': 'job_id', 'type': 'tag'},
+        {'name': 'job_user', 'type': 'tag'},
         {'name': 'job_name', 'type': 'tag'},
+        {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
-        {'name': 'ibmi.job.cpu_usage', 'type': 'rate'},
         {'name': 'ibmi.job.active', 'type': 'gauge'},
+        {'name': 'ibmi.job.cpu_usage', 'type': 'gauge'},
     ],
 }
 
 JobMemoryUsage = {
     'name': 'job_memory_usage',
     'query': (
-        'SELECT JOB_NAME, JOB_STATUS, MEMORY_POOL, TEMPORARY_STORAGE FROM '
-        'TABLE(QSYS2.ACTIVE_JOB_INFO(\'NO\', \'\', \'\', \'\'))'
+        # TODO: try to move the JOB_NAME split logic to Python
+        "SELECT SUBSTR(JOB_NAME,1,POSSTR(JOB_NAME,'/')-1) AS JOB_ID, "
+        "SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1,POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "
+        "SUBSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "
+        "SUBSYSTEM, JOB_STATUS, MEMORY_POOL, TEMPORARY_STORAGE FROM "
+        "TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', ''))"
     ),
     'columns': [
+        {'name': 'job_id', 'type': 'tag'},
+        {'name': 'job_user', 'type': 'tag'},
         {'name': 'job_name', 'type': 'tag'},
+        {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
         {'name': 'memory_pool_name', 'type': 'tag'},
         {'name': 'ibmi.job.temp_storage', 'type': 'gauge'},
