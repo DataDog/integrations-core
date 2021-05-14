@@ -72,8 +72,10 @@ def redis_auth_acl():
     """
     with docker_run(
         os.path.join(HERE, 'compose', 'acl.compose'),
-        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf'),
-                  'REDIS_USERS_ACL': os.path.join(HERE, 'config', 'users.acl')},
+        env_vars={
+            'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf'),
+            'REDIS_USERS_ACL': os.path.join(HERE, 'config', 'users.acl'),
+        },
     ):
         yield
 
