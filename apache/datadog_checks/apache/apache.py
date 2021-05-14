@@ -17,6 +17,7 @@ class Apache(AgentCheck):
     GAUGES = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',
+        'MaxWorkers': 'apache.performance.max_workers',
         'CPULoad': 'apache.performance.cpu_load',
         'Uptime': 'apache.performance.uptime',
         'Total kBytes': 'apache.net.bytes',
@@ -28,6 +29,21 @@ class Apache(AgentCheck):
     }
 
     RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
+
+    SCOREBOARD_KEYS = {
+        '_': 'apache.scoreboard.waiting_for_connection',
+        'S': 'apache.scoreboard.starting_up',
+        'R': 'apache.scoreboard.reading_request',
+        'W': 'apache.scoreboard.sending_reply',
+        'K': 'apache.scoreboard.keepalive',
+        'D': 'apache.scoreboard.dns_lookup',
+        'C': 'apache.scoreboard.closing_connection',
+        'L': 'apache.scoreboard.logging',
+        'G': 'apache.scoreboard.gracefully_finishing',
+        'I': 'apache.scoreboard.idle_cleanup',
+        '.': 'apache.scoreboard.open_slot',
+        ' ': 'apache.scoreboard.disabled',
+    }
 
     HTTP_CONFIG_REMAPPER = {
         'apache_user': {'name': 'username'},
@@ -81,6 +97,12 @@ class Apache(AgentCheck):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
+
+                # Special case
+                if metric == 'Scoreboard':
+                    self._submit_scoreboard(value, tags)
+                    continue
+
                 # Special case: fetch and submit the version
                 if metric == 'ServerVersion':
                     self._submit_metadata(value)
@@ -141,3 +163,19 @@ class Apache(AgentCheck):
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version.split('.'))}
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
         self.log.debug("found apache version %s", version)
+
+    def _submit_scoreboard(self, value, tags):
+        max_workers = 0
+        metrics = {}
+        for _key, metric in self.SCOREBOARD_KEYS.items():
+            metrics[metric] = 0
+
+        for i in value:
+            max_workers += 1
+            metrics[self.SCOREBOARD_KEYS[i]] += 1
+
+        for _key, metric in self.SCOREBOARD_KEYS.items():
+            self.gauge(metric, metrics[metric], tags=tags)
+
+        self.gauge(self.GAUGES['MaxWorkers'], max_workers, tags=tags)
+        self.log.debug("Scoreboard: %s", value)
