@@ -78,8 +78,6 @@ def redis_auth_acl():
         yield
 
 
-
-
 @pytest.fixture(scope='session')
 def dd_environment(master_instance):
     """
