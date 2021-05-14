@@ -270,7 +270,7 @@ class Redis(AgentCheck):
                 self.log.error('Missing client|list permission: will skip client metrics collection')
             else:
                 clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-                for name, count in clients_by_name.items():
+                for name, count in iteritems(clients_by_name):
                     self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
