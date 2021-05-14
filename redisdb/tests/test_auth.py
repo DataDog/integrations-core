@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, USERNAME, PASSWORD, PORT, PORT_ACL_INSTANCE
+from .common import HOST, PASSWORD, PORT, PORT_ACL_INSTANCE, USERNAME
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
