@@ -140,7 +140,7 @@ For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configu
 
 Additional helpful documentation, links, and articles:
 
-- [Hadoop & Spark monitoring with Datadog][12]
+- [Hadoop and Spark monitoring with Datadog][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
