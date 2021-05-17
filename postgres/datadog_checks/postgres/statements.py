@@ -28,6 +28,7 @@ SELECT {cols}
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '<insufficient privilege>'
+  AND query NOT LIKE 'EXPLAIN %%'
   {filters}
   LIMIT {limit}
 """
