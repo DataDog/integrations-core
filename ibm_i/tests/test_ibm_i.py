@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import mock
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_i import IbmICheck
@@ -58,3 +59,60 @@ def test_query_error_system_info(instance):
     assert system_info is None
     delete_conn.assert_called_once_with(exc)
     check.log.error.assert_not_called()
+
+
+def test_set_up_query_manager_error(instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=None):
+        check.set_up_query_manager()
+    assert check._query_manager is None
+
+
+def test_set_up_query_manager_7_2(instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)):
+        check.set_up_query_manager()
+    assert check._query_manager is not None
+    assert len(check._query_manager.queries) == 7
+
+
+def test_set_up_query_manager_7_4(instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)):
+        check.set_up_query_manager()
+    assert check._query_manager is not None
+    assert len(check._query_manager.queries) == 8
+
+
+def test_check_no_query_manager(aggregator, instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=None):
+        check.check(instance)
+    assert check._query_manager is None
+    check.log.warning.assert_called_once()
+    aggregator.assert_all_metrics_covered()
+
+
+def test_check_query_error(aggregator, instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+
+    with mock.patch(
+        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)
+    ), mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', side_effect=Exception("boom")), mock.patch(
+        'datadog_checks.ibm_i.IbmICheck._delete_connection'
+    ) as delete_conn:
+        check.check(instance)
+    assert check._query_manager is not None
+    delete_conn.assert_called_once_with("query error")
+    aggregator.assert_service_check("ibmi.can_connect", count=1, status=AgentCheck.CRITICAL)
+    aggregator.assert_metric("ibmi.check.duration", hostname="host", tags=["check_id:{}".format(check.check_id)])
+    aggregator.assert_all_metrics_covered()
