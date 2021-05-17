@@ -69,7 +69,6 @@ setup(
     include_package_data=True,
     extras_require={
         'cli': [
-            'appdirs>=1.4.4',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
             'click~=8.0',
@@ -81,6 +80,7 @@ setup(
             'markdown',
             'packaging',
             'pip-tools',
+            'platformdirs>=2.0.0a3',
             'pyperclip>=1.7.0',
             'pysmi>=0.3.4',
             'semver',
