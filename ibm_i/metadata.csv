@@ -1,19 +1,19 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ibmi.asp.unit_storage_capacity,gauge,,byte,,Storage capacity of the unit,0,ibmi,asp capacity
-ibmi.asp.unit_space_available,gauge,,byte,,Space available on the unit for use,0,ibmi,asp available
-ibmi.asp.percent_used,gauge,,percent,,Percentage that has been consumed from the disk unit,0,ibmi,asp percent
-ibmi.system.cpu_usage,gauge,,,,The average CPU utilization for all the active processors.,0,ibmi,cpu usage
-ibmi.job.active,gauge,,,,Whether a job is currently active,0,ibmi,job active
-ibmi.job.cpu_usage,gauge,,,,CPU usage by a job,0,ibmi,job cpu
-ibmi.job.temp_storage,gauge,,megabyte,,The amount of temporary storage that is currently allocated to a job ,0,ibmi,job storage
-ibmi.pool.size,gauge,,megabyte,,The amount of main storage in a pool,0,ibmi,pool size
-ibmi.pool.reserved_size,gauge,,megabyte,,The amount of storage in a pool reserved for system use,0,ibmi,pool reserved
-ibmi.pool.defined_size,gauge,,megabyte,,"The size of a pool as defined in the shared pool, subsystem description, or system value QMCHPOOL",0,ibmi,pool defined
-ibmi.subsystem.active,gauge,,,,Whether a subsystem is currently active,0,ibmi,subsys active
-ibmi.subsystem.active_jobs,gauge,,unit,,The number of jobs currently active in a subsystem,0,ibmi,subsys jobs
-ibmi.job_queue.size,gauge,,unit,,The number of jobs in a job queue,0,ibmi,jobq size
-ibmi.job_queue.released_size,gauge,,unit,,The number of jobs in *RELEASED status in a job queue,0,ibmi,jobq released
-ibmi.job_queue.scheduled_size,gauge,,unit,,The number of jobs in *SCHEDULED status in a job queue,0,ibmi,jobq scheduled
-ibmi.job_queue.held_size,gauge,,unit,,The number of jobs in *HELD status in a job queue,0,ibmi,jobq held
-ibmi.message_queue.size,gauge,,unit,,The number of messages in a message queue,0,ibmi,msgq size
-ibmi.message_queue.critical_size,gauge,,unit,,The number of critical messages in a message queue,-1,ibmi,msgq critical
+ibm_i.asp.unit_storage_capacity,gauge,,byte,,Storage capacity of the unit,0,ibm_i,asp capacity
+ibm_i.asp.unit_space_available,gauge,,byte,,Space available on the unit for use,0,ibm_i,asp available
+ibm_i.asp.percent_used,gauge,,percent,,Percentage that has been consumed from the disk unit,0,ibm_i,asp percent
+ibm_i.system.cpu_usage,gauge,,,,The average CPU utilization for all the active processors.,0,ibm_i,cpu usage
+ibm_i.job.active,gauge,,,,Whether a job is currently active,0,ibm_i,job active
+ibm_i.job.cpu_usage,gauge,,,,CPU usage by a job,0,ibm_i,job cpu
+ibm_i.job.temp_storage,gauge,,mebibyte,,The amount of temporary storage that is currently allocated to a job ,0,ibm_i,job storage
+ibm_i.pool.size,gauge,,mebibyte,,The amount of main storage in a pool,0,ibm_i,pool size
+ibm_i.pool.reserved_size,gauge,,mebibyte,,The amount of storage in a pool reserved for system use,0,ibm_i,pool reserved
+ibm_i.pool.defined_size,gauge,,mebibyte,,"The size of a pool as defined in the shared pool, subsystem description, or system value QMCHPOOL",0,ibm_i,pool defined
+ibm_i.subsystem.active,gauge,,,,Whether a subsystem is currently active,0,ibm_i,subsys active
+ibm_i.subsystem.active_jobs,gauge,,unit,,The number of jobs currently active in a subsystem,0,ibm_i,subsys jobs
+ibm_i.job_queue.size,gauge,,unit,,The number of jobs in a job queue,0,ibm_i,jobq size
+ibm_i.job_queue.released_size,gauge,,unit,,The number of jobs in *RELEASED status in a job queue,0,ibm_i,jobq released
+ibm_i.job_queue.scheduled_size,gauge,,unit,,The number of jobs in *SCHEDULED status in a job queue,0,ibm_i,jobq scheduled
+ibm_i.job_queue.held_size,gauge,,unit,,The number of jobs in *HELD status in a job queue,0,ibm_i,jobq held
+ibm_i.message_queue.size,gauge,,unit,,The number of messages in a message queue,0,ibm_i,msgq size
+ibm_i.message_queue.critical_size,gauge,,unit,,The number of critical messages in a message queue,-1,ibm_i,msgq critical
