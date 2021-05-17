@@ -17,7 +17,7 @@ SystemInfo = NamedTuple('SystemInfo', [('hostname', str), ('os_version', int), (
 
 
 class IbmICheck(AgentCheck, ConfigMixin):
-    SERVICE_CHECK_NAME = "ibmi.can_connect"
+    SERVICE_CHECK_NAME = "ibm_i.can_connect"
 
     def __init__(self, name, init_config, instances):
         super(IbmICheck, self).__init__(name, init_config, instances)
@@ -72,7 +72,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
             # The list() conversion is needed as self.config.tags is a tuple
             check_duration_tags = list(self.config.tags) + ["check_id:{}".format(self.check_id)]
             self.gauge(
-                "ibmi.check.duration",
+                "ibm_i.check.duration",
                 check_duration.total_seconds(),
                 check_duration_tags,
                 hostname=self._query_manager.hostname,

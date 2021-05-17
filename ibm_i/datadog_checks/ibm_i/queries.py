@@ -12,9 +12,9 @@ DiskUsage = {
         {'name': 'asp_number', 'type': 'tag'},
         {'name': 'unit_number', 'type': 'tag'},
         {'name': 'unit_type', 'type': 'tag'},
-        {'name': 'ibmi.asp.unit_storage_capacity', 'type': 'gauge'},
-        {'name': 'ibmi.asp.unit_space_available', 'type': 'gauge'},
-        {'name': 'ibmi.asp.percent_used', 'type': 'gauge'},
+        {'name': 'ibm_i.asp.unit_storage_capacity', 'type': 'gauge'},
+        {'name': 'ibm_i.asp.unit_space_available', 'type': 'gauge'},
+        {'name': 'ibm_i.asp.percent_used', 'type': 'gauge'},
     ],
 }
 
@@ -22,7 +22,7 @@ CPUUsage = {
     'name': 'cpu_usage',
     'query': 'SELECT AVERAGE_CPU_UTILIZATION FROM QSYS2.SYSTEM_STATUS_INFO',
     'columns': [
-        {'name': 'ibmi.system.cpu_usage', 'type': 'gauge'},
+        {'name': 'ibm_i.system.cpu_usage', 'type': 'gauge'},
     ],
 }
 
@@ -53,8 +53,8 @@ JobStatus = {
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
-        {'name': 'ibmi.job.active', 'type': 'gauge'},
-        {'name': 'ibmi.job.cpu_usage', 'type': 'gauge'},
+        {'name': 'ibm_i.job.active', 'type': 'gauge'},
+        {'name': 'ibm_i.job.cpu_usage', 'type': 'gauge'},
     ],
 }
 
@@ -75,7 +75,7 @@ JobMemoryUsage = {
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
         {'name': 'memory_pool_name', 'type': 'tag'},
-        {'name': 'ibmi.job.temp_storage', 'type': 'gauge'},
+        {'name': 'ibm_i.job.temp_storage', 'type': 'gauge'},
     ],
 }
 
@@ -87,9 +87,9 @@ MemoryInfo = {
     'columns': [
         {'name': 'pool_name', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
-        {'name': 'ibmi.pool.size', 'type': 'gauge'},
-        {'name': 'ibmi.pool.reserved_size', 'type': 'gauge'},
-        {'name': 'ibmi.pool.defined_size', 'type': 'gauge'},
+        {'name': 'ibm_i.pool.size', 'type': 'gauge'},
+        {'name': 'ibm_i.pool.reserved_size', 'type': 'gauge'},
+        {'name': 'ibm_i.pool.defined_size', 'type': 'gauge'},
     ],
 }
 
@@ -101,8 +101,8 @@ SubsystemInfo = {
     ),
     'columns': [
         {'name': 'subsystem_name', 'type': 'tag'},
-        {'name': 'ibmi.subsystem.active', 'type': 'gauge'},
-        {'name': 'ibmi.subsystem.active_jobs', 'type': 'gauge'},
+        {'name': 'ibm_i.subsystem.active', 'type': 'gauge'},
+        {'name': 'ibm_i.subsystem.active_jobs', 'type': 'gauge'},
     ],
 }
 
@@ -117,10 +117,10 @@ JobQueueInfo = {
         {'name': 'job_queue_name', 'type': 'tag'},
         {'name': 'job_queue_status', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
-        {'name': 'ibmi.job_queue.size', 'type': 'gauge'},
-        {'name': 'ibmi.job_queue.released_size', 'type': 'gauge'},
-        {'name': 'ibmi.job_queue.scheduled_size', 'type': 'gauge'},
-        {'name': 'ibmi.job_queue.held_size', 'type': 'gauge'},
+        {'name': 'ibm_i.job_queue.size', 'type': 'gauge'},
+        {'name': 'ibm_i.job_queue.released_size', 'type': 'gauge'},
+        {'name': 'ibm_i.job_queue.scheduled_size', 'type': 'gauge'},
+        {'name': 'ibm_i.job_queue.held_size', 'type': 'gauge'},
     ],
 }
 
@@ -133,7 +133,7 @@ MessageQueueInfo = {
     'columns': [
         {'name': 'message_queue_name', 'type': 'tag'},
         {'name': 'message_queue_library', 'type': 'tag'},
-        {'name': 'ibmi.message_queue.size', 'type': 'gauge'},
-        {'name': 'ibmi.message_queue.critical_size', 'type': 'gauge'},
+        {'name': 'ibm_i.message_queue.size', 'type': 'gauge'},
+        {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
     ],
 }
