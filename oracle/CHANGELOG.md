@@ -1,5 +1,8 @@
 # CHANGELOG - oracle
 
+## 3.3.1-rc.3 / 2021-05-17
+
+
 ## 3.3.0 / 2021-04-19
 
 * [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
