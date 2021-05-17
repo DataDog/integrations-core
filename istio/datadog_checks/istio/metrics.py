@@ -243,7 +243,7 @@ ISTIOD_METRICS = {
     'pilot_xds_rds_reject': 'pilot.xds.rds_reject',
     'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
     'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
-    'pilot_xds_lds_reject': 'pilot.xds.lds_reject'
+    'pilot_xds_lds_reject': 'pilot.xds.lds_reject',
     'grpc_server_handled_total': 'grpc.server.handled_total',
     'grpc_server_handling_seconds': 'grpc.server.handling_seconds',
     'grpc_server_msg_received_total': 'grpc.server.msg_received_total',
