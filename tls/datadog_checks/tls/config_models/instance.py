@@ -29,6 +29,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     seconds_critical: Optional[int]
     seconds_warning: Optional[int]
+    send_cert_duration: Optional[bool]
     server: str
     server_hostname: Optional[str]
     service: Optional[str]
