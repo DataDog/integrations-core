@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -13,10 +13,29 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Proxy(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    http: Optional[str]
+    https: Optional[str]
+    no_proxy: Optional[Sequence[str]]
+
+
+class RestApiOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    proxy: Optional[Proxy]
+    skip_proxy: Optional[bool]
+    timeout: Optional[float]
+
+
 class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    rest_api_options: Optional[RestApiOptions]
     service: Optional[str]
 
     @root_validator(pre=True)

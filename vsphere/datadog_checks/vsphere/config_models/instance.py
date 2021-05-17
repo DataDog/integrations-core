@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -44,6 +44,60 @@ class ResourceFilter(BaseModel):
     type: Optional[str]
 
 
+class AuthToken(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    reader: Optional[Mapping[str, Any]]
+    writer: Optional[Mapping[str, Any]]
+
+
+class Proxy(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    http: Optional[str]
+    https: Optional[str]
+    no_proxy: Optional[Sequence[str]]
+
+
+class RestApiOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    auth_token: Optional[AuthToken]
+    auth_type: Optional[str]
+    aws_host: Optional[str]
+    aws_region: Optional[str]
+    aws_service: Optional[str]
+    connect_timeout: Optional[float]
+    extra_headers: Optional[Mapping[str, Any]]
+    headers: Optional[Mapping[str, Any]]
+    kerberos_auth: Optional[str]
+    kerberos_cache: Optional[str]
+    kerberos_delegate: Optional[bool]
+    kerberos_force_initiate: Optional[bool]
+    kerberos_hostname: Optional[str]
+    kerberos_keytab: Optional[str]
+    kerberos_principal: Optional[str]
+    log_requests: Optional[bool]
+    ntlm_domain: Optional[str]
+    password: Optional[str]
+    persist_connections: Optional[bool]
+    proxy: Optional[Proxy]
+    read_timeout: Optional[float]
+    skip_proxy: Optional[bool]
+    timeout: Optional[float]
+    tls_ca_cert: Optional[str]
+    tls_cert: Optional[str]
+    tls_ignore_warning: Optional[bool]
+    tls_private_key: Optional[str]
+    tls_use_host_header: Optional[bool]
+    tls_verify: Optional[bool]
+    use_legacy_auth_encoding: Optional[bool]
+    username: Optional[str]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -70,6 +124,7 @@ class InstanceConfig(BaseModel):
     refresh_infrastructure_cache_interval: Optional[int]
     refresh_metrics_metadata_cache_interval: Optional[int]
     resource_filters: Optional[Sequence[ResourceFilter]]
+    rest_api_options: Optional[RestApiOptions]
     service: Optional[str]
     ssl_capath: Optional[str]
     ssl_verify: Optional[bool]

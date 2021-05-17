@@ -4,6 +4,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_rest_api_options(field, value):
+    return get_default_field_value(field, value)
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
@@ -81,6 +85,10 @@ def instance_refresh_metrics_metadata_cache_interval(field, value):
 
 
 def instance_resource_filters(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_rest_api_options(field, value):
     return get_default_field_value(field, value)
 
 
