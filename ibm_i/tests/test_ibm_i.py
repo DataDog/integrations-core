@@ -113,6 +113,6 @@ def test_check_query_error(aggregator, instance):
         check.check(instance)
     assert check._query_manager is not None
     delete_conn.assert_called_once_with("query error")
-    aggregator.assert_service_check("ibmi.can_connect", count=1, status=AgentCheck.CRITICAL)
-    aggregator.assert_metric("ibmi.check.duration", hostname="host", tags=["check_id:{}".format(check.check_id)])
+    aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
+    aggregator.assert_metric("ibm_i.check.duration", hostname="host", tags=["check_id:{}".format(check.check_id)])
     aggregator.assert_all_metrics_covered()
