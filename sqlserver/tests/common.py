@@ -6,6 +6,7 @@
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev.docker import using_windows_containers
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
@@ -185,6 +186,7 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
 def assert_metrics(aggregator, expected_tags):
