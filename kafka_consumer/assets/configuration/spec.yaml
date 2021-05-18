@@ -216,12 +216,11 @@ files:
           KafkaClient / KazooClient tries contacting the next host.
           Details: https://github.com/DataDog/dd-agent/issues/2943
         value:
-          type: array
-          items:
-            type: object
-          example:
-            - localhost:2181
-            - <ZOOKEEPER_ENDPOINT>:2181
+          anyOf:
+          - type: array
+            items:
+              type: string
+          - type: string
       - name: zk_prefix
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets
