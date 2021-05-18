@@ -9,11 +9,9 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.utils import running_on_windows_ci
 
 from .common import (
     DOCKER_SERVER,
-    E2E_METADATA,
     FULL_E2E_CONFIG,
     HERE,
     INIT_CONFIG,
@@ -111,39 +109,33 @@ def dd_environment():
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
-    if running_on_windows_ci():
-        yield INSTANCE_SQL2017, E2E_METADATA
-    else:
+    def sqlserver_can_connect():
+        conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(get_local_driver(), DOCKER_SERVER)
+        pyodbc.connect(conn, timeout=30)
 
-        def sqlserver_can_connect():
-            conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
-                get_local_driver(), DOCKER_SERVER
+    compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
+    conditions = [
+        WaitFor(sqlserver_can_connect, wait=3, attempts=10),
+    ]
+
+    if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
+        conditions += [
+            CheckDockerLogs(
+                compose_file,
+                'Always On Availability Groups connection with primary database established for secondary database',
             )
-            pyodbc.connect(conn, timeout=30)
-
-        compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
-        conditions = [
-            WaitFor(sqlserver_can_connect, wait=3, attempts=10),
+        ]
+    else:
+        conditions += [
+            CheckDockerLogs(
+                compose_file,
+                'setup.sql completed',
+            )
         ]
 
-        if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
-            conditions += [
-                CheckDockerLogs(
-                    compose_file,
-                    'Always On Availability Groups connection with primary database established for secondary database',
-                )
-            ]
-        else:
-            conditions += [
-                CheckDockerLogs(
-                    compose_file,
-                    'setup.sql completed',
-                )
-            ]
-
-        with docker_run(
-            compose_file=compose_file,
-            conditions=conditions,
-            mount_logs=True,
-        ):
-            yield FULL_E2E_CONFIG, E2E_METADATA
+    with docker_run(
+        compose_file=compose_file,
+        conditions=conditions,
+        mount_logs=True,
+    ):
+        yield FULL_E2E_CONFIG
