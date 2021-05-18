@@ -41,7 +41,7 @@ class InstanceConfig(BaseModel):
     ssl_keyfile: Optional[str]
     ssl_password: Optional[str]
     tags: Optional[Sequence[str]]
-    zk_connect_str: Optional[Sequence[Mapping[str, Any]]]
+    zk_connect_str: Optional[Union[str, Sequence[str]]]
     zk_prefix: Optional[str]
 
     @root_validator(pre=True)
