@@ -106,7 +106,7 @@ class PostgresStatementMetrics(object):
         )
         cursor = db.cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
-        col_names = [desc[0] for desc in cursor.description] if cursor.description else None
+        col_names = [desc[0] for desc in cursor.description] if cursor.description else []
         self._stat_column_cache = col_names
         return col_names
 
@@ -172,7 +172,7 @@ class PostgresStatementMetrics(object):
 
         rows = self._normalize_queries(rows)
         if not rows:
-            return None
+            return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
