@@ -215,7 +215,7 @@ instances:
     #
     # broker_requests_batch_size: 30
 
-    ## @param zk_connect_str - list of strings or string - optional
+    ## @param zk_connect_str - string or list of strings - optional
     ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
     ## from Zookeeper and is deprecated.
     ## Zookeeper endpoints and port to connect to.
