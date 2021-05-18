@@ -98,7 +98,7 @@ class Apache(AgentCheck):
             if len(values) == 2:  # match
                 metric, value = values
 
-                # Special case
+                # Special case: Report the status of the workers
                 if metric == 'Scoreboard':
                     self._submit_scoreboard(value, tags)
                     continue
@@ -165,6 +165,8 @@ class Apache(AgentCheck):
         self.log.debug("found apache version %s", version)
 
     def _submit_scoreboard(self, value, tags):
+        """The scoreboard is a long string where each character represents the status of a given worker.
+        This method parses that string and emits the corresponding metrics"""
         max_workers = 0
         metrics = {}
         for _key, metric in self.SCOREBOARD_KEYS.items():
