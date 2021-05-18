@@ -92,9 +92,8 @@ class PostgreSql(AgentCheck):
             # if this is a relation-specific query, we need to list all relations last
             if is_relations:
                 schema_field = get_schema_field(descriptors)
-                relations_filter = self._relations_manager.build_relations_filter(schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
-                cursor.execute(query.format(relations=relations_filter))
+                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                cursor.execute(formatted_query)
             else:
                 self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
