@@ -14,7 +14,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.statement_samples import DBExplainSetupState, PostgresStatementSamples
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
+from datadog_checks.postgres.statements import PG_NON_MONOTONIC_COLUMNS, PG_STAT_STATEMENTS_COLUMN_QUERY
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
@@ -281,7 +281,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert set(event['tags']) == {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test'}
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
-    for username, _, dbname, query, _ in SAMPLE_QUERIES:
+    for username, _, dbname, query, arg in SAMPLE_QUERIES:
         expected_query = query % obfuscated_param
         query_signature = compute_sql_signature(expected_query)
         matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == query_signature]
@@ -294,7 +294,17 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         assert row['datname'] == dbname
         assert row['rolname'] == username
         assert row['query'] == expected_query
-        for col in PG_STAT_STATEMENTS_METRICS_COLUMNS:
+
+        stat_column_query = PG_STAT_STATEMENTS_COLUMN_QUERY.format(pg_stat_statements_view=pg_stat_statements_view)
+        stat_column_cursor = check.db.cursor()
+        stat_column_cursor.execute(stat_column_query, (arg,))
+        assert stat_column_cursor.description is not None
+
+        stat_columns = set([desc[0] for desc in stat_column_cursor.description])
+        available_columns = set(row.keys()).intersection(stat_columns)
+        metric_columns = available_columns.difference(PG_NON_MONOTONIC_COLUMNS)
+        assert len(metric_columns) != 0
+        for col in metric_columns:
             assert type(row[col]) in (float, int)
 
     for conn in connections.values():
