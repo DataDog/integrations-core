@@ -41,25 +41,6 @@ METRICS_COLUMNS = {
     'sum_no_good_index_used',
 }
 
-# These limits define the top K and bottom K unique query rows for each metric. For each check run the
-# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
-DEFAULT_STATEMENT_METRICS_LIMITS = {
-    'count': (400, 0),
-    'errors': (100, 0),
-    'time': (400, 0),
-    'select_scan': (50, 0),
-    'select_full_join': (50, 0),
-    'no_index_used': (50, 0),
-    'no_good_index_used': (50, 0),
-    'lock_time': (50, 0),
-    'rows_affected': (100, 0),
-    'rows_sent': (100, 0),
-    'rows_examined': (100, 0),
-    # Synthetic column limits
-    'avg_time': (400, 0),
-    'rows_sent_ratio': (0, 50),
-}
-
 
 class MySQLStatementMetrics(object):
     """
