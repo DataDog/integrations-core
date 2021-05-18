@@ -396,7 +396,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
-                self.statement_metrics.collect_per_statement_metrics(self.db, tags)
+                self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
                 self.statement_samples.run_sampler(tags)
 
         except Exception as e:
