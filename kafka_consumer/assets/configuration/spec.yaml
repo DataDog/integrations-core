@@ -227,10 +227,10 @@ files:
             - server2:2181
         value:
           anyOf:
+          - type: string
           - type: array
             items:
               type: string
-          - type: string
       - name: zk_prefix
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets
