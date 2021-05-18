@@ -167,17 +167,8 @@ class Apache(AgentCheck):
     def _submit_scoreboard(self, value, tags):
         """The scoreboard is a long string where each character represents the status of a given worker.
         This method parses that string and emits the corresponding metrics"""
-        max_workers = 0
-        metrics = {}
         for _key, metric in self.SCOREBOARD_KEYS.items():
-            metrics[metric] = 0
+            self.gauge(metric, value.count(_key), tags=tags)
 
-        for i in value:
-            max_workers += 1
-            metrics[self.SCOREBOARD_KEYS[i]] += 1
-
-        for _key, metric in self.SCOREBOARD_KEYS.items():
-            self.gauge(metric, metrics[metric], tags=tags)
-
-        self.gauge(self.GAUGES['MaxWorkers'], max_workers, tags=tags)
+        self.gauge(self.GAUGES['MaxWorkers'], len(value), tags=tags)
         self.log.debug("Scoreboard: %s", value)
