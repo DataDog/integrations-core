@@ -4,6 +4,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_collect_default_metrics(field, value):
+    return True
+
+
 def shared_conf(field, value):
     return get_default_field_value(field, value)
 
