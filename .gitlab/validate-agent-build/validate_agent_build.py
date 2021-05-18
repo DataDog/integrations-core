@@ -89,6 +89,11 @@ if __name__ == '__main__':
             sys.exit(1)
         print("Waiting 1 min before next check.")
         time.sleep(60)
+    else:
+        # The job has run for 55 minutes and there are still some pending jobs.
+        # Fail and notify the author
+        print("Job is timing out, please retry it.")
+        sys.exit(1)
 
 
 
