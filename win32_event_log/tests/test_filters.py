@@ -9,6 +9,11 @@ from datadog_checks.win32_event_log.filters import construct_xpath_query
 pytestmark = [pytest.mark.unit]
 
 
+def test_no_values():
+    with pytest.raises(Exception, match='No values set for property filter: source'):
+        construct_xpath_query({'source': []})
+
+
 @pytest.mark.parametrize(
     'filters, query',
     [
@@ -50,35 +55,3 @@ def test_query_construction(new_check, instance, filters, query):
     check.load_configuration_models()
 
     assert construct_xpath_query(exclude_undefined_keys(check.config.filters.dict())) == query
-
-
-class TestBasicValidation:
-    def test_unknown_filter(self):
-        with pytest.raises(Exception):
-            construct_xpath_query({'foo': 'bar'})
-
-    def test_no_values(self):
-        with pytest.raises(Exception, match='No values set for property filter: source'):
-            construct_xpath_query({'source': []})
-
-
-class TestSourceValidation:
-    def test_value_not_string(self):
-        with pytest.raises(Exception):
-            construct_xpath_query({'source': [0]})
-
-
-class TestTypeValidation:
-    def test_value_not_string(self):
-        with pytest.raises(Exception):
-            construct_xpath_query({'type': [0]})
-
-    def test_unknown_value(self):
-        with pytest.raises(Exception):
-            construct_xpath_query({'type': ['foo']})
-
-
-class TestIdValidation:
-    def test_value_not_integer(self):
-        with pytest.raises(Exception):
-            construct_xpath_query({'id': ['foo']})
