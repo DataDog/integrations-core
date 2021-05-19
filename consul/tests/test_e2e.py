@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.consul import ConsulCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -24,6 +25,14 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_metric('consul.catalog.nodes_up', count=2)
     aggregator.assert_metric('consul.catalog.total_nodes', count=2)
     aggregator.assert_metric('consul.catalog.services_count', count=6)
+    aggregator.assert_metric('consul.net.node.latency.max', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.median', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.min', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.p25', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.p75', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.p90', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.p95', tags=['consul_datacenter:dc1'], count=6)
+    aggregator.assert_metric('consul.net.node.latency.p99', tags=['consul_datacenter:dc1'], count=6)
 
     aggregator.assert_service_check(
         'consul.up', ConsulCheck.OK, tags=['consul_datacenter:dc1', 'consul_url:http://{}:8500'.format(common.HOST)]
@@ -53,3 +62,5 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_service_check(
         'consul.can_connect', ConsulCheck.OK, tags=['url:http://{}:8500/v1/coordinate/nodes'.format(common.HOST)]
     )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
