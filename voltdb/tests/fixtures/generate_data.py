@@ -3,7 +3,7 @@ import json
 import random
 import string
 import time
-from math import log2
+from math import log
 
 MAPPING = {
     'COMMANDLOG': ['timestamp', 'host_id', 'hostname', 'int', 'int', 'int', 'int', 'int'],
@@ -156,7 +156,7 @@ def generate_bool(idx=0):
 
 
 def generate_int(idx=0):
-    return int(-(idx * 10 + 1) * 100000 * log2(1 - random.random()))
+    return int(-(idx * 10 + 1) * 100000 * log(1 - random.random(), 2))
 
 
 def generate_timestamp(idx=0):
