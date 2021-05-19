@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+from datadog_checks.dev.docker import using_windows_containers
 
 INSTANCE_INTEGRATION = {'name': 'datadog', 'hostname': 'www.datadoghq.com', 'nameserver': '8.8.8.8'}
 
@@ -69,6 +69,8 @@ CONFIG_INVALID = [
         "DNS resolution of example.com has failed",
     ),
 ]
+
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
 def _test_check(aggregator):

@@ -64,6 +64,9 @@ assets/               @DataDog/agent-integrations
 /nginx_ingress_controller/                @DataDog/container-integrations @DataDog/agent-integrations
 /nginx_ingress_controller/*.md            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /nginx_ingress_controller/manifest.json   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/oom_kill/                                @DataDog/container-integrations @DataDog/agent-integrations
+/oom_kill/*.md                            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/oom_kill/manifest.json                   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /openmetrics/                             @DataDog/container-integrations @DataDog/agent-integrations
 /openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation

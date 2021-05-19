@@ -8,19 +8,27 @@ import yaml
 
 from datadog_checks.dev.utils import file_exists, read_file
 
-from ...utils import get_default_config_spec, get_jmx_metrics_file, get_valid_integrations, is_jmx_integration
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
-def jmx_metrics(verbose):
-    """Validate all default JMX metrics definitions."""
+def jmx_metrics(check, verbose):
+    """Validate all default JMX metrics definitions.
 
-    echo_info("Validating all JMX metrics files...")
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
+    checks = process_checks_option(check, source='integrations')
+    integrations = sorted(check for check in checks if is_jmx_integration(check))
+    echo_info(f"Validating JMX metrics files for {len(integrations)} checks ...")
 
     saved_errors = defaultdict(list)
-    integrations = sorted(check for check in get_valid_integrations() if is_jmx_integration(check))
+
     for check_name in integrations:
         validate_jmx_metrics(check_name, saved_errors, verbose)
         validate_config_spec(check_name, saved_errors)

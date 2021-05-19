@@ -5,11 +5,13 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.utils import get_check_files, get_default_config_spec, get_valid_integrations
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 
+from ...testing import process_checks_option
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
+
 EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
 REQUEST_LIBRARY_FUNCTIONS = {
@@ -107,12 +109,16 @@ def validate_use_http_wrapper(check):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
-def http():
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def http(check):
     """Validate all integrations for usage of http wrapper."""
 
     has_failed = False
-    echo_info("Validating all integrations for usage of http wrapper...")
-    for check in sorted(get_valid_integrations()):
+
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating {len(checks)} integrations for usage of http wrapper...")
+
+    for check in checks:
         check_uses_http_wrapper = False
 
         # Validate use of http wrapper (self.http.[...]) in check's .py files
