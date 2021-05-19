@@ -534,6 +534,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      security_monitoring:
+        target: 75
+        flags:
+        - security_monitoring
       vSphere:
         target: 75
         flags:
@@ -1065,6 +1069,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  security_monitoring:
+    carryforward: true
+    paths:
+    - security_monitoring/datadog_checks/security_monitoring
+    - security_monitoring/tests
   snmp:
     carryforward: true
     paths:

@@ -372,6 +372,9 @@ jobs:
     - checkName: scylla
       displayName: Scylla
       os: linux
+    - checkName: security_monitoring
+      displayName: security_monitoring
+      os: linux
     - checkName: snmp
       displayName: SNMP
       os: linux

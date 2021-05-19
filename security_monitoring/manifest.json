@@ -1,0 +1,35 @@
+{
+  "display_name": "security_monitoring",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "security_monitoring",
+  "metric_prefix": "security_monitoring.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Provides resources related to the Security Monitoring product",
+  "guid": "b9b74c94-e72b-46ce-aad5-1b4b9d7d3cfd",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "security_monitoring",
+  "categories": [
+    "security"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "security-monitoring",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
