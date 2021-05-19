@@ -62,7 +62,7 @@ def assert_common_metrics(aggregator):
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 
-    if os.environ.get('CLOUD_ENV') == 'false':
+    if os.environ.get('CLOUD_ENV', 'false') == 'false':
         assert_non_cloud_metrics(aggregator)
 
 
