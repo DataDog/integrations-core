@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -18,7 +18,7 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     default_event_priority: Optional[str]
-    event_priority: Optional[str]
+    event_priority: Optional[Literal['normal', 'low']]
     interpret_messages: Optional[bool]
     service: Optional[str]
     tag_event_id: Optional[bool]

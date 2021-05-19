@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Literal, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -13,19 +13,28 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Filters(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    id: Optional[Sequence[int]]
+    source: Optional[Sequence[str]]
+    type: Optional[Sequence[Literal['success', 'error', 'warning', 'information', 'success audit', 'failure audit']]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    auth_type: Optional[str]
+    auth_type: Optional[Literal['default', 'negotiate', 'kerberos', 'ntlm']]
     bookmark_frequency: Optional[int]
     domain: Optional[str]
     empty_default_hostname: Optional[bool]
     event_format: Optional[Sequence[str]]
     event_id: Optional[Sequence[str]]
-    event_priority: Optional[str]
+    event_priority: Optional[Literal['normal', 'low']]
     excluded_messages: Optional[Sequence[str]]
-    filters: Optional[Mapping[str, Any]]
+    filters: Optional[Filters]
     host: Optional[str]
     included_messages: Optional[Sequence[str]]
     interpret_messages: Optional[bool]
@@ -40,7 +49,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str]
     service: Optional[str]
     source_name: Optional[Sequence[str]]
-    start: Optional[str]
+    start: Optional[Literal['now', 'oldest']]
     tag_event_id: Optional[bool]
     tag_sid: Optional[bool]
     tags: Optional[Sequence[str]]
