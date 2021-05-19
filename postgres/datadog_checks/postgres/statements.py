@@ -88,6 +88,9 @@ class PostgresStatementMetrics(object):
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+            # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
+            # but the next time the query is run, it will retrieve the correct columns.
+            self._stat_column_cache = []
             self._log.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
@@ -97,10 +100,10 @@ class PostgresStatementMetrics(object):
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
-        # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         if self._stat_column_cache:
             return self._stat_column_cache
 
+        # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
         )
@@ -127,7 +130,7 @@ class PostgresStatementMetrics(object):
                 'min_collection_interval': self._config.min_collection_interval,
                 'tags': tags,
                 'postgres_rows': rows,
-                'postgres_version': '{major}.{minor}.{patch}'.format(
+                'postgres_version': 'v{major}.{minor}.{patch}'.format(
                     major=db_version.major, minor=db_version.minor, patch=db_version.patch
                 ),
             }
