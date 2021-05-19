@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [security_monitoring][1] through the Datadog Agent.
+This integration provides a logs saved view when the [Security Monitoring][1] product is enabled. There is no associated agent check.
 
 ## Setup
 
@@ -41,7 +41,7 @@ security_monitoring does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.datadoghq.com/security_platform/security_monitoring/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/security_monitoring/datadog_checks/security_monitoring/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
