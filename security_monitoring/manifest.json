@@ -27,7 +27,9 @@
     },
     "dashboards": {},
     "monitors": {},
-    "saved_views": {},
+    "saved_views": {
+      "default_signal_view": "assets/saved_views/default_signal_view.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"

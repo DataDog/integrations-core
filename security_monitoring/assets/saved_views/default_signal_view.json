@@ -1,0 +1,43 @@
+{
+  "name": "Security Monitoring",
+  "type": "logs",
+  "page": "stream",
+  "query": "*",
+  "timerange": {
+    "interval_ms": 900000
+  },
+  "visible_facets": [
+    "core_index",
+    "tag_source",
+    "core_host",
+    "core_service",
+    "core_status",
+    "log_evt.name",
+    "log_evt.outcome",
+    "log_network.client.ip",
+    "log_usr.id",
+    "log_network.client.geoip.city.name",
+    "log_network.client.geoip.subdivision.iso_code",
+    "log_network.client.geoip.country.iso_code",
+    "log_network.client.geoip.country.name",
+    "log_network.client.geoip.continent.name",
+    "log_network.client.geoip.subdivision.name",
+    "log_usr.email",
+    "log_usr.name"
+  ],
+  "options": {
+    "columns": [
+      "source",
+      "service",
+      "@usr.id",
+      "@evt.name",
+      "@evt.outcome",
+      "@network.client.ip"
+    ],
+    "sort": "desc",
+    "show_date_column": true,
+    "message_display": "inline",
+    "show_message_column": false,
+    "show_timeline": true
+  }
+}
