@@ -177,11 +177,6 @@ class Redis(AgentCheck):
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
-                # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
-                # dropped python 2 support
-                # issue: https://github.com/andymccurdy/redis-py/issues/1475
-                # fix: https://github.com/andymccurdy/redis-py/pull/1352
-                # TODO: remove once PY2 is no longer supported
                 msg = "You need a redis library that supports authenticated connections. Try `pip install redis`."
                 raise Exception(msg)
 
@@ -462,9 +457,15 @@ class Redis(AgentCheck):
         try:
             slowlogs = conn.slowlog_get(max_slow_entries)
         except TypeError as e:
-            # https://github.com/andymccurdy/redis-py/issues/1475
+            # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
+            # dropped python 2 support
+            # issue: https://github.com/andymccurdy/redis-py/issues/1475
+            # fix: https://github.com/andymccurdy/redis-py/pull/1352
+            # TODO: remove once PY2 is no longer supported
             self.log.exception(e)
-            self.log.error('There was an error retrieving slowlog, these metrics will be skipped')
+            self.log.error(
+                'There was an error retrieving slowlog, these metrics will be skipped. This issue is fixed on Agent 7+'
+            )
             slowlogs = []
 
         # Find slowlog entries between last timestamp and now using start_time
