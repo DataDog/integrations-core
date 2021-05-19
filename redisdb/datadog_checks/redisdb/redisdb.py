@@ -177,6 +177,11 @@ class Redis(AgentCheck):
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
+                # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
+                # dropped python 2 support
+                # issue: https://github.com/andymccurdy/redis-py/issues/1475
+                # fix: https://github.com/andymccurdy/redis-py/pull/1352
+                # TODO: remove once PY2 is no longer supported
                 msg = "You need a redis library that supports authenticated connections. Try `pip install redis`."
                 raise Exception(msg)
 
