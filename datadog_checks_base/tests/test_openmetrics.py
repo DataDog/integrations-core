@@ -2781,3 +2781,20 @@ def test_empty_namespace(aggregator, mocked_prometheus_check, text_data, ref_gau
     check.process_metric(ref_gauge, config)
 
     aggregator.assert_metric('process.vm.bytes', count=1)
+
+
+def test_ignore_tags(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patterns are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['tags'] = ['foo', 'foofoo', 'bar', 'bar:baz']
+    instance['ignore_tags'] = ['foo*', 'bar:baz']
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=['bar'], count=1)

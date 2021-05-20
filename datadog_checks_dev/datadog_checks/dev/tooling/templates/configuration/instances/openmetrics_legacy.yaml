@@ -167,5 +167,16 @@
     example:
       <KEY_1>: [<LABEL_1>, <LABEL_2>]
       <KEY_2>: ['*']
+- name: ignore_tags
+  description: A list of tags to ignore, the "*" wildcard can be used to match multiple tag strings.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX*>
+      - <*TAG_SUFFIX>
+      - <*SUBSTRING*>
 - template: instances/http
 - template: instances/default
