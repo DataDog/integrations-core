@@ -112,6 +112,10 @@ def instance_ignore_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ignore_tags(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_kerberos_auth(field, value):
     return 'disabled'
 
