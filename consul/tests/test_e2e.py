@@ -5,8 +5,11 @@ import pytest
 
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+from packaging import version
 
 from . import common
+from .common import CONSUL_VERSION
+from .test_integration import MULTI_NODE_METRICS
 
 pytestmark = pytest.mark.e2e
 
@@ -25,14 +28,10 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_metric('consul.catalog.nodes_up', count=2)
     aggregator.assert_metric('consul.catalog.total_nodes', count=2)
     aggregator.assert_metric('consul.catalog.services_count', count=6)
-    aggregator.assert_metric('consul.net.node.latency.max', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.median', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.min', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.p25', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.p75', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.p90', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.p95', tags=['consul_datacenter:dc1'], count=6)
-    aggregator.assert_metric('consul.net.node.latency.p99', tags=['consul_datacenter:dc1'], count=6)
+
+    at_least = 6 if version.parse(CONSUL_VERSION) > version.parse('1.6.0') else 0
+    for metric in MULTI_NODE_METRICS:
+        aggregator.assert_metric(metric, tags=['consul_datacenter:dc1'], at_least=at_least)
 
     aggregator.assert_service_check(
         'consul.up', ConsulCheck.OK, tags=['consul_datacenter:dc1', 'consul_url:http://{}:8500'.format(common.HOST)]
