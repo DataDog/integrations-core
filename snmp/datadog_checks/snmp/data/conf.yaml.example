@@ -115,6 +115,7 @@ init_config:
 
   ## @param collect_device_metadata - bool - optional - default: false
   ## Enable device metadata collection
+  ## Only available using corecheck SNMP integration with `loader: core` config.
   #
   # collect_device_metadata: true
 
