@@ -70,8 +70,8 @@ class MaprCheck(AgentCheck):
                 "user. Please update the file permissions.",
                 self.auth_ticket,
             )
-
-        os.environ[TICKET_LOCATION_ENV_VAR] = self.auth_ticket
+        else:
+            os.environ[TICKET_LOCATION_ENV_VAR] = self.auth_ticket
 
     def check(self, _):
         if ck is None:
