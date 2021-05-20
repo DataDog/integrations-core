@@ -279,7 +279,7 @@ metadata:
     ad.datadoghq.com/mongo.instances: |
       [
         {
-          "hosts": ["%%host%%:%%port%%], 
+          "hosts": ["%%host%%:%%port%%"], 
           "username": "datadog", 
           "password": "<UNIQUEPASSWORD>", 
           "database": "<DATABASE>"
