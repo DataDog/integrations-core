@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.redisdb import Redis
 
 from . import common
@@ -62,7 +63,7 @@ def assert_common_metrics(aggregator):
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 
-    if os.environ.get('CLOUD_ENV', 'false') == 'false':
+    if not is_affirmative(common.CLOUD_ENV):
         assert_non_cloud_metrics(aggregator)
 
 
