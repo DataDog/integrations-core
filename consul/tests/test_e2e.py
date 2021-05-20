@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+from packaging import version
 
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
-from packaging import version
 
 from . import common
 from .common import CONSUL_VERSION
