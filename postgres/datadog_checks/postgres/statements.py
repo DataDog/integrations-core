@@ -36,13 +36,14 @@ SELECT {cols}
 DEFAULT_STATEMENTS_LIMIT = 10000
 
 # Required columns for the check to run
-PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'total_time', 'rows'})
+PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
 
 PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
     {
         'calls',
-        'total_time',
         'rows',
+        'total_time',
+        'total_exec_time',
         'shared_blks_hit',
         'shared_blks_read',
         'shared_blks_dirtied',
@@ -80,6 +81,7 @@ class PostgresStatementMetrics(object):
         self._db_hostname = None
         self._log = get_check_logger()
         self._state = StatementMetrics()
+        self._stat_column_cache = []
 
     def _execute_query(self, cursor, query, params=()):
         try:
@@ -87,6 +89,9 @@ class PostgresStatementMetrics(object):
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+            # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
+            # but the next time the query is run, it will retrieve the correct columns.
+            self._stat_column_cache = []
             self._log.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
@@ -96,14 +101,18 @@ class PostgresStatementMetrics(object):
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
+        if self._stat_column_cache:
+            return self._stat_column_cache
+
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
         )
         cursor = db.cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
-        colnames = [desc[0] for desc in cursor.description] if cursor.description else None
-        return colnames
+        col_names = [desc[0] for desc in cursor.description] if cursor.description else []
+        self._stat_column_cache = col_names
+        return col_names
 
     def _db_hostname_cached(self):
         if self._db_hostname:
@@ -111,7 +120,7 @@ class PostgresStatementMetrics(object):
         self._db_hostname = resolve_db_host(self._config.host)
         return self._db_hostname
 
-    def collect_per_statement_metrics(self, db, tags):
+    def collect_per_statement_metrics(self, db, db_version, tags):
         try:
             rows = self._collect_metrics_rows(db)
             if not rows:
@@ -122,6 +131,9 @@ class PostgresStatementMetrics(object):
                 'min_collection_interval': self._config.min_collection_interval,
                 'tags': tags,
                 'postgres_rows': rows,
+                'postgres_version': 'v{major}.{minor}.{patch}'.format(
+                    major=db_version.major, minor=db_version.minor, patch=db_version.patch
+                ),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -139,7 +151,7 @@ class PostgresStatementMetrics(object):
             )
             return []
 
-        query_columns = sorted(list(PG_STAT_ALL_DESIRED_COLUMNS & available_columns))
+        query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
         params = ()
         filters = ""
         if self._config.dbstrict:
@@ -163,9 +175,13 @@ class PostgresStatementMetrics(object):
             return (row['query_signature'], row['datname'], row['rolname'])
 
         rows = self._normalize_queries(rows)
-        rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRICS_COLUMNS, key=row_keyfunc)
-        self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
+        if not rows:
+            return []
 
+        available_columns = set(rows[0].keys())
+        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=row_keyfunc)
+        self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
         return rows
 
     def _normalize_queries(self, rows):

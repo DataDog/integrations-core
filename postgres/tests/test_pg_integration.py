@@ -294,7 +294,10 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         assert row['datname'] == dbname
         assert row['rolname'] == username
         assert row['query'] == expected_query
-        for col in PG_STAT_STATEMENTS_METRICS_COLUMNS:
+
+        available_columns = set(row.keys())
+        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        for col in metric_columns:
             assert type(row[col]) in (float, int)
 
     for conn in connections.values():
