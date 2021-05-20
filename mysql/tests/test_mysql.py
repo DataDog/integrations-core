@@ -16,6 +16,7 @@ import pymysql
 import pytest
 from pkg_resources import parse_version
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -263,37 +264,35 @@ def test_complex_config_replica(aggregator, instance_complex):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_metrics(aggregator, dbm_instance):
-    QUERY = 'select * from information_schema.processlist'
-    QUERY_DIGEST_TEXT = 'SELECT * FROM `information_schema` . `processlist`'
-    # The query signature should match the query and consistency of this tag has product impact. Do not change
-    # the query signature for this test unless you know what you're doing. The query digest is determined by
-    # mysql and varies across versions.
-    QUERY_SIGNATURE = '8cd0f2b4343decc'
-    if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        QUERY_DIGEST = '5d343195f2d7adf4388d42755311c3e3'
-    elif environ.get('MYSQL_VERSION') == '5.6':
-        QUERY_DIGEST = 'acfa199773950cd8cf912f3a19219492'
-    elif environ.get('MYSQL_VERSION') == '5.7':
-        QUERY_DIGEST = '0737e429dc883ba8c86c15ae76e59dda'
-    else:
-        # 8.0+
-        QUERY_DIGEST = '6817a67871eb7edddad5b7836c93330aa3c98801ac759eed1bea6db1a34579c4'
-        QUERY_SIGNATURE = '9d73cb71644af0a2'
-
+# these queries are formatted the same way they appear in events_statements_summary_by_digest to make the test simpler
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM `testdb` . `users`",
+        # include one long query that exceeds truncation limit so we can confirm the truncation is happening
+        "SELECT `hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `name` , "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `age` FROM `testdb` . `users` "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` JOIN `testdb` . `users` `B` ON "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `name` = `B` . `name`",
+    ],
+)
+@pytest.mark.parametrize("default_schema", [None, "testdb"])
+def test_statement_metrics(aggregator, dbm_instance, query, default_schema):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
     def run_query(q):
         with mysql_check._connect() as db:
             with closing(db.cursor()) as cursor:
+                if default_schema:
+                    cursor.execute("USE " + default_schema)
                 cursor.execute(q)
 
     # Run a query
-    run_query(QUERY)
+    run_query(query)
     mysql_check.check(dbm_instance)
 
     # Run the query and check a second time so statement metrics are computed from the previous run
-    run_query(QUERY)
+    run_query(query)
     mysql_check.check(dbm_instance)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
@@ -307,17 +306,30 @@ def test_statement_metrics(aggregator, dbm_instance):
         tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
     )
 
-    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == QUERY_SIGNATURE]
+    query_signature = compute_sql_signature(query)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
     row = matching_rows[0]
 
-    assert row['digest'] == QUERY_DIGEST
-    assert row['schema_name'] is None
-    assert row['digest_text'].strip() == QUERY_DIGEST_TEXT.strip()
-    assert row['query_signature'] == QUERY_SIGNATURE
+    assert row['digest']
+    assert row['schema_name'] == default_schema
+    assert row['digest_text'].strip() == query.strip()[0:200]
 
     for col in statements.METRICS_COLUMNS:
         assert type(row[col]) in (float, int)
+
+    events = aggregator.get_event_platform_events("dbm-samples")
+    assert len(events) > 0
+    fqt_events = [e for e in events if e.get('dbm_type') == 'fqt']
+    assert len(fqt_events) > 0
+    matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+    event = matching[0]
+    assert event['db']['query_signature'] == query_signature
+    assert event['db']['statement'] == query
+    assert event['mysql']['schema'] == default_schema
+    assert event['timestamp'] > 0
+    assert event['host'] == 'stubbed.hostname'
 
 
 @pytest.mark.integration
