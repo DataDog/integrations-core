@@ -36,7 +36,6 @@ PROMETHEUS_METRICS = [
     'consul.serf.events',
     'consul.serf.member.join',
     'consul.serf.member.update',
-    'consul.raft.leader.lastContact.count',
 ]
 
 PROMETHEUS_HIST_METRICS = [

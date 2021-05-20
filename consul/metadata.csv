@@ -92,6 +92,8 @@ consul.raft.leader.lastContact.avg,gauge,10,millisecond,,[DogStatsD only] Averag
 consul.raft.leader.lastContact.count,rate,10,,,The number of samples of raft.leader.lastContact,0,consul,last contact count
 consul.raft.leader.lastContact.max,gauge,10,millisecond,,[DogStatsD only] Max time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact max
 consul.raft.leader.lastContact.median,gauge,10,millisecond,,[DogStatsD only] Median time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact med
+consul.raft.leader.lastContact.quantile,gauge,10,millisecond,,[DogStatsD or prometheus only] The quantile time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact quantile
+consul.raft.leader.lastContact.sum,gauge,10,millisecond,,[DogStatsD or prometheus only] Sum the time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact sum
 consul.raft.leader.lastContact.95percentile,gauge,10,millisecond,,[DogStatsD only] P95 time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact p95
 consul.raft.replication.appendEntries.logs,gauge,,entry,,"Measures the number of logs replicated to an agent, to bring it up to speed with the leader's logs.",0,consul,raft repl entry log
 consul.raft.replication.appendEntries.rpc.count,count,,millisecond,,"Count the time taken by the append entries RFC, to replicate the log entries of a leader agent onto its follower agent(s)",0,consul,raft repl entry rpc cnt
