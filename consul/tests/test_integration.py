@@ -4,12 +4,14 @@
 import logging
 
 import pytest
+from packaging import version
 from requests import HTTPError
 
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
+from .common import CONSUL_VERSION
 
 METRICS = [
     'consul.catalog.nodes_up',
@@ -95,6 +97,7 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
 def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, caplog):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance_prometheus])
     common_tags = instance_prometheus['tags']
+    greater_than_1_6 = version.parse(CONSUL_VERSION) > version.parse('1.6.0')
 
     if common.PROMETHEUS_ENDPOINT_AVAILABLE:
         consul_check.check(instance_prometheus)
@@ -109,7 +112,8 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
 
         aggregator.assert_metric('consul.memberlist.msg.suspect', tags=common_tags, at_least=0)
         aggregator.assert_metric('consul.peers', value=3, count=1)
-        aggregator.assert_metric_has_tag_prefix('consul.raft.replication.appendEntries.logs', 'peer_id', count=2)
+        if greater_than_1_6:
+            aggregator.assert_metric_has_tag_prefix('consul.raft.replication.appendEntries.logs', 'peer_id', count=2)
 
         for hist_suffix in ['count', 'sum', 'quantile']:
             aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
@@ -117,6 +121,13 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
                 for metric in common.PROMETHEUS_HIST_METRICS:
                     aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
                 aggregator.assert_metric_has_tag('consul.raft.leader.lastContact.' + hist_suffix, tag, at_least=0)
+                if greater_than_1_6:
+                    aggregator.assert_metric_has_tag(
+                        'consul.raft.replication.appendEntries.rpc.' + hist_suffix, tag, at_least=1
+                    )
+                    aggregator.assert_metric_has_tag(
+                        'consul.raft.replication.heartbeat.' + hist_suffix, tag, at_least=1
+                    )
 
         aggregator.assert_all_metrics_covered()
 

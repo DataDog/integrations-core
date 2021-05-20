@@ -45,8 +45,6 @@ PROMETHEUS_HIST_METRICS = [
     'consul.memberlist.pushpullnode.',
     'consul.raft.commitTime.',
     'consul.raft.leader.dispatchLog.',
-    'consul.raft.replication.appendEntries.rpc.',
-    'consul.raft.replication.heartbeat.',
     'consul.serf.coordinate.adjustment_ms.',
     'consul.serf.msgs.sent.',
     'consul.serf.msgs.received.',
