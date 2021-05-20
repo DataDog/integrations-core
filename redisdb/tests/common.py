@@ -19,9 +19,5 @@ CLOUD_ENV = is_affirmative(os.environ['CLOUD_ENV'])
 
 if CLOUD_ENV:
     DOCKER_COMPOSE_PATH = os.path.join(HERE, 'compose', '1m-2s-cloud.compose')
-    COMPOSE_ENV_VARS = env_vars = {
-        'REDIS_CLOUD_CONFIG': os.path.join(HERE, 'config', 'redis.conf'),
-    }
 else:
     DOCKER_COMPOSE_PATH = os.path.join(HERE, 'compose', '1m-2s.compose')
-    COMPOSE_ENV_VARS = env_vars = {}

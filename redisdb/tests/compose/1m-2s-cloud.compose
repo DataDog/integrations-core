@@ -9,7 +9,7 @@ services:
       - network1
     command: redis-server /usr/local/etc/redis/redis.conf --port 6382
     volumes:
-      - ${REDIS_CLOUD_CONFIG}:/usr/local/etc/redis/redis.conf
+      - ../config/redis.conf:/usr/local/etc/redis/redis.conf
 
   redis-slave:
     image: "redis:${REDIS_VERSION}"
