@@ -220,7 +220,7 @@ class MetricsMetadataValidator(ManifestValidator):
 
 class MetricToCheckValidator(ManifestValidator):
     def validate(self, check_name, decoded, _):
-        if not self.should_validate() or check_name == 'snmp' or check_name != 'moogsoft':
+        if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
             return
 
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')

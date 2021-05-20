@@ -1,5 +1,5 @@
 {
-    "title": "Amazon MSK Overview",
+    "title": "Amazon MSK (Agent) Overview",
     "description": "## Amazon MSK Overview\n\nThis is an example Amazon MSK dashboard demonstrating the metrics that the integration collects.",
     "widgets": [
         {

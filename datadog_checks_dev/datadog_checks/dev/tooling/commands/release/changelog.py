@@ -121,7 +121,8 @@ def changelog(
             thanks_note = ''
             if entry.from_contributor:
                 thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-            new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
+            title_period = "." if not entry.title.endswith(".") else ""
+            new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
     # read the old contents

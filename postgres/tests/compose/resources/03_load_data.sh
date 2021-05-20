@@ -14,7 +14,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
 EOSQL
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs <<-EOSQL
+for DBNAME in dogs dogs_noschema dogs_nofunc; do
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-EOSQL
     CREATE TABLE breed (id SERIAL, name VARCHAR(255));
     CREATE TABLE kennel (id SERIAL, address VARCHAR(255));
     INSERT INTO kennel (address) VALUES ('Midtown, New York'), ('Boston');
@@ -23,3 +25,5 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs <<-EOSQL
     INSERT INTO breed (name) VALUES ('Labrador Retriver'), ('German Shepherd'), ('Yorkshire Terrier'), ('Golden Retriever'), ('Bulldog');
     SELECT * FROM breed WHERE name = 'Labrador';
 EOSQL
+
+done

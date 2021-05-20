@@ -32,11 +32,11 @@ class VSphereRestAPI(object):
     Abstraction class over the vSphere REST api
     """
 
-    def __init__(self, config, log):
-        # type: (VSphereConfig, CheckLoggingAdapter) -> None
+    def __init__(self, config, log, deprecated_api=True):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
         self.config = config
         self.log = log
-        self._client = VSphereRestClient(config, log)
+        self._client = VSphereRestClient(config, log, deprecated_api)
         self.smart_connect()
 
     def smart_connect(self):
@@ -136,11 +136,30 @@ class VSphereRestClient(object):
     """
 
     JSON_REQUEST_HEADERS = {'Content-Type': 'application/json'}
+    API_ENDPOINTS = {
+        'current': {
+            'tag-association-action': 'cis/tagging/tag-association?action=list-attached-tags-on-objects',
+            'tags-get': 'cis/tagging/tag/{}',
+            'category-get': 'cis/tagging/category/{}',
+            'session': 'session',
+        },
+        'deprecated': {
+            'tag-association-action': 'tagging/tag-association?~action=list-attached-tags-on-objects',
+            'tags-get': 'tagging/tag/id:{}',
+            'category-get': 'tagging/category/id:{}',
+            'session': 'session',
+        },
+    }
 
-    def __init__(self, config, log):
-        # type: (VSphereConfig, CheckLoggingAdapter) -> None
+    def __init__(self, config, log, deprecated_api):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
         self.log = log
-        self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
+        self.deprecated_api = deprecated_api
+        self._api_base_url = "https://{}/api/".format(config.hostname)
+        self.endpoints = self.API_ENDPOINTS['current']
+        if deprecated_api:
+            self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
+            self.endpoints = self.API_ENDPOINTS['deprecated']
         self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
@@ -159,7 +178,9 @@ class VSphereRestClient(object):
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/session.create-operation.html
         """
-        session_token = self._request_json("session", method="post", extra_headers=self.JSON_REQUEST_HEADERS)
+        session_token = self._request_json(
+            self.endpoints['session'], method="post", extra_headers=self.JSON_REQUEST_HEADERS
+        )
         return session_token
 
     def tagging_category_get(self, category_id):
@@ -169,7 +190,7 @@ class VSphereRestClient(object):
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/category.get-operation.html
         """
-        return self._request_json("tagging/category/id:{}".format(category_id))
+        return self._request_json(self.endpoints['category-get'].format(category_id))
 
     def tagging_tags_get(self, tag_id):
         # type: (str) -> Dict[str, Any]
@@ -178,7 +199,7 @@ class VSphereRestClient(object):
         Doc:
         https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag.get-operation.html
         """
-        return self._request_json("tagging/tag/id:{}".format(tag_id))
+        return self._request_json(self.endpoints['tags-get'].format(tag_id))
 
     def tagging_tag_association_list_attached_tags_on_objects(self, mors):
         # type: (List[vim.ManagedEntity]) -> List[TagAssociation]
@@ -191,7 +212,7 @@ class VSphereRestClient(object):
         """
         payload = {"object_ids": [{"id": mor._moId, "type": MOR_TYPE_MAPPING_TO_STRING[type(mor)]} for mor in mors]}
         tag_associations = self._request_json(
-            "tagging/tag-association?~action=list-attached-tags-on-objects",
+            self.endpoints['tag-association-action'],
             method="post",
             data=json.dumps(payload),
             extra_headers=self.JSON_REQUEST_HEADERS,
@@ -205,6 +226,9 @@ class VSphereRestClient(object):
         resp.raise_for_status()
 
         data = resp.json()
+        if not self.deprecated_api:
+            return data
+
         if 'value' not in data:
             raise APIResponseError("Missing `value` element in response for url: {}".format(url))
 

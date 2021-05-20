@@ -1008,7 +1008,7 @@ class TestSubmission:
             tags=['test:init'],
         )
         query_manager.compile_queries()
-        query_manager.execute(extra_tags=['test:runtime', 'test:init'])
+        query_manager.execute(extra_tags=['test:runtime'])
 
         aggregator.assert_metric(
             'test.foo', 8, metric_type=aggregator.COUNT, tags=['test:init', 'test:runtime', 'tag:tag1']

@@ -36,8 +36,9 @@ RELATION_INDEX_METRICS = [
 IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
 def test_relations_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
 
@@ -71,8 +72,6 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(name, count=1, tags=expected_size_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
         {'relation_regex': '.*', 'schemas': ['hello', 'hello2']},
@@ -105,8 +104,6 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
             aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_max_relations(aggregator, integration_check, pg_instance):
     pg_instance.update({'relations': [{'relation_regex': '.*'}], 'max_relations': 1})
     posgres_check = integration_check(pg_instance)
@@ -127,8 +124,6 @@ def test_max_relations(aggregator, integration_check, pg_instance):
         assert len(relation_metrics) == 1
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_index_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = 'dogs'
@@ -149,17 +144,12 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_locks_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
     pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute('LOCK persons')
-            check.check(pg_instance)
+    check_with_lock(check, pg_instance)
 
     expected_tags = pg_instance['tags'] + [
         'server:{}'.format(HOST),
@@ -172,3 +162,29 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
     ]
 
     aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
+
+
+def test_locks_relkind_match(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['r']}]
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
+
+    check = integration_check(pg_instance)
+    check_with_lock(check, pg_instance)
+
+    aggregator.assert_metric('postgresql.locks', count=1)
+
+
+def test_locks_metrics_no_relkind_match(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['i']}]
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
+
+    check = integration_check(pg_instance)
+    check_with_lock(check, pg_instance)
+    aggregator.assert_metric('postgresql.locks', count=0)
+
+
+def check_with_lock(check, instance):
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute('LOCK persons')
+            check.check(instance)

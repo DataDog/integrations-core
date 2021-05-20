@@ -2,6 +2,7 @@ variables:
   REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
+  VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
@@ -19,10 +20,10 @@ variables:
 
 stages:
   - build
+  - trigger
   - validate
   - release
   - notify
-
 
 validate-log-integrations:
   stage: validate
@@ -46,6 +47,70 @@ validate-log-integrations:
     when: always
   tags: [ "runner:main", "size:large" ]
 
+trigger-agent-build:
+  stage: trigger
+  image: $VALIDATE_AGENT_BUILD
+  script:
+    - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+    - export AGENT_REQUIREMENTS_CHANGED="false"
+    - git fetch origin master
+    - git --no-pager diff --exit-code --name-only HEAD $(git merge-base HEAD FETCH_HEAD) -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
+    - |
+      if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
+          echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
+          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+
+          # Get slack user
+          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
+          if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+
+          MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
+          postmessage "$SLACK_AUTHOR" "$MESSAGE"
+      else
+          echo "Nothing to run, skipping job."
+      fi
+  artifacts:
+    paths:
+    - pipeline_id.txt
+    expire_in: 1 day
+    when: always
+  tags: [ "runner:main", "size:large" ]
+
+
+validate-agent-build:
+  stage: validate
+  image: $VALIDATE_AGENT_BUILD
+  script:
+    - |
+      if [[ -s ./pipeline_id.txt ]]; then
+          # Fetch secrets from SCM
+          GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
+          DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+          PIPELINE_ID=$(cat pipeline_id.txt)
+
+          # Get slack user
+          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
+          if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+
+          # Wait for the agent build to complete
+          export BUILD_SUCCESS="true"
+          GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt) || export BUILD_SUCCESS="false" || true
+          echo $BUILD_SUCCESS
+          if [[ "$BUILD_SUCCESS" = "true" ]]; then
+              echo "Agent build was successful!"
+              postmessage "$SLACK_AUTHOR" "Build was successful, you can merge your PR!" success
+          else
+              echo "Agent build failed."
+              postmessage "$SLACK_AUTHOR" "The build failed, you might want to retry this job: ${CI_JOB_URL}" alert
+              exit 1
+          fi
+      else
+        echo "A pipeline was not triggered, skipping this job."
+      fi
+
+  tags: [ "runner:main", "size:large" ]
 
 notify-slack:
   stage: notify
@@ -68,6 +133,8 @@ notify-slack:
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
+  only:
+  - master
   when: on_failure
   script:
     - |
@@ -156,4 +223,20 @@ validate-log-intgs-builder:
     - docker build --tag $VALIDATE_LOG_INTGS .
     - docker images $VALIDATE_LOG_INTGS
     - docker push $VALIDATE_LOG_INTGS
+  tags: [ "runner:docker", "size:large" ]
+
+validate-agent-build-builder:
+  stage: build
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  only:
+    changes:
+      - .gitlab/validate-agent-build/**
+    refs:
+      - master
+  script:
+    - cd .gitlab/validate-agent-build/
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
+    - docker build --tag $VALIDATE_AGENT_BUILD .
+    - docker images $VALIDATE_AGENT_BUILD
+    - docker push $VALIDATE_AGENT_BUILD
   tags: [ "runner:docker", "size:large" ]

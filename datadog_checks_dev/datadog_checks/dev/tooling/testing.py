@@ -11,7 +11,7 @@ from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
-from .utils import complete_set_root, get_testable_checks
+from .utils import complete_set_root, get_metric_sources, get_testable_checks, get_valid_checks, get_valid_integrations
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
@@ -298,6 +298,8 @@ def testable_files(files):
 
 
 def get_changed_checks():
+    """Return set of check names that have changes in testable code."""
+
     # Get files that changed compared to `master`
     changed_files = files_changed()
 
@@ -307,7 +309,44 @@ def get_changed_checks():
     return {line.split('/')[0] for line in changed_files}
 
 
+def get_changed_directories():
+    """Return set of check names that have any changes at all."""
+    changed_files = files_changed()
+
+    return {line.split('/')[0] for line in changed_files}
+
+
 def get_tox_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
         return int(match.group(1))
+
+
+def process_checks_option(check, source=None, validate=False):
+    # provide common function for determining which check to run validations against
+    # `source` determines which method for gathering valid check, default will use `get_valid_checks`
+    # `validate` gets applied for specific check names, ensuring the check is included in the default
+    #   collection specified by `source`.  If not, it returns an empty list.
+
+    if source is None or source == 'valid_checks':
+        get_valid = get_valid_checks
+    elif source == 'metrics':
+        get_valid = get_metric_sources
+    elif source == 'testable':
+        get_valid = get_testable_checks
+    elif source == 'integrations':
+        get_valid = get_valid_integrations
+    else:
+        get_valid = get_valid_integrations
+
+    if check is None or check.lower() == 'all':
+        choice = sorted(get_valid())
+    elif check.lower() == 'changed':
+        choice = sorted(get_changed_directories() & get_valid())
+    else:
+        if validate:
+            choice = [check] if check in get_valid() else []
+        else:
+            choice = [check]
+
+    return choice

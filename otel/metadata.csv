@@ -26,5 +26,5 @@ otel.process.disk.io,count,,byte,,Disk bytes transferred per second,0,otel,proce
 otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,otel,paging in use
 otel.system.paging.faults,count,,occurrence,,The number of paging faults,0,otel,paging faults
 otel.system.paging.operations,count,,unit,,The number of paging operations,0,otel,paging ops
-otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that the Datadog metrics exporter is successfully sending metrics,0,otel,metrics running
-otel.datadog_exporter.traces.running,gauge,,unit,,Reports that the Datadog traces exporter is successfully sending traces,0,otel,traces running
+otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that metrics are being sent from a host through the Datadog exporter for the OpenTelemetry Collector,0,otel,metrics running
+otel.datadog_exporter.traces.running,gauge,,unit,,Reports that traces are being sent from a host through the Datadog exporter for the OpenTelemetry Collector,0,otel,traces running

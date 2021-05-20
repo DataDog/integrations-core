@@ -12,6 +12,7 @@ from os import environ
 
 import mock
 import psutil
+import pymysql
 import pytest
 from pkg_resources import parse_version
 
@@ -31,7 +32,6 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def dbm_instance(instance_complex):
     instance_complex['deep_database_monitoring'] = True
-    instance_complex['min_collection_interval'] = 1
     instance_complex['statement_samples'] = {
         'enabled': True,
         # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
@@ -295,17 +295,29 @@ def test_statement_metrics(aggregator, dbm_instance):
     # Run the query and check a second time so statement metrics are computed from the previous run
     run_query(QUERY)
     mysql_check.check(dbm_instance)
-    for name in statements.STATEMENT_METRICS.values():
-        aggregator.assert_metric(
-            name,
-            tags=tags.SC_TAGS
-            + [
-                'query:{}'.format(QUERY_DIGEST_TEXT),
-                'query_signature:{}'.format(QUERY_SIGNATURE),
-                'digest:{}'.format(QUERY_DIGEST),
-            ],
-            count=1,
-        )
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    assert event['host'] == 'stubbed.hostname'
+    assert event['timestamp'] > 0
+    assert event['min_collection_interval'] == 15
+    assert set(event['tags']) == set(
+        tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    )
+
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == QUERY_SIGNATURE]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
+
+    assert row['digest'] == QUERY_DIGEST
+    assert row['schema_name'] is None
+    assert row['digest_text'].strip() == QUERY_DIGEST_TEXT.strip()
+    assert row['query_signature'] == QUERY_SIGNATURE
+
+    for col in statements.METRICS_COLUMNS:
+        assert type(row[col]) in (float, int)
 
 
 @pytest.mark.integration
@@ -318,16 +330,6 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
     # the query signature for this test unless you know what you're doing. The query digest is determined by
     # mysql and varies across versions.
     query_signature = '94caeb4c54f97849'
-
-    if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        query_digest = '9d1281ca764113522cfddefa25171e04'
-    elif environ.get('MYSQL_VERSION') == '5.6':
-        query_digest = '8ed22fb1a4d540751208966b7e322c3b'
-    elif environ.get('MYSQL_VERSION') == '5.7':
-        query_digest = '6b5a1b14bbeef4253f3d88bd6d2f41cf'
-    else:
-        # 8.0+
-        query_digest = 'bab5dd3d1abebc38338867fb4933301115cb3c40840fea30e1d6301cc14099c5'
 
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
@@ -354,78 +356,16 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         run_query(query_two)
         mysql_check.check(dbm_instance)
 
-    expected_tags = tags.SC_TAGS + [
-        'query:{}'.format(normalized_query),
-        'query_signature:{}'.format(query_signature),
-        'digest:{}'.format(query_digest),
-    ]
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
 
-    aggregator.assert_metric('mysql.queries.count', count=1, tags=expected_tags)
-    aggregator.assert_metric('mysql.queries.count', value=2.0, tags=expected_tags)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
 
-
-def test_generate_synthetic_rows():
-    rows = [
-        {
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_examined': 50,
-        },
-        {
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_examined': 0,
-        },
-    ]
-    result = statements.generate_synthetic_rows(rows)
-    assert result == [
-        {
-            'avg_time': 25.2,
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_sent_ratio': 0.4,
-            'rows_examined': 50,
-        },
-        {
-            'avg_time': 0,
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_sent_ratio': 0,
-            'rows_examined': 0,
-        },
-    ]
+    assert row['query_signature'] == query_signature
+    assert row['count_star'] == 2
 
 
 @pytest.mark.integration
@@ -766,6 +706,128 @@ def test_replication_check_status(
         expected_service_check_len += 1
 
     assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
+
+
+def test__get_is_aurora():
+    def new_check():
+        return MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    class MockCursor:
+        def __init__(self, rows, side_effect=None):
+            self.rows = rows
+            self.side_effect = side_effect
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def execute(self, command):
+            if self.side_effect:
+                raise self.side_effect
+
+        def close(self):
+            return MockCursor([])
+
+        def fetchall(self):
+            return self.rows
+
+    class MockDatabase:
+        def __init__(self, cursor):
+            self.cursor = cursor
+
+        def cursor(self):
+            return self.cursor
+
+    check = new_check()
+    assert True is check._get_is_aurora(MockDatabase(MockCursor(rows=[('1.72.1',)])))
+    assert True is check._get_is_aurora(None)
+    assert True is check._is_aurora
+
+    check = new_check()
+    assert True is check._get_is_aurora(
+        MockDatabase(
+            MockCursor(
+                rows=[
+                    ('1.72.1',),
+                    ('1.72.1',),
+                ]
+            )
+        )
+    )
+    assert True is check._get_is_aurora(None)
+    assert True is check._is_aurora
+
+    check = new_check()
+    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=[])))
+    assert False is check._get_is_aurora(None)
+    assert False is check._is_aurora
+
+    check = new_check()
+    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
+    assert None is check._is_aurora
+    assert False is check._get_is_aurora(None)
+
+
+@pytest.mark.unit
+def test__get_runtime_aurora_tags():
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    class MockCursor:
+        def __init__(self, rows, side_effect=None):
+            self.rows = rows
+            self.side_effect = side_effect
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def execute(self, command):
+            if self.side_effect:
+                raise self.side_effect
+
+        def close(self):
+            return MockCursor(None)
+
+        def fetchone(self):
+            return self.rows.pop(0)
+
+    class MockDatabase:
+        def __init__(self, cursor):
+            self.cursor = cursor
+
+        def cursor(self):
+            return self.cursor
+
+    reader_row = ('reader',)
+    writer_row = ('writer',)
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[reader_row])))
+    assert tags == ['replication_role:reader']
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[writer_row])))
+    assert tags == ['replication_role:writer']
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[(1, 'reader')])))
+    assert tags == []
+
+    # Error cases for non-aurora databases; any error should be caught and not fail the check
+
+    tags = mysql_check._get_runtime_aurora_tags(
+        MockDatabase(
+            MockCursor(
+                rows=[], side_effect=pymysql.err.InternalError(pymysql.constants.ER.UNKNOWN_TABLE, 'Unknown Table')
+            )
+        )
+    )
+    assert tags == []
+
+    tags = mysql_check._get_runtime_aurora_tags(
+        MockDatabase(
+            MockCursor(
+                rows=[],
+                side_effect=pymysql.err.ProgrammingError(pymysql.constants.ER.DBACCESS_DENIED_ERROR, 'Access Denied'),
+            )
+        )
+    )
+    assert tags == []
 
 
 @pytest.mark.integration

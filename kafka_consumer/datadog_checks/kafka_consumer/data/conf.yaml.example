@@ -32,7 +32,7 @@ init_config:
 #
 instances:
 
-    ## @param kafka_connect_str - list of strings - required
+    ## @param kafka_connect_str - string or list of strings - required
     ## Kafka endpoints and port to connect to.
     ##
     ## In a production environment, it's often useful to specify multiple
@@ -40,9 +40,18 @@ instances:
     ## only generate a single check process, but if one host goes down,
     ## KafkaClient tries contacting the next host.
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    ##
+    ## You may specify a single server like:
+    ##
+    ##   kafka_connect_str: server:9092
+    ##
+    ## or multiple servers like:
+    ##
+    ##   kafka_connect_str:
+    ##   - server1:9092
+    ##   - server2:9092
     #
-  - kafka_connect_str:
-      - localhost:9092
+  - kafka_connect_str: <KAFKA_CONNECT_STR>
 
     ## @param kafka_client_api_version - string - optional
     ## Specify the highest client protocol version supported by all brokers in the cluster.
@@ -206,7 +215,7 @@ instances:
     #
     # broker_requests_batch_size: 30
 
-    ## @param zk_connect_str - list of mappings - optional
+    ## @param zk_connect_str - string or list of strings - optional
     ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
     ## from Zookeeper and is deprecated.
     ## Zookeeper endpoints and port to connect to.
@@ -215,10 +224,18 @@ instances:
     ## only generate a single check process, but if one host goes down,
     ## KafkaClient / KazooClient tries contacting the next host.
     ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    ##
+    ## You may specify a single server like:
+    ##
+    ##   zk_connect_str: localhost:2181
+    ##
+    ## or multiple servers like:
+    ##
+    ##   zk_connect_str:
+    ##   - server1:2181
+    ##   - server2:2181
     #
-    # zk_connect_str:
-    #   - localhost:2181
-    #   - <ZOOKEEPER_ENDPOINT>:2181
+    # zk_connect_str: <ZK_CONNECT_STR>
 
     ## @param zk_prefix - string - optional
     ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets

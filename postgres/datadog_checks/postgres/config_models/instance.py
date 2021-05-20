@@ -18,7 +18,9 @@ class Relation(BaseModel):
         allow_mutation = False
 
     relation_name: Optional[str]
+    relation_regex: Optional[str]
     relation_schema: Optional[str]
+    relkind: Optional[Sequence[str]]
     schemas: Optional[Sequence[str]]
 
 
@@ -51,6 +53,7 @@ class InstanceConfig(BaseModel):
     deep_database_monitoring: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
+    ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
     min_collection_interval: Optional[float]
     password: Optional[str]
@@ -60,7 +63,6 @@ class InstanceConfig(BaseModel):
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
-    statement_metrics_limits: Optional[Mapping[str, Any]]
     statement_samples: Optional[StatementSamples]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
