@@ -1,2 +1,0 @@
-# CHANGELOG - security_monitoring
-
