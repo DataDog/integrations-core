@@ -108,7 +108,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 #### DogStatsD
 
-Optionally, you can configure Consul to also send data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from Consul. 
+Optionally, you can configure Consul to also send data to the Agent through [DogStatsD][3] to pull different a different set of metrics from Consul.
 
 1. Configure Consul to send DogStatsD metrics by adding the `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
 
