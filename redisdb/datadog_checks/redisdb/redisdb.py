@@ -211,7 +211,7 @@ class Redis(AgentCheck):
                 config = conn.config_get("maxclients")
             except redis.ResponseError:
                 # config_get is disabled on some environments
-                self.log.warning("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
+                self.log.debug("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
                 config = {}
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
@@ -270,7 +270,7 @@ class Redis(AgentCheck):
                     self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
             except redis.ResponseError:
                 # client_list is disabled on some environments
-                self.log.warning("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
+                self.log.debug("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
@@ -453,7 +453,7 @@ class Redis(AgentCheck):
                     max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
             # No config on AWS Elasticache
             except redis.ResponseError:
-                self.log.warning("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
+                self.log.debug("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
