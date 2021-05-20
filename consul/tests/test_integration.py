@@ -118,8 +118,7 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
         # Example with `consul.raft.commitTime.count`:
         #  * It is a rate when submitting metrics with DogStatsD
         #  * It is a rate when submitting metrics with OpenMetricsBaseCheck
-        # TODO: solve conflict
-        # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     else:
         caplog.at_level(logging.WARNING)
