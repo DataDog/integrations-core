@@ -414,7 +414,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             # Collecting nodes with service in parallel to support cluster with high volume of services
             # Any code with potential impact on the performance of this check should go here
             for service in services:
-                nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=service)
+                nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
 
             self.thread_pool.close()
             self.thread_pool.join()
