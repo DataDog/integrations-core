@@ -416,9 +416,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
             for service in services:
                 nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
 
-            self.thread_pool.close()
-            self.thread_pool.join()
-
             for service in services:
                 self.get_service_checks(main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service,
                                         services[service], nodes_with_service[service].get())
