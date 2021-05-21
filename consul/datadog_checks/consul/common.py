@@ -20,7 +20,7 @@ MAX_CONFIG_TTL = 300
 # cap on distinct Consul ServiceIDs to interrogate
 MAX_SERVICES = 50
 
-# cap on distinct Consul ServiceIDs to interrogate
+# Increase the number of threads to collect consul services checks
 CONSUL_CHECK_THREADS = 1
 
 STATUS_SC = {
