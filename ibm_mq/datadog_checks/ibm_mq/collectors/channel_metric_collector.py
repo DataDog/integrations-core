@@ -50,7 +50,10 @@ class ChannelMetricCollector(object):
             pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
-            self.log.warning("Error getting CHANNEL stats %s", e)
+            # Don't warn if no messages, see:
+            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                self.log.warning("Error getting CHANNEL stats %s", e)
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(metrics.METRIC_PREFIX)
