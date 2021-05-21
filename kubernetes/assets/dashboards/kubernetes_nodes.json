@@ -555,7 +555,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -574,7 +574,7 @@
                         "display_type": "error dashed"
                     }
                 ],
-                "title": "Memory utilization per node",
+                "title": "Memory utilization of pods per node",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": false,
@@ -1399,7 +1399,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
+                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -1424,7 +1424,7 @@
                         "label": "y = 80"
                     }
                 ],
-                "title": "Memory utilization % per node",
+                "title": "Memory utilization % of pods per node",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": false,
