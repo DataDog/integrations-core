@@ -151,13 +151,8 @@ class OpenMetricsScraper:
         # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
         ignore_tags = config.get('ignore_tags', [])
         if ignore_tags:
-            ignored_tag_patterns = set()
-            for ignored_tag in ignore_tags:
-                ignored_tag_patterns.add(fnmatch.translate(ignored_tag))
-
-            if ignored_tag_patterns:
-                ignored_tags_re = re.compile('|'.join(ignored_tag_patterns))
-                custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
+            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
         # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
         # https://www.bittorrent.org/beps/bep_0003.html
