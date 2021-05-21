@@ -122,10 +122,10 @@ instances:
     #
     # max_services: 50
 
-    ## @param consul_check_threads - number - optional - default: 1
+    ## @param threads_count - number - optional - default: 1
     ## Increase the number of threads to collect consul services checks.
     #
-    # consul_check_threads: 1
+    # threads_count: 1
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed

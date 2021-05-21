@@ -55,7 +55,7 @@ class InstanceConfig(BaseModel):
     kerberos_principal: Optional[str]
     log_requests: Optional[bool]
     max_services: Optional[float]
-    consul_check_threads: Optional[float]
+    threads_count: Optional[float]
     min_collection_interval: Optional[float]
     network_latency_checks: Optional[bool]
     new_leader_checks: Optional[bool]

@@ -106,7 +106,7 @@ files:
         type: number
         example: 50
 
-    - name: consul_check_threads
+    - name: threads_count
       description: |
         Increase the number of threads to collect consul services checks.
       value:

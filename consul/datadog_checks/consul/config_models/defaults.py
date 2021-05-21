@@ -104,7 +104,7 @@ def instance_max_services(field, value):
     return 50
 
 
-def instance_consul_check_threads(field, value):
+def instance_threads_count(field, value):
     return 1
 
 

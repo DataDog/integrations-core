@@ -21,7 +21,7 @@ MAX_CONFIG_TTL = 300
 MAX_SERVICES = 50
 
 # Increase the number of threads to collect consul services checks
-CONSUL_CHECK_THREADS = 1
+THREADS_COUNT = 1
 
 STATUS_SC = {
     'up': AgentCheck.OK,

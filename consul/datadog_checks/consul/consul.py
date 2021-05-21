@@ -22,7 +22,7 @@ from datadog_checks.consul.common import (
     HEALTH_CHECK,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
-    CONSUL_CHECK_THREADS,
+    THREADS_COUNT,
     SOURCE_TYPE_NAME,
     STATUS_SC,
     STATUS_SEVERITY,
@@ -106,8 +106,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
-        self.consul_check_threads = self.instance.get(
-            'consul_check_threads', self.init_config.get('consul_check_threads', CONSUL_CHECK_THREADS))
+        self.threads_count = self.instance.get(
+            'threads_count', self.init_config.get('threads_count', THREADS_COUNT))
+        self.thread_pool = ThreadPool(self.threads_count)
 
         self._local_config = None
         self._last_config_fetch_time = None
@@ -409,13 +410,18 @@ class ConsulCheck(OpenMetricsBaseCheck):
             #   The metric is a gauge whose value is the total number of services sharing the same name, the same node
             #   and the same tags.
 
-            thread_pool = ThreadPool(self.consul_check_threads)
+            nodes_with_service = {}
+            # Collecting nodes with service in parallel to support cluster with high volume of services
+            # Any code with potential impact on the performance of this check should go here
             for service in services:
-                thread_pool.apply_async(self.get_service_checks, args=(main_tags, nodes_per_service_tag_counts,
-                                                                       nodes_to_service_status, service,
-                                                                       services[service]))
-            thread_pool.close()
-            thread_pool.join()
+                nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=service)
+
+            self.thread_pool.close()
+            self.thread_pool.join()
+
+            for service in services:
+                self.get_service_checks(main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service,
+                                        services[service], nodes_with_service[service].get())
 
             for node, service_status in iteritems(nodes_to_service_status):
                 # For every node discovered for included services, gauge the following:
@@ -449,7 +455,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)
 
-    def get_service_checks(self, main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service, service_tags):
+    def get_service_checks(self, main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service, service_tags, nodes_with_service):
         # For every service in the cluster,
         # Gauge the following:
         # `consul.catalog.nodes_up` : # of Nodes registered with that service
@@ -457,7 +463,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
         # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
         # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
         all_service_tags = self._get_service_tags(service, service_tags)
-        nodes_with_service = self.get_nodes_with_service(service)
         # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
         node_count_per_status = defaultdict(int)
         for node in nodes_with_service:
