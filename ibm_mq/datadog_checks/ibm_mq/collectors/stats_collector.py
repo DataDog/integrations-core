@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
