@@ -104,6 +104,10 @@ def instance_max_services(field, value):
     return 50
 
 
+def instance_consul_check_threads(field, value):
+    return 1
+
+
 def instance_min_collection_interval(field, value):
     return 15
 

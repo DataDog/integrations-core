@@ -9,6 +9,7 @@ from itertools import islice
 from time import time as timestamp
 
 import requests
+from multiprocessing.pool import ThreadPool
 from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
@@ -18,6 +19,7 @@ from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
     CONSUL_CHECK,
+    CONSUL_CHECK_THREADS,
     HEALTH_CHECK,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
@@ -104,6 +106,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
+        self.consul_check_threads = self.instance.get(
+            'consul_check_threads', self.init_config.get('consul_check_threads', CONSUL_CHECK_THREADS))
 
         self._local_config = None
         self._last_config_fetch_time = None
@@ -404,89 +408,14 @@ class ConsulCheck(OpenMetricsBaseCheck):
             # `consul.catalog.services_count` tagged by node name, service name and status and service tags.
             #   The metric is a gauge whose value is the total number of services sharing the same name, the same node
             #   and the same tags.
+
+            thread_pool = ThreadPool(self.consul_check_threads)
             for service in services:
-                # For every service in the cluster,
-                # Gauge the following:
-                # `consul.catalog.nodes_up` : # of Nodes registered with that service
-                # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
-                # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
-                # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
-
-                all_service_tags = self._get_service_tags(service, services[service])
-
-                nodes_with_service = self.get_nodes_with_service(service)
-
-                # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
-                node_count_per_status = defaultdict(int)
-
-                for node in nodes_with_service:
-                    # The node_id is n['Node']['Node']
-                    node_id = node.get('Node', {}).get("Node")
-
-                    # An additional service is registered on this node. Bump up the counter
-                    nodes_to_service_status[node_id]["up"] += 1
-
-                    # If there is no Check for the node then Consul and dd-agent consider it up
-                    if 'Checks' not in node:
-                        node_count_per_status['passing'] += 1
-                        node_count_per_status['up'] += 1
-                    else:
-                        found_critical = False
-                        found_warning = False
-                        found_serf_health = False
-
-                        for check in node['Checks']:
-                            if check['CheckID'] == 'serfHealth':
-                                found_serf_health = True
-
-                                # For backwards compatibility, the "up" node_count_per_status is computed
-                                # based on the total # of nodes 'running' as part of the service.
-
-                                # If the serfHealth is `critical` it means the Consul agent isn't even responding,
-                                # and we don't register the node as `up`
-                                if check['Status'] != 'critical':
-                                    node_count_per_status["up"] += 1
-                                    continue
-
-                            if check['Status'] == 'critical':
-                                found_critical = True
-                                break
-                            elif check['Status'] == 'warning':
-                                found_warning = True
-                                # Keep looping in case there is a critical status
-
-                        service_tags_set = frozenset(node.get('Service', {}).get('Tags') or [])
-
-                        # Increment the counters based on what was found in Checks
-                        # `critical` checks override `warning`s, and if neither are found,
-                        # register the node as `passing`
-                        if found_critical:
-                            node_count_per_status['critical'] += 1
-                            nodes_to_service_status[node_id]["critical"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'critical')
-                        elif found_warning:
-                            node_count_per_status['warning'] += 1
-                            nodes_to_service_status[node_id]["warning"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'warning')
-                        else:
-                            if not found_serf_health:
-                                # We have not found a serfHealth check for this node, which is unexpected
-                                # If we get here assume this node's status is "up", since we register it as 'passing'
-                                node_count_per_status['up'] += 1
-
-                            node_count_per_status['passing'] += 1
-                            nodes_to_service_status[node_id]["passing"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'passing')
-
-                        nodes_per_service_tag_counts[node_status] += 1
-
-                for status_key in STATUS_SC:
-                    status_value = node_count_per_status[status_key]
-                    self.gauge(
-                        '{}.nodes_{}'.format(CONSUL_CATALOG_CHECK, status_key),
-                        status_value,
-                        tags=main_tags + all_service_tags,
-                    )
+                thread_pool.apply_async(self.get_service_checks, args=(main_tags, nodes_per_service_tag_counts,
+                                                                       nodes_to_service_status, service,
+                                                                       services[service]))
+            thread_pool.close()
+            thread_pool.join()
 
             for node, service_status in iteritems(nodes_to_service_status):
                 # For every node discovered for included services, gauge the following:
@@ -519,6 +448,85 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)
+
+    def get_service_checks(self, main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service, service_tags):
+        # For every service in the cluster,
+        # Gauge the following:
+        # `consul.catalog.nodes_up` : # of Nodes registered with that service
+        # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
+        # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
+        # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
+        all_service_tags = self._get_service_tags(service, service_tags)
+        nodes_with_service = self.get_nodes_with_service(service)
+        # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
+        node_count_per_status = defaultdict(int)
+        for node in nodes_with_service:
+            # The node_id is n['Node']['Node']
+            node_id = node.get('Node', {}).get("Node")
+
+            # An additional service is registered on this node. Bump up the counter
+            nodes_to_service_status[node_id]["up"] += 1
+
+            # If there is no Check for the node then Consul and dd-agent consider it up
+            if 'Checks' not in node:
+                node_count_per_status['passing'] += 1
+                node_count_per_status['up'] += 1
+            else:
+                found_critical = False
+                found_warning = False
+                found_serf_health = False
+
+                for check in node['Checks']:
+                    if check['CheckID'] == 'serfHealth':
+                        found_serf_health = True
+
+                        # For backwards compatibility, the "up" node_count_per_status is computed
+                        # based on the total # of nodes 'running' as part of the service.
+
+                        # If the serfHealth is `critical` it means the Consul agent isn't even responding,
+                        # and we don't register the node as `up`
+                        if check['Status'] != 'critical':
+                            node_count_per_status["up"] += 1
+                            continue
+
+                    if check['Status'] == 'critical':
+                        found_critical = True
+                        break
+                    elif check['Status'] == 'warning':
+                        found_warning = True
+                        # Keep looping in case there is a critical status
+
+                service_tags_set = frozenset(node.get('Service', {}).get('Tags') or [])
+
+                # Increment the counters based on what was found in Checks
+                # `critical` checks override `warning`s, and if neither are found,
+                # register the node as `passing`
+                if found_critical:
+                    node_count_per_status['critical'] += 1
+                    nodes_to_service_status[node_id]["critical"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'critical')
+                elif found_warning:
+                    node_count_per_status['warning'] += 1
+                    nodes_to_service_status[node_id]["warning"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'warning')
+                else:
+                    if not found_serf_health:
+                        # We have not found a serfHealth check for this node, which is unexpected
+                        # If we get here assume this node's status is "up", since we register it as 'passing'
+                        node_count_per_status['up'] += 1
+
+                    node_count_per_status['passing'] += 1
+                    nodes_to_service_status[node_id]["passing"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'passing')
+
+                nodes_per_service_tag_counts[node_status] += 1
+        for status_key in STATUS_SC:
+            status_value = node_count_per_status[status_key]
+            self.gauge(
+                '{}.nodes_{}'.format(CONSUL_CATALOG_CHECK, status_key),
+                status_value,
+                tags=main_tags + all_service_tags,
+            )
 
     def _get_coord_datacenters(self):
         return self.consul_request('/v1/coordinate/datacenters')

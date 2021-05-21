@@ -20,6 +20,9 @@ MAX_CONFIG_TTL = 300
 # cap on distinct Consul ServiceIDs to interrogate
 MAX_SERVICES = 50
 
+# cap on distinct Consul ServiceIDs to interrogate
+CONSUL_CHECK_THREADS = 1
+
 STATUS_SC = {
     'up': AgentCheck.OK,
     'passing': AgentCheck.OK,
