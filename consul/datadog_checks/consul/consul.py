@@ -6,10 +6,10 @@ from __future__ import division
 from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 from itertools import islice
+from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 
 import requests
-from multiprocessing.pool import ThreadPool
 from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
@@ -22,10 +22,10 @@ from datadog_checks.consul.common import (
     HEALTH_CHECK,
     MAX_CONFIG_TTL,
     MAX_SERVICES,
-    THREADS_COUNT,
     SOURCE_TYPE_NAME,
     STATUS_SC,
     STATUS_SEVERITY,
+    THREADS_COUNT,
     ceili,
     distance,
 )
@@ -36,7 +36,6 @@ try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
-
 
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
@@ -106,8 +105,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         )
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
-        self.threads_count = self.instance.get(
-            'threads_count', self.init_config.get('threads_count', THREADS_COUNT))
+        self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
         self.thread_pool = ThreadPool(self.threads_count)
 
         self._local_config = None
@@ -417,8 +415,14 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
 
             for service in services:
-                self.get_service_checks(main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service,
-                                        services[service], nodes_with_service[service].get())
+                self.get_service_checks(
+                    main_tags,
+                    nodes_per_service_tag_counts,
+                    nodes_to_service_status,
+                    service,
+                    services[service],
+                    nodes_with_service[service].get(),
+                )
 
             for node, service_status in iteritems(nodes_to_service_status):
                 # For every node discovered for included services, gauge the following:
@@ -452,7 +456,15 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)
 
-    def get_service_checks(self, main_tags, nodes_per_service_tag_counts, nodes_to_service_status, service, service_tags, nodes_with_service):
+    def get_service_checks(
+        self,
+        main_tags,
+        nodes_per_service_tag_counts,
+        nodes_to_service_status,
+        service,
+        service_tags,
+        nodes_with_service,
+    ):
         # For every service in the cluster,
         # Gauge the following:
         # `consul.catalog.nodes_up` : # of Nodes registered with that service
