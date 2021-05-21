@@ -104,10 +104,6 @@ def instance_max_services(field, value):
     return 50
 
 
-def instance_threads_count(field, value):
-    return 1
-
-
 def instance_min_collection_interval(field, value):
     return 15
 
@@ -166,6 +162,10 @@ def instance_skip_proxy(field, value):
 
 def instance_tags(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_threads_count(field, value):
+    return 1
 
 
 def instance_timeout(field, value):
