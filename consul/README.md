@@ -58,7 +58,7 @@ To configure this check for an Agent running on a host:
 
 Optionally, you can enable the `use_prometheus_endpoint` configuration option to get an additional set of metrics from the Consul Prometheus endpoint.
 
-**Note**: Use either the DogStatsD method or the Prometheus method, do not enable both for the same instance.
+**Note**: Use the DogStatsD or Prometheus method, do not enable both for the same instance.
 
 1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
 
@@ -72,7 +72,7 @@ Optionally, you can enable the `use_prometheus_endpoint` configuration option to
     }
     ```
 
-2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the prometheus endpoint.
+2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the Prometheus endpoint.
     ```yaml
     instances:
         - url: <EXAMPLE>
@@ -140,7 +140,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
+2. Edit this configuration block in your `consul.yaml` file to collect Consul logs:
 
    ```yaml
    logs:
@@ -174,7 +174,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
