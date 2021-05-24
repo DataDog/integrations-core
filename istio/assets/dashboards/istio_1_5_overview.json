@@ -46,7 +46,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(sum:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
