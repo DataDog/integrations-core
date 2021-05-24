@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+import re
 import subprocess
 import time
 from collections import Counter
@@ -10,7 +11,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
 from os import environ
 
-import re
 import mock
 import psutil
 import pymysql
