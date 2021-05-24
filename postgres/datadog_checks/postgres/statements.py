@@ -8,6 +8,7 @@ import time
 
 import psycopg2
 import psycopg2.extras
+from cachetools import TTLCache
 
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -72,6 +73,14 @@ PG_STAT_ALL_DESIRED_COLUMNS = (
 )
 
 
+def _row_key(row):
+    """
+    :param row: a normalized row from pg_stat_statements
+    :return: a tuple uniquely identifying this row
+    """
+    return row['query_signature'], row['datname'], row['rolname']
+
+
 class PostgresStatementMetrics(object):
     """Collects telemetry for SQL statements"""
 
@@ -82,6 +91,11 @@ class PostgresStatementMetrics(object):
         self._log = get_check_logger()
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
+        self._full_statement_text_cache = TTLCache(
+            maxsize=self._config.full_statement_text_cache_max_size,
+            ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
+        )
 
     def _execute_query(self, cursor, query, params=()):
         try:
@@ -125,6 +139,11 @@ class PostgresStatementMetrics(object):
             rows = self._collect_metrics_rows(db)
             if not rows:
                 return
+            for event in self._rows_to_fqt_events(rows, tags):
+                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+            # truncate query text to the maximum length supported by metrics tags
+            for row in rows:
+                row['query'] = row['query'][0:200]
             payload = {
                 'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
@@ -171,16 +190,13 @@ class PostgresStatementMetrics(object):
     def _collect_metrics_rows(self, db):
         rows = self._load_pg_stat_statements(db)
 
-        def row_keyfunc(row):
-            return (row['query_signature'], row['datname'], row['rolname'])
-
         rows = self._normalize_queries(rows)
         if not rows:
             return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=row_keyfunc)
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
         return rows
 
@@ -200,3 +216,30 @@ class PostgresStatementMetrics(object):
             normalized_rows.append(normalized_row)
 
         return normalized_rows
+
+    def _rows_to_fqt_events(self, rows, tags):
+        for row in rows:
+            query_cache_key = _row_key(row)
+            if query_cache_key in self._full_statement_text_cache:
+                continue
+            self._full_statement_text_cache[query_cache_key] = True
+            row_tags = tags + [
+                "db:{}".format(row['datname']),
+                "rolname:{}".format(row['rolname']),
+            ]
+            yield {
+                "timestamp": time.time() * 1000,
+                "host": self._db_hostname_cached(),
+                "ddsource": "postgres",
+                "ddtags": ",".join(row_tags),
+                "dbm_type": "fqt",
+                "db": {
+                    "instance": row['datname'],
+                    "query_signature": row['query_signature'],
+                    "statement": row['query'],
+                },
+                "postgres": {
+                    "datname": row["datname"],
+                    "rolname": row["rolname"],
+                },
+            }

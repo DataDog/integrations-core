@@ -34,6 +34,16 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
+    (
+        "bob",
+        "bob",
+        "datadog_test",
+        "SELECT hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid, "
+        "hello_how_is_it_going_this_is_a_very_long_table_alias_name.lastname "
+        "FROM persons hello_how_is_it_going_this_is_a_very_long_table_alias_name JOIN persons B "
+        "ON hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid = B.personid WHERE B.city = %s",
+        "hello",
+    ),
     ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
@@ -281,6 +291,8 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert set(event['tags']) == {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test'}
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
         expected_query = query % obfuscated_param
         query_signature = compute_sql_signature(expected_query)
@@ -288,17 +300,31 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
             continue
+
+        # metrics
         assert len(matching_rows) == 1
         row = matching_rows[0]
         assert row['calls'] == 1
         assert row['datname'] == dbname
         assert row['rolname'] == username
-        assert row['query'] == expected_query
-
+        assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         for col in metric_columns:
             assert type(row[col]) in (float, int)
+
+        # full query text
+        fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
+        assert len(fqt_events) > 0
+        matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+        assert len(matching) == 1
+        fqt_event = matching[0]
+        assert fqt_event['ddsource'] == "postgres"
+        assert fqt_event['db']['statement'] == expected_query
+        assert fqt_event['postgres']['datname'] == dbname
+        assert fqt_event['postgres']['rolname'] == username
+        assert fqt_event['timestamp'] > 0
+        assert fqt_event['host'] == 'stubbed.hostname'
 
     for conn in connections.values():
         conn.close()
@@ -529,7 +555,9 @@ def test_statement_samples_collection_loop_cancel(aggregator, integration_check,
     # wait for it to stop and make sure it doesn't throw any exceptions
     check.statement_samples._collection_loop_future.result()
     assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
-    assert check.statement_samples._db_pool[dbm_instance['dbname']] is None, "db connection should be gone"
+    # if the thread doesn't start until after the cancel signal is set then the db connection will never
+    # be created in the first place
+    assert check.statement_samples._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
     aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
 
 
