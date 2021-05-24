@@ -10,6 +10,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
 from os import environ
 
+import re
 import mock
 import psutil
 import pymysql
@@ -262,6 +263,10 @@ def test_complex_config_replica(aggregator, instance_complex):
     )
 
 
+def _obfuscate_sql(query):
+    return re.sub(r'\s+', ' ', query or '').strip()
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 # these queries are formatted the same way they appear in events_statements_summary_by_digest to make the test simpler
@@ -277,7 +282,7 @@ def test_complex_config_replica(aggregator, instance_complex):
     ],
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
-def test_statement_metrics(aggregator, dbm_instance, query, default_schema):
+def test_statement_metrics(aggregator, dbm_instance, query, default_schema, datadog_agent):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
     def run_query(q):
@@ -287,13 +292,16 @@ def test_statement_metrics(aggregator, dbm_instance, query, default_schema):
                     cursor.execute("USE " + default_schema)
                 cursor.execute(q)
 
-    # Run a query
-    run_query(query)
-    mysql_check.check(dbm_instance)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    run_query(query)
-    mysql_check.check(dbm_instance)
+        # Run a query
+        run_query(query)
+        mysql_check.check(dbm_instance)
+
+        # Run the query and check a second time so statement metrics are computed from the previous run
+        run_query(query)
+        mysql_check.check(dbm_instance)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
