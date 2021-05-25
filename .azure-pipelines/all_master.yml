@@ -14,7 +14,7 @@ resources:
     - container: dd_agent
       image: datadog/agent:latest
       ports:
-        - 8127:8127
+        - 8127:8126
       env:
         DD_API_KEY: $(DD_CI_API_KEY)
         DD_HOSTNAME: "none"
