@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.13.0 / 2021-05-25
+
+* [Added] Add runtime configuration validation. See [#8935](https://github.com/DataDog/integrations-core/pull/8935).
+* [Fixed] Try SSL connection when host not found. See [#9404](https://github.com/DataDog/integrations-core/pull/9404).
+* [Fixed] Don't emit warnings if there are no messages. See [#9400](https://github.com/DataDog/integrations-core/pull/9400).
+
 ## 3.12.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add flag to convert endianness. See [#8601](https://github.com/DataDog/integrations-core/pull/8601).
