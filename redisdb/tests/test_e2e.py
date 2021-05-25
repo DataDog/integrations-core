@@ -117,5 +117,7 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.stats.io_threaded_writes_processed', count=1, tags=tags)
     aggregator.assert_metric('redis.cpu.sys_main_thread', count=1, tags=tags)
     aggregator.assert_metric('redis.cpu.user_main_thread', count=1, tags=tags)
+    aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
+    aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()

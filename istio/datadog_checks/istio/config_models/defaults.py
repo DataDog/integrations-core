@@ -88,6 +88,10 @@ def instance_ignore_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ignore_tags(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_istio_mesh_endpoint(field, value):
     return 'http://istio-proxy.istio-system:15090/stats/prometheus'
 

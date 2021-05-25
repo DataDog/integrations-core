@@ -50,14 +50,14 @@ The instructions below show you how to configure the task using the [AWS CLI too
 11. Scroll down to the **Advanced container configuration** section and enter `10` in **CPU units**.
 12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][5] as the value. _If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][6]._
 13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
-14. (Optional) If you use datadog.eu, add another environment variable using the **Key** `DD_SITE` and the value `datadoghq.eu`.
+14. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
 15. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 16. Click **Create** to create the task definition.
 
 ##### AWS CLI
 
 1. Download [datadog-agent-ecs-fargate][8]. **Note**: If you are using IE, this may download as gzip file, which contains the JSON file mentioned below.**
-2. Update the JSON with a **TASK_NAME** and your [Datadog API Key][5]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
+2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][5], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 4. Execute the following command to register the ECS task definition:
 
@@ -333,7 +333,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Trace Collection
 
-1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings.
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 
 2. [Instrument your application][32] based on your setup.
 

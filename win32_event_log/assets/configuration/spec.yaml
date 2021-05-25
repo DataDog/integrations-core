@@ -23,6 +23,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: interpret_messages
       description: |
         Whether or not to interpret event messages for unknown sources or sources that have not been registered
@@ -68,6 +71,9 @@ files:
       value:
         type: string
         example: now
+        enum:
+        - now
+        - oldest
     - name: query
       description: |
         A raw XPath or structured XML query used to filter events.
@@ -102,6 +108,26 @@ files:
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
       value:
         type: object
+        properties:
+        - name: source
+          type: array
+          items:
+            type: string
+        - name: type
+          type: array
+          items:
+            type: string
+            enum:
+            - success
+            - error
+            - warning
+            - information
+            - success audit
+            - failure audit
+        - name: id
+          type: array
+          items:
+            type: integer
         example:
           source:
            - Microsoft-Windows-Ntfs
@@ -169,6 +195,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: auth_type
       description: |
         The type of authentication to use. The available types are:
@@ -183,6 +212,11 @@ files:
       value:
         type: string
         example: default
+        enum:
+        - default
+        - negotiate
+        - kerberos
+        - ntlm
     - name: server
       description: |
         The name of the remote computer to connect to.

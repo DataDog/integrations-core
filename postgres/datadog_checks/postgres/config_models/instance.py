@@ -20,6 +20,7 @@ class Relation(BaseModel):
     relation_name: Optional[str]
     relation_regex: Optional[str]
     relation_schema: Optional[str]
+    relkind: Optional[Sequence[str]]
     schemas: Optional[Sequence[str]]
 
 
@@ -62,7 +63,6 @@ class InstanceConfig(BaseModel):
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
-    statement_metrics_limits: Optional[Mapping[str, Any]]
     statement_samples: Optional[StatementSamples]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]

@@ -6,6 +6,7 @@ files:
     options:
     - template: init_config/jmx
       overrides:
+        is_jmx.required: false
         is_jmx.value.example: false
     - template: init_config/http
   - template: instances
@@ -57,7 +58,7 @@ files:
         The components for which metrics should be collected. Each object may override the default
         options. For example, the following will gather all default metrics for "some-project",
         and only what is included/excluded for "another-project":
-          
+
           components:
             some-project:
             another-project:
@@ -69,7 +70,7 @@ files:
               exclude:
                 - issues.(false_positive_issues|reopened_issues)
 
-        NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true` 
+        NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true`
         or `false.
       value:
         type: object
@@ -86,6 +87,8 @@ files:
             type: string
     - template: instances/jmx
       overrides:
+        host.required: false
+        port.required: false
         user.description: |
           User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
         password.description: |

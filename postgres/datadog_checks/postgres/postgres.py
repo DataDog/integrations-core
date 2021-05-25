@@ -9,14 +9,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import (
-    IDX_METRICS,
-    LOCK_METRICS,
-    REL_METRICS,
-    SIZE_METRICS,
-    STATIO_METRICS,
-    RelationsManager,
-)
+from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -52,9 +45,7 @@ class PostgreSql(AgentCheck):
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
-        self.check_initializations.append(
-            lambda: self._relations_manager.validate_relations_config(self._config.relations)
-        )
+        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
 
     def cancel(self):
         self.statement_samples.cancel()
@@ -86,7 +77,7 @@ class PostgreSql(AgentCheck):
             self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
 
-    def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors, is_relations):
+    def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
             return None
         if scope == REPLICATION_METRICS or not self.version >= V9:
@@ -95,14 +86,14 @@ class PostgreSql(AgentCheck):
             log_func = self.log.warning
 
         results = None
+        is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if is_relations:
                 schema_field = get_schema_field(descriptors)
-                relations_filter = self._relations_manager.build_relations_filter(schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
-                cursor.execute(query.format(relations=relations_filter))
+                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                cursor.execute(formatted_query)
             else:
                 self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
@@ -158,9 +149,7 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
-        is_relations = scope['relation'] and len(self._relations_manager.config) > 0
-
-        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors, is_relations)
+        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
         if not results:
             return None
 
@@ -230,7 +219,7 @@ class PostgreSql(AgentCheck):
 
         # Do we need relation-specific metrics?
         if self._config.relations:
-            metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+            metric_scope.extend(RELATION_METRICS)
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -406,7 +395,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.deep_database_monitoring:
-                self.statement_metrics.collect_per_statement_metrics(self.db, tags)
+                self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
                 self.statement_samples.run_sampler(tags)
 
         except Exception as e:

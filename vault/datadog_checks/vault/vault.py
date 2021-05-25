@@ -5,6 +5,7 @@ import time
 from collections import namedtuple
 
 import requests
+from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
@@ -265,7 +266,7 @@ class Vault(OpenMetricsBaseCheck):
         return json_data
 
     def parse_config(self):
-        if not self._api_url:
+        if PY2 and not self._api_url:
             raise ConfigurationError('Vault setting `api_url` is required')
 
         api_version = self._api_url[-1]

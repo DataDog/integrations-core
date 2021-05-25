@@ -35,8 +35,8 @@ steps:
   displayName: 'Validate default configuration files'
 
 - script: |
-    echo "ddev validate models"
-    ddev validate models
+    echo "ddev validate models ${{ parameters.check }}"
+    ddev validate models ${{ parameters.check }}
   displayName: 'Validate configuration data models'
 
 - script: |

@@ -7,6 +7,7 @@ from contextlib import closing
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
+from cachetools import TTLCache
 
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -19,13 +20,11 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-
 PyMysqlRow = Dict[str, Any]
 Row = Dict[str, Any]
 RowKey = Tuple[Any]
 RowKeyFunction = Callable[[PyMysqlRow], RowKey]
 Metric = Tuple[str, int, List[str]]
-
 
 METRICS_COLUMNS = {
     'count_star',
@@ -41,24 +40,13 @@ METRICS_COLUMNS = {
     'sum_no_good_index_used',
 }
 
-# These limits define the top K and bottom K unique query rows for each metric. For each check run the
-# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
-DEFAULT_STATEMENT_METRICS_LIMITS = {
-    'count': (400, 0),
-    'errors': (100, 0),
-    'time': (400, 0),
-    'select_scan': (50, 0),
-    'select_full_join': (50, 0),
-    'no_index_used': (50, 0),
-    'no_good_index_used': (50, 0),
-    'lock_time': (50, 0),
-    'rows_affected': (100, 0),
-    'rows_sent': (100, 0),
-    'rows_examined': (100, 0),
-    # Synthetic column limits
-    'avg_time': (400, 0),
-    'rows_sent_ratio': (0, 50),
-}
+
+def _row_key(row):
+    """
+    :param row: a normalized row from events_statements_summary_by_digest
+    :return: a tuple uniquely identifying this row
+    """
+    return row['schema_name'], row['query_signature']
 
 
 class MySQLStatementMetrics(object):
@@ -73,6 +61,11 @@ class MySQLStatementMetrics(object):
         self._db_hostname = None
         self.log = get_check_logger()
         self._state = StatementMetrics()
+        # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
+        self._full_statement_text_cache = TTLCache(
+            maxsize=self._config.full_statement_text_cache_max_size,
+            ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
+        )  # type: TTLCache
 
     def _db_hostname_cached(self):
         if self._db_hostname:
@@ -86,6 +79,14 @@ class MySQLStatementMetrics(object):
             rows = self._collect_per_statement_metrics(db)
             if not rows:
                 return
+
+            for event in self._rows_to_fqt_events(rows, tags):
+                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+
+            # truncate query text to the maximum length supported by metrics tags
+            for row in rows:
+                row['digest_text'] = row['digest_text'][0:200]
+
             payload = {
                 'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
@@ -98,17 +99,10 @@ class MySQLStatementMetrics(object):
             self.log.exception('Unable to collect statement metrics due to an error')
 
     def _collect_per_statement_metrics(self, db):
-        # type: (pymysql.connections.Connection) -> List[Metric]
-        metrics = []  # type: List[Metric]
-
-        def keyfunc(row):
-            return (row['schema_name'], row['query_signature'])
-
+        # type: (pymysql.connections.Connection) -> List[PyMysqlRow]
         monotonic_rows = self._query_summary_per_statement(db)
         monotonic_rows = self._normalize_queries(monotonic_rows)
-        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=keyfunc)
-        metrics.append(('dd.mysql.queries.query_rows_raw', len(rows), []))
-
+        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
         return rows
 
     def _query_summary_per_statement(self, db):
@@ -167,3 +161,24 @@ class MySQLStatementMetrics(object):
             normalized_rows.append(normalized_row)
 
         return normalized_rows
+
+    def _rows_to_fqt_events(self, rows, tags):
+        for row in rows:
+            query_cache_key = _row_key(row)
+            if query_cache_key in self._full_statement_text_cache:
+                continue
+            self._full_statement_text_cache[query_cache_key] = True
+            row_tags = tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else tags
+            yield {
+                "timestamp": time.time() * 1000,
+                "host": self._db_hostname_cached(),
+                "ddsource": "mysql",
+                "ddtags": ",".join(row_tags),
+                "dbm_type": "fqt",
+                "db": {
+                    "instance": row['schema_name'],
+                    "query_signature": row['query_signature'],
+                    "statement": row['digest_text'],
+                },
+                "mysql": {"schema": row["schema_name"]},
+            }
