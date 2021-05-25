@@ -302,7 +302,7 @@
     type: boolean
 - name: ignore_tags
   description: |
-    A list of regular expressions used to ignore entries in the `tags` option.
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
   value:
     type: array
     items:

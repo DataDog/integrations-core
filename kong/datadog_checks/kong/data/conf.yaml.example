@@ -238,7 +238,7 @@ instances:
     # telemetry: false
 
     ## @param ignore_tags - list of strings - optional
-    ## A list of regular expressions used to ignore entries in the `tags` option.
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
     #
     # ignore_tags:
     #   - <FULL:TAG>
