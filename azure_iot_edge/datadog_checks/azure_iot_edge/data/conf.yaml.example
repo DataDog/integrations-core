@@ -163,7 +163,7 @@ instances:
     #   - '*'
 
     ## @param ignore_tags - list of strings - optional
-    ## A list of tags to ignore, regular expressions can be used to match multiple tag strings.
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
     #
     # ignore_tags:
     #   - <FULL:TAG>
