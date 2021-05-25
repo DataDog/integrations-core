@@ -130,7 +130,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
                 query_list.append(queries.SubsystemInfo)
 
-            if self.ibm_mq_check():
+            if self.config.fetch_ibm_mq_metrics and self.ibm_mq_check():
                 query_list.append(queries.IBMMQInfo)
 
             self._query_manager = QueryManager(
