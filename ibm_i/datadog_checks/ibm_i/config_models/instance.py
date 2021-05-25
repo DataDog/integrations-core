@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
+    fetch_ibm_mq_metrics: Optional[bool]
     password: Optional[str]
     service: Optional[str]
     system: Optional[str]
