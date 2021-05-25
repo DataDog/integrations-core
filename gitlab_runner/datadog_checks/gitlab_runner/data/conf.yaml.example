@@ -212,13 +212,12 @@ instances:
     #   - '*'
 
     ## @param ignore_tags - list of strings - optional
-    ## A list of tags to ignore, the "*" wildcard can be used to match multiple tag strings.
+    ## A list of tags to ignore, regular expressions can be used to match multiple tag strings.
     #
     # ignore_tags:
     #   - <FULL:TAG>
-    #   - <TAG_PREFIX*>
-    #   - <*TAG_SUFFIX>
-    #   - <*SUBSTRING*>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

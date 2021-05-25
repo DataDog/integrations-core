@@ -325,13 +325,8 @@ class OpenMetricsScraperMixin(object):
         # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
         ignore_tags = instance.get('ignore_tags', default_instance.get('ignore_tags', []))
         if ignore_tags:
-            ignored_tag_patterns = set()
-            for ignored_tag in ignore_tags:
-                ignored_tag_patterns.add(translate(ignored_tag))
-
-            if ignored_tag_patterns:
-                ignored_tags_re = compile('|'.join(ignored_tag_patterns))
-                config['custom_tags'] = [tag for tag in config['custom_tags'] if not ignored_tags_re.search(tag)]
+            ignored_tags_re = compile('|'.join(set(ignore_tags)))
+            config['custom_tags'] = [tag for tag in config['custom_tags'] if not ignored_tags_re.search(tag)]
 
         # Additional tags to be sent with each metric
         config['_metric_tags'] = []
