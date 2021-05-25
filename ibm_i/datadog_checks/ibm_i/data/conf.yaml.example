@@ -39,6 +39,11 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
+    ## @param fetch_ibm_mq_metrics - boolean - optional - default: true
+    ## Set to false to prevent the check from trying to fetch IBM MQ metrics.
+    #
+    # fetch_ibm_mq_metrics: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
