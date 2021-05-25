@@ -18,6 +18,12 @@ init_config:
   #
   # oid_batch_size: 10
 
+  ## @param collect_device_metadata - boolean - optional - default: false
+  ## Enable device metadata collection
+  ## Only available using corecheck SNMP integration with `loader: core` config.
+  #
+  # collect_device_metadata: true
+
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
@@ -51,12 +57,6 @@ init_config:
   #   router:
   #     definition_file: generic-router.yaml
   #   [...]
-
-  ## @param collect_device_metadata - boolean - optional - default: false
-  ## Enable device metadata collection
-  ## Only available using corecheck SNMP integration with `loader: core` config.
-  #
-  # collect_device_metadata: true
 
   ## @param refresh_oids_cache_interval - integer - optional - default: 0
   ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
@@ -137,6 +137,26 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param loader - string - optional - default: python
+    ## Check loader to use. Available loaders:
+    ## - core: (recommended) will use new corecheck SNMP integration
+    ## - python: will use legacy python SNMP integration
+    #
+    # loader: core
+
+    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    ## Only available for corecheck implementation (`loader: core`).
+    #
+    # oid_batch_size: 10
+
+    ## @param collect_device_metadata - boolean - optional - default: false
+    ## Enable device metadata collection
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # collect_device_metadata: true
 
     ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
@@ -228,26 +248,6 @@ instances:
     #    tags:
     #        host: \2
     #        device_type: \1
-
-    ## @param loader - string - optional - default: python
-    ## Check loader to use. Available loaders:
-    ## - core: (recommended) will use new corecheck SNMP integration
-    ## - python: will use legacy python SNMP integration
-    #
-    # loader: core
-
-    ## @param oid_batch_size - integer - optional - default: 60 (core)
-    ## The number of OIDs handled by each batch. Increasing this number improves performance but
-    ## uses more resources.
-    ## Only available for corecheck implementation (`loader: core`).
-    #
-    # oid_batch_size: 10
-
-    ## @param collect_device_metadata - boolean - optional - default: false
-    ## Enable device metadata collection
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
