@@ -418,7 +418,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 if self.thread_pool is None:
                     nodes_with_service[service] = self.get_nodes_with_service(service)
                 else:
-                    nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
+                    nodes_with_service[service] = self.thread_pool.apply_async(
+                        self.get_nodes_with_service, args=(service,)
+                    )
 
             for service in services:
                 self._submit_service_status(
