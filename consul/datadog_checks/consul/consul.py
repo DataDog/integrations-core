@@ -106,7 +106,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
-        self.thread_pool = ThreadPool(self.threads_count)
+        if (self.threads_count > 1):
+            self.thread_pool = ThreadPool(self.threads_count)
 
         self._local_config = None
         self._last_config_fetch_time = None
@@ -412,16 +413,19 @@ class ConsulCheck(OpenMetricsBaseCheck):
             # Collecting nodes with service in parallel to support cluster with high volume of services
             # Any code with potential impact on the performance of this check should go here
             for service in services:
-                nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
+                if self.thread_pool is None:
+                    nodes_with_service[service] = self.get_nodes_with_service(service)
+                else:
+                    nodes_with_service[service] = self.thread_pool.apply_async(self.get_nodes_with_service, args=(service,))
 
             for service in services:
-                self.get_service_checks(
+                self._submit_service_status(
                     main_tags,
                     nodes_per_service_tag_counts,
                     nodes_to_service_status,
                     service,
                     services[service],
-                    nodes_with_service[service].get(),
+                    nodes_with_service[service] if self.thread_pool is None else nodes_with_service[service].get(),
                 )
 
             for node, service_status in iteritems(nodes_to_service_status):
@@ -456,7 +460,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)
 
-    def get_service_checks(
+    def _submit_service_status(
         self,
         main_tags,
         nodes_per_service_tag_counts,
