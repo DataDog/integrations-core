@@ -31,6 +31,7 @@ class IbmMqCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(IbmMqCheck, self).__init__(*args, **kwargs)
 
+        # TEMP: Integration is changing
         if not pymqi:
             self.log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
