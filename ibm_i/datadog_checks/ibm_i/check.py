@@ -150,7 +150,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         query = "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO"
         results = list(self.execute_query(query))  # type: List[Tuple[str]]
         if len(results) == 0:
-            self.log.error("Couldn't find hostname on the remote system.")
+            self.log.error("Couldn't find system info on the remote system.")
             return None
         if len(results) > 1:
             self.log.error("Too many results returned by system query. Expected 1, got %d", len(results))
@@ -165,7 +165,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             os_version = int(info_row[1])
         except ValueError:
-            self.log.error("Expected integer for OS version, got %d", info_row[1])
+            self.log.error("Expected integer for OS version, got %s", info_row[1])
             return None
 
         try:
