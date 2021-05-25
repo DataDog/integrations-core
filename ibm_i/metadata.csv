@@ -15,5 +15,6 @@ ibm_i.job_queue.size,gauge,,unit,,The number of jobs in a job queue,0,ibm_i,jobq
 ibm_i.job_queue.released_size,gauge,,unit,,The number of jobs in *RELEASED status in a job queue,0,ibm_i,jobq released
 ibm_i.job_queue.scheduled_size,gauge,,unit,,The number of jobs in *SCHEDULED status in a job queue,0,ibm_i,jobq scheduled
 ibm_i.job_queue.held_size,gauge,,unit,,The number of jobs in *HELD status in a job queue,0,ibm_i,jobq held
-ibm_i.message_queue.size,gauge,,unit,,The number of messages in a message queue,0,ibm_i,msgq size
-ibm_i.message_queue.critical_size,gauge,,unit,,The number of critical messages in a message queue,-1,ibm_i,msgq critical
+ibm_i.message_queue.size,gauge,,unit,,The number of messages in a system message queue,0,ibm_i,msgq size
+ibm_i.message_queue.critical_size,gauge,,unit,,The number of critical messages in a system message queue,-1,ibm_i,msgq critical
+ibm_i.ibm_mq.size,gauge,,unit,,The number of messages in an IBM MQ queue,0,ibm_i,ibm mq msgq size
