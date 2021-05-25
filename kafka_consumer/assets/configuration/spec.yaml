@@ -41,13 +41,23 @@ files:
           only generate a single check process, but if one host goes down,
           KafkaClient tries contacting the next host.
           Details: https://github.com/DataDog/dd-agent/issues/2943
-        required: True
+
+          You may specify a single server like:
+
+            kafka_connect_str: server:9092
+
+          or multiple servers like:
+
+            kafka_connect_str:
+            - server1:9092
+            - server2:9092
+        required: true
         value:
-          type: array
-          items:
-            type: string
-          example:
-            - localhost:9092
+          anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
       - name: kafka_client_api_version
         description: |
           Specify the highest client protocol version supported by all brokers in the cluster.
@@ -205,13 +215,22 @@ files:
           only generate a single check process, but if one host goes down,
           KafkaClient / KazooClient tries contacting the next host.
           Details: https://github.com/DataDog/dd-agent/issues/2943
+
+          You may specify a single server like:
+
+            zk_connect_str: localhost:2181
+
+          or multiple servers like:
+
+            zk_connect_str:
+            - server1:2181
+            - server2:2181
         value:
-          type: array
-          items:
-            type: object
-          example:
-            - localhost:2181
-            - <ZOOKEEPER_ENDPOINT>:2181
+          anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
       - name: zk_prefix
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets

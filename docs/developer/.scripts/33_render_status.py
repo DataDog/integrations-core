@@ -1,6 +1,6 @@
 import os
 
-from datadog_checks.dev.tooling.catalog_const import DASHBOARD_NOT_POSSIBLE
+from datadog_checks.dev.tooling.catalog_const import DASHBOARD_NOT_POSSIBLE, PROCESS_SIGNATURE_EXCLUDE
 from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
@@ -16,7 +16,7 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only,
+    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
 )
 
 MARKER = '<docs-insert-status>'
@@ -205,8 +205,7 @@ def render_e2e_progress():
 
 
 def render_process_signatures_progress():
-    exclude = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'snowflake'}
-    valid_checks = sorted([c for c in get_valid_checks() if c not in exclude])
+    valid_checks = sorted([c for c in get_valid_checks() if c not in PROCESS_SIGNATURE_EXCLUDE])
     total_checks = len(valid_checks)
     checks_with_ps = 0
 
@@ -249,11 +248,11 @@ def render_check_signatures_progress():
 
 
 def render_saved_views_progress():
-    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x) and has_logs(x)]
     total_checks = len(valid_checks)
     checks_with_sv = 0
 
-    lines = ['## Default saved views', '', None, '', '??? check "Completed"']
+    lines = ['## Default saved views (for integrations with logs)', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
         if has_saved_views(check):
@@ -272,7 +271,7 @@ def render_saved_views_progress():
 
 
 def render_recommended_monitors_progress():
-    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
+    valid_checks = get_available_recommended_monitors_integrations()
     total_checks = len(valid_checks)
     checks_with_rm = 0
 

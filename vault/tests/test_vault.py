@@ -22,8 +22,8 @@ class TestVault:
         instance = INSTANCES['invalid']
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with pytest.raises(Exception, match='^Vault setting `api_url` is required$'):
-            run_check(c, extract_message=True)
+        with pytest.raises(Exception):
+            run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 

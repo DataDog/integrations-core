@@ -14,11 +14,12 @@ resources:
     - container: dd_agent
       image: datadog/agent:latest
       ports:
-        - 8126:8126
+        - 8127:8126
       env:
         DD_API_KEY: $(DD_CI_API_KEY)
         DD_HOSTNAME: "none"
         DD_INSIDE_CI: "true"
+        DD_TRACE_AGENT_PORT: 8127
 
 jobs:
 - template: './templates/test-all-checks.yml'

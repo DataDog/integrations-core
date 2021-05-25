@@ -2781,3 +2781,63 @@ def test_empty_namespace(aggregator, mocked_prometheus_check, text_data, ref_gau
     check.process_metric(ref_gauge, config)
 
     aggregator.assert_metric('process.vm.bytes', count=1)
+
+
+def test_ignore_tags_match(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patterns are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['foo', 'bar:baz']
+    wanted_tags = ['bar', 'bar:bar']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+def test_ignore_tags_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patters with wildcards are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['foo*', '.*baz']
+    wanted_tags = ['bar', 'bar:bar']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patters with regex are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['^foo', '.+:bar$']
+    wanted_tags = ['bar:baz']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)

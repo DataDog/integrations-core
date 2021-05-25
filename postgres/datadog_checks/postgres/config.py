@@ -10,6 +10,13 @@ from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
+DEFAULT_IGNORE_DATABASES = [
+    'template%',
+    'rdsadmin',
+    'azure_maintenance',
+    'postgres',
+]
+
 
 class PostgresConfig:
     RATE = AgentCheck.rate
@@ -53,7 +60,9 @@ class PostgresConfig:
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
+        self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
+        if is_affirmative(instance.get('collect_default_database', False)):
+            self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
         self.service_check_tags = self._get_service_check_tags()
@@ -63,6 +72,10 @@ class PostgresConfig:
 
         # Deep Database monitoring adds additional telemetry for statement metrics
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')

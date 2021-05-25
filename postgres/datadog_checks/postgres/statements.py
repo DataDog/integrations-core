@@ -4,21 +4,22 @@
 from __future__ import unicode_literals
 
 import copy
+import time
 
 import psycopg2
 import psycopg2.extras
+from cachetools import TTLCache
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.db.sql import compute_sql_signature, normalize_query_tag
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
-
-from .util import milliseconds_to_nanoseconds
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.serialization import json
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
 
 STATEMENTS_QUERY = """
 SELECT {cols}
@@ -27,98 +28,85 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE pg_database.datname = %s
-  AND query != '<insufficient privilege>'
+  WHERE query != '<insufficient privilege>'
+  AND query NOT LIKE 'EXPLAIN %%'
+  {filters}
   LIMIT {limit}
 """
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
 # Required columns for the check to run
-PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'total_time', 'rows'})
+PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
+
+PG_STAT_STATEMENTS_METRICS_COLUMNS = frozenset(
+    {
+        'calls',
+        'rows',
+        'total_time',
+        'total_exec_time',
+        'shared_blks_hit',
+        'shared_blks_read',
+        'shared_blks_dirtied',
+        'shared_blks_written',
+        'local_blks_hit',
+        'local_blks_read',
+        'local_blks_dirtied',
+        'local_blks_written',
+        'temp_blks_read',
+        'temp_blks_written',
+    }
+)
+
+PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
+    {
+        'datname',
+        'rolname',
+        'query',
+    }
+)
 
 PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
 
-# Monotonically increasing count columns to be converted to metrics
-PG_STAT_STATEMENTS_METRIC_COLUMNS = {
-    'calls': 'postgresql.queries.count',
-    'total_time': 'postgresql.queries.time',
-    'rows': 'postgresql.queries.rows',
-    'shared_blks_hit': 'postgresql.queries.shared_blks_hit',
-    'shared_blks_read': 'postgresql.queries.shared_blks_read',
-    'shared_blks_dirtied': 'postgresql.queries.shared_blks_dirtied',
-    'shared_blks_written': 'postgresql.queries.shared_blks_written',
-    'local_blks_hit': 'postgresql.queries.local_blks_hit',
-    'local_blks_read': 'postgresql.queries.local_blks_read',
-    'local_blks_dirtied': 'postgresql.queries.local_blks_dirtied',
-    'local_blks_written': 'postgresql.queries.local_blks_written',
-    'temp_blks_read': 'postgresql.queries.temp_blks_read',
-    'temp_blks_written': 'postgresql.queries.temp_blks_written',
-}
-
-# Columns to apply as tags
-PG_STAT_STATEMENTS_TAG_COLUMNS = {
-    'datname': 'db',
-    'rolname': 'user',
-    'query': 'query',
-}
-
-# These limits define the top K and bottom K unique query rows for each metric. For each check run the
-# max metrics sent will be sum of all numbers below (in practice, much less due to overlap in rows).
-DEFAULT_STATEMENT_METRICS_LIMITS = {
-    'calls': (400, 0),
-    'total_time': (400, 0),
-    'rows': (400, 0),
-    'shared_blks_hit': (50, 0),
-    'shared_blks_read': (50, 0),
-    'shared_blks_dirtied': (50, 0),
-    'shared_blks_written': (50, 0),
-    'local_blks_hit': (50, 0),
-    'local_blks_read': (50, 0),
-    'local_blks_dirtied': (50, 0),
-    'local_blks_written': (50, 0),
-    'temp_blks_read': (50, 0),
-    'temp_blks_written': (50, 0),
-    # Synthetic column limits
-    'avg_time': (400, 0),
-    'shared_blks_ratio': (0, 50),
-}
+PG_STAT_ALL_DESIRED_COLUMNS = (
+    PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TAG_COLUMNS | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
+)
 
 
-def generate_synthetic_rows(rows):
+def _row_key(row):
     """
-    Given a list of rows, generate a new list of rows with "synthetic" column values derived from
-    the existing row values.
+    :param row: a normalized row from pg_stat_statements
+    :return: a tuple uniquely identifying this row
     """
-    synthetic_rows = []
-    for row in rows:
-        new = copy.copy(row)
-        new['avg_time'] = float(new['total_time']) / new['calls'] if new['calls'] > 0 else 0
-        new['shared_blks_ratio'] = (
-            float(new['shared_blks_hit']) / (new['shared_blks_hit'] + new['shared_blks_read'])
-            if new['shared_blks_hit'] + new['shared_blks_read'] > 0
-            else 0
-        )
-
-        synthetic_rows.append(new)
-
-    return synthetic_rows
+    return row['query_signature'], row['datname'], row['rolname']
 
 
 class PostgresStatementMetrics(object):
     """Collects telemetry for SQL statements"""
 
-    def __init__(self, config):
-        self.config = config
-        self.log = get_check_logger()
+    def __init__(self, check, config):
+        self._check = check
+        self._config = config
+        self._db_hostname = None
+        self._log = get_check_logger()
         self._state = StatementMetrics()
+        self._stat_column_cache = []
+        # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
+        self._full_statement_text_cache = TTLCache(
+            maxsize=self._config.full_statement_text_cache_max_size,
+            ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
+        )
 
     def _execute_query(self, cursor, query, params=()):
         try:
+            self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             return cursor.fetchall()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-            self.log.warning('Statement-level metrics are unavailable: %s', e)
+            # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
+            # but the next time the query is run, it will retrieve the correct columns.
+            self._stat_column_cache = []
+            self._log.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
     def _get_pg_stat_statements_columns(self, db):
@@ -127,101 +115,90 @@ class PostgresStatementMetrics(object):
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
         be upgraded without upgrading extensions, even when the extension is included by default.
         """
+        if self._stat_column_cache:
+            return self._stat_column_cache
+
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*',
-            pg_stat_statements_view=self.config.pg_stat_statements_view,
-            limit=0,
+            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
         )
         cursor = db.cursor()
-        self._execute_query(cursor, query, params=(self.config.dbname,))
-        colnames = [desc[0] for desc in cursor.description]
-        return colnames
+        self._execute_query(cursor, query, params=(self._config.dbname,))
+        col_names = [desc[0] for desc in cursor.description] if cursor.description else []
+        self._stat_column_cache = col_names
+        return col_names
 
-    def collect_per_statement_metrics(self, db):
+    def _db_hostname_cached(self):
+        if self._db_hostname:
+            return self._db_hostname
+        self._db_hostname = resolve_db_host(self._config.host)
+        return self._db_hostname
+
+    def collect_per_statement_metrics(self, db, db_version, tags):
         try:
-            return self._collect_per_statement_metrics(db)
+            rows = self._collect_metrics_rows(db)
+            if not rows:
+                return
+            for event in self._rows_to_fqt_events(rows, tags):
+                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+            # truncate query text to the maximum length supported by metrics tags
+            for row in rows:
+                row['query'] = row['query'][0:200]
+            payload = {
+                'host': self._db_hostname_cached(),
+                'timestamp': time.time() * 1000,
+                'min_collection_interval': self._config.min_collection_interval,
+                'tags': tags,
+                'postgres_rows': rows,
+                'postgres_version': 'v{major}.{minor}.{patch}'.format(
+                    major=db_version.major, minor=db_version.minor, patch=db_version.patch
+                ),
+            }
+            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
             db.rollback()
-            self.log.exception('Unable to collect statement metrics due to an error')
+            self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
-    def _collect_per_statement_metrics(self, db):
-        metrics = []
-
-        available_columns = self._get_pg_stat_statements_columns(db)
-        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - set(available_columns)
+    def _load_pg_stat_statements(self, db):
+        available_columns = set(self._get_pg_stat_statements_columns(db))
+        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
         if len(missing_columns) > 0:
-            self.log.warning(
+            self._log.warning(
                 'Unable to collect statement metrics because required fields are unavailable: %s',
                 ', '.join(list(missing_columns)),
             )
-            return metrics
+            return []
 
-        desired_columns = (
-            list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys())
-            + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
-            + list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
-        )
-        query_columns = list(set(desired_columns) & set(available_columns) | set(PG_STAT_STATEMENTS_TAG_COLUMNS.keys()))
-        rows = self._execute_query(
+        query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
+        params = ()
+        filters = ""
+        if self._config.dbstrict:
+            filters = "AND pg_database.datname = %s"
+            params = (self._config.dbname,)
+        return self._execute_query(
             db.cursor(cursor_factory=psycopg2.extras.DictCursor),
             STATEMENTS_QUERY.format(
                 cols=', '.join(query_columns),
-                pg_stat_statements_view=self.config.pg_stat_statements_view,
+                pg_stat_statements_view=self._config.pg_stat_statements_view,
+                filters=filters,
                 limit=DEFAULT_STATEMENTS_LIMIT,
             ),
-            params=(self.config.dbname,),
+            params=params,
         )
-        if not rows:
-            return metrics
 
-        def row_keyfunc(row):
-            return (row['query_signature'], row['datname'], row['rolname'])
+    def _collect_metrics_rows(self, db):
+        rows = self._load_pg_stat_statements(db)
 
         rows = self._normalize_queries(rows)
-        rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
-        metrics.append(('dd.postgres.queries.query_rows_raw', len(rows), []))
+        if not rows:
+            return []
 
-        rows = generate_synthetic_rows(rows)
-        rows = apply_row_limits(
-            rows,
-            self.config.statement_metrics_limits or DEFAULT_STATEMENT_METRICS_LIMITS,
-            tiebreaker_metric='calls',
-            tiebreaker_reverse=True,
-            key=row_keyfunc,
-        )
-        metrics.append(('dd.postgres.queries.query_rows_limited', len(rows), []))
-
-        for row in rows:
-            # All "Deep Database Monitoring" statement-level metrics are tagged with a `query_signature`
-            # which uniquely identifies the normalized query family. Where possible, this hash should
-            # match the hash of APM "resources" (https://docs.datadoghq.com/tracing/visualization/resource/)
-            # when the resource is a SQL query. Postgres' query normalization in the `pg_stat_statements` table
-            # preserves most of the original query, so we tag the `resource_hash` with the same value as the
-            # `query_signature`. The `resource_hash` tag should match the *actual* APM resource hash most of
-            # the time, but not always. So this is a best-effort approach to link these metrics to APM metrics.
-            tags = ['query_signature:' + row['query_signature'], 'resource_hash:' + row['query_signature']]
-
-            for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
-                if column not in row:
-                    continue
-                value = row[column]
-                if column == 'query':
-                    value = normalize_query_tag(row['query'])
-                tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
-
-            for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
-                if column not in row:
-                    continue
-                value = row[column]
-                if column == 'total_time':
-                    # All "Deep Database Monitoring" timing metrics are in nanoseconds
-                    # Postgres tracks pg_stat* timing stats in milliseconds
-                    value = milliseconds_to_nanoseconds(value)
-                metrics.append((metric_name, value, tags))
-
-        return metrics
+        available_columns = set(rows[0].keys())
+        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
+        self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
+        return rows
 
     def _normalize_queries(self, rows):
         normalized_rows = []
@@ -230,7 +207,8 @@ class PostgresStatementMetrics(object):
             try:
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                # obfuscation errors are relatively common so only log them during debugging
+                self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
             normalized_row['query'] = obfuscated_statement
@@ -238,3 +216,30 @@ class PostgresStatementMetrics(object):
             normalized_rows.append(normalized_row)
 
         return normalized_rows
+
+    def _rows_to_fqt_events(self, rows, tags):
+        for row in rows:
+            query_cache_key = _row_key(row)
+            if query_cache_key in self._full_statement_text_cache:
+                continue
+            self._full_statement_text_cache[query_cache_key] = True
+            row_tags = tags + [
+                "db:{}".format(row['datname']),
+                "rolname:{}".format(row['rolname']),
+            ]
+            yield {
+                "timestamp": time.time() * 1000,
+                "host": self._db_hostname_cached(),
+                "ddsource": "postgres",
+                "ddtags": ",".join(row_tags),
+                "dbm_type": "fqt",
+                "db": {
+                    "instance": row['datname'],
+                    "query_signature": row['query_signature'],
+                    "statement": row['query'],
+                },
+                "postgres": {
+                    "datname": row["datname"],
+                    "rolname": row["rolname"],
+                },
+            }

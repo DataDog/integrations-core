@@ -86,7 +86,6 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
-    statement_metrics_limits: Optional[Mapping[str, Any]]
     statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]

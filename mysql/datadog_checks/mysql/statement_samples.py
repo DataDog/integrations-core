@@ -216,7 +216,6 @@ class MySQLStatementSamples(object):
         self._db = None
         self._tags = None
         self._tags_str = None
-        self._service = "mysql"
         self._collection_loop_future = None
         self._cancel_event = threading.Event()
         self._rate_limiter = ConstantRateLimiter(1)
@@ -290,9 +289,6 @@ class MySQLStatementSamples(object):
             return
         self._tags = tags
         self._tags_str = ','.join(tags)
-        for t in self._tags:
-            if t.startswith('service:'):
-                self._service = t[len('service:') :]
         if not self._version_processed and self._check.version:
             self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
@@ -506,7 +502,6 @@ class MySQLStatementSamples(object):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._db_hostname,
-                "service": self._service,
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],

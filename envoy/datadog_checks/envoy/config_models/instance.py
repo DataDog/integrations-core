@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     cache_metrics: Optional[bool]
+    collect_server_info: Optional[bool]
     connect_timeout: Optional[float]
     empty_default_hostname: Optional[bool]
     excluded_metrics: Optional[Sequence[str]]

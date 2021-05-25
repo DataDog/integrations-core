@@ -70,6 +70,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_server_info
+      description: |
+        Collect Envoy version by accessing the `/server_info` endpoint.
+        Disable this if this endpoint is not reachable by the agent.
+      value:
+        type: boolean
+        example: true
     - template: instances/default
     - template: instances/http
       overrides:

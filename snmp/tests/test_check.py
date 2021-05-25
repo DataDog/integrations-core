@@ -1221,6 +1221,10 @@ def test_timeout(aggregator, caplog):
     aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
+    aggregator.assert_metric('snmp.ifInDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifInErrors.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutErrors.rate', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)

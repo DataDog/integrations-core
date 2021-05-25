@@ -163,10 +163,16 @@ class ModelConsumer:
                 required_options = schema['required'] = []
                 options_with_defaults = False
                 validator_data = []
+                options_seen = set()
 
-                for option in sorted(section['options'], key=lambda o: o['name']):
+                for option in sorted(section['options'], key=lambda o: (o['name'], o['hidden'])):
                     option_name = option['name']
                     normalized_option_name = normalize_option_name(option_name)
+
+                    if normalized_option_name in options_seen:
+                        continue
+                    else:
+                        options_seen.add(normalized_option_name)
 
                     if 'value' in option:
                         type_data = option['value']

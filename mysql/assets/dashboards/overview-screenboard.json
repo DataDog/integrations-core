@@ -1,939 +1,1439 @@
 {
   "title": "MySQL",
-  "description": "",
+  "description": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
   "widgets": [
     {
-      "id": 7819738301267990,
-      "layout": {
-        "x": 1,
-        "y": 14,
-        "width": 30,
-        "height": 40
-      },
+      "id": 2101495049883950,
       "definition": {
-        "type": "note",
-        "content": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.\n\nTo learn more about our MySQL integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n\n\n",
+        "title": "About MySQL",
+        "title_align": "center",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/mysql_hero_1.jpeg",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1282662978160396,
+            "definition": {
+              "type": "note",
+              "content": "Using this dashboard, you can get a high-level view of your MySQL metrics related to throughput, performance, and resource utilization.",
+              "background_color": "transparent",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 2949261894225096,
+            "definition": {
+              "type": "note",
+              "content": "\n\n**To learn more about our MySQL integration**\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/mysql/?tab=host).\n\n- [Monitoring MySQL Performance Metrics](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/).\n\n- [Collecting MySQL statistics and metrics](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/).\n\n- [Our blog post on MySQL monitoring](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/).",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 6
+      }
+    },
+    {
+      "id": 1272699396363952,
+      "definition": {
+        "title": "Basic Activity Monitor",
+        "title_align": "center",
+        "type": "group",
         "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6289627865756156,
+            "definition": {
+              "title": "Failed Connects",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "avg:mysql.net.aborted_connects{$scope}",
+                  "aggregator": "avg",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 0
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 683106599202738,
+            "definition": {
+              "title": "Connections to Server - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "avg:mysql.net.connections{$scope}",
+                  "aggregator": "avg"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 2019894577351012,
+            "definition": {
+              "title": "Connections - Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "avg:mysql.net.max_connections{$scope}",
+                  "aggregator": "avg"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 6
       }
     },
     {
-      "id": 4949655736738342,
-      "layout": {
-        "x": 33,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
+      "id": 8065369650995666,
       "definition": {
-        "type": "note",
-        "content": "Basic Activity Monitor",
+        "title": "Performance",
+        "title_align": "center",
+        "type": "group",
         "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 2053914314500650,
-      "layout": {
-        "x": 105,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Throughput",
-        "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 33563484962610,
-      "layout": {
-        "x": 33,
-        "y": 46,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "MySQL Resource Utilization",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 7813434609764132,
-      "layout": {
-        "x": 33,
-        "y": 24,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Performance",
-        "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 8724911101387132,
-      "layout": {
-        "x": 177,
-        "y": 16,
-        "width": 47,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Logs",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 3510484440766506,
-      "definition": {
-        "type": "query_value",
-        "requests": [
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "avg:mysql.net.max_connections{*}",
-            "aggregator": "avg"
-          }
-        ],
-        "title": "Number of Connections",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 2
-      },
-      "layout": {
-        "x": 33,
-        "y": 7,
-        "width": 20,
-        "height": 15
-      }
-    },
-    {
-      "id": 4580303685497888,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.threads_running{*}",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Threads Running",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 33,
-        "y": 52,
-        "width": 33,
-        "height": 15
-      }
-    },
-    {
-      "id": 7333327975143908,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.threads_connected{*}",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Threads Connected",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 68,
-        "y": 52,
-        "width": 35,
-        "height": 15
-      }
-    },
-    {
-      "id": 3132289999982172,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.innodb.buffer_pool_pages_total{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mysql.innodb.buffer_pool_pages_free{*}",
-            "display_type": "area",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mysql.innodb.buffer_pool_pages_data{*}",
-            "display_type": "area",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "InnoDB Buffer Pool Pages",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 68,
-        "y": 68,
-        "width": 35,
-        "height": 15
-      }
-    },
-    {
-      "id": 3757592705691892,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.innodb.buffer_pool_free{*}",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mysql.innodb.buffer_pool_used{*}",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          },
-          {
-            "q": "avg:mysql.innodb.buffer_pool_total{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "InnoDB Buffer Pool",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 33,
-        "y": 68,
-        "width": 33,
-        "height": 15
-      }
-    },
-    {
-      "id": 3026433805375000,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.com_select{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Rate of Select Queries",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 105,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 8459550148722216,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.query_run_time.avg{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Query Average Runtime",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 33,
-        "y": 30,
-        "width": 33,
-        "height": 15
-      }
-    },
-    {
-      "id": 8995043206631004,
-      "layout": {
-        "x": 105,
-        "y": 39,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "System Resource Utilization",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 5133552342659276,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:system.load.1{$scope}"
-          },
-          {
-            "q": "avg:system.load.5{$scope}"
-          },
-          {
-            "q": "avg:system.load.15{$scope}"
-          }
-        ],
-        "title": "System load",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 141,
-        "y": 45,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 3174962352359576,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:system.cpu.idle{$scope}, avg:system.cpu.system{$scope}, avg:system.cpu.iowait{$scope}, avg:system.cpu.user{$scope}, avg:system.cpu.stolen{$scope}, avg:system.cpu.guest{$scope}"
-          }
-        ],
-        "title": "CPU usage (%)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 105,
-        "y": 45,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 7146327569259880,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "max:mysql.performance.kernel_time{$scope}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "MySQL CPU Time (%)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 105,
-        "y": 61,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 3433922753288356,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:system.mem.usable{$scope}, sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
-          }
-        ],
-        "title": "System memory",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 141,
-        "y": 61,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 824726960195446,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:system.net.bytes_rcvd{$scope}"
-          },
-          {
-            "q": "sum:system.net.bytes_sent{$scope}"
-          }
-        ],
-        "title": "Network traffic (per sec)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 105,
-        "y": 77,
-        "width": 70,
-        "height": 15
-      }
-    },
-    {
-      "id": 3597777553720704,
-      "layout": {
-        "x": 177,
-        "y": 22,
-        "width": 47,
-        "height": 55
-      },
-      "definition": {
-        "title": "",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "log_stream",
-        "indexes": [],
-        "query": "source:mysql",
-        "sort": {
-          "column": "time",
-          "order": "desc"
-        },
-        "columns": [
-          "core_host",
-          "core_service"
-        ],
-        "show_date_column": true,
-        "show_message_column": true,
-        "message_display": "expanded-md"
-      }
-    },
-    {
-      "id": 8463261690002896,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.com_update{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Rate of Update Queries",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 141,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 6252548321364566,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.com_insert{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Rate of Insert Queries",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 105,
-        "y": 23,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 756419659654490,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.com_delete{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Rate of Delete Queries",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 141,
-        "y": 23,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 2368466329359410,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.innodb.data_reads{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          },
-          {
-            "q": "avg:mysql.innodb.data_writes{*}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Rate of Data Reads/Writes",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 33,
-        "y": 84,
-        "width": 33,
-        "height": 15
-      }
-    },
-    {
-      "id": 3221412590263788,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "avg:mysql.net.connections{*}",
-            "aggregator": "avg"
-          }
-        ],
-        "title": "Rate of Connections to Server",
-        "title_size": "16",
-        "title_align": "left",
-        "precision": 2
-      },
-      "layout": {
-        "x": 80,
-        "y": 7,
-        "width": 23,
-        "height": 15
-      }
-    },
-    {
-      "id": 8368115667870794,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.key_cache_utilization{*} by {service}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Cache Utilization Ratio",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 68,
-        "y": 84,
-        "width": 35,
-        "height": 15
-      }
-    },
-    {
-      "id": 2637040087034578,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:mysql.performance.slow_queries{*}",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "on_right_yaxis": false
-          }
-        ],
-        "yaxis": {
-          "label": "",
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "include_zero": true
-        },
-        "title": "Slow Query Rate",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 68,
-        "y": 30,
-        "width": 35,
-        "height": 15
-      }
-    },
-    {
-      "id": 2902465927202362,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "avg:mysql.net.aborted_connects{*}",
-            "aggregator": "avg",
-            "conditional_formats": [
-              {
-                "comparator": "<=",
-                "value": 0,
-                "palette": "white_on_green"
+            "id": 3940233987703902,
+            "definition": {
+              "title": "Slow Query - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.slow_queries{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
               },
-              {
-                "comparator": ">",
-                "value": 0,
-                "palette": "white_on_red"
-              }
-            ]
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 1521887063617046,
+            "definition": {
+              "title": "Query Runtime - Avg",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.query_run_time.avg{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
           }
-        ],
-        "title": "Failed MySQL Connects",
-        "title_size": "16",
-        "title_align": "left",
-        "precision": 2
+        ]
       },
       "layout": {
-        "x": 54,
-        "y": 7,
-        "width": 25,
-        "height": 15
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 7
       }
     },
     {
-      "id": 5811070951344460,
-      "layout": {
-        "x": 1,
-        "y": 81,
-        "width": 30,
-        "height": 8
-      },
+      "id": 7865657118623736,
       "definition": {
-        "type": "note",
-        "content": "InnoDB is the storage management system for both MariaDB and MySQL.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
+        "title": "Throughput",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "blue",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 747120230400942,
+            "definition": {
+              "title": "Select Queries - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_size": "0",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.com_select{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4833137674597370,
+            "definition": {
+              "title": "Insert Queries - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.com_insert{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6308767590919314,
+            "definition": {
+              "title": "Update Queries - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.com_update{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2230182233657926,
+            "definition": {
+              "title": "Delete Queries - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.com_delete{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4787807694967516,
+            "definition": {
+              "type": "note",
+              "content": "The current rate of queries will naturally rise and fall, and as such it’s not always an actionable metric based on fixed thresholds. But it is worthwhile to alert on sudden changes in query volume—drastic drops in throughput, especially, can indicate a serious problem.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "25%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 8,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 7
       }
     },
     {
-      "id": 7403239476791868,
-      "layout": {
-        "x": 1,
-        "y": 55,
-        "width": 30,
-        "height": 25
-      },
+      "id": 2145431347459902,
       "definition": {
-        "type": "note",
-        "content": "Most of the metrics and monitoring strategies outlined here also apply to MySQL-compatible technologies such MariaDB and Percona Server, with some notable differences. For instance, some of the features in the MySQL Workbench are not compatible with currently available versions of MariaDB.\n\nAmazon RDS users should check out our specialized monitoring guides for [MySQL on RDS](https://www.datadoghq.com/blog/monitoring-rds-mysql-performance-metrics/) and for the MySQL-compatible [Amazon Aurora](https://www.datadoghq.com/blog/monitoring-amazon-aurora-performance-metrics/).\n\n",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
+        "title": "MySQL Resource Utilization",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_green",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1120147112786838,
+            "definition": {
+              "title": "Running - Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.threads_running{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1317137258610410,
+            "definition": {
+              "title": "Connected - Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.threads_connected{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3682098355889932,
+            "definition": {
+              "type": "note",
+              "content": "\nMost of the metrics and monitoring strategies outlined here also apply to MySQL-compatible technologies such MariaDB and Percona Server, with some notable differences. For instance, some of the features in the MySQL Workbench are not compatible with currently available versions of MariaDB.\n\nAmazon RDS users should check out our specialized monitoring guides for [MySQL on RDS](https://www.datadoghq.com/blog/monitoring-rds-mysql-performance-metrics/) and for the MySQL-compatible [Amazon Aurora](https://www.datadoghq.com/blog/monitoring-amazon-aurora-performance-metrics/).\n\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "25%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1241315372890026,
+            "definition": {
+              "title": "Cache Utilization Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Cache Utilization"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.performance.key_cache_utilization{$scope} by {service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 450835307903482,
+            "definition": {
+              "title": "Data Reads/Writes - Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Data Reads"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Data Writes"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.innodb.data_reads{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:mysql.innodb.data_writes{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5584453730332458,
+            "definition": {
+              "title": "InnoDB Buffer Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Available Buffer Pool"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Used Buffer Pool"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Total Buffer Pool"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_free{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_used{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_total{$scope}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 642030921874296,
+            "definition": {
+              "title": "InnoDB Buffer Pool Pages",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total Pages"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Free Pages"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Pages Data"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_pages_total{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_pages_free{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:mysql.innodb.buffer_pool_pages_data{$scope}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1902626197544406,
+            "definition": {
+              "type": "note",
+              "content": "InnoDB is the storage management system for both MariaDB and MySQL.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "is_column_break": true
       }
     },
     {
-      "id": 400903025136302,
-      "layout": {
-        "x": 177,
-        "y": 1,
-        "width": 47,
-        "height": 13
-      },
+      "id": 8791240349460846,
       "definition": {
-        "type": "note",
-        "content": "The current rate of queries will naturally rise and fall, and as such it’s not always an actionable metric based on fixed thresholds. But it is worthwhile to alert on sudden changes in query volume—drastic drops in throughput, especially, can indicate a serious problem.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "title": "System Resource Utilization",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 102600120516942,
+            "definition": {
+              "title": "CPU usage (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "min",
+                "max",
+                "avg",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "idle"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "system"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "iowait"
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "user"
+                    },
+                    {
+                      "formula": "query5",
+                      "alias": "stolen"
+                    },
+                    {
+                      "formula": "query6",
+                      "alias": "guest"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:system.cpu.idle{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:system.cpu.system{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:system.cpu.iowait{$scope}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "avg:system.cpu.user{$scope}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "avg:system.cpu.stolen{$scope}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "avg:system.cpu.guest{$scope}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5690041729436510,
+            "definition": {
+              "title": "System load",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "system.load.1"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "system.load.5"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "system.load.15"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:system.load.1{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:system.load.5{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:system.load.15{$scope}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3141901397641716,
+            "definition": {
+              "title": "System memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "min",
+                "max",
+                "value",
+                "avg"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Available Memory"
+                    },
+                    {
+                      "formula": "query2 - query1",
+                      "alias": "Memory Used"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:system.mem.usable{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:system.mem.total{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2606326720001498,
+            "definition": {
+              "title": "MySQL CPU Time (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "min",
+                "max",
+                "value",
+                "avg"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "max:mysql.performance.kernel_time{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3491655337950842,
+            "definition": {
+              "title": "Network traffic (per sec)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2",
+                      "alias": "Bytes Sent"
+                    },
+                    {
+                      "formula": "-query1",
+                      "alias": "Bytes Received"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:system.net.bytes_rcvd{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:system.net.bytes_sent{$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
       }
     },
     {
-      "id": 1801107147992128,
-      "layout": {
-        "x": 1,
-        "y": 1,
-        "width": 30,
-        "height": 12
-      },
+      "id": 1226269205466820,
       "definition": {
-        "type": "image",
-        "url": "/static/images/logos/mysql_large.svg",
-        "sizing": "fit"
+        "title": "Logs",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "white",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6626156661629262,
+            "definition": {
+              "title": "Error Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:mysql  $scope status:error",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7693652234657664,
+            "definition": {
+              "title": "All Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:mysql $scope",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
       }
     }
   ],
   "template_variables": [
     {
       "name": "scope",
-      "default": "*",
-      "prefix": null
+      "default": "*"
     }
   ],
-  "layout_type": "free",
+  "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "id": "5ga-gvj-t8m"
+  "reflow_type": "fixed",
+  "id": "zbv-i3c-aba"
 }

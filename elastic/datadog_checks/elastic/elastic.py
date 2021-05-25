@@ -324,6 +324,8 @@ class ESCheck(AgentCheck):
                 value = xform(value)
             if xtype == "gauge":
                 self.gauge(metric, value, tags=tags, hostname=hostname)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric, value, tags=tags, hostname=hostname)
             else:
                 self.rate(metric, value, tags=tags, hostname=hostname)
         else:
@@ -387,7 +389,7 @@ class ESCheck(AgentCheck):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
-        if version < [7, 2, 0]:
+        if version < [5, 0, 0]:
             self.log.debug(
                 "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
             )

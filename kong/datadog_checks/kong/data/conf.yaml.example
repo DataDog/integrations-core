@@ -173,6 +173,13 @@ instances:
     #
     # histogram_buckets_as_distributions: false
 
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
@@ -229,6 +236,14 @@ instances:
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
     #
     # telemetry: false
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
