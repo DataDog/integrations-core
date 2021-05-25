@@ -137,3 +137,12 @@ MessageQueueInfo = {
         {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
     ],
 }
+
+IBMMQInfo = {
+    'name': 'ibm_mq_info',
+    'query': 'SELECT QNAME, COUNT(*) FROM TABLE(MQREADALL()) GROUP BY QNAME',
+    'columns': [
+        {'name': 'message_queue_name', 'type': 'tag'},
+        {'name': 'ibm_i.ibm_mq.size', 'type': 'gauge'},
+    ],
+}
