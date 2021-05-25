@@ -16,6 +16,10 @@ def instance_driver(field, value):
     return 'iSeries Access ODBC Driver'
 
 
+def instance_fetch_ibm_mq_metrics(field, value):
+    return True
+
+
 def instance_empty_default_hostname(field, value):
     return False
 

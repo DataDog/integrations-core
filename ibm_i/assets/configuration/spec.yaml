@@ -33,4 +33,10 @@ files:
         The raw connection string to use to connect to the system, ignoring all of the above options.
       value:
         type: string
+    - name: fetch_ibm_mq_metrics
+      description: |
+        Set to false to prevent the check from trying to fetch IBM MQ metrics.
+      value:
+        type: boolean
+        example: true
     - template: instances/default
