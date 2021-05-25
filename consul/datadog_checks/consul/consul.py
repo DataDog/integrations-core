@@ -106,8 +106,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
         self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
-        if (self.threads_count > 1):
+        if self.threads_count > 1:
             self.thread_pool = ThreadPool(self.threads_count)
+        else:
+            self.thread_pool = None
 
         self._local_config = None
         self._last_config_fetch_time = None
