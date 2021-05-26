@@ -4,13 +4,13 @@
 import json
 
 try:
-    from json import JSONDecodeError
+    from json.decoder import JSONDecodeError
 except ImportError:
     from simplejson import JSONDecodeError
 
 import os
 import shlex
-from typing import Any
+from typing import Dict, List
 
 from six import iteritems
 
@@ -34,7 +34,7 @@ class GlusterfsCheck(AgentCheck):
     BRICK_SC = "brick.health"
 
     def __init__(self, name, init_config, instances):
-        # type: (*Any, **Any) -> None
+        # type: (str, Dict, List[Dict]) -> None
         super(GlusterfsCheck, self).__init__(name, init_config, instances)
         self._tags = self.instance.get('tags', [])
 

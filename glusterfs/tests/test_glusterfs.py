@@ -47,6 +47,6 @@ def test_version_metadata(aggregator, datadog_agent, instance):
 def test_parse_version(instance):
     c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
     major, minor, patch = c.parse_version('3.13.2')
-    assert major == 3
-    assert minor == 13
-    assert patch == 2
+    assert major == '3'
+    assert minor == '13'
+    assert patch == '2'
