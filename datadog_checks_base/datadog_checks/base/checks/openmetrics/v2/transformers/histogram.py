@@ -60,7 +60,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 True,
                                 hostname,
                                 tags,
-                                flush_first_value=runtime_data['has_successfully_executed']
+                                flush_first_value=runtime_data['has_successfully_executed'],
                             )
 
             else:
@@ -88,7 +88,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             True,
                             hostname,
                             tags,
-                            flush_first_value=runtime_data['has_successfully_executed']
+                            flush_first_value=runtime_data['has_successfully_executed'],
                         )
 
         else:
