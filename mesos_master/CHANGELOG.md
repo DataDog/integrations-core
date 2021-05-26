@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_master
 
-## 1.13.0 / 2021-04-19
+## 1.13.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add log support. See [#8717](https://github.com/DataDog/integrations-core/pull/8717).
 

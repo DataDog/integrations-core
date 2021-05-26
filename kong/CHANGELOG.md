@@ -1,6 +1,6 @@
 # CHANGELOG - kong
 
-## 1.13.0 / 2021-04-19
+## 1.13.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add new implementation based on the official Prometheus plugin. See [#9031](https://github.com/DataDog/integrations-core/pull/9031).
 * [Fixed] Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).

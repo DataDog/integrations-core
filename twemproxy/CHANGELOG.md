@@ -1,6 +1,6 @@
 # CHANGELOG - twemproxy
 
-## 1.9.0 / 2021-04-19
+## 1.9.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8999](https://github.com/DataDog/integrations-core/pull/8999).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.8.6 / 2021-04-20
+## 2.8.6 / 2021-04-20 / Agent 7.28.0
 
 * [Fixed] Fix warning log format. See [#9192](https://github.com/DataDog/integrations-core/pull/9192).
 * [Fixed] Provide better error message when api version cannot be determined. See [#9186](https://github.com/DataDog/integrations-core/pull/9186).

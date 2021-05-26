@@ -1,6 +1,6 @@
 # CHANGELOG - Openstack_controller
 
-## 1.11.0 / 2021-04-19
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Openstack controller log support. See [#9115](https://github.com/DataDog/integrations-core/pull/9115).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

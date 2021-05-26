@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.1.0 / 2021-04-19
+## 5.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
 * [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).

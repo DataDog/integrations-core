@@ -1,6 +1,6 @@
 # CHANGELOG - dns_check
 
-## 2.0.0 / 2021-04-19
+## 2.0.0 / 2021-04-19 / Agent 7.28.0
 
 * [Changed] Utilize time precision function from datadog_checks_base. See [#8841](https://github.com/DataDog/integrations-core/pull/8841).
 
