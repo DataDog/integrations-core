@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 3.4.0 / 2021-04-19
+## 3.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Report io thread metrics. See [#9018](https://github.com/DataDog/integrations-core/pull/9018). Thanks [jlisam](https://github.com/jlisam).
 * [Added] Support redis 6 cpu metrics. See [#9015](https://github.com/DataDog/integrations-core/pull/9015). Thanks [jlisam](https://github.com/jlisam).

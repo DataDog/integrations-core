@@ -1,6 +1,6 @@
 # CHANGELOG - Confluent Platform
 
-## 1.4.0 / 2021-03-30
+## 1.4.0 / 2021-03-30 / Agent 7.28.0
 
 * [Added] Add 'DelayQueueSize'. See [#9033](https://github.com/DataDog/integrations-core/pull/9033).
 * [Added] Add 'RequestHandlerAvgIdlePercent' as a 'OneMinuteRate'. See [#9032](https://github.com/DataDog/integrations-core/pull/9032).

@@ -1,6 +1,6 @@
 # CHANGELOG - Aerospike
 
-## 1.11.0 / 2021-04-06
+## 1.11.0 / 2021-04-06 / Agent 7.28.0
 
 * [Added] Support XDR metrics for Aerospike Enterprise 5.0+. See [#8696](https://github.com/DataDog/integrations-core/pull/8696).
 

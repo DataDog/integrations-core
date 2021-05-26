@@ -1,6 +1,6 @@
 # CHANGELOG - Vault
 
-## 2.12.0 / 2021-04-19
+## 2.12.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add Additional Vault Route Metrics. See [#8761](https://github.com/DataDog/integrations-core/pull/8761).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

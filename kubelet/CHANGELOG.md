@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 6.1.0 / 2021-04-19
+## 6.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Allow configurability of the ignore_metrics option. See [#9161](https://github.com/DataDog/integrations-core/pull/9161).
 

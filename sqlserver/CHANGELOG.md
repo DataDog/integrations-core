@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 3.0.0 / 2021-03-30
+## 3.0.0 / 2021-03-30 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
 * [Fixed] Fix autodiscovery tagging. See [#9055](https://github.com/DataDog/integrations-core/pull/9055).
