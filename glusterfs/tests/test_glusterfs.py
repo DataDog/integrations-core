@@ -30,7 +30,7 @@ def test_version_metadata(aggregator, datadog_agent, instance):
     c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
     c.check_id = 'test:123'
     c.check(instance)
-    major, minor = c.parse_version(GLUSTER_VERSION)
+    major, minor, patch = c.parse_version(GLUSTER_VERSION)
 
     version_metadata = {
         'version.raw': GLUSTER_VERSION,
@@ -46,6 +46,7 @@ def test_version_metadata(aggregator, datadog_agent, instance):
 @pytest.mark.unit
 def test_parse_version(instance):
     c = GlusterfsCheck(CHECK, E2E_INIT_CONFIG, [instance])
-    major, minor = c.parse_version('3.13.2')
+    major, minor, patch = c.parse_version('3.13.2')
     assert major == 3
     assert minor == 13
+    assert patch == 2

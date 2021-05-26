@@ -104,24 +104,29 @@ class GlusterfsCheck(AgentCheck):
     def submit_version_metadata(self, data):
         raw_version = data.get(GLUSTER_VERSION)
         if raw_version:
-            major, minor = self.parse_version(raw_version)
+            major, minor, patch = self.parse_version(raw_version)
             version_parts = {'major': str(int(major)), 'minor': str(int(minor))}
+            if patch:
+                version_parts['patch'] = patch
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
             self.log.debug('Found GlusterFS version: %s', raw_version)
         else:
             self.log.warning('Could not retrieve GlusterFS version info: %s', raw_version)
 
     def parse_version(self, version):
-        # type (str) -> str, str
+        # type (str) -> str, str, str
         """
         GlusterFS versions are in format <major>.<minor>
         """
-        major, minor = None, None
+        major, minor, patch = None, None, None
         try:
-            major, minor = version.split('.')[0:2]
+            split_version = version.split('.')
+            major, minor = split_version[0:2]
+            if len(split_version) > 2:
+                patch = split_version[2]
         except ValueError as e:
             self.log.debug("Unable to parse GlusterFS version %s: %s", str(version), str(e))
-        return major, minor
+        return major, minor, patch
 
     def parse_volume_summary(self, output):
         for volume in output:
