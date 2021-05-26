@@ -103,15 +103,19 @@ class GlusterfsCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
         raw_version = data.get(GLUSTER_VERSION)
-        if raw_version:
+        if not raw_version:
+            self.log.warning('Could not retrieve GlusterFS version info: %s', raw_version)
+            return
+
+        self.log.debug('Found GlusterFS version: %s', raw_version)
+        try:
             major, minor, patch = self.parse_version(raw_version)
             version_parts = {'major': str(int(major)), 'minor': str(int(minor))}
             if patch:
-                version_parts['patch'] = patch
+                version_parts['patch'] = str(int(patch))
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
-            self.log.debug('Found GlusterFS version: %s', raw_version)
-        else:
-            self.log.warning('Could not retrieve GlusterFS version info: %s', raw_version)
+        except Exception as e:
+            self.log.debug("Could not handle GlusterFS version: %s", str(e))
 
     def parse_version(self, version):
         # type (str) -> str, str, str
