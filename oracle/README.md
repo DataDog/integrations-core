@@ -401,6 +401,10 @@ The structure of the directory should look similar:
         ```
     - Then restart the Agent.
 
+- If you encounter this error `Unsupported major.minor version 52.0` it means that you're running a Java version that
+is too old. You need to either update your system Java or additionally install a newer version and point your `JAVA_HOME`
+variable to the new install as explained above.
+
 - Verify your environment variables are set correctly by running the following command from the Agent.
 Ensure the displayed output matches the correct value.
 
