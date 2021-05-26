@@ -53,7 +53,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 continue
 
                             submit_histogram_bucket_method(
-                                metric_name, 
+                                metric_name,
                                 sample.value,
                                 lower_bound,
                                 upper_bound,
@@ -82,7 +82,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
 
                         submit_histogram_bucket_method(
                             metric_name,
-                            sample.value, 
+                            sample.value,
                             lower_bound,
                             upper_bound,
                             True,

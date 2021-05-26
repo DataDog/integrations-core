@@ -477,8 +477,18 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool) -> None
+    def submit_histogram_bucket(
+            self,
+            name,
+            value,
+            lower_bound,
+            upper_bound,
+            monotonic,
+            hostname,
+            tags,
+            raw=False,
+            flush_first_value=False):
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
