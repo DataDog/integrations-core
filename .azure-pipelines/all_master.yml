@@ -8,6 +8,7 @@ pr: none
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
+  DD_TRACE_AGENT_PORT: 8127
 
 resources:
   containers:
@@ -19,7 +20,6 @@ resources:
         DD_API_KEY: $(DD_CI_API_KEY)
         DD_HOSTNAME: "none"
         DD_INSIDE_CI: "true"
-        DD_TRACE_AGENT_PORT: 8127
 
 jobs:
 - template: './templates/test-all-checks.yml'
