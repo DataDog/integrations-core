@@ -16,7 +16,7 @@ from datadog_checks.tls.tls_local import TLSLocalCheck
 
 def test_right_class(instance_local_no_server_hostname):
     c = TLSCheck('tls', {}, [instance_local_no_server_hostname])
-    assert isinstance(c, TLSLocalCheck)
+    assert isinstance(c.checker, TLSLocalCheck)
 
 
 def test_no_server_hostname(instance_local_no_server_hostname):
