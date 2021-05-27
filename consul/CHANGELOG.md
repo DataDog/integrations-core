@@ -1,6 +1,10 @@
 # CHANGELOG - consul
 
-## 1.19.0 / 2021-04-19
+## 1.20.0 / 2021-05-25
+
+* [Added] Adding support for multiprocessing consul checks. See [#9402](https://github.com/DataDog/integrations-core/pull/9402). Thanks [lchayoun](https://github.com/lchayoun).
+
+## 1.19.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8899](https://github.com/DataDog/integrations-core/pull/8899).
 * [Fixed] Rename service_whitelist to services_include. See [#8802](https://github.com/DataDog/integrations-core/pull/8802).

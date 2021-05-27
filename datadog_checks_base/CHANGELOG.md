@@ -5,7 +5,7 @@
 * [Added] Add merging of duplicate rows in statement_metrics. See [#9227](https://github.com/DataDog/integrations-core/pull/9227).
 * [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).
 
-## 18.2.0 / 2021-04-19
+## 18.2.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Allow the loading of arbitrary configuration models. See [#9180](https://github.com/DataDog/integrations-core/pull/9180).
 

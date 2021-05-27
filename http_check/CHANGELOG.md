@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 5.3.1 / 2021-04-20
+## 5.3.1 / 2021-04-20 / Agent 7.28.0
 
 * [Fixed] Restore correct default value of tls_verify. See [#9197](https://github.com/DataDog/integrations-core/pull/9197).
 

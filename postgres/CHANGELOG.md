@@ -4,7 +4,7 @@
 
 * [Fixed] Revert way of checking if it's aurora. See [#9224](https://github.com/DataDog/integrations-core/pull/9224).
 
-## 6.0.1 / 2021-04-26
+## 6.0.1 / 2021-04-26 / Agent 7.28.0
 
 * [Fixed] Fix config validation for `relations`. See [#9242](https://github.com/DataDog/integrations-core/pull/9242).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 3.0.1 / 2021-04-27
+## 3.0.1 / 2021-04-27 / Agent 7.28.0
 
 * [Fixed] Account for name change in replica metrics. See [#9230](https://github.com/DataDog/integrations-core/pull/9230).
 
