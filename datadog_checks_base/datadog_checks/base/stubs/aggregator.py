@@ -37,6 +37,22 @@ def backend_normalize_metric_name(metric_name):
     return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
 
 
+def check_tag_names(metric, tags):
+    forbidden_tags = [
+        'cluster_name',
+        'clustername',
+        'cluster',
+        'host_name',
+        'hostname',
+        'host',
+    ]
+
+    for tag in tags:
+        tag_name = tag.split(':')[0]
+        if  tag_name in forbidden_tags:
+            raise Exception("Metric {} was submitted with a forbidden tag: {}".format(metric, tag_name))
+
+
 class AggregatorStub(object):
     """
     This implements the methods defined by the Agent's
@@ -91,6 +107,7 @@ class AggregatorStub(object):
         return name in cls.IGNORED_METRICS
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
+        check_tag_names(name, tags)
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
 
