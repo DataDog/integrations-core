@@ -199,13 +199,13 @@ class SapHanaCheck(AgentCheck):
             host = self.get_hana_hostname(host)
             running = counts['running']
             idle = counts['idle']
-            queueing = counts['queueing']
+            queuing = counts['queuing']
             empty = counts['empty']
 
             self.gauge('connection.running', running, tags=tags, hostname=host)
             self.gauge('connection.idle', idle, tags=tags, hostname=host)
             self.gauge('connection.open', running + idle, tags=tags, hostname=host)
-            self.gauge('connection.queueing', queueing, tags=tags, hostname=host)
+            self.gauge('connection.queuing', queuing, tags=tags, hostname=host)
             self.gauge('connection.empty', empty, tags=tags, hostname=host)
 
     def query_disk_usage(self):
