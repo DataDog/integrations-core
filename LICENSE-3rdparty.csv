@@ -7,7 +7,7 @@ PySocks,PyPI,BSD-3-Clause,Anorov
 PyYAML,PyPI,MIT,Kirill Simonov
 Pyro4,PyPI,MIT,Irmen de Jong
 adodbapi,PyPI,LGPL-2.1-only,Vernon Cole
-aerospike,PyPI,Apache-2.0,Aerospike, Inc.
+aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,David Muller
 beautifulsoup4,PyPI,MIT,Leonard Richardson
 binary,PyPI,Apache-2.0,Ofek Lev
@@ -19,10 +19,10 @@ cachetools,PyPI,MIT,Thomas Kemmer
 clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
 clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
-cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors
-cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors
+cryptography,PyPI,Apache-2.0,The cryptography developers
+cryptography,PyPI,BSD-3-Clause,The cryptography developers
 cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
-ddtrace,PyPI,BSD-3-Clause,Datadog, Inc.
+ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
 flup,PyPI,BSD-3-Clause,Allan Saddi
@@ -64,12 +64,12 @@ python-binary-memcached,PyPI,MIT,Jayson Reis
 python-dateutil,PyPI,Apache-2.0,Gustavo Niemeyer
 python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
 python3-gearman,PyPI,Apache-2.0,
-pyvmomi,PyPI,Apache-2.0,VMware, Inc.
+pyvmomi,PyPI,Apache-2.0,"VMware, Inc."
 pywin32,PyPI,PSF,Mark Hammond (et al)
 redis,PyPI,MIT,Andy McCurdy
 requests,PyPI,Apache-2.0,Kenneth Reitz
-requests-kerberos,PyPI,ISC,Ian Cordasco, Cory Benfield, Michael Komitee
-requests-toolbelt,PyPI,Apache-2.0,Ian Cordasco, Cory Benfield
+requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
+requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
 requests-unixsocket,PyPI,Apache-2.0,Marc Abramowitz
 requests_ntlm,PyPI,ISC,Ben Toews
 rethinkdb,PyPI,Apache-2.0,RethinkDB.
@@ -82,11 +82,11 @@ service-identity,PyPI,MIT,Hynek Schlawack
 simplejson,PyPI,AFL-3.0,Bob Ippolito
 simplejson,PyPI,MIT,Bob Ippolito
 six,PyPI,MIT,Benjamin Peterson
-snowflake-connector-python,PyPI,Apache-2.0,Snowflake, Inc
+snowflake-connector-python,PyPI,Apache-2.0,"Snowflake, Inc"
 supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough
 tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
-typing,PyPI,PSF,Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi
+typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,Koen Crolla
-vertica-python,PyPI,Apache-2.0,Justin Berka, Alex Kim, Siting Ren
+vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell

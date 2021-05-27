@@ -103,8 +103,11 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 }
 
 
-def format_attribution_line(package_name, license_id, copyright):
-    return f'{package_name},PyPI,{license_id},{copyright}\n'
+def format_attribution_line(package_name, license_id, package_copyright):
+    if ',' in package_copyright:
+        package_copyright = f'"{package_copyright}"'
+
+    return f'{package_name},PyPI,{license_id},{package_copyright}\n'
 
 
 def extract_license_classifier(classifier):
