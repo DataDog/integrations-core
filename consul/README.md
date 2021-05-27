@@ -83,7 +83,7 @@ Optionally, you can enable the `use_prometheus_endpoint` configuration option to
 
 ##### DogStatsD
 
-Instead of using the Prometheus endpoint, you can configure Consul to also send data to the Agent through [DogStatsD][3] the same set of additional metrics from Consul.
+Instead of using the Prometheus endpoint, you can configure Consul to send the same set of additional metrics to the Agent through [DogStatsD][3].
 
 1. Configure Consul to send DogStatsD metrics by adding the `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
 
