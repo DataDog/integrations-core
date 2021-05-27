@@ -114,11 +114,13 @@ class AggregatorStub(object):
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, check, check_id, event):
@@ -130,6 +132,7 @@ class AggregatorStub(object):
     def submit_histogram_bucket(
         self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
         )
