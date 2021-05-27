@@ -37,7 +37,7 @@ class TLSRemoteCheck(object):
             * 60
         )
 
-    def check(self, _):
+    def check(self):
         if not self.agent_check._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
 

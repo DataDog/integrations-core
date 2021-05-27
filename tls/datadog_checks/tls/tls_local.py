@@ -48,7 +48,7 @@ class TLSLocalCheck(object):
             return None
         return cert
 
-    def check(self, _):
+    def check(self):
         if self.agent_check._tls_validate_hostname and not self.agent_check._server_hostname:
             raise ConfigurationError(
                 'You must specify `server_hostname` in your configuration file, or disable `tls_validate_hostname`.'
