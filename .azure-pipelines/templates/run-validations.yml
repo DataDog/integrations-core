@@ -101,6 +101,12 @@ steps:
     ddev validate jmx-metrics
   displayName: 'Validate JMX integrations metrics.yaml'
 
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: |
+      echo "ddev validate licenses"
+      ddev validate licenses
+    displayName: 'Validate third-party license list'
+
 - ${{ if eq(parameters.repo, 'marketplace') }}:
   - script: |
       echo "ddev validate eula"
