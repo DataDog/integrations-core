@@ -99,10 +99,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
                     connection_string += f'System={self.config.system};'
 
                 if self.config.username:
-                    connection_string += f'Uid={self.config.username};'
+                    connection_string += f'UID={self.config.username};'
 
                 if self.config.password:
-                    connection_string += f'Pwd={self.config.password};'
+                    connection_string += f'PWD={self.config.password};'
                     self.register_secret(self.config.password)
 
             self._connection = pyodbc.connect(connection_string)
