@@ -40,6 +40,7 @@ def test_not_found(aggregator, instance_local_not_found):
 
 def test_ok(aggregator, instance_local_ok):
     c = TLSCheck('tls', {}, [instance_local_ok])
+
     c.check(None)
 
     aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, count=0)
