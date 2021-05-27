@@ -1,92 +1,92 @@
 Component,Origin,License,Copyright
-JPype1,PyPI,Apache-2.0,
-JayDeBeApi,PyPI,LGPL-3.0-only,
-PyJWT,PyPI,MIT,
-PyMySQL,PyPI,MIT,
-PySocks,PyPI,BSD-3-Clause,
-PyYAML,PyPI,MIT,
-Pyro4,PyPI,MIT,
-adodbapi,PyPI,LGPL-2.1-only,
-aerospike,PyPI,Apache-2.0,
-aws-requests-auth,PyPI,BSD-3-Clause,
-beautifulsoup4,PyPI,MIT,
-binary,PyPI,Apache-2.0,
-binary,PyPI,MIT,
-boto,PyPI,MIT,
-boto3,PyPI,Apache-2.0,
-botocore,PyPI,Apache-2.0,
-cachetools,PyPI,MIT,
-clickhouse-cityhash,PyPI,MIT,
-clickhouse-driver,PyPI,MIT,
-contextlib2,PyPI,PSF,
-cryptography,PyPI,Apache-2.0,
-cryptography,PyPI,BSD-3-Clause,
-cx-Oracle,PyPI,BSD-3-Clause,
-ddtrace,PyPI,BSD-3-Clause,
-dnspython,PyPI,ISC,
-enum34,PyPI,BSD-3-Clause,
-flup,PyPI,BSD-3-Clause,
-flup-py3,PyPI,BSD-3-Clause,
-futures,PyPI,PSF,
-gearman,PyPI,Apache-2.0,
-immutables,PyPI,Apache-2.0,
-in-toto,PyPI,Apache-2.0,
-ipaddress,PyPI,PSF,
-kafka-python,PyPI,Apache-2.0,
-kazoo,PyPI,Apache-2.0,
-kubernetes,PyPI,Apache-2.0,
-ldap3,PyPI,LGPL-3.0-only,
-lxml,PyPI,BSD-3-Clause,
-lz4,PyPI,BSD-3-Clause,
-mmh3,PyPI,CC0-1.0,
-openstacksdk,PyPI,Apache-2.0,
-orjson,PyPI,Apache-2.0,
-orjson,PyPI,MIT,
-paramiko,PyPI,LGPL-2.1-only,
-ply,PyPI,BSD-3-Clause,
-prometheus-client,PyPI,Apache-2.0,
-protobuf,PyPI,BSD-3-Clause,
-psutil,PyPI,BSD-3-Clause,
-psycopg2-binary,PyPI,BSD-3-Clause,
-psycopg2-binary,PyPI,LGPL-3.0-only,
-pyasn1,PyPI,BSD-3-Clause,
-pycryptodomex,PyPI,BSD-2-Clause,
-pycryptodomex,PyPI,Unlicense,
-pydantic,PyPI,MIT,
-pyhdb,PyPI,Apache-2.0,
-pymongo,PyPI,Apache-2.0,
-pymqi,PyPI,PSF,
-pyodbc,PyPI,MIT,
-pysmi,PyPI,BSD-3-Clause,
-pysnmp,PyPI,BSD-3-Clause,
-pysnmp-mibs,PyPI,BSD-3-Clause,
-python-binary-memcached,PyPI,MIT,
-python-dateutil,PyPI,Apache-2.0,
-python-dateutil,PyPI,BSD-3-Clause,
+JPype1,PyPI,Apache-2.0,Steve Menard
+JayDeBeApi,PyPI,LGPL-3.0-only,Bastian Bowe
+PyJWT,PyPI,MIT,Jose Padilla
+PyMySQL,PyPI,MIT,yutaka.matsubara
+PySocks,PyPI,BSD-3-Clause,Anorov
+PyYAML,PyPI,MIT,Kirill Simonov
+Pyro4,PyPI,MIT,Irmen de Jong
+adodbapi,PyPI,LGPL-2.1-only,Vernon Cole
+aerospike,PyPI,Apache-2.0,Aerospike, Inc.
+aws-requests-auth,PyPI,BSD-3-Clause,David Muller
+beautifulsoup4,PyPI,MIT,Leonard Richardson
+binary,PyPI,Apache-2.0,Ofek Lev
+binary,PyPI,MIT,Ofek Lev
+boto,PyPI,MIT,Mitch Garnaat
+boto3,PyPI,Apache-2.0,Amazon Web Services
+botocore,PyPI,Apache-2.0,Amazon Web Services
+cachetools,PyPI,MIT,Thomas Kemmer
+clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
+clickhouse-driver,PyPI,MIT,Konstantin Lebedev
+contextlib2,PyPI,PSF,Nick Coghlan
+cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors
+cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors
+cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
+ddtrace,PyPI,BSD-3-Clause,Datadog, Inc.
+dnspython,PyPI,ISC,Bob Halley
+enum34,PyPI,BSD-3-Clause,Ethan Furman
+flup,PyPI,BSD-3-Clause,Allan Saddi
+flup-py3,PyPI,BSD-3-Clause,Allan Saddi
+futures,PyPI,PSF,Brian Quinlan
+gearman,PyPI,Apache-2.0,Matthew Tai
+immutables,PyPI,Apache-2.0,MagicStack Inc
+in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
+ipaddress,PyPI,PSF,Philipp Hagemeister
+kafka-python,PyPI,Apache-2.0,Dana Powers
+kazoo,PyPI,Apache-2.0,Kazoo team
+kubernetes,PyPI,Apache-2.0,Kubernetes
+ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
+lxml,PyPI,BSD-3-Clause,lxml dev team
+lz4,PyPI,BSD-3-Clause,Jonathan Underwood
+mmh3,PyPI,CC0-1.0,Hajime Senuma
+openstacksdk,PyPI,Apache-2.0,OpenStack
+orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,ijl <ijl@mailbox.org>
+paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
+ply,PyPI,BSD-3-Clause,David Beazley
+prometheus-client,PyPI,Apache-2.0,Brian Brazil
+protobuf,PyPI,BSD-3-Clause,protobuf@googlegroups.com
+psutil,PyPI,BSD-3-Clause,Giampaolo Rodola
+psycopg2-binary,PyPI,BSD-3-Clause,Federico Di Gregorio
+psycopg2-binary,PyPI,LGPL-3.0-only,Federico Di Gregorio
+pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
+pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
+pycryptodomex,PyPI,Unlicense,Helder Eijs
+pydantic,PyPI,MIT,Samuel Colvin
+pyhdb,PyPI,Apache-2.0,Christoph Heer
+pymongo,PyPI,Apache-2.0,Bernie Hackett
+pymqi,PyPI,PSF,Dariusz Suchojad
+pyodbc,PyPI,MIT,Michael Kleehammer
+pysmi,PyPI,BSD-3-Clause,Ilya Etingof
+pysnmp,PyPI,BSD-3-Clause,Ilya Etingof
+pysnmp-mibs,PyPI,BSD-3-Clause,Ilya Etingof <ilya@glas.net>
+python-binary-memcached,PyPI,MIT,Jayson Reis
+python-dateutil,PyPI,Apache-2.0,Gustavo Niemeyer
+python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
 python3-gearman,PyPI,Apache-2.0,
-pyvmomi,PyPI,Apache-2.0,
-pywin32,PyPI,PSF,
-redis,PyPI,MIT,
-requests,PyPI,Apache-2.0,
-requests-kerberos,PyPI,ISC,
-requests-toolbelt,PyPI,Apache-2.0,
-requests-unixsocket,PyPI,Apache-2.0,
-requests_ntlm,PyPI,ISC,
-rethinkdb,PyPI,Apache-2.0,
-scandir,PyPI,BSD-3-Clause,
-securesystemslib,PyPI,MIT,
-selectors34,PyPI,PSF,
-semver,PyPI,BSD-3-Clause,
-serpent,PyPI,MIT,
-service-identity,PyPI,MIT,
-simplejson,PyPI,AFL-3.0,
-simplejson,PyPI,MIT,
-six,PyPI,MIT,
-snowflake-connector-python,PyPI,Apache-2.0,
-supervisor,PyPI,BSD-3-Clause-Modification,
-tuf,PyPI,Apache-2.0,
-tuf,PyPI,MIT,
-typing,PyPI,PSF,
-uptime,PyPI,BSD-2-Clause,
-vertica-python,PyPI,Apache-2.0,
-win-inet-pton,PyPI,Unlicense,
+pyvmomi,PyPI,Apache-2.0,VMware, Inc.
+pywin32,PyPI,PSF,Mark Hammond (et al)
+redis,PyPI,MIT,Andy McCurdy
+requests,PyPI,Apache-2.0,Kenneth Reitz
+requests-kerberos,PyPI,ISC,Ian Cordasco, Cory Benfield, Michael Komitee
+requests-toolbelt,PyPI,Apache-2.0,Ian Cordasco, Cory Benfield
+requests-unixsocket,PyPI,Apache-2.0,Marc Abramowitz
+requests_ntlm,PyPI,ISC,Ben Toews
+rethinkdb,PyPI,Apache-2.0,RethinkDB.
+scandir,PyPI,BSD-3-Clause,Ben Hoyt
+securesystemslib,PyPI,MIT,https://www.updateframework.com
+selectors34,PyPI,PSF,Berker Peksag
+semver,PyPI,BSD-3-Clause,Kostiantyn Rybnikov
+serpent,PyPI,MIT,Irmen de Jong
+service-identity,PyPI,MIT,Hynek Schlawack
+simplejson,PyPI,AFL-3.0,Bob Ippolito
+simplejson,PyPI,MIT,Bob Ippolito
+six,PyPI,MIT,Benjamin Peterson
+snowflake-connector-python,PyPI,Apache-2.0,Snowflake, Inc
+supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough
+tuf,PyPI,Apache-2.0,https://www.updateframework.com
+tuf,PyPI,MIT,https://www.updateframework.com
+typing,PyPI,PSF,Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi
+uptime,PyPI,BSD-2-Clause,Koen Crolla
+vertica-python,PyPI,Apache-2.0,Justin Berka, Alex Kim, Siting Ren
+win-inet-pton,PyPI,Unlicense,Ryan Vennell

@@ -103,8 +103,8 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 }
 
 
-def format_attribution_line(package_name, license_id):
-    return f'{package_name},PyPI,{license_id},\n'
+def format_attribution_line(package_name, license_id, copyright):
+    return f'{package_name},PyPI,{license_id},{copyright}\n'
 
 
 def extract_license_classifier(classifier):
@@ -128,17 +128,21 @@ async def get_data(url):
         else:
             return (
                 info['name'],
+                info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
                 info['license'],
                 {extract_license_classifier(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
 
 
 async def scrape_license_data(urls):
-    package_data = defaultdict(lambda: {'licenses': [], 'classifiers': set()})
+    package_data = defaultdict(lambda: {'copyright': '', 'licenses': [], 'classifiers': set()})
 
     async with Pool() as pool:
-        async for package_name, package_license, license_classifiers in pool.map(get_data, urls):
+        async for package_name, package_copyright, package_license, license_classifiers in pool.map(get_data, urls):
             data = package_data[package_name]
+            if package_copyright:
+                data['copyright'] = package_copyright
+
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
@@ -180,7 +184,7 @@ def licenses(ctx, sync):
     for package_name, data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
-                lines.append(format_attribution_line(package_name, license_id))
+                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
 
             continue
 
@@ -218,7 +222,7 @@ def licenses(ctx, sync):
 
         if license_ids:
             for license_id in sorted(license_ids):
-                lines.append(format_attribution_line(package_name, license_id))
+                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
         else:
             package_license_errors[package_name].append('no license information')
 
