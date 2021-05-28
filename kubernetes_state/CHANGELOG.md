@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+## 5.7.0 / 2021-05-28
+
+* [Added] KSM: add `node.by_condition` to have the conditions of individual nodes. See [#9311](https://github.com/DataDog/integrations-core/pull/9311).
+* [Added] update kubernetes_state auto_conf.yaml with valid example configuration. See [#7414](https://github.com/DataDog/integrations-core/pull/7414). Thanks [jfmyers9](https://github.com/jfmyers9).
+
 ## 5.6.4 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
