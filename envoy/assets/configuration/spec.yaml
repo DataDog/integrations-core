@@ -79,7 +79,7 @@ files:
         example: true
     - name: disable_legacy_cluster_tag
       description: |
-        Enable to stop submitting the tag `cluster_name` and `virtual_cluster_name`,
+        Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
         which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
       value:
         type: boolean
