@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.19.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9009](https://github.com/DataDog/integrations-core/pull/9009).
+
 ## 1.18.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Rename cluster_name tag to yarn_cluster. See [#8579](https://github.com/DataDog/integrations-core/pull/8579).
