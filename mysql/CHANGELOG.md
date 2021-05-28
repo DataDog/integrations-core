@@ -7,7 +7,7 @@
 * [Changed] Send database monitoring "full query text" events. See [#9397](https://github.com/DataDog/integrations-core/pull/9397).
 * [Changed] Remove `service` event facet. See [#9275](https://github.com/DataDog/integrations-core/pull/9275).
 * [Changed] Send database monitoring query metrics to new intake. See [#9223](https://github.com/DataDog/integrations-core/pull/9223).
-* [Removed] Remove unused query metric limit configuration refs in mysql integration. See [#9376](https://github.com/DataDog/integrations-core/pull/9376).
+* [Removed] Remove unused query metric limit configuration. See [#9376](https://github.com/DataDog/integrations-core/pull/9376).
 
 ## 3.0.1 / 2021-04-27 / Agent 7.28.0
 

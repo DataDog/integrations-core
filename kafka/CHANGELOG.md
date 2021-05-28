@@ -2,7 +2,7 @@
 
 ## 2.7.0 / 2021-05-28
 
-* [Added] Kafka - Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).
+* [Added] Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).
 * [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
 * [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
 

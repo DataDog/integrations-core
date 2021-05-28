@@ -2,7 +2,7 @@
 
 ## 7.0.0 / 2021-05-28
 
-* [Changed] Increase Kubelet default scraping time from 15s to 20s. See [#9193](https://github.com/DataDog/integrations-core/pull/9193).
+* [Changed] Increase default scraping time from 15s to 20s. See [#9193](https://github.com/DataDog/integrations-core/pull/9193).
 
 ## 6.1.0 / 2021-04-19 / Agent 7.28.0
 

@@ -2,17 +2,17 @@
 
 ## 7.0.0 / 2021-05-28
 
-* [Added] filter lock relation metrics by relkind. See [#9323](https://github.com/DataDog/integrations-core/pull/9323).
+* [Added] Filter lock relation metrics by relkind. See [#9323](https://github.com/DataDog/integrations-core/pull/9323).
 * [Fixed] Allow strings in relations. See [#9432](https://github.com/DataDog/integrations-core/pull/9432).
 * [Fixed] Postgres 13 support for statement metrics. See [#9365](https://github.com/DataDog/integrations-core/pull/9365).
 * [Fixed] Fix erroneous postgres statement metrics on duplicate queries. See [#9231](https://github.com/DataDog/integrations-core/pull/9231).
 * [Changed] Send database monitoring "full query text" events. See [#9405](https://github.com/DataDog/integrations-core/pull/9405).
 * [Changed] Exclude `EXPLAIN` queries from `pg_stat_statements`. See [#9358](https://github.com/DataDog/integrations-core/pull/9358).
-* [Changed] extract relations logic to RelationsManager. See [#9322](https://github.com/DataDog/integrations-core/pull/9322).
+* [Changed] Extract relations logic to RelationsManager. See [#9322](https://github.com/DataDog/integrations-core/pull/9322).
 * [Changed] Collect statement metrics & samples from all databases on host. See [#9252](https://github.com/DataDog/integrations-core/pull/9252).
 * [Changed] Remove `service` event facet. See [#9275](https://github.com/DataDog/integrations-core/pull/9275).
 * [Changed] Send database monitoring query metrics to new intake. See [#9222](https://github.com/DataDog/integrations-core/pull/9222).
-* [Removed] Remove unused query metric limit configuration refs in postgres integration. See [#9377](https://github.com/DataDog/integrations-core/pull/9377).
+* [Removed] Remove unused query metric limit configuration. See [#9377](https://github.com/DataDog/integrations-core/pull/9377).
 
 ## 6.0.2 / 2021-04-27
 
