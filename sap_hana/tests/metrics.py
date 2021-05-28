@@ -6,6 +6,8 @@ STANDARD = [
     'sap_hana.connection.idle',
     'sap_hana.connection.open',
     'sap_hana.connection.running',
+    'sap_hana.connection.queuing',
+    'sap_hana.connection.empty',
     'sap_hana.cpu.service.utilized',
     'sap_hana.disk.free',
     'sap_hana.disk.size',
