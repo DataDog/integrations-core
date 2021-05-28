@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import traceback
 from collections import defaultdict
 from contextlib import closing
 from itertools import chain
@@ -97,8 +96,7 @@ class SapHanaCheck(AgentCheck):
                     self.log.error('Error querying %s: %s', e.source(), str(e))
                     continue
                 except Exception as e:
-                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
-                    self.log.error(traceback.format_exc())
+                    self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
         finally:
             if self._connection_lost:
