@@ -1,5 +1,10 @@
 # CHANGELOG - gitlab_runner
 
+## 2.12.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Add runtime configuration validation. See [#8919](https://github.com/DataDog/integrations-core/pull/8919).
+
 ## 2.11.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
