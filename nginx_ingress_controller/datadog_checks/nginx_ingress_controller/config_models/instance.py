@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -73,6 +73,7 @@ class InstanceConfig(BaseModel):
     health_service_check: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
+    ignore_tags: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -84,9 +85,9 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
-    metrics: Sequence[str]
+    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
-    namespace: str
+    namespace: Optional[str]
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
