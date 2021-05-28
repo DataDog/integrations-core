@@ -18,12 +18,6 @@ init_config:
   #
   # oid_batch_size: 10
 
-  ## @param collect_device_metadata - boolean - optional - default: false
-  ## Enable device metadata collection
-  ## Only available using corecheck SNMP integration with `loader: core` config.
-  #
-  # collect_device_metadata: true
-
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
@@ -151,12 +145,6 @@ instances:
     ## Only available for corecheck implementation (`loader: core`).
     #
     # oid_batch_size: 10
-
-    ## @param collect_device_metadata - boolean - optional - default: false
-    ## Enable device metadata collection
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
 
     ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
