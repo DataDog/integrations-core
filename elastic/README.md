@@ -153,7 +153,7 @@ Set [Autodiscovery Integrations Templates][22] as Docker labels on your applicat
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["elastic"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%:9200"}]'
+LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 ```
 
 ##### Log collection
@@ -206,7 +206,7 @@ metadata:
     ad.datadoghq.com/elasticsearch.instances: |
       [
         {
-          "url": "https://%%host%%:9200"
+          "url": "http://%%host%%:9200"
         }
       ]
 spec:
@@ -268,7 +268,7 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"elastic\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"url\": \"https://%%host%%:9200\"}]"
+      "com.datadoghq.ad.instances": "[{\"url\": \"http://%%host%%:9200\"}]"
     }
   }]
 }
