@@ -60,12 +60,14 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 True,
                                 hostname,
                                 tags,
-                                flush_first_value=runtime_data['has_successfully_executed'],
+                                flush_first_value=has_successfully_executed,
                             )
 
             else:
 
                 def histogram(metric, sample_data, runtime_data):
+                    has_successfully_executed = runtime_data['has_successfully_executed']
+
                     for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
                         if not sample.name.endswith('_bucket'):
                             continue
@@ -88,7 +90,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             True,
                             hostname,
                             tags,
-                            flush_first_value=runtime_data['has_successfully_executed'],
+                            flush_first_value=has_successfully_executed,
                         )
 
         else:
