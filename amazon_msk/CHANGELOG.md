@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## 1.6.0 / 2021-04-19
+## 1.6.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Allow the use of the new OpenMetrics implementation. See [#9082](https://github.com/DataDog/integrations-core/pull/9082).
 * [Added] Add runtime configuration validation. See [#8883](https://github.com/DataDog/integrations-core/pull/8883).

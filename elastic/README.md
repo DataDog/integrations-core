@@ -201,7 +201,7 @@ kind: Pod
 metadata:
   name: elasticsearch
   annotations:
-    ad.datadoghq.com/elasticsearch.check_names: '["elasticsearch"]'
+    ad.datadoghq.com/elasticsearch.check_names: '["elastic"]'
     ad.datadoghq.com/elasticsearch.init_configs: '[{}]'
     ad.datadoghq.com/elasticsearch.instances: |
       [
