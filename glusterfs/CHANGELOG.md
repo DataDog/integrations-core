@@ -1,5 +1,10 @@
 # CHANGELOG - GlusterFS
 
+## 1.2.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8920](https://github.com/DataDog/integrations-core/pull/8920).
+* [Fixed] Fix version parsing. See [#9423](https://github.com/DataDog/integrations-core/pull/9423).
+
 ## 1.1.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
