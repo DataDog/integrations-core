@@ -121,7 +121,7 @@ instances:
     # collect_server_info: true
 
     ## @param disable_legacy_cluster_tag - boolean - optional - default: false
-    ## Enable to stop submitting the tag `cluster_name` and `virtual_cluster_name`,
+    ## Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
     ## which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
     #
     # disable_legacy_cluster_tag: true
