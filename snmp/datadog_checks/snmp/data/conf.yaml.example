@@ -113,12 +113,6 @@ init_config:
   #   netapp:
   #     definition_file: netapp.yaml
 
-  ## @param collect_device_metadata - boolean - optional - default: false
-  ## Enable device metadata collection
-  ## Only available using corecheck SNMP integration with `loader: core` config.
-  #
-  # collect_device_metadata: true
-
 instances:
   -
     ## @param ip_address - string - optional
@@ -316,9 +310,3 @@ instances:
     ## Only available for corecheck implementation (`loader: core`).
     #
     # oid_batch_size: 10
-
-    ## @param collect_device_metadata - boolean - optional - default: false
-    ## Enable device metadata collection
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
