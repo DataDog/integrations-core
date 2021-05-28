@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 3.5.0 / 2021-05-28
+
+* [Added] added recent_max_input_buffer and recent_max_output_buffer. See [#9321](https://github.com/DataDog/integrations-core/pull/9321). Thanks [yonatan-ess](https://github.com/yonatan-ess).
+
 ## 3.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Report io thread metrics. See [#9018](https://github.com/DataDog/integrations-core/pull/9018). Thanks [jlisam](https://github.com/jlisam).
