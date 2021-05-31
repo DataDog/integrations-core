@@ -124,8 +124,8 @@ class MaprCheck(AgentCheck):
                     raise CheckException(
                         "dd-agent user could not consume topic '%s'. Please ensure that:\n"
                         "\t* This is a non secure cluster, otherwise a user ticket is required.\n"
-                        "\t* The dd-agent user has the 'consume' permission on topic %s."
-                        % (self.topic_path, self.topic_path)
+                        "\t* The dd-agent user has the 'consume' permission on topic %s or "
+                        "impersonation is correctly configured." % (self.topic_path, self.topic_path)
                     )
             elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
                 # Partition EOF is expected anytime we reach the end of one partition in the topic.
