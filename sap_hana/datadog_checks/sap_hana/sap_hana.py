@@ -96,7 +96,7 @@ class SapHanaCheck(AgentCheck):
                     self.log.error('Error querying %s: %s', e.source(), str(e))
                     continue
                 except Exception as e:
-                    self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
+                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
         finally:
             if self._connection_lost:
@@ -183,9 +183,8 @@ class SapHanaCheck(AgentCheck):
             self.gauge('license.utilized', utilized, tags=tags, hostname=host)
 
     def query_connection_overview(self):
-        # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.05/en-US/20abcf1f75191014a254a82b3d0f66bf.html
-        # Documented statuses: RUNNING, IDLE, QUEUING, EMPTY
-        db_counts = defaultdict(lambda: defaultdict(int))
+        # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20abcf1f75191014a254a82b3d0f66bf.html
+        db_counts = defaultdict(lambda: {'running': 0, 'idle': 0})
         for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus):
             db_counts[(conn['db_name'], conn['host'], conn['port'])][conn['status'].lower()] += conn['total']
 
@@ -197,14 +196,10 @@ class SapHanaCheck(AgentCheck):
             host = self.get_hana_hostname(host)
             running = counts['running']
             idle = counts['idle']
-            queuing = counts['queuing']
-            empty = counts['empty']
 
             self.gauge('connection.running', running, tags=tags, hostname=host)
             self.gauge('connection.idle', idle, tags=tags, hostname=host)
             self.gauge('connection.open', running + idle, tags=tags, hostname=host)
-            self.gauge('connection.queuing', queuing, tags=tags, hostname=host)
-            self.gauge('connection.empty', empty, tags=tags, hostname=host)
 
     def query_disk_usage(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/a2aac2ee72b341699fa8eb3988d8cecb.html
