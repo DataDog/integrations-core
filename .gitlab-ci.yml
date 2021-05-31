@@ -217,7 +217,7 @@ validate-log-intgs-builder:
     changes:
       - .gitlab/validate-logs-intgs/**
     refs:
-      - flo/fix_log_ci
+      - master
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker build --tag $VALIDATE_LOG_INTGS .
