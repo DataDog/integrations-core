@@ -1,3 +1,7 @@
+## Datadog Agent version [7.28.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7281)
+
+* TLS [2.5.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+
 ## Datadog Agent version [7.28.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7280)
 
 * Active Directory [1.11.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
