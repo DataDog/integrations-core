@@ -11,6 +11,7 @@ files:
       description: |
         The path to the MapR user ticket, if included it overrides the MAPR_TICKETFILE_LOCATION environment variable.
         Either the environment variable or this config option needs to be set if security is enabled on the cluster.
+        If no ticket is provided the dd-agent POSIX user will be used.
       value:
         example: "<TICKETFILE_LOCATION>"
         type: string
