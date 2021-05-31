@@ -1,5 +1,9 @@
 # CHANGELOG - SAP HANA
 
+## 1.4.2 / 2021-05-31
+
+* [Fixed] Resolve unexpected errors when statuses other than 'running' or 'idle' is received. See [#9428](https://github.com/DataDog/integrations-core/pull/9428).
+
 ## 1.4.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Catch exception when closing lost connection. See [#8630](https://github.com/DataDog/integrations-core/pull/8630).
