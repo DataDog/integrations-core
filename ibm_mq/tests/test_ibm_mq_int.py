@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime as dt
+import logging
 import os
 
 import mock
 import pytest
-from pymqi import MQMIError
-from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
+from pymqi import MQMIError, PCFExecute
+from pymqi.CMQC import MQCC_FAILED, MQRC_BUFFER_ERROR, MQRC_NO_MSG_AVAILABLE
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -19,6 +20,36 @@ from . import common
 from .common import QUEUE_METRICS, assert_all_metrics
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
+
+
+def test_no_msg_errors_are_caught(aggregator, instance, caplog):
+    caplog.set_level(logging.WARNING)
+    m = mock.MagicMock()
+    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
+        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
+    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+        error = MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE)
+        m.side_effect = error
+        m.unpack = PCFExecute.unpack
+        check = IbmMqCheck('ibm_mq', {}, [instance])
+        check.check(instance)
+
+        assert not caplog.records
+
+
+def test_errors_are_loogged(aggregator, instance, caplog):
+    caplog.set_level(logging.WARNING)
+    m = mock.MagicMock()
+    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
+        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
+    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+        error = MQMIError(MQCC_FAILED, MQRC_BUFFER_ERROR)
+        m.side_effect = error
+        m.unpack = PCFExecute.unpack
+        check = IbmMqCheck('ibm_mq', {}, [instance])
+        check.check(instance)
+
+        assert caplog.records
 
 
 def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
