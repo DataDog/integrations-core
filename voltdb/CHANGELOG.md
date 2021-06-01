@@ -1,5 +1,9 @@
 # CHANGELOG - VoltDB
 
+## 1.3.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
 ## 1.3.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#9004](https://github.com/DataDog/integrations-core/pull/9004).
