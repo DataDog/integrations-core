@@ -2,7 +2,7 @@
 
 ## 3.0.0 / 2021-05-28
 
-* [Changed] Change metric types to monotonic_count. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
+* [Added] Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
 
 ## 2.2.0 / 2021-05-17
 
