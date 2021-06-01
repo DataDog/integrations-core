@@ -17,7 +17,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 - [MapR monitoring][3] is running correctly.
 - You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user.
 
-##### On a non secure cluster
+##### On a non-secure cluster
 Follow [this guide][12] so that the `dd-agent` user can impersonate this MapR user.
 
 ##### On a secure cluster

@@ -123,7 +123,7 @@ class MaprCheck(AgentCheck):
                 else:
                     raise CheckException(
                         "dd-agent user could not consume topic '%s'. Please ensure that:\n"
-                        "\t* This is a non secure cluster, otherwise a user ticket is required.\n"
+                        "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
                         "\t* The dd-agent user has the 'consume' permission on topic %s or "
                         "impersonation is correctly configured." % (self.topic_path, self.topic_path)
                     )
