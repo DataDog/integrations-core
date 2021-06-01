@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.9.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
 ## 2.9.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#9006](https://github.com/DataDog/integrations-core/pull/9006).

@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.13.1 / 2021-06-01
+
+* [Fixed] Don't emit any warnings if NO_MSG_AVAILABLE is received. See [#9452](https://github.com/DataDog/integrations-core/pull/9452).
+
 ## 3.13.0 / 2021-05-25
 
 * [Added] Add runtime configuration validation. See [#8935](https://github.com/DataDog/integrations-core/pull/8935).
