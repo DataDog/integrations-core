@@ -1,6 +1,6 @@
 # CHANGELOG - TLS
 
-## 2.5.0 / 2021-05-27
+## 2.5.0 / 2021-05-27 / Agent 7.28.1
 
 * [Added] Add runtime configuration validation. See [#8996](https://github.com/DataDog/integrations-core/pull/8996).
 * [Fixed] Do not use check inheritance. See [#9433](https://github.com/DataDog/integrations-core/pull/9433).
