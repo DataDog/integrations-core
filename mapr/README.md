@@ -18,11 +18,10 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 - You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user.
 
 ##### On a non secure cluster
-By default the `dd-agent` user will be used to consume from MapR so the `dd-agent` user permissions should be configured to consume from the kafka topic.
-If you wish to use a different user you can follow [this guide][12] so that the `dd-agent` user can impersonate another POSIX/MapR user.
+Follow [this guide][12] so that the `dd-agent` user can impersonate this MapR user.
 
 ##### On a secure cluster
-You will need to generate a [service long-lived ticket][5] for this user that is readable by the `dd-agent` user.
+Generate a [long-lived service ticket][5] for this user that is readable by the `dd-agent` user.
 
 Installation steps for each node:
 
