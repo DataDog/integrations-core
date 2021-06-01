@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 4.0.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
 ## 4.0.0 / 2021-05-28
 
 * [Added] Adds a `replication_role` tag to metrics emitted from AWS Aurora instances. See [#8282](https://github.com/DataDog/integrations-core/pull/8282).
