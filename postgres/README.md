@@ -7,56 +7,135 @@
 Get metrics from PostgreSQL in real time to:
 
 - Visualize and monitor PostgreSQL states.
-- Received notifications about PostgreSQL failovers and events.
+- Receive notifications about PostgreSQL failovers and events.
+- Collect query metrics, samples and execution plans (with [Deep Database Monitoring](#deep-database-monitoring)). 
 
 ## Setup
 
-### Installation
+The Datadog Agent collects telemetry directly from the database by logging in as a read-only user.
 
-The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent][2].
+Some setup is required to begin using the PostgreSQL integration:
 
-### Configuration
+1. [Configure database parameters](#database-configuration)
+1. [Grant the Datadog Agent access to the database](#agent-database-access)
+1. [Install the Datadog Agent](#agent-installation)
+1. [Configure the Datadog Agent](#agent-configuration)
 
-#### Prepare Postgres
+### Database Configuration
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
+Configure the following [Postgres parameters][35]. These parameters are required only for [Deep Database Monitoring](#deep-database-monitoring). **Note:** A server restart is required for these settings to take effect. For further information on these parameters, please see the [documentation][34].
 
-For PostgreSQL version 10 and above, run:
+| Parameter | Value | Description |
+| --- | --- | --- |
+| `shared_preload_libraries` | `pg_stat_statements` | Required for `postgresql.queries.*` metrics. Enables collection of query metrics via the the [pg_stat_statements][34] extension. |
+| `track_activity_query_size` | `4096` | Required for collection of larger queries. Increases the size of SQL text in `pg_stat_activity` and `pg_stat_statements`. If left at the default value then queries longer than `1024` characters will not be collected. |
+| `pg_stat_statements.track` | `ALL` | Optional. Enables tracking of statements within stored procedures and functions. |
+| `pg_stat_statements.max` | `10000` | Optional. Increases the number of normalized queries tracked in `pg_stat_statements`. This setting is recommended for high-volume databases which see many different types of queries from many different clients. |
 
-```shell
-create user datadog with password '<PASSWORD>';
-grant pg_monitor to datadog;
-grant SELECT ON pg_stat_database to datadog;
+##### How to configure
+
+| Deployment Method | Configuration |
+| --- | --- |
+| Self-hosted | [Parameters][36] are configured in the `postgresql.conf` file. |
+| Amazon [RDS][37] or [RDS Aurora][38] | [DB Parameter Group][39] <br/>  Note that for RDS Aurora `pg_stat_statements` is enabled by default. |
+| Google [CloudSQL][40] | [Database Flags][41] |
+
+
+### Agent Database Access
+
+The Datadog Agent requires read-only access to the database in order to collect statistics and queries.
+Connect to the **postgres** database and run the following SQL commands with superuser or a user with sufficient permissions to execute these commands. This can be done manually with [psql][43] or using any automated configuration you use for managing your databases.
+
+For example, connect to the `postgres` database to execute the SQL commands in the following steps:
+ ```bash
+ psql -h mydb.example.com -d postgres -U postgres
+ ```
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Postgres ≥ 10" xxx -->
+
+```SQL
+CREATE USER datadog WITH password '<PASSWORD>';
+CREATE SCHEMA datadog;
+GRANT USAGE ON SCHEMA datadog TO datadog;
+GRANT USAGE ON SCHEMA public TO datadog;
+GRANT pg_monitor TO datadog;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 ```
 
-For older PostgreSQL versions, run:
+<!-- xxz tab xxx -->
+<!-- xxx tab "Postgres ≤ 9.6" xxx -->
 
-```shell
-create user datadog with password '<PASSWORD>';
-grant SELECT ON pg_stat_database to datadog;
+```SQL
+CREATE USER datadog WITH password '<PASSWORD>';
+CREATE SCHEMA datadog;
+GRANT USAGE ON SCHEMA datadog TO datadog;
+GRANT USAGE ON SCHEMA public TO datadog;
+GRANT SELECT ON pg_stat_database TO datadog;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 ```
 
-To verify the permissions are correct, run the following command:
+Create functions to enable the agent to read the full contents of `pg_stat_activity` and `pg_stat_statements`:
 
-```shell
-psql -h localhost -U datadog postgres -c \
-"select * from pg_stat_database LIMIT(1);" \
-&& echo -e "\e[0;32mPostgres connection - OK\e[0m" \
-|| echo -e "\e[0;31mCannot connect to Postgres\e[0m"
+```SQL
+CREATE OR REPLACE FUNCTION datadog.pg_stat_activity() RETURNS SETOF pg_stat_activity AS
+  $$ SELECT * FROM pg_catalog.pg_stat_activity; $$
+LANGUAGE sql
+SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION datadog.pg_stat_statements() RETURNS SETOF pg_stat_statements AS
+    $$ SELECT * FROM pg_stat_statements; $$
+LANGUAGE sql
+SECURITY DEFINER;
 ```
 
-When it prompts for a password, enter the one used in the first command.
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
-**Note**: For PostgreSQL versions 9.6 and below, run the following and create a `SECURITY DEFINER` to read from `pg_stat_activity`.
+Create the function to enable the agent to collect execution plans. This is required only for [Deep Database Monitoring](#deep-database-monitoring).
+
+```SQL
+CREATE OR REPLACE FUNCTION datadog.explain_statement (
+   l_query text,
+   out explain JSON
+)
+RETURNS SETOF JSON AS
+$$
+BEGIN
+   RETURN QUERY EXECUTE 'EXPLAIN (FORMAT JSON) ' || l_query;
+END;
+$$
+LANGUAGE 'plpgsql'
+RETURNS NULL ON NULL INPUT
+SECURITY DEFINER;
+```
+
+To verify the permissions are correct, run the following commands to confirm the agent user is able to connect to the database and read the core tables:
 
 ```shell
-CREATE FUNCTION pg_stat_activity() RETURNS SETOF pg_catalog.pg_stat_activity AS
-$$ SELECT * from pg_catalog.pg_stat_activity; $$
-LANGUAGE sql VOLATILE SECURITY DEFINER;
+psql -h localhost -U datadog postgres -A \
+  -c "select * from pg_stat_database limit 1;" \
+  && echo -e "\e[0;32mPostgres connection - OK\e[0m" \
+  || echo -e "\e[0;31mCannot connect to Postgres\e[0m"
 
-CREATE VIEW pg_stat_activity_dd AS SELECT * FROM pg_stat_activity();
-grant SELECT ON pg_stat_activity_dd to datadog;
+psql -h localhost -U datadog postgres -A \
+  -c "select * from pg_stat_activity limit 1;" \
+  && echo -e "\e[0;32mPostgres pg_stat_activity read OK\e[0m" \
+  || echo -e "\e[0;31mCannot read from pg_stat_activity\e[0m"
+
+psql -h localhost -U datadog postgres -A \
+  -c "select * from pg_stat_statements limit 1;" \
+  && echo -e "\e[0;32mPostgres pg_stat_statements read OK\e[0m" \
+  || echo -e "\e[0;31mCannot read from pg_stat_statements\e[0m"
 ```
+
+When it prompts for a password, use the password you entered when you created the `datadog` user.
+
+### Agent Installation
+
+The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent][2].  
+
+### Agent Configuration
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -352,6 +431,24 @@ Then, [instrument your application container that makes requests to Postgres][32
 
 [Run the Agent's status subcommand][9] and look for `postgres` under the Checks section.
 
+## Deep Database Monitoring
+
+<div class="alert alert-warning">
+Deep Database Monitoring is currently in beta.
+</div>
+
+Datadog **Deep Database Monitoring** provides deeper visibility into what is running on your database by collecting per-query Metrics, Query Samples, and Execution Plans. To get started, add the `deep_database_monitoring` and `statement_samples` settings to your instance configuration:
+
+```yaml
+instances:
+ - host: ""
+   deep_database_monitoring: true
+   statement_samples:
+     enabled: true
+```
+
+Once enabled, visit the [Databases][42] page to get started!
+
 ## Data Collected
 
 Some of the metrics listed below require additional configuration, see the [sample postgres.d/conf.yaml][3] for all configurable options.
@@ -417,3 +514,13 @@ Additional helpful documentation, links, and articles:
 [31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
 [33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[34]: https://www.postgresql.org/docs/current/pgstatstatements.html
+[35]: https://www.postgresql.org/docs/13/config-setting.html
+[36]: https://www.postgresql.org/docs/current/config-setting.html
+[37]: https://aws.amazon.com/rds/postgresql/
+[38]: https://aws.amazon.com/rds/aurora/postgresql-features/
+[39]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html
+[40]: https://cloud.google.com/sql
+[41]: https://cloud.google.com/sql/docs/postgres/flags
+[42]: https://app.datadoghq.com/databases
+[43]: https://www.postgresql.org/docs/current/app-psql.html

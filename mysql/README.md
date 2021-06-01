@@ -4,12 +4,13 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
+The Datadog Agent can collect a variety of telemetry from MySQL databases, including (but not limited to):
 
 - Query throughput
 - Query performance (e.g. average query run time, slow queries, etc.)
 - Connections (e.g. currently open connections, aborted connections, errors, etc.)
 - InnoDB (e.g. buffer pool metrics, etc.)
+- Query metrics, samples & execution plans (with [Deep Database Monitoring](#deep-database-monitoring))
 
 You can also create your own metrics using custom SQL queries.
 
@@ -17,29 +18,149 @@ You can also create your own metrics using custom SQL queries.
 
 ## Setup
 
-### Installation
+The Datadog Agent collects telemetry directly from the database by logging in as a read-only user.
 
-The MySQL check is included in the [Datadog Agent][4] package. No additional installation is needed on your MySQL server.
+Some setup is required to begin using the MySQL integration:
 
-#### Prepare MySQL
+1. [Configure database parameters](#database-configuration)
+1. [Grant the Datadog Agent access to the database](#agent-database-access)
+1. [Install the Datadog Agent](#agent-installation)
+1. [Configure the Datadog Agent](#agent-configuration)
 
-On each MySQL server, create a database user for the Datadog Agent:
+### Database configuration
 
-```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
-Query OK, 0 rows affected (0.00 sec)
+#### Performance schema
+
+In order to collect query metrics, samples, and execution plans for [Deep Database Monitoring](#deep-database-monitoring), the [MySQL Performance Schema][28] needs to be enabled.   
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Self-hosted" xxx -->
+
+Configure the following [Performance Schema Options][29]. They can be configured on the command-line or in option files (for example,`mysql.conf`).  
+
+| Parameter | Value | Description |
+| --- | --- | --- |
+| `performance_schema` | `ON` | Required. Enables the [Performance Schema][30]. |
+| `performance-schema-consumer-events-statements-current` | `ON` | Required. Enables monitoring of currently running queries. |
+| `performance-schema-consumer-events-statements-history` | `ON` | Optional. Enables tracking recent query history per thread. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
+| `performance-schema-consumer-events-statements-history-long` | `ON` | Optional. Enables tracking of a larger number of recent queries across all threads. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
+| `max_digest_length` | `4096` | Required for collection of larger queries. If left at the default value then queries longer than `1024` characters will not be collected. |
+| <code style="word-break:break-all;">`performance_schema_max_digest_length`</code> | `4096` | Must match `max_digest_length`. |
+| <code style="word-break:break-all;">`performance_schema_max_sql_text_length`</code> | `4096` | Must match `max_digest_length`. |
+
+**Note**: an alternative method to configuring the `performance-schema-consumer-*` settings is to configure them dynamically at runtime. See [Runtime Setup Consumers](#runtime-setup-consumers).
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Amazon RDS MySQL" xxx -->
+
+Configure the following in the [DB Parameter Group][31]:
+
+| Parameter | Value | Description |
+| --- | --- | --- |
+| `performance_schema` | `1` | Required. Enables the [Performance Schema][30]. |
+| `max_digest_length` | `4096` | Required for collection of larger queries. Increases the size of SQL digest text in `events_statements_*` tables. If left at the default value then queries longer than `1024` characters will not be collected. |
+| `performance_schema_max_digest_length` | `4096` | Must match `max_digest_length`. |
+| `performance_schema_max_sql_text_length` | `4096` | Must match `max_digest_length`. |
+
+**Note**: For Amazon RDS MySQL, there is no way to configure the `events-statements_*` consumers in the [DB Parameter Group][31] so they must enabled dynamically at runtime. See [Runtime Setup Consumers](#runtime-setup-consumers).
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Amazon RDS Aurora MySQL" xxx -->
+
+Configure the following in the [DB Parameter Group][32]:
+
+| Parameter | Value | Description |
+| --- | --- | --- |
+| `performance_schema` | `ON` | Required. Enables the [Performance Schema][30]. |
+| <code style="word-break:break-all;">performance_schema_consumer_events_statements_current</code> | `ON` | Required. Enables monitoring of currently running queries. |
+| <code style="word-break:break-all;">performance_schema_consumer_events_statements_history</code> | `ON` | Optional. Enables tracking recent query history per thread. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
+| <code style="word-break:break-all;">performance_schema_consumer_events_statements_history_long</code> | `ON` | Optional. Enables tracking of a larger number of recent queries across all threads. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
+| `max_digest_length` | `4096` | Required for collection of larger queries. Increases the size of SQL digest text in `events_statements_*` tables. If left at the default value then queries longer than `1024` characters will not be collected. |
+| <code style="word-break:break-all;">`performance_schema_max_digest_length`</code> | `4096` | Must match `max_digest_length`. |
+| <code style="word-break:break-all;">`performance_schema_max_sql_text_length`</code> | `4096` | Must match `max_digest_length`. |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+### Agent Database Access
+
+The Datadog Agent requires read-only access to the database in order to collect statistics and queries.
+
+The following instructions grant the agent permission to login from any host using `datadog@'%'`. This is required for managed databases like `Amazon RDS` or `Google CloudSQL` as it's not possible to install the datadog agent directly on the host. For self-hosted databases the datadog user can be restricted to be allowed to login only from localhost by using `datadog@'localhost'`. See the [MySQL documentation][5] for more info.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "MySQL ≥ 8.0" xxx -->
+
+```SQL
+CREATE USER datadog@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
+ALTER USER datadog@'%' WITH MAX_USER_CONNECTIONS 5;
+GRANT REPLICATION CLIENT ON *.* TO datadog@'%'
+GRANT PROCESS ON *.* TO datadog@'%';
+GRANT SELECT ON performance_schema.* TO datadog@'%';
 ```
 
-For mySQL 8.0+ create the `datadog` user with the native password hashing method:
+<!-- xxz tab xxx -->
+<!-- xxx tab "MySQL 5.6 & 5.7" xxx -->
 
-```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
-Query OK, 0 rows affected (0.00 sec)
+```SQL
+CREATE USER datadog@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
+GRANT REPLICATION CLIENT ON *.* TO datadog@'%' WITH MAX_USER_CONNECTIONS 5;
+GRANT PROCESS ON *.* TO datadog@'%';
+GRANT SELECT ON performance_schema.* TO datadog@'%';
 ```
 
-**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
-**Note**: If you encounter the following error message `(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))`, see the [MySQL Localhost Error documentation][18].
+The following schema and procedures are required for [Deep Database Monitoring](#deep-database-monitoring).
+
+```SQL
+CREATE SCHEMA IF NOT EXISTS datadog;
+GRANT EXECUTE ON datadog.* to datadog@'%'
+GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO datadog@'%';
+```
+
+Create the procedures to enable the agent to collect execution plans. The `explain_statement` procedure must be created in every schema from which you want to collect execution plans.   
+
+```SQL
+DELIMITER $$
+
+CREATE PROCEDURE datadog.explain_statement(IN query TEXT)
+    SQL SECURITY DEFINER
+BEGIN
+    SET @explain := CONCAT('EXPLAIN FORMAT=json ', query);
+    PREPARE stmt FROM @explain;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END $$
+
+-- repeat for every application schema 
+CREATE PROCEDURE {schema}.explain_statement(IN query TEXT)
+    SQL SECURITY DEFINER
+BEGIN
+    SET @explain := CONCAT('EXPLAIN FORMAT=json ', query);
+    PREPARE stmt FROM @explain;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END $$
+
+DELIMITER ;
+GRANT EXECUTE ON PROCEDURE {schema}.explain_statement TO datadog@'%';
+```
+
+##### Runtime Setup Consumers
+Create the following procedure to give the agent the ability to enable `performance_schema.events_statements_*` consumers at runtime. This is necessary on databases where the performance schema consumers can't be enabled permanently in the configuration (like Amazon RDS). Required only for [Deep Database Monitoring](#deep-database-monitoring).
+
+```SQL
+DELIMITER $$
+CREATE PROCEDURE datadog.enable_events_statements_consumers()
+    SQL SECURITY DEFINER
+BEGIN
+    UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%';
+END $$
+DELIMITER ;
+GRANT EXECUTE ON PROCEDURE datadog.enable_events_statements_consumers TO datadog@'%';
+```
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
@@ -55,39 +176,11 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 ```
 
-The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
+### Agent Installation
 
-```shell
-mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
-Query OK, 0 rows affected, 1 warning (0.00 sec)
+The MySQL check is packaged with the Agent. To start gathering your MySQL metrics and logs, [install the Agent][4].
 
-mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
-Query OK, 0 rows affected (0.00 sec)
-```
-
-For MySQL 8.0+ set `max_user_connections` with:
-
-```shell
-mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
-Query OK, 0 rows affected (0.00 sec)
-```
-
-If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
-
-```shell
-mysql> show databases like 'performance_schema';
-+-------------------------------+
-| Database (performance_schema) |
-+-------------------------------+
-| performance_schema            |
-+-------------------------------+
-1 row in set (0.00 sec)
-
-mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
-Query OK, 0 rows affected (0.00 sec)
-```
-
-### Configuration
+### Agent Configuration
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
@@ -358,6 +451,24 @@ Then, set [Log Integrations][34] as Docker labels:
 
 [Run the Agent's status subcommand][14] and look for `mysql` under the Checks section.
 
+## Deep Database Monitoring
+
+<div class="alert alert-warning">
+Deep Database Monitoring is currently in beta.
+</div>
+
+Datadog **Deep Database Monitoring** provides deeper visibility into what is running on your database by collecting per-query Metrics, Query Samples, and Execution Plans. To get started, add the `deep_database_monitoring` and `statement_samples` settings to your instance configuration:
+
+```yaml
+instances:
+  - server: ""
+    deep_database_monitoring: true
+    statement_samples:
+      enabled: true
+```
+
+Once enabled, visit the [Databases][27] page to get started!
+
 ## Data Collected
 
 ### Metrics
@@ -575,3 +686,10 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [35]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [36]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [37]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+# TODO: fix
+[27]: https://app.datadoghq.com/databases
+[28]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-quick-start.html
+[29]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-options.html
+[30]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html
+[31]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
+[32]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html
