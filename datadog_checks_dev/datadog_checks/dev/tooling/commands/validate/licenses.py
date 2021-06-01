@@ -104,6 +104,7 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
+    package_copyright = ' | '.join(sorted(package_copyright))
     if ',' in package_copyright:
         package_copyright = f'"{package_copyright}"'
 
@@ -138,13 +139,13 @@ async def get_data(url):
 
 
 async def scrape_license_data(urls):
-    package_data = defaultdict(lambda: {'copyright': '', 'licenses': [], 'classifiers': set()})
+    package_data = defaultdict(lambda: {'copyright': set(), 'licenses': [], 'classifiers': set()})
 
     async with Pool() as pool:
         async for package_name, package_copyright, package_license, license_classifiers in pool.map(get_data, urls):
             data = package_data[package_name]
             if package_copyright:
-                data['copyright'] = package_copyright
+                data['copyright'].add(package_copyright)
 
             data['classifiers'].update(license_classifiers)
             if package_license:
