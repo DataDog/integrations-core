@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 7.0.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
 ## 7.0.0 / 2021-05-28
 
 * [Added] Filter lock relation metrics by relkind. See [#9323](https://github.com/DataDog/integrations-core/pull/9323).
