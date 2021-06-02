@@ -52,7 +52,12 @@ def check_tag_names(metric, tags):
         for tag in tags:
             tag_name = tag.split(':')[0]
             if tag_name in forbidden_tags:
-                raise Exception("Metric {} was submitted with a forbidden tag: {}".format(metric, tag_name))
+                raise Exception(
+                    "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
+                    "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
+                        metric, tag_name
+                    )
+                )
 
 
 class AggregatorStub(object):
