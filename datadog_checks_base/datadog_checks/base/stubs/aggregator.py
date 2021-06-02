@@ -48,7 +48,7 @@ def check_tag_names(metric, tags):
         'host',
     ]
 
-    if not os.environ.get('SKIP_GENERIC_TAGS_CHECK'):
+    if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
         for tag in tags:
             tag_name = tag.split(':')[0]
             if tag_name in forbidden_tags:
