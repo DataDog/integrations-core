@@ -4,6 +4,7 @@
 from __future__ import division
 
 import json
+import os
 import re
 from collections import OrderedDict, defaultdict
 
@@ -47,10 +48,11 @@ def check_tag_names(metric, tags):
         'host',
     ]
 
-    for tag in tags:
-        tag_name = tag.split(':')[0]
-        if  tag_name in forbidden_tags:
-            raise Exception("Metric {} was submitted with a forbidden tag: {}".format(metric, tag_name))
+    if not os.environ.get('SKIP_GENERIC_TAGS_CHECK'):
+        for tag in tags:
+            tag_name = tag.split(':')[0]
+            if tag_name in forbidden_tags:
+                raise Exception("Metric {} was submitted with a forbidden tag: {}".format(metric, tag_name))
 
 
 class AggregatorStub(object):
