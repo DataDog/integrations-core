@@ -1,7 +1,3 @@
-admin:
-  access_log_path: "/dev/null"
-  address:
-    socket_address: { address: 0.0.0.0, port_value: 8081}
 static_resources:
   listeners:
   - address:
@@ -94,4 +90,9 @@ dynamic_resources:
 node:
   cluster: e2e-test-cluster
   id: e2e-test-id
-
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8001
