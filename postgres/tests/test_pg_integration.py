@@ -288,7 +288,8 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['min_collection_interval']
-    assert set(event['tags']) == {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test'}
+    expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
+    assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
@@ -325,6 +326,10 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         assert fqt_event['postgres']['rolname'] == username
         assert fqt_event['timestamp'] > 0
         assert fqt_event['host'] == 'stubbed.hostname'
+        assert set(fqt_event['ddtags'].split(',')) == expected_dbm_metrics_tags | {
+            "db:" + fqt_event['postgres']['datname'],
+            "rolname:" + fqt_event['postgres']['rolname'],
+        }
 
     for conn in connections.values():
         conn.close()
