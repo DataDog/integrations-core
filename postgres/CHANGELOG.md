@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 7.0.2 / 2021-06-03
+
+* [Fixed] Remove instance-level database tag from DBM metrics & events. See [#9469](https://github.com/DataDog/integrations-core/pull/9469).
+
 ## 7.0.1 / 2021-06-01
 
 * [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
