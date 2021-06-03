@@ -351,6 +351,9 @@ files:
                   type: integer
                   example: 300
           - template: instances/default
+            overrides:
+              min_collection_interval.default: 10
+              min_collection_interval.value.example: 10
 
       - template: logs
         example:

@@ -61,7 +61,7 @@ def instance_max_relations(field, value):
 
 
 def instance_min_collection_interval(field, value):
-    return 15
+    return 10
 
 
 def instance_password(field, value):

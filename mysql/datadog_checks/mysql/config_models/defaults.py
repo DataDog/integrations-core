@@ -45,7 +45,7 @@ def instance_max_custom_queries(field, value):
 
 
 def instance_min_collection_interval(field, value):
-    return 15
+    return 10
 
 
 def instance_options(field, value):
