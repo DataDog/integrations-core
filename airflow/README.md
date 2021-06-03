@@ -276,7 +276,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 |----------------------|-----------------------|
 | `<INTEGRATION_NAME>` | `airflow`             |
 | `<INIT_CONFIG>`      | blank or `{}`         |
-| `<INSTANCE_CONFIG>`  | `{"url": "%%host%%"}` |
+| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%"}` |
 
 ##### Log collection
 
