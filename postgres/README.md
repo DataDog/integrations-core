@@ -234,9 +234,9 @@ kind: Pod
 metadata:
   name: postgres
   annotations:
-    ad.datadoghq.com/postgres.check_names: '["postgres"]'
-    ad.datadoghq.com/postgres.init_configs: '[{}]'
-    ad.datadoghq.com/postgres.instances: |
+    ad.datadoghq.com/postgresql.check_names: '["postgres"]'
+    ad.datadoghq.com/postgresql.init_configs: '[{}]'
+    ad.datadoghq.com/postgresql.instances: |
       [
         {
           "host": "%%host%%",
