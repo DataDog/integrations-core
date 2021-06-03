@@ -135,6 +135,10 @@ class PostgresStatementMetrics(object):
         return self._db_hostname
 
     def collect_per_statement_metrics(self, db, db_version, tags):
+        # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
+        # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
+        # each query came from.
+        tags = [t for t in tags if not t.startswith("db:")]
         try:
             rows = self._collect_metrics_rows(db)
             if not rows:
