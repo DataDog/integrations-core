@@ -57,7 +57,7 @@ def instance_collate_status_tags_per_host(field, value):
 
 
 def instance_collect_aggregates_only(field, value):
-    return True
+    return get_default_field_value(field, value)
 
 
 def instance_collect_status_metrics(field, value):
