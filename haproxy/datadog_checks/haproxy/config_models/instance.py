@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence, Union
 
-from pydantic import BaseModel, Extra, root_validator, validator
+from pydantic import BaseModel, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -42,14 +42,6 @@ class LabelJoins(BaseModel):
         allow_mutation = False
 
     target_metric: Optional[TargetMetric]
-
-
-class Metric(BaseModel):
-    pass
-
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
 
 
 class Proxy(BaseModel):
@@ -100,7 +92,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
-    metrics: Optional[Sequence[Union[str, Metric]]]
+    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
     namespace: Optional[str]
     ntlm_domain: Optional[str]
