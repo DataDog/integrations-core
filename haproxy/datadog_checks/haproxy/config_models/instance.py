@@ -74,7 +74,7 @@ class InstanceConfig(BaseModel):
     bearer_token_auth: Optional[bool]
     bearer_token_path: Optional[str]
     collate_status_tags_per_host: Optional[bool]
-    collect_aggregates_only: Optional[str]
+    collect_aggregates_only: Optional[Union[bool, str]]
     collect_status_metrics: Optional[bool]
     collect_status_metrics_by_host: Optional[bool]
     connect_timeout: Optional[float]

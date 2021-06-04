@@ -72,7 +72,7 @@ instances:
     #
     # status_check: false
 
-    ## @param collect_aggregates_only - boolean or string - optional
+    ## @param collect_aggregates_only - boolean or string - optional - default: true
     ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
     ## status lines from the stats output instead of for each backend. With this parameter set to false the agent
     ## collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
@@ -83,7 +83,7 @@ instances:
     ##
     ## NOTE: This only takes effect when `use_prometheus` is set to `false`.
     #
-    # collect_aggregates_only: <COLLECT_AGGREGATES_ONLY>
+    # collect_aggregates_only: true
 
     ## @param collect_status_metrics - boolean - optional - default: false
     ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
