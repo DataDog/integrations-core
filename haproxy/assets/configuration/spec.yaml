@@ -40,8 +40,8 @@ files:
         NOTE: This only takes effect when `use_prometheus` is set to `false`.
     - name: collect_aggregates_only
       value:
-        example: true
-        type: boolean
+        example: 'true'
+        type: string
       description: |
         This parameter instructs the check to collect metrics only from the aggregate frontend/backend
         status lines from the stats output instead of for each backend. With this parameter set to false the agent
