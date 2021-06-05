@@ -343,7 +343,7 @@ class VSphereCheck(AgentCheck):
                 port = 0
 
                 if ':' in host:
-                    hostip, portstr = host.split(':', maxsplit=1)
+                    hostip, portstr = host.split(':')[:2]
                     if portstr.isdigit():
                         port = int(portstr)
                     else:
