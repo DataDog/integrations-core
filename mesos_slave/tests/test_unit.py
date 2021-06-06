@@ -182,9 +182,10 @@ def test_can_connect_service_check_state(
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
+
 @pytest.mark.integration
 def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
-    instance['cluster_name']='some-cluster-name'
+    instance['cluster_name'] = 'some-cluster-name'
     expected_tags = ['url:http://hello.com/state', 'instance:mytag1', 'mesos_cluster:some-cluster-name']
     expected_status = AgentCheck.OK
     check = MesosSlave('mesos_slave', {}, [instance])
