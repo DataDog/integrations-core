@@ -55,8 +55,8 @@ instances:
     #
     # master_port: 5050
 
-    ## @param cluster_name - string - optional
-    ## Specify the cluster name, to optimize the check.
+    ## @param cluster_name - string - optional - default: my-cluster-name
+    ## Specify the cluster name
     #
     # cluster_name: my-cluster-name
 
