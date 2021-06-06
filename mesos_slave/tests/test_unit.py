@@ -182,6 +182,23 @@ def test_can_connect_service_check_state(
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
+@pytest.mark.integration
+def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
+    instance['cluster_name']='some-cluster-name'
+    expected_tags = ['url:http://hello.com/state', 'instance:mytag1', 'mesos_cluster:some-cluster-name']
+    expected_status = AgentCheck.OK
+    check = MesosSlave('mesos_slave', {}, [instance])
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
+        try:
+            check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
+            assert not False
+        except Exception:
+            if not False:
+                raise
+
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
 
 @pytest.mark.parametrize(PARAMETERS, stats_test_data)
 @pytest.mark.integration
