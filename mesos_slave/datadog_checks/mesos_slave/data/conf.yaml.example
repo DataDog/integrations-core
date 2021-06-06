@@ -55,6 +55,11 @@ instances:
     #
     # master_port: 5050
 
+    ## @param cluster_name - string - optional
+    ## Specify the cluster name, to optimize the check.
+    #
+    # cluster_name: my-cluster-name
+
     ## @param tasks - list of strings - optional
     ## Specify the tasks from which you want to send metrics to Datadog.
     #
