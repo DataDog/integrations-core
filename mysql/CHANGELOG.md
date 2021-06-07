@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 4.0.2 / 2021-06-07
+
+* [Fixed] Fix missing replication_role tag on DBM metrics & events. See [#9486](https://github.com/DataDog/integrations-core/pull/9486).
+
 ## 4.0.1 / 2021-06-01
 
 * [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
