@@ -25,20 +25,21 @@ init_config:
 #
 instances:
 
-    ## @param db - string - required
-    ## The name of the database to establish a connection with.
+  -
+    ## @param db - string - optional
+    ## The name of the database to establish a connection with, defaulting to the `username`.
     #
-  - db: <DATABASE_NAME>
+    # db: <DATABASE_NAME>
 
-    ## @param server - string - required
+    ## @param server - string - optional - default: localhost
     ## The hostname used to connect to the database.
     #
-    server: <SERVER>
+    # server: localhost
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 5433
     ## The port used to connect to the database.
     #
-    port: 5433
+    # port: 5433
 
     ## @param metric_groups - list of strings - optional
     ## Enable metric groups for metric collection. Metric groups are based on Vertica tables.
@@ -58,10 +59,10 @@ instances:
     #   - disk_storage
     #   - resource_usage
 
-    ## @param username - string - required
+    ## @param username - string - optional
     ## The database user to authenticate as.
     #
-    username: <USERNAME>
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password of `username`.
