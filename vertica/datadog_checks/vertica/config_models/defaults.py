@@ -29,7 +29,7 @@ def instance_custom_queries(field, value):
 
 
 def instance_db(field, value):
-    return 'username'
+    return get_default_field_value(field, value)
 
 
 def instance_empty_default_hostname(field, value):
