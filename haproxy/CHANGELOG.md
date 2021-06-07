@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.18.1 / 2021-06-07
+
+* [Fixed] Fix `collect_aggregates_only` option type in example config. See [#9473](https://github.com/DataDog/integrations-core/pull/9473).
+
 ## 2.18.0 / 2021-05-28
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
