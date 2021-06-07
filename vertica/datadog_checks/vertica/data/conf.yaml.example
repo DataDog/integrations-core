@@ -26,8 +26,8 @@ init_config:
 instances:
 
   -
-    ## @param db - string - optional - default: username
-    ## The name of the database to establish a connection with.
+    ## @param db - string - optional
+    ## The name of the database to establish a connection with defaults to the username.
     #
     # db: <DATABASE_NAME>
 
