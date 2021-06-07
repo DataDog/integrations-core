@@ -39,10 +39,10 @@ class VerticaCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(VerticaCheck, self).__init__(name, init_config, instances)
 
-        self._db = self.instance.get('db', '')
-        self._server = self.instance.get('server', '')
+        self._server = self.instance.get('server', 'localhost')
         self._port = int(self.instance.get('port', 5433))
-        self._username = self.instance.get('username', '')
+        self._username = self.instance.get('username')
+        self._db = self.instance.get('db', self._username)
         self._password = self.instance.get('password', '')
         self._backup_servers = [
             (bs.get('server', self._server), int(bs.get('port', self._port)))
@@ -94,7 +94,7 @@ class VerticaCheck(AgentCheck):
         # Default to no library logs, since they're too verbose even at the INFO level.
         return None
 
-    def check(self, _):
+    def _connect(self):
         if self._connection is None:
             connection = self.get_connection()
             if connection is None:
@@ -104,6 +104,8 @@ class VerticaCheck(AgentCheck):
         elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
 
+    def check(self, _):
+        self._connect()
         # The order of queries is important as some results are cached for later re-use
         try:
             for method in self._metric_groups:
@@ -578,6 +580,7 @@ class VerticaCheck(AgentCheck):
             connection_options['ssl'] = tls_context
 
         try:
+            connection_options = {k: v for k, v in connection_options.items() if v is not None}
             connection = vertica.connect(**connection_options)
         except Exception as e:
             self.log.error('Unable to connect to database `%s` as user `%s`: %s', self._db, self._username, e)
