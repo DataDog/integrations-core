@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 2.1.1 / 2021-06-07
+
+* [Fixed] Fix required values in vertica. See [#9479](https://github.com/DataDog/integrations-core/pull/9479).
+
 ## 2.1.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#9003](https://github.com/DataDog/integrations-core/pull/9003).
