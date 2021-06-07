@@ -20,7 +20,7 @@ files:
             value:
               type: string
               example: <DATABASE_NAME>
-              default: username
+              display_default: username
           - name: server
             description: The hostname used to connect to the database.
             value:
