@@ -33,7 +33,9 @@ files:
         request with the data parameter.
         SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
       value:
-        type: object
+        anyOf:
+        - type: object
+        - type: string
         enabled: false
         example:
           <KEY>: <VALUE>
