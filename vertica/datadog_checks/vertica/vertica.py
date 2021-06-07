@@ -10,11 +10,11 @@ from datetime import datetime
 from itertools import chain
 
 import vertica_python as vertica
-from datadog_checks.base.utils.common import exclude_undefined_keys
 from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
