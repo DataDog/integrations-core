@@ -16,7 +16,7 @@ files:
       - template: instances
         options:
           - name: db
-            description: The name of the database to establish a connection with defaults to the username.
+            description: The name of the database to establish a connection with, defaulting to the `username`.
             value:
               type: string
               example: <DATABASE_NAME>
