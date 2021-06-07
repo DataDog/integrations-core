@@ -27,7 +27,7 @@ instances:
 
   -
     ## @param db - string - optional
-    ## The name of the database to establish a connection with defaults to the username.
+    ## The name of the database to establish a connection with, defaulting to the `username`.
     #
     # db: <DATABASE_NAME>
 
