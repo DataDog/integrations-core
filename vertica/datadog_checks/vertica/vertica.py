@@ -10,6 +10,7 @@ from datetime import datetime
 from itertools import chain
 
 import vertica_python as vertica
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
@@ -580,8 +581,7 @@ class VerticaCheck(AgentCheck):
             connection_options['ssl'] = tls_context
 
         try:
-            connection_options = {k: v for k, v in connection_options.items() if v is not None}
-            connection = vertica.connect(**connection_options)
+            connection = vertica.connect(**exclude_undefined_keys(connection_options))
         except Exception as e:
             self.log.error('Unable to connect to database `%s` as user `%s`: %s', self._db, self._username, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
