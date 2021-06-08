@@ -94,6 +94,11 @@ class QueueMetricCollector(object):
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
                     queues.append(to_string(queue).strip())
+            finally:
+                # Close internal reply queue to prevent filling up a dead-letter queue.
+                # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
+                # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
+                pcf.disconnect()
 
         return queues
 
@@ -128,6 +133,8 @@ class QueueMetricCollector(object):
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 self._submit_queue_stats(queue_info, queue_name, tags)
+        finally:
+            pcf.disconnect()
 
     def _submit_queue_stats(self, queue_info, queue_name, tags):
         for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
@@ -174,6 +181,8 @@ class QueueMetricCollector(object):
                         msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
                         msg = msg.format(mname, queue_name)
                         self.log.debug(msg)
+        finally:
+            pcf.disconnect()
 
     def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
         try:
@@ -191,3 +200,5 @@ class QueueMetricCollector(object):
                 metrics_map = metrics.pcf_status_reset_metrics()
                 prefix = "{}.queue".format(metrics.METRIC_PREFIX)
                 self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)
+        finally:
+            pcf.disconnect()
