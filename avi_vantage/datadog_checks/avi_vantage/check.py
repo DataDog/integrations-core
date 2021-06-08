@@ -23,32 +23,32 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(AviVantageCheck, self).__init__(name, init_config, instances)
-        self.base_url = self.config.avi_controller_url.rstrip('/')
-        if 'username' in self.instance:
-            del self.instance["username"]
-        if 'password' in self.instance:
-            del self.instance["password"]
         # Required for storing the auth cookie
         self.instance['persist_connections'] = True
 
         self.collect_events = False
-        self.scraper_configs = self._generate_scraper_configs()
         self.last_event_time = None
 
-    def _generate_scraper_configs(self):
-        configs = []
-        base_url = self.base_url + "/api/analytics/prometheus-metrics/"
+    def configure_scrapers(self):
+        scrapers = {}
+
+        base_url = self.config.avi_controller_url.rstrip('/') + "/api/analytics/prometheus-metrics/"
         for resource, metrics in RESOURCE_METRICS.items():
             instance_copy = deepcopy(self.instance)
-            instance_copy['openmetrics_endpoint'] = base_url + resource
+            endpoint = base_url + resource
+            instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [metrics]
-            configs.append(instance_copy)
-        return configs
+            scrapers[endpoint] = self.create_scraper(instance_copy)
+
+        self.scrapers.clear()
+        self.scrapers.update(scrapers)
 
     @contextmanager
     def login(self):
-        login_url = self.base_url + "/login"
-        logout_url = self.base_url + "/logout"
+        import pdb; pdb.set_trace()
+        base_url = self.config.avi_controller_url.rstrip('/')
+        login_url = base_url + "/login"
+        logout_url = base_url + "/logout"
         login_resp = self.http.post(login_url, data={'username': self.config.username, 'password': self.config.password})
         login_resp.raise_for_status()
         yield
@@ -56,7 +56,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if csrf_token:
             logout_resp = self.http.post(
                 logout_url,
-                extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url}
+                extra_headers={'X-CSRFToken': csrf_token, 'Referer': base_url}
             )
             logout_resp.raise_for_status()
 

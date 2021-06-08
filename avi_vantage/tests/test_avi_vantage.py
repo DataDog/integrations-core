@@ -11,7 +11,6 @@ from datadog_checks.avi_vantage import AviVantageCheck
 
 def test_check(aggregator, instance, dd_run_check):
     # type: (AggregatorStub, Dict[str, Any], Callable) -> None
-    import pdb; pdb.set_trace()
     check = AviVantageCheck('avi_vantage', {}, [instance])
     dd_run_check(check)
 
