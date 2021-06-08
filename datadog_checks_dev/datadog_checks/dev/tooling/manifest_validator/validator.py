@@ -38,6 +38,7 @@ class ValidationResult(object):
     def __repr__(self):
         return str(self)
 
+
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
     def __init__(self, is_extras=False, is_marketplace=False, check_in_extras=True, check_in_marketplace=True):
