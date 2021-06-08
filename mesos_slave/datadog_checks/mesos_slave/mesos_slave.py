@@ -205,16 +205,13 @@ class MesosSlave(AgentCheck):
             self.set_metadata('version', version)
 
     def _set_cluster_name(self, url, master_port, state_metrics, tags):
-        if self.cluster_name:
-            tags.append('mesos_cluster:{}'.format(self.cluster_name))
-            return
-        if 'master_hostname' in state_metrics:
+        if 'master_hostname' in state_metrics and not self.cluster_name:
             master_url = '{}://{}:{}'.format(urlparse(url).scheme, state_metrics['master_hostname'], master_port)
             master_state = self._get_state_metrics(master_url, [], "-summary")
             if master_state:
                 self.cluster_name = master_state.get('cluster')
-                if self.cluster_name:
-                    tags.append('mesos_cluster:{}'.format(self.cluster_name))
+        if self.cluster_name:
+            tags.append('mesos_cluster:{}'.format(self.cluster_name))
 
     def _process_tasks(self, tasks, state_metrics, tags):
         for task in tasks:

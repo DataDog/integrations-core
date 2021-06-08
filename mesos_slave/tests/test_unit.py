@@ -33,7 +33,7 @@ def test_fixtures(check, instance, aggregator):
 
     service_check_tags = [
         'instance:mytag1',
-        'mesos_cluster:test',
+        'mesos_cluster:test-cluster',
         'mesos_node:slave',
         'mesos_pid:slave(1)@127.0.0.1:5051',
         'task_name:hello',
@@ -122,6 +122,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
 
 
 additional_tags = ['instance:mytag1']
+cluster_name_tag = ['mesos_cluster:test-cluster']
 
 state_test_data = [
     (
@@ -184,9 +185,28 @@ def test_can_connect_service_check_state(
 
 
 @pytest.mark.integration
+def test_can_connect_to_master_service_with_instance_cluster_name(instance, aggregator):
+    expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
+    expected_status = AgentCheck.OK
+    check = MesosSlave('mesos_slave', {}, [instance])
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        mock_resp = mock.MagicMock(status_code=200)
+        mock_resp.json.return_value = {"master_hostname": "localhost", "frameworks":[]}
+        r.get.return_value = mock_resp
+        try:
+            check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
+            assert not False
+        except Exception:
+            if not False:
+                raise
+
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
+
+@pytest.mark.integration
 def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
-    instance['cluster_name'] = 'some-cluster-name'
-    expected_tags = ['url:http://hello.com/state', 'instance:mytag1', 'mesos_cluster:some-cluster-name']
+    instance['cluster_name'] = 'test-cluster'
+    expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
     expected_status = AgentCheck.OK
     check = MesosSlave('mesos_slave', {}, [instance])
     with mock.patch('datadog_checks.base.utils.http.requests') as r:

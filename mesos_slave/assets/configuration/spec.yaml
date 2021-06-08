@@ -24,7 +24,7 @@ files:
             description: Specify the cluster name
             value:
               type: string
-              example: my-cluster-name
+              example: <CLUSTER_NAME>
           - name: tasks
             description: Specify the tasks from which you want to send metrics to Datadog.
             value:
