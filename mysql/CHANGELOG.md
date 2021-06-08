@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 4.0.3 / 2021-06-08
+
+* [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).
+
 ## 4.0.2 / 2021-06-07
 
 * [Fixed] Fix missing replication_role tag on DBM metrics & events. See [#9486](https://github.com/DataDog/integrations-core/pull/9486).
