@@ -488,7 +488,8 @@ class Redis(AgentCheck):
             value = slowlog['duration']
             self.histogram('redis.slowlog.micros', value, tags=slowlog_tags)
 
-        self.last_timestamp_seen = max_ts
+        if max_ts != 0:
+            self.last_timestamp_seen = max_ts
 
     def _check_command_stats(self, conn, tags):
         """Get command-specific statistics from redis' INFO COMMANDSTATS command"""
