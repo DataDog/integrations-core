@@ -273,9 +273,7 @@ class PostgreSql(AgentCheck):
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
             conn = psycopg2.connect(**args)
-        # The integration runs a number of queries in a session but they are independent and should
-        # not execute in a transaction. Therefore autocommit is enabled by default for safety for
-        # all new connections (to prevent long-lived transactions).
+        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)
         return conn
 
