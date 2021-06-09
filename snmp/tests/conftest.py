@@ -36,6 +36,37 @@ E2E_METADATA = {
     ],
 }
 
+profiles = [
+    'apc_ups',
+    'arista',
+    'aruba',
+    'chatsworth_pdu',
+    'checkpoint-firewall',
+    'cisco-3850',
+    'cisco-asa',
+    'cisco-asa-5525',
+    'cisco-catalyst',
+    'cisco-csr1000v',
+    'cisco-nexus',
+    'cisco_icm',
+    'cisco_isr_4431',
+    'cisco_uc_virtual_machine',
+    'dell-poweredge',
+    'f5-big-ip',
+    'fortinet-fortigate',
+    'generic-router',
+    'hp-ilo4',
+    'hpe-proliant',
+    'idrac',
+    'isilon',
+    'juniper-ex',
+    'juniper-mx',
+    'juniper-srx',
+    'meraki-cloud-controller',
+    'netapp',
+    'palo-alto',
+]
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -60,6 +91,28 @@ def dd_environment():
                 instance_config = generate_container_instance_config(
                     SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
                 )
+                ip_address = instance_config['instances'][0]['ip_address']
+                port = instance_config['instances'][0]['port']
+                instance_config['instances'] = []
+                for profile in profiles:
+                    instance_config['instances'].append(
+                        {
+                            'ip_address': ip_address,
+                            'port': port,
+                            'community_string': profile,
+                            'tags': ['autodiscovery_subnet:1.2.3.4/30'],
+                        }
+                    )
+                instance_config['instances'].append(
+                    {
+                        'ip_address': '99.99.99.99',
+                        'port': port,
+                        'community_string': 'not_reachable',
+                        'tags': ['reachable:no'],
+                    }
+                )
+                instance_config['init_config']['collect_device_metadata'] = True
+                instance_config['init_config']['loader'] = 'core'
             yield instance_config, new_e2e_metadata
 
 
