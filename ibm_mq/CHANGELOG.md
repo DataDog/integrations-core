@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.13.2 / 2021-06-09
+
+* [Fixed] Properly close internal reply queues. See [#9488](https://github.com/DataDog/integrations-core/pull/9488).
+
 ## 3.13.1 / 2021-06-01
 
 * [Fixed] Don't emit any warnings if NO_MSG_AVAILABLE is received. See [#9452](https://github.com/DataDog/integrations-core/pull/9452).
