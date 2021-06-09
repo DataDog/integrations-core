@@ -62,18 +62,18 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-##### JDBC Driver
+##### JDBC driver
 
 *NOTE*: This method only works on Linux.
 
-Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver.
+Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC driver.
 
 Once it is installed, complete the following steps: 
 
 1. [Download the JDBC Driver][2] jar file.
 2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
-#### Datadog User creation
+#### Datadog user creation
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Stand Alone" xxx -->
@@ -218,7 +218,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 [Run the Agent's status subcommand][10] and look for `oracle` under the Checks section.
 
-## Custom Query
+## Custom query
 
 Providing custom queries is also supported. Each query must have 3 parameters:
 
@@ -341,7 +341,7 @@ Verifies the database is available and accepting connections.
 
 ## Troubleshooting
 
-### Common Problems
+### Common problems
 #### Oracle Instant Client
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.
 The structure of the directory should look similar:
@@ -387,7 +387,7 @@ The structure of the directory should look similar:
 - See further Windows installation documentation on [Oracle][17].
 
 
-#### JDBC Driver (Linux Only)
+#### JDBC driver (Linux only)
 - If you encounter a `JVMNotFoundException`:
 
     ```text

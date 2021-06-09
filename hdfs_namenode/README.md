@@ -18,7 +18,7 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 ### Configuration
 
-#### Prepare the NameNode
+#### Prepare the node
 
 1. The Agent collects metrics from the NameNode's JMX remote interface. The interface is disabled by default, so enable it by setting the following option in `hadoop-env.sh` (usually found in \$HADOOP_HOME/conf):
 
@@ -33,7 +33,7 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 #### Connect the Agent
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host

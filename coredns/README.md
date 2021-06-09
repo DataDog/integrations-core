@@ -18,7 +18,7 @@ The CoreDNS check is included in the [Datadog Agent][1] package, so you don't ne
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
-#### Metric Collection
+#### Metric collection
 
 | Parameter            | Value                                                                            |
 | -------------------- | -------------------------------------------------------------------------------- |

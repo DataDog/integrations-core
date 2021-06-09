@@ -25,7 +25,7 @@ The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx
 - [stub status module][2] - for open source NGINX
 - [http status module][3] - only for NGINX Plus
 
-#### NGINX Open Source
+#### NGINX open source
 
 If you use open source NGINX, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 

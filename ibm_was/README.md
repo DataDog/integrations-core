@@ -16,7 +16,7 @@ By default, this check collects JDBC, JVM, thread pool, and Servlet Session Mana
 
 The IBM WAS check is included in the [Datadog Agent][4] package.
 
-#### Enable the PerfServlet
+#### Enable the `PerfServlet`
 
 The servlet's .ear file (PerfServletApp.ear) is located in the `<WAS_HOME>/installableApps` directory, where `<WAS_HOME>` is the installation path for WebSphere Application Server.
 

@@ -113,7 +113,7 @@ fi
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "All nodes" xxx -->
-##### Install the Datadog Agent on Driver and Worker Nodes
+##### Install the Datadog Agent on driver and worker nodes
 
 After creating the `datadog-install-driver-workers.sh` script, add the init script path in the [cluster configuration page](https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui).
 

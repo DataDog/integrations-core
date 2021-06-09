@@ -30,7 +30,7 @@ To get the best observability coverage monitoring workloads in AWS EKS Fargate, 
 
 Also, set up integrations for any other AWS services you are running with EKS (for example, [ELB][12]).
 
-#### Manual Installation
+#### Manual installation
 
 To install, download the custom Agent image: `datadog/agent` with version v7.17 or above.
 
@@ -138,7 +138,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Metrics Collection
+## Metrics collection
 
 ### Integration metrics
 
@@ -252,8 +252,8 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Log Collection
-### Collecting logs from EKS on Fargate with Fluent Bit.
+## Log collection
+### Collecting logs from EKS on Fargate with Fluent Bit
 
 You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs. 
 
@@ -276,7 +276,7 @@ You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs.
             auto_create_group On
    ```
 
-## Traces Collection
+## Traces collection
 
 Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][19].
 
@@ -333,7 +333,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Events Collection
+## Events collection
 
 To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
 
@@ -344,7 +344,7 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
-## Process Collection
+## Process collection
 
 For Agent 6.19+/7.19+, [Process Collection][23] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
 

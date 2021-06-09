@@ -1,4 +1,4 @@
-# Mesos_slave Integration
+# Mesos Slave Integration
 
 ![Mesos Slave Dashboard][101]
 
@@ -153,7 +153,7 @@ See [metadata.csv][104] for a list of metrics provided by this integration.
 
 The Mesos-slave check does not include any events.
 
-### Service Check
+### Service Checks
 
 **mesos_slave.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise `OK`.

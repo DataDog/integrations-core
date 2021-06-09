@@ -68,7 +68,7 @@ Finally, [restart the Agent][4].
 
 **Note**: For the Security logs channel, add your Datadog Agent user to the `Event Log Readers` user group.
 
-### Filtering Events
+### Filtering events
 
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.
 
