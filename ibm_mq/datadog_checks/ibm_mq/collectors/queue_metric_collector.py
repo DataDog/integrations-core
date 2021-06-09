@@ -82,6 +82,7 @@ class QueueMetricCollector(object):
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            pcf = None
             try:
                 pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
                 response = pcf.MQCMD_INQUIRE_Q(args)
@@ -94,6 +95,12 @@ class QueueMetricCollector(object):
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
                     queues.append(to_string(queue).strip())
+            finally:
+                # Close internal reply queue to prevent filling up a dead-letter queue.
+                # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
+                # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
+                if pcf is not None:
+                    pcf.disconnect()
 
         return queues
 
@@ -115,6 +122,7 @@ class QueueMetricCollector(object):
         """
         Grab stats from queues
         """
+        pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
             pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
@@ -128,6 +136,9 @@ class QueueMetricCollector(object):
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 self._submit_queue_stats(queue_info, queue_name, tags)
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
 
     def _submit_queue_stats(self, queue_info, queue_name, tags):
         for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
@@ -146,6 +157,7 @@ class QueueMetricCollector(object):
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
+        pcf = None
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
@@ -174,8 +186,12 @@ class QueueMetricCollector(object):
                         msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
                         msg = msg.format(mname, queue_name)
                         self.log.debug(msg)
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
 
     def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
+        pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
             pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
@@ -191,3 +207,6 @@ class QueueMetricCollector(object):
                 metrics_map = metrics.pcf_status_reset_metrics()
                 prefix = "{}.queue".format(metrics.METRIC_PREFIX)
                 self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)
+        finally:
+            if pcf is not None:
+                pcf.disconnect()
