@@ -21,10 +21,9 @@ files:
               example: 5050
               type: integer
           - name: cluster_name
-            description: Specify the cluster name
+            description: This is used as the value of the `mesos_cluster` tag, avoiding potential network calls.
             value:
               type: string
-              example: <CLUSTER_NAME>
           - name: tasks
             description: Specify the tasks from which you want to send metrics to Datadog.
             value:
