@@ -209,23 +209,22 @@ class Redis(AgentCheck):
                 self.log.debug("Redis role was not found")
 
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
-            try:
-                config = conn.config_get("maxclients")
-            except redis.ResponseError:
-                # config_get is disabled on some environments
-                self.log.debug("Error querying config")
-                config = {}
-            status = AgentCheck.OK
-            self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
-        except ValueError:
-            status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=self.tags)
+        except ValueError as e:
+            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
             raise
-        except Exception:
-            status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=self.tags)
+        except Exception as e:
+            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
             raise
+        else:
+            self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
+
+        try:
+            config = conn.config_get("maxclients")
+        except redis.ResponseError:
+            # config_get is disabled on some environments
+            self.log.debug("Error querying config")
+            config = {}
 
         # Save the database statistics.
         for key in info.keys():
