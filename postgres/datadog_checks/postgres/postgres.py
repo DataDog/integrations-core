@@ -258,7 +258,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            return psycopg2.connect(connection_string)
+            conn = psycopg2.connect(connection_string)
         else:
             args = {
                 'host': self._config.host,
@@ -272,7 +272,10 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
-            return psycopg2.connect(**args)
+            conn = psycopg2.connect(**args)
+        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
+        conn.set_session(autocommit=True)
+        return conn
 
     def _connect(self):
         """Get and memoize connections to instances"""
