@@ -438,6 +438,30 @@ class Redis(AgentCheck):
 
         """
         conn = self._get_conn(self.instance)
+
+        # Use fixed version of parse_slowlog_get callback for the
+        # 'SLOWLOG GET' command; taken from upstream/master since it
+        # will not be released in redis==3.5.3
+        # - https://github.com/andymccurdy/redis-py/issues/1428#issuecomment-749692873
+        # - upstream/master: https://github.com/andymccurdy/redis-py/commit/bc5854217b4e94eb7a33e3da5738858a17135ca5
+        def upstream_parse_slowlog_get(response, **options):
+            space = ' ' if options.get('decode_responses', False) else b' '
+            return [
+                {
+                    'id': item[0],
+                    'start_time': int(item[1]),
+                    'duration': int(item[2]),
+                    'command':
+                    # Redis Enterprise injects another entry at index [3], which has
+                    # the complexity info (i.e. the value N in case the command has
+                    # an O(N) complexity) instead of the command.
+                    space.join(item[3]) if isinstance(item[3], list) else space.join(item[4]),
+                }
+                for item in response
+            ]
+
+        conn.set_response_callback("SLOWLOG GET", upstream_parse_slowlog_get)
+
         if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
@@ -479,10 +503,7 @@ class Redis(AgentCheck):
 
             slowlog_tags = list(self.tags)
             command = slowlog['command'].split()
-            # When the "Garantia Data" custom Redis is used, redis-py returns
-            # an empty `command` field
-            # FIXME when https://github.com/andymccurdy/redis-py/pull/622 is released in redis-py
-            if command:
+            if len(command) > 0:
                 slowlog_tags.append('command:{}'.format(ensure_unicode(command[0])))
 
             value = slowlog['duration']
