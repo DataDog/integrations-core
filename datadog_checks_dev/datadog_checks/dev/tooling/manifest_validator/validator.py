@@ -222,12 +222,14 @@ class MetricToCheckValidator(ManifestValidator):
     def validate(self, check_name, decoded, _):
         if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
             return
-
         metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
         # metric_to_check
         metric_to_check = decoded.get('metric_to_check')
+        pricing = decoded.get('pricing', [])
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
+            if any(p.get('metric') in metrics_to_check for p in pricing):
+                return
             for metric in metrics_to_check:
                 metric_integration_check_name = check_name
                 # snmp vendor specific integrations define metric_to_check
