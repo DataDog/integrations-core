@@ -102,6 +102,10 @@ def dd_environment():
                             'community_string': profile,
                             'tags': [
                                 'autodiscovery_subnet:1.2.3.4/30',
+
+                                # since we are using the same IP
+                                # we need to add a static tag that is different for each instance
+                                # that is used to generate different Device ID
                                 'static_tag_profile:' + profile,
                             ],
                         }
