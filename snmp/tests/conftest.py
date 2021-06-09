@@ -100,7 +100,10 @@ def dd_environment():
                             'ip_address': ip_address,
                             'port': port,
                             'community_string': profile,
-                            'tags': ['autodiscovery_subnet:1.2.3.4/30'],
+                            'tags': [
+                                'autodiscovery_subnet:1.2.3.4/30',
+                                'static_tag_profile:' + profile,
+                            ],
                         }
                     )
                 instance_config['instances'].append(
