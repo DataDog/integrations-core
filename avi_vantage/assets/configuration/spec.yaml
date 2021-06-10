@@ -1,4 +1,5 @@
 name: Avi Vantage
+
 files:
 - name: avi_vantage.yaml
   options:
@@ -28,23 +29,57 @@ files:
         are monitored.
       value:
         type: array
-        example:
+        example: &avi_entities
         - controller
         - pool
-        - service engine
-        - virtual service
-        default:
-          - controller
-          - pool
-          - service engine
-          - virtual service
+        - serviceengine
+        - virtualservice
+        default: *avi_entities
         items:
           type: string
-          enum:
-            - controller
-            - pool
-            - service engine
-            - virtual service
+          enum: *avi_entities
+    - name: resource_filters
+      required: false
+      description: |
+        Filter which entities to monitor.
+      value:
+        type: array
+        example:
+          - type: include
+            property: name
+            entity: '"serviceengine"'
+            patterns:
+              - "^.*-prod$"
+          - type: exclude
+            property: id
+            entity: controller
+            patterns:
+              - "1de12feacb4"
+        items:
+          type: object
+          properties:
+          - name: type
+            type: string
+            enum:
+              - include
+              - exclude
+          - name: property
+            type: string
+            enum:
+              - id
+              - name
+          - name: entity
+            type: string
+            enum: *avi_entities
+          - name: patterns
+            type: array
+            items:
+              type: string
+          required:
+            - type
+            - property
+            - entity
+            - patterns
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.hidden: true

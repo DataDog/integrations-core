@@ -8,6 +8,8 @@ from typing import Any
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.avi_vantage import metrics
+from datadog_checks.base.errors import CheckException
+
 from .config_models import ConfigMixin
 
 RESOURCE_METRICS = {
@@ -33,9 +35,14 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         scrapers = {}
 
         base_url = self.config.avi_controller_url.rstrip('/') + "/api/analytics/prometheus-metrics/"
-        for resource, metrics in RESOURCE_METRICS.items():
+        for entity in self.config.entities:
+            if entity not in RESOURCE_METRICS:
+                raise CheckException(
+                    f"Entity {entity} is not valid. Must be one of {', '.join(RESOURCE_METRICS.keys())}."
+                )
+            metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
-            endpoint = base_url + resource
+            endpoint = base_url + entity
             instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [metrics]
             scrapers[endpoint] = self.create_scraper(instance_copy)
@@ -45,7 +52,6 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @contextmanager
     def login(self):
-        import pdb; pdb.set_trace()
         base_url = self.config.avi_controller_url.rstrip('/')
         login_url = base_url + "/login"
         logout_url = base_url + "/logout"

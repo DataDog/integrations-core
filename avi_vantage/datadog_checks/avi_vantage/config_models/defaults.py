@@ -69,7 +69,7 @@ def instance_enable_health_service_check(field, value):
 
 
 def instance_entities(field, value):
-    return ['controller', 'pool', 'service engine', 'virtual service']
+    return ['controller', 'pool', 'serviceengine', 'virtualservice']
 
 
 def instance_exclude_labels(field, value):
@@ -198,6 +198,10 @@ def instance_rename_labels(field, value):
 
 def instance_request_size(field, value):
     return 16
+
+
+def instance_resource_filters(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_service(field, value):

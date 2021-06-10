@@ -48,6 +48,16 @@ class Proxy(BaseModel):
     no_proxy: Optional[Sequence[str]]
 
 
+class ResourceFilter(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    entity: Literal['controller', 'pool', 'serviceengine', 'virtualservice']
+    patterns: Sequence[str]
+    property: Literal['id', 'name']
+    type: Literal['include', 'exclude']
+
+
 class ShareLabel(BaseModel):
     class Config:
         allow_mutation = False
@@ -73,7 +83,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
-    entities: Optional[Sequence[Literal['controller', 'pool', 'service engine', 'virtual service']]]
+    entities: Optional[Sequence[Literal['controller', 'pool', 'serviceengine', 'virtualservice']]]
     exclude_labels: Optional[Sequence[str]]
     exclude_metrics: Optional[Sequence[str]]
     exclude_metrics_by_labels: Optional[Mapping[str, Union[bool, Sequence[str]]]]
@@ -106,6 +116,7 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[float]
     rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
+    resource_filters: Optional[Sequence[ResourceFilter]]
     service: Optional[str]
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
