@@ -1,6 +1,11 @@
 # CHANGELOG - TLS
 
-## 2.4.0 / 2021-04-19
+## 2.5.0 / 2021-05-27 / Agent 7.28.1
+
+* [Added] Add runtime configuration validation. See [#8996](https://github.com/DataDog/integrations-core/pull/8996).
+* [Fixed] Do not use check inheritance. See [#9433](https://github.com/DataDog/integrations-core/pull/9433).
+
+## 2.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add an option to send certificate duration. See [#9067](https://github.com/DataDog/integrations-core/pull/9067). Thanks [lindleywhite](https://github.com/lindleywhite).
 * [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).

@@ -111,7 +111,7 @@ class AggregatorStub(object):
         self._event_platform_events[event_type].append(raw_event)
 
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=False
     ):
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)

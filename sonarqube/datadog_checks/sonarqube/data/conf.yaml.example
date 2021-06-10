@@ -7,10 +7,10 @@ init_config:
     #
     # is_jmx: false
 
-    ## @param collect_default_metrics - boolean - optional - default: true
+    ## @param collect_default_metrics - boolean - optional - default: false
     ## Whether or not the check should collect all default metrics.
     #
-    # collect_default_metrics: true
+    collect_default_metrics: true
 
     ## @param new_gc_metrics - boolean - optional - default: false
     ## Set to true to use better metric names for garbage collection metrics.

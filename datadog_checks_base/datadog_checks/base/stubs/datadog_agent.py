@@ -67,7 +67,7 @@ class DatadogAgentStub(object):
 
     def obfuscate_sql(self, query):
         # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
-        return re.sub(r'\s+', ' ', query or '')
+        return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
         # Passthrough stub: obfuscation implementation is in Go code.

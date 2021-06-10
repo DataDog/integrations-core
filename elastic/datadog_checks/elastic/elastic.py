@@ -324,6 +324,8 @@ class ESCheck(AgentCheck):
                 value = xform(value)
             if xtype == "gauge":
                 self.gauge(metric, value, tags=tags, hostname=hostname)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric, value, tags=tags, hostname=hostname)
             else:
                 self.rate(metric, value, tags=tags, hostname=hostname)
         else:
