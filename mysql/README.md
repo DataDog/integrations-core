@@ -226,7 +226,7 @@ _Available for Agent versions >6.0_
 
 To configure this check for an Agent running on a container:
 
-##### Metric Collection
+##### Metric collection
 
 Set [Autodiscovery Integration Templates][27] as Docker labels on your application container:
 

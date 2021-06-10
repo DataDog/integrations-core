@@ -17,7 +17,7 @@ The CoreDNS check is included in the [Datadog Agent][1] package, so you don't ne
 
 To configure this check for an Agent running on a container:
 
-##### Metric Collection
+##### Metric collection
 
 Set [Autodiscovery Integration Templates][9] as Docker labels on your application container:
 
