@@ -20,6 +20,10 @@ def instance_collect_connection_queues(field, value):
     return False
 
 
+def instance_collect_connection_state(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return False
 

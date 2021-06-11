@@ -20,7 +20,7 @@ class InstanceConfig(BaseModel):
     blacklist_conntrack_metrics: Optional[Sequence[str]]
     collect_aws_ena_metrics: Optional[bool]
     collect_connection_queues: Optional[bool]
-    collect_connection_state: bool
+    collect_connection_state: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_rate_metrics: Optional[bool]
     combine_connection_states: Optional[bool]
