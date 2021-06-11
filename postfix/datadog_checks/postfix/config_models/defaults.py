@@ -4,6 +4,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_postfix_user(field, value):
+    return 'root'
+
+
 def shared_postqueue(field, value):
     return False
 

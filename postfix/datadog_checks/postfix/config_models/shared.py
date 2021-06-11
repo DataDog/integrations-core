@@ -17,7 +17,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    postfix_user: str
+    postfix_user: Optional[str]
     postqueue: Optional[bool]
     service: Optional[str]
 
