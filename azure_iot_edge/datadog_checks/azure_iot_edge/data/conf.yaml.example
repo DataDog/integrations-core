@@ -162,6 +162,14 @@ instances:
     #   <KEY_2>:
     #   - '*'
 
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

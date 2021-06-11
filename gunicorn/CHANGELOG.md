@@ -1,6 +1,10 @@
 # CHANGELOG - gunicorn
 
-## 1.14.2 / 2021-03-07
+## 1.15.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8923](https://github.com/DataDog/integrations-core/pull/8923).
+
+## 1.14.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 * [Fixed] Improve readability a bit. See [#8454](https://github.com/DataDog/integrations-core/pull/8454).

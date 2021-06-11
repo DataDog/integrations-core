@@ -513,7 +513,7 @@ LINKERD_FIXTURE_VALUES = {
     'linkerd.rt.bindcache.client.oneshots': 0,
 }
 
-EXPECTED_METRICS_V2 = {
+EXPECTED_METRICS_V2_BASE = {
     'linkerd.request_total': aggregator.MONOTONIC_COUNT,
     'linkerd.response_total': aggregator.MONOTONIC_COUNT,
     'linkerd.response_latency.count': aggregator.GAUGE,
@@ -523,16 +523,11 @@ EXPECTED_METRICS_V2 = {
     'linkerd.route.response_latency.sum': aggregator.GAUGE,
     'linkerd.route.response_total': aggregator.MONOTONIC_COUNT,
     'linkerd.route.actual_request_total': aggregator.MONOTONIC_COUNT,
-    'linkerd.route.actual_response_latency.count': aggregator.GAUGE,
-    'linkerd.route.actual_response_latency.sum': aggregator.GAUGE,
-    'linkerd.route.actual_response_total': aggregator.MONOTONIC_COUNT,
     'linkerd.tcp.open_total': aggregator.MONOTONIC_COUNT,
     'linkerd.tcp.open_connections': aggregator.GAUGE,
     'linkerd.tcp.read_bytes_total': aggregator.MONOTONIC_COUNT,
     'linkerd.tcp.write_bytes_total': aggregator.MONOTONIC_COUNT,
     'linkerd.tcp.close_total': aggregator.MONOTONIC_COUNT,
-    'linkerd.tcp.connection_duration.count': aggregator.GAUGE,
-    'linkerd.tcp.connection_duration.sum': aggregator.GAUGE,
     'linkerd.control.request_total': aggregator.MONOTONIC_COUNT,
     'linkerd.control.response_latency.count': aggregator.GAUGE,
     'linkerd.control.response_latency.sum': aggregator.GAUGE,
@@ -546,8 +541,20 @@ EXPECTED_METRICS_V2 = {
     'linkerd.prometheus.health': aggregator.GAUGE,
 }
 
+# These metrics no longer reliably report on latest linkerd installs
+EXPECTED_METRICS_V2_EXTENDED = {
+    'linkerd.route.actual_response_latency.count': aggregator.GAUGE,
+    'linkerd.route.actual_response_latency.sum': aggregator.GAUGE,
+    'linkerd.route.actual_response_total': aggregator.MONOTONIC_COUNT,
+    'linkerd.tcp.connection_duration.count': aggregator.GAUGE,
+    'linkerd.tcp.connection_duration.sum': aggregator.GAUGE,
+}
+
+EXPECTED_METRICS_V2 = EXPECTED_METRICS_V2_BASE.copy()
+EXPECTED_METRICS_V2.update(EXPECTED_METRICS_V2_EXTENDED)
+
 EXPECTED_METRICS_V2_E2E = {
-    k: aggregator.COUNT if v == aggregator.MONOTONIC_COUNT else v for k, v in EXPECTED_METRICS_V2.items()
+    k: aggregator.COUNT if v == aggregator.MONOTONIC_COUNT else v for k, v in EXPECTED_METRICS_V2_BASE.items()
 }
 
 EXPECTED_METRICS_V2_NEW = {}

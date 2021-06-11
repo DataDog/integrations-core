@@ -15,9 +15,9 @@ pytestmark = pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, param',
     [
-        pytest.param('adodbapi', 'adoprovider', id='Provider is ignored when using adodbapi'),
-        pytest.param('odbc', 'dsn', id='DSN is ignored when using odbc'),
-        pytest.param('odbc', 'driver', id='Driver is ignored when using odbc'),
+        pytest.param('odbc', 'adoprovider', id='Provider is ignored when using odbc'),
+        pytest.param('adodbapi', 'dsn', id='DSN is ignored when using adodbapi'),
+        pytest.param('adodbapi', 'driver', id='Driver is ignored when using adodbapi'),
     ],
 )
 def test_will_warn_parameters_for_the_wrong_connection(instance_sql2017_defaults, connector, param):
@@ -33,15 +33,15 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_sql2017_defaults
 @pytest.mark.parametrize(
     'connector, cs, param',
     [
-        pytest.param('adodbapi', 'DSN', 'dsn', id='Cannot define DSN twice'),
-        pytest.param('adodbapi', 'DRIVER', 'driver', id='Cannot define DRIVER twice'),
-        pytest.param('adodbapi', 'SERVER', 'host', id='Cannot define DRIVER twice'),
-        pytest.param('adodbapi', 'UID', 'username', id='Cannot define UID twice'),
-        pytest.param('adodbapi', 'PWD', 'password', id='Cannot define PWD twice'),
-        pytest.param('odbc', 'PROVIDER', 'adoprovider', id='Cannot define PROVIDER twice'),
-        pytest.param('odbc', 'Data Source', 'host', id='Cannot define Data Source twice'),
-        pytest.param('odbc', 'User ID', 'username', id='Cannot define User ID twice'),
-        pytest.param('odbc', 'Password', 'password', id='Cannot define Password twice'),
+        pytest.param('odbc', 'DSN', 'dsn', id='Cannot define DSN twice'),
+        pytest.param('odbc', 'DRIVER', 'driver', id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'SERVER', 'host', id='Cannot define DRIVER twice'),
+        pytest.param('odbc', 'UID', 'username', id='Cannot define UID twice'),
+        pytest.param('odbc', 'PWD', 'password', id='Cannot define PWD twice'),
+        pytest.param('adodbapi', 'PROVIDER', 'adoprovider', id='Cannot define PROVIDER twice'),
+        pytest.param('adodbapi', 'Data Source', 'host', id='Cannot define Data Source twice'),
+        pytest.param('adodbapi', 'User ID', 'username', id='Cannot define User ID twice'),
+        pytest.param('adodbapi', 'Password', 'password', id='Cannot define Password twice'),
     ],
 )
 def test_will_fail_for_duplicate_parameters(instance_sql2017_defaults, connector, cs, param):
@@ -59,15 +59,15 @@ def test_will_fail_for_duplicate_parameters(instance_sql2017_defaults, connector
 @pytest.mark.parametrize(
     'connector, cs',
     [
-        pytest.param('odbc', 'DSN', id='Cannot define DSN for odbc'),
-        pytest.param('odbc', 'DRIVER', id='Cannot define DRIVER for odbc'),
-        pytest.param('odbc', 'SERVER', id='Cannot define DRIVER for odbc'),
-        pytest.param('odbc', 'UID', id='Cannot define UID for odbc'),
-        pytest.param('odbc', 'PWD', id='Cannot define PWD for odbc'),
-        pytest.param('adodbapi', 'PROVIDER', id='Cannot define PROVIDER for adodbapi'),
-        pytest.param('adodbapi', 'Data Source', id='Cannot define Data source for adodbapi'),
-        pytest.param('adodbapi', 'User ID', id='Cannot define User ID for adodbapi'),
-        pytest.param('adodbapi', 'Password', id='Cannot define Password for adodbapi'),
+        pytest.param('adodbapi', 'DSN', id='Cannot define DSN for adodbapi'),
+        pytest.param('adodbapi', 'DRIVER', id='Cannot define DRIVER for adodbapi'),
+        pytest.param('adodbapi', 'SERVER', id='Cannot define DRIVER for adodbapi'),
+        pytest.param('adodbapi', 'UID', id='Cannot define UID for adodbapi'),
+        pytest.param('adodbapi', 'PWD', id='Cannot define PWD for adodbapi'),
+        pytest.param('odbc', 'PROVIDER', id='Cannot define PROVIDER for odbc'),
+        pytest.param('odbc', 'Data Source', id='Cannot define Data source for odbc'),
+        pytest.param('odbc', 'User ID', id='Cannot define User ID for odbc'),
+        pytest.param('odbc', 'Password', id='Cannot define Password for odbc'),
     ],
 )
 def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_sql2017_defaults, connector, cs):

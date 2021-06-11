@@ -1,6 +1,10 @@
 # CHANGELOG - Kube_scheduler
 
-## 1.7.0 / 2021-03-07
+## 1.8.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
+## 1.7.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).
 * [Fixed] Bump base package requirement. See [#8770](https://github.com/DataDog/integrations-core/pull/8770).

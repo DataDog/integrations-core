@@ -1,5 +1,66 @@
 # CHANGELOG - datadog_checks_base
 
+## 19.0.0 / 2021-05-28
+
+* [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Upgrade ClickHouse dependencies. See [#9344](https://github.com/DataDog/integrations-core/pull/9344).
+* [Added] [OpenMetricsV2] Add an option to send sum and count information when using distribution metrics. See [#9301](https://github.com/DataDog/integrations-core/pull/9301).
+* [Added] Improve performance of using extra tags when executing a QueryManager. See [#8466](https://github.com/DataDog/integrations-core/pull/8466).
+* [Added] Add `hostname` parameter to QueryManager. See [#9260](https://github.com/DataDog/integrations-core/pull/9260).
+* [Fixed] Fix AttributeError in AIA chasing. See [#9328](https://github.com/DataDog/integrations-core/pull/9328).
+* [Fixed] Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+* [Changed] Add flush first value to Openmetrics histogram buckets. See [#9276](https://github.com/DataDog/integrations-core/pull/9276).
+* [Changed] Change 'collision in cached query metrics' log from debug to error. See [#9268](https://github.com/DataDog/integrations-core/pull/9268).
+* [Removed] Remove unused `utils.db.statement_samples` client. See [#9166](https://github.com/DataDog/integrations-core/pull/9166).
+* [Removed] Remove unused apply_row_limits in statement_metrics.py. See [#9378](https://github.com/DataDog/integrations-core/pull/9378).
+
+## 18.3.0 / 2021-04-27
+
+* [Added] Add merging of duplicate rows in statement_metrics. See [#9227](https://github.com/DataDog/integrations-core/pull/9227).
+* [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).
+
+## 18.2.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Allow the loading of arbitrary configuration models. See [#9180](https://github.com/DataDog/integrations-core/pull/9180).
+
+## 18.1.0 / 2021-04-16
+
+* [Added] Add unix_time format to QueryManager time_elapsed transformer. See [#9174](https://github.com/DataDog/integrations-core/pull/9174).
+* [Added] Support new aggregator APIs for the event platform. See [#9165](https://github.com/DataDog/integrations-core/pull/9165).
+* [Fixed] Upgrade ddtrace. See [#9127](https://github.com/DataDog/integrations-core/pull/9127).
+* [Security] Upgrade lxml python package. See [#9173](https://github.com/DataDog/integrations-core/pull/9173).
+
+## 18.0.0 / 2021-04-07
+
+* [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
+* [Added] Add `native_dynamic` OpenMetrics transformer. See [#9077](https://github.com/DataDog/integrations-core/pull/9077).
+* [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
+
+## 17.0.0 / 2021-03-30
+
+* [Added] Add `KubeletBase` base class. See [#9051](https://github.com/DataDog/integrations-core/pull/9051).
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Make counter refresh-related code more reusable. See [#8822](https://github.com/DataDog/integrations-core/pull/8822).
+* [Changed] Add a timeout for Kubernetes API calls. See [#9035](https://github.com/DataDog/integrations-core/pull/9035).
+
+## 16.9.0 / 2021-03-22
+
+* [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
+
+## 16.8.0 / 2021-03-18
+
+* [Added] AIA chasing for HTTP. See [#8725](https://github.com/DataDog/integrations-core/pull/8725).
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+
+## 16.7.0 / 2021-03-16
+
+* [Added] Add new precision time function. See [#8838](https://github.com/DataDog/integrations-core/pull/8838).
+
+## 16.6.1 / 2021-03-12 / Agent 7.27.0
+
+* [Fixed] Import kube client lazily. See [#8820](https://github.com/DataDog/integrations-core/pull/8820).
+
 ## 16.6.0 / 2021-03-05
 
 * [Added] Upgrade PyJWT to 2.0.1 on Python 3. See [#8762](https://github.com/DataDog/integrations-core/pull/8762).

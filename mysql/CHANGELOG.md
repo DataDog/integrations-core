@@ -1,6 +1,38 @@
 # CHANGELOG - mysql
 
-## 2.3.0 / 2021-03-07
+## 4.0.3 / 2021-06-08
+
+* [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).
+
+## 4.0.2 / 2021-06-07
+
+* [Fixed] Fix missing replication_role tag on DBM metrics & events. See [#9486](https://github.com/DataDog/integrations-core/pull/9486).
+
+## 4.0.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
+## 4.0.0 / 2021-05-28
+
+* [Added] Adds a `replication_role` tag to metrics emitted from AWS Aurora instances. See [#8282](https://github.com/DataDog/integrations-core/pull/8282).
+* [Fixed] Fix potential erroneous mysql statement metrics on duplicate queries. See [#9253](https://github.com/DataDog/integrations-core/pull/9253).
+* [Changed] Send database monitoring "full query text" events. See [#9397](https://github.com/DataDog/integrations-core/pull/9397).
+* [Changed] Remove `service` event facet. See [#9275](https://github.com/DataDog/integrations-core/pull/9275).
+* [Changed] Send database monitoring query metrics to new intake. See [#9223](https://github.com/DataDog/integrations-core/pull/9223).
+* [Removed] Remove unused query metric limit configuration. See [#9376](https://github.com/DataDog/integrations-core/pull/9376).
+
+## 3.0.1 / 2021-04-27 / Agent 7.28.0
+
+* [Fixed] Account for name change in replica metrics. See [#9230](https://github.com/DataDog/integrations-core/pull/9230).
+
+## 3.0.0 / 2021-04-19
+
+* [Added] Add runtime configuration validation. See [#8958](https://github.com/DataDog/integrations-core/pull/8958).
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Add replication_mode tag to replication service check. See [#8753](https://github.com/DataDog/integrations-core/pull/8753).
+* [Changed] Submit DBM query samples via new aggregator API. See [#9045](https://github.com/DataDog/integrations-core/pull/9045).
+
+## 2.3.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Collect mysql statement samples & execution plans . See [#8629](https://github.com/DataDog/integrations-core/pull/8629).
 * [Added] Apply default limits to MySQL statement summaries. See [#8646](https://github.com/DataDog/integrations-core/pull/8646).

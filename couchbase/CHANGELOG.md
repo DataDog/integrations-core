@@ -1,6 +1,6 @@
 # CHANGELOG - couchbase
 
-## 1.17.0 / 2021-03-01
+## 1.17.0 / 2021-03-01 / Agent 7.27.0
 
 * [Added] Add support for Sync Gateway metrics. See [#8691](https://github.com/DataDog/integrations-core/pull/8691).
 * [Added] Refactor and use new Agent signature. See [#8712](https://github.com/DataDog/integrations-core/pull/8712).

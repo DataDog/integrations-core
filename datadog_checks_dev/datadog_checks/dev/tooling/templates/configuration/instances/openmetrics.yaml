@@ -216,6 +216,14 @@
   value:
     example: false
     type: boolean
+- name: collect_counters_with_distributions
+  description: |
+    Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    `histogram_buckets_as_distributions` option.
+  value:
+    example: false
+    type: boolean
 - name: share_labels
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
@@ -292,5 +300,16 @@
   value:
     example: false
     type: boolean
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

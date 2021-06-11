@@ -7,15 +7,9 @@ from collections import defaultdict
 
 import click
 
-from ...utils import (
-    complete_valid_checks,
-    get_metadata_file,
-    get_metric_sources,
-    load_manifest,
-    normalize_display_name,
-    read_metadata_rows,
-)
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_success, echo_warning
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -205,6 +199,8 @@ VALID_UNIT_NAMES = {
     'deciwatt',
     'decidegree celsius',
     'span',
+    'exception',
+    'run',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
@@ -254,21 +250,19 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 def metadata(check, check_duplicates, show_warnings):
     """Validates metadata.csv files
 
-    If `check` is specified, only the check will be validated,
-    otherwise all metadata files in the repo will be.
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
     """
-    metric_sources = get_metric_sources()
+    checks = process_checks_option(check, source='metrics', validate=True)
+    echo_info(f"Validating metadata for {len(checks)} checks ...")
 
-    if check:
-        if check not in metric_sources:
-            abort(f'Metadata file `{get_metadata_file(check)}` does not exist.')
-        metric_sources = [check]
-    else:
-        metric_sources = sorted(metric_sources)
+    # If a check is specified, abort if it doesn't have a metadata file
+    if check not in ('all', 'changed') and not checks:
+        abort(f'Metadata file for {check} not found.')
 
     errors = False
 
-    for current_check in metric_sources:
+    for current_check in checks:
         if current_check.startswith('datadog_checks_'):
             continue
 
@@ -390,7 +384,7 @@ def metadata(check, check_duplicates, show_warnings):
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
 
             # check if there is unicode
-            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+            elif any(not content.isascii() for _, content in row.items()):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 

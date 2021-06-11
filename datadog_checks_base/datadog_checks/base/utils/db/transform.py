@@ -4,6 +4,7 @@
 from __future__ import division
 
 import re
+import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -253,10 +254,27 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     then this would submit with a value of `5`.
 
     The optional modifier `format` indicates what format the result is in. By default it is `native`, assuming the
-    underlying library provides timestamps as `datetime` objects. If it does not and passes them through directly as
-    strings, you must provide the expected timestamp format using the
+    underlying library provides timestamps as `datetime` objects.
+
+    If the value is a UNIX timestamp you can set the `format` modifier to `unix_time`.
+
+    If the value is a string representation of a date, you must provide the expected timestamp format using the
     [supported codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
+    Example:
+
+    ```yaml
+        columns:
+      - name: time_since_x
+        type: time_elapsed
+        format: native  # default value and can be omitted
+      - name: time_since_y
+        type: time_elapsed
+        format: unix_time
+      - name: time_since_z
+        type: time_elapsed
+        format: "%d/%m/%Y %H:%M:%S"
+    ```
     !!! note
         The code `%z` (lower case) is not supported on Windows.
     """
@@ -271,6 +289,11 @@ def get_time_elapsed(transformers, column_name, **modifiers):
         def time_elapsed(_, value, **kwargs):
             value = ensure_aware_datetime(value)
             gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    elif time_format == 'unix_time':
+
+        def time_elapsed(_, value, **kwargs):
+            gauge(_, time.time() - value, **kwargs)
 
     else:
 

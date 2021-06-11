@@ -68,6 +68,10 @@ For example:
 ```
 ddev release trello testable 7.17.1 7.18.0-rc.1
 ```
+or if the tag is not ready yet:
+```
+ddev release trello testable 7.17.1 origin/master
+```
 
 would select all commits that were merged between the Git references.
 

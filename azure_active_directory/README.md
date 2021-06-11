@@ -1,4 +1,4 @@
-# Agent Check: azure_active_directory
+# azure_active_directory
 
 ## Overview
 
@@ -48,7 +48,7 @@ This integration allows you to setup log ingestion for Azure Active Directory ac
 
 This includes the following:
 
-   - Sign-ins – Provides information about the usage of managed applications and user sign-in activities.
+   - Sign-ins - Provides information about the usage of managed applications and user sign-in activities.
 
    - Audit logs - Provides traceability through logs for all changes done by various features within Azure AD.  
 

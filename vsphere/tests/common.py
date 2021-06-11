@@ -3,7 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
+
 HERE = os.path.abspath(os.path.dirname(__file__))
+
+VSPHERE_VERSION = os.environ.get('VSPHERE_VERSION')
 
 LAB_USERNAME = os.environ.get('TEST_VSPHERE_USER')
 LAB_PASSWORD = os.environ.get('TEST_VSPHERE_PASS')
@@ -21,3 +25,9 @@ LAB_INSTANCE = {
     'collect_events': True,
     'use_collect_events_fallback': True,
 }
+
+
+def build_rest_api_client(config, logger):
+    if VSPHERE_VERSION.startswith('7.'):
+        return VSphereRestAPI(config, logger, False)
+    return VSphereRestAPI(config, logger, True)
