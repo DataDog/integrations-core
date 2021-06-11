@@ -294,5 +294,4 @@ def test_e2e(dd_agent_check):
             aggregator.assert_metric(metric)
     # We can't assert all covered, as some aren't received every time
     aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
