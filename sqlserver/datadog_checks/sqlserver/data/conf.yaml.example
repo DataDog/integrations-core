@@ -58,7 +58,7 @@ instances:
 
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.  
-    If `true`, overrides `database` option.
+    ## If `true`, overrides `database` option.
     ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
     #
     # database_autodiscovery: false
