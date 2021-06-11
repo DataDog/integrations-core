@@ -19,7 +19,7 @@
             "prefix": "app_name"
         }
     ],
-    "title": "Databricks Overview",
+    "title": "Databricks Spark Overview",
     "widgets": [
         {
             "definition": {
