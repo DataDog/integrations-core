@@ -39,6 +39,19 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 ## Best Practices
 
+### Example of a great integration dashboard
+
+![Elasticsearch in high density mode](../assets/images/example_dashboard_high_density.png)
+
+- [x] Attention-grabbing "about" section with a banner image, concise copy, useful links, and a good typography hierarchy
+- [x] A brief, annotated "overview" section with the most important statistics, right at the top
+- [x] Simple graph titles. Group titles in title-case
+- [x] Close to symmetrical in high density mode
+- [x] Well formatted, concise notes
+- [x] Color coordination between related groups, notes within groups, and graphs within groups
+
+Follow the guidelines below as you build your dashboard to achieve something similar.
+
 ### General
 
 1. When creating a new dashboard, select the default dashboard type (internally called multisize layout).
@@ -47,12 +60,15 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
     !!! warning
         Avoid using ++hyphen++ (hyphen) in the dashboard title as the dashboard URL is generated from the title.
-
-1. Research the metrics supported by the integration and consider grouping them in relevant categories.
-Important metrics that are key to the performance and overview of the integration should be at the top.
+        
+1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.us1.prod.dog/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
+   ![Logo in header](../assets/images/logo_header.png)
 
 1. Always include an "about" group for the integration containing a brief description and helpful links. Also include an "overview" group containing a few of the most important metrics, and place it at the top of the dashboard. Edit the "about" group and select the "banner" display option, then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. We store integration banner images in github, add a new one by creating a PR in the [web-ui repo](https://github.com/DataDog/web-ui/tree/preprod/public/static/images/integration_dashboard). The "about" section should contain content, not data; the "overview" section should contain data. Avoid making the "about" section full-width.
    ![Elasticsearch dashboard](../assets/images/example_dashboard.png)
+   
+1. Research the metrics supported by the integration and consider grouping them in relevant categories.
+Important metrics that are key to the performance and overview of the integration should be at the top.
 
 1. Use Group widgets to title and group sections, rather than note widgets as you might on a screenboard. Use partial width groups to display groups side-by-side. Most dashboards should display every widget within a group.
    ![Group titles](../assets/images/group_titles.png)
@@ -65,9 +81,6 @@ Important metrics that are key to the performance and overview of the integratio
 
 1. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you're confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. The most commonly used metric widgets are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
    ![Variety of widgets](../assets/images/variety.png)
-
-1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.us1.prod.dog/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
-   ![Logo in header](../assets/images/logo_header.png)
 
 1. Try to make the left and right halves of your dashboard symmetrical in high density mode. Users with large monitors will see your dashboard in high density mode by default, so it's important to make sure the group relationships make sense, and the dashboard looks good. You can adjust group heights to achieve this, and move groups between the left and right halves.
 
@@ -134,16 +147,3 @@ Important metrics that are key to the performance and overview of the integratio
     | Volume (e.g. Number of connections) | `area` |
     | Counts (e.g. Number of errors) | `bars` |
     | Multiple groups or default | `lines` |
-
-### Examples
-
-#### Elasticsearch
-
-![Elasticsearch in high density mode](../assets/images/example_dashboard_high_density.png)
-
-- [x] Attention-grabbing "about" section with a banner image, concise copy, useful links, and a good typography hierarchy
-- [x] A brief, annotated "overview" section with the most important statistics, right at the top
-- [x] Simple graph titles. Group titles in title-case
-- [x] Close to symmetrical in high density mode
-- [x] Well formatted, concise notes
-- [x] Color coordination between related groups, notes within groups, and graphs within groups
