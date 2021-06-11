@@ -179,7 +179,7 @@ envoy.http.downstream_cx_ssl_total,count,,connection,,Total TLS connections,0,en
 envoy.http.downstream_cx_http1_total,count,,connection,,Total HTTP/1.1 connections,0,envoy,
 envoy.http.downstream_cx_websocket_total,count,,connection,,Total WebSocket connections,0,envoy,
 envoy.http.downstream_cx_http2_total,count,,connection,,Total HTTP/2 connections,0,envoy,
-envoy.http.downstream_cx_http3_total,count,,connection,,Total HTTP/3 connections,0,envoy
+envoy.http.downstream_cx_http3_total,count,,connection,,Total HTTP/3 connections,0,envoy,
 envoy.http.downstream_cx_destroy,count,,connection,,Total connections destroyed,0,envoy,
 envoy.http.downstream_cx_destroy_remote,count,,connection,,Total connections destroyed due to remote close,0,envoy,
 envoy.http.downstream_cx_destroy_local,count,,connection,,Total connections destroyed due to local close,0,envoy,
@@ -191,7 +191,7 @@ envoy.http.downstream_cx_ssl_active,gauge,,connection,,Total active TLS connecti
 envoy.http.downstream_cx_http1_active,gauge,,connection,,Total active HTTP/1.1 connections,0,envoy,
 envoy.http.downstream_cx_websocket_active,gauge,,connection,,Total active WebSocket connections,0,envoy,
 envoy.http.downstream_cx_http2_active,gauge,,connection,,Total active HTTP/2 connections,0,envoy,
-envoy.http.downstream_cx_http3_active,gauge,,connection,,Total active HTTP/3 connections,0,envoy
+envoy.http.downstream_cx_http3_active,gauge,,connection,,Total active HTTP/3 connections,0,envoy,
 envoy.http.downstream_cx_protocol_error,count,,error,,Total protocol errors,-1,envoy,
 envoy.http.downstream_cx_rx_bytes_total,count,,byte,,Total bytes received,0,envoy,
 envoy.http.downstream_cx_rx_bytes_buffered,gauge,,byte,,Total received bytes currently buffered,0,envoy,
