@@ -90,6 +90,8 @@ consul.runtime.gc_pause_ns.95percentile,gauge,,nanosecond,,[DogStatsD] [Promethe
 consul.runtime.gc_pause_ns.avg,gauge,,nanosecond,,[DogStatsD] [Prometheus] The avg for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc avg
 consul.runtime.gc_pause_ns.count,count,,,,[DogStatsD] [Prometheus] The number of samples of consul.runtime.gc_pause_ns,-1,consul,run gc count
 consul.runtime.gc_pause_ns.max,gauge,,nanosecond,,[DogStatsD] [Prometheus] The max for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc max
+consul.runtime.gc_pause_ns.sum,count,,nanosecond,,[DogStatsD] [Prometheus] The sum of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,0,consul,run gc sum
+consul.runtime.gc_pause_ns.quantile,gauge,,nanosecond,,[DogStatsD] [Prometheus] The quantile of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,0,consul,run gc sum
 consul.runtime.gc_pause_ns.median,gauge,,nanosecond,,[DogStatsD] [Prometheus] The median for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc median
 consul.serf.events,count,10,event,,[DogStatsD] [Prometheus] This increments when a Consul agent processes a serf event,0,consul,num events
 consul.serf.coordinate.adjustment_ms.95percentile,gauge,,millisecond,,[DogStatsD] [Prometheus] The p95 in milliseconds for the node coordinate adjustment,-1,consul,serf coord avg
