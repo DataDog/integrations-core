@@ -7,8 +7,8 @@ import pytest
 
 from datadog_checks.base import OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.dev import get_here
+from datadog_checks.dev.testing import requires_py3
 
-from ..utils import requires_py3
 from .bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVERRIDES
 
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_config]

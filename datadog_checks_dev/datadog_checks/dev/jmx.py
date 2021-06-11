@@ -36,3 +36,8 @@ JMX_E2E_METRICS = [
     'jmx.gc.minor_collection_count',
     'jmx.gc.minor_collection_time',
 ]
+
+JVM_E2E_METRICS_NEW = list(JVM_E2E_METRICS)
+JVM_E2E_METRICS_NEW.remove('jvm.gc.cms.count')
+JVM_E2E_METRICS_NEW.remove('jvm.gc.parnew.time')
+JVM_E2E_METRICS_NEW.extend(m.replace('jmx.', 'jvm.', 1) for m in JMX_E2E_METRICS)

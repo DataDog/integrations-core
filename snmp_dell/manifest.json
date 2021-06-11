@@ -3,7 +3,6 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "snmp_dell",
-  "metric_prefix": "snmp.",
   "metric_to_check": [
     "snmp.fanSpeed",
     "snmp.systemStateChassisStatus",

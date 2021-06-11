@@ -8,7 +8,7 @@ from clickhouse_driver.errors import Error, NetworkError
 from datadog_checks.clickhouse import ClickhouseCheck
 
 from .common import CLICKHOUSE_VERSION
-from .metrics import ALL_METRICS
+from .metrics import get_metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -20,7 +20,8 @@ def test_check(aggregator, instance):
 
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
-    for metric in ALL_METRICS:
+    metrics = get_metrics(CLICKHOUSE_VERSION)
+    for metric in metrics:
         aggregator.assert_metric_has_tag(metric, server_tag)
         aggregator.assert_metric_has_tag(metric, port_tag)
         aggregator.assert_metric_has_tag(metric, 'db:default')

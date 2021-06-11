@@ -1,6 +1,14 @@
 # CHANGELOG - ClickHouse
 
-## 2.0.2 / 2021-03-07
+## 2.2.0 / 2021-05-28
+
+* [Added] Upgrade ClickHouse dependencies. See [#9344](https://github.com/DataDog/integrations-core/pull/9344).
+
+## 2.1.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Support Clickhouse metrics v20. See [#8779](https://github.com/DataDog/integrations-core/pull/8779).
+
+## 2.0.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

@@ -25,7 +25,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "ASP.NET - Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"

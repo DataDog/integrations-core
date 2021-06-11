@@ -374,6 +374,38 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'vhost.vcluster.upstream_rq_retry': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'vhost.vcluster.upstream_rq_retry_limit_exceeded': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'vhost.vcluster.upstream_rq_retry_overflow': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'vhost.vcluster.upstream_rq_retry_success': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'vhost.vcluster.upstream_rq_time': {
         'tags': (
             ('virtual_host_name', ),
@@ -381,6 +413,22 @@ METRICS = {
             (),
         ),
         'method': 'histogram',
+    },
+    'vhost.vcluster.upstream_rq_timeout': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'vhost.vcluster.upstream_rq_total': {
+        'tags': (
+            ('virtual_host_name', ),
+            ('virtual_cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'cluster.ratelimit.ok': {
         'tags': (

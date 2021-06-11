@@ -4,15 +4,31 @@
 import json
 
 import boto3
+from six import PY2
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
 
 class AmazonMskCheck(OpenMetricsBaseCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
     SERVICE_CHECK_CONNECT = 'aws.msk.can_connect'
     DEFAULT_METRIC_LIMIT = 0
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if not PY2 and is_affirmative(instance.get('use_openmetrics', False)):
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AmazonMskCheckV2
+
+            return AmazonMskCheckV2(name, init_config, instances)
+        else:
+            return super(AmazonMskCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(AmazonMskCheck, self).__init__(
@@ -29,6 +45,7 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             (int(self.instance.get('jmx_exporter_port', 11001)), JMX_METRICS_MAP, JMX_METRICS_OVERRIDES),
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
         )
+        self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
@@ -77,8 +94,8 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
 
             for endpoint in broker_info['Endpoints']:
                 for (port, metrics_mapper, type_overrides) in self._exporter_data:
-                    self._scraper_config['prometheus_url'] = '{}://{}:{}/metrics'.format(
-                        self._endpoint_prefix, endpoint, port
+                    self._scraper_config['prometheus_url'] = '{}://{}:{}{}'.format(
+                        self._endpoint_prefix, endpoint, port, self._prometheus_metrics_path
                     )
                     self._scraper_config['metrics_mapper'] = metrics_mapper
                     self._scraper_config['type_overrides'] = type_overrides

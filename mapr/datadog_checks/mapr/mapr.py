@@ -56,22 +56,22 @@ class MaprCheck(AgentCheck):
         self.base_tags = self.instance.get('tags', [])
         self.has_ever_submitted_metrics = False
 
-        auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
+        self.auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
 
-        if not auth_ticket:
+        if not self.auth_ticket:
             self.log.warning(
                 "Neither `ticket_location` (in the config.yaml) or the %s environment variable is set. This will"
                 "cause authentication issues if your cluster requires authenticated requests.",
                 TICKET_LOCATION_ENV_VAR,
             )
-        elif not os.access(auth_ticket, os.R_OK):
+        elif not os.access(self.auth_ticket, os.R_OK):
             raise CheckException(
                 "MapR authentication ticket located at %s is not readable by the dd-agent "
                 "user. Please update the file permissions.",
-                auth_ticket,
+                self.auth_ticket,
             )
-
-        os.environ[TICKET_LOCATION_ENV_VAR] = auth_ticket
+        else:
+            os.environ[TICKET_LOCATION_ENV_VAR] = self.auth_ticket
 
     def check(self, _):
         if ck is None:
@@ -115,10 +115,18 @@ class MaprCheck(AgentCheck):
                     self.log.warning("Received unexpected message %s, wont be processed", msg.value())
                     self.log.exception(e)
             elif msg.error().code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
-                raise CheckException(
-                    "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
-                    "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
-                )
+                if self.auth_ticket:
+                    raise CheckException(
+                        "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
+                        "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
+                    )
+                else:
+                    raise CheckException(
+                        "dd-agent user could not consume topic '%s'. Please ensure that:\n"
+                        "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
+                        "\t* The dd-agent user has the 'consume' permission on topic %s or "
+                        "impersonation is correctly configured." % (self.topic_path, self.topic_path)
+                    )
             elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
                 # Partition EOF is expected anytime we reach the end of one partition in the topic.
                 # This is expected at least once per partition per check run.

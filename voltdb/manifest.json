@@ -43,5 +43,11 @@
       "source": "voltdb"
     },
     "metrics_metadata": "metadata.csv"
-  }
+  },
+  "further_reading": [
+    {"link": "https://www.datadoghq.com/blog/monitor-voltdb-with-datadog/",
+      "tag": "Blog",
+      "text": "Monitor VoltDB with Datadog"
+    }
+  ]
 }

@@ -6,9 +6,9 @@ import os
 import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.ssh_tunnel import socks_proxy
 from datadog_checks.dev.terraform import terraform_run
-from datadog_checks.dev.utils import get_here
 
 
 @pytest.fixture(scope='session')

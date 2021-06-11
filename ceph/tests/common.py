@@ -33,6 +33,11 @@ EXPECTED_METRICS = [
     "ceph.write_op_per_sec",
     "ceph.num_near_full_osds",
     "ceph.num_full_osds",
+    "ceph.misplaced_objects",
+    "ceph.misplaced_total",
+    "ceph.recovering_objects_per_sec",
+    "ceph.recovering_bytes_per_sec",
+    "ceph.recovering_keys_per_sec",
     # "ceph.osd.pct_used",  # Not send or ceph luminous and above
 ]
 

@@ -20,6 +20,10 @@ files:
             value:
               example: 5050
               type: integer
+          - name: cluster_name
+            description: This is used as the value of the `mesos_cluster` tag, avoiding potential network calls.
+            value:
+              type: string
           - name: tasks
             description: Specify the tasks from which you want to send metrics to Datadog.
             value:
@@ -54,3 +58,8 @@ files:
                     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
                     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
           - template: instances/default
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/mesos/*
+            source: mesos

@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import click
 
-from ...utils import resolve_path
+from ...fs import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
 from ..utils import kebab_case_name, normalize_package_name

@@ -29,6 +29,10 @@ INSTANCES = {
         'included_metrics': [r'envoy\.cluster\.'],
         'excluded_metrics': [r'envoy\.cluster\.out\.'],
     },
+    'collect_server_info': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'collect_server_info': 'false',
+    },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 

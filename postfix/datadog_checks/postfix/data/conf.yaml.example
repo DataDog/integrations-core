@@ -2,7 +2,7 @@
 #
 init_config:
 
-    ## @param postfix_user - string - required
+    ## @param postfix_user - string - optional - default: root
     ## The user running dd-agent must have passwordless sudo access for the find
     ## command to run the postfix check.
     ## Example /etc/sudoers entry:
@@ -11,7 +11,7 @@ init_config:
     ## On Redhat, CentOS, and Amazon Linux, also add:
     ##   Defaults:dd-agent !requiretty
     #
-    postfix_user: postfix
+    # postfix_user: root
 
     ## @param postqueue - boolean - optional - default: false
     ## Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.

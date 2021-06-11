@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Hazelcast][1].
+This check monitors [Hazelcast][1] v4.0+.
 
 ## Setup
 

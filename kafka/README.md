@@ -25,6 +25,8 @@ The Agent's Kafka check is included in the [Datadog Agent][4] package, so you do
 
 The check collects metrics via JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][5]. You can use the same JVM that Kafka uses.
 
+**Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Please use the [Amazon MSK integration][6] instead.
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -36,9 +38,9 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6]. Kafka bean names depend on the exact Kafka version you're running. Use the [example configuration file][7] that comes packaged with the Agent as a base since it is the most up-to-date configuration. **Note**: the Agent version in the example may be for a newer version of the Agent than what you have installed.
+1. Edit the `kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Kafka bean names depend on the exact Kafka version you're running. Use the [example configuration file][8] that comes packaged with the Agent as a base since it is the most up-to-date configuration. **Note**: the Agent version in the example may be for a newer version of the Agent than what you have installed.
 
-2. [Restart the Agent][8].
+2. [Restart the Agent][9].
 
 ##### Log collection
 
@@ -63,7 +65,7 @@ _Available for Agent versions >6.0_
      [%d] %p %m (%c)%n
    ```
 
-    Clone and edit the [integration pipeline][9] if you have a different format.
+    Clone and edit the [integration pipeline][10] if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -71,7 +73,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-4. Add the following configuration block to your `kafka.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample kafka.d/conf.yaml][7] for all available configuration options.
+4. Add the following configuration block to your `kafka.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample kafka.d/conf.yaml][8] for all available configuration options.
 
    ```yaml
    logs:
@@ -86,7 +88,7 @@ _Available for Agent versions >6.0_
        #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
    ```
 
-5. [Restart the Agent][8].
+5. [Restart the Agent][9].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -95,13 +97,13 @@ _Available for Agent versions >6.0_
 
 ##### Metric collection
 
-For containerized environments, see the [Autodiscovery with JMX][10] guide.
+For containerized environments, see the [Autodiscovery with JMX][11] guide.
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
@@ -112,7 +114,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][12] and look for `kafka` under the **JMXFetch** section:
+[Run the Agent's status subcommand][13] and look for `kafka` under the **JMXFetch** section:
 
 ```text
 ========
@@ -132,7 +134,7 @@ JMXFetch
 
 ### Metrics
 
-See [metadata.csv][13] for a list of metrics provided by this check.
+See [metadata.csv][14] for a list of metrics provided by this check.
 
 ### Events
 
@@ -145,32 +147,33 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 
 ## Troubleshooting
 
-- [Troubleshooting and Deep Dive for Kafka][14]
-- [Agent failed to retrieve RMIServer stub][15]
-- [Producer and Consumer metrics don't appear in my Datadog application][16]
+- [Troubleshooting and Deep Dive for Kafka][15]
+- [Agent failed to retrieve RMIServer stub][16]
+- [Producer and Consumer metrics don't appear in my Datadog application][17]
 
 ## Further Reading
 
-- [Monitoring Kafka performance metrics][17]
-- [Collecting Kafka performance metrics][18]
-- [Monitoring Kafka with Datadog][19]
+- [Monitoring Kafka performance metrics][18]
+- [Collecting Kafka performance metrics][19]
+- [Monitoring Kafka with Datadog][20]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
-[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[7]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[11]: https://docs.datadoghq.com/agent/kubernetes/log/
-[12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[13]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
-[14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[16]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[17]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[18]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[19]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[8]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[11]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
+[15]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[16]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[17]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
+[18]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[19]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[20]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
