@@ -124,7 +124,7 @@ instances:
     ## Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
     ## which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
     #
-    # disable_legacy_cluster_tag: true
+    disable_legacy_cluster_tag: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
