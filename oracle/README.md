@@ -46,7 +46,7 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
        unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
        ```
 
-<!-- xxz tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
