@@ -122,6 +122,11 @@ instances:
     #
     # max_services: 50
 
+    ## @param threads_count - number - optional - default: 1
+    ## Increase the number of threads to collect consul services checks.
+    #
+    # threads_count: 1
+
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `consul_service` and disable the associated deprecation warning.

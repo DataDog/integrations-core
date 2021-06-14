@@ -194,7 +194,7 @@ kind: Pod
 metadata:
   name: haproxy
   annotations:
-    ad.datadoghq.com/mongo.logs: '[{"source":"haproxy","service":"<SERVICE_NAME>"}]'
+    ad.datadoghq.com/haproxy.logs: '[{"source":"haproxy","service":"<SERVICE_NAME>"}]'
 spec:
   containers:
     - name: haproxy

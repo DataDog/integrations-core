@@ -17,7 +17,7 @@ def shared_is_jmx(field, value):
 
 
 def shared_new_gc_metrics(field, value):
-    return False
+    return True
 
 
 def shared_proxy(field, value):

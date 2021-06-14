@@ -74,6 +74,7 @@ class InstanceConfig(BaseModel):
     health_service_check: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
+    ignore_tags: Optional[Sequence[str]]
     jmx_exporter_port: Optional[int]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]

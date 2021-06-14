@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.12.0 / 2021-05-28
+
+* [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).
+
 ## 1.11.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

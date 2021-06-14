@@ -16,6 +16,7 @@ from .eula import eula
 from .http import http
 from .imports import imports
 from .jmx_metrics import jmx_metrics
+from .licenses import licenses
 from .manifest import manifest
 from .metadata import metadata
 from .models import models
@@ -35,6 +36,7 @@ ALL_COMMANDS = (
     dep,
     eula,
     jmx_metrics,
+    licenses,
     http,
     legacy_signature,
     imports,

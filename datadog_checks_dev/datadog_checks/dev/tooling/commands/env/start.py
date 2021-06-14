@@ -245,6 +245,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
+    post_install_commands = metadata.get('post_install_commands', [])
 
     # for example, to install some tools inside container:
     # export DDEV_AGENT_START_COMMAND="bash -c 'apt update && apt install -y vim less'"
@@ -298,7 +299,25 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             environment.update_check()
             echo_success('success!')
 
-    if dev or base or start_commands:
+    if post_install_commands:
+        echo_waiting('Running extra post-install commands... ', nl=False)
+
+        for command in post_install_commands:
+            result = environment.exec_command(command, capture=True)
+            if result.code:
+                click.echo()
+                echo_info(result.stdout + result.stderr)
+                echo_failure('An error occurred.')
+                echo_waiting('Stopping the environment...')
+                stop_environment(check, env, metadata=metadata)
+                echo_waiting('Stopping the Agent...')
+                environment.stop_agent()
+                environment.remove_config()
+                abort()
+
+        echo_success('success!')
+
+    if dev or base or start_commands or post_install_commands:
         echo_waiting('Reloading the environment to reflect changes... ', nl=False)
         result = environment.restart_agent()
 

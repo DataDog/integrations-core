@@ -175,7 +175,7 @@ class RelationsManager(object):
 
     @staticmethod
     def validate_relations_config(yamlconfig):
-        # type: (Dict) -> None
+        # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
             if isinstance(element, dict):
                 if not (RELATION_NAME in element or RELATION_REGEX in element):
@@ -196,7 +196,7 @@ class RelationsManager(object):
                     raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
                 if not isinstance(element.get(RELKIND, []), list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
-            else:
+            elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod

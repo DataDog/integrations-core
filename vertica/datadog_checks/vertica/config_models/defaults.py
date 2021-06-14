@@ -28,6 +28,10 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_db(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -42,6 +46,14 @@ def instance_min_collection_interval(field, value):
 
 def instance_password(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_port(field, value):
+    return 5433
+
+
+def instance_server(field, value):
+    return 'localhost'
 
 
 def instance_service(field, value):
@@ -86,3 +98,7 @@ def instance_use_global_custom_queries(field, value):
 
 def instance_use_tls(field, value):
     return False
+
+
+def instance_username(field, value):
+    return get_default_field_value(field, value)

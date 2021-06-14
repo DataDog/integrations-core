@@ -70,6 +70,7 @@ class InstanceConfig(BaseModel):
     single_node_install: Optional[bool]
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
+    threads_count: Optional[float]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]

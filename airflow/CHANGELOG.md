@@ -1,6 +1,6 @@
 # CHANGELOG - Airflow
 
-## 1.8.0 / 2021-04-19
+## 1.8.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add support for Airflow 2. See [#9064](https://github.com/DataDog/integrations-core/pull/9064).
 

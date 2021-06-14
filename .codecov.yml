@@ -1,5 +1,5 @@
 comment:
-  layout: flags, files
+  layout: flags
   behavior: default
   branches: null
 coverage:

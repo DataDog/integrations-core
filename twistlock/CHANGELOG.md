@@ -1,6 +1,6 @@
 # CHANGELOG - Twistlock
 
-## 1.11.0 / 2021-04-19
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#9000](https://github.com/DataDog/integrations-core/pull/9000).
 
