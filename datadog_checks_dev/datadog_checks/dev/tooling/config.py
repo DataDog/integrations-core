@@ -6,8 +6,8 @@ from collections import deque
 from copy import deepcopy
 
 import toml
-from appdirs import user_data_dir
 from atomicwrites import atomic_write
+from platformdirs import user_data_dir
 
 from ..fs import ensure_parent_dir_exists, file_exists, read_file
 

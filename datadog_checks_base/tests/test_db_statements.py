@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import copy
 
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 
 
 def add_to_dict(a, b):
@@ -75,7 +76,10 @@ class TestStatementMetrics:
                 'user': 'rover',
             },
         ]
-        assert expected == sm.compute_derivative_rows(rows2, metrics, key=key)
+
+        expected_by_query = {v['query']: v for v in expected}
+        derived_rows = {v['query']: v for v in sm.compute_derivative_rows(rows2, metrics, key=key)}
+        assert expected_by_query == derived_rows
         # No changes should produce no rows
         assert [] == sm.compute_derivative_rows(rows2, metrics, key=key)
 
@@ -109,63 +113,71 @@ class TestStatementMetrics:
         assert 1 == len(sm.compute_derivative_rows(rows3, metrics, key=key))  # only 1 row computed
         assert 2 == len(sm.compute_derivative_rows(rows4, metrics, key=key))  # both rows computed
 
-    def test_apply_row_limits(self):
-        def assert_any_order(a, b):
-            assert sorted(a, key=lambda row: row['_']) == sorted(b, key=lambda row: row['_'])
+    def test_compute_derivative_rows_with_duplicates(self):
+        sm = StatementMetrics()
 
-        rows = [
-            {'_': 0, 'count': 2, 'time': 1000},
-            {'_': 1, 'count': 20, 'time': 5000},
-            {'_': 2, 'count': 20, 'time': 8000},
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},
-            {'_': 5, 'count': 60, 'time': 500},
-            {'_': 6, 'count': 90, 'time': 5000},
-            {'_': 7, 'count': 50, 'time': 5000},
-            {'_': 8, 'count': 40, 'time': 100},
-            {'_': 9, 'count': 30, 'time': 900},
-            {'_': 10, 'count': 80, 'time': 800},
-            {'_': 11, 'count': 110, 'time': 7000},
+        def key(row):
+            return (row['query_signature'], row['db'], row['user'])
+
+        metrics = ['count', 'time']
+
+        rows1 = [
+            {
+                'count': 13,
+                'time': 2005,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 25,
+                'time': 105,
+                'errors': 0,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
         ]
-        assert_any_order(
-            [], apply_row_limits(rows, {'count': (0, 0), 'time': (0, 0)}, 'count', True, key=lambda row: row['_'])
-        )
 
-        expected = [
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},  # The bottom 1 row for both 'count' and 'time'
-            {'_': 2, 'count': 20, 'time': 8000},
+        rows2 = [
+            {
+                'count': 14,
+                'time': 2006,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
         ]
-        assert_any_order(
-            expected, apply_row_limits(rows, {'count': (1, 1), 'time': (1, 1)}, 'count', True, key=lambda row: row['_'])
-        )
 
-        expected = [
-            {'_': 5, 'count': 60, 'time': 500},
-            {'_': 10, 'count': 80, 'time': 800},
-            {'_': 6, 'count': 90, 'time': 5000},
-            {'_': 11, 'count': 110, 'time': 7000},
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},
-            {'_': 0, 'count': 2, 'time': 1000},
-            {'_': 2, 'count': 20, 'time': 8000},
-            {'_': 8, 'count': 40, 'time': 100},
+        # Run a first check to initialize tracking
+        sm.compute_derivative_rows(rows1, metrics, key=key)
+        # Run the check again to compute the metrics
+        metrics = sm.compute_derivative_rows(rows2, metrics, key=key)
+
+        expected_merged_metrics = [
+            {
+                'count': 2,
+                'time': 21,
+                'errors': 32,
+                'db': 'puppies',
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'user': 'dog',
+            }
         ]
-        assert_any_order(
-            expected, apply_row_limits(rows, {'count': (5, 2), 'time': (2, 2)}, 'count', True, key=lambda row: row['_'])
-        )
 
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (6, 6), 'time': (0, 0)}, 'time', False, key=lambda row: row['_']),
-        )
-
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (0, 0), 'time': (4, 8)}, 'time', False, key=lambda row: row['_']),
-        )
-
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (20, 20), 'time': (12, 5)}, 'time', False, key=lambda row: row['_']),
-        )
+        assert expected_merged_metrics == metrics

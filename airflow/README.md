@@ -34,7 +34,7 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
 
 ##### Connect Airflow to DogStatsD
 
-Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics:
+Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics. For more information about the metrics reported by the Airflow version that is being used, and about the additional options available in Airflow, see the [Airflow documentation][16].
 
 **Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][13].
 
@@ -276,7 +276,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 |----------------------|-----------------------|
 | `<INTEGRATION_NAME>` | `airflow`             |
 | `<INIT_CONFIG>`      | blank or `{}`         |
-| `<INSTANCE_CONFIG>`  | `{"url": "%%host%%"}` |
+| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%"}` |
 
 ##### Log collection
 
@@ -350,3 +350,4 @@ Need help? Contact [Datadog support][7].
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample
+[16]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html

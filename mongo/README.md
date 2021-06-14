@@ -11,7 +11,7 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
-**Note**: MongoDB v3.0+ is required for this integration.
+**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters.
 
 ## Setup
 
@@ -279,7 +279,7 @@ metadata:
     ad.datadoghq.com/mongo.instances: |
       [
         {
-          "hosts": ["%%host%%:%%port%%], 
+          "hosts": ["%%host%%:%%port%%"], 
           "username": "datadog", 
           "password": "<UNIQUEPASSWORD>", 
           "database": "<DATABASE>"

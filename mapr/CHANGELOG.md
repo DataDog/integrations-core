@@ -1,6 +1,11 @@
 # CHANGELOG - mapr
 
-## 1.4.0 / 2021-04-19
+## 1.4.1 / 2021-05-20
+
+* [Fixed] Fix init failure when auth_ticket is not provided. See [#9390](https://github.com/DataDog/integrations-core/pull/9390).
+* [Fixed] Fixup for an AttributeError. See [#9343](https://github.com/DataDog/integrations-core/pull/9343).
+
+## 1.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8950](https://github.com/DataDog/integrations-core/pull/8950).
 

@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.7.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8961](https://github.com/DataDog/integrations-core/pull/8961).
+
 ## 1.6.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

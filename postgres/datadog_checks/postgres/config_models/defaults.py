@@ -52,6 +52,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_ignore_databases(field, value):
+    return ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+
+
 def instance_max_relations(field, value):
     return 300
 
@@ -86,10 +90,6 @@ def instance_service(field, value):
 
 def instance_ssl(field, value):
     return 'false'
-
-
-def instance_statement_metrics_limits(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_statement_samples(field, value):

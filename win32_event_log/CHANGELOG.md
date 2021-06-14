@@ -1,6 +1,14 @@
 # CHANGELOG - win32_event_log
 
-## 2.8.0 / 2021-04-19
+## 2.9.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
+## 2.9.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9006](https://github.com/DataDog/integrations-core/pull/9006).
+
+## 2.8.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
 * [Fixed] Fix description of the `path` option. See [#8842](https://github.com/DataDog/integrations-core/pull/8842).

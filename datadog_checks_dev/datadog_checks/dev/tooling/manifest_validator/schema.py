@@ -21,7 +21,6 @@ def get_manifest_schema():
                 "maintainer": {
                     "description": "The email address for the maintainer of this integration",
                     "type": "string",
-                    "pattern": "^[\u0000-\u007F]*$",
                     "format": "email",
                 },
                 "manifest_version": {"description": "The schema version of this manifest", "type": "string"},
@@ -58,7 +57,6 @@ def get_manifest_schema():
                 "support": {
                     "description": "The support type for this integration, one of `core`, `contrib`, or `partner`",
                     "type": "string",
-                    "pattern": "^[\u0000-\u007F]*$",
                     "enum": ["core", "contrib", "partner"],
                 },
                 "supported_os": {
@@ -69,7 +67,6 @@ def get_manifest_schema():
                 "public_title": {
                     "description": "A human readable public title of this integration",
                     "type": "string",
-                    "pattern": "^[\u0000-\u007F]*$",
                     "minLength": 1,
                 },
                 "categories": {
@@ -224,7 +221,6 @@ def get_manifest_schema():
                                     "legal_email": {
                                         "description": "Email of the partner company to use for subscription purposes",
                                         "type": "string",
-                                        "pattern": "^[\u0000-\u007F]*$",
                                         "format": "email",
                                         "minLength": 1,
                                     },

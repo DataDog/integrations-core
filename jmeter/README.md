@@ -43,6 +43,13 @@ JMeter does not include any events.
 
 Need help? Contact [Datadog support][2].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+  - [Monitor JMeter test results with Datadog][4]
+
 [1]: https://github.com/DataDog/jmeter-datadog-backend-listener/releases
 [2]: https://docs.datadoghq.com/help/
 [3]: https://github.com/DataDog/integrations-core/blob/master/jmeter/metadata.csv
+[4]: https://www.datadoghq.com/blog/monitor-jmeter-test-results-datadog/

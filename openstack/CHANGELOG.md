@@ -1,6 +1,6 @@
 # CHANGELOG - openstack
 
-## 1.11.0 / 2021-04-19
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Openstack log support. See [#9116](https://github.com/DataDog/integrations-core/pull/9116).
 * [Fixed] Include missing default config templates. See [#9150](https://github.com/DataDog/integrations-core/pull/9150).

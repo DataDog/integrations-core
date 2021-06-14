@@ -1,5 +1,48 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.0.0 / 2021-05-28
+
+* [Added] Add validation for third-party licenses. See [#9436](https://github.com/DataDog/integrations-core/pull/9436).
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Support running post-install commands for E2E. See [#9399](https://github.com/DataDog/integrations-core/pull/9399).
+* [Added] Support hidden duplicate options from templates. See [#9347](https://github.com/DataDog/integrations-core/pull/9347).
+* [Added] Replace CLI dependency `appdirs` with `platformdirs`. See [#9356](https://github.com/DataDog/integrations-core/pull/9356).
+* [Added] Upgrade click. See [#9342](https://github.com/DataDog/integrations-core/pull/9342).
+* [Added] Upgrade datamodel-code-generator. See [#9335](https://github.com/DataDog/integrations-core/pull/9335).
+* [Added] [OpenMetricsV2] Add an option to send sum and count information when using distribution metrics. See [#9301](https://github.com/DataDog/integrations-core/pull/9301).
+* [Added] Upgrade virtualenv. See [#9330](https://github.com/DataDog/integrations-core/pull/9330).
+* [Added] Allow skipping of E2E tests based on environment markers. See [#9327](https://github.com/DataDog/integrations-core/pull/9327).
+* [Added] Support new Synthetics `run` metric unit for validation. See [#9313](https://github.com/DataDog/integrations-core/pull/9313).
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Sign `requirements.in` for releases. See [#9419](https://github.com/DataDog/integrations-core/pull/9419).
+* [Fixed] Fix detection of E2E environments. See [#9373](https://github.com/DataDog/integrations-core/pull/9373).
+* [Fixed] Fix `load_jmx_config` utility. See [#9369](https://github.com/DataDog/integrations-core/pull/9369).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+* [Fixed] Fix typing. See [#9338](https://github.com/DataDog/integrations-core/pull/9338).
+* [Fixed] Update validate all log line to use validation name. See [#9319](https://github.com/DataDog/integrations-core/pull/9319).
+* [Fixed] Stop collecting empty coverage reports for non-Python checks. See [#9297](https://github.com/DataDog/integrations-core/pull/9297).
+* [Changed] Add common check parsing for validations. See [#9229](https://github.com/DataDog/integrations-core/pull/9229).
+
+## 11.2.0 / 2021-05-05
+
+* [Added] Avoid double periods at the end of PR titles. See [#8442](https://github.com/DataDog/integrations-core/pull/8442).
+* [Added] Bump mypy. See [#9285](https://github.com/DataDog/integrations-core/pull/9285).
+* [Fixed] Fix validator bugs. See [#9290](https://github.com/DataDog/integrations-core/pull/9290).
+
+## 11.1.0 / 2021-05-03
+
+* [Added] [snmp] Add interactive option to generate profile tool. See [#9259](https://github.com/DataDog/integrations-core/pull/9259).
+* [Added] [SNMP] Invert interactive logic in validate mib files. See [#9258](https://github.com/DataDog/integrations-core/pull/9258).
+* [Added] Add `ddev env edit` command. See [#9196](https://github.com/DataDog/integrations-core/pull/9196).
+* [Added] [SNMP] Validate mib filenames in snmp tooling. See [#9228](https://github.com/DataDog/integrations-core/pull/9228).
+* [Fixed] Refactor manifest validation into a class system. See [#9111](https://github.com/DataDog/integrations-core/pull/9111).
+
+## 11.0.1 / 2021-04-21
+
+* [Fixed] Reduce ascii validation for assets. See [#9208](https://github.com/DataDog/integrations-core/pull/9208).
+* [Fixed] Fix QA card assignment to be distributed randomly and equally. See [#9190](https://github.com/DataDog/integrations-core/pull/9190).
+
 ## 11.0.0 / 2021-04-19
 
 * [Added] Include ascii validation in asset files. See [#9169](https://github.com/DataDog/integrations-core/pull/9169).

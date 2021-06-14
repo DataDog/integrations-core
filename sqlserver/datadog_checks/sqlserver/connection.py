@@ -280,19 +280,19 @@ class Connection(object):
         password = self.instance.get('password')
 
         adodbapi_options = {
+            'PROVIDER': 'adoprovider',
+            'Data Source': 'host',
+            'Initial Catalog': db_name or db_key,
+            'User ID': 'username',
+            'Password': 'password',
+        }
+        odbc_options = {
             'DSN': 'dsn',
             'DRIVER': 'driver',
             'SERVER': 'host',
             'DATABASE': db_name or db_key,
             'UID': 'username',
             'PWD': 'password',
-        }
-        odbc_options = {
-            'PROVIDER': 'adoprovider',
-            'Data Source': 'host',
-            'Initial Catalog': db_name or db_key,
-            'User ID': 'username',
-            'Password': 'password',
         }
 
         if self.connector == 'adodbapi':

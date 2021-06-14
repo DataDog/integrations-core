@@ -27,6 +27,7 @@ class Envoy(AgentCheck):
         self.custom_tags = self.instance.get('tags', [])
         self.caching_metrics = self.instance.get('cache_metrics', True)
 
+        self.collect_server_info = self.instance.get('collect_server_info', True)
         self.stats_url = self.instance.get('stats_url')
         if self.stats_url is None:
             raise ConfigurationError('Envoy configuration setting `stats_url` is required')
@@ -144,6 +145,9 @@ class Envoy(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self):
+        if not self.collect_server_info:
+            self.log.debug("Skipping server info collection because collect_server_info was disabled")
+            return
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(self.stats_url, 'server_info')
         raw_version = None

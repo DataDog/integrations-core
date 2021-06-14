@@ -28,7 +28,7 @@ def get_queue_manager_connection(config):
             get_normal_connection(config)
         except pymqi.MQMIError as e:
             log.debug("Tried normal connection before SSL connection. It failed with: %s", e)
-            if e.reason in [pymqi.CMQC.MQRC_HOST_NOT_AVAILABLE, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME]:
+            if e.reason == pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME:
                 raise
         return get_ssl_connection(config)
     else:

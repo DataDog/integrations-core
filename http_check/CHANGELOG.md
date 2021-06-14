@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+## 5.3.2 / 2021-06-07
+
+* [Fixed] Fix data configuration type. See [#9482](https://github.com/DataDog/integrations-core/pull/9482).
+
+## 5.3.1 / 2021-04-20 / Agent 7.28.0
+
+* [Fixed] Restore correct default value of tls_verify. See [#9197](https://github.com/DataDog/integrations-core/pull/9197).
+
 ## 5.3.0 / 2021-04-19
 
 * [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
