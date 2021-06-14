@@ -2110,7 +2110,7 @@ METRICS = {
     },
     'cluster.upstream_cx_http3_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -2327,7 +2327,7 @@ METRICS = {
     },
     'cluster.upstream_rq_max_duration_reached': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
