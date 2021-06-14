@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import GAUGES, MONOTONIC_COUNTS
@@ -23,6 +23,6 @@ def test_e2e(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
 
     aggregator.assert_service_check("ignite.can_connect")
