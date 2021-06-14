@@ -12,8 +12,16 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_host(field, value):
+    return 'localhost'
+
+
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_port(field, value):
+    return 8126
 
 
 def instance_service(field, value):

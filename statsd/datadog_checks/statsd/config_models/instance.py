@@ -18,9 +18,9 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     empty_default_hostname: Optional[bool]
-    host: str
+    host: Optional[str]
     min_collection_interval: Optional[float]
-    port: int
+    port: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]

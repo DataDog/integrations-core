@@ -9,14 +9,12 @@ files:
       - template: instances
         options:
           - name: host
-            required: true
             description: Host to collect StatsD data from.
             value:
               example: localhost
               type: string
           - name: port
             description: Port to use to collect StatsD data.
-            required: true
             value:
               example: 8126
               type: integer
