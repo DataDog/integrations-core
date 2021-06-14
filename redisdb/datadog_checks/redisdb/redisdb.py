@@ -223,7 +223,7 @@ class Redis(AgentCheck):
             config = conn.config_get("maxclients")
         except redis.ResponseError:
             # config_get is disabled on some environments
-            self.log.debug("Error querying config")
+            self.log.debug("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
             config = {}
 
         # Save the database statistics.
@@ -263,11 +263,15 @@ class Redis(AgentCheck):
                 self.gauge(metric_name, value, tags=tags)
 
         if self.collect_client_metrics:
-            # Save client connections statistics
-            clients = conn.client_list()
-            clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-            for name, count in clients_by_name.items():
-                self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            try:
+                # Save client connections statistics
+                clients = conn.client_list()
+                clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+                for name, count in clients_by_name.items():
+                    self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            except redis.ResponseError:
+                # client_list is disabled on some environments
+                self.log.debug("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
@@ -474,6 +478,7 @@ class Redis(AgentCheck):
                     max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
             # No config on AWS Elasticache
             except redis.ResponseError:
+                self.log.debug("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))

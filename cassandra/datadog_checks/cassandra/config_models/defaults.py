@@ -13,7 +13,7 @@ def shared_conf(field, value):
 
 
 def shared_new_gc_metrics(field, value):
-    return False
+    return True
 
 
 def shared_service(field, value):
