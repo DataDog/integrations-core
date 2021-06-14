@@ -8,6 +8,14 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_access_id(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_access_secret(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_empty_default_hostname(field, value):
     return False
 

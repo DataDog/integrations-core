@@ -17,8 +17,8 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    access_id: str
-    access_secret: str
+    access_id: Optional[str]
+    access_secret: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     is_secure: Optional[bool]
