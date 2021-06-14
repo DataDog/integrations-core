@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 
 @pytest.mark.e2e
@@ -37,7 +37,9 @@ def test_e2e(dd_agent_check):
         'jboss.undertow_listener.error_count',
         'jboss.undertow_listener.processing_time',
         'jboss.undertow_listener.request_count',
-    ] + JVM_E2E_METRICS_NEW
+    ] + JVM_E2E_METRICS
+    metrics.remove('jvm.gc.cms.count')
+    metrics.remove('jvm.gc.parnew.time')
     for metric in metrics:
         aggregator.assert_metric(metric)
 
