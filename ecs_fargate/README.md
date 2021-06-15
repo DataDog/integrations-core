@@ -168,7 +168,7 @@ Metrics are collected with [DogStatsD][13] through UDP port 8125.
 
 To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
 
-**Note**: There is no provision for a host tag with Fargate, so in order to use a unique identifier for the submission of custom metrics set `DD_DOGSTATSD_TAGS` to inject the task_arn tag to all the dogstatsd metrics or set the agent dogstatsd tagger in orchestrator mode to automatically inject the `taks_arn` tag. This requires using origin detection(via UDS)to set the cardinality in the agent via `DD_DOGSTATSD_TAG_CARDINALITY`, see [DogStatsD over Unix Domain Socket][41]. (please note that implementing this setting can contribute to increased custom metric cardinality) 
+**Note**: There is no notion of a host tag with Fargate, so to provide a unique identifier for submitting custom metrics, set `DD_DOGSTATSD_TAGS` to inject the `task_arn` tag to all the DogStatsD metrics or set the Agent DogStatsD tagger in orchestrator mode to automatically inject the `taks_arn` tag. This requires using origin detection (via UDS) to set the cardinality in the Agent via `DD_DOGSTATSD_TAG_CARDINALITY`. For more information, see [DogStatsD over Unix Domain Socket][41]. (Implementing this setting can contribute to increased custom metric cardinality.) 
 
 
 #### Other environment variables
@@ -410,4 +410,3 @@ Need help? Contact [Datadog support][19].
 [39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [41]: https://docs.datadoghq.com/developers/dogstatsd/unix_socket/?tab=host
-
