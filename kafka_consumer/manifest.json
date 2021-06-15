@@ -2,7 +2,8 @@
   "categories": [
     "processing",
     "messaging",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Kafka Consumer",
