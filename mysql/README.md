@@ -37,7 +37,9 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password b
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-**Note**: `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][5].
+**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
+
+**Note**: If you encounter the following error message ```(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))```, see the [MySQL Localhost Error documentation][18].
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
