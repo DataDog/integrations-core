@@ -305,6 +305,7 @@ class ImmutableAttributesValidator(ManifestValidator):
 class LogsCategoryValidator(ManifestValidator):
     """If an integration defines logs it should have the log collection category"""
     LOG_COLLECTION_CATEGORY = "log collection"
+    IGNORE_LIST = ['docker_daemon', 'jmeter', 'kubernetes', 'pan_firewall']
 
     def validate(self, check_name, decoded, fix):
         categories = decoded.get('categories')
@@ -323,13 +324,9 @@ class LogsCategoryValidator(ManifestValidator):
             else:
                 self.fail(output)
         else:
-            output = '  This integration does not have logs, please remove the category: ' + self.LOG_COLLECTION_CATEGORY
-            if fix:
-                categories.remove([self.LOG_COLLECTION_CATEGORY])
-                decoded['categories'] = categories
-                self.fix(output, f'  new `categories`: {categories}')
-            else:
-                self.fail(output)
+            output = '  This integration does not have logs, please remove the category: ' \
+                     + self.LOG_COLLECTION_CATEGORY + ' or define the logs properly'
+            self.fail(output)
 
 
 def get_all_validators(is_extras, is_marketplace):
