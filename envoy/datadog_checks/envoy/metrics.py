@@ -3417,7 +3417,6 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    # TODO
     'sds.key_rotation_failed': {
         'tags': (
             ('envoy_secret', ),
