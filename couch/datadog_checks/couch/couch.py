@@ -60,14 +60,14 @@ class CouchDb(AgentCheck):
             raise
         return r.json()
 
-    def check(self, instance):
-        server = self.get_server(instance)
+    def check(self, _):
+        server = self.get_server(self.instance)
         if self.checker is None:
-            name = instance.get('name', server)
-            tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
+            name = self.instance.get('name', server)
+            tags = ["instance:{0}".format(name)] + self.get_config_tags(self.instance)
 
             try:
-                version = self.get(self.get_server(instance), tags, True)['version']
+                version = self.get(self.get_server(self.instance), tags, True)['version']
                 if version is not None:
                     self.set_metadata('version', version)
                 else:
@@ -85,7 +85,7 @@ class CouchDb(AgentCheck):
                 # v2 of the CouchDB check supports versions 2 and higher of Couch
                 self.checker = CouchDB2(self)
 
-        self.checker.check(instance)
+        self.checker.check(self.instance)
 
     def get_server(self, instance):
         server = instance.get('server')
