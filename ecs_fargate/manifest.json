@@ -2,8 +2,7 @@
   "categories": [
     "aws",
     "containers",
-    "orchestration",
-    "log collection"
+    "orchestration"
   ],
   "creates_events": false,
   "display_name": "Amazon Fargate",
