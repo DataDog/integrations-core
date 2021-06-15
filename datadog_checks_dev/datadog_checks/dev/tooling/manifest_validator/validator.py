@@ -312,6 +312,7 @@ class LogsCategoryValidator(ManifestValidator):
         'ecs_fargate',  # Logs are provided by FireLens or awslogs
         'cassandra_nodetool',  # Logs are provided by cassandra
         'jmeter',
+        'kafka_consumer',  # Logs are provided by kafka
         'kubernetes',
         'pan_firewall',
         'altostra',
