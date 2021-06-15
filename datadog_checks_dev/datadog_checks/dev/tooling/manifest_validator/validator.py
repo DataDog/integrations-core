@@ -309,7 +309,8 @@ class LogsCategoryValidator(ManifestValidator):
     LOG_COLLECTION_CATEGORY = "log collection"
     IGNORE_LIST = {
         'docker_daemon',
-        'cassandra_nodetool',
+        'ecs_fargate',  # Logs are provided by FireLens or awslogs
+        'cassandra_nodetool',  # Logs are provided by cassandra
         'jmeter',
         'kubernetes',
         'pan_firewall',
