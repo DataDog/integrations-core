@@ -15,7 +15,7 @@ from datadog_checks.dev.tooling.utils import (
     get_metadata_file,
     is_metric_in_metadata_file,
     parse_version_parts,
-    read_metadata_rows,
+    read_metadata_rows, has_logs,
 )
 
 FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
@@ -302,6 +302,36 @@ class ImmutableAttributesValidator(ManifestValidator):
             )
 
 
+class LogsCategoryValidator(ManifestValidator):
+    """If an integration defines logs it should have the log collection category"""
+    LOG_COLLECTION_CATEGORY = "log collection"
+
+    def validate(self, check_name, decoded, fix):
+        categories = decoded.get('categories')
+        check_has_logs = has_logs(check_name)
+        check_has_logs_category = self.LOG_COLLECTION_CATEGORY in categories
+
+        if check_has_logs == check_has_logs_category:
+            return
+
+        if check_has_logs:
+            output = '  required category: ' + self.LOG_COLLECTION_CATEGORY
+            if fix:
+                correct_categories = categories + [self.LOG_COLLECTION_CATEGORY]
+                decoded['categories'] = correct_categories
+                self.fix(output, f'  new `categories`: {correct_categories}')
+            else:
+                self.fail(output)
+        else:
+            output = '  This integration does not have logs, please remove the category: ' + self.LOG_COLLECTION_CATEGORY
+            if fix:
+                categories.remove([self.LOG_COLLECTION_CATEGORY])
+                decoded['categories'] = categories
+                self.fix(output, f'  new `categories`: {categories}')
+            else:
+                self.fail(output)
+
+
 def get_all_validators(is_extras, is_marketplace):
     return [
         AttributesValidator(),
@@ -314,4 +344,5 @@ def get_all_validators(is_extras, is_marketplace):
         SupportValidator(is_extras, is_marketplace),
         IsPublicValidator(),
         ImmutableAttributesValidator(),
+        LogsCategoryValidator(),
     ]
