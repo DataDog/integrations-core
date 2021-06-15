@@ -9,12 +9,10 @@ files:
     options:
     - name: access_id
       description: The RiakCS access key.
-      required: true
       value:
         type: string
     - name: access_secret
       description: The corresponding RiakCS access secret.
-      required: true
       value:
         type: string
     - name: is_secure
