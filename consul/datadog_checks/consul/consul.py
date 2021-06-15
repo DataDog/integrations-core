@@ -15,7 +15,9 @@ from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.consul.common import (
+from datadog_checks.base.utils.serialization import json
+
+from .common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
     CONSUL_CHECK,
@@ -29,7 +31,6 @@ from datadog_checks.consul.common import (
     ceili,
     distance,
 )
-
 from .metrics import METRIC_MAP
 
 try:
@@ -158,7 +159,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         else:
             self.service_check(CONSUL_CAN_CONNECT, self.OK, tags=service_check_tags)
 
-        return resp.json()
+        return json.loads(resp.content)
 
     # Consul Config Accessors
     def _get_local_config(self):
