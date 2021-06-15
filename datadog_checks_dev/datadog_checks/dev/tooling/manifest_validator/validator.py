@@ -13,9 +13,10 @@ from datadog_checks.dev.tooling.git import content_changed
 from datadog_checks.dev.tooling.manifest_validator.schema import get_manifest_schema
 from datadog_checks.dev.tooling.utils import (
     get_metadata_file,
+    has_logs,
     is_metric_in_metadata_file,
     parse_version_parts,
-    read_metadata_rows, has_logs,
+    read_metadata_rows,
 )
 
 FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
@@ -304,8 +305,18 @@ class ImmutableAttributesValidator(ManifestValidator):
 
 class LogsCategoryValidator(ManifestValidator):
     """If an integration defines logs it should have the log collection category"""
+
     LOG_COLLECTION_CATEGORY = "log collection"
-    IGNORE_LIST = {'docker_daemon', 'jmeter', 'kubernetes', 'pan_firewall', 'altostra', 'hasura_cloud', 'sqreen'}
+    IGNORE_LIST = {
+        'docker_daemon',
+        'cassandra_nodetool',
+        'jmeter',
+        'kubernetes',
+        'pan_firewall',
+        'altostra',
+        'hasura_cloud',
+        'sqreen',
+    }
 
     def validate(self, check_name, decoded, fix):
         categories = decoded.get('categories')
@@ -324,8 +335,11 @@ class LogsCategoryValidator(ManifestValidator):
             else:
                 self.fail(output)
         else:
-            output = '  This integration does not have logs, please remove the category: ' \
-                     + self.LOG_COLLECTION_CATEGORY + ' or define the logs properly'
+            output = (
+                '  This integration does not have logs, please remove the category: '
+                + self.LOG_COLLECTION_CATEGORY
+                + ' or define the logs properly'
+            )
             self.fail(output)
 
 
