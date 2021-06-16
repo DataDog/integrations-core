@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 
 import pymysql
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 try:
     import rrdtool
@@ -40,7 +40,7 @@ class CactiCheck(AgentCheck):
         super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
         # Load the instance config
-        self._config = self._get_config(instances[0])
+        self._config = self._get_config()
 
     @staticmethod
     def get_library_versions():
@@ -48,9 +48,9 @@ class CactiCheck(AgentCheck):
             return {"rrdtool": rrdtool.__version__}
         return {"rrdtool": "Not Found"}
 
-    def check(self, instance):
+    def check(self, _):
         if rrdtool is None:
-            raise Exception("Unable to import python rrdtool module")
+            raise ConfigurationError("Unable to import python rrdtool module")
 
         connection = self._get_connection()
 
@@ -91,22 +91,21 @@ class CactiCheck(AgentCheck):
 
         return patterns
 
-    @classmethod
-    def _get_config(cls, instance):
+    def _get_config(self):
         required = ['mysql_host', 'mysql_user', 'rrd_path']
         for param in required:
-            if not instance.get(param):
-                raise Exception("Cacti instance missing %s. Skipping." % (param))
+            if not self.instance.get(param):
+                raise ConfigurationError("Cacti instance missing %s. Skipping." % param)
 
-        host = instance.get('mysql_host')
-        user = instance.get('mysql_user')
-        password = instance.get('mysql_password', '') or ''
-        db = instance.get('mysql_db', 'cacti')
-        port = instance.get('mysql_port')
-        rrd_path = instance.get('rrd_path')
-        whitelist = instance.get('rrd_whitelist')
-        field_names = instance.get('field_names', ['ifName', 'dskDevice'])
-        tags = instance.get('tags', [])
+        host = self.instance.get('mysql_host')
+        user = self.instance.get('mysql_user')
+        password = self.instance.get('mysql_password', '') or ''
+        db = self.instance.get('mysql_db', 'cacti')
+        port = self.instance.get('mysql_port')
+        rrd_path = self.instance.get('rrd_path')
+        whitelist = self.instance.get('rrd_whitelist')
+        field_names = self.instance.get('field_names', ['ifName', 'dskDevice'])
+        tags = self.instance.get('tags', [])
 
         Config = namedtuple(
             'Config', ['host', 'user', 'password', 'db', 'port', 'rrd_path', 'whitelist', 'field_names', 'tags']
