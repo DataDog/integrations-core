@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
-from datadog_checks.couch import CouchDb, errors
+from datadog_checks.couch import CouchDb
 
 from . import common
 
@@ -41,32 +40,6 @@ def _assert_check(aggregator, assert_device_tag):
     aggregator.assert_service_check(
         CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=common.BASIC_CONFIG_TAGS, count=2
     )
-
-
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.integration
-def test_bad_config(aggregator, check, instance):
-    """
-    Test the check with various bogus instances
-    """
-    with pytest.raises(errors.BadConfigError):
-        # `server` is missing from the instance
-        check.check({})
-
-    with pytest.raises(errors.ConnectionError):
-        # the server instance is invalid
-        check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
-
-    check.get = mock.MagicMock(return_value={'version': '0.1.0'})
-    with pytest.raises(errors.BadVersionError):
-        # the server has an unsupported version
-        check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
 
 
 @pytest.mark.usefixtures('dd_environment')
