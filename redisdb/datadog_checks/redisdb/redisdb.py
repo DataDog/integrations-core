@@ -198,6 +198,7 @@ class Redis(AgentCheck):
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
+        tags = list(self.tags)
         try:
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
@@ -212,7 +213,6 @@ class Redis(AgentCheck):
         else:
             self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
 
-        tags = list(self.tags)
         if info.get("role"):
             tags.append("redis_role:{}".format(info["role"]))
         else:
