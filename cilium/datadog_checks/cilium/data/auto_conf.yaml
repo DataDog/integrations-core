@@ -4,6 +4,7 @@
 ## https://docs.datadoghq.com/agent/guide/ad_identifiers/
 #
 ad_identifiers:
+  - cilium-agent
   - cilium
 
 ## All options defined here are available to all instances.

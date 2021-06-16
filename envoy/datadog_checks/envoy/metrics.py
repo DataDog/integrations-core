@@ -264,6 +264,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster_manager.cds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'cluster_manager.cds.version': {
         'tags': (
             (),
@@ -602,6 +610,14 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'http.rds.update_time': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'http.rds.version': {
         'tags': (
@@ -1496,6 +1512,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'listener_manager.lds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'listener_manager.lds.version': {
         'tags': (
             (),
@@ -1560,6 +1584,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_cx_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_cx_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1637,6 +1668,13 @@ METRICS = {
         'method': 'gauge',
     },
     'http.downstream_cx_http2_active': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.downstream_cx_http3_active': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1728,6 +1766,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_rq_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_rq_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -2063,6 +2108,13 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.upstream_cx_http3_total': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.upstream_cx_connect_fail': {
         'tags': (
             ('envoy_cluster', ),
@@ -2267,6 +2319,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_maintenance_mode': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.upstream_rq_max_duration_reached': {
         'tags': (
             ('envoy_cluster', ),
             (),
@@ -3354,6 +3413,13 @@ METRICS = {
         'tags': (
             ('envoy_cluster', ),
             (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'sds.key_rotation_failed': {
+        'tags': (
+            ('envoy_secret', ),
             (),
         ),
         'method': 'monotonic_count',

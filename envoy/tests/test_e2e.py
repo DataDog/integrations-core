@@ -4,9 +4,10 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
-from .common import HOST
+from .common import FLAVOR, HOST
 
 METRICS = [
     'envoy.cluster.assignment_stale',
@@ -26,9 +27,10 @@ METRICS = [
     'envoy.cluster.http2.outbound_flood',
     'envoy.cluster.http2.rx_messaging_error',
     'envoy.cluster.http2.rx_reset',
-    'envoy.cluster.http2.too_many_header_frames',
     'envoy.cluster.http2.trailers',
     'envoy.cluster.http2.tx_reset',
+    'envoy.cluster.internal.upstream_rq_2xx',
+    'envoy.cluster.internal.upstream_rq_completed',
     'envoy.cluster.lb_healthy_panic',
     'envoy.cluster.lb_local_cluster_not_ok',
     'envoy.cluster.lb_recalculate_zone_structures',
@@ -87,6 +89,7 @@ METRICS = [
     'envoy.cluster.upstream_flow_control_resumed_reading_total',
     'envoy.cluster.upstream_internal_redirect_failed_total',
     'envoy.cluster.upstream_internal_redirect_succeeded_total',
+    'envoy.cluster.upstream_rq_2xx',
     'envoy.cluster.upstream_rq_active',
     'envoy.cluster.upstream_rq_cancelled',
     'envoy.cluster.upstream_rq_completed',
@@ -117,6 +120,12 @@ METRICS = [
     'envoy.cluster_manager.cds.control_plane.connected_state',
     'envoy.cluster_manager.cds.control_plane.pending_requests',
     'envoy.cluster_manager.cds.control_plane.rate_limit_enforced',
+    'envoy.cluster_manager.cds.update_time',
+    'envoy.filesystem.flushed_by_timer',
+    'envoy.filesystem.reopen_failed',
+    'envoy.filesystem.write_buffered',
+    'envoy.filesystem.write_completed',
+    'envoy.filesystem.write_total_buffered',
     'envoy.http.downstream_cx_active',
     'envoy.http.downstream_cx_destroy',
     'envoy.http.downstream_cx_destroy_active_rq',
@@ -129,6 +138,8 @@ METRICS = [
     'envoy.http.downstream_cx_http1_total',
     'envoy.http.downstream_cx_http2_active',
     'envoy.http.downstream_cx_http2_total',
+    'envoy.http.downstream_cx_http3_active',
+    'envoy.http.downstream_cx_http3_total',
     'envoy.http.downstream_cx_idle_timeout',
     'envoy.http.downstream_cx_protocol_error',
     'envoy.http.downstream_cx_rx_bytes_buffered',
@@ -148,6 +159,7 @@ METRICS = [
     'envoy.http.downstream_rq_active',
     'envoy.http.downstream_rq_http1_total',
     'envoy.http.downstream_rq_http2_total',
+    'envoy.http.downstream_rq_http3_total',
     'envoy.http.downstream_rq_non_relative_path',
     'envoy.http.downstream_rq_response_before_rq_complete',
     'envoy.http.downstream_rq_rx_reset',
@@ -189,9 +201,12 @@ METRICS = [
     'envoy.listener_manager.lds.update_success',
     'envoy.listener_manager.lds.update_failure',
     'envoy.listener_manager.lds.update_rejected',
+    'envoy.listener_manager.lds.update_time',
+    'envoy.listener_manager.lds.version',
     'envoy.listener_manager.lds.control_plane.connected_state',
     'envoy.listener_manager.lds.control_plane.pending_requests',
     'envoy.listener_manager.lds.control_plane.rate_limit_enforced',
+    'envoy.listener.no_filter_chain_match',
     'envoy.runtime.admin_overrides_active',
     'envoy.runtime.deprecated_feature_use',
     'envoy.runtime.load_error',
@@ -214,6 +229,53 @@ METRICS = [
     'envoy.server.version',
     'envoy.server.watchdog_mega_miss',
     'envoy.server.watchdog_miss',
+    'envoy.vhost.vcluster.upstream_rq_retry',
+    'envoy.vhost.vcluster.upstream_rq_retry_limit_exceeded',
+    'envoy.vhost.vcluster.upstream_rq_retry_overflow',
+    'envoy.vhost.vcluster.upstream_rq_retry_success',
+    'envoy.vhost.vcluster.upstream_rq_timeout',
+    'envoy.vhost.vcluster.upstream_rq_total',
+]
+
+# Metrics only available in our API v2 environment
+METRICS_V2 = [
+    'envoy.cluster.http2.too_many_header_frames',
+]
+
+# Metrics only available in our API v3 environment
+METRICS_V3 = [
+    'envoy.cluster.upstream_cx_http3_total',
+    'envoy.cluster.upstream_rq_max_duration_reached',
+    'envoy.http.downstream_cx_length_ms.0percentile',
+    'envoy.http.downstream_cx_length_ms.100percentile',
+    'envoy.http.downstream_cx_length_ms.25percentile',
+    'envoy.http.downstream_cx_length_ms.50percentile',
+    'envoy.http.downstream_cx_length_ms.75percentile',
+    'envoy.http.downstream_cx_length_ms.90percentile',
+    'envoy.http.downstream_cx_length_ms.95percentile',
+    'envoy.http.downstream_cx_length_ms.99_5percentile',
+    'envoy.http.downstream_cx_length_ms.99_9percentile',
+    'envoy.http.downstream_cx_length_ms.99percentile',
+    'envoy.http.downstream_rq_time.0percentile',
+    'envoy.http.downstream_rq_time.100percentile',
+    'envoy.http.downstream_rq_time.25percentile',
+    'envoy.http.downstream_rq_time.50percentile',
+    'envoy.http.downstream_rq_time.75percentile',
+    'envoy.http.downstream_rq_time.90percentile',
+    'envoy.http.downstream_rq_time.95percentile',
+    'envoy.http.downstream_rq_time.99_5percentile',
+    'envoy.http.downstream_rq_time.99_9percentile',
+    'envoy.http.downstream_rq_time.99percentile',
+    'envoy.listener.downstream_cx_length_ms.0percentile',
+    'envoy.listener.downstream_cx_length_ms.100percentile',
+    'envoy.listener.downstream_cx_length_ms.25percentile',
+    'envoy.listener.downstream_cx_length_ms.50percentile',
+    'envoy.listener.downstream_cx_length_ms.75percentile',
+    'envoy.listener.downstream_cx_length_ms.90percentile',
+    'envoy.listener.downstream_cx_length_ms.95percentile',
+    'envoy.listener.downstream_cx_length_ms.99_5percentile',
+    'envoy.listener.downstream_cx_length_ms.99_9percentile',
+    'envoy.listener.downstream_cx_length_ms.99percentile',
 ]
 
 
@@ -223,5 +285,13 @@ def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(instance, rate=True)
     for metric in METRICS:
         aggregator.assert_metric(metric)
+
+    if FLAVOR == 'api_v2':
+        for metric in METRICS_V2:
+            aggregator.assert_metric(metric)
+    else:
+        for metric in METRICS_V3:
+            aggregator.assert_metric(metric, at_least=0)
     # We can't assert all covered, as some aren't received every time
     aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
