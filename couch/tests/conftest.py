@@ -17,18 +17,12 @@ from . import common
 
 @pytest.fixture
 def check():
-    if common.COUCH_MAJOR_VERSION == 1:
-        return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG])
-    else:
-        return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG_V2])
+    return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG_V2])
 
 
 @pytest.fixture
 def instance():
-    if common.COUCH_MAJOR_VERSION == 1:
-        return deepcopy(common.BASIC_CONFIG)
-    else:
-        return deepcopy(common.BASIC_CONFIG_V2)
+    return deepcopy(common.BASIC_CONFIG_V2)
 
 
 @pytest.fixture
@@ -49,33 +43,20 @@ def dd_environment():
     up.
     """
     couch_version = os.environ["COUCH_VERSION"][0]
-    if couch_version == "1":
-        with docker_run(
-            compose_file=os.path.join(common.HERE, 'compose', 'compose_v1.yaml'),
-            env_vars={'COUCH_PORT': common.PORT},
-            conditions=[
-                CheckEndpoints([common.URL]),
-                CheckDockerLogs('couchdb-1', ['CouchDB has started', 'Application couch_index started']),
-                WaitFor(generate_data, args=(couch_version,)),
-            ],
-        ):
-            yield common.BASIC_CONFIG
-
-    else:
-        with docker_run(
-            compose_file=os.path.join(common.HERE, 'compose', 'compose_v2.yaml'),
-            env_vars={'COUCH_PORT': common.PORT, 'COUCH_USER': common.USER, 'COUCH_PASSWORD': common.PASSWORD},
-            conditions=[
-                CheckEndpoints([common.URL]),
-                CheckDockerLogs('couchdb-1', ['Started replicator db changes listener']),
-                WaitFor(enable_cluster),
-                WaitFor(generate_data, args=(couch_version,)),
-                WaitFor(check_node_stats),
-                WaitFor(send_replication),
-                WaitFor(get_replication),
-            ],
-        ):
-            yield common.BASIC_CONFIG_V2
+    with docker_run(
+        compose_file=os.path.join(common.HERE, 'compose', 'compose_v2.yaml'),
+        env_vars={'COUCH_PORT': common.PORT, 'COUCH_USER': common.USER, 'COUCH_PASSWORD': common.PASSWORD},
+        conditions=[
+            CheckEndpoints([common.URL]),
+            CheckDockerLogs('couchdb-1', ['Started replicator db changes listener']),
+            WaitFor(enable_cluster),
+            WaitFor(generate_data, args=(couch_version,)),
+            WaitFor(check_node_stats),
+            WaitFor(send_replication),
+            WaitFor(get_replication),
+        ],
+    ):
+        yield common.BASIC_CONFIG_V2
 
 
 def enable_cluster():
