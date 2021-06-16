@@ -202,13 +202,6 @@ class Redis(AgentCheck):
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
 
-            tags = list(self.tags)
-            if info.get("role"):
-                tags.append("redis_role:{}".format(info["role"]))
-            else:
-                self.log.debug("Redis role was not found")
-
-            self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -218,6 +211,14 @@ class Redis(AgentCheck):
             raise
         else:
             self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
+
+        tags = list(self.tags)
+        if info.get("role"):
+            tags.append("redis_role:{}".format(info["role"]))
+        else:
+            self.log.debug("Redis role was not found")
+
+        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
 
         try:
             config = conn.config_get("maxclients")
