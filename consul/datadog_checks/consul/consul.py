@@ -590,17 +590,15 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         # Intra-datacenter
         nodes = self._get_coord_nodes()
-        if len(nodes) == 1:
+        num_nodes = len(nodes)
+        if num_nodes == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
-            for node in nodes:
+            for i, node in enumerate(nodes):
                 node_name = node['Node']
-                latencies = []
-                for other in nodes:
-                    other_name = other['Node']
-                    if node_name == other_name:
-                        continue
-                    latencies.append(distance(node, other))
+                latencies = [distance(node, nodes[n]) for n in range(i + 1, num_nodes)]
+                if not latencies:
+                    continue
                 latencies.sort()
                 n = len(latencies)
                 half_n = n // 2
