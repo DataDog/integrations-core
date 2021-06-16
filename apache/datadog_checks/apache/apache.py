@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-from datadog_checks.base.errors import CheckException
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.errors import CheckException
 
 
 class Apache(AgentCheck):
