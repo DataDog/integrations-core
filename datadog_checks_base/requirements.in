@@ -15,7 +15,7 @@ mmh3==3.0.0; python_version > '3.0'
 orjson==2.6.1; python_version > '3.0'
 prometheus-client==0.9.0
 protobuf==3.7.0
-pydantic==1.8.1; python_version > '3.0'
+pydantic==1.8.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.0.1; python_version > '3.0'
 pysocks==1.7.0
