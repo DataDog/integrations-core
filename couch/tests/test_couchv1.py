@@ -48,10 +48,11 @@ def _assert_check(aggregator, assert_device_tag):
 def test_couch_inclusion(aggregator, check, instance, param_name):
     DB_INCLUDE = ["_users"]
     instance[param_name] = DB_INCLUDE
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for db_name in common.DB_NAMES:
-        expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
+        expected_tags = ["db:{}".format(db_name), "device:{}".format(db_name)] + common.BASIC_CONFIG_TAGS
         for gauge in common.CHECK_GAUGES:
             if db_name in DB_INCLUDE:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
@@ -65,7 +66,8 @@ def test_couch_inclusion(aggregator, check, instance, param_name):
 def test_couch_exclusion(aggregator, check, instance, param_name):
     DB_EXCLUDE = ["_replicator"]
     instance[param_name] = DB_EXCLUDE
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
@@ -80,7 +82,8 @@ def test_couch_exclusion(aggregator, check, instance, param_name):
 @pytest.mark.integration
 def test_only_max_nodes_are_scanned(aggregator, check, instance):
     instance["max_dbs_per_check"] = 1
-    check.check(instance)
+    check.instance = instance
+    check.check({})
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric(gauge, count=1)
 
@@ -90,7 +93,8 @@ def test_only_max_nodes_are_scanned(aggregator, check, instance):
 def test_config_tags(aggregator, check, instance):
     TEST_TAG = "test_tag"
     instance["tags"] = [TEST_TAG]
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)
