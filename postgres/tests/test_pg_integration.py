@@ -475,10 +475,12 @@ def test_statement_samples_collect(
 
         if expected_error_tag:
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
+            assert event['db']['no_plan_reason'] is not None
             aggregator.assert_metric("dd.postgres.statement_samples.error", tags=tags + [expected_error_tag])
         else:
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
+            assert event['db']['no_plan_reason'] == {}
             assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
             # we expect to get a duration because the connections are in "idle" state
             assert event['duration']
