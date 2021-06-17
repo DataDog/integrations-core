@@ -26,33 +26,33 @@ class DNSCheck(AgentCheck):
 
         self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
 
-    def _load_conf(self, instance):
+    def _load_conf(self):
         # Fetches the conf
-        hostname = instance.get('hostname')
+        hostname = self.instance.get('hostname')
         if not hostname:
             raise BadConfException('A valid "hostname" must be specified')
 
         resolver = dns.resolver.Resolver()
 
         # If a specific DNS server was defined use it, else use the system default
-        nameserver = instance.get('nameserver')
-        nameserver_port = instance.get('nameserver_port')
+        nameserver = self.instance.get('nameserver')
+        nameserver_port = self.instance.get('nameserver_port')
         if nameserver is not None:
             resolver.nameservers = [nameserver]
         if nameserver_port is not None:
             resolver.port = nameserver_port
 
-        timeout = float(instance.get('timeout', self.default_timeout))
+        timeout = float(self.instance.get('timeout', self.default_timeout))
         resolver.lifetime = timeout
-        record_type = instance.get('record_type', 'A')
-        resolves_as = instance.get('resolves_as', None)
+        record_type = self.instance.get('record_type', 'A')
+        resolves_as = self.instance.get('resolves_as', None)
         if resolves_as and record_type not in ['A', 'CNAME', 'MX']:
             raise BadConfException('"resolves_as" can currently only support A, CNAME and MX records')
 
         return hostname, timeout, nameserver, record_type, resolver, resolves_as
 
-    def check(self, instance):
-        hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf(instance)
+    def check(self, _):
+        hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf()
 
         # Perform the DNS query, and report its duration as a gauge
         t0 = get_precise_time()
@@ -67,7 +67,7 @@ class DNSCheck(AgentCheck):
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
-                answer = resolver.query(hostname, rdtype=record_type)
+                answer = resolver.resolve(hostname, rdtype=record_type, search=True)
                 assert answer.rrset.items[0].to_text()
                 if resolves_as:
                     self._check_answer(answer, resolves_as)
