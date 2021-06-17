@@ -81,21 +81,34 @@ def get_all_profiles_from_dir(directory):
 
 
 def read_profile(profile_path):
+    path_and_contents = {}
     try:
         with open(profile_path) as f:
             file_contents = yaml.safe_load(f.read())
     except OSError:
         echo_failure("Profile file not found, or could not be read")
         exit()
+    path_and_contents[profile_path] = file_contents
+
+    return path_and_contents
 
 
-    return file_contents
+def validate_with_jsonschema(path_and_contents):
+    schema = get_profile_schema()
+    validator = jsonschema.Draft7Validator(schema)
+    errors_dict = {}
+    for path in path_and_contents:
+        errors = validator.iter_errors(path_and_contents[path])
+
+    for error in errors:
+        errors_dict[error] = path
+
+    for el in errors_dict:
+        echo_info(errors_dict[el])
+        echo_info(el)
 
 
-def validate_with_jsonschema(profile):
-    result = jsonschema.validate(schema=get_profile_schema(), instance=profile)
-
-    return result
+    return
 
 
     #validate profile structure
