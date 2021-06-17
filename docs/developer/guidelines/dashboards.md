@@ -53,7 +53,7 @@ Important metrics that are key to the performance and overview of the integratio
 
 1. Always include an "about" group for the integration containing a brief description and helpful links. Also include an "overview" group containing a few of the most important metrics, and place it at the top of the dashboard. Edit the "about" group and select the "banner" display option, then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`.
 
-If an [illustrated banner image](https://static.datadoghq.com/static/images/integration_dashboard/tomcat_hero_2.png) hasn't already been created, generate a temporary one [here](https://druids.us1.prod.dog/logos/logo-gallery) by clicking on your integration and selecting the "MSL Dashboard" tab.
+If an [illustrated banner image](https://static.datadoghq.com/static/images/integration_dashboard/tomcat_hero_2.png) hasn't already been created, generate a temporary one [here](https://app.datadoghq.com/internal/styleguide/logos/logo-gallery) by clicking on your integration and selecting the "MSL Dashboard" tab.
 
 The "about" section should contain content, not data; the "overview" section should contain data. Avoid making the "about" section full-width.
    ![Elasticsearch dashboard](../assets/images/example_dashboard.png)
@@ -70,7 +70,7 @@ The "about" section should contain content, not data; the "overview" section sho
 1. Which widgets best represent your data? Try using a mix of widget types and sizes. Explore visualizations and formatting options until you're confident your dashboard is as clear as it can be. Sometimes a whole dashboard of timeseries is ok, but other times variety can improve things. The most commonly used metric widgets are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/), [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/). For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
    ![Variety of widgets](../assets/images/variety.png)
 
-1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.us1.prod.dog/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
+1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://app.datadoghq.com/internal/styleguide/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
    ![Logo in header](../assets/images/logo_header.png)
 
 1. Try to make the left and right halves of your dashboard symmetrical in high density mode. Users with large monitors will see your dashboard in high density mode by default, so it's important to make sure the group relationships make sense, and the dashboard looks good. You can adjust group heights to achieve this, and move groups between the left and right halves.
