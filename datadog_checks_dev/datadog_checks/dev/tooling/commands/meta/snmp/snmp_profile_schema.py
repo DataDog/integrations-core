@@ -467,7 +467,7 @@ def get_profile_schema():
                                             ],
                                             "required": [
                                                 "tag",
-                                                "column"
+
                                             ],
                                             "properties": {
                                                 "tag": {
