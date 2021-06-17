@@ -81,6 +81,7 @@ trigger-agent-build:
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
+  timeout: 2 hours
   script:
     - |
       if [[ -s ./pipeline_id.txt ]]; then
