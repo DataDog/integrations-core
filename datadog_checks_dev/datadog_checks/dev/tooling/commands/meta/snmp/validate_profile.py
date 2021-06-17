@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import click
-import jsonschema
 import os
 from os.path import isfile, join
+from sys import exit
+
+import click
+import jsonschema
+
 import yaml
 
 from ...console import CONTEXT_SETTINGS,echo_info, abort, echo_failure, echo_success
@@ -25,9 +28,6 @@ def validate_profile(file, directory):
         contents = read_profile(profile_path)
         validate_with_jsonschema(contents)
 
-
-#find profiles in directory
-#read profiles (error handling re files not found etc)
 #validate profiles
 #collect errors - tell which file is generating the error
 
@@ -47,15 +47,10 @@ def find_profiles(file, directory):
 #iterate through to yield filenames
     profiles_list = []
     if file:
-        echo_info("file!")
         profiles_list.append(file)
         return profiles_list
 
-
-
     if directory:
-        echo_info("directory!")
-
         # profiles_path = os.path.join(get_root(), "snmp","datadog_checks", "snmp","data","profiles")
         # file_extensions = [".yaml", ".yml"] #use .lower()?
         # profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
@@ -67,26 +62,32 @@ def find_profiles(file, directory):
 
     else:
         profiles_path = os.path.join("dd", "integrations-core", "snmp","datadog_checks","snmp","data","profiles")
-
         profiles_list = get_all_profiles_from_dir(profiles_path)
         return profiles_list
-
 
     return profiles_list
 
 def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
-    dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
+    try:
+        dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
+    except FileNotFoundError:
+        echo_failure("Directory not found, or could not be read")
+        exit()
     for profile in dir_contents:
         profiles_list.append(os.path.join(profiles_path,profile))
     return profiles_list
 
 
 def read_profile(profile_path):
-    # error handling for file not existing etc
-    with open(profile_path) as f:
-        file_contents = yaml.safe_load(f.read())
+    try:
+        with open(profile_path) as f:
+            file_contents = yaml.safe_load(f.read())
+    except OSError:
+        echo_failure("Profile file not found, or could not be read")
+        exit()
+
 
     return file_contents
 
