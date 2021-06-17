@@ -51,9 +51,7 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 1. Research the metrics supported by the integration and consider grouping them in relevant categories.
 Important metrics that are key to the performance and overview of the integration should be at the top.
 
-1. Always include an "about" group for the integration containing a brief description and helpful links. Also include an "overview" group containing a few of the most important metrics, and place it at the top of the dashboard. Edit the "about" group and select the "banner" display option, then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`.
-
-If an [illustrated banner image](https://static.datadoghq.com/static/images/integration_dashboard/tomcat_hero_2.png) hasn't already been created, generate a temporary one [here](https://app.datadoghq.com/internal/styleguide/logos/logo-gallery) by clicking on your integration and selecting the "MSL Dashboard" tab.
+1. Always include an "about" group for the integration containing a brief description and helpful links. Also include an "overview" group containing a few of the most important metrics, and place it at the top of the dashboard. Edit the "about" group and select the "banner" display option, then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. (If an [illustrated banner image](https://static.datadoghq.com/static/images/integration_dashboard/tomcat_hero_2.png) hasn't already been created, generate a temporary one [here](https://app.datadoghq.com/internal/styleguide/logos/logo-gallery) by clicking on your integration and selecting the "MSL Dashboard" tab.)
 
 The "about" section should contain content, not data; the "overview" section should contain data. Avoid making the "about" section full-width.
    ![Elasticsearch dashboard](../assets/images/example_dashboard.png)
