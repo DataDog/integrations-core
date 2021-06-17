@@ -14,27 +14,25 @@ from .....fs import dir_exists, path_join, read_file, file_exists
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('--file', help="Path to a profile file to validate")
-def validate_profile(file):
-    #jsonschema.validate(instance=read_profiles(), schema=get_profile_schema())
+@click.option('--directory', help="Path to a directory of profiles to validate")
+def validate_profile(file, directory):
+
     #validating multiple instances with same schema - use IValidator.validate method
     #jsonschema.validate validates schema before validating instance
     # https://python-jsonschema.readthedocs.io/en/stable/validate/
-
-    profile_list = read_profiles(file)
-    for profile in profile_list:
-        with open(profile) as f:
-            contents = yaml.safe_load(f.read())
-            result = jsonschema.validate(schema=get_profile_schema(), instance=contents)
-            echo_info(profile)
-
-    return result
-
-    #collect errors
-    # tell which file is generating the error
+    profiles_list = find_profiles(file, directory)
+    for profile_path in profiles_list:
+        contents = read_profile(profile_path)
+        validate_with_jsonschema(contents)
 
 
+#find profiles in directory
+#read profiles (error handling re files not found etc)
+#validate profiles
+#collect errors - tell which file is generating the error
 
-def read_profiles(file):
+
+def find_profiles(file, directory):
     # allow adding path to other profiles? ex rapdev profiles: https://files.rapdev.io/datadog/snmp-profiles.zip
     #sample profile for testing
     # will probably need a function like this: https://github.com/DataDog/integrations-core/blob/97b85017240fec523c4ce84351fa25b80ddb031b/datadog_checks_dev/datadog_checks/dev/tooling/utils.py#L232-L234
@@ -47,7 +45,8 @@ def read_profiles(file):
 
 #default is snmp/data/profiles
 #iterate through to yield filenames
-
+    if directory:
+        echo_info("directory")
 
     if not file:
         # profiles_path = os.path.join(get_root(), "snmp","datadog_checks", "snmp","data","profiles")
@@ -62,21 +61,23 @@ def read_profiles(file):
             profiles_list.append(os.path.join(profiles_path,profile))
 
 
-        #yield profiles?
-
-    #if file:
-    #with open(file, "r") as f:
-    # with open("good_yaml.yaml") as f:
-    #     profile = yaml.safe_load(f.read()) #returns json object
 
 
     return profiles_list #return a list of profiles
 
 
+def read_profile(profile_path):
+    # error handling for file not existing etc
+    with open(profile_path) as f:
+        file_contents = yaml.safe_load(f.read())
+
+    return file_contents
 
 
+def validate_with_jsonschema(profile):
+    result = jsonschema.validate(schema=get_profile_schema(), instance=profile)
 
-
+    return result
 
 
     #validate profile structure
