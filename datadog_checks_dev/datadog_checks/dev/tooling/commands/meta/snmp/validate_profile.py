@@ -45,25 +45,42 @@ def find_profiles(file, directory):
 
 #default is snmp/data/profiles
 #iterate through to yield filenames
-    if directory:
-        echo_info("directory")
+    profiles_list = []
+    if file:
+        echo_info("file!")
+        profiles_list.append(file)
+        return profiles_list
 
-    if not file:
+
+
+    if directory:
+        echo_info("directory!")
+
         # profiles_path = os.path.join(get_root(), "snmp","datadog_checks", "snmp","data","profiles")
         # file_extensions = [".yaml", ".yml"] #use .lower()?
         # profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
 
         # echo_info(get_root()) # returns /Users/laura.hampton/dd/integrations-extras, why?
-        profiles_list = []
+
+        profiles_list = get_all_profiles_from_dir(directory)
+        return profiles_list
+
+    else:
         profiles_path = os.path.join("dd", "integrations-core", "snmp","datadog_checks","snmp","data","profiles")
-        dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
-        for profile in dir_contents:
-            profiles_list.append(os.path.join(profiles_path,profile))
+
+        profiles_list = get_all_profiles_from_dir(profiles_path)
+        return profiles_list
 
 
+    return profiles_list
 
-
-    return profiles_list #return a list of profiles
+def get_all_profiles_from_dir(directory):
+    profiles_list = []
+    profiles_path = directory
+    dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
+    for profile in dir_contents:
+        profiles_list.append(os.path.join(profiles_path,profile))
+    return profiles_list
 
 
 def read_profile(profile_path):
