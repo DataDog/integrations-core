@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
-from datadog_checks.base.errors import CheckException
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.errors import CheckException
 
 from .metrics import METRIC_MAP
 
@@ -138,7 +138,7 @@ class Etcd(OpenMetricsBaseCheck):
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
 
     def check_post_v3(self):
-        scraper_config = self.get_scraper_config()
+        scraper_config = self.get_scraper_config(self.instance)
 
         if 'prometheus_url' not in scraper_config:
             raise ConfigurationError('You have to define at least one `prometheus_url`.')
