@@ -56,7 +56,6 @@ def find_profiles(file, directory):
         # profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
 
         # echo_info(get_root()) # returns /Users/laura.hampton/dd/integrations-extras, why?
-
         profiles_list = get_all_profiles_from_dir(directory)
         return profiles_list
 
@@ -104,10 +103,8 @@ def validate_with_jsonschema(path_and_contents):
         errors_dict[error] = path
 
     for el in errors_dict:
-        echo_info(errors_dict[el])
+        echo_failure(errors_dict[el])
         echo_info(el)
-
-
     return
 
 
