@@ -460,7 +460,7 @@ class PostgresStatementSamples(object):
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
             if not obfuscated_plan:
-                # There are situations where a 'no plan reason' is provided even when a plan is generated.
+                # There could be a situation where a 'no plan reason' is provided even when a plan is generated.
                 # This is because some queries in a schema can fail while others succeed. This check
                 # prevents including a 'no plan reason' despite actually having a plan.
                 event['db']['no_plan_reason'] = self._no_explain_reason
