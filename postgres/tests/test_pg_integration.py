@@ -391,7 +391,7 @@ def dbm_instance(pg_instance):
 
 
 @pytest.mark.parametrize(
-    "dbname,expected_explain_setup_state,expected_no_explain_reason",
+    "dbname,expected_explain_setup_state,expected_failed_explain_reason",
     [
         ("datadog_test", DBExplainSetupState.ok, None),
         ("dogs", DBExplainSetupState.ok, None),
@@ -400,16 +400,16 @@ def dbm_instance(pg_instance):
     ],
 )
 def test_get_db_explain_setup_state(
-    integration_check, dbm_instance, dbname, expected_explain_setup_state, expected_no_explain_reason
+    integration_check, dbm_instance, dbname, expected_explain_setup_state, expected_failed_explain_reason
 ):
     check = integration_check(dbm_instance)
     check._connect()
-    explain_setup_state, no_explain_reason = check.statement_samples._get_db_explain_setup_state(dbname)
+    explain_setup_state, failed_explain_reason = check.statement_samples._get_db_explain_setup_state(dbname)
     assert explain_setup_state == expected_explain_setup_state
     if explain_setup_state != DBExplainSetupState.ok:
-        assert no_explain_reason is not None
+        assert failed_explain_reason is not None
     else:
-        assert no_explain_reason is None
+        assert failed_explain_reason is None
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])

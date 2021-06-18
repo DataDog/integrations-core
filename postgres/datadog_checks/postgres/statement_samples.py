@@ -335,7 +335,7 @@ class PostgresStatementSamples(object):
             )
             return DBExplainSetupState.failed_connect, {
                 'code': FailedExplainReason.database_error.value,
-                'reason': 'dbname={}: {}'.format(dbname, repr(e)),
+                'reason': '{}'.format(repr(e)),
             }
 
         try:
@@ -344,7 +344,7 @@ class PostgresStatementSamples(object):
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.invalid_schema, {
                 'code': FailedExplainReason.invalid_schema.value,
-                'reason': 'dbname={}: {}'.format(dbname, repr(e)),
+                'reason': '{}'.format(repr(e)),
             }
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
@@ -352,7 +352,7 @@ class PostgresStatementSamples(object):
             self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.failed_function, {
                 'code': FailedExplainReason.failed_function.value,
-                'reason': 'dbname={}: {}'.format(dbname, repr(e)),
+                'reason': '{}'.format(repr(e)),
             }
 
         if not result:
@@ -363,15 +363,15 @@ class PostgresStatementSamples(object):
     def _get_db_explain_setup_state_cached(self, dbname):
         strategy_cache = self._collection_strategy_cache.get(dbname)
         if strategy_cache:
-            explain_setup_state, no_explain_reason = strategy_cache
+            explain_setup_state, failed_explain_reason = strategy_cache
             self._log.debug("using cached explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
-            return explain_setup_state, no_explain_reason
+            return explain_setup_state, failed_explain_reason
 
-        explain_setup_state, no_explain_reason = self._get_db_explain_setup_state(dbname)
-        self._collection_strategy_cache[dbname] = (explain_setup_state, no_explain_reason)
+        explain_setup_state, failed_explain_reason = self._get_db_explain_setup_state(dbname)
+        self._collection_strategy_cache[dbname] = (explain_setup_state, failed_explain_reason)
         self._log.debug("caching new explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
 
-        return explain_setup_state, no_explain_reason
+        return explain_setup_state, failed_explain_reason
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
@@ -391,18 +391,18 @@ class PostgresStatementSamples(object):
             return result[0][0]
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement):
-        ok, no_explain_reason = self._can_explain_statement(obfuscated_statement)
+        ok, failed_explain_reason = self._can_explain_statement(obfuscated_statement)
         if not ok:
-            return None, no_explain_reason
+            return None, failed_explain_reason
 
-        explain_setup_state, no_explain_reason = self._get_db_explain_setup_state_cached(dbname)
+        explain_setup_state, failed_explain_reason = self._get_db_explain_setup_state_cached(dbname)
         if explain_setup_state != DBExplainSetupState.ok:
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(explain_setup_state)),
             )
-            return None, no_explain_reason
+            return None, failed_explain_reason
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None
@@ -415,7 +415,7 @@ class PostgresStatementSamples(object):
             )
             return None, {
                 'code': FailedExplainReason.database_error.value,
-                'reason': 'dbname={}: {}'.format(dbname, repr(e)),
+                'reason': '{}'.format(repr(e)),
             }
 
     def _collect_plan_for_statement(self, row):
@@ -440,7 +440,7 @@ class PostgresStatementSamples(object):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, no_explain_reason = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
+        plan_dict, failed_explain_reason = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
@@ -472,7 +472,7 @@ class PostgresStatementSamples(object):
                         "definition": obfuscated_plan,
                         "cost": plan_cost,
                         "signature": plan_signature,
-                        "collection_error": no_explain_reason,
+                        "collection_error": failed_explain_reason,
                     },
                     "query_signature": query_signature,
                     "resource_hash": query_signature,
