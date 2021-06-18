@@ -28,6 +28,7 @@ jobs:
     vmImage: 'ubuntu-18.04'
 
   variables:
+    DDEV_E2E_AGENT: datadog/agent-dev:kserrania-exclude-aerospike-strip-py3-jmx
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.repo, 'core')) }}:
       DDEV_SKIP_GENERIC_TAGS_CHECK: true
