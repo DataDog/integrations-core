@@ -18,6 +18,16 @@ init_config:
   #
   # oid_batch_size: 10
 
+  ## @param bulk_max_repetitions - integer - optional - default: 10
+  ## The number of "rows" to fetch for each table column OIDs at once. Used as parameter for GETBULK calls.
+  ## Increasing this number can improves performance.
+  ## It might lead to timeouts if the device doesn't support high number of OID values being fetched at one.
+  ## The total OIDs fetched using SNMP GETBULK is oid_batch_size * bulk_max_repetitions.
+  ## Example, for SNMP corecheck, the default total OIDs per GETBULK call is 600 (60 * 10).
+  ## Only available for corecheck implementation (`loader: core`).
+  #
+  # bulk_max_repetitions: 10
+
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
@@ -145,6 +155,16 @@ instances:
     ## Only available for corecheck implementation (`loader: core`).
     #
     # oid_batch_size: 10
+
+    ## @param bulk_max_repetitions - integer - optional - default: 10
+    ## The number of "rows" to fetch for each table column OIDs at once. Used as parameter for GETBULK calls.
+    ## Increasing this number can improves performance.
+    ## It might lead to timeouts if the device doesn't support high number of OID values being fetched at one.
+    ## The total OIDs fetched using SNMP GETBULK is oid_batch_size * bulk_max_repetitions.
+    ## Example, for SNMP corecheck, the default total OIDs per GETBULK call is 600 (60 * 10).
+    ## Only available for corecheck implementation (`loader: core`).
+    #
+    # bulk_max_repetitions: 10
 
     ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
