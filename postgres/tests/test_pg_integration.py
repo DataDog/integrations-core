@@ -486,7 +486,7 @@ def test_statement_samples_collect(
         # validate the events (if applicable) to ensure we've provided an explanation for not providing an exec plan
         for event in matching:
             if event['db']['plan']['definition'] is None:
-                assert event['db']['no_plan_reason'] != {}
+                assert event['db']['no_plan_reason'] != ''
             else:
                 assert 'no_plan_reason' not in event['db']
 

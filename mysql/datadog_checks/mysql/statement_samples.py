@@ -228,7 +228,7 @@ class MySQLStatementSamples(object):
             'events_statements_row_limit', 5000
         )
         self._explain_procedure = self._config.statement_samples_config.get('explain_procedure', 'explain_statement')
-        self._no_explain_reason = {}
+        self._no_explain_reason = ''
         self._fully_qualified_explain_procedure = self._config.statement_samples_config.get(
             'fully_qualified_explain_procedure', 'datadog.explain_statement'
         )
@@ -479,7 +479,7 @@ class MySQLStatementSamples(object):
         if query_cache_key in self._explained_statements_cache:
             return None
         self._explained_statements_cache[query_cache_key] = True
-        self._no_explain_reason.clear()
+        self._no_explain_reason = ''
 
         plan = None
         with closing(self._get_db_connection().cursor()) as cursor:
@@ -692,10 +692,10 @@ class MySQLStatementSamples(object):
                 raise
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_strategy_error
-            self._no_explain_reason = {
-                'reason': 'Unable to explain statement because the schema could not be accessed. This could be'
-                + ' the result of a missing schema, permissions error, or incorrect definition.'
-            }
+            self._no_explain_reason = (
+                'Unable to explain statement because the schema could not be accessed. This could be'
+                + ' the result of a missing schema, invalid permissions, or incorrect definition.'
+            )
             self._check.count(
                 "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
@@ -718,9 +718,10 @@ class MySQLStatementSamples(object):
         for strategy in strategies:
             try:
                 if not schema and strategy == "PROCEDURE":
-                    self._no_explain_reason = {
-                        'reason': 'Unable to explain statement because there is no default schema for this statement.'
-                    }
+                    self._no_explain_reason = (
+                        'Unable to explain statement because a schema was not provided and there'
+                        + ' is no default schema for this statement.'
+                    )
                     self._log.debug(
                         'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
                         obfuscated_statement,
@@ -747,10 +748,10 @@ class MySQLStatementSamples(object):
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
-                self._no_explain_reason = {
-                    'reason': 'Unable to explain statement due to a database error. Note, some queries in a schema'
+                self._no_explain_reason = (
+                    'Unable to explain statement due to a database error. Note, some queries in a schema'
                     + ' can fail while others succeed.'
-                }
+                )
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
@@ -792,11 +793,9 @@ class MySQLStatementSamples(object):
 
     def _can_explain(self, obfuscated_statement):
         if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            self._no_explain_reason = {
-                'reason': 'This statement cannot be explained. An explainable statement can be: {}'.format(
-                    ", ".join([s.upper() for s in VALID_EXPLAIN_STATEMENTS])
-                )
-            }
+            self._no_explain_reason = 'This statement cannot be explained. An explainable statement can be: {}'.format(
+                ", ".join([s.upper() for s in VALID_EXPLAIN_STATEMENTS])
+            )
             return False
         return True
 
