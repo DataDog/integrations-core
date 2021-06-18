@@ -391,18 +391,25 @@ def dbm_instance(pg_instance):
 
 
 @pytest.mark.parametrize(
-    "dbname,expected_explain_setup_state",
+    "dbname,expected_explain_setup_state,expected_no_explain_reason",
     [
-        ("datadog_test", DBExplainSetupState.ok),
-        ("dogs", DBExplainSetupState.ok),
-        ("dogs_noschema", DBExplainSetupState.invalid_schema),
-        ("dogs_nofunc", DBExplainSetupState.failed_function),
+        ("datadog_test", DBExplainSetupState.ok, None),
+        ("dogs", DBExplainSetupState.ok, None),
+        ("dogs_noschema", DBExplainSetupState.invalid_schema, {'code': 'invalid_schema', 'reason': 'dummy reason'}),
+        ("dogs_nofunc", DBExplainSetupState.failed_function, {'code': 'invalid_schema', 'reason': 'dummy reason'}),
     ],
 )
-def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, expected_explain_setup_state):
+def test_get_db_explain_setup_state(
+    integration_check, dbm_instance, dbname, expected_explain_setup_state, expected_no_explain_reason
+):
     check = integration_check(dbm_instance)
     check._connect()
-    assert check.statement_samples._get_db_explain_setup_state(dbname) == expected_explain_setup_state
+    explain_setup_state, no_explain_reason = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert explain_setup_state == expected_explain_setup_state
+    if explain_setup_state != DBExplainSetupState.ok:
+        assert no_explain_reason is not None
+    else:
+        assert no_explain_reason is None
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
@@ -482,6 +489,13 @@ def test_statement_samples_collect(
             assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
             # we expect to get a duration because the connections are in "idle" state
             assert event['duration']
+
+        # validate the events (if applicable) to ensure we've provided an explanation for not providing an exec plan
+        for event in matching:
+            if event['db']['plan']['definition'] is None:
+                assert event['db']['plan']['collection_error'] != {}
+            else:
+                assert event['db']['plan']['collection_error'] is None
 
     finally:
         conn.close()
