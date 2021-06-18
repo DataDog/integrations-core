@@ -72,7 +72,7 @@ class DBExplainSetupState(Enum):
     invalid_result = 5
 
 
-class NoQueryExplainReason(Enum):
+class FailedExplainReason(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
     """
@@ -319,11 +319,11 @@ class PostgresStatementSamples(object):
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
-            return False, {'code': NoQueryExplainReason.no_plans_possible.value}
+            return False, {'code': FailedExplainReason.no_plans_possible.value}
         if obfuscated_statement.startswith('autovacuum:'):
-            return False, {'code': NoQueryExplainReason.no_plans_possible.value}
+            return False, {'code': FailedExplainReason.no_plans_possible.value}
         if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            return False, {'code': NoQueryExplainReason.invalid_statement.value}
+            return False, {'code': FailedExplainReason.invalid_statement.value}
         return True, None
 
     def _get_db_explain_setup_state(self, dbname):
@@ -334,7 +334,7 @@ class PostgresStatementSamples(object):
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainSetupState.failed_connect, {
-                'code': NoQueryExplainReason.database_error.value,
+                'code': FailedExplainReason.database_error.value,
                 'reason': 'dbname={}: {}'.format(dbname, repr(e)),
             }
 
@@ -343,7 +343,7 @@ class PostgresStatementSamples(object):
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.invalid_schema, {
-                'code': NoQueryExplainReason.invalid_schema.value,
+                'code': FailedExplainReason.invalid_schema.value,
                 'reason': 'dbname={}: {}'.format(dbname, repr(e)),
             }
         except psycopg2.DatabaseError as e:
@@ -351,12 +351,12 @@ class PostgresStatementSamples(object):
             # incorrect definition)
             self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.failed_function, {
-                'code': NoQueryExplainReason.failed_function.value,
+                'code': FailedExplainReason.failed_function.value,
                 'reason': 'dbname={}: {}'.format(dbname, repr(e)),
             }
 
         if not result:
-            return DBExplainSetupState.invalid_result, {'code': NoQueryExplainReason.invalid_result.value}
+            return DBExplainSetupState.invalid_result, {'code': FailedExplainReason.invalid_result.value}
 
         return DBExplainSetupState.ok, None
 
@@ -407,7 +407,6 @@ class PostgresStatementSamples(object):
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None
         except psycopg2.errors.DatabaseError as e:
-            self._no_explain_reason = 'Unable to explain statement due to a database error.'
             self._log.warning("Failed to collect execution plan: %s", repr(e))
             self._check.count(
                 "dd.postgres.statement_samples.error",
@@ -415,7 +414,7 @@ class PostgresStatementSamples(object):
                 tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
             )
             return None, {
-                'code': NoQueryExplainReason.database_error.value,
+                'code': FailedExplainReason.database_error.value,
                 'reason': 'dbname={}: {}'.format(dbname, repr(e)),
             }
 

@@ -396,7 +396,7 @@ def dbm_instance(pg_instance):
         ("datadog_test", DBExplainSetupState.ok, None),
         ("dogs", DBExplainSetupState.ok, None),
         ("dogs_noschema", DBExplainSetupState.invalid_schema, {'code': 'invalid_schema', 'reason': 'dummy reason'}),
-        ("dogs_nofunc", DBExplainSetupState.failed_function, {'code': 'invalid_schema', 'reason': 'dummy reason'}),
+        ("dogs_nofunc", DBExplainSetupState.failed_function, {'code': 'failed_function', 'reason': 'dummy reason'}),
     ],
 )
 def test_get_db_explain_setup_state(
