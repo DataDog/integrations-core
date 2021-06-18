@@ -100,7 +100,7 @@ class PostgresStatementSamples(object):
         self._explain_function = self._config.statement_samples_config.get(
             'explain_function', 'datadog.explain_statement'
         )
-        self._no_exec_plan_reason = {}
+        self._no_explain_reason = {}
 
         self._collection_strategy_cache = TTLCache(
             maxsize=self._config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
@@ -296,19 +296,16 @@ class PostgresStatementSamples(object):
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
-            self._no_exec_plan_reason = {
-                'reason': 'There are no execution plans for the EXPLAIN function.'
-            }
+            self._no_explain_reason = {'reason': 'There are no execution plans for the EXPLAIN function.'}
             return False
         if obfuscated_statement.startswith('autovacuum:'):
-            self._no_exec_plan_reason = {
-                'reason': 'There are no execution plans for the AUTOVACUUM process.'
-            }
+            self._no_explain_reason = {'reason': 'There are no execution plans for the AUTOVACUUM process.'}
             return False
         if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            self._no_exec_plan_reason = {
-                'reason': 'This statement is not a valid EXPLAIN statement. Statements that' +
-                          ' can be explained: {}'.format(", ".join([s.upper() for s in VALID_EXPLAIN_STATEMENTS]))
+            self._no_explain_reason = {
+                'reason': 'This statement cannot be explained. An explainable statement can be: {}'.format(
+                    ", ".join([s.upper() for s in VALID_EXPLAIN_STATEMENTS])
+                )
             }
             return False
         return True
@@ -318,9 +315,7 @@ class PostgresStatementSamples(object):
         try:
             self._get_db(dbname)
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
-            self._no_exec_plan_reason = {
-                'reason': 'Unable to explain statement due to a failed DB connection.'
-            }
+            self._no_explain_reason = {'reason': 'Unable to explain statement due to a failed DB connection.'}
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
@@ -329,25 +324,21 @@ class PostgresStatementSamples(object):
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
-            self._no_exec_plan_reason = {
-                'reason': 'Unable to explain statement due to an invalid schema.'
-            }
+            self._no_explain_reason = {'reason': 'Unable to explain statement due to an invalid schema.'}
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.invalid_schema
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
-            self._no_exec_plan_reason = {
+            self._no_explain_reason = {
                 'reason': 'Unable to explain statement. There could be a problem with the EXPLAIN function (missing,'
-                          + ' invalid permissions, or incorrect definition).'
+                + ' invalid permissions, or an incorrect definition).'
             }
             self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
             return DBExplainSetupState.failed_function
 
         if not result:
-            self._no_exec_plan_reason = {
-                'reason': 'Received an invalid result when invoking the explain function.'
-            }
+            self._no_explain_reason = {'reason': 'Received an invalid result when invoking the explain function.'}
             return DBExplainSetupState.invalid_result
 
         return DBExplainSetupState.ok
@@ -398,9 +389,7 @@ class PostgresStatementSamples(object):
         try:
             return self._run_explain(dbname, statement, obfuscated_statement)
         except psycopg2.errors.DatabaseError as e:
-            self._no_exec_plan_reason = {
-                'reason': 'Unable to explain statement due to a database error.'
-            }
+            self._no_explain_reason = {'reason': 'Unable to explain statement due to a database error.'}
             self._log.warning("Failed to collect execution plan: %s", repr(e))
             self._check.count(
                 "dd.postgres.statement_samples.error",
@@ -425,7 +414,7 @@ class PostgresStatementSamples(object):
         if cache_key in self._explained_statements_cache:
             return None
         self._explained_statements_cache[cache_key] = True
-        self._no_exec_plan_reason.clear()
+        self._no_explain_reason.clear()
 
         # Plans have several important signatures to tag events with. Note that for postgres, the
         # query_signature and resource_hash will be the same value.
@@ -450,6 +439,7 @@ class PostgresStatementSamples(object):
                 "host": self._db_hostname,
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
+                "timestamp": time.time() * 1000,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -460,7 +450,6 @@ class PostgresStatementSamples(object):
                 "db": {
                     "instance": row.get('datname', None),
                     "plan": {"definition": obfuscated_plan, "cost": plan_cost, "signature": plan_signature},
-                    "no_plan_reason": self._no_exec_plan_reason,
                     "query_signature": query_signature,
                     "resource_hash": query_signature,
                     "application": row.get('application_name', None),
@@ -469,7 +458,11 @@ class PostgresStatementSamples(object):
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
-            event['timestamp'] = time.time() * 1000
+            if not obfuscated_plan:
+                # There are situations where a 'no plan reason' is provided even when a plan is generated.
+                # This is because some queries in a schema can fail while others succeed. This check
+                # prevents including a 'no plan reason' despite actually having a plan.
+                event['db']['no_plan_reason'] = self._no_explain_reason
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
                     event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
