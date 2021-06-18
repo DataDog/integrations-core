@@ -14,8 +14,8 @@ import tempfile
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
-from in_toto.util import import_public_keys_from_files_as_dict
 from pkg_resources import parse_version
+from securesystemslib import interface
 from tuf import settings as tuf_settings
 from tuf.client.updater import Updater
 from tuf.exceptions import UnknownTargetError
@@ -191,7 +191,7 @@ class TUFDownloader:
     def __load_root_layout(self, target_relpath):
         root_layout = Metablock.load(self.__root_layout)
         root_layout_pubkeys = glob.glob('*.pub')
-        root_layout_pubkeys = import_public_keys_from_files_as_dict(root_layout_pubkeys)
+        root_layout_pubkeys = interface.import_publickeys_from_file(root_layout_pubkeys)
         # Parameter substitution.
         root_layout_params = substitute(target_relpath)
         return root_layout, root_layout_pubkeys, root_layout_params
