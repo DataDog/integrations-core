@@ -228,6 +228,7 @@ class MySQLStatementSamples(object):
             'events_statements_row_limit', 5000
         )
         self._explain_procedure = self._config.statement_samples_config.get('explain_procedure', 'explain_statement')
+        self._no_explain_reason = {}
         self._fully_qualified_explain_procedure = self._config.statement_samples_config.get(
             'fully_qualified_explain_procedure', 'datadog.explain_statement'
         )
@@ -478,6 +479,7 @@ class MySQLStatementSamples(object):
         if query_cache_key in self._explained_statements_cache:
             return None
         self._explained_statements_cache[query_cache_key] = True
+        self._no_explain_reason.clear()
 
         plan = None
         with closing(self._get_db_connection().cursor()) as cursor:
@@ -499,7 +501,7 @@ class MySQLStatementSamples(object):
         query_plan_cache_key = (query_cache_key, plan_signature)
         if query_plan_cache_key not in self._seen_samples_cache:
             self._seen_samples_cache[query_plan_cache_key] = True
-            return {
+            event = {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._db_hostname,
                 "ddsource": "mysql",
@@ -519,6 +521,12 @@ class MySQLStatementSamples(object):
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
+            if not obfuscated_plan:
+                # There are situations where a 'no plan reason' is provided even when a plan is generated.
+                # This is because some queries in a schema can fail while others succeed. This check
+                # prevents including a 'no plan reason' despite actually having a plan.
+                event['db']['no_plan_reason'] = self._no_explain_reason
+            return event
 
     def _collect_plans_for_statements(self, rows):
         for row in rows:
@@ -684,6 +692,10 @@ class MySQLStatementSamples(object):
                 raise
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_strategy_error
+            self._no_explain_reason = {
+                'reason': 'Unable to explain statement because the schema could not be accessed. This could be'
+                + ' the result of a missing schema, permissions error, or incorrect definition.'
+            }
             self._check.count(
                 "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
@@ -706,6 +718,9 @@ class MySQLStatementSamples(object):
         for strategy in strategies:
             try:
                 if not schema and strategy == "PROCEDURE":
+                    self._no_explain_reason = {
+                        'reason': 'Unable to explain statement because there is no default schema for this statement.'
+                    }
                     self._log.debug(
                         'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
                         obfuscated_statement,
@@ -732,6 +747,10 @@ class MySQLStatementSamples(object):
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
+                self._no_explain_reason = {
+                    'reason': 'Unable to explain statement due to a database error. Note, some queries in a schema'
+                    + ' can fail while others succeed.'
+                }
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
@@ -771,9 +790,15 @@ class MySQLStatementSamples(object):
         )
         return cursor.fetchone()[0]
 
-    @staticmethod
-    def _can_explain(obfuscated_statement):
-        return obfuscated_statement.split(' ', 1)[0].lower() in VALID_EXPLAIN_STATEMENTS
+    def _can_explain(self, obfuscated_statement):
+        if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
+            self._no_explain_reason = {
+                'reason': 'This statement cannot be explained. An explainable statement can be: {}'.format(
+                    ", ".join([s.upper() for s in VALID_EXPLAIN_STATEMENTS])
+                )
+            }
+            return False
+        return True
 
     @staticmethod
     def _parse_execution_plan_cost(execution_plan):
