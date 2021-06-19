@@ -18,7 +18,8 @@ from .....fs import dir_exists, path_join, read_file, file_exists
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('--file', help="Path to a profile file to validate")
 @click.option('--directory', help="Path to a directory of profiles to validate")
-def validate_profile(file, directory):
+@click.option('--verbose', help="Increase verbosity of error messages", is_flag=True)
+def validate_profile(file, directory, verbose):
 
     #validating multiple instances with same schema - use IValidator.validate method
     #jsonschema.validate validates schema before validating instance
@@ -26,7 +27,9 @@ def validate_profile(file, directory):
     profiles_list = find_profiles(file, directory)
     for profile_path in profiles_list:
         contents = read_profile(profile_path)
-        validate_with_jsonschema(contents)
+        errors = validate_with_jsonschema(contents)
+
+    produce_errors(errors, verbose)
 
 #validate profiles
 #collect errors - tell which file is generating the error
@@ -88,6 +91,9 @@ def read_profile(profile_path):
         echo_failure("Profile file not found, or could not be read")
         exit()
     path_and_contents[profile_path] = file_contents
+    if not file_contents:
+        echo_failure("File contents returned None: " + profile_path)
+        exit()
 
     return path_and_contents
 
@@ -102,12 +108,21 @@ def validate_with_jsonschema(path_and_contents):
     for error in errors:
         errors_dict[error] = path
 
-    for el in errors_dict:
-        echo_failure(errors_dict[el])
-        echo_info(el)
-    return
+    #TODO - condition if there are no errors found
+    return errors_dict
 
+def produce_errors(errors_dict,verbose):
+    for error in errors_dict:
+        echo_failure("Error found in file: " + errors_dict[error])
+        if not verbose:
+            echo_failure(error.message)
+        if verbose:
+            echo_failure("Full error message: ")
+            echo_failure(error)
+
+    #readlines?
 
     #validate profile structure
     #base profiles different from non-base?
+    #jsonschema human-readable output ? cli is jsonschema
 
