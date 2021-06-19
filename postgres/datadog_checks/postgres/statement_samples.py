@@ -333,45 +333,36 @@ class PostgresStatementSamples(object):
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
-            return DBExplainSetupState.failed_connect, {
-                'code': FailedExplainReason.database_error.value,
-                'reason': '{}'.format(repr(e)),
-            }
+            return DBExplainSetupState.failed_connect, e
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
-            return DBExplainSetupState.invalid_schema, {
-                'code': FailedExplainReason.invalid_schema.value,
-                'reason': '{}'.format(repr(e)),
-            }
+            return DBExplainSetupState.invalid_schema, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
-            return DBExplainSetupState.failed_function, {
-                'code': FailedExplainReason.failed_function.value,
-                'reason': '{}'.format(repr(e)),
-            }
+            return DBExplainSetupState.failed_function, e
 
         if not result:
-            return DBExplainSetupState.invalid_result, {'code': FailedExplainReason.invalid_result.value}
+            return DBExplainSetupState.invalid_result, None
 
         return DBExplainSetupState.ok, None
 
     def _get_db_explain_setup_state_cached(self, dbname):
         strategy_cache = self._collection_strategy_cache.get(dbname)
         if strategy_cache:
-            explain_setup_state, failed_explain_reason = strategy_cache
+            explain_setup_state, err = strategy_cache
             self._log.debug("using cached explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
-            return explain_setup_state, failed_explain_reason
+            return explain_setup_state, err
 
-        explain_setup_state, failed_explain_reason = self._get_db_explain_setup_state(dbname)
-        self._collection_strategy_cache[dbname] = (explain_setup_state, failed_explain_reason)
+        explain_setup_state, err = self._get_db_explain_setup_state(dbname)
+        self._collection_strategy_cache[dbname] = (explain_setup_state, err)
         self._log.debug("caching new explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
 
-        return explain_setup_state, failed_explain_reason
+        return explain_setup_state, err
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
@@ -390,19 +381,46 @@ class PostgresStatementSamples(object):
                 return None
             return result[0][0]
 
+    @staticmethod
+    def _translate_setup_state_err_to_reason(state, err):
+        return {
+            DBExplainSetupState.failed_connect: {
+                'code': FailedExplainReason.database_error.value,
+                'reason': '{}'.format(repr(err)),
+            },
+            DBExplainSetupState.invalid_schema: {
+                'code': FailedExplainReason.invalid_schema.value,
+                'reason': '{}'.format(repr(err)),
+            },
+            DBExplainSetupState.failed_function: {
+                'code': FailedExplainReason.failed_function.value,
+                'reason': '{}'.format(repr(err)),
+            },
+            DBExplainSetupState.invalid_result: {
+                'code': FailedExplainReason.invalid_result.value,
+                'reason': '{}'.format(repr(err)),
+            },
+        }.get(
+            state,
+            {
+                'code': 'unknown_reason',
+                'reason': '{}'.format(repr(err)),
+            },
+        )
+
     def _run_explain_safe(self, dbname, statement, obfuscated_statement):
         ok, failed_explain_reason = self._can_explain_statement(obfuscated_statement)
         if not ok:
             return None, failed_explain_reason
 
-        explain_setup_state, failed_explain_reason = self._get_db_explain_setup_state_cached(dbname)
+        explain_setup_state, err = self._get_db_explain_setup_state_cached(dbname)
         if explain_setup_state != DBExplainSetupState.ok:
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(explain_setup_state)),
             )
-            return None, failed_explain_reason
+            return None, self._translate_setup_state_err_to_reason(explain_setup_state, err)
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None
