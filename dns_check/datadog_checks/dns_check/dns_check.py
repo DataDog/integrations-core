@@ -63,7 +63,7 @@ class DNSCheck(AgentCheck):
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
-                answer = resolver.resolve(hostname, rdtype=record_type, search=True)
+                answer = resolver.query(hostname, rdtype=record_type)
                 assert answer.rrset.items[0].to_text()
                 if resolves_as:
                     self._check_answer(answer, resolves_as)
