@@ -155,8 +155,9 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance):
+def test_consul_request(aggregator, instance, mocker):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request("foo")
         url = "{}/{}".format(instance["url"], "foo")
@@ -489,9 +490,10 @@ def test_network_latency_checks(aggregator):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs, mocker):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)

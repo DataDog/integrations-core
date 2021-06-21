@@ -614,7 +614,8 @@ def has_logs(check):
     readme_file = get_readme_file(check)
     if os.path.exists(readme_file):
         with open(readme_file, 'r', encoding='utf-8') as f:
-            if '# log collection' in f.read().lower():
+            line = f.read().lower()
+            if '# log collection' in line or '# logs' in line:
                 return True
     return False
 

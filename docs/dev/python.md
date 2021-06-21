@@ -48,7 +48,7 @@ If you're using Miniconda, a tool to manage virtual environments is included. Re
 [2]: https://brew.sh/#install
 [3]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
 [4]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
-[5]: https://conda.io/docs/user-guide/install/macos.html
+[5]: https://docs.conda.io/projects/continuumio-conda/en/latest/user-guide/install/macos.html
 [6]: https://docs.python.org/2.7/using/windows.html
 [7]: https://pypi.python.org/pypi/virtualenv
 [8]: https://virtualenvwrapper.readthedocs.io/en/latest/index.html
