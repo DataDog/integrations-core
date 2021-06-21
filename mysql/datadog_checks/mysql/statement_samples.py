@@ -5,6 +5,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
+from enum import Enum
 
 import pymysql
 from cachetools import TTLCache
@@ -196,6 +197,30 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
         1370,  # no execute on procedure
     }
 )
+
+
+class FailedExplainReason(Enum):
+    """
+    Denotes the various reasons a query may not have an explain statement.
+    """
+
+    # database error i.e connection error
+    database_error = 'database_error'
+
+    # statements not in VALID_EXPLAIN_STATEMENTS are not valid
+    invalid_statement = 'invalid_statement'
+
+    # this could be the result of a missing EXPLAIN function
+    invalid_schema = 'invalid_schema'
+
+    # a value retrieved from the EXPLAIN function could be invalid
+    invalid_result = 'invalid_result'
+
+    # some statements cannot be explained i.e AUTOVACUUM
+    no_plans_possible = 'no_plans_possible'
+
+    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
+    failed_function = 'failed_function'
 
 
 class MySQLStatementSamples(object):
@@ -479,10 +504,12 @@ class MySQLStatementSamples(object):
             return None
         self._explained_statements_cache[query_cache_key] = True
 
-        plan = None
+        plan, failed_explain_reason = None, None
         with closing(self._get_db_connection().cursor()) as cursor:
             try:
-                plan = self._explain_statement(cursor, row['sql_text'], row['current_schema'], obfuscated_statement)
+                plan, failed_explain_reason = self._explain_statement(
+                    cursor, row['sql_text'], row['current_schema'], obfuscated_statement
+                )
             except Exception as e:
                 self._check.count(
                     "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
@@ -512,7 +539,12 @@ class MySQLStatementSamples(object):
                 },
                 "db": {
                     "instance": row['current_schema'],
-                    "plan": {"definition": obfuscated_plan, "cost": plan_cost, "signature": plan_signature},
+                    "plan": {
+                        "definition": obfuscated_plan,
+                        "cost": plan_cost,
+                        "signature": plan_signature,
+                        "collection_error": failed_explain_reason,
+                    },
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
@@ -665,13 +697,17 @@ class MySQLStatementSamples(object):
 
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, statement)
 
-        if not self._can_explain(obfuscated_statement):
+        ok, failed_explain_reason = self._can_explain(obfuscated_statement)
+        if not ok:
             self._log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
-            return None
+            return None, failed_explain_reason
 
-        if self._collection_strategy_cache.get(strategy_cache_key) == explain_strategy_error:
-            self._log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
-            return None
+        strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
+        if strategy_cache:
+            strategy_error, failed_explain_reason = strategy_cache
+            if strategy_error == explain_strategy_error:
+                self._log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
+                return None, failed_explain_reason
 
         try:
             # If there was a default schema when this query was run, then switch to it before trying to collect
@@ -682,8 +718,9 @@ class MySQLStatementSamples(object):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
+            failed_explain_reason = {'code': FailedExplainReason.invalid_schema.value, 'reason': '{}'.format(repr(e))}
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
-                self._collection_strategy_cache[strategy_cache_key] = explain_strategy_error
+                self._collection_strategy_cache[strategy_cache_key] = (explain_strategy_error, failed_explain_reason)
             self._check.count(
                 "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
@@ -694,18 +731,21 @@ class MySQLStatementSamples(object):
                 schema,
                 obfuscated_statement,
             )
-            return None
+            return None, failed_explain_reason
 
         # Use a cached strategy for the schema, if any, or try each strategy to collect plans
         strategies = list(self._preferred_explain_strategies)
-        cached = self._collection_strategy_cache.get(strategy_cache_key)
-        if cached:
-            strategies.remove(cached)
-            strategies.insert(0, cached)
+        strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
+        if strategy_cache:
+            strategy, _ = strategy_cache
+            strategies.remove(strategy)
+            strategies.insert(0, strategy)
 
+        failed_explain_reason = None
         for strategy in strategies:
             try:
                 if not schema and strategy == "PROCEDURE":
+                    failed_explain_reason = {'code': FailedExplainReason.invalid_schema.value}
                     self._log.debug(
                         'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
                         obfuscated_statement,
@@ -713,7 +753,7 @@ class MySQLStatementSamples(object):
                     continue
                 plan = self._explain_strategies[strategy](cursor, statement, obfuscated_statement)
                 if plan:
-                    self._collection_strategy_cache[strategy_cache_key] = strategy
+                    self._collection_strategy_cache[strategy_cache_key] = (strategy, None)
                     self._log.debug(
                         'Successfully collected execution plan. strategy=%s, schema=%s, statement="%s"',
                         strategy,
@@ -725,13 +765,17 @@ class MySQLStatementSamples(object):
                         (time.time() - start_time) * 1000,
                         tags=self._tags + ["strategy:{}".format(strategy)],
                     )
-                    return plan
+                    return plan, None
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
+                failed_explain_reason = {
+                    'code': FailedExplainReason.database_error.value,
+                    'reason': '{}'.format(repr(e)),
+                }
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
@@ -745,7 +789,7 @@ class MySQLStatementSamples(object):
                     obfuscated_statement,
                 )
                 continue
-        return None
+        return None, failed_explain_reason
 
     def _run_explain(self, cursor, statement, obfuscated_statement):
         """
@@ -773,7 +817,9 @@ class MySQLStatementSamples(object):
 
     @staticmethod
     def _can_explain(obfuscated_statement):
-        return obfuscated_statement.split(' ', 1)[0].lower() in VALID_EXPLAIN_STATEMENTS
+        if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
+            return False, {'code': FailedExplainReason.no_plans_possible.value}
+        return True, None
 
     @staticmethod
     def _parse_execution_plan_cost(execution_plan):

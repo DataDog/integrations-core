@@ -486,6 +486,13 @@ def test_statement_samples_collect(
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
         assert set(event['ddtags'].split(',')) == expected_tags
 
+    # validate the events to ensure we've provided an explanation for not providing an exec plan
+    for event in matching:
+        if event['db']['plan']['definition'] is None:
+            assert event['db']['plan']['collection_error'] != {}
+        else:
+            assert event['db']['plan']['collection_error'] is None
+
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
     mysql_check._statement_samples._close_db_conn()
