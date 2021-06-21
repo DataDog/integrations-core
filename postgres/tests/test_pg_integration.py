@@ -407,7 +407,7 @@ def test_get_db_explain_setup_state(
     explain_setup_state, failed_explain_reason = check.statement_samples._get_db_explain_setup_state(dbname)
     assert explain_setup_state == expected_explain_setup_state
     if explain_setup_state != DBExplainSetupState.ok:
-        assert failed_explain_reason is not None
+        assert failed_explain_reason != {}
     else:
         assert failed_explain_reason is None
 
