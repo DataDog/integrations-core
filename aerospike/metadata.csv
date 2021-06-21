@@ -709,8 +709,11 @@ aerospike.set.objects,gauge,,record,,The total number of objects (master and all
 aerospike.set.stop_writes_count,gauge,,,,The total count this set has hit stop_writes,0,aerospike,
 aerospike.set.device_data_bytes,gauge,,byte,,The device storage used by data (master and proles) excluding primary index.,0,aerospike,
 aerospike.set.disable_eviction,gauge,,,,Whether or not this set is protected from evictions,0,aerospike,
+aerospike.set.enable_index,gauge,,,,Whether or not this set has its own index,0,aerospike,
+aerospike.set.index_populating,gauge,,,,,0,aerospike,
+aerospike.set.sindexes,gauge,,,,,0,aerospike,
 aerospike.sindex.keys,gauge,,,,The number of secondary keys for this secondary index.,0,aerospike,
-aerospike.sindex.entries,gauge,,,,Th number of secondary index entries for this secondary index. This is the number of records that have been indexed by this secondary index.,0,aerospike,
+aerospike.sindex.entries,gauge,,,,The number of secondary index entries for this secondary index. This is the number of records that have been indexed by this secondary index.,0,aerospike,
 aerospike.sindex.ibtr_memory_used,gauge,,byte,,The amount of memory the secondary index is consuming for the keys,0,aerospike,Sindex Index Memory Used
 aerospike.sindex.nbtr_memory_used,gauge,,byte,,The amount of memory the secondary index is consuming for the entries,0,aerospike,Sindex Entry Memory Used
 aerospike.sindex.si_accounted_memory,gauge,,byte,,The amount of memory the secondary index is consuming. This is the sum of ibtr_memory_used and nbtr_memory_used.,0,aerospike,Sindex Total Memory Used
