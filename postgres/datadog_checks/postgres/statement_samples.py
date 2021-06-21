@@ -5,7 +5,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum
-from typing import Dict, Tuple, Union
+from typing import Dict, Optional, Tuple
 
 import psycopg2
 from cachetools import TTLCache
@@ -307,7 +307,7 @@ class PostgresStatementSamples(object):
         return True, None
 
     def _get_db_explain_setup_state(self, dbname):
-        # type: (str) -> Tuple[Union[DBExplainError, None], Union[Exception, None]]
+        # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
             self._get_db(dbname)
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
@@ -364,10 +364,10 @@ class PostgresStatementSamples(object):
             return result[0][0]
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement):
-        # type: (str, str, str) -> Tuple[Union[Dict, None], Union[str, None], Union[str, None]]
+        # type: (str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[Exception]]
         ok, db_explain_error = self._can_explain_statement(obfuscated_statement)
         if not ok:
-            return None, db_explain_error.value, None
+            return None, db_explain_error, None
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
         if db_explain_error is not None:
@@ -376,7 +376,7 @@ class PostgresStatementSamples(object):
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)),
             )
-            return None, db_explain_error.value, '{}'.format(type(err))
+            return None, db_explain_error, err
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
@@ -387,7 +387,7 @@ class PostgresStatementSamples(object):
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
             )
-            return None, DBExplainError.database_error.value, '{}'.format(type(e))
+            return None, DBExplainError.database_error, e
 
     def _collect_plan_for_statement(self, row):
         try:
@@ -412,6 +412,10 @@ class PostgresStatementSamples(object):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
+        collection_error = None
+        if explain_err_code:
+            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err))}
+
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
@@ -443,10 +447,7 @@ class PostgresStatementSamples(object):
                         "definition": obfuscated_plan,
                         "cost": plan_cost,
                         "signature": plan_signature,
-                        "collection_error": {
-                            "code": explain_err_code,
-                            "reason": err,
-                        },
+                        "collection_error": collection_error,
                     },
                     "query_signature": query_signature,
                     "resource_hash": query_signature,

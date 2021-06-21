@@ -419,7 +419,7 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
             "SELECT * FROM kennel WHERE id = %s",
             123,
             "error:explain-{}".format(DBExplainError.invalid_schema),
-            {'code': 'invalid_schema', 'reason': "<class 'psycopg2.errors.InvalidSchemaName'>"},
+            {'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"},
         ),
         (
             "dd_admin",
@@ -428,7 +428,7 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
             "SELECT * FROM kennel WHERE id = %s",
             123,
             "error:explain-{}".format(DBExplainError.failed_function),
-            {'code': 'failed_function', 'reason': "<class 'psycopg2.errors.UndefinedFunction'>"},
+            {'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"},
         ),
     ],
 )
@@ -492,7 +492,7 @@ def test_statement_samples_collect(
             if event['db']['plan']['definition'] is None:
                 assert event['db']['plan']['collection_error'] == expected_collection_error
             else:
-                assert event['db']['plan']['collection_error'] == {'code': None, 'reason': None}
+                assert event['db']['plan']['collection_error'] is None
 
     finally:
         conn.close()
