@@ -5,6 +5,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum
+from typing import Dict, Tuple, Union
 
 import psycopg2
 from cachetools import TTLCache
@@ -21,7 +22,7 @@ from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
+SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
 # columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
 # under other standard keys
@@ -51,28 +52,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
 EXPLAIN_VALIDATION_QUERY = "SELECT * FROM pg_stat_activity"
 
 
-class DBExplainSetupState(Enum):
-    """
-    Denotes the various states the database can be in with respect to enabling the agent to collect execution plans.
-    """
-
-    # agent is able to collect execution plans using the configured explain function
-    ok = 1
-
-    # failed to connect to the database
-    failed_connect = 2
-
-    # invalid schema for explain function
-    invalid_schema = 3
-
-    # failed to execute explain function
-    failed_function = 4
-
-    # received an invalid result when invoking the explain function
-    invalid_result = 5
-
-
-class FailedExplainReason(Enum):
+class DBExplainError(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
     """
@@ -319,50 +299,52 @@ class PostgresStatementSamples(object):
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
-            return False, {'code': FailedExplainReason.no_plans_possible.value}
+            return False, DBExplainError.no_plans_possible
         if obfuscated_statement.startswith('autovacuum:'):
-            return False, {'code': FailedExplainReason.no_plans_possible.value}
-        if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            return False, {'code': FailedExplainReason.invalid_statement.value}
+            return False, DBExplainError.no_plans_possible
+        if obfuscated_statement.split(' ', 1)[0].lower() not in SUPPORTED_EXPLAIN_STATEMENTS:
+            return False, DBExplainError.no_plans_possible
         return True, None
 
     def _get_db_explain_setup_state(self, dbname):
+        # type: (str) -> Tuple[Union[DBExplainError, None], Union[Exception, None]]
         try:
             self._get_db(dbname)
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
-            return DBExplainSetupState.failed_connect, e
+            return DBExplainError.database_error, e
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
-            return DBExplainSetupState.invalid_schema, e
+            return DBExplainError.invalid_schema, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
             self._log.warning("cannot collect execution plans in dbname=%s: %s", dbname, repr(e))
-            return DBExplainSetupState.failed_function, e
+            return DBExplainError.failed_function, e
 
         if not result:
-            return DBExplainSetupState.invalid_result, None
+            return DBExplainError.invalid_result, None
 
-        return DBExplainSetupState.ok, None
+        return None, None
 
     def _get_db_explain_setup_state_cached(self, dbname):
+        # type: (str) -> Tuple[DBExplainError, Exception]
         strategy_cache = self._collection_strategy_cache.get(dbname)
         if strategy_cache:
-            explain_setup_state, err = strategy_cache
-            self._log.debug("using cached explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
-            return explain_setup_state, err
+            db_explain_error, err = strategy_cache
+            self._log.debug("using cached explain_setup_state for DB '%s': %s", dbname, db_explain_error)
+            return db_explain_error, err
 
-        explain_setup_state, err = self._get_db_explain_setup_state(dbname)
-        self._collection_strategy_cache[dbname] = (explain_setup_state, err)
-        self._log.debug("caching new explain_setup_state for DB '%s': %s", dbname, explain_setup_state)
+        db_explain_error, err = self._get_db_explain_setup_state(dbname)
+        self._collection_strategy_cache[dbname] = (db_explain_error, err)
+        self._log.debug("caching new explain_setup_state for DB '%s': %s", dbname, db_explain_error)
 
-        return explain_setup_state, err
+        return db_explain_error, err
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
@@ -381,60 +363,31 @@ class PostgresStatementSamples(object):
                 return None
             return result[0][0]
 
-    @staticmethod
-    def _translate_setup_state_err_to_reason(state, err):
-        return {
-            DBExplainSetupState.failed_connect: {
-                'code': FailedExplainReason.database_error.value,
-                'reason': '{}'.format(repr(err)),
-            },
-            DBExplainSetupState.invalid_schema: {
-                'code': FailedExplainReason.invalid_schema.value,
-                'reason': '{}'.format(repr(err)),
-            },
-            DBExplainSetupState.failed_function: {
-                'code': FailedExplainReason.failed_function.value,
-                'reason': '{}'.format(repr(err)),
-            },
-            DBExplainSetupState.invalid_result: {
-                'code': FailedExplainReason.invalid_result.value,
-                'reason': '{}'.format(repr(err)),
-            },
-        }.get(
-            state,
-            {
-                'code': 'unknown_reason',
-                'reason': '{}'.format(repr(err)),
-            },
-        )
-
     def _run_explain_safe(self, dbname, statement, obfuscated_statement):
-        ok, failed_explain_reason = self._can_explain_statement(obfuscated_statement)
+        # type: (str, str, str) -> Tuple[Union[Dict, None], Union[str, None], Union[str, None]]
+        ok, db_explain_error = self._can_explain_statement(obfuscated_statement)
         if not ok:
-            return None, failed_explain_reason
+            return None, db_explain_error.value, None
 
-        explain_setup_state, err = self._get_db_explain_setup_state_cached(dbname)
-        if explain_setup_state != DBExplainSetupState.ok:
+        db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
+        if db_explain_error is not None:
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(explain_setup_state)),
+                tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)),
             )
-            return None, self._translate_setup_state_err_to_reason(explain_setup_state, err)
+            return None, db_explain_error.value, '{}'.format(type(err))
 
         try:
-            return self._run_explain(dbname, statement, obfuscated_statement), None
-        except psycopg2.errors.DatabaseError as e:
-            self._log.warning("Failed to collect execution plan: %s", repr(e))
+            return self._run_explain(dbname, statement, obfuscated_statement), None, None
+        except psycopg2.errors.DatabaseError as err:
+            self._log.warning("Failed to collect execution plan: %s", repr(err))
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
+                tags=self._dbtags(dbname, "error:explain-{}".format(type(err))),
             )
-            return None, {
-                'code': FailedExplainReason.database_error.value,
-                'reason': '{}'.format(repr(e)),
-            }
+            return None, DBExplainError.database_error.value, '{}'.format(type(err))
 
     def _collect_plan_for_statement(self, row):
         try:
@@ -458,7 +411,7 @@ class PostgresStatementSamples(object):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, failed_explain_reason = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
+        plan_dict, db_explain_error, err = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
@@ -490,7 +443,10 @@ class PostgresStatementSamples(object):
                         "definition": obfuscated_plan,
                         "cost": plan_cost,
                         "signature": plan_signature,
-                        "collection_error": failed_explain_reason,
+                        "collection_error": {
+                            "code": db_explain_error,
+                            "reason": err,
+                        },
                     },
                     "query_signature": query_signature,
                     "resource_hash": query_signature,

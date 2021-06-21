@@ -13,7 +13,7 @@ from semver import VersionInfo
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.statement_samples import DBExplainSetupState, PostgresStatementSamples
+from datadog_checks.postgres.statement_samples import DBExplainError, PostgresStatementSamples
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -391,40 +391,35 @@ def dbm_instance(pg_instance):
 
 
 @pytest.mark.parametrize(
-    "dbname,expected_explain_setup_state,expected_failed_explain_reason",
+    "dbname,expected_db_explain_error",
     [
-        ("datadog_test", DBExplainSetupState.ok, None),
-        ("dogs", DBExplainSetupState.ok, None),
-        ("dogs_noschema", DBExplainSetupState.invalid_schema, {'code': 'invalid_schema', 'reason': 'dummy reason'}),
-        ("dogs_nofunc", DBExplainSetupState.failed_function, {'code': 'failed_function', 'reason': 'dummy reason'}),
+        ("datadog_test", None),
+        ("dogs", None),
+        ("dogs_noschema", DBExplainError.invalid_schema),
+        ("dogs_nofunc", DBExplainError.failed_function),
     ],
 )
-def test_get_db_explain_setup_state(
-    integration_check, dbm_instance, dbname, expected_explain_setup_state, expected_failed_explain_reason
-):
+def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, expected_db_explain_error):
     check = integration_check(dbm_instance)
     check._connect()
-    explain_setup_state, failed_explain_reason = check.statement_samples._get_db_explain_setup_state(dbname)
-    assert explain_setup_state == expected_explain_setup_state
-    if explain_setup_state != DBExplainSetupState.ok:
-        assert failed_explain_reason != {}
-    else:
-        assert failed_explain_reason is None
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error == expected_db_explain_error
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_error",
     [
-        ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None),
-        ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None),
+        ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None, None),
+        ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None, None),
         (
             "dd_admin",
             "dd_admin",
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainSetupState.invalid_schema),
+            "error:explain-{}".format(DBExplainError.invalid_schema),
+            {'code': 'invalid_schema', 'reason': "<class 'psycopg2.errors.InvalidSchemaName'>"},
         ),
         (
             "dd_admin",
@@ -432,7 +427,8 @@ def test_get_db_explain_setup_state(
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainSetupState.failed_function),
+            "error:explain-{}".format(DBExplainError.failed_function),
+            {'code': 'failed_function', 'reason': "<class 'psycopg2.errors.UndefinedFunction'>"},
         ),
     ],
 )
@@ -447,6 +443,7 @@ def test_statement_samples_collect(
     query,
     arg,
     expected_error_tag,
+    expected_collection_error,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -490,12 +487,12 @@ def test_statement_samples_collect(
             # we expect to get a duration because the connections are in "idle" state
             assert event['duration']
 
-        # validate the events (if applicable) to ensure we've provided an explanation for not providing an exec plan
+        # validate the events to ensure we've provided an explanation for not providing an exec plan
         for event in matching:
             if event['db']['plan']['definition'] is None:
-                assert event['db']['plan']['collection_error'] != {}
+                assert event['db']['plan']['collection_error'] == expected_collection_error
             else:
-                assert event['db']['plan']['collection_error'] is None
+                assert event['db']['plan']['collection_error'] == {'code': None, 'reason': None}
 
     finally:
         conn.close()
