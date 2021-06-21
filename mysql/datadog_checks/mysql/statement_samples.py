@@ -818,7 +818,7 @@ class MySQLStatementSamples(object):
     @staticmethod
     def _can_explain(obfuscated_statement):
         if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            return False, {'code': FailedExplainReason.no_plans_possible.value}
+            return False, {'code': FailedExplainReason.invalid_statement.value}
         return True, None
 
     @staticmethod
