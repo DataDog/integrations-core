@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import os
 from os.path import isfile, join
 from sys import exit
@@ -27,7 +28,7 @@ def validate_profile(file, directory, verbose):
     profiles_list = find_profiles(file, directory)
     for profile_path in profiles_list:
         contents = read_profile(profile_path)
-        errors = validate_with_jsonschema(contents)
+        errors = validate_with_jsonschema(contents, verbose)
 
     produce_errors(errors, verbose)
 
@@ -98,15 +99,19 @@ def read_profile(profile_path):
     return path_and_contents
 
 
-def validate_with_jsonschema(path_and_contents):
+def validate_with_jsonschema(path_and_contents, verbose):
     schema = get_profile_schema()
     validator = jsonschema.Draft7Validator(schema)
     errors_dict = {}
+    valid_files = []
     for path in path_and_contents:
+        if verbose:
+            echo_info("Validating file: " + path)
         errors = validator.iter_errors(path_and_contents[path])
-
     for error in errors:
         errors_dict[error] = path
+
+
 
     #TODO - condition if there are no errors found
     return errors_dict
@@ -114,15 +119,18 @@ def validate_with_jsonschema(path_and_contents):
 def produce_errors(errors_dict,verbose):
     for error in errors_dict:
         echo_failure("Error found in file: " + errors_dict[error])
-        if not verbose:
-            echo_failure(error.message)
+        json_error = json.loads(json.dumps(error.instance))
+        yaml_error = yaml.dump(json_error, indent=2)
+        echo_failure("The file failed to parse near these lines: " +"\n" + yaml_error)
         if verbose:
             echo_failure("Full error message: ")
             echo_failure(error)
 
-    #readlines?
 
-    #validate profile structure
-    #base profiles different from non-base?
-    #jsonschema human-readable output ? cli is jsonschema
 
+
+#report all errors for a file together, under the same filename?
+
+#translate json from error message into yaml, then find in file, potentially?
+
+# import json as json file
