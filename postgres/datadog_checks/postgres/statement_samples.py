@@ -380,14 +380,14 @@ class PostgresStatementSamples(object):
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.DatabaseError as err:
-            self._log.warning("Failed to collect execution plan: %s", repr(err))
+        except psycopg2.errors.DatabaseError as e:
+            self._log.warning("Failed to collect execution plan: %s", repr(e))
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(type(err))),
+                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
             )
-            return None, DBExplainError.database_error.value, '{}'.format(type(err))
+            return None, DBExplainError.database_error.value, '{}'.format(type(e))
 
     def _collect_plan_for_statement(self, row):
         try:
@@ -411,7 +411,7 @@ class PostgresStatementSamples(object):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, db_explain_error, err = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
+        plan_dict, explain_err_code, err = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
@@ -444,7 +444,7 @@ class PostgresStatementSamples(object):
                         "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_error": {
-                            "code": db_explain_error,
+                            "code": explain_err_code,
                             "reason": err,
                         },
                     },
