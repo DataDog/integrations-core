@@ -32,7 +32,7 @@ class DNSCheck(AgentCheck):
         if not hostname:
             raise BadConfException('A valid "hostname" must be specified')
 
-        resolver = dns.resolver.Resolver()
+        resolver = dns.resolver.Resolver.resolve()
 
         # If a specific DNS server was defined use it, else use the system default
         nameserver = instance.get('nameserver')
@@ -67,7 +67,7 @@ class DNSCheck(AgentCheck):
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
-                answer = resolver.query(hostname, rdtype=record_type)
+                answer = resolver.resolve(hostname, rdtype=record_type, search=True)
                 assert answer.rrset.items[0].to_text()
                 if resolves_as:
                     self._check_answer(answer, resolves_as)
