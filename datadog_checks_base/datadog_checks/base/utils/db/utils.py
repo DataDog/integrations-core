@@ -8,6 +8,8 @@ import socket
 import time
 from itertools import chain
 
+from cachetools import TTLCache
+
 try:
     import datadog_agent
 except ImportError:
@@ -85,6 +87,23 @@ class ConstantRateLimiter:
         sleep_amount = max(self.period_s - elapsed_s, 0)
         time.sleep(sleep_amount)
         self.last_event = time.time()
+
+
+class RateLimitingTTLCache(TTLCache):
+    """
+    TTLCache wrapper used for rate limiting by key
+    """
+
+    def acquire(self, key):
+        """
+        :return: True if the key has not yet reached its rate limit
+        """
+        if len(self) >= self.maxsize:
+            return False
+        if key in self:
+            return False
+        self[key] = True
+        return True
 
 
 def resolve_db_host(db_host):
