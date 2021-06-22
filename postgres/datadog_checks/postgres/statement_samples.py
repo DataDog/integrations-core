@@ -296,12 +296,12 @@ class PostgresStatementSamples(object):
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
-            return False, DBExplainError.no_plans_possible
+            return False
         if obfuscated_statement.startswith('autovacuum:'):
-            return False, DBExplainError.no_plans_possible
+            return False
         if obfuscated_statement.split(' ', 1)[0].lower() not in SUPPORTED_EXPLAIN_STATEMENTS:
-            return False, DBExplainError.no_plans_possible
-        return True, None
+            return False
+        return True
 
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
@@ -362,9 +362,8 @@ class PostgresStatementSamples(object):
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement):
         # type: (str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[Exception]]
-        ok, db_explain_error = self._can_explain_statement(obfuscated_statement)
-        if not ok:
-            return None, db_explain_error, None
+        if not self._can_explain_statement(obfuscated_statement):
+            return None, DBExplainError.no_plans_possible, None
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
         if db_explain_error is not None:
