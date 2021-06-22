@@ -415,7 +415,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         ),
         (
             'information_schema',
-            'select name as nam from testdb.users',
+            'select * from testdb.users',
             {'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"},
         ),
         (
