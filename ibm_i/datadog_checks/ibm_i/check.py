@@ -121,8 +121,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
             query_list = [
                 queries.DiskUsage,
                 queries.CPUUsage,
-                queries.JobStatus,
-                queries.JobCPUUsage,
+                queries.InactiveJobStatus,
+                queries.ActiveJobStatus,
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
                 queries.JobsInJobQueueInfo,
