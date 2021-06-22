@@ -411,7 +411,7 @@ class PostgresStatementSamples(object):
         plan_dict, explain_err_code, err = self._run_explain_safe(row['datname'], row['query'], obfuscated_statement)
         collection_error = None
         if explain_err_code:
-            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err))}
+            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err)) if err else None}
 
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
