@@ -113,9 +113,10 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                             self.get_scraper_config(instance)
                             break
                         except (IOError, requests.HTTPError, requests.exceptions.SSLError) as e:
-                            self.log.info("Couldn't connect to {}: {}, trying next possible URL.".format(url, e))
+                            self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                     else:
-                        self.log.warning("The agent could connect to none of the following URL: {}.".format(str(instance['prometheus_possible_urls'])))
+                        self.log.warning("The agent could connect to none of the following URL: %s.",
+                                         str(instance['prometheus_possible_urls']))
                 else:
                     self.get_scraper_config(instance)
 
