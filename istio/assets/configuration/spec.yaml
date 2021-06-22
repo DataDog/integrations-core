@@ -7,6 +7,14 @@ files:
         - template: init_config/openmetrics_legacy
     - template: instances
       options:
+        - name: use_openmetrics
+          description: |
+            Use the latest OpenMetrics implementation for more features and better performance.
+            In a future release, this option will be set to `true` by default.
+            This implementation only supports Istio 1.5, please use `istiod_endpoint` or `istio_mesh_endpoint`.
+          value:
+            example: false
+            type: boolean
         - name: istiod_endpoint
           description: |
             Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
