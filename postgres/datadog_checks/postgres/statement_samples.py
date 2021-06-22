@@ -374,7 +374,7 @@ class PostgresStatementSamples(object):
         try:
             return self._run_explain(dbname, statement, obfuscated_statement)
         except psycopg2.errors.DatabaseError as e:
-            self._log.warning("Failed to collect execution plan: %s", repr(e))
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,

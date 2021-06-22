@@ -315,6 +315,8 @@ class AerospikeCheck(AgentCheck):
         if not data:
             return []
 
+        # Get rid of any trailing separators before splitting
+        data = data.rstrip(';')
         return data.split(separator)
 
     def collect_datacenter(self, datacenter):

@@ -23,8 +23,6 @@ possible to checkout and build the code for a certain version of a specific chec
 
 To see all checks that need to be released, run `ddev release show ready`.
 
-## Steps
-
 1. Checkout and pull the most recent version of the `master` branch.
 
     ```
@@ -35,13 +33,15 @@ To see all checks that need to be released, run `ddev release show ready`.
     !!! danger "Important"
         Not using the latest version of `master` may cause errors in the [build pipeline](../meta/cd.md).
 
-1. Review which PRs were merged in between the latest release and the `master` branch.
+2. Review which PRs were merged in between the latest release and the `master` branch.
 
     ```
     ddev release show changes <INTEGRATION>
     ```
 
     You should ensure that PR titles and changelog labels are correct.
+
+## Creating the release
 
 1. Create a release branch from master (suggested naming format is `<USERNAME>/release-<INTEGRATION_NAME>`).
    This has the purpose of opening a PR so others can review the changelog.
@@ -50,7 +50,9 @@ To see all checks that need to be released, run `ddev release show ready`.
         It is critical the branch name is not in the form `<USERNAME>/<INTEGRATION_NAME>-<NEW_VERSION>` because one of
         our Gitlab jobs is triggered whenever a Git reference matches that pattern, see !3843 & !3980.
 
-1. Make the release.
+2. Make the release.
+
+    ### Core
 
     ```
     ddev release make <INTEGRATION>
@@ -60,38 +62,40 @@ To see all checks that need to be released, run `ddev release show ready`.
 
     This will automatically:
 
-    - update the version in `<INTEGRATION>/datadog_checks/<INTEGRATION>/__about__.py`
-    - update the changelog
-    - update the `requirements-agent-release.txt` file
-    - update [in-toto metadata](../meta/cd.md)
-    - commit the above changes
+    * update the version in `<INTEGRATION>/datadog_checks/<INTEGRATION>/__about__.py`
+    * update the changelog
+    * update the `requirements-agent-release.txt` file
+    * update [in-toto metadata](../meta/cd.md)
+    * commit the above changes
 
-1. Push your branch to GitHub and create a pull request.
+    ### Third party
+
+    * Update the version on `datadog_checks/<INTEGRATION>/__about__.py`.
+    
+    * Update the CHANGELOG.md file This file can be automatically updated by `ddev` using the following command:
+    
+    ```
+    ddev release changelog <INTEGRATION_NAME> <VERSION>
+    ``` 
+
+    This command will list all merged PRs since the last release and creates a changelog entry based on the pull request labels,
+    this means that *the version bump needs to be on a separate PR from the one that included the changes*.
+    For changelog types, we adhere to those defined by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/#how).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+
+
+3. Push your branch to GitHub and create a pull request.
 
     1. Update the title of the PR to something like `[Release] Bumped <INTEGRATION> version to <VERSION>`.
     1. Ask for a review in Slack.
 
-1. Merge the pull request after approval.
+4. Merge the pull request after approval or wait for it to be merged.
 
-### PyPI
+## Metadata
 
-If you released `datadog_checks_base` or `datadog_checks_dev` then these must be uploaded to [PyPI][]
-for use by [integrations-extras][].
+You need to run certain backend jobs if any changes modified integration metadata or assets such as dashboards.
+If you are a contributor a datadog employee will handle this.
 
-This is automatically handled by two GitHub Action jobs: [release-base.yml][] and [release-dev.yml][].
-
-In case you need to do it manually:
-
-```
-ddev release upload datadog_checks_[base|dev]
-```
-
-### Metadata
-
-You need to run certain jobs if any changes modified integration metadata. See the
-[Declarative Integration Pipeline](https://github.com/DataDog/devops/wiki/Declarative-Integration-Pipeline) wiki.
-
-## Bulk releases
+## Bulk releases (core integrations only)
 
 To create a release for every integration that has changed, use `all` as the integration name in the `ddev release make`
 step above.
@@ -113,9 +117,9 @@ ddev release make all --exclude datadog_checks_dev
     1. Run the [remove-labels](../ddev/cli.md#ddev-meta-scripts-remove-labels) command
     1. After merging, manually add back the `changelog/no-changelog` label
 
-## Betas
+## Betas (core integrations only)
 
-Creating pre-releases is the same workflow except you do not open a pull request but rather release directly from a branch.
+Creating pre-releases follows the same workflow except you do not open a pull request but rather release directly from a branch.
 
 In the `ddev release make` step set `--version` to `[major|minor|patch],[rc|alpha|beta]`.
 
@@ -141,7 +145,9 @@ ddev release make <INTEGRATION> --version rc
 
 ## New integrations
 
-To bump a new integration to `1.0.0` if it is not already there, run:
+### Core integrations
+
+To bump a new core integration to `1.0.0` if it is not already there, run:
 
 ```
 ddev release make <INTEGRATION> --new
@@ -157,6 +163,25 @@ If a release was created, run:
 
 ```
 ddev agent requirements
+```
+
+### Third party integrations
+
+For first time releases of third party integrations, simply merge the integration to master and a release will be 
+triggered with the specified version number in the about file.
+
+
+## Base package releases
+
+If you released `datadog_checks_base` or `datadog_checks_dev` then these must be uploaded to [PyPI][]
+for use by [integrations-extras][].
+
+This is automatically handled by two GitHub Action jobs: [release-base.yml][] and [release-dev.yml][].
+
+In case you need to do it manually:
+
+```
+ddev release upload datadog_checks_[base|dev]
 ```
 
 ## Troubleshooting
@@ -224,10 +249,6 @@ who, at the time of writing (28-02-2020), can trigger a build by signing [in-tot
 ??? info "[Ofek Lev](https://api.github.com/users/ofek/gpg_keys)"
     - `C295 CF63 B355 DFEB 3316  02F7 F426 A944 35BE 6F99`
     - `D009 8861 8057 D2F4 D855  5A62 B472 442C B7D3 AF42`
-
-??? info "[Florimond Manca](https://api.github.com/users/florimondmanca/gpg_keys)"
-    - `B023 B02A 0331 9CD8 D19A  4328 83ED 89A4 5548 48FC`
-    - `0992 11D9 AA67 D21E 7098  7B59 7C7D CB06 C9F2 0C13`
 
 ??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
     - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
