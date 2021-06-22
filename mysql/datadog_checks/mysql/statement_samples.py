@@ -694,10 +694,9 @@ class MySQLStatementSamples(object):
 
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, statement)
 
-        ok, db_explain_error = self._can_explain(obfuscated_statement)
-        if not ok:
+        if not self._can_explain(obfuscated_statement):
             self._log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
-            return None, db_explain_error, None
+            return None, DBExplainError.no_plans_possible, None
 
         strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
         if strategy_cache:
@@ -815,9 +814,7 @@ class MySQLStatementSamples(object):
 
     @staticmethod
     def _can_explain(obfuscated_statement):
-        if obfuscated_statement.split(' ', 1)[0].lower() not in SUPPORTED_EXPLAIN_STATEMENTS:
-            return False, DBExplainError.no_plans_possible
-        return True, None
+        return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
 
     @staticmethod
     def _parse_execution_plan_cost(execution_plan):
