@@ -411,7 +411,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         (
             None,
             'select name as nam from testdb.users',
-            {'code': 'invalid_schema', 'message': None},
+            {'code': 'procedure_strategy_requires_default_schema', 'message': None},
         ),
         (
             'information_schema',
