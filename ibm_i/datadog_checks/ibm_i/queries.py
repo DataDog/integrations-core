@@ -29,6 +29,27 @@ CPUUsage = {
 JobStatus = {
     'name': 'job_status',
     'query': (
+        # TODO: try to move the JOB_NAME split logic to Python
+        "SELECT SUBSTR(JOB_NAME,1,POSSTR(JOB_NAME,'/')-1) AS JOB_ID, "
+        "SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1,POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "
+        "SUBSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
+        "JOB_SUBSYSTEM, "
+        "CASE WHEN JOB_STATUS = 'ACTIVE' THEN 1 ELSE 0 END "
+        "FROM TABLE(QSYS2.JOB_INFO('*ALL', '*ALL', '*ALL', '*ALL', '*ALL'))"
+    ),
+    'columns': [
+        {'name': 'job_id', 'type': 'tag'},
+        {'name': 'job_user', 'type': 'tag'},
+        {'name': 'job_name', 'type': 'tag'},
+        {'name': 'subsystem_name', 'type': 'tag'},
+        {'name': 'ibm_i.job.active', 'type': 'gauge'},
+    ],
+
+}
+
+JobCPUUsage = {
+    'name': 'job_cpu_usage',
+    'query': (
         # We prefer using ELAPSED_CPU_TIME / ELAPSED_TIME over ELAPSED_CPU_PERCENTAGE
         # because the latter only has a precision of one decimal.
         # ELAPSED_CPU_TIME is in milliseconds, while ELAPSED_TIME is in seconds
@@ -40,7 +61,7 @@ JobStatus = {
         "SELECT SUBSTR(A.JOB_NAME,1,POSSTR(A.JOB_NAME,'/')-1) AS JOB_ID, "
         "SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1,POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "  # noqa:E501
         "SUBSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
-        "A.SUBSYSTEM, A.JOB_STATUS, 1, "
+        "A.SUBSYSTEM, A.JOB_STATUS, "
         "CASE WHEN A.ELAPSED_TIME = 0 THEN 0 ELSE A.ELAPSED_CPU_TIME / (10 * A.ELAPSED_TIME) END AS CPU_RATE "
         # Two queries: one to fetch the stats, another to reset them
         "FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', '')) A INNER JOIN TABLE(QSYS2.ACTIVE_JOB_INFO('YES', '', '', '')) B "  # noqa:E501
@@ -53,7 +74,6 @@ JobStatus = {
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'job_status', 'type': 'tag'},
-        {'name': 'ibm_i.job.active', 'type': 'gauge'},
         {'name': 'ibm_i.job.cpu_usage', 'type': 'gauge'},
     ],
 }
