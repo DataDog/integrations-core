@@ -60,9 +60,6 @@ class DBExplainError(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
-    # statements not in VALID_EXPLAIN_STATEMENTS are not valid
-    invalid_statement = 'invalid_statement'
-
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
