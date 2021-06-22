@@ -4,7 +4,6 @@
 import json
 import os
 from os.path import isfile, join
-from sys import exit
 
 import click
 import jsonschema
@@ -77,7 +76,7 @@ def get_all_profiles_from_dir(directory):
         dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
     except FileNotFoundError:
         echo_failure("Directory not found, or could not be read")
-        exit()
+        abort()
     for profile in dir_contents:
         profiles_list.append(os.path.join(profiles_path,profile))
     return profiles_list
@@ -90,11 +89,11 @@ def read_profile(profile_path):
             file_contents = yaml.safe_load(f.read())
     except OSError:
         echo_failure("Profile file not found, or could not be read")
-        exit()
+        abort()
     path_and_contents[profile_path] = file_contents
     if not file_contents:
         echo_failure("File contents returned None: " + profile_path)
-        exit()
+        abort()
 
     return path_and_contents
 
@@ -127,15 +126,15 @@ def produce_errors(errors_dict,verbose):
         if verbose:
             echo_failure("Full error message: ")
             echo_failure(error.message)
-
+    abort()
 
 def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error.instance))
     yaml_error = yaml.dump(json_error, indent=2)
     return yaml_error
 
-#tomorrow - sysobjid, ci pipeline, remove hardcoded paths  check for duplicates? better errors,
-#return error code for CI
+#tomorrow - , remove hardcoded paths  check for duplicates? better errors,
+#x return error code for CI
 # open draft pr
 
 
