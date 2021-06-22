@@ -44,7 +44,6 @@ JobStatus = {
         {'name': 'subsystem_name', 'type': 'tag'},
         {'name': 'ibm_i.job.active', 'type': 'gauge'},
     ],
-
 }
 
 JobCPUUsage = {
