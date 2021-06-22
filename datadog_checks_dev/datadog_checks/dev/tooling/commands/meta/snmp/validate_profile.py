@@ -16,9 +16,9 @@ from ....constants import get_root
 from .....fs import dir_exists, path_join, read_file, file_exists
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
-@click.option('--file', help="Path to a profile file to validate")
-@click.option('--directory', help="Path to a directory of profiles to validate")
-@click.option('--verbose', help="Increase verbosity of error messages", is_flag=True)
+@click.option('-f', '--file', help="Path to a profile file to validate")
+@click.option('-d','--directory', help="Path to a directory of profiles to validate")
+@click.option('-v','--verbose', help="Increase verbosity of error messages", is_flag=True)
 def validate_profile(file, directory, verbose):
     profiles_list = find_profiles(file, directory)
     for profile_path in profiles_list:
@@ -92,7 +92,6 @@ def validate_with_jsonschema(path_and_contents, verbose):
         errors_dict[error] = path
 
 
-
     #TODO - condition if there are no errors found
     return errors_dict
 
@@ -101,10 +100,11 @@ def produce_errors(errors_dict,verbose):
         echo_failure("Error found in file: " + errors_dict[error])
         yaml_error = convert_to_yaml(error)
         echo_failure("The file failed to parse near these lines: " +"\n" + yaml_error)
+        echo_failure(error.message)
 
         if verbose:
             echo_failure("Full error message: ")
-            echo_failure(error.message)
+            echo_failure(error)
     abort()
 
 def convert_to_yaml(error):
@@ -112,14 +112,15 @@ def convert_to_yaml(error):
     yaml_error = yaml.dump(json_error, indent=2)
     return yaml_error
 
-#tomorrow - , remove hardcoded paths  check for duplicates? better errors,
+#x remove hardcoded paths  check for duplicates?
 #x return error code for CI
+#x sysobjectid can be an array instead of string
 # open draft pr
 
 
 #integrations-core validation only
 #friendlier verbose error output - what was expected - expecting this, got this instead
-# x sysobjectid can be an array instead of string
+
 
 
 
