@@ -17,7 +17,12 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import (
+    ConstantRateLimiter,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    resolve_db_host,
+)
 from datadog_checks.base.utils.serialization import json
 
 VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
@@ -265,13 +270,13 @@ class MySQLStatementSamples(object):
         )
 
         # explained_statements_cache: limit how often we try to re-explain the same query
-        self._explained_statements_cache = TTLCache(
+        self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=self._config.statement_samples_config.get('explained_statements_cache_maxsize', 5000),
             ttl=60 * 60 / self._config.statement_samples_config.get('explained_statements_per_hour_per_query', 60),
         )
 
         # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
-        self._seen_samples_cache = TTLCache(
+        self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
             maxsize=self._config.statement_samples_config.get('seen_samples_cache_maxsize', 10000),
@@ -475,9 +480,8 @@ class MySQLStatementSamples(object):
         query_signature = compute_sql_signature(obfuscated_digest_text)
 
         query_cache_key = (row['current_schema'], query_signature)
-        if query_cache_key in self._explained_statements_cache:
+        if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
-        self._explained_statements_cache[query_cache_key] = True
 
         plan = None
         with closing(self._get_db_connection().cursor()) as cursor:
@@ -497,8 +501,7 @@ class MySQLStatementSamples(object):
             plan_cost = self._parse_execution_plan_cost(plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
-        if query_plan_cache_key not in self._seen_samples_cache:
-            self._seen_samples_cache[query_plan_cache_key] = True
+        if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._db_hostname,
@@ -639,11 +642,11 @@ class MySQLStatementSamples(object):
         self._check.histogram("dd.mysql.collect_statement_samples.time", (time.time() - start_time) * 1000, tags=tags)
         self._check.count("dd.mysql.collect_statement_samples.events_submitted.count", submitted_count, tags=tags)
         self._check.gauge(
-            "dd.mysql.collect_statement_samples.seen_samples_cache.len", len(self._seen_samples_cache), tags=tags
+            "dd.mysql.collect_statement_samples.seen_samples_cache.len", len(self._seen_samples_ratelimiter), tags=tags
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.explained_statements_cache.len",
-            len(self._explained_statements_cache),
+            len(self._explained_statements_ratelimiter),
             tags=tags,
         )
         self._check.gauge(
