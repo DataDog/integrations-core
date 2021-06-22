@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import socket
 import time
+from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
@@ -518,27 +520,68 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         conn.close()
 
 
-def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
+def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
+    # test the main collection loop rate limit
+    collections_per_second = 10
+    dbm_instance['statement_samples']['collections_per_second'] = collections_per_second
     dbm_instance['statement_samples']['run_sync'] = False
-    # one collection every two seconds
-    dbm_instance['statement_samples']['collections_per_second'] = 0.5
     check = integration_check(dbm_instance)
     check._connect()
-    query = "SELECT city FROM persons WHERE city = 'hello'"
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_collections = int(collections_per_second * sleep_time) + 1
+    check.cancel()
+    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+
+def test_statement_samples_unique_plans_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
+    # tests rate limiting ingestion of samples per unique (query, plan)
+    cache_max_size = 10
+    dbm_instance['statement_samples']['seen_samples_cache_maxsize'] = cache_max_size
+    # samples_per_hour_per_query set very low so that within this test we will have at most one sample per
+    # (query, plan)
+    dbm_instance['statement_samples']['samples_per_hour_per_query'] = 1
+    # run it synchronously with a high rate limit specifically for the test
+    dbm_instance['statement_samples']['collections_per_second'] = 100
+    dbm_instance['statement_samples']['run_sync'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    query_template = "SELECT {} FROM persons WHERE city = 'hello'"
+    # queries that have different numbers of columns are considered different queries
+    # i.e. "SELECT city, city FROM persons where city= 'hello'"
+    queries = [query_template.format(','.join(["city"] * i)) for i in range(1, 15)]
+
     # leave bob's connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
     cursor = bob_conn.cursor()
-    for _ in range(5):
-        cursor.execute(query)
-        check.check(dbm_instance)
-        time.sleep(1)
+    for _ in range(3):
+        # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
+        for q in queries:
+            cursor.execute(q)
+            check.check(dbm_instance)
     cursor.close()
 
-    matching = [e for e in aggregator.get_event_platform_events("dbm-samples") if e['db']['statement'] == query]
-    assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
+    def _sample_key(e):
+        return e['db']['query_signature'], e['db'].get('plan', {}).get('signature')
 
-    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
-    assert 2 < len(metrics) < 6
+    dbm_samples = [e for e in aggregator.get_event_platform_events("dbm-samples") if e.get('dbm_type') != 'fqt']
+    statement_counts = Counter(_sample_key(e) for e in dbm_samples)
+    assert len(statement_counts) == cache_max_size, "expected to collect at most {} unique statements".format(
+        cache_max_size
+    )
+
+    for _, count in statement_counts.items():
+        assert count == 1, "expected to collect exactly one sample per statement during this time"
+
+    # in addition to the test query, dbm_samples will also contain samples from other queries that the postgres
+    # integration is running
+    pattern = query_template.format("(city,?)+")
+    matching = [e for e in dbm_samples if re.match(pattern, e['db']['statement'])]
+
+    assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
 def test_statement_samples_collection_loop_inactive_stop(aggregator, integration_check, dbm_instance):
