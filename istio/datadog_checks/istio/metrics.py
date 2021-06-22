@@ -168,7 +168,7 @@ PILOT_METRICS = {
     'pilot_xds_rds_reject': 'pilot.xds.rds_reject',
     'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
     'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
-    'pilot_xds_lds_reject': 'pilot.xds.lds_reject'
+    'pilot_xds_lds_reject': 'pilot.xds.lds_reject',
 }
 
 
