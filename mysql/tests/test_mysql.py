@@ -406,11 +406,23 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
-    "schema,statement",
+    "schema,statement,expected_collection_error",
     [
-        (None, 'select name as nam from testdb.users'),
-        ('information_schema', 'select name as nam from testdb.users'),
-        ('testdb', 'select name as nam from users'),
+        (
+            None,
+            'select name as nam from testdb.users',
+            {'code': 'invalid_schema', 'message': "<class 'NoneType'>"},
+        ),
+        (
+            'information_schema',
+            'select name as nam from testdb.users',
+            {'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"},
+        ),
+        (
+            'testdb',
+            'select name as nam from users',
+            {'code': 'database_error', 'message': "<class 'pymysql.err.ProgrammingError'>"},
+        ),
     ],
 )
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
@@ -422,6 +434,7 @@ def test_statement_samples_collect(
     explain_strategy,
     schema,
     statement,
+    expected_collection_error,
     aurora_replication_role,
     caplog,
 ):
@@ -486,10 +499,16 @@ def test_statement_samples_collect(
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
         assert set(event['ddtags'].split(',')) == expected_tags
 
-    # validate the events to ensure we've provided an explanation for not providing an exec plan
+    # Validate the events to ensure we've provided an explanation for not providing an exec plan
     for event in matching:
         if event['db']['plan']['definition'] is None:
-            assert event['db']['plan']['collection_error'] != {}
+            if schema == 'information_schema' and explain_strategy == 'PROCEDURE':
+                # Since we can't create an EXPLAIN statement procedure in performance_schema, the result of the
+                # collection_error is unreliable, making expected mocks difficult. The important thing here is
+                # to verify we have a collection_error.
+                assert event['db']['plan']['collection_error'] != {}
+            else:
+                assert event['db']['plan']['collection_error'] == expected_collection_error
         else:
             assert event['db']['plan']['collection_error'] is None
 

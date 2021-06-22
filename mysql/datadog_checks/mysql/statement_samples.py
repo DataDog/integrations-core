@@ -199,7 +199,7 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
 )
 
 
-class FailedExplainReason(Enum):
+class DBExplainError(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
     """
@@ -207,20 +207,11 @@ class FailedExplainReason(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
-    # statements not in VALID_EXPLAIN_STATEMENTS are not valid
-    invalid_statement = 'invalid_statement'
-
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
-    # a value retrieved from the EXPLAIN function could be invalid
-    invalid_result = 'invalid_result'
-
     # some statements cannot be explained i.e AUTOVACUUM
     no_plans_possible = 'no_plans_possible'
-
-    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
-    failed_function = 'failed_function'
 
 
 class MySQLStatementSamples(object):
@@ -504,10 +495,10 @@ class MySQLStatementSamples(object):
             return None
         self._explained_statements_cache[query_cache_key] = True
 
-        plan, failed_explain_reason = None, None
+        plan, explain_err_code, err = None, None, None
         with closing(self._get_db_connection().cursor()) as cursor:
             try:
-                plan, failed_explain_reason = self._explain_statement(
+                plan, explain_err_code, err = self._explain_statement(
                     cursor, row['sql_text'], row['current_schema'], obfuscated_statement
                 )
             except Exception as e:
@@ -515,6 +506,10 @@ class MySQLStatementSamples(object):
                     "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
                 )
                 self._log.exception("Failed to explain statement: %s", obfuscated_statement)
+
+        collection_error = None
+        if explain_err_code:
+            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err))}
 
         normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None
         if plan:
@@ -543,7 +538,7 @@ class MySQLStatementSamples(object):
                         "definition": obfuscated_plan,
                         "cost": plan_cost,
                         "signature": plan_signature,
-                        "collection_error": failed_explain_reason,
+                        "collection_error": collection_error,
                     },
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
@@ -689,6 +684,8 @@ class MySQLStatementSamples(object):
         Tries the available methods used to explain a statement for the given schema. If a non-retryable
         error occurs (such as a permissions error), then statements executed under the schema will be
         disallowed in future attempts.
+        returns: An execution plan, otherwise it returns an explain error code and optionally an exception.
+        rtype: Tuple[Optional[Dict], Optional[DBExplainError], Optional[Exception]]
         """
         start_time = time.time()
         strategy_cache_key = 'explain_strategy:%s' % schema
@@ -697,17 +694,17 @@ class MySQLStatementSamples(object):
 
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, statement)
 
-        ok, failed_explain_reason = self._can_explain(obfuscated_statement)
+        ok, db_explain_error = self._can_explain(obfuscated_statement)
         if not ok:
             self._log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
-            return None, failed_explain_reason
+            return None, db_explain_error, None
 
         strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
         if strategy_cache:
-            strategy_error, failed_explain_reason = strategy_cache
+            strategy_error, db_explain_error, err = strategy_cache
             if strategy_error == explain_strategy_error:
                 self._log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
-                return None, failed_explain_reason
+                return None, db_explain_error, err
 
         try:
             # If there was a default schema when this query was run, then switch to it before trying to collect
@@ -718,9 +715,13 @@ class MySQLStatementSamples(object):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
-            failed_explain_reason = {'code': FailedExplainReason.invalid_schema.value, 'reason': '{}'.format(repr(e))}
+            db_explain_error = DBExplainError.invalid_schema
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
-                self._collection_strategy_cache[strategy_cache_key] = (explain_strategy_error, failed_explain_reason)
+                self._collection_strategy_cache[strategy_cache_key] = (
+                    explain_strategy_error,
+                    db_explain_error,
+                    e,
+                )
             self._check.count(
                 "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
@@ -731,21 +732,21 @@ class MySQLStatementSamples(object):
                 schema,
                 obfuscated_statement,
             )
-            return None, failed_explain_reason
+            return None, db_explain_error, e
 
         # Use a cached strategy for the schema, if any, or try each strategy to collect plans
         strategies = list(self._preferred_explain_strategies)
         strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
         if strategy_cache:
-            strategy, _ = strategy_cache
+            strategy, _, _ = strategy_cache
             strategies.remove(strategy)
             strategies.insert(0, strategy)
 
-        failed_explain_reason = None
+        db_explain_error, err = None, None
         for strategy in strategies:
             try:
                 if not schema and strategy == "PROCEDURE":
-                    failed_explain_reason = {'code': FailedExplainReason.invalid_schema.value}
+                    db_explain_error = DBExplainError.invalid_schema
                     self._log.debug(
                         'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
                         obfuscated_statement,
@@ -753,7 +754,7 @@ class MySQLStatementSamples(object):
                     continue
                 plan = self._explain_strategies[strategy](cursor, statement, obfuscated_statement)
                 if plan:
-                    self._collection_strategy_cache[strategy_cache_key] = (strategy, None)
+                    self._collection_strategy_cache[strategy_cache_key] = (strategy, None, None)
                     self._log.debug(
                         'Successfully collected execution plan. strategy=%s, schema=%s, statement="%s"',
                         strategy,
@@ -765,17 +766,14 @@ class MySQLStatementSamples(object):
                         (time.time() - start_time) * 1000,
                         tags=self._tags + ["strategy:{}".format(strategy)],
                     )
-                    return plan, None
+                    return plan, None, None
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
-                failed_explain_reason = {
-                    'code': FailedExplainReason.database_error.value,
-                    'reason': '{}'.format(repr(e)),
-                }
+                db_explain_error, err = DBExplainError.database_error, e
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
@@ -789,7 +787,7 @@ class MySQLStatementSamples(object):
                     obfuscated_statement,
                 )
                 continue
-        return None, failed_explain_reason
+        return None, db_explain_error, err
 
     def _run_explain(self, cursor, statement, obfuscated_statement):
         """
@@ -818,7 +816,7 @@ class MySQLStatementSamples(object):
     @staticmethod
     def _can_explain(obfuscated_statement):
         if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            return False, {'code': FailedExplainReason.invalid_statement.value}
+            return False, DBExplainError.no_plans_possible
         return True, None
 
     @staticmethod
