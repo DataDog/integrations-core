@@ -32,7 +32,7 @@ class DNSCheck(AgentCheck):
         if not hostname:
             raise BadConfException('A valid "hostname" must be specified')
 
-        resolver = dns.resolver.Resolver().resolve()
+        resolver = dns.resolver.Resolver()
 
         # If a specific DNS server was defined use it, else use the system default
         nameserver = instance.get('nameserver')
