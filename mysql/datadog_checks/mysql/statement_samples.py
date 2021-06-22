@@ -509,7 +509,7 @@ class MySQLStatementSamples(object):
 
         collection_error = None
         if explain_err_code:
-            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err))}
+            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(type(err)) if err else None}
 
         normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None
         if plan:

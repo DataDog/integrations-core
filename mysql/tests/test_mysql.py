@@ -411,7 +411,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         (
             None,
             'select name as nam from testdb.users',
-            {'code': 'invalid_schema', 'message': "<class 'NoneType'>"},
+            {'code': 'invalid_schema', 'message': None},
         ),
         (
             'information_schema',
@@ -502,13 +502,7 @@ def test_statement_samples_collect(
     # Validate the events to ensure we've provided an explanation for not providing an exec plan
     for event in matching:
         if event['db']['plan']['definition'] is None:
-            if schema == 'information_schema' and explain_strategy == 'PROCEDURE':
-                # Since we can't create an EXPLAIN statement procedure in performance_schema, the result of the
-                # collection_error is unreliable, making expected mocks difficult. The important thing here is
-                # to verify we have a collection_error.
-                assert event['db']['plan']['collection_error'] != {}
-            else:
-                assert event['db']['plan']['collection_error'] == expected_collection_error
+            assert event['db']['plan']['collection_error'] == expected_collection_error
         else:
             assert event['db']['plan']['collection_error'] is None
 
