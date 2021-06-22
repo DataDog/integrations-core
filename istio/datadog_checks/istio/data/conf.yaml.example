@@ -46,6 +46,13 @@ init_config:
 instances:
 
   -
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ## In a future release, this option will be set to `true` by default.
+    ## This implementation only supports Istio 1.5, please use `istiod_endpoint` or `istio_mesh_endpoint`.
+    #
+    # use_openmetrics: false
+
     ## @param istiod_endpoint - string - optional
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
     ## Only available for Istio >= v1.5.
