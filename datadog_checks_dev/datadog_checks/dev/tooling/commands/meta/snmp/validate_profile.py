@@ -100,7 +100,6 @@ def read_profile(profile_path):
 
 
 def validate_with_jsonschema(path_and_contents, verbose):
-    #schema = get_profile_schema()
     with open("/Users/laura.hampton/Embed_June_21/Ddev_local/dd/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/snmp_profile.json", "r") as f:
         contents = f.read()
         schema = json.loads(contents)
@@ -122,15 +121,39 @@ def validate_with_jsonschema(path_and_contents, verbose):
 def produce_errors(errors_dict,verbose):
     for error in errors_dict:
         echo_failure("Error found in file: " + errors_dict[error])
-        json_error = json.loads(json.dumps(error.instance))
-        yaml_error = yaml.dump(json_error, indent=2)
+        yaml_error = convert_to_yaml(error)
         echo_failure("The file failed to parse near these lines: " +"\n" + yaml_error)
+
         if verbose:
             echo_failure("Full error message: ")
-            echo_failure(error)
+            echo_failure(error.message)
+
+
+def convert_to_yaml(error):
+    json_error = json.loads(json.dumps(error.instance))
+    yaml_error = yaml.dump(json_error, indent=2)
+    return yaml_error
+
+#tomorrow - sysobjid, ci pipeline, remove hardcoded paths  check for duplicates? better errors,
+#return error code for CI
+# open draft pr
+
+
+#integrations-core validation only
+#friendlier verbose error output - what was expected - expecting this, got this instead
+# x sysobjectid can be an array instead of string
 
 
 
+#good condition
+# find errors in support cases
+#group errors by file
+#number of errors by file
+# 0 errors found
+# fix path to jsonschema and profiles
+#check on extract tags pattern - check per dev documentation
+# features not supported in core check - name but not oid
+# https://docs.google.com/document/d/1OMMEOMuB9NWOz2uJgf89lNzudqHvQqGA-0Eeg8o81D0/edit#heading=h.klntf3xonn2j - raise warning on not supported? deprecated schema - create card
 
 #report all errors for a file together, under the same filename?
 # report files that passed validation
