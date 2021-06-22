@@ -109,8 +109,7 @@ class MySql(AgentCheck):
                 self._conn = db
 
                 if self._get_is_aurora(db):
-                    tags.extend(self._get_runtime_aurora_tags(db))
-                    tags = list(set(tags))
+                    tags = tags + self._get_runtime_aurora_tags(db)
 
                 # version collection
                 self.version = get_version(db)
@@ -120,8 +119,9 @@ class MySql(AgentCheck):
                 self._collect_metrics(db, tags=tags)
                 self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
-                    self._statement_metrics.collect_per_statement_metrics(db, self.service_check_tags)
-                    self._statement_samples.run_sampler(self.service_check_tags)
+                    dbm_tags = list(set(self.service_check_tags) | set(tags))
+                    self._statement_metrics.collect_per_statement_metrics(db, dbm_tags)
+                    self._statement_samples.run_sampler(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -167,6 +167,7 @@ class MySql(AgentCheck):
         connection_args = {
             'ssl': ssl,
             'connect_timeout': self._config.connect_timeout,
+            'autocommit': True,
         }
         if self._config.charset:
             connection_args['charset'] = self._config.charset

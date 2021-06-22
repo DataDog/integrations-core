@@ -84,6 +84,10 @@ def instance_ignore_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ignore_tags(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_jmx_exporter_port(field, value):
     return 11001
 

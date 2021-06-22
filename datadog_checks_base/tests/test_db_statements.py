@@ -6,7 +6,7 @@ import copy
 
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 
 
 def add_to_dict(a, b):
@@ -181,64 +181,3 @@ class TestStatementMetrics:
         ]
 
         assert expected_merged_metrics == metrics
-
-    def test_apply_row_limits(self):
-        def assert_any_order(a, b):
-            assert sorted(a, key=lambda row: row['_']) == sorted(b, key=lambda row: row['_'])
-
-        rows = [
-            {'_': 0, 'count': 2, 'time': 1000},
-            {'_': 1, 'count': 20, 'time': 5000},
-            {'_': 2, 'count': 20, 'time': 8000},
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},
-            {'_': 5, 'count': 60, 'time': 500},
-            {'_': 6, 'count': 90, 'time': 5000},
-            {'_': 7, 'count': 50, 'time': 5000},
-            {'_': 8, 'count': 40, 'time': 100},
-            {'_': 9, 'count': 30, 'time': 900},
-            {'_': 10, 'count': 80, 'time': 800},
-            {'_': 11, 'count': 110, 'time': 7000},
-        ]
-        assert_any_order(
-            [], apply_row_limits(rows, {'count': (0, 0), 'time': (0, 0)}, 'count', True, key=lambda row: row['_'])
-        )
-
-        expected = [
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},  # The bottom 1 row for both 'count' and 'time'
-            {'_': 2, 'count': 20, 'time': 8000},
-        ]
-        assert_any_order(
-            expected, apply_row_limits(rows, {'count': (1, 1), 'time': (1, 1)}, 'count', True, key=lambda row: row['_'])
-        )
-
-        expected = [
-            {'_': 5, 'count': 60, 'time': 500},
-            {'_': 10, 'count': 80, 'time': 800},
-            {'_': 6, 'count': 90, 'time': 5000},
-            {'_': 11, 'count': 110, 'time': 7000},
-            {'_': 3, 'count': 180, 'time': 8000},
-            {'_': 4, 'count': 0, 'time': 10},
-            {'_': 0, 'count': 2, 'time': 1000},
-            {'_': 2, 'count': 20, 'time': 8000},
-            {'_': 8, 'count': 40, 'time': 100},
-        ]
-        assert_any_order(
-            expected, apply_row_limits(rows, {'count': (5, 2), 'time': (2, 2)}, 'count', True, key=lambda row: row['_'])
-        )
-
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (6, 6), 'time': (0, 0)}, 'time', False, key=lambda row: row['_']),
-        )
-
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (0, 0), 'time': (4, 8)}, 'time', False, key=lambda row: row['_']),
-        )
-
-        assert_any_order(
-            rows,
-            apply_row_limits(rows, {'count': (20, 20), 'time': (12, 5)}, 'time', False, key=lambda row: row['_']),
-        )

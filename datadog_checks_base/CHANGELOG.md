@@ -1,11 +1,26 @@
 # CHANGELOG - datadog_checks_base
 
+## 19.0.0 / 2021-05-28
+
+* [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Upgrade ClickHouse dependencies. See [#9344](https://github.com/DataDog/integrations-core/pull/9344).
+* [Added] [OpenMetricsV2] Add an option to send sum and count information when using distribution metrics. See [#9301](https://github.com/DataDog/integrations-core/pull/9301).
+* [Added] Improve performance of using extra tags when executing a QueryManager. See [#8466](https://github.com/DataDog/integrations-core/pull/8466).
+* [Added] Add `hostname` parameter to QueryManager. See [#9260](https://github.com/DataDog/integrations-core/pull/9260).
+* [Fixed] Fix AttributeError in AIA chasing. See [#9328](https://github.com/DataDog/integrations-core/pull/9328).
+* [Fixed] Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+* [Changed] Add flush first value to Openmetrics histogram buckets. See [#9276](https://github.com/DataDog/integrations-core/pull/9276).
+* [Changed] Change 'collision in cached query metrics' log from debug to error. See [#9268](https://github.com/DataDog/integrations-core/pull/9268).
+* [Removed] Remove unused `utils.db.statement_samples` client. See [#9166](https://github.com/DataDog/integrations-core/pull/9166).
+* [Removed] Remove unused apply_row_limits in statement_metrics.py. See [#9378](https://github.com/DataDog/integrations-core/pull/9378).
+
 ## 18.3.0 / 2021-04-27
 
 * [Added] Add merging of duplicate rows in statement_metrics. See [#9227](https://github.com/DataDog/integrations-core/pull/9227).
 * [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).
 
-## 18.2.0 / 2021-04-19
+## 18.2.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Allow the loading of arbitrary configuration models. See [#9180](https://github.com/DataDog/integrations-core/pull/9180).
 

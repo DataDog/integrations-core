@@ -72,7 +72,7 @@ instances:
     #
     # status_check: false
 
-    ## @param collect_aggregates_only - boolean - optional - default: true
+    ## @param collect_aggregates_only - boolean or string - optional - default: true
     ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
     ## status lines from the stats output instead of for each backend. With this parameter set to false the agent
     ## collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
@@ -303,6 +303,14 @@ instances:
     #   - <LABEL_2>
     #   <KEY_2>:
     #   - '*'
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

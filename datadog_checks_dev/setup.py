@@ -69,6 +69,8 @@ setup(
     include_package_data=True,
     extras_require={
         'cli': [
+            'aiohttp',
+            'aiomultiprocess',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
             'click~=8.0',
@@ -78,6 +80,7 @@ setup(
             'in-toto>=0.4.2',
             'jsonschema',
             'markdown',
+            'orjson',
             'packaging',
             'pip-tools',
             'platformdirs>=2.0.0a3',

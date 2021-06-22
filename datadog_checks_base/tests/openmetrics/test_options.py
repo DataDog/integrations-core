@@ -550,3 +550,65 @@ class TestShareLabels:
         )
 
         aggregator.assert_all_metrics_covered()
+
+
+class TestIgnoreTags:
+    def test_simple_match(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes 6.396288e+06
+            """
+        )
+        all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+        ignored_tags = ['foo', 'bar:baz']
+        wanted_tags = ['bar', 'bar:bar']
+        check = get_check({'metrics': ['go_memstats_alloc_bytes'], 'tags': all_tags, 'ignore_tags': ignored_tags})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test'] + wanted_tags
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_simple_wildcard(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes 6.396288e+06
+            """
+        )
+        all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+        ignored_tags = ['foo*', '.*baz']
+        wanted_tags = ['bar', 'bar:bar']
+        check = get_check({'metrics': ['go_memstats_alloc_bytes'], 'tags': all_tags, 'ignore_tags': ignored_tags})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test'] + wanted_tags
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+    def test_regex(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes 6.396288e+06
+            """
+        )
+        all_tags = ['foo', 'foobar', 'bar:baz', 'bar:bar']
+        ignored_tags = ['^foo', '.+:bar$']
+        wanted_tags = ['bar:baz']
+        check = get_check({'metrics': ['go_memstats_alloc_bytes'], 'tags': all_tags, 'ignore_tags': ignored_tags})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test'] + wanted_tags
+        )
+
+        aggregator.assert_all_metrics_covered()

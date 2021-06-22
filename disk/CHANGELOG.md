@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 4.3.0 / 2021-03-24
+## 4.3.0 / 2021-03-24 / Agent 7.28.0
 
 * [Added] Log something if a disk is excluded. See [#8829](https://github.com/DataDog/integrations-core/pull/8829).
 

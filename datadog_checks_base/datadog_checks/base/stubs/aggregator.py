@@ -4,6 +4,7 @@
 from __future__ import division
 
 import json
+import os
 import re
 from collections import OrderedDict, defaultdict
 
@@ -35,6 +36,28 @@ def backend_normalize_metric_name(metric_name):
     """
     metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
     return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
+
+
+def check_tag_names(metric, tags):
+    forbidden_tags = [
+        'cluster_name',
+        'clustername',
+        'cluster',
+        'host_name',
+        'hostname',
+        'host',
+    ]
+
+    if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        for tag in tags:
+            tag_name = tag.split(':')[0]
+            if tag_name in forbidden_tags:
+                raise Exception(
+                    "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
+                    "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
+                        metric, tag_name
+                    )
+                )
 
 
 class AggregatorStub(object):
@@ -91,17 +114,20 @@ class AggregatorStub(object):
         return name in cls.IGNORED_METRICS
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
+        check_tag_names(name, tags)
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
 
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, check, check_id, event):
@@ -111,8 +137,9 @@ class AggregatorStub(object):
         self._event_platform_events[event_type].append(raw_event)
 
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
         )
@@ -418,7 +445,7 @@ class AggregatorStub(object):
         - hostname
         """
         # metric types that intended to be called multiple times are ignored
-        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        ignored_types = [self.COUNT, self.COUNTER]
         metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
 
         def stub_to_key_fn(stub):

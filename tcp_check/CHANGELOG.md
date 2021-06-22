@@ -1,6 +1,10 @@
 # CHANGELOG - tcp_check
 
-## 3.0.0 / 2021-04-19
+## 3.1.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8994](https://github.com/DataDog/integrations-core/pull/8994).
+
+## 3.0.0 / 2021-04-19 / Agent 7.28.0
 
 * [Changed] Utilize time precision function from datadog_checks_base. See [#8841](https://github.com/DataDog/integrations-core/pull/8841).
 

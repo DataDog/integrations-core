@@ -1,6 +1,6 @@
 # CHANGELOG - IBM WAS
 
-## 1.9.0 / 2021-04-19
+## 1.9.0 / 2021-04-19 / Agent 7.28.0
 
 * [Security] Upgrade lxml python package. See [#9173](https://github.com/DataDog/integrations-core/pull/9173).
 

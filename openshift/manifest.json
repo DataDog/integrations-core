@@ -1,7 +1,8 @@
 {
   "categories": [
     "containers",
-    "orchestration"
+    "orchestration",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "OpenShift",

@@ -1,5 +1,9 @@
 # CHANGELOG - CockroachDB
 
+## 1.6.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
 ## 1.5.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
