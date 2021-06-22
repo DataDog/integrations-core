@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
 
+from copy import deepcopy
+import requests
+
 from ...errors import CheckException
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
@@ -97,7 +100,24 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         if instances is not None:
             for instance in instances:
-                self.get_scraper_config(instance)
+                possible_urls = instance.get('prometheus_possible_urls')
+                if possible_urls is not None:
+                    for url in possible_urls:
+                        try:
+                            new_instance = deepcopy(instance)
+                            new_instance.update({'prometheus_url': url})
+                            scraper_config = self.get_scraper_config(new_instance)
+                            response = self.send_request(url, scraper_config)
+                            response.raise_for_status()
+                            instance['prometheus_url'] = url
+                            self.get_scraper_config(instance)
+                            break
+                        except (IOError, requests.HTTPError, requests.exceptions.SSLError) as e:
+                            self.log.info("Couldn’t connect to {}: {}, trying next possible URL.".format(url, e))
+                    else:
+                        self.log.warning("The agent could connect to none of the following URL: {}.".format(str(instance['prometheus_possible_urls'])))
+                else:
+                    self.get_scraper_config(instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance
