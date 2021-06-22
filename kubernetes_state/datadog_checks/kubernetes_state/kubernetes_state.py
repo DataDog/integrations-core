@@ -173,7 +173,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         for job_tags, job in iteritems(self.cron_job_complete_check):
             status = self.UNKNOWN if job.status is None else job.status
-            self.service_check(scraper_config['namespace'] + '.cronjob.complete', status, list(job_tags))
+            self.service_check(scraper_config['namespace'] + '.cronjob.last_job_complete', status, list(job_tags))
             job.set_previous_and_reset_current_ts()
 
         # Logic for Jobs
@@ -703,8 +703,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     self.cron_job_complete_check[frozenset(tags)].update_current_ts_and_track_completion(
                         job_ts, self.OK
                     )
-                else:
-                    self.service_check(service_check_name, self.OK, tags=tags + scraper_config['custom_tags'])
+                self.service_check(service_check_name, self.OK, tags=tags + scraper_config['custom_tags'])
 
     def kube_job_failed(self, metric, scraper_config):
         service_check_name = scraper_config['namespace'] + '.job.complete'
@@ -725,8 +724,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     self.cron_job_complete_check[frozenset(tags)].update_current_ts_and_track_completion(
                         job_ts, self.CRITICAL
                     )
-                else:
-                    self.service_check(service_check_name, self.CRITICAL, tags=tags + scraper_config['custom_tags'])
+                self.service_check(service_check_name, self.CRITICAL, tags=tags + scraper_config['custom_tags'])
 
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
