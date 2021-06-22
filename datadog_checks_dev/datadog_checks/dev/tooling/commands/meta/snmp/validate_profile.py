@@ -100,7 +100,10 @@ def read_profile(profile_path):
 
 
 def validate_with_jsonschema(path_and_contents, verbose):
-    schema = get_profile_schema()
+    #schema = get_profile_schema()
+    with open("/Users/laura.hampton/Embed_June_21/Ddev_local/dd/integrations-core/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/snmp_profile.json", "r") as f:
+        contents = f.read()
+        schema = json.loads(contents)
     validator = jsonschema.Draft7Validator(schema)
     errors_dict = {}
     valid_files = []
@@ -130,7 +133,7 @@ def produce_errors(errors_dict,verbose):
 
 
 #report all errors for a file together, under the same filename?
-
+# report files that passed validation
 #translate json from error message into yaml, then find in file, potentially?
 
-# import json as json file
+
