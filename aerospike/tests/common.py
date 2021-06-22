@@ -31,7 +31,7 @@ TPS_METRICS = [
     'tps.read',
 ]
 
-SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
+SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count', 'disable_eviction']
 
 ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
