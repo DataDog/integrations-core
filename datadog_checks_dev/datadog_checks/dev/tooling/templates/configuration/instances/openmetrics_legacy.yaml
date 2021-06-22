@@ -1,20 +1,8 @@
 - name: prometheus_url
-  required: false
-  description: |
-    The URL where your application metrics are exposed by Prometheus.
-    One of prometheus_possible_urls or prometheus_url parameter is required.
+  required: true
+  description: The URL where your application metrics are exposed by Prometheus.
   value:
     type: string
-- name: prometheus_possible_urls
-  required: false
-  description: |
-    The URLs to try to get your application metrics that are exposed by Prometheus.
-    The check will try each URLs in the list and will use the first working one.
-    One of prometheus_possible_urls or prometheus_url parameter is required.
-  value:
-    type: array
-    items:
-      type: string
 - name: namespace
   hidden: true
   description: The namespace to be prepended to all metrics.
