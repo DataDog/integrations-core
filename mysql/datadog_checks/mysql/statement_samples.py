@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
-VALID_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
+SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
 
 # unless a specific table is configured, we try all of the events_statements tables in descending order of
 # preference
@@ -815,7 +815,7 @@ class MySQLStatementSamples(object):
 
     @staticmethod
     def _can_explain(obfuscated_statement):
-        if obfuscated_statement.split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
+        if obfuscated_statement.split(' ', 1)[0].lower() not in SUPPORTED_EXPLAIN_STATEMENTS:
             return False, DBExplainError.no_plans_possible
         return True, None
 
