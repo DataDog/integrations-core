@@ -125,6 +125,25 @@ SubsystemInfo = {
     ],
 }
 
+JobsInJobQueueInfo = {
+    'name': 'jobs_in_job_queue',
+    'query': (
+        "SELECT SUBSTR(JOB_NAME,1,POSSTR(JOB_NAME,'/')-1) AS JOB_ID, "
+        "SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1,POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "
+        "SUBSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
+        "JOB_QUEUE_NAME, JOB_QUEUE_STATUS, 1 "
+        "FROM TABLE(QSYS2.JOB_INFO('*JOBQ', '*ALL', '*ALL', '*ALL', '*ALL'))"
+    ),
+    'columns': [
+        {'name': 'job_id', 'type': 'tag'},
+        {'name': 'job_user', 'type': 'tag'},
+        {'name': 'job_name', 'type': 'tag'},
+        {'name': 'job_queue_name', 'type': 'tag'},
+        {'name': 'job_queue_status', 'type': 'tag'},
+        {'name': 'ibm_i.job.in_jobq', 'type': 'gauge'}
+    ],
+}
+
 JobQueueInfo = {
     'name': 'job_queue',
     'query': (

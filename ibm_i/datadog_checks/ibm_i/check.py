@@ -125,6 +125,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.JobCPUUsage,
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
+                queries.JobsInJobQueueInfo,
                 queries.JobQueueInfo,
                 queries.MessageQueueInfo,
             ]
