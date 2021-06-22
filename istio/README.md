@@ -113,6 +113,11 @@ For Istio versions `1.5` or higher:
 **istio.prometheus.health**:<br>
 Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
+When using the Agent 7+ implementation by setting `use_openmetrics` to `true`:
+
+**istio.openmetrics.health**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
+
 For all other versions of Istio:
 
 **istio.pilot.prometheus.health**:<br>
