@@ -2,10 +2,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import math
 import time
 
-from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, ConstantRateLimiter
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, RateLimitingTTLCache
 
 
 def test_constant_rate_limiter():
