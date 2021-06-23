@@ -62,6 +62,11 @@ SUPERVISORD_VERSION_PATTERN = re.compile(
 
 class SupervisordCheck(AgentCheck):
     def check(self, instance):
+        if instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+        if instance.get('pass'):
+            self._log_deprecation('_config_renamed', 'pass', 'password')
+
         server_name = instance.get('name')
 
         if not server_name or not server_name.strip():

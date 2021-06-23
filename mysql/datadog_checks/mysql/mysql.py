@@ -102,6 +102,12 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+
+        if self.instance.get('pass'):
+            self._log_deprecation('_config_renamed', 'pass', 'password')
+
         tags = list(self._config.tags)
         self._set_qcache_stats()
         with self._connect() as db:

@@ -16,8 +16,8 @@ class MySQLConfig(object):
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')
-        self.user = instance.get('user', '')
-        self.password = str(instance.get('pass', instance.get('password', '')))
+        self.user = instance.get('username', instance.get('user', ''))
+        self.password = str(instance.get('password', instance.get('pass', '')))
         self.tags = self._build_tags(instance.get('tags', []))
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
         replication_channel = self.options.get('replication_channel')
