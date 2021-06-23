@@ -406,22 +406,28 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
-    "schema,statement,expected_collection_error",
+    "schema,statement,expected_collection_errors",
     [
         (
             None,
             'select name as nam from testdb.users',
-            {'code': 'procedure_strategy_requires_default_schema', 'message': None},
+            [{'strategy': 'PROCEDURE', 'code': 'procedure_strategy_requires_default_schema', 'message': None}],
         ),
         (
             'information_schema',
             'select * from testdb.users',
-            {'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"},
+            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
         ),
         (
             'testdb',
             'select name as nam from users',
-            {'code': 'database_error', 'message': "<class 'pymysql.err.ProgrammingError'>"},
+            [
+                {
+                    'strategy': 'FQ_PROCEDURE',
+                    'code': 'database_error',
+                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                }
+            ],
         ),
     ],
 )
@@ -434,7 +440,7 @@ def test_statement_samples_collect(
     explain_strategy,
     schema,
     statement,
-    expected_collection_error,
+    expected_collection_errors,
     aurora_replication_role,
     caplog,
 ):
@@ -502,9 +508,9 @@ def test_statement_samples_collect(
     # Validate the events to ensure we've provided an explanation for not providing an exec plan
     for event in matching:
         if event['db']['plan']['definition'] is None:
-            assert event['db']['plan']['collection_error'] == expected_collection_error
+            assert event['db']['plan']['collection_errors'] == expected_collection_errors
         else:
-            assert event['db']['plan']['collection_error'] is None
+            assert event['db']['plan']['collection_errors'] is None
 
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
