@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 20.0.1 / 2021-06-23
+
+* [Fixed] Fix Python 2 integer division bug in db.util `ConstantRateLimiter`. See [#9592](https://github.com/DataDog/integrations-core/pull/9592).
+
 ## 20.0.0 / 2021-06-22
 
 * [Added] Add `RateLimitingTTLCache` to `db.utils`. See [#9582](https://github.com/DataDog/integrations-core/pull/9582).
