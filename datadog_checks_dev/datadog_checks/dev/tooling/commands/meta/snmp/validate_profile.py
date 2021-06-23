@@ -98,7 +98,7 @@ def validate_with_jsonschema(path_and_contents, verbose):
 def produce_errors(errors_dict,verbose):
     for error in errors_dict:
         echo_failure("Error found in file: " + errors_dict[error])
-        yaml_error = convert_to_yaml(error)
+        yaml_error = convert_to_yaml(error.instance)
         echo_failure("The file failed to parse near these lines: " +"\n" + yaml_error)
         echo_failure(error.message)
 
@@ -108,7 +108,7 @@ def produce_errors(errors_dict,verbose):
     abort()
 
 def convert_to_yaml(error):
-    json_error = json.loads(json.dumps(error.instance))
+    json_error = json.loads(json.dumps(error))
     yaml_error = yaml.dump(json_error, indent=2)
     return yaml_error
 
