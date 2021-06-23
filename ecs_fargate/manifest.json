@@ -16,7 +16,11 @@
   "public_title": "Datadog-Amazon ECS on AWS Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "support": "core",
-  "supported_os": [],
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ]
   "type": "check",
   "integration_id": "aws-fargate",
   "assets": {
