@@ -252,7 +252,16 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
+### Live Containers
+
+Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][21] page.
+
+### Live Processes
+
+Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][22] page. To enable live processes, [enable shareProcessNamespace in the pod spec][23].
+
 ## Log Collection
+
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
 You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs. 
@@ -275,6 +284,7 @@ You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs.
             log_stream_prefix awslogs-firelens-example
             auto_create_group On
    ```
+
 
 ## Traces Collection
 
@@ -346,7 +356,7 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 ## Process Collection
 
-For Agent 6.19+/7.19+, [Process Collection][23] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
+For Agent 6.19+/7.19+, [Process Collection][24] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
 
 ```
 apiVersion: v1
@@ -399,14 +409,15 @@ Need help? Contact [Datadog support][22].
 [13]: https://app.datadoghq.com/account/settings#api
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [15]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[16]: https://docs.datadoghq.com/infrastructure/livecontainers
-[17]: https://docs.datadoghq.com/developers/dogstatsd/
-[18]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
-[19]: http://docs.datadoghq.com/tracing/setup
-[20]: http://docs.datadoghq.com/agent/cluster_agent/setup
-[21]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
-[22]: https://docs.datadoghq.com/help/
-[23]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
-[24]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[16]: https://docs.datadoghq.com/developers/dogstatsd/
+[17]: http://docs.datadoghq.com/tracing/setup
+[18]: http://docs.datadoghq.com/agent/cluster_agent/setup
+[19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
+[20]: https://docs.datadoghq.com/help
+[21]: https://app.datadoghq.com/containers
+[22]: https://app.datadoghq.com/process
+[23]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+[24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [25]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [26]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+
