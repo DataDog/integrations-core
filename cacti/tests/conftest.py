@@ -70,6 +70,7 @@ def dd_environment():
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
             env_vars={'RRD_PATH': rrd_path},
             build=True,
+            mount_logs=True,
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
 

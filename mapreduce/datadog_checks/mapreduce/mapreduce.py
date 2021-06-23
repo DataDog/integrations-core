@@ -65,7 +65,10 @@ class MapReduceCheck(AgentCheck):
                 self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
-        self.metric_tags = self.custom_tags + ['cluster_name:{}'.format(cluster_name)]
+
+        self.metric_tags = self.custom_tags + ['mapreduce_cluster:{}'.format(cluster_name)]
+        if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            self.metric_tags.append('cluster_name:{}'.format(cluster_name))
 
     def check(self, instance):
         # Get the running MR applications from YARN
@@ -442,9 +445,7 @@ class MapReduceCheck(AgentCheck):
 
     def _critical_service(self, service_name, tags, message):
         if service_name:
-            self.service_check(
-                service_name, AgentCheck.CRITICAL, tags=tags, message=message,
-            )
+            self.service_check(service_name, AgentCheck.CRITICAL, tags=tags, message=message)
 
     def _join_url_dir(self, url, *args):
         """

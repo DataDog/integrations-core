@@ -13,7 +13,9 @@ DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
 DEFAULT_CLUSTER_NAME = 'default_cluster'
 DEFAULT_COLLECT_APP_METRICS = True
+DEFAULT_COLLECT_NODE_METRICS = True
 MAX_DETAILED_QUEUES = 100
+DEFAULT_SPLIT_YARN_APPLICATION_TAGS = False
 
 # Path to retrieve cluster metrics
 YARN_CLUSTER_METRICS_PATH = '/ws/v1/cluster/metrics'
@@ -202,13 +204,16 @@ class YarnCheck(AgentCheck):
             )
             cluster_name = DEFAULT_CLUSTER_NAME
 
-        tags.append('cluster_name:{}'.format(cluster_name))
+        tags.append('yarn_cluster:{}'.format(cluster_name))
+        if not is_affirmative(self.instance.get('disable_legacy_cluster_tag', False)):
+            tags.append('cluster_name:{}'.format(cluster_name))
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
         if is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
             self._yarn_app_metrics(rm_address, app_tags, tags)
-        self._yarn_node_metrics(rm_address, tags)
+        if is_affirmative(instance.get('collect_node_metrics', DEFAULT_COLLECT_NODE_METRICS)):
+            self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
 
     def _yarn_cluster_metrics(self, rm_address, addl_tags):
@@ -218,7 +223,6 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH, addl_tags)
 
         if metrics_json:
-
             yarn_metrics = metrics_json[YARN_CLUSTER_METRICS_ELEMENT]
 
             if yarn_metrics is not None:
@@ -230,7 +234,7 @@ class YarnCheck(AgentCheck):
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
-        if metrics_json and metrics_json['apps'] is not None and metrics_json['apps']['app'] is not None:
+        if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
                 tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
@@ -245,14 +249,36 @@ class YarnCheck(AgentCheck):
                 )
 
     def _get_app_tags(self, app_json, app_tags):
+        split_app_tags = self.instance.get('split_yarn_application_tags', DEFAULT_SPLIT_YARN_APPLICATION_TAGS)
         tags = []
         for dd_tag, yarn_key in iteritems(app_tags):
             try:
                 val = app_json[yarn_key]
                 if val:
-                    tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
+                    if split_app_tags and yarn_key == 'applicationTags':
+                        splitted_tags = self._split_yarn_application_tags(val, dd_tag)
+                        tags.extend(splitted_tags)
+                    else:
+                        tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
             except KeyError:
                 self.log.error("Invalid value %s for application_tag", yarn_key)
+        return tags
+
+    def _split_yarn_application_tags(self, application_tags, dd_tag):
+        """Splits the YARN application tags string, if formatted as
+        "key1:val1,key2:val2" into Datadog application tags as such:
+            app_key1: val1
+            app_key2: val2
+        """
+        tags = []
+        kv_pairs = [x.split(':') for x in application_tags.split(',')]
+        try:
+            for tag_key, tag_value in kv_pairs:
+                tags.append('app_{tag}:{value}'.format(tag=tag_key, value=tag_value))
+        except ValueError:
+            self.log.warning("Unable to split string %s with YARN application tags", application_tags)
+            # Reverting to default behavior.
+            tags.append('{tag}:{value}'.format(tag=dd_tag, value=application_tags))
         return tags
 
     def _yarn_node_metrics(self, rm_address, addl_tags):
@@ -262,8 +288,7 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
         version_set = False
 
-        if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
-
+        if metrics_json and metrics_json.get('nodes') and metrics_json['nodes'].get('node') is not None:
             for node_json in metrics_json['nodes']['node']:
                 node_id = node_json['id']
 
@@ -300,8 +325,7 @@ class YarnCheck(AgentCheck):
 
         self._set_yarn_metrics_from_json(tags, metrics_json, YARN_ROOT_QUEUE_METRICS)
 
-        if metrics_json['queues'] is not None and metrics_json['queues']['queue'] is not None:
-
+        if metrics_json and metrics_json.get('queues') and metrics_json['queues'].get('queue') is not None:
             queues_count = 0
             for queue_json in metrics_json['queues']['queue']:
                 queue_name = queue_json['queueName']

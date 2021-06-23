@@ -1,0 +1,84 @@
+name: CoreDNS
+files:
+- name: coredns.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.description: |
+          To enable CoreDNS metrics you must specify the prometheus url
+          and enable the plugin within coredns.
+          See: https://coredns.io/plugins/metrics/
+        prometheus_url.value.example: "http://%%host%%:9153/metrics"
+        prometheus_url.display_priority: 2
+        tags.required: True
+        tags.display_priority: 1
+        tags.value.example:
+          - "dns-pod:%%host%%"
+        metrics.hidden: false
+        metrics.value.example:
+          - coredns_template_matches_total: template_matches_count
+          - coredns_template_template_failures_total: template_templating_failures_count
+          - coredns_template_rr_failures_total: template_resource_record_failures_count
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - coredns
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: prometheus_url
+      description: |
+        To enable CoreDNS metrics you must specify the prometheus url
+        and enable the plugin within coredns
+        See: https://coredns.io/plugins/metrics/
+      required: true
+      value:
+        type: string
+        example: "http://%%host%%:9153/metrics"
+    - name: tags
+      description: |
+        List of tags to attach to every metric and service check emitted by this integration.
+
+        Learn more about tagging: https://docs.datadoghq.com/tagging/
+      required: True
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - "dns-pod:%%host%%"
+    - name: send_histograms_buckets
+      description: Set send_histograms_buckets to true to send the histograms bucket.
+      value:
+        type: boolean
+        example: True
+    - name: send_monotonic_counter
+      description: |
+        To send counters as monotonic counter
+        see: https://github.com/DataDog/integrations-core/issues/1303
+      value:
+        type: boolean
+        example: True
+    - name: metrics
+      description: |
+        Metrics from the CoreDNS plugins for 'metrics', 'proxy', 'forward' and 'cache'
+        are enabled by default, however in order to scrape metrics for optional
+        plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
+        As an example, the 'template' plugin's metrics are below
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - coredns_template_matches_total: template_matches_count
+          - coredns_template_template_failures_total: template_templating_failures_count
+          - coredns_template_rr_failures_total: template_resource_record_failures_count

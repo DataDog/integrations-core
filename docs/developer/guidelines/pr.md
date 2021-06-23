@@ -4,7 +4,7 @@
 
 ## Title
 
-The [release command](../ddev/cli.md#make) uses the title of pull requests as-is to generate changelog entries.
+The [release command](../ddev/cli.md#ddev-release-make) uses the title of pull requests as-is to generate changelog entries.
 Therefore, be as explicit and concise as possible when describing code changes. For example, do not say `Fix typo`,
 but rather something like `Fix typo in debug log messages`.
 
@@ -37,7 +37,7 @@ Every pull request should do one thing only, for many reasons:
 
 1. **Easy Git management** - For example, if you are editing documentation and notice an error in the shipped example configuration, you
    should fix the error in a separate pull request. Doing so will enable a clean cherry-pick or revert of the bug fix should the need arise.
-1. **Easier release management** - Let's consider how the [release command](../ddev/cli.md#make) would handle the case of
+1. **Easier release management** - Let's consider how the [release command](../ddev/cli.md#ddev-release-make) would handle the case of
    making a code change to multiple integrations.
 
     - If one of the changes only fixes a typo in a code comment, that integration will still be released as indicated by the label.
@@ -45,10 +45,7 @@ Every pull request should do one thing only, for many reasons:
 
 ## Merges
 
-To keep a clean Git history we disable standard merges and use GitHub's [squash and merge][github-squash-and-merge].
+We only allow GitHub's [squash and merge][github-squash-and-merge], for 2 reasons:
 
-You may [rebase and merge][github-rebase-and-merge] only if all of the following conditions are true:
-
-1. the change is massive and cannot be broken into multiple pull requests
-1. retaining the history of commits is actually deemed to be important
-1. the commits are curated so each represents a distinct change
+1. To keep a clean Git history
+1. Our release tooling relies on commits being suffixed with the PR number in order to list changes between versions

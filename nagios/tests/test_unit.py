@@ -17,7 +17,7 @@ def test_centreon_event_logs():
     events = []
     mock_log = MagicMock()
     tailer = NagiosEventLogTailer(NAGIOS_TEST_LOG, mock_log, "host", events.append, None, False)
-    tailer._parse_line(log)
+    tailer.parse_line(log)
     assert len(events) == 1
     assert events[0]['event_type'] == 'SERVICE ALERT'
     assert events[0]['host'] == 'SOMEHOST'

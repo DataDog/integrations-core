@@ -16,20 +16,56 @@ PORT = '11414'
 USERNAME = 'admin'
 PASSWORD = 'passw0rd'
 
-QUEUE_MANAGER = 'datadog'
+QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
+CHANNEL_SSL = 'PYMQI.SSL.SVRCONN'
+SSL_CLIENT_LABEL = 'client'
+SSL_CYPHER_SPEC = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
 
 QUEUE = 'DEV.QUEUE.1'
 
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
-MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
+MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
-COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
+IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
+
+COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
 INSTANCE = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+    'collect_statistics_metrics': True,
+}
+
+INSTANCE_SSL = {
+    'channel': CHANNEL_SSL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'ssl_auth': 'yes',
+    'ssl_cipher_spec': SSL_CYPHER_SPEC,
+    'ssl_key_repository_location': '/opt/pki/keys/client',
+    'ssl_certificate_label': SSL_CLIENT_LABEL,
+}
+
+INSTANCE_METADATA = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
@@ -81,6 +117,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
@@ -96,7 +133,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'docker_volumes': ['{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
@@ -170,6 +207,46 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
+CHANNEL_STATS_METRICS = [
+    ('ibm_mq.stats.channel.msgs', COUNT),
+    ('ibm_mq.stats.channel.bytes', COUNT),
+    ('ibm_mq.stats.channel.put_retries', COUNT),
+]
+
+QUEUE_STATS_METRICS = [
+    ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+    ('ibm_mq.stats.queue.q_max_depth', GAUGE),
+    ('ibm_mq.stats.queue.put_fail_count', COUNT),
+    ('ibm_mq.stats.queue.get_fail_count', COUNT),
+    ('ibm_mq.stats.queue.put1_fail_count', COUNT),
+    ('ibm_mq.stats.queue.browse_fail_count', COUNT),
+    ('ibm_mq.stats.queue.non_queued_msg_count', COUNT),
+    ('ibm_mq.stats.queue.expired_msg_count', COUNT),
+    ('ibm_mq.stats.queue.purge_count', COUNT),
+]
+
+# These are Queue Stat metrics that return a list containing both persistent and non-persistent metrics
+# These metrics have an extra tag for `persistent`.
+QUEUE_STATS_LIST_METRICS = [
+    ('ibm_mq.stats.queue.avg_q_time', GAUGE),
+    ('ibm_mq.stats.queue.put_count', COUNT),
+    ('ibm_mq.stats.queue.get_count', COUNT),
+    ('ibm_mq.stats.queue.browse_bytes', GAUGE),
+    ('ibm_mq.stats.queue.browse_count', COUNT),
+    ('ibm_mq.stats.queue.get_bytes', COUNT),
+    ('ibm_mq.stats.queue.put_bytes', COUNT),
+    ('ibm_mq.stats.queue.put1_count', COUNT),
+]
+
+if IS_CLUSTER:
+    CHANNEL_STATUS_METRICS.extend(
+        [
+            ('ibm_mq.channel.batches', GAUGE),
+            ('ibm_mq.channel.current_msgs', GAUGE),
+            ('ibm_mq.channel.indoubt_status', GAUGE),
+        ]
+    )
+
 METRICS = (
     [
         ('ibm_mq.queue_manager.dist_lists', GAUGE),
@@ -184,15 +261,23 @@ METRICS = (
 )
 
 OPTIONAL_METRICS = [
-    'ibm_mq.queue.max_channels',
+    ('ibm_mq.queue.max_channels', GAUGE),
+    ('ibm_mq.stats.channel.full_batches', COUNT),
+    ('ibm_mq.stats.channel.incomplete_batches', COUNT),
+    ('ibm_mq.stats.channel.avg_batch_size', GAUGE),
 ]
+
+# stats metrics are not always present at each check run
+OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 
 
 def assert_all_metrics(aggregator):
     for metric, metric_type in METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
+    for metric, metric_type in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
 
     aggregator.assert_all_metrics_covered()

@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import logging
 import os
 import time
 import weakref
@@ -30,11 +31,11 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
-def test_parse_metrics(lcd_mock):
+def test_parse_metrics(lcd_mock, caplog):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
 
@@ -75,7 +76,8 @@ def test_parse_metrics(lcd_mock):
     with pytest.raises(Exception):
         config.parse_metrics(metrics)
 
-    # MIB with table and symbols
+    # MIB with table and symbols but no metric_tags
+    caplog.at_level(logging.WARNING)
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 2
@@ -85,6 +87,9 @@ def test_parse_metrics(lcd_mock):
     assert foo.name == 'foo'
     assert isinstance(foo, ParsedTableMetric)
     assert bar.name == 'bar'
+    assert (
+        "foo_table table doesn't have a 'metric_tags' section, all its metrics will use the same tags." in caplog.text
+    )
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
@@ -97,13 +102,23 @@ def test_parse_metrics(lcd_mock):
         config.parse_metrics(metrics)
 
     # Table with manual OID
-    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
+    metrics = [
+        {
+            "MIB": "foo_mib",
+            "table": "foo_table",
+            "symbols": [{"OID": "1.2.3", "name": "foo"}],
+            "metric_tags": [{"tag": "test", "index": "1"}],
+        }
+    ]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
+    index_tag = foo.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
@@ -178,6 +193,11 @@ def test_parse_metrics(lcd_mock):
     assert column_tag.column == 'baz'
     assert column_tag.parsed_metric_tag.name == 'test'
 
+    # Invalid extract value pattern
+    metrics = [{"MIB": "foo_mib", "symbol": {"OID": "1.2.3", "name": "hey", "extract_value": "[aa-"}}]
+    with pytest.raises(Exception, match="Failed to compile regular expression"):
+        config.parse_metrics(metrics)
+
 
 def test_ignore_ip_addresses():
     # type: () -> None
@@ -241,6 +261,21 @@ def test_duplicate_sysobjectid_error():
     SnmpCheck('snmp', init_config, [instance])
 
 
+def test_sysobjectid_list():
+    profile_multiple = {'sysobjectid': ['1.3.6.1.4.1.9.1.241', '1.3.6.1.4.1.9.1.1790']}
+    profile_single = {'sysobjectid': '1.3.6.1.4.1.9.1.3450'}
+
+    instance = common.generate_instance_config([])
+    init_config = {'profiles': {'multiple': {'definition': profile_multiple}, 'single': {'definition': profile_single}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    assert check.profiles_by_oid == {
+        '1.3.6.1.4.1.9.1.241': 'multiple',
+        '1.3.6.1.4.1.9.1.1790': 'multiple',
+        '1.3.6.1.4.1.9.1.3450': 'single',
+    }
+
+
 def test_no_address():
     instance = common.generate_instance_config([])
     instance.pop('ip_address')
@@ -275,21 +310,23 @@ def test_removing_host():
     check.check(instance)
 
     assert len(warnings) == 1
-    warning = warnings[0]
-    msg = 'Failed to collect some metrics: No SNMP response received before timeout'
-    assert msg in warning
+    msg = 'No SNMP response received before timeout'
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning]
+    assert len(warnings) == 2
+    assert all(msg in warning for warning in warnings)
 
     check.check(instance)
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [warning, warning, warning]
+    assert len(warnings) == 3
+    assert all(msg in warning for warning in warnings)
 
 
 def test_invalid_discovery_interval():
@@ -549,3 +586,103 @@ def test_batches(items, size, output):
 def test_batches_size_must_be_strictly_positive(size):
     with pytest.raises(ValueError):
         list(batches([1, 2, 3], size=size))
+
+
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric():
+    instance = common.generate_instance_config([])
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+    results = {
+        'ifHighSpeed': {
+            ('1', '2'): 80,
+        },
+        'ifHCInOctets': {
+            ('1', '2'): 5000000,
+        },
+        'ifHCOutOctets': {
+            ('1', '2'): 1000000,
+        },
+    }
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
+    # ((5000000 * 8) / (80 * 1000000)) * 100 = 50.0
+    check.rate.assert_called_with('snmp.ifBandwidthInUsage.rate', 50.0, ['foo', 'bar'])
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
+    # ((1000000 * 8) / (80 * 1000000)) * 100 = 10.0
+    check.rate.assert_called_with('snmp.ifBandwidthOutUsage.rate', 10.0, ['foo', 'bar'])
+
+
+@pytest.mark.parametrize(
+    "results, metric_name, error_messages",
+    [
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCInOctets',
+            ['missing `ifHCInOctets`'],
+            id="missing ifHCInOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHCOutOctets`'],
+            id="missing ifHCOutOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 0,
+                },
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['Zero value at ifHighSpeed, skipping'],
+            id="zero ifHighSpeed",
+        ),
+        pytest.param(
+            {
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHighSpeed` metric'],
+            id="missing ifHighSpeed",
+        ),
+    ],
+)
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors(results, metric_name, error_messages, caplog):
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+
+    check.rate = mock.Mock()
+    with caplog.at_level(logging.DEBUG):
+        check.try_submit_bandwidth_usage_metric_if_bandwidth_metric(metric_name, index, results, tags)
+
+    check.rate.assert_not_called()
+    for msg in error_messages:
+        assert msg in caplog.text

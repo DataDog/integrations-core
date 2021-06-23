@@ -1,24 +1,5 @@
 # Generic UDP metrics for routers.
+# This profile is deprecated and kept in place for retrocompatibility purposes, please use `_generic-udp` instead.
 
-metrics:
-- MIB: UDP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.7.8
-    name: udpHCInDatagrams
-- MIB: UDP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.7.2
-    name: udpNoPorts
-- MIB: UDP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.7.3
-    name: udpInErrors
-- MIB: UDP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.7.9
-    name: udpHCOutDatagrams
-
+extends:
+  - _generic-udp.yaml

@@ -10,13 +10,12 @@ import click
 from ...utils import (
     complete_valid_checks,
     get_check_file,
-    get_config_file,
     get_data_directory,
-    get_readme_file,
     get_testable_checks,
     get_valid_integrations,
     has_dashboard,
     has_e2e,
+    has_logs,
     is_tile_only,
 )
 from ..console import CONTEXT_SETTINGS, abort, echo_info
@@ -72,17 +71,10 @@ def catalog(checks, out_file, markdown):
     integration_catalog = []
 
     for check in sorted(checks):
-        has_logs = False
         is_prometheus = False
         is_http = False
         has_metadata = False
         tile_only = is_tile_only(check)
-
-        if not is_tile_only:
-            config_file = get_config_file(check)
-            with open(config_file) as f:
-                if '# logs:' in f.read():
-                    has_logs = True
 
         check_file = get_check_file(check)
         if os.path.exists(check_file):
@@ -95,16 +87,10 @@ def catalog(checks, out_file, markdown):
                 if 'self.set_metadata' in contents:
                     has_metadata = True
 
-        readme_file = get_readme_file(check)
-        if not has_logs and os.path.exists(readme_file):
-            with open(readme_file) as f:
-                if '# Log collection' in f.read():
-                    has_logs = True
-
         entry = {
             'name': check,
             'has_dashboard': has_dashboard(check),
-            'has_logs': has_logs,
+            'has_logs': has_logs(check),
             'is_jmx': os.path.exists(os.path.join(get_data_directory(check), 'metrics.yaml')),
             'is_prometheus': is_prometheus,
             'is_http': is_http,

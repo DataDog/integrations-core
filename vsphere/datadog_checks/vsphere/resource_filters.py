@@ -72,6 +72,15 @@ class TagFilter(ResourceFilter):
         return False
 
 
+class AttributeFilter(ResourceFilter):
+    def match(self, mor, infrastructure_data, resource_tags):
+        attributes = infrastructure_data[mor].get("attributes", [])
+        for attribute in attributes:
+            if match_any_regex(attribute, self.patterns):
+                return True
+        return False
+
+
 class HostnameFilter(ResourceFilter):
     def match(self, mor, infrastructure_data, resource_tags):
         host = infrastructure_data[mor].get("runtime.host")
@@ -94,4 +103,5 @@ FILTER_PROP_TO_FILTER_CLASS = {
     'tag': TagFilter,
     'hostname': HostnameFilter,
     'guest_hostname': GuestHostnameFilter,
+    'attribute': AttributeFilter,
 }

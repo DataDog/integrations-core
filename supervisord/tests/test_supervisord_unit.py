@@ -99,9 +99,9 @@ Stop time: {time_stop}\nExit Status: 0""".format(
 
 class MockXmlRcpServer:
     """Class that mocks an XML RPC server. Initialized using a mocked
-     supervisord server url, which is used to initialize the supervisord
-     server.
-     """
+    supervisord server url, which is used to initialize the supervisord
+    server.
+    """
 
     def __init__(self, url, transport):
         self.supervisor = MockSupervisor(url, transport)

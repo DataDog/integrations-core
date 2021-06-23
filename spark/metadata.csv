@@ -50,6 +50,18 @@ spark.executor.total_input_bytes,count,,byte,,Total number of input bytes in the
 spark.executor.total_shuffle_read,count,,byte,,Total number of bytes read during a shuffle in the application's executors,0,spark,exe tot shfl rd
 spark.executor.total_shuffle_write,count,,byte,,Total number of shuffled bytes in the application's executors,0,spark,exe tot shfl wrt
 spark.executor_memory,count,,byte,,Maximum memory available for caching RDD blocks in the application's executors,0,spark,exe max mem
+spark.executor.id.rdd_blocks,count,,block,,Number of persisted RDD blocks in this executor,0,spark,exe rdd blk
+spark.executor.id.memory_used,count,,byte,,Amount of memory used for cached RDDs in this executor.,0,spark,exe id mem usd
+spark.executor.id.max_memory,count,,byte,,Total amount of memory available for storage for this executor,0,spark,exe id mem max
+spark.executor.id.disk_used,count,,byte,,Amount of disk space used by persisted RDDs in this executor,0,spark,exe id dsk usd
+spark.executor.id.active_tasks,count,,task,,Number of active tasks in this executor,0,spark,exe id act tsk
+spark.executor.id.failed_tasks,count,,task,,Number of failed tasks in this executor,0,spark,exe id fld tsk
+spark.executor.id.completed_tasks,count,,task,,Number of completed tasks in this executor,0,spark,exe id comp tsk
+spark.executor.id.total_tasks,count,,task,,Total number of tasks in this executor,0,spark,exe id tot tsk
+spark.executor.id.total_duration,count,,millisecond,,Time spent by the executor executing tasks,0,spark,exe id tot dur
+spark.executor.id.total_input_bytes,count,,byte,,Total number of input bytes in the executor,0,spark,exe id in byt
+spark.executor.id.total_shuffle_read,count,,byte,,Total number of bytes read during a shuffle in the executor,0,spark,exe id tot shfl rd
+spark.executor.id.total_shuffle_write,count,,byte,,Total number of shuffled bytes in the executor,0,spark,exe id tot shfl wrt
 spark.rdd.count,count,,,,Number of RDDs,0,spark,rdd count
 spark.rdd.num_partitions,count,,,,Number of persisted RDD partitions in the application,0,spark,rdd num part
 spark.rdd.num_cached_partitions,count,,,,Number of in-memory cached RDD partitions in the application,0,spark,rdd num ch part
@@ -68,3 +80,9 @@ spark.streaming.statistics.num_received_records,count,,record,,Number of receive
 spark.streaming.statistics.num_receivers,gauge,,object,,Number of streaming application's receivers,0,spark,num receivers
 spark.streaming.statistics.num_retained_completed_batches,count,,job,,Number of retained completed application's streaming batches,0,spark,num retained completed batches
 spark.streaming.statistics.num_total_completed_batches,count,,job,,Total number of completed application's streaming batches,0,spark,num total completed batches
+spark.structured_streaming.input_rate,gauge,,record,second,Average streaming input data rate,0,spark,num received records
+spark.structured_streaming.latency,gauge,,millisecond,,Average latency for the structured streaming application.,0,spark,num received records
+spark.structured_streaming.processing_rate,gauge,,row,second,Number of received streaming records per second,0,spark,num received records
+spark.structured_streaming.rows_count,gauge,,row,,Count of rows.,0,spark,num received records
+spark.structured_streaming.used_bytes,gauge,,byte,,Number of bytes used in memory.,0,spark,num received records
+

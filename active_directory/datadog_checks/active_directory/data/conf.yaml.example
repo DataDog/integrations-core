@@ -14,7 +14,7 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## The host the Datadog Active Directory check connects to.
+    ## The host the current check connects to.
     ## "." means the current host
     #
   - host: .
@@ -54,9 +54,9 @@ instances:
     ## <DATA_TYPE>  : The type of your metric (int or float)
     #
     # counter_data_types:
-    #   - [<METRIC_NAME>, <DATA_TYPE>]
-    #   - [active_directory.dra.inbound.bytes.total, int]
-    #   - [active_directory.ldap.bind_time, float]
+    #   - <METRIC_NAME>,<DATA_TYPE>
+    #   - active_directory.dra.inbound.bytes.total,int
+    #   - active_directory.ldap.bind_time,float
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -94,7 +94,9 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

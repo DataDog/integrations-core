@@ -18,13 +18,19 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `tls.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TLS data. See the [sample tls.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -35,6 +41,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INTEGRATION_NAME>` | `tls`                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port":"443"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -54,10 +63,17 @@ TLS does not include any events.
 
 See [service_checks.json][7] for a list of service checks provided by this integration:
 
-- `tls.can_connect` - Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, otherwise returns `OK`.
-- `tls.version` - Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
-- `tls.cert_validation` - Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`.
-- `tls.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`.
+**tls.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, otherwise returns `OK`.
+
+**tls.version**:<br>
+Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
+
+**tls.cert_validation**:<br>
+Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`.
+
+**tls.cert_expiration**:<br>
+Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`.
 
 ## Troubleshooting
 

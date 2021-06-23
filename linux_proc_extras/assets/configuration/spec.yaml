@@ -1,0 +1,17 @@
+name: Linux proc extras
+files:
+- name: linux_proc_extras.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: include_interrupt_metrics
+      description: |
+        Optionally include CPU/IRQ interrupt metrics.  This can dramatically increase cardinality
+        for large systems, so use with caution.
+      value:
+        type: boolean
+        example: false
+    - template: instances/default

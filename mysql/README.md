@@ -37,7 +37,9 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password b
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-**Note**: `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][5].
+**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
+
+**Note**: If you encounter the following error message `(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))`, see the [MySQL Localhost Error documentation][18].
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
@@ -89,7 +91,12 @@ Query OK, 0 rows affected (0.00 sec)
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][7] for all available configuration options.
 
@@ -187,6 +194,13 @@ _Available for Agent versions >6.0_
            pattern: "# Time:"
            # If mysqld was started with `--log-short-format`, use:
            # pattern: "# Query_time:"
+           # If using mysql version <5.7, use the following rules instead:
+           # - type: multi_line
+           #   name: new_slow_query_log_entry
+           #   pattern: "# Time|# User@Host"
+           # - type: exclude_at_match
+           #   name: exclude_timestamp_only_line
+           #   pattern: "# Time:"
 
      - type: file
        path: "<GENERAL_LOG_FILE_PATH>"
@@ -197,35 +211,148 @@ _Available for Agent versions >6.0_
        #   - type: multi_line
        #     name: new_log_start_with_date
        #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+       # If the logs start with a date with the format yymmdd but include a timestamp with each new second, rather than with each log, uncomment the following processing rule
+       # log_processing_rules:
+       #   - type: multi_line
+       #     name: new_logs_do_not_always_start_with_timestamp
+       #     pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
    ```
 
     See our [sample mysql.yaml][9] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][10].
 
-#### Containerized
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+#### Docker
 
-For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                  |
-| -------------------- | ---------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `mysql`                                                                |
-| `<INIT_CONFIG>`      | blank or `{}`                                                          |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
+Set [Autodiscovery Integration Templates][27] as Docker labels on your application container:
 
-See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["mysql"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}]'
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][29].
+
+Then, set [Log Integrations][30] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"mysql","service":"mysql"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][31] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][32].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/nginx.check_names: '["mysql"]'
+    ad.datadoghq.com/nginx.init_configs: '[{}]'
+    ad.datadoghq.com/nginx.instances: |
+      [
+        {
+          "server": "%%host%%", 
+          "user": "datadog",
+          "pass": "<UNIQUEPASSWORD>"
+        }
+      ]
+  labels:
+    name: mysql
+spec:
+  containers:
+    - name: mysql
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][33].
+
+Then, set [Log Integrations][34] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][35].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/mysql.logs: '[{"source": "mysql", "service": "mysql"}]'
+  labels:
+    name: mysql
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][36] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "mysql",
+    "image": "mysql:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"mysql\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"pass\": \"<UNIQUEPASSWORD>\"}]"
+    }
+  }]
+}
+```
+
+See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][37].
 
-| Parameter      | Value                                     |
-| -------------- | ----------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
+Then, set [Log Integrations][34] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "mysql",
+    "image": "mysql:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"mysql\",\"service\":\"mysql\"}]"
+    }
+  }]
+}
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -386,8 +513,11 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
+**mysql.replication.replica_running**:<br>
+Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
+
 **mysql.replication.slave_running**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance, otherwise returns `OK`. See [this][16] for more details.
+Deprecated in favor of `mysql.replication.replica_running`. Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
 
 **mysql.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, otherwise returns `OK`.
@@ -434,3 +564,14 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [24]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [25]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [26]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[27]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[28]: https://docs.datadoghq.com/agent/faq/template_variables/
+[29]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[30]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[31]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[32]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[33]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[34]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[35]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[36]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[37]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux

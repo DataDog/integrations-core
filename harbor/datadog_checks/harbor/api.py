@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .common import (
+    API_VERSION_URL,
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
     PING_URL,
@@ -15,11 +16,14 @@ from .common import (
     VOLUME_INFO_URL,
 )
 
+LEGACY_API_VERSION = 'v1.0'
+
 
 class HarborAPI(object):
     def __init__(self, harbor_url, http):
         self.base_url = harbor_url
         self.http = http
+        self.api_version = LEGACY_API_VERSION
         self._fetch_and_set_harbor_version()
 
     def chartrepo_health(self):
@@ -56,6 +60,14 @@ class HarborAPI(object):
         return self._make_get_request(VOLUME_INFO_URL)
 
     def _fetch_and_set_harbor_version(self):
+        # Only available in v2+
+        try:
+            api_version_info = self._make_get_request(API_VERSION_URL)
+        except Exception:
+            pass
+        else:
+            self.api_version = api_version_info.get('version', LEGACY_API_VERSION)
+
         systeminfo = self._make_get_request(SYSTEM_INFO_URL)
         version_str = systeminfo['harbor_version'].split('-')[0].lstrip('v').split('.')[:3]
         self.harbor_version = [int(s) for s in version_str]
@@ -92,4 +104,11 @@ class HarborAPI(object):
             return resp.json()
 
     def _resolve_url(self, url):
-        return url.format(base_url=self.base_url)
+        url = url.format(base_url=self.base_url)
+
+        if self.api_version != LEGACY_API_VERSION:
+            api_path = '{}/api/'.format(self.base_url)
+            if url.startswith(api_path):
+                url = url.replace(api_path, '{}{}/'.format(api_path, self.api_version), 1)
+
+        return url

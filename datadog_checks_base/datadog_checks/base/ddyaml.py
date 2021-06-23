@@ -8,12 +8,12 @@ import yaml
 from six import string_types
 
 try:
-    from yaml import CSafeLoader as yLoader
     from yaml import CSafeDumper as yDumper
+    from yaml import CSafeLoader as yLoader
 except ImportError:
     # On source install C Extensions might have not been built
-    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
     from yaml import SafeDumper as yDumper  # noqa, imported from here elsewhere
+    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
 
 log = logging.getLogger(__name__)
 

@@ -1,15 +1,17 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from fnmatch import fnmatch
 
+from ..fs import chdir, path_join, read_file_binary, write_file_binary
 from ..subprocess import run_command
-from ..utils import chdir, path_join, read_file_binary, write_file_binary
+from .commands.console import abort, echo_debug
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
-from .utils import complete_set_root, get_testable_checks
+from .utils import complete_set_root, get_metric_sources, get_testable_checks, get_valid_checks, get_valid_integrations
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
@@ -50,10 +52,22 @@ def get_tox_envs(
         checks = sorted(testable_checks & changed_checks)
 
     checks_seen = set()
+
+    tox_env_filter = os.environ.get("TOX_SKIP_ENV")
+    tox_env_filter_re = re.compile(tox_env_filter) if tox_env_filter is not None else None
+
     for check in checks:
         check, _, envs_selected = check.partition(':')
+        echo_debug(f"Getting tox envs for `{check}:{envs_selected}`")
 
-        if check in checks_seen or check not in testable_checks or (changed_only and check not in changed_checks):
+        if check in checks_seen:
+            echo_debug(f"`{check}` already evaluated, skipping")
+            continue
+        elif check not in testable_checks:
+            echo_debug(f"`{check}` is not testable, skipping")
+            continue
+        elif changed_only and check not in changed_checks:
+            echo_debug(f"`{check}` does not have changes, skipping")
             continue
         else:
             checks_seen.add(check)
@@ -85,6 +99,10 @@ def get_tox_envs(
             else:
                 envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
 
+        if tox_env_filter_re:
+            envs_selected[:] = [e for e in envs_selected if not tox_env_filter_re.match(e)]
+
+        echo_debug(f"Selected environments: {envs_selected}")
         yield check, envs_selected
 
 
@@ -97,9 +115,12 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
         tox_command = 'tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
-        output = run_command(tox_command, capture='out').stdout
+        output = run_command(tox_command, capture='out')
 
-    env_list = [e.strip() for e in output.splitlines()]
+    if output.code != 0:
+        abort(f'STDOUT: {output.stdout}\nSTDERR: {output.stderr}')
+
+    env_list = [e.strip() for e in output.stdout.splitlines()]
 
     if e2e_tests_only:
         envs = []
@@ -189,6 +210,7 @@ def construct_pytest_options(
     test_filter='',
     pytest_args='',
     e2e=False,
+    ddtrace=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -214,6 +236,9 @@ def construct_pytest_options(
     if latest_metrics:
         pytest_options += ' --run-latest-metrics'
         marker = 'latest_metrics'
+
+    if ddtrace:
+        pytest_options += ' --ddtrace'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'
@@ -273,6 +298,8 @@ def testable_files(files):
 
 
 def get_changed_checks():
+    """Return set of check names that have changes in testable code."""
+
     # Get files that changed compared to `master`
     changed_files = files_changed()
 
@@ -282,7 +309,44 @@ def get_changed_checks():
     return {line.split('/')[0] for line in changed_files}
 
 
+def get_changed_directories():
+    """Return set of check names that have any changes at all."""
+    changed_files = files_changed()
+
+    return {line.split('/')[0] for line in changed_files}
+
+
 def get_tox_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
         return int(match.group(1))
+
+
+def process_checks_option(check, source=None, validate=False):
+    # provide common function for determining which check to run validations against
+    # `source` determines which method for gathering valid check, default will use `get_valid_checks`
+    # `validate` gets applied for specific check names, ensuring the check is included in the default
+    #   collection specified by `source`.  If not, it returns an empty list.
+
+    if source is None or source == 'valid_checks':
+        get_valid = get_valid_checks
+    elif source == 'metrics':
+        get_valid = get_metric_sources
+    elif source == 'testable':
+        get_valid = get_testable_checks
+    elif source == 'integrations':
+        get_valid = get_valid_integrations
+    else:
+        get_valid = get_valid_integrations
+
+    if check is None or check.lower() == 'all':
+        choice = sorted(get_valid())
+    elif check.lower() == 'changed':
+        choice = sorted(get_changed_directories() & get_valid())
+    else:
+        if validate:
+            choice = [check] if check in get_valid() else []
+        else:
+            choice = [check]
+
+    return choice

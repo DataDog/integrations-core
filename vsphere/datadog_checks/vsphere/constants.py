@@ -6,7 +6,7 @@ from pyVmomi import vim
 SOURCE_TYPE = 'vsphere'
 
 ALLOWED_FILTER_TYPES = ['whitelist', 'blacklist']
-ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag']
+ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag', 'attribute']
 EXTRA_FILTER_PROPERTIES_FOR_VMS = ['hostname', 'guest_hostname']
 
 
@@ -56,3 +56,4 @@ DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL = 300
 REFERENCE_METRIC = "cpu.usage.avg"
 
 DEFAULT_VSPHERE_TAG_PREFIX = ""
+DEFAULT_VSPHERE_ATTR_PREFIX = ""

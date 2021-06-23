@@ -4,7 +4,10 @@ services:
   sqlserver:
     # https://hub.docker.com/_/microsoft-mssql-server
     # https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-linux-2017
-    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    #image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123

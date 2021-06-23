@@ -14,6 +14,11 @@ All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScrap
 ::: datadog_checks.base.checks.openmetrics.OpenMetricsBaseCheck
     rendering:
       heading_level: 4
+    selection:
+      members:
+        - __init__
+        - check
+        - get_scraper_config
 
 ::: datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin
     rendering:

@@ -30,6 +30,10 @@
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "ambari"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

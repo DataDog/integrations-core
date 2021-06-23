@@ -23,8 +23,9 @@ from .show import changes
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.option('--exclude', help='Comma-separated list of checks to skip')
+@click.option('--allow-master', is_flag=True, help='Allow ddev to commit directly to master. Forbidden for core.')
 @click.pass_context
-def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
+def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, allow_master):
     """Perform a set of operations needed to release checks:
 
     \b
@@ -42,7 +43,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
-    from ...signing import update_link_metadata, YubikeyException
+    from ...signing import YubikeyException, update_link_metadata
 
     releasing_all = 'all' in checks
 
@@ -51,10 +52,6 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         for check in checks:
             if check not in valid_checks:
                 abort(f'Check `{check}` is not an Agent-based Integration')
-
-    # don't run the task on the master branch
-    if get_current_branch() == 'master':
-        abort('Please create a release branch, you do not want to commit to master directly.')
 
     if releasing_all:
         if version:
@@ -73,6 +70,9 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
 
     repo_choice = ctx.obj['repo_choice']
     core_workflow = repo_choice == 'core'
+
+    if get_current_branch() == 'master' and (core_workflow or not allow_master):
+        abort('Please create a release branch, you do not want to commit to master directly.')
 
     # Signing is done by a pipeline in a separate commit
     if not core_workflow and not sign_only:

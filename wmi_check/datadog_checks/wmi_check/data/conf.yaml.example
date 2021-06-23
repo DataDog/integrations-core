@@ -54,10 +54,10 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param namespace - string - optional - default: cimv2
+    ## @param namespace - string - optional - default: root\cimv2
     ## The optional WMI namespace to connect to.
     #
-    # namespace: cimv2
+    # namespace: root\cimv2
 
     ## @param filters - list of mappings - optional
     ## A list of filters on the WMI query you may want.

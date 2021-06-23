@@ -9,6 +9,8 @@ Get metrics from the Kubernetes service in real time to:
 - Visualize and monitor Kubernetes states
 - Be notified about Kubernetes failovers and events.
 
+Note: This check only works with Agent v5. For Agent v6+, refer to the [kubelet check][14].
+
 ## Setup
 
 ### Installation
@@ -22,8 +24,7 @@ To collect Kubernetes State metrics, please refer to the [kubernetes_state integ
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][4] for all available configuration options.
-
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor.
 
 ### Validation
 
@@ -121,3 +122,4 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [11]: https://github.com/DataDog/dd-agent/pull/3051
 [12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
 [13]: https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
+[14]: https://docs.datadoghq.com/integrations/kubelet

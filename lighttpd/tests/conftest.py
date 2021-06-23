@@ -23,7 +23,7 @@ def wait_for_lighttpd():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(common.COMPOSE_FILE, conditions=[WaitFor(wait_for_lighttpd)]):
+    with docker_run(common.COMPOSE_FILE, conditions=[WaitFor(wait_for_lighttpd)], mount_logs=True):
         instance = deepcopy(common.INSTANCE)
         yield instance
 

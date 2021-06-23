@@ -24,7 +24,10 @@ files:
               type: string
 
           - name: password
-            description: Password to use for the SSH connection.
+            description: |
+              Password to use for the SSH connection.
+              If an encrypted SSH private key is specified in `private_key_file`, 
+                the given password will be used to decrypt the key.
             value:
               type: string
 
@@ -41,7 +44,10 @@ files:
               type: boolean
 
           - name: private_key_file
-            description: File path to a SSH private key.
+            description: |
+              File path to a SSH private key.
+              If the SSH private key is encrypted, `password` will be used to decrypt the key.
+              See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
             value:
               type: string
 

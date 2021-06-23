@@ -42,6 +42,9 @@ NGINX Plus packages prior to release 13 include the http status module. For NGIN
 
 #### Prepare NGINX
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
 
 ```conf
@@ -64,6 +67,9 @@ server {
 
     # available only with NGINX Plus
     # status;
+
+    # ensures the version information can be retrieved
+    server_tokens on;
   }
 }
 ```
@@ -99,9 +105,43 @@ Reload NGINX to enable the status or API endpoint. There's no need for a full re
 sudo nginx -t && sudo nginx -s reload
 ```
 
+<!-- xxx tab "Kubernetes" xxx -->
+
+The following ConfigMap defines the integration template for NGINX containers:
+
+```yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginxconfig
+  namespace: default
+data:
+  nginx.conf: |+
+    worker_processes  5;
+    events {
+      worker_connections  4096;
+    }
+    http {
+        server {
+            location /nginx_status {
+              stub_status on;
+              access_log  /dev/stdout;
+              allow all;
+            }
+        }
+    }
+```
+
+<!-- xxz tab xxx -->
+
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
 
@@ -112,6 +152,7 @@ Follow the instructions below to configure this check for an Agent running on a 
     **NGINX Plus**:
 
       - For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
+      - Stream stats API calls are included by default for NGINX Plus. If you want to disable them, set the parameter `use_plus_api_stream` to `false` in your `nginx.d/conf.yaml` configuration file.
       - If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
           ```yaml
@@ -164,29 +205,140 @@ http {
 }
 ```
 
-#### Containerized
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+#### Docker
+
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                      |
-| -------------------- | ---------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `nginx`                                                    |
-| `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"nginx_status_url": "http://%%host%%:81/nginx_status/"}` |
+Set [Autodiscovery Integration Templates][19] as Docker labels on your application container:
 
-**Note**: This `<INSTANCE_CONFIG>` configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["nginx"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/nginx_status/"}]'
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
+
+Then, set [Log Integrations][18] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][8] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][20].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.check_names: '["nginx"]'
+    ad.datadoghq.com/nginx.init_configs: '[{}]'
+    ad.datadoghq.com/nginx.instances: |
+      [
+        {
+          "nginx_status_url":"http://%%host%%:81/nginx_status/"
+        }
+      ]
+  labels:
+    name: nginx
+spec:
+  containers:
+    - name: nginx
+  volumes:
+        - name: "config"
+          configMap:
+            name: "nginxconfig"
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
+
+Then, set [Log Integrations][22] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.logs: '[{"source":"nginx","service":"nginx"}]'
+  labels:
+    name: nginx
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"nginx\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"nginx_status_url\":\"http://%%host%%:81/nginx_status/\"}]"
+    }
+  }]
+}
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
 
-| Parameter      | Value                                     |
-| -------------- | ----------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
+Then, set [Log Integrations][22] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"nginx\",\"service\":\"nginx\"}]"
+    }
+  }]
+}
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -261,3 +413,11 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
 [15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[17]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[21]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[22]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[23]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux

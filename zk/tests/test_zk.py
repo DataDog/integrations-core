@@ -12,7 +12,7 @@ from datadog_checks.zk import ZookeeperCheck
 
 from . import common, conftest
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 def extract_nan_metrics(text):
@@ -26,15 +26,15 @@ def extract_nan_metrics(text):
     return metrics
 
 
-def test_check(aggregator, dd_environment, get_instance, caplog):
+def test_check(aggregator, dd_environment, get_test_instance, caplog):
     """
     Collect ZooKeeper metrics.
     """
     caplog.set_level(logging.DEBUG)
-    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_instance])
-    zk_check.check(get_instance)
-    zk_check.check(get_instance)
+    zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
+    zk_check.check(get_test_instance)
 
+    # adding to skip for now
     skipped_metrics = extract_nan_metrics(caplog.text)
 
     # Test metrics
@@ -43,7 +43,7 @@ def test_check(aggregator, dd_environment, get_instance, caplog):
 
     common.assert_service_checks_ok(aggregator)
 
-    expected_mode = get_instance['expected_mode']
+    expected_mode = get_test_instance['expected_mode']
     mname = "zookeeper.instances.{}".format(expected_mode)
     aggregator.assert_metric(mname, value=1)
     aggregator.assert_all_metrics_covered()
@@ -78,13 +78,12 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     aggregator.assert_metric(mname, value=1, count=1)
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_metadata(datadog_agent):
-    check = ZookeeperCheck(conftest.CHECK_NAME, {}, [conftest.VALID_CONFIG])
+def test_metadata(datadog_agent, get_test_instance):
+    check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
 
     check.check_id = 'test:123'
 
-    check.check(conftest.VALID_CONFIG)
+    check.check(get_test_instance)
 
     raw_version = common.ZK_VERSION
     major, minor = raw_version.split('.')[:2]

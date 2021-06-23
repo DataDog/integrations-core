@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import json
+import os
+import re
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
@@ -10,6 +13,9 @@ from six import iteritems
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
+
+METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
+METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
 
 
 def normalize_tags(tags, sort=False):
@@ -21,6 +27,37 @@ def normalize_tags(tags, sort=False):
         else:
             return [to_native_string(tag) for tag in tags]
     return tags
+
+
+def backend_normalize_metric_name(metric_name):
+    """
+    Normalize a metric name for the backend to understand it.
+    This is the same metric that is used to validate the metadata.csv file
+    """
+    metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
+    return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
+
+
+def check_tag_names(metric, tags):
+    forbidden_tags = [
+        'cluster_name',
+        'clustername',
+        'cluster',
+        'host_name',
+        'hostname',
+        'host',
+    ]
+
+    if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        for tag in tags:
+            tag_name = tag.split(':')[0]
+            if tag_name in forbidden_tags:
+                raise Exception(
+                    "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
+                    "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
+                        metric, tag_name
+                    )
+                )
 
 
 class AggregatorStub(object):
@@ -49,12 +86,23 @@ class AggregatorStub(object):
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
+    METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP = {
+        'gauge': 'gauge',
+        'rate': 'gauge',
+        'count': 'count',
+        'monotonic_count': 'count',
+        'counter': 'rate',
+        'histogram': 'rate',  # Checking .count only, the other are gauges
+        'historate': 'rate',  # Checking .count only, the other are gauges
+    }
 
     def __init__(self):
         self._metrics = defaultdict(list)
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        # dict[event_type, [events]]
+        self._event_platform_events = {}
         self._histogram_buckets = defaultdict(list)
 
     @classmethod
@@ -65,24 +113,33 @@ class AggregatorStub(object):
     def ignore_metric(cls, name):
         return name in cls.IGNORED_METRICS
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
+        check_tag_names(name, tags)
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
 
-    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+    def submit_metric_e2e(
+        self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
+    ):
+        check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
 
+    def submit_event_platform_event(self, check, check_id, raw_event, event_type):
+        self._event_platform_events[event_type].append(raw_event)
+
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
         )
@@ -125,6 +182,12 @@ class AggregatorStub(object):
         Return all events
         """
         return self._events
+
+    def get_event_platform_events(self, event_type, parse_json=True):
+        """
+        Return all event platform events for the event_type
+        """
+        return [json.loads(e) if parse_json else e for e in self._event_platform_events[event_type]]
 
     def histogram_bucket(self, name):
         """
@@ -184,12 +247,14 @@ class AggregatorStub(object):
     def assert_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
     ):
+        expected_tags = normalize_tags(tags, sort=True)
+
         candidates = []
         for bucket in self.histogram_bucket(name):
             if value is not None and value != bucket.value:
                 continue
 
-            if tags and tags != sorted(bucket.tags):
+            if expected_tags and expected_tags != sorted(bucket.tags):
                 continue
 
             if hostname and hostname != bucket.hostname:
@@ -305,13 +370,16 @@ class AggregatorStub(object):
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
-    def assert_metrics_using_metadata(self, metadata_metrics, check_metric_type=True, exclude=None):
+    def assert_metrics_using_metadata(
+        self, metadata_metrics, check_metric_type=True, check_submission_type=False, exclude=None
+    ):
         """
         Assert metrics using metadata.csv
 
-        Checking type: Since we are asserting the in-app metric type (NOT submission type),
-        asserting the type make sense only for e2e (metrics collected from agent).
-        For integration tests, set kwarg `check_metric_type=False`.
+        Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
+        asserting this type make sense for e2e (metrics collected from agent).
+        For integrations tests, we can check the submission type with `check_submission_type=True`, or
+        use `check_metric_type=False` not to check types.
 
         Usage:
 
@@ -326,19 +394,33 @@ class AggregatorStub(object):
             if metric_name in exclude:
                 continue
             for metric_stub in metric_stubs:
+                metric_stub_name = backend_normalize_metric_name(metric_stub.name)
+                actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
-                if metric_stub.name not in metadata_metrics:
-                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
+                # We only check `*.count` metrics for histogram and historate submissions
+                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted
+                if check_submission_type and actual_metric_type in ['histogram', 'historate']:
+                    metric_stub_name += '.count'
+
+                # Checking the metric is in `metadata.csv`
+                if metric_stub_name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub_name))
                     continue
 
-                if check_metric_type:
-                    expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
-                    actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+                expected_metric_type = metadata_metrics[metric_stub_name]['metric_type']
+                if check_submission_type:
+                    # Integration tests type mapping
+                    actual_metric_type = AggregatorStub.METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP[actual_metric_type]
+                else:
+                    # E2E tests
+                    if actual_metric_type == 'monotonic_count' and expected_metric_type == 'count':
+                        actual_metric_type = 'count'
 
+                if check_metric_type:
                     if expected_metric_type != actual_metric_type:
                         errors.add(
                             "Expect `{}` to have type `{}` but got `{}`.".format(
-                                metric_stub.name, expected_metric_type, actual_metric_type
+                                metric_stub_name, expected_metric_type, actual_metric_type
                             )
                         )
 
@@ -363,7 +445,7 @@ class AggregatorStub(object):
         - hostname
         """
         # metric types that intended to be called multiple times are ignored
-        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        ignored_types = [self.COUNT, self.COUNTER]
         metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
 
         def stub_to_key_fn(stub):
@@ -417,6 +499,7 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._event_platform_events = defaultdict(list)
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0

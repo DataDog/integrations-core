@@ -22,7 +22,8 @@
         "statuses": [
             "ok",
             "warning",
-            "critical"
+            "critical",
+            "unknown"
         ],
         "groups": [
             "host",

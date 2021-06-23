@@ -1,0 +1,12 @@
+{
+	"argv" : [
+		"mongod",
+		"--bind_ip_all"
+	],
+	"parsed" : {
+		"net" : {
+			"bindIp" : "*"
+		}
+	},
+	"ok" : 1
+}

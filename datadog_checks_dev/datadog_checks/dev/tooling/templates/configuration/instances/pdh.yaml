@@ -1,7 +1,7 @@
 - name: host
   required: false
   description: |
-    The host the Datadog Active Directory check connects to.
+    The host the current check connects to.
     "." means the current host
   value:
     example: .
@@ -34,7 +34,8 @@
                   rate, histogram, or count.
   value:
     example:
-    - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+    - ['Processor', none, '% Processor Time', processor.time, gauge]
+    - ['Processor', none, '% User Time', processor.user.time, gauge]
     type: array
     compact_example: true
     items:
@@ -50,10 +51,9 @@
     <DATA_TYPE>  : The type of your metric (int or float)
   value:
       example:
-        - [<METRIC_NAME>, <DATA_TYPE>]
-        - [active_directory.dra.inbound.bytes.total, int]
-        - [active_directory.ldap.bind_time, float]
+        - <METRIC_NAME>,<DATA_TYPE>
+        - processor.time,int
+        - processor.user.time,float
       type: array
-      compact_example: true
       items:
         type: string

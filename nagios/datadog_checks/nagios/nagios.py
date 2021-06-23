@@ -189,41 +189,57 @@ class NagiosCheck(AgentCheck):
         if not instance_key or instance_key not in self.nagios_tails:
             raise Exception('No Nagios configuration file specified')
         for tailer in self.nagios_tails[instance_key]:
-            tailer.check()
+            try:
+                tailer.check()
+            except (RuntimeError, StopIteration) as e:
+                self.log.exception(e)
+                self.warning(
+                    "Can't tail %s file, will retry from the end of file on the next check run.", tailer.log_path
+                )
+                tailer.reset()
 
 
 class NagiosTailer(object):
-    def __init__(self, log_path, logger, parse_line):
+    def __init__(self, log_path, logger):
         """
         :param log_path: string, path to the file to parse
         :param logger: Logger object
         """
         self.log_path = log_path
         self.log = logger
-        self._nested_parse_line = parse_line
         self._line_parsed = 0
 
-        tail = TailFile(self.log, self.log_path, self.parse_line)
-        self.gen = tail.tail(line_by_line=False, move_end=True)
+        self._tailer = TailFile(self.log, self.log_path, self._parse_line_with_counter)
+        self._gen = None
         next(self.gen)
 
+    def reset(self):
+        self._tailer.close()
+        self._tailer = TailFile(self.log, self.log_path, self._parse_line_with_counter)
+        self._gen = None
+
+    @property
+    def gen(self):
+        if self._gen is None:
+            self._gen = self._tailer.tail(line_by_line=False, move_end=True)
+        return self._gen
+
     def parse_line(self, line):
+        raise NotImplementedError()
+
+    def _parse_line_with_counter(self, line):
         self._line_parsed += 1
-        return self._nested_parse_line(line)
+        return self.parse_line(line)
 
     def check(self):
         self._line_parsed = 0
         # read until the end of file
-        try:
-            self.log.debug("Start nagios check for file %s", self.log_path)
-            next(self.gen)
-            self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
-        except StopIteration as e:
-            self.log.exception(e)
-            self.log.warning("Can't tail %s file", self.log_path)
+        self.log.debug("Start nagios check for file %s", self.log_path)
+        next(self.gen)
+        self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
 
 
-class NagiosEventLogTailer(object):
+class NagiosEventLogTailer(NagiosTailer):
     def __init__(self, log_path, logger, hostname, event_func, tags, passive_checks):
         """
         :param log_path: string, path to the file to parse
@@ -232,14 +248,13 @@ class NagiosEventLogTailer(object):
         :param event_func: function to create event, should accept dict
         :param passive_checks: bool, enable or not passive checks events
         """
-        self.log = logger
+        super(NagiosEventLogTailer, self).__init__(log_path, logger)
         self.hostname = hostname
         self._event = event_func
         self._tags = tags
         self._passive_checks = passive_checks
-        self.check = NagiosTailer(log_path, logger, self._parse_line).check
 
-    def _parse_line(self, line):
+    def parse_line(self, line):
         """
         Actual nagios parsing
         Return True if we found an event, False otherwise
@@ -284,8 +299,7 @@ class NagiosEventLogTailer(object):
             return False
 
     def create_event(self, timestamp, event_type, hostname, fields, tags=None):
-        """Factory method called by the parsers
-        """
+        """Factory method called by the parsers"""
         # Agent6 expects a specific set of fields, so we need to place all
         # extra fields in the msg_title and let the Datadog backend separate them
         # Any remaining fields that aren't a part of the datadog-agent payload
@@ -321,7 +335,7 @@ class NagiosEventLogTailer(object):
         return event_payload
 
 
-class NagiosPerfDataTailer(object):
+class NagiosPerfDataTailer(NagiosTailer):
     metric_prefix = 'nagios'
     pair_pattern = re.compile(
         r"".join(
@@ -338,14 +352,13 @@ class NagiosPerfDataTailer(object):
     )
 
     def __init__(self, log_path, file_template, logger, hostname, gauge_func, tags, perfdata_field, metric_prefix):
-        self.log = logger
+        super(NagiosPerfDataTailer, self).__init__(log_path, logger)
         self.compile_file_template(file_template)
         self.hostname = hostname
         self._gauge = gauge_func
         self._tags = tags
         self._get_metric_prefix = metric_prefix
         self._perfdata_field = perfdata_field
-        self.check = NagiosTailer(log_path, logger, self._parse_line).check
 
     def compile_file_template(self, file_template):
         try:
@@ -358,7 +371,7 @@ class NagiosPerfDataTailer(object):
         except Exception as e:
             raise InvalidDataTemplate("%s (%s)" % (file_template, e))
 
-    def _parse_line(self, line):
+    def parse_line(self, line):
         matched = self.line_pattern.match(line)
         if not matched:
             self.log.debug("Non matching line found %s", line)
@@ -372,7 +385,7 @@ class NagiosPerfDataTailer(object):
             perf_data = data.get(self._perfdata_field)
             if not perf_data:
                 self.log.warning(
-                    'Could not find field {} in {}, check your perfdata_format', self._perfdata_field, line
+                    'Could not find field %s in %s, check your perfdata_format', self._perfdata_field, line
                 )
                 return
             for pair in perf_data.split():

@@ -13,12 +13,14 @@ ddev agent changelog
 ddev agent integrations
 ```
 
-See more options for [`ddev agent changelog`](../../ddev/cli.md#changelog) and [`ddev agent integrations`](../../ddev/cli.md#integrations).
+See more options for [`ddev agent changelog`](../../ddev/cli.md#ddev-agent-changelog) and
+[`ddev agent integrations`](../../ddev/cli.md#ddev-agent-integrations).
 
 Run the following commands to update the contents:
 
 1. `ddev agent changelog -w -f` to update the existing [`AGENT_CHANGELOG`][agent-changelog] file
 2. `ddev agent integrations -w -f` to update the existing [`AGENT_INTEGRATIONS`][agent-integrations] file.
+3. `ddev agent integrations-changelog -w` to add Agent version to existing `CHANGELOG.md` releases of integrations.
 
 Create a pull request and wait for approval before merging.
 
@@ -47,7 +49,7 @@ Follow the following steps to add patch release:
     - Make a pull request with [integration release](../integration-release.md#new-integrations), then merge it to the release branch.
 
     !!! important
-        Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#tag):
+        Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
 
             `ddev release tag <INTEGRATION>`
 

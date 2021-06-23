@@ -67,3 +67,12 @@ def test_check(mock_disk_sampler, aggregator, check):
         aggregator.assert_metric(mname, tags=["foobar"], count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['tag_by'] = 'Name'
+    c = check(instance)
+    c.check(instance)
+    get_running_wmi_sampler = c._get_running_wmi_sampler
+    assert get_running_wmi_sampler.call_args.kwargs['tag_by'] == 'Name'

@@ -186,11 +186,16 @@ class ProcessCheck(AgentCheck):
                             break
 
             if not matching_pids:
-                self.log.debug(
-                    "Unable to find process named %s among processes: %s",
-                    search_string,
-                    ', '.join(sorted(proc.name() for proc in self.process_list_cache.elements)),
-                )
+                # Allow debug logging while preserving warning check state.
+                # Uncaught psutil exceptions trigger an Error state
+                try:
+                    processes = sorted(proc.name() for proc in self.process_list_cache.elements)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+                else:
+                    self.log.debug(
+                        "Unable to find process named %s among processes: %s", search_string, ', '.join(processes)
+                    )
 
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()
@@ -274,8 +279,9 @@ class ProcessCheck(AgentCheck):
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
                     self.warning('Process %s disappeared while scanning', pid)
-                    # reset the PID cache now, something changed
+                    # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
+                    self.process_list_cache.reset()
                     continue
 
             p = self.process_cache[name][pid]
@@ -447,6 +453,9 @@ class ProcessCheck(AgentCheck):
 
         if len(pids) == 0:
             self.warning("No matching process '%s' was found", name)
+            # reset the process caches now, something changed
+            self.last_pid_cache_ts[name] = 0
+            self.process_list_cache.reset()
 
         for attr, mname in iteritems(ATTR_TO_METRIC):
             vals = [x for x in proc_state[attr] if x is not None]

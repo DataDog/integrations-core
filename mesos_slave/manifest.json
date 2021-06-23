@@ -2,7 +2,8 @@
   "categories": [
     "configuration & deployment",
     "containers",
-    "orchestration"
+    "orchestration",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Mesos Slave",
@@ -23,8 +24,15 @@
   "type": "check",
   "integration_id": "mesos-slave",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "mesos"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

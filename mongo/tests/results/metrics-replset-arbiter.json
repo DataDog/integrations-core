@@ -1,0 +1,34 @@
+[
+    {
+        "name": "mongodb.replset.health",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.replset.state",
+        "type": 0,
+        "value": 7.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.replset.votes",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.replset.votefraction",
+        "type": 0,
+        "value": 0.25,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

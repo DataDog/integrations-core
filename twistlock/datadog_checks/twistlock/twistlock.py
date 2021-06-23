@@ -42,18 +42,18 @@ class TwistlockCheck(AgentCheck):
 
         self.last_run = datetime.utcnow()
 
-        self.config = None
+        self._config = None
         if instances:
-            self.config = Config(instances[0])
+            self._config = Config(instances[0])
 
     def check(self, instance):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
 
-        if not self.config:
-            self.config = Config(instance)
+        if not self._config:
+            self._config = Config(instance)
 
-        if not self.config.username or not self.config.password:
+        if not self._config.username or not self._config.password:
             raise Exception('The Twistlock check requires both a username and a password')
 
         # alert if a scan hasn't been able to run in a few hours and then in a day
@@ -80,7 +80,7 @@ class TwistlockCheck(AgentCheck):
                 raise Exception("expiration_date not found.")
         except Exception as e:
             self.warning("cannot retrieve license data: %s", e)
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self._config.tags)
             raise e
 
         # alert if your license will expire in 30 days and then in a week
@@ -95,7 +95,7 @@ class TwistlockCheck(AgentCheck):
         if expiration_date < critical_date:
             licence_status = AgentCheck.CRITICAL
         self.service_check(
-            service_check_name, licence_status, tags=self.config.tags, message=license.get("expiration_date")
+            service_check_name, licence_status, tags=self._config.tags, message=license.get("expiration_date")
         )
 
     def report_registry_scan(self):
@@ -103,10 +103,10 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/registry")
-            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.OK, tags=self._config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self._config.tags)
             return None
 
         for image in scan_result:
@@ -116,7 +116,7 @@ class TwistlockCheck(AgentCheck):
             image_name = image['_id']
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX) :]
-            image_tags = ["scanned_image:{}".format(image_name)] + self.config.tags
+            image_tags = ["scanned_image:{}".format(image_name)] + self._config.tags
 
             self._report_layer_count(image, namespace, image_tags)
             self._report_service_check(
@@ -130,10 +130,10 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/images")
-            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.OK, tags=self._config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self._config.tags)
             return None
 
         for image in scan_result:
@@ -148,7 +148,7 @@ class TwistlockCheck(AgentCheck):
                 continue
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX) :]
-            image_tags = ["scanned_image:{}".format(image_name)] + self.config.tags
+            image_tags = ["scanned_image:{}".format(image_name)] + self._config.tags
 
             self._report_layer_count(image, namespace, image_tags)
             self._report_service_check(
@@ -162,10 +162,10 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/hosts")
-            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.OK, tags=self._config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self._config.tags)
             return None
 
         for host in scan_result:
@@ -174,7 +174,7 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             hostname = host['hostname']
-            host_tags = ["scanned_host:{}".format(hostname)] + self.config.tags
+            host_tags = ["scanned_host:{}".format(hostname)] + self._config.tags
 
             self._report_service_check(
                 host, namespace, tags=host_tags, message="Last scan: {}".format(host.get("scanTime"))
@@ -187,10 +187,10 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/containers")
-            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.OK, tags=self._config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self._config.tags)
             return None
 
         for container in scan_result:
@@ -205,7 +205,7 @@ class TwistlockCheck(AgentCheck):
             image_name = container.get('imageName')
             if image_name:
                 container_tags += ["image_name:{}".format(image_name)]
-            container_tags += self.config.tags
+            container_tags += self._config.tags
 
             self._report_service_check(
                 container, namespace, tags=container_tags, message="Last scan: {}".format(container.get("scanTime"))
@@ -260,7 +260,7 @@ class TwistlockCheck(AgentCheck):
                 'event_type': 'twistlock',
                 'msg_title': cve_id,
                 'msg_text': msg_text,
-                "tags": self.config.tags,
+                "tags": self._config.tags,
                 "aggregation_key": cve_id,
                 'host': self.hostname,
             }
@@ -316,8 +316,8 @@ class TwistlockCheck(AgentCheck):
         self.service_check('{}.is_scanned'.format(prefix), scan_status, tags=tags, message=message)
 
     def _retrieve_json(self, path):
-        url = self.config.url + path
-        project = self.config.project
+        url = self._config.url + path
+        project = self._config.project
         qparams = {'project': project} if project else None
         response = self.http.get(url, params=qparams)
         try:

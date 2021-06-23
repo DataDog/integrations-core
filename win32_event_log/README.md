@@ -21,6 +21,8 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 ### Log collection
 
+First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
+
 To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager.
 
 To see the channel list, run the following command in a PowerShell:

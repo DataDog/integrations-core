@@ -84,7 +84,7 @@ def trace_method(method):
 
 
 class VSphereLegacyCheck(AgentCheck):
-    """ Get performance metrics from a vCenter server and upload them to Datadog
+    """Get performance metrics from a vCenter server and upload them to Datadog
     References:
         http://pubs.vmware.com/vsphere-51/index.jsp#com.vmware.wssdk.apiref.doc/vim.PerformanceManager.html
 
@@ -148,7 +148,7 @@ class VSphereLegacyCheck(AgentCheck):
         self.exception_printed = 0
 
     def print_exception(self, msg):
-        """ Print exceptions happening in separate threads
+        """Print exceptions happening in separate threads
         Prevent from logging a ton of them if a potentially big number of them fail the same way
         """
         if self.exception_printed < 10:
@@ -320,7 +320,7 @@ class VSphereLegacyCheck(AgentCheck):
             return self.server_instances[i_key]
 
     def _compute_needed_metrics(self, instance, available_metrics):
-        """ Compare the available metrics for one MOR we have computed and intersect them
+        """Compare the available metrics for one MOR we have computed and intersect them
         with the set of metrics we want to report
         """
         i_key = self._instance_key(instance)
@@ -806,7 +806,7 @@ class VSphereLegacyCheck(AgentCheck):
         return False
 
     def _transform_value(self, instance, counter_id, value):
-        """ Given the counter_id, look up for the metrics metadata to check the vsphere
+        """Given the counter_id, look up for the metrics metadata to check the vsphere
         type of the counter and apply pre-reporting transformation if needed.
         """
         i_key = self._instance_key(instance)
@@ -822,8 +822,7 @@ class VSphereLegacyCheck(AgentCheck):
 
     @trace_method
     def _collect_metrics_async(self, instance, query_specs):
-        """ Task that collects the metrics listed in the morlist for one MOR
-        """
+        """Task that collects the metrics listed in the morlist for one MOR"""
         # ## <TEST-INSTRUMENTATION>
         t = Timer()
         # ## </TEST-INSTRUMENTATION>

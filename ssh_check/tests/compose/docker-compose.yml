@@ -8,4 +8,4 @@ services:
       - "8022:22"
     environment:
       - ROOT_PASSWORD=${ROOT_PASSWORD}
-      - KEYPAIR_LOGIN=${KEYPAIR_LOGIN}
+      - ROOT_KEYPAIR_LOGIN_ENABLED=false

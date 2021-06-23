@@ -101,7 +101,7 @@ class TestVersion:
 
             expected_message = 'Unable to transform `version` metadata value `1.0.0`: Unsupported version scheme `foo`'
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -162,7 +162,7 @@ class TestVersion:
 
             expected_prefix = 'Unable to transform `version` metadata value `1.0`: '
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message.startswith(expected_prefix):
+                if level == logging.DEBUG and message.startswith(expected_prefix):
                     break
             else:
                 raise AssertionError('Expected ERROR log starting with message: {}'.format(expected_prefix))
@@ -247,7 +247,7 @@ class TestVersion:
                 'Unable to transform `version` metadata value `1.0`: Version scheme `regex` requires a `pattern` option'
             )
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -266,7 +266,7 @@ class TestVersion:
                 'Version does not match the regular expression pattern'
             )
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -285,7 +285,7 @@ class TestVersion:
                 'Regular expression pattern has no named subgroups'
             )
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -347,7 +347,7 @@ class TestVersion:
                 'Version scheme `parts` requires a `part_map` option'
             )
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -365,7 +365,7 @@ class TestConfig:
 
             expected_message = 'Unable to transform `config` metadata: The `section` option is required'
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
@@ -387,7 +387,7 @@ class TestConfig:
                 'Skipping metadata submission of non-primitive type `list` for field `foo` in section `instance`'
             )
             for _, level, message in caplog.record_tuples:
-                if level == logging.WARNING and message == expected_message:
+                if level == logging.DEBUG and message == expected_message:
                     break
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))

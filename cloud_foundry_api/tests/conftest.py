@@ -37,6 +37,15 @@ def instance_defaults():
 
 
 @pytest.fixture()
+def events_v3_p0():
+    """
+    Returns raw events from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'events_v3_p0.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
 def events_v3_p1():
     """
     Returns raw events from API v3
@@ -51,6 +60,114 @@ def events_v3_p2():
     Returns raw events from API v3
     """
     with open(os.path.join(HERE, 'fixtures', 'events_v3_p2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def orgs_v2_p1():
+    """
+    Returns raw orgs from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'orgs_v2_p1.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def orgs_v2_p2():
+    """
+    Returns raw orgs from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'orgs_v2_p2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def orgs_v3_p1():
+    """
+    Returns raw orgs from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'orgs_v3_p1.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def orgs_v3_p2():
+    """
+    Returns raw orgs from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'orgs_v3_p2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def spaces_v2_p1():
+    """
+    Returns raw spaces from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'spaces_v2_p1.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def spaces_v2_p2():
+    """
+    Returns raw spaces from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'spaces_v2_p2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def spaces_v3_p1():
+    """
+    Returns raw spaces from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'spaces_v3_p1.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def spaces_v3_p2():
+    """
+    Returns raw spaces from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'spaces_v3_p2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def space_v3():
+    """
+    Returns raw space from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'space_v3.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def space_v2():
+    """
+    Returns raw space from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'space_v2.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def org_v3():
+    """
+    Returns raw org from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'org_v3.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
+def org_v2():
+    """
+    Returns raw org from API v2
+    """
+    with open(os.path.join(HERE, 'fixtures', 'org_v2.json')) as f:
         return json.loads(f.read())
 
 

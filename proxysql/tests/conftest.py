@@ -4,70 +4,39 @@
 import os
 from copy import deepcopy
 
+import mock
 import pymysql
 import pytest
 
-from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.proxysql import ProxysqlCheck
 
-DOCKER_HOST = get_docker_hostname()
-MYSQL_PORT = 6612
-PROXY_PORT = 6033
-PROXY_ADMIN_PORT = 6032
-MYSQL_USER = 'proxysql'
-MYSQL_PASS = 'pass'
-PROXY_ADMIN_USER = 'proxy'
-PROXY_ADMIN_PASS = 'proxy'
-PROXY_STATS_USER = 'proxystats'
-PROXY_STATS_PASS = 'proxystats'
-MYSQL_DATABASE = 'test'
-PROXY_MAIN_DATABASE = 'main'
-PROXYSQL_VERSION = os.environ['PROXYSQL_VERSION']
-
-BASIC_INSTANCE = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [],
-}
-
-INSTANCE_ALL_METRICS = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_ADMIN_USER,
-    'password': PROXY_ADMIN_PASS,
-    'tags': ["application:test"],
-    'additional_metrics': [
-        'command_counters_metrics',
-        'connection_pool_metrics',
-        'users_metrics',
-        'memory_metrics',
-        'query_rules_metrics',
-    ],
-}
-
-INSTANCE_ALL_METRICS_STATS = {
-    'host': DOCKER_HOST,
-    'port': PROXY_ADMIN_PORT,
-    'username': PROXY_STATS_USER,
-    'password': PROXY_STATS_PASS,
-    'database_name': PROXY_MAIN_DATABASE,
-    'tags': ["application:test"],
-    'additional_metrics': [
-        'command_counters_metrics',
-        'connection_pool_metrics',
-        'users_metrics',
-        'memory_metrics',
-        'query_rules_metrics',
-    ],
-}
+from .common import (
+    ALL_METRICS,
+    BASIC_INSTANCE,
+    BASIC_INSTANCE_TLS,
+    DOCKER_HOST,
+    INSTANCE_ALL_METRICS,
+    INSTANCE_ALL_METRICS_STATS,
+    MYSQL_DATABASE,
+    MYSQL_PASS,
+    MYSQL_PORT,
+    MYSQL_USER,
+    PROXY_ADMIN_PORT,
+    PROXY_PORT,
+    PROXYSQL_VERSION,
+)
 
 
 @pytest.fixture
 def instance_basic():
     return deepcopy(BASIC_INSTANCE)
+
+
+@pytest.fixture
+def instance_basic_tls():
+    return deepcopy(BASIC_INSTANCE_TLS)
 
 
 @pytest.fixture()
@@ -120,3 +89,28 @@ def init_mysql():
 
 def init_proxy():
     pymysql.connect(host=DOCKER_HOST, port=PROXY_PORT, user=MYSQL_USER, passwd=MYSQL_PASS)
+
+
+def get_check(instance):
+    """Simple helper method to get a check instance from a config instance."""
+    return ProxysqlCheck('proxysql', {}, [instance])
+
+
+def _assert_all_metrics(aggregator):
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def _assert_metadata(datadog_agent, check_id=''):
+    raw_version = PROXYSQL_VERSION
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
+    datadog_agent.assert_metadata(check_id, version_metadata)

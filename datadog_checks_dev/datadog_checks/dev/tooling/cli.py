@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ..__about__ import __version__
 from .commands import ALL_COMMANDS
 from .commands.console import (
     CONTEXT_SETTINGS,
@@ -22,13 +23,14 @@ from .utils import initialize_root
 @click.option('--core', '-c', is_flag=True, help='Work on `integrations-core`.')
 @click.option('--extras', '-e', is_flag=True, help='Work on `integrations-extras`.')
 @click.option('--agent', '-a', is_flag=True, help='Work on `datadog-agent`.')
+@click.option('--marketplace', '-m', is_flag=True, help='Work on `marketplace`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
 @click.option('--color/--no-color', default=None, help='Whether or not to display colored output (default true).')
 @click.option('--quiet', '-q', help='Silence output', is_flag=True)
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
-@click.version_option()
+@click.version_option(version=__version__, prog_name='ddev')
 @click.pass_context
-def ddev(ctx, core, extras, agent, here, color, quiet, debug):
+def ddev(ctx, core, extras, agent, marketplace, here, color, quiet, debug):
     if not quiet and not config_file_exists():
         echo_waiting('No config file found, creating one with default settings now...')
 
@@ -41,7 +43,7 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     # Load and store configuration for sub-commands.
     config = load_config()
 
-    msg = initialize_root(config, agent, core, extras, here)
+    msg = initialize_root(config, agent, core, extras, marketplace, here)
     if not quiet:
         if msg:
             echo_warning(msg)

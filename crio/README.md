@@ -31,7 +31,8 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-CRI-O includes a service check about the reachability of the metrics endpoint.
+**crio.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ### Events
 

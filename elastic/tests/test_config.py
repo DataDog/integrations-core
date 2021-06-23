@@ -27,7 +27,6 @@ def test_from_instance_defaults():
     assert c.cluster_stats is False
     assert c.index_stats is False
     assert c.service_check_tags == ['host:example.com', 'port:None']
-    assert c.health_tags == []
     assert c.tags == ['url:http://example.com']
     assert c.url == 'http://example.com'
     assert c.pending_task_stats is True

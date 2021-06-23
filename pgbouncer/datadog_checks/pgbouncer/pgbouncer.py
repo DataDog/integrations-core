@@ -4,7 +4,7 @@
 import re
 
 import psycopg2 as pg
-import psycopg2.extras as pgextras
+from psycopg2 import extras as pgextras
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -67,11 +67,10 @@ class PgBouncer(AgentCheck):
                     try:
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
-
                         rows = cursor.fetchall()
 
-                    except pg.Error:
-                        self.log.exception("Not all metrics may be available")
+                    except Exception as e:
+                        self.log.exception("Not all metrics may be available: %s", str(e))
 
                     else:
                         for row in rows:
@@ -132,7 +131,7 @@ class PgBouncer(AgentCheck):
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message,
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message
             )
             raise
 
@@ -160,7 +159,7 @@ class PgBouncer(AgentCheck):
         redacted_dsn = self._get_redacted_dsn()
         message = u'Established connection to {}'.format(redacted_dsn)
         self.service_check(
-            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message,
+            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message
         )
         self._set_metadata()
 

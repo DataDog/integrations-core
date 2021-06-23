@@ -18,7 +18,7 @@ from datadog_checks.couch import CouchDb
 
 from . import common
 
-pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
 INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 
@@ -34,6 +34,10 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
+            if row[0] == "couchdb.couchdb.httpd.all_docs_timeouts" and common.COUCH_MAJOR_VERSION == 2:
+                # All remaining metrics are Couchv3 only
+                break
+
             if row[0] == 'metric_name':
                 # skip the header
                 continue
@@ -121,12 +125,13 @@ def _assert_check(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_whitelisting(aggregator, gauges):
+@pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
+def test_db_inclusion(aggregator, gauges, param_name):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node['db_whitelist'] = ['db0']
+        node[param_name] = ['db0']
         configs.append(node)
 
     for config in configs:
@@ -147,12 +152,13 @@ def test_db_whitelisting(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_blacklisting(aggregator, gauges):
+@pytest.mark.parametrize('param_name', ["db_blacklist", "db_exclude"])
+def test_db_exclusion(aggregator, gauges, param_name):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['db0']
+        config[param_name] = ['db0']
         configs.append(config)
 
     for config in configs:

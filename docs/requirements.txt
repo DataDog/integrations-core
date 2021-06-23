@@ -1,4 +1,0 @@
-# requirements file to run the docs build
--e ./datadog_checks_base[deps]
--e ./datadog_checks_dev[cli]
-sphinx-click

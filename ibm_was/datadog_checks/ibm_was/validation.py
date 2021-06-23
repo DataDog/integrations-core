@@ -10,8 +10,3 @@ def validate_query(query):
     for field in REQUIRED_QUERY_FIELDS:
         if field not in query:
             raise ConfigurationError("Custom Query: {} missing required field: {}. Skipping".format(query, field))
-
-
-def validate_config(instance):
-    if not instance.get('servlet_url'):
-        raise ConfigurationError("Please specify a servlet_url in the configuration file")

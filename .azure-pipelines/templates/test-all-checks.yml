@@ -1,9 +1,19 @@
 parameters:
+  ispr: false
   pip_cache_config: null
+  run_py2_tests: true
+  force_base_package: false
+  test_e2e: true
+  ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
   parameters:
+    ispr: ${{ parameters.ispr }}
     pip_cache_config: ${{ parameters.pip_cache_config }}
+    run_py2_tests: ${{ parameters.run_py2_tests }}
+    force_base_package: ${{ parameters.force_base_package }}
+    test_e2e: ${{ parameters.test_e2e }}
+    ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -47,6 +57,9 @@ jobs:
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
+    - checkName: azure_iot_edge
+      displayName: Azure IoT Edge
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
@@ -148,6 +161,9 @@ jobs:
       os: linux
     - checkName: gitlab_runner
       displayName: Gitlab Runner
+      os: linux
+    - checkName: glusterfs
+      displayName: GlusterFS
       os: linux
     - checkName: go_expvar
       displayName: Go-Expvar
@@ -254,6 +270,9 @@ jobs:
     - checkName: marathon
       displayName: Marathon
       os: linux
+    - checkName: marklogic
+      displayName: MarkLogic
+      os: linux
     - checkName: mcache
       displayName: Memcached
       os: linux
@@ -273,8 +292,11 @@ jobs:
       displayName: Nagios
       os: linux
     - checkName: network
-      displayName: Network
+      displayName: Network (Linux)
       os: linux
+    - checkName: network
+      displayName: Network (Windows)
+      os: windows
     - checkName: nfsstat
       displayName: NFSstat
       os: linux
@@ -300,7 +322,7 @@ jobs:
       displayName: Oracle Database
       os: linux
     - checkName: pdh_check
-      displayName: PDH
+      displayName: PDH (Windows)
       os: windows
     - checkName: pgbouncer
       displayName: PGBouncer
@@ -342,7 +364,7 @@ jobs:
       displayName: Riak
       os: linux
     - checkName: riakcs
-      displayName: Riak CS
+      displayName: RiakCS
       os: linux
     - checkName: sap_hana
       displayName: SAP HANA
@@ -353,8 +375,14 @@ jobs:
     - checkName: snmp
       displayName: SNMP
       os: linux
+    - checkName: snowflake
+      displayName: Snowflake
+      os: linux
     - checkName: solr
       displayName: Solr
+      os: linux
+    - checkName: sonarqube
+      displayName: SonarQube
       os: linux
     - checkName: spark
       displayName: Spark
@@ -395,9 +423,10 @@ jobs:
     - checkName: tls
       displayName: TLS
       os: linux
-    - checkName: tokumx
-      displayName: TokuMX
-      os: linux
+    - ${{ if eq(parameters.run_py2_tests, 'true') }}:
+      - checkName: tokumx
+        displayName: TokuMX
+        os: linux
     - checkName: tomcat
       displayName: Tomcat
       os: linux
@@ -415,6 +444,9 @@ jobs:
       os: linux
     - checkName: vertica
       displayName: Vertica
+      os: linux
+    - checkName: voltdb
+      displayName: VoltDB
       os: linux
     - checkName: vsphere
       displayName: vSphere

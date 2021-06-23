@@ -64,6 +64,15 @@ CONFIG_WITH_FAMILY = {
     'exchanges_regexes': [r'(test)\d+'],
 }
 
+CONFIG_WITH_FAMILY_NAMED_GROUP = {
+    'rabbitmq_api_url': URL,
+    'rabbitmq_user': 'guest',
+    'rabbitmq_pass': 'guest',
+    'tag_families': True,
+    'queues_regexes': [r'(?P<first_group>test)\d+'],
+    'exchanges_regexes': [r'(?P<first_group>test)\d+'],
+}
+
 CONFIG_DEFAULT_VHOSTS = {
     'rabbitmq_api_url': URL,
     'rabbitmq_user': 'guest',

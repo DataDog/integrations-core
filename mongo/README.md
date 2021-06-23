@@ -11,7 +11,7 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
-**Note**: MongoDB v2.6+ is required for this integration.
+**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters.
 
 ## Setup
 
@@ -19,14 +19,17 @@ You can also create your own metrics using custom `find`, `count` and `aggregate
 
 The MongoDB check is included in the [Datadog Agent][2] package. No additional installation is necessary.
 
-### Configuration
+### Architecture
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
-#### Host
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Standalone" xxx -->
+#### Standalone
+
+To configure this integration for a single node MongoDB deployment:
 
 ##### Prepare MongoDB
-
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
 ```shell
@@ -49,6 +52,94 @@ db.createUser({
 })
 ```
 
+##### Configure the agents
+You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
+<!-- xxz tab xxx -->
+<!-- xxx tab "ReplicaSet" xxx -->
+#### ReplicaSet
+
+To configure this integration for a MongoDB replica set:
+
+##### Prepare MongoDB
+In a Mongo shell, authenticate to the primary and create a read-only user for the Datadog Agent in the `admin` database:
+
+```shell
+# Authenticate as the admin user.
+use admin
+db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
+
+# On MongoDB 2.x, use the addUser command.
+db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+
+# On MongoDB 3.x or higher, use the createUser command.
+db.createUser({
+  "user": "datadog",
+  "pwd": "<UNIQUEPASSWORD>",
+  "roles": [
+    { role: "read", db: "admin" },
+    { role: "clusterMonitor", db: "admin" },
+    { role: "read", db: "local" }
+  ]
+})
+```
+
+##### Configure the agents
+You need to configure one agent for each member. See below for configuration options.
+Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Sharding" xxx -->
+#### Sharding
+
+To configure this integration for a MongoDB sharded cluster:
+
+##### Prepare MongoDB
+For each shard in your cluster, connect to the primary of the replica set and create a local read-only user for the Datadog Agent in the `admin` database:
+
+```shell
+# Authenticate as the admin user.
+use admin
+db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
+
+# On MongoDB 2.x, use the addUser command.
+db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+
+# On MongoDB 3.x or higher, use the createUser command.
+db.createUser({
+  "user": "datadog",
+  "pwd": "<UNIQUEPASSWORD>",
+  "roles": [
+    { role: "read", db: "admin" },
+    { role: "clusterMonitor", db: "admin" },
+    { role: "read", db: "local" }
+  ]
+})
+```
+
+Then create the same user from a mongos proxy, this also has the side effect of creating the local user in the config servers and allows direct connection.
+
+
+##### Configure the agents
+1. Configure one Agent for each member of each shard.
+2. Configure one Agent for each member of the config servers.
+3. Configure one extra Agent to connect to the cluster through a mongos proxy. This mongos can be a new one dedicated to monitoring purposes or an existing one.
+
+Note: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][18]. Yet, any status change of an arbiter node is reported by the agent connected to the primary.
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+
+### Configuration
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
+
 ##### Metric collection
 
 1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent's configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
@@ -61,6 +152,7 @@ db.createUser({
        ## Hosts to collect metrics from, as is appropriate for your deployment topology.
        ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
        ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       ## Only specify multiple hosts when connecting through mongos
        #
      - hosts:
          - <HOST>:<PORT>
@@ -86,12 +178,6 @@ db.createUser({
        #
        options:
          authSource: admin
-
-       ## @param replica_check - boolean - optional - default: true
-       ## Whether or not to read from available replicas.
-       ## Disable this if any replicas are inaccessible to the Agent.
-       #
-       replica_check: true
    ```
 
 2. [Restart the Agent][5].
@@ -127,17 +213,100 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
-#### Containerized
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+#### Docker
+
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                                                                     |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `mongo`                                                                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%hosts%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>", "replica_check": true}` |
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["mongo"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%""], "username": "datadog", "password" : "<UNIQUEPASSWORD>", "database": "<DATABASE>"}]'
+```
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
+
+Then, set [Log Integrations][21] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"mongodb","service":"<SERVICE_NAME>"}]'
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][31] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  annotations:
+    ad.datadoghq.com/mongo.check_names: '["mongo"]'
+    ad.datadoghq.com/mongo.init_configs: '[{}]'
+    ad.datadoghq.com/mongo.instances: |
+      [
+        {
+          "hosts": ["%%host%%:%%port%%"], 
+          "username": "datadog", 
+          "password": "<UNIQUEPASSWORD>", 
+          "database": "<DATABASE>"
+        }
+      ]
+spec:
+  containers:
+    - name: mongo
+```
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
+
+Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  annotations:
+    ad.datadoghq.com/mongo.logs: '[{"source":"mongodb","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: mongo
+```
 
 ##### Trace collection
 
@@ -145,26 +314,80 @@ APM for containerized apps is supported on hosts running Agent v6+ but requires 
 
 Required environment variables on the Agent container:
 
-| Parameter                    | Value     |
-| ---------------------------- | --------- |
-| `<DD_API_KEY>`               | `api_key` |
-| `<DD_APM_ENABLED>`           | true      |
-| `<DD_APM_NON_LOCAL_TRAFFIC>` | true      |
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][16] and the [Kubernetes Daemon Setup][17] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][33] and the [Kubernetes DaemonSet Setup][34] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the name of your Agent container.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][27] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "mongo",
+    "image": "mongo:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"mongo\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"hosts\": [\"%%host%%:%%port%%\"], \"username\": \"datadog\", \"password\": \"<UNIQUEPASSWORD>\", \"database\": \"<DATABASE>\"}]"
+    }
+  }]
+}
+```
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][28].
 
-| Parameter      | Value                                       |
-| -------------- | ------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "mongodb", "service": "mongo"}` |
+Then, set [Log Integrations][29] as Docker labels:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "mongo",
+    "image": "mongo:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"mongodb\",\"service\":\"<SERVICE_NAME>\"}]"
+    }
+  }]
+}
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][31] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the [EC2 private IP address][30].
+
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -234,3 +457,20 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [15]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
 [16]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [17]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[18]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[26]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[27]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[28]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[29]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[30]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[31]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
+[32]: https://docs.datadoghq.com/tracing/setup/
+[33]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
+[34]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

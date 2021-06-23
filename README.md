@@ -4,6 +4,7 @@
 [![Coverage status][17]][18]
 [![Documentation Status][19]][20]
 [![Code style - black][21]][22]
+[![Code style - isort][24]][25]
 
 This repository contains the Agent Integrations that Datadog officially develops and supports.
 To add a new integration, please see the [Integrations Extras][5] repository and the
@@ -50,3 +51,5 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 [21]: https://img.shields.io/badge/code%20style-black-000000.svg
 [22]: https://github.com/ambv/black
 [23]: https://datadoghq.dev/integrations-core/process/integration-release/#releasers
+[24]: https://img.shields.io/badge/code%20style-isort-1674b1.svg
+[25]: https://github.com/PyCQA/isort

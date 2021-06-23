@@ -22,9 +22,12 @@ The Couchbase check is included in the [Datadog Agent][2] package, so you don't 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric Collection
 
@@ -42,6 +45,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
@@ -53,6 +59,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INTEGRATION_NAME>` | `couchbase`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"server": "http://%%host%%:8091"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -70,18 +79,15 @@ The Couchbase check emits an event to Datadog each time the cluster rebalances.
 
 ### Service Checks
 
-- `couchbase.can_connect`:
-
+**couchbase.can_connect**:<br>
 Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
-- `couchbase.by_node.cluster_membership`:
-
+**couchbase.by_node.cluster_membership**:<br>
 Returns `Critical` if the node failed over.
 Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
 Returns `Ok` otherwise.
 
-- `couchbase.by_node.health`:
-
+**couchbase.by_node.health**:<br>
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 
 ## Troubleshooting

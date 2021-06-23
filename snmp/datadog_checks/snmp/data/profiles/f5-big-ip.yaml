@@ -2,12 +2,16 @@
 #
 extends:
   - _base.yaml
-  - _generic-router-if.yaml # F5-specific variants of the other metrics are provided in this profile.
-  - _generic-router-bgp4.yaml
-  - _generic-router-ospf.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
-  - _generic-router-ip.yaml
+  - _generic-if.yaml # F5-specific variants of the other metrics are provided in this profile.
+  - _generic-bgp4.yaml
+  - _generic-ospf.yaml
+  - _generic-tcp.yaml
+  - _generic-udp.yaml
+  - _generic-ip.yaml
+
+device:
+  vendor: "f5"
+
 
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
 
@@ -16,42 +20,42 @@ metrics:
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44.0
       name: sysStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45.0
       name: sysStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.28
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.28.0
       name: sysGlobalTmmStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.29
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.29.0
       name: sysGlobalTmmStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.44
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.44.0
       name: sysGlobalHostOtherMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.45
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.45.0
       name: sysGlobalHostOtherMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.46
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.46.0
       name: sysGlobalHostSwapTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47.0
       name: sysGlobalHostSwapUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
     table:
@@ -82,93 +86,93 @@ metrics:
   # TCP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.2
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.2.0
       name: sysTcpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.3
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.3.0
       name: sysTcpStatCloseWait
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.4
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.4.0
       name: sysTcpStatFinWait
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.5
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.5.0
       name: sysTcpStatTimeWait
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.6
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.6.0
       name: sysTcpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.7
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.7.0
       name: sysTcpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.8
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.8.0
       name: sysTcpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9.0
       name: sysTcpStatConnfails
   # UDP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.2
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.2.0
       name: sysUdpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.3
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.3.0
       name: sysUdpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.4
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.4.0
       name: sysUdpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.5
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.5.0
       name: sysUdpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.6
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.6.0
       name: sysUdpStatConnfails
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.2
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.2.0
       name: sysClientsslStatCurConns
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.10
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.10.0
       name: sysClientsslStatEncryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.11
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.11.0
       name: sysClientsslStatEncryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.12
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.12.0
       name: sysClientsslStatDecryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.13
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.13.0
       name: sysClientsslStatDecryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29.0
       name: sysClientsslStatHandshakeFailures
 
   # Metrics from F5-BIGIP-LOCAL-MIB provide monitoring information about virtual servers, nodes, and pools.

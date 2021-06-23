@@ -25,4 +25,21 @@ CHECK_NAME = 'fluentd'
 DEFAULT_INSTANCE = {"monitor_agent_url": URL}
 INSTANCE_WITH_PLUGIN = {"monitor_agent_url": URL, "plugin_ids": "plg1"}
 
-EXPECTED_GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
+EXPECTED_GAUGES = [
+    'retry_count',
+    'buffer_total_queued_size',
+    'buffer_queue_length',
+]
+
+ADDITIONAL_METRICS = [
+    'emit_records',
+    'emit_count',
+    'write_count',
+    'rollback_count',
+    'slow_flush_count',
+    'flush_time_count',
+    'buffer_stage_length',
+    'buffer_stage_byte_size',
+    'buffer_queue_byte_size',
+    'buffer_available_buffer_space_ratios',
+]

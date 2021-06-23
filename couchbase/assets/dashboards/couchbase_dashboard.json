@@ -1,0 +1,125 @@
+{
+    "title": "Couchbase - Metrics",
+    "description": "This dashboard provides key Couchbase metrics to help you identify which clusters consume the most resources and to spot unexpected changes in network traffic. For further reading on Couchbase monitoring: \n\n- [How to monitoring Couchbase performance with Datadog](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/)  \n\n- [Datadog’s Couchbase integration docs](https://docs.datadoghq.com/integrations/couchbase/). \n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "rate(sum:couchbase.by_bucket.get_hits{$scope})"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Couchbase Hits (per second)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "rate(sum:couchbase.by_bucket.bytes_read{$scope})"
+                    },
+                    {
+                        "q": "rate(sum:couchbase.by_bucket.bytes_written{$scope})"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Couchbase Bytes read and written"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:couchbase.by_bucket.curr_connections{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Couchbase Current connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:couchbase.by_bucket.couch_total_disk_size{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Couchbase Disk size"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        }
+    ]
+}

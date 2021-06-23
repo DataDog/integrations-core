@@ -27,6 +27,8 @@
     "dashboards": {
       "Kubernetes Metrics Server - Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

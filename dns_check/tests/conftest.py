@@ -10,7 +10,7 @@ from . import common
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield common.INSTANCE_INTEGRATION
+    yield common.INSTANCE_INTEGRATION, common.E2E_METADATA
 
 
 @pytest.fixture

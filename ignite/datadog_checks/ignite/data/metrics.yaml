@@ -3,6 +3,7 @@
 
 jmx_metrics:
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group="Thread Pools",name=(.*)
       exclude_tags:
@@ -37,6 +38,7 @@ jmx_metrics:
           alias: ignite.threads.maximum_pool_size
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=DataRegionMetrics,name=(.*)
       exclude_tags:
@@ -107,6 +109,7 @@ jmx_metrics:
           alias: ignite.check_point_buffer_size
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=Kernal,name=ClusterMetricsMXBeanImpl
       exclude_tags:
@@ -283,6 +286,7 @@ jmx_metrics:
           alias: ignite.total_client_nodes
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=SPIs,name=AlwaysFailoverSpi
       exclude_tags:
@@ -297,6 +301,7 @@ jmx_metrics:
           alias: ignite.jobs.total_failover
           metric_type: monotonic_count
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=SPIs,name=TcpDiscoverySpi
       exclude_tags:
@@ -335,6 +340,7 @@ jmx_metrics:
           alias: ignite.discovery.total_processed_messages
           metric_type: monotonic_count
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=TransactionMetrics,name=TransactionMetricsMxBeanImpl
       exclude_tags:
@@ -358,6 +364,7 @@ jmx_metrics:
           alias: ignite.transaction.owner
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group="Persistent Store",name=DataStorageMetrics
       exclude_tags:
@@ -414,6 +421,7 @@ jmx_metrics:
           alias: ignite.checkpoint.total_time
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group="Cache groups",name=(.*)
       exclude_tags:
@@ -454,6 +462,7 @@ jmx_metrics:
           alias: ignite.cache.partitions
           metric_type: gauge
   - include:
+      domain: org.apache
       bean_regex:
         - org\.apache:clsLdr=(.*),group=default,name="org.apache.ignite.internal.processors.cache.CacheClusterMetricsMXBeanImpl"
       exclude_tags:

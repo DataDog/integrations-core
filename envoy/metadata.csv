@@ -15,6 +15,7 @@ envoy.cluster_manager.cds.update_attempt,count,,request,,Total API fetches attem
 envoy.cluster_manager.cds.update_success,count,,request,,Total API fetches completed successfully,1,envoy,cds successful api accesses
 envoy.cluster_manager.cds.update_failure,count,,request,,Total API fetches that failed because of network errors,-1,envoy,cds failed api accesses
 envoy.cluster_manager.cds.update_rejected,count,,request,,Total API fetches that failed because of schema/validation errors,-1,envoy,cds rejected api accesses
+envoy.cluster_manager.cds.update_time,gauge,,millisecond,,Timestamp of the last successful API fetch attempt as milliseconds since the epoch,0,envoy,cds time api access
 envoy.cluster_manager.cds.version,gauge,,item,,Hash of the contents from the last successful API fetch,0,envoy,
 envoy.cluster_manager.cds.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,cds control plane state
 envoy.cluster_manager.cds.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,cds pending control plane requests
@@ -28,6 +29,12 @@ envoy.vhost.vcluster.upstream_rq_2xx,count,,response,,Aggregate HTTP 2xx respons
 envoy.vhost.vcluster.upstream_rq_3xx,count,,response,,Aggregate HTTP 3xx response codes,0,envoy,vhost 3xx response codes
 envoy.vhost.vcluster.upstream_rq_4xx,count,,response,,Aggregate HTTP 4xx response codes,-1,envoy,vhost 4xx response codes
 envoy.vhost.vcluster.upstream_rq_5xx,count,,response,,Aggregate HTTP 5xx response codes,-1,envoy,vhost 5xx response codes
+envoy.vhost.vcluster.upstream_rq_retry,count,,request,,Total request retries,-1,envoy,vhost request retries
+envoy.vhost.vcluster.upstream_rq_retry_limit_exceeded,count,,request,,Total requests not retried due to exceeding the configured number of maximum retries,-1,envoy,vhost request retries exceeded
+envoy.vhost.vcluster.upstream_rq_retry_overflow,count,,request,,Total requests not retried due to circuit breaking or exceeding the retry budgets,-1,envoy,vhost request retries over budget
+envoy.vhost.vcluster.upstream_rq_retry_success,count,,request,,Total request retry successes,0,envoy,vhost request retries succeeded
+envoy.vhost.vcluster.upstream_rq_timeout,count,,request,,Total requests that timed out waiting for a response,-1,envoy,vhost requests timed out
+envoy.vhost.vcluster.upstream_rq_total,count,,request,,Total requests initiated by the router to the upstream,0,envoy,vhost requests total
 envoy.cluster.ratelimit.ok,count,,response,,Total under limit responses from the rate limit service,1,envoy,
 envoy.cluster.ratelimit.error,count,,response,,Total errors contacting the rate limit service,-1,envoy,
 envoy.cluster.ratelimit.over_limit,count,,response,,Total over limit responses from the rate limit service,-1,envoy,
@@ -55,8 +62,14 @@ envoy.tcp.downstream_cx_total,count,,connection,,Total number of connections han
 envoy.tcp.downstream_cx_no_route,count,,connection,,Number of connections for which no matching route was found,-1,envoy,
 envoy.tcp.downstream_cx_tx_bytes_total,count,,byte,,Total bytes written to the downstream connection,0,envoy,
 envoy.tcp.downstream_cx_tx_bytes_buffered,gauge,,byte,,Total bytes currently buffered to the downstream connection,0,envoy,
+envoy.tcp.downstream_cx_rx_bytes_total,count,,byte,,Total bytes written from the downstream connection,0,envoy,
+envoy.tcp.downstream_cx_rx_bytes_buffered,gauge,,byte,,Total bytes currently buffered from the downstream connection,0,envoy,
 envoy.tcp.downstream_flow_control_paused_reading_total,count,,occurrence,,Total number of times flow control paused reading from downstream,0,envoy,
 envoy.tcp.downstream_flow_control_resumed_reading_total,count,,occurrence,,Total number of times flow control resumed reading from downstream,0,envoy,
+envoy.tcp.idle_timeout,count,,connection,,Total number of connections closed due to idle timeout,0,envoy,
+envoy.tcp.max_downstream_connection_duration,count,,connection,,Total number of connections closed due to max_downstream_connection_duration timeout,0,envoy,
+envoy.tcp.upstream_flush_total,count,,connection,,Total number of connections that continued to flush upstream data after the downstream connection was closed,0,envoy,
+envoy.tcp.upstream_flush_active,gauge,,connection,,Total connections currently continuing to flush upstream data after the downstream connection was closed,0,envoy,
 envoy.auth.clientssl.update_success,count,,success,,Total principal update successes,1,envoy,
 envoy.auth.clientssl.update_failure,count,,error,,Total principal update failures,-1,envoy,
 envoy.auth.clientssl.auth_no_ssl,count,,connection,,Total connections ignored due to no TLS,-1,envoy,
@@ -156,6 +169,7 @@ envoy.listener_manager.lds.update_attempt,count,,request,,Total API fetches atte
 envoy.listener_manager.lds.update_success,count,,request,,Total API fetches completed successfully,1,envoy,lds successful api accesses
 envoy.listener_manager.lds.update_failure,count,,request,,Total API fetches that failed because of network errors,-1,envoy,lds failed api accesses
 envoy.listener_manager.lds.update_rejected,count,,request,,Total API fetches that failed because of schema/validation errors,-1,envoy,lds rejected api accesses
+envoy.listener_manager.lds.update_time,gauge,,millisecond,,Timestamp of the last successful API fetch attempt as milliseconds since the epoch,0,envoy,lds time api access 
 envoy.listener_manager.lds.version,gauge,,item,,Hash of the contents from the last successful API fetch,0,envoy,
 envoy.listener_manager.lds.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,lds control plane state
 envoy.listener_manager.lds.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,lds pending control plane requests
@@ -165,6 +179,7 @@ envoy.http.downstream_cx_ssl_total,count,,connection,,Total TLS connections,0,en
 envoy.http.downstream_cx_http1_total,count,,connection,,Total HTTP/1.1 connections,0,envoy,
 envoy.http.downstream_cx_websocket_total,count,,connection,,Total WebSocket connections,0,envoy,
 envoy.http.downstream_cx_http2_total,count,,connection,,Total HTTP/2 connections,0,envoy,
+envoy.http.downstream_cx_http3_total,count,,connection,,[API v3 only] Total HTTP/3 connections,0,envoy,
 envoy.http.downstream_cx_destroy,count,,connection,,Total connections destroyed,0,envoy,
 envoy.http.downstream_cx_destroy_remote,count,,connection,,Total connections destroyed due to remote close,0,envoy,
 envoy.http.downstream_cx_destroy_local,count,,connection,,Total connections destroyed due to local close,0,envoy,
@@ -176,6 +191,7 @@ envoy.http.downstream_cx_ssl_active,gauge,,connection,,Total active TLS connecti
 envoy.http.downstream_cx_http1_active,gauge,,connection,,Total active HTTP/1.1 connections,0,envoy,
 envoy.http.downstream_cx_websocket_active,gauge,,connection,,Total active WebSocket connections,0,envoy,
 envoy.http.downstream_cx_http2_active,gauge,,connection,,Total active HTTP/2 connections,0,envoy,
+envoy.http.downstream_cx_http3_active,gauge,,connection,,[API v3 only] Total active HTTP/3 connections,0,envoy,
 envoy.http.downstream_cx_protocol_error,count,,error,,Total protocol errors,-1,envoy,
 envoy.http.downstream_cx_rx_bytes_total,count,,byte,,Total bytes received,0,envoy,
 envoy.http.downstream_cx_rx_bytes_buffered,gauge,,byte,,Total received bytes currently buffered,0,envoy,
@@ -188,6 +204,7 @@ envoy.http.downstream_flow_control_resumed_reading_total,count,,occurrence,,Tota
 envoy.http.downstream_rq_total,count,,request,,Total requests,0,envoy,
 envoy.http.downstream_rq_http1_total,count,,request,,Total HTTP/1.1 requests,0,envoy,
 envoy.http.downstream_rq_http2_total,count,,request,,Total HTTP/2 requests,0,envoy,
+envoy.http.downstream_rq_http3_total,count,,request,,[API v3 only] Total HTTP/3 requests,0,envoy,
 envoy.http.downstream_rq_active,gauge,,request,,Total active requests,0,envoy,
 envoy.http.downstream_rq_response_before_rq_complete,count,,response,,Total responses sent before the request was complete,0,envoy,
 envoy.http.downstream_rq_rx_reset,count,,request,,Total request resets received,0,envoy,
@@ -227,6 +244,7 @@ envoy.cluster.upstream_cx_total,count,,connection,,Total connections,0,envoy,
 envoy.cluster.upstream_cx_active,gauge,,connection,,Total active connections,0,envoy,
 envoy.cluster.upstream_cx_http1_total,count,,connection,,Total HTTP/1.1 connections,0,envoy,
 envoy.cluster.upstream_cx_http2_total,count,,connection,,Total HTTP/2 connections,0,envoy,
+envoy.cluster.upstream_cx_http3_total,count,,connection,,[API v3 only] Total HTTP/3 connections,0,envoy,
 envoy.cluster.upstream_cx_connect_fail,count,,error,,Total connection failures,-1,envoy,
 envoy.cluster.upstream_cx_connect_timeout,count,,timeout,,Total connection timeouts,-1,envoy,
 envoy.cluster.upstream_cx_connect_attempts_exceeded,count,,error,,Total consecutive connection failures exceeding configured connection attempts,-1,envoy,
@@ -255,6 +273,7 @@ envoy.cluster.upstream_rq_pending_failure_eject,count,,request,,Total requests t
 envoy.cluster.upstream_rq_pending_active,gauge,,request,,Total active requests pending a connection pool connection,-1,envoy,
 envoy.cluster.upstream_rq_cancelled,count,,request,,Total requests cancelled before obtaining a connection pool connection,-1,envoy,
 envoy.cluster.upstream_rq_maintenance_mode,count,,request,,Total requests that resulted in an immediate 503 due to maintenance mode,-1,envoy,
+envoy.cluster.upstream_rq_max_duration_reached,count,,request,,Total requests closed due to max duration reached,0,envoy,
 envoy.cluster.upstream_rq_timeout,count,,request,,Total requests that timed out waiting for a response,-1,envoy,
 envoy.cluster.upstream_rq_per_try_timeout,count,,request,,Total requests that hit the per try timeout,-1,envoy,
 envoy.cluster.upstream_rq_rx_reset,count,,request,,Total requests that were reset remotely,0,envoy,
@@ -304,6 +323,10 @@ envoy.cluster.health_check.passive_failure,count,,check,,Number of health check 
 envoy.cluster.health_check.network_failure,count,,check,,Number of health check failures due to network error,-1,envoy,
 envoy.cluster.health_check.verify_cluster,count,,check,,Number of health checks that attempted cluster name verification,0,envoy,
 envoy.cluster.health_check.healthy,gauge,,check,,Number of healthy members,1,envoy,
+envoy.cluster.http1.dropped_headers_with_underscores,count,,,,Total number of dropped headers with names containing underscores. This action is configured by setting the headers_with_underscores_action config setting.,0,envoy,
+envoy.cluster.http1.metadata_not_supported_error,count,,,,Total number of metadata dropped during HTTP/1 encoding,0,envoy,
+envoy.cluster.http1.response_flood,count,,connection,,Total number of connections closed due to response flooding,0,envoy,
+envoy.cluster.http1.requests_rejected_with_underscores_in_headers,count,,request,,Total numbers of rejected requests due to header names containing underscores. This action is configured by setting the headers_with_underscores_action config setting.,0,envoy,
 envoy.cluster.http2.header_overflow,count,,connection,,Total number of connections reset due to the headers being larger than 63 K,-1,envoy,
 envoy.cluster.http2.inbound_empty_frames_flood,count,,connection,,Total number of connections terminated for exceeding the limit on consecutive inbound frames with an empty payload and no end stream flag,-1,envoy,
 envoy.cluster.http2.inbound_priority_frames_flood,count,,connection,,Total number of connections terminated for exceeding the limit on inbound frames of type PRIORITY,-1,envoy,
@@ -316,6 +339,7 @@ envoy.cluster.http2.rx_reset,count,,message,,Total number of reset stream frames
 envoy.cluster.http2.too_many_header_frames,count,,occurrence,,Total number of times an HTTP2 connection is reset due to receiving too many headers frames. Envoy currently supports proxying at most one header frame for 100-Continue one non-100 response code header frame and one frame with trailers.,-1,envoy,
 envoy.cluster.http2.trailers,count,,item,,Total number of trailers seen on requests coming from downstream,0,envoy,
 envoy.cluster.http2.tx_reset,count,,message,,Total number of reset stream frames transmitted by Envoy,0,envoy,
+envoy.cluster.original_dst_host_invalid,count,,,,Total number of invalid hosts passed to original destination load balancer,0,envoy,
 envoy.cluster.outlier_detection.ejections_enforced_total,count,,,,Number of enforced ejections due to any outlier type,-1,envoy,
 envoy.cluster.outlier_detection.ejections_active,gauge,,,,Number of currently ejected hosts,-1,envoy,
 envoy.cluster.outlier_detection.ejections_overflow,count,,,,Number of ejections aborted due to the max ejection %,-1,envoy,
@@ -528,6 +552,7 @@ envoy.listener.downstream_cx_length_ms.75percentile,gauge,,millisecond,,Connecti
 envoy.listener.downstream_cx_length_ms.90percentile,gauge,,millisecond,,Connection length in milliseconds 90-percentile,-1,envoy,
 envoy.listener.downstream_cx_length_ms.95percentile,gauge,,millisecond,,Connection length in milliseconds 95-percentile,-1,envoy,
 envoy.listener.downstream_cx_length_ms.99percentile,gauge,,millisecond,,Connection length in milliseconds 99-percentile,-1,envoy,
+envoy.listener.downstream_cx_length_ms.99_5percentile,gauge,,millisecond,,Connection length in milliseconds 99.5-percentile,-1,envoy,
 envoy.listener.downstream_cx_length_ms.99_9percentile,gauge,,millisecond,,Connection length in milliseconds 99.9-percentile,-1,envoy,
 envoy.listener.downstream_cx_length_ms.100percentile,gauge,,millisecond,,Connection length in milliseconds 100-percentile,-1,envoy,
 envoy.http.downstream_cx_length_ms.0percentile,gauge,,millisecond,,Connection length in milliseconds 0-percentile,-1,envoy,
@@ -537,6 +562,7 @@ envoy.http.downstream_cx_length_ms.75percentile,gauge,,millisecond,,Connection l
 envoy.http.downstream_cx_length_ms.90percentile,gauge,,millisecond,,Connection length in milliseconds 90-percentile,-1,envoy,
 envoy.http.downstream_cx_length_ms.95percentile,gauge,,millisecond,,Connection length in milliseconds 95-percentile,-1,envoy,
 envoy.http.downstream_cx_length_ms.99percentile,gauge,,millisecond,,Connection length in milliseconds 99-percentile,-1,envoy,
+envoy.http.downstream_cx_length_ms.99_5percentile,gauge,,millisecond,,Connection length in milliseconds 99.5-percentile,-1,envoy,
 envoy.http.downstream_cx_length_ms.99_9percentile,gauge,,millisecond,,Connection length in milliseconds 99.9-percentile,-1,envoy,
 envoy.http.downstream_cx_length_ms.100percentile,gauge,,millisecond,,Connection length in milliseconds 100-percentile,-1,envoy,
 envoy.http.downstream_rq_time.0percentile,gauge,,millisecond,,Request time in milliseconds 0-percentile,-1,envoy,
@@ -546,6 +572,7 @@ envoy.http.downstream_rq_time.75percentile,gauge,,millisecond,,Request time in m
 envoy.http.downstream_rq_time.90percentile,gauge,,millisecond,,Request time in milliseconds 90-percentile,-1,envoy,
 envoy.http.downstream_rq_time.95percentile,gauge,,millisecond,,Request time in milliseconds 95-percentile,-1,envoy,
 envoy.http.downstream_rq_time.99percentile,gauge,,millisecond,,Request time in milliseconds 99-percentile,-1,envoy,
+envoy.http.downstream_rq_time.99_5percentile,gauge,,millisecond,,Request time in milliseconds 99.5-percentile,-1,envoy,
 envoy.http.downstream_rq_time.99_9percentile,gauge,,millisecond,,Request time in milliseconds 99.9-percentile,-1,envoy,
 envoy.http.downstream_rq_time.100percentile,gauge,,millisecond,,Request time in milliseconds 100-percentile,-1,envoy,
 envoy.cluster.upstream_cx_connect_ms.0percentile,gauge,,millisecond,,Connection establishment in milliseconds 0-percentile,-1,envoy,
@@ -555,6 +582,7 @@ envoy.cluster.upstream_cx_connect_ms.75percentile,gauge,,millisecond,,Connection
 envoy.cluster.upstream_cx_connect_ms.90percentile,gauge,,millisecond,,Connection establishment in milliseconds 90-percentile,-1,envoy,
 envoy.cluster.upstream_cx_connect_ms.95percentile,gauge,,millisecond,,Connection establishment in milliseconds 95-percentile,-1,envoy,
 envoy.cluster.upstream_cx_connect_ms.99percentile,gauge,,millisecond,,Connection establishment in milliseconds 99-percentile,-1,envoy,
+envoy.cluster.upstream_cx_connect_ms.99_5percentile,gauge,,millisecond,,Connection establishment in milliseconds 99.5-percentile,-1,envoy,
 envoy.cluster.upstream_cx_connect_ms.99_9percentile,gauge,,millisecond,,Connection establishment in milliseconds 99.9-percentile,-1,envoy,
 envoy.cluster.upstream_cx_connect_ms.100percentile,gauge,,millisecond,,Connection establishment in milliseconds 100-percentile,-1,envoy,
 envoy.cluster.upstream_cx_length_ms.0percentile,gauge,,millisecond,,Connection length in milliseconds 0-percentile,0,envoy,
@@ -564,6 +592,7 @@ envoy.cluster.upstream_cx_length_ms.75percentile,gauge,,millisecond,,Connection 
 envoy.cluster.upstream_cx_length_ms.90percentile,gauge,,millisecond,,Connection length in milliseconds 90-percentile,0,envoy,
 envoy.cluster.upstream_cx_length_ms.95percentile,gauge,,millisecond,,Connection length in milliseconds 95-percentile,0,envoy,
 envoy.cluster.upstream_cx_length_ms.99percentile,gauge,,millisecond,,Connection length in milliseconds 99-percentile,0,envoy,
+envoy.cluster.upstream_cx_length_ms.99_5percentile,gauge,,millisecond,,Connection length in milliseconds 99.5-percentile,0,envoy,
 envoy.cluster.upstream_cx_length_ms.99_9percentile,gauge,,millisecond,,Connection length in milliseconds 99.9-percentile,0,envoy,
 envoy.cluster.upstream_cx_length_ms.100percentile,gauge,,millisecond,,Connection length in milliseconds 100-percentile,0,envoy,
 envoy.cluster.upstream_rq_time.0percentile,gauge,,millisecond,,Request time in milliseconds 0-percentile,-1,envoy,
@@ -611,3 +640,4 @@ envoy.cluster.zone.upstream_rq_time.95percentile,gauge,,millisecond,,Zone reques
 envoy.cluster.zone.upstream_rq_time.99percentile,gauge,,millisecond,,Zone request time in milliseconds 99-percentile,-1,envoy,
 envoy.cluster.zone.upstream_rq_time.99_9percentile,gauge,,millisecond,,Zone request time in milliseconds 99.9-percentile,-1,envoy,
 envoy.cluster.zone.upstream_rq_time.100percentile,gauge,,millisecond,,Zone request time in milliseconds 100-percentile,-1,envoy,
+envoy.sds.key_rotation_failed,count,,,,[API v3 only] Total number of filesystem key rotations that failed outside of an SDS update.,-1,envoy,

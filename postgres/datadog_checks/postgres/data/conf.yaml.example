@@ -41,7 +41,24 @@ instances:
     #
     # dbname: <DBNAME>
 
-    ## @param ssl - string - optional - default: False
+    ## @param dbstrict - boolean - optional - default: false
+    ## Whether to restrict the scope of the check to just the database in question.
+    ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+    #
+    # dbstrict: false
+
+    ## @param ignore_databases - list of strings - optional
+    ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
+    ## Each value can be a plain string or a Postgres pattern.
+    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+    #
+    # ignore_databases:
+    #   - template%
+    #   - rdsadmin
+    #   - azure_maintenance
+    #   - postgres
+
+    ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -68,26 +85,42 @@ instances:
     #
     # query_timeout: 1000
 
-    ## @param relations - list of mappings - optional
-    ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+    ## @param relations - (list of string or mapping) - optional
+    ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
     ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
     ## Each relation generates many metrics (10 + 10 per index).
+    ##
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
+    ##
+    ## Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
+    ## metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+    ## collected only for user tables.
+    ## To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
+    ## as a list of the options:
+    ## * r = ordinary table
+    ## * i = index
+    ## * S = sequence
+    ## * t = TOAST table
+    ## * m = materialized view
+    ## * c = composite type
+    ## * f = foreign table
+    ## * p = partitioned table
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
     ## the list of table names. All schemas are included and regex are not supported.
     ## relations:
-    ##   - <TABLE_NAME1>
-    ##   - <TABLE_NAME2>
     #
     # relations:
     #   - relation_name: <TABLE_NAME>
     #     schemas:
     #     - <SCHEMA_NAME1>
     #   - relation_regex: <TABLE_PATTERN>
+    #     relkind:
+    #     - r
+    #     - p
 
     ## @param max_relations - integer - optional - default: 300
     ## Determines the maximum number of relations to fetch.
@@ -146,6 +179,72 @@ instances:
     #     tags:
     #     - <TAG_KEY>:<TAG_VALUE>
 
+    ## @param application_name - string - optional - default: datadog-agent
+    ## The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+    ## It is typically set by an application upon connection to the server.
+    ## The name is displayed in the pg_stat_activity view and included in CSV log entries.
+    #
+    # application_name: datadog-agent
+
+    ## @param deep_database_monitoring - boolean - optional - default: false
+    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+    ##
+    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+    ## success manager or Datadog support.
+    #
+    # deep_database_monitoring: false
+
+    ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
+    ## Set this value if you want to define a custom view or function to allow the datadog user to query the
+    ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
+    ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+    #
+    # pg_stat_statements_view: show_pg_stat_statements()
+
+    ## Configure collection of statement samples
+    #
+    statement_samples:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+        #
+        # enabled: false
+
+        ## @param collections_per_second - number - optional - default: 1
+        ## Set the maximum statement sample collection rate. Each collection involves a single query to
+        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+        #
+        # collections_per_second: 1
+
+        ## @param explain_function - string - optional - default: datadog.explain_statement
+        ## Override the default function used to collect execution plans for statements.
+        #
+        # explain_function: datadog.explain_statement
+
+        ## @param explained_statements_per_hour_per_query - integer - optional - default: 60
+        ## Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+        #
+        # explained_statements_per_hour_per_query: 60
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+        ## plan.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param explained_statements_cache_maxsize - integer - optional - default: 5000
+        ## Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+        ## be increased for databases with a very large number unique normalized queries which exceed the cache's
+        ## limit.
+        #
+        # explained_statements_cache_maxsize: 5000
+
+        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
+        ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+        #
+        # seen_samples_cache_maxsize: 10000
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -182,7 +281,9 @@ instances:
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which Integration sent the logs.
-## service - required - The name of the service that generates the log.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
 ## tags - optional - Add tags to the collected logs.
 ##

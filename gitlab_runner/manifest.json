@@ -2,7 +2,8 @@
   "categories": [
     "collaboration",
     "source control",
-    "issue tracking"
+    "issue tracking",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Gitlab Runner",
@@ -24,8 +25,15 @@
   "type": "check",
   "integration_id": "gitlab-runner",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "gitlab-runner"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

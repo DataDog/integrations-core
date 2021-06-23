@@ -1,61 +1,72 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param keystone_server_url - string - required
-  ## Where your identity server lives. Note that the server must support Identity API v3
-  #
-  keystone_server_url: "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"
+    ## @param keystone_server_url - string - required
+    ## Where your identity server lives. Note that the server must support Identity API v3
+    #
+    keystone_server_url: https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/
 
-  ## @param os_host - string - optional
-  ## The hostname of this machine registered with Nova.
-  ## Defaults to the Hostname detected by the Agent.
-  ## See https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
-  #
-  # os_host: <HOSTNAME>
+    ## @param os_host - string - optional
+    ## The hostname of this machine registered with Nova.
+    ## Defaults to the Hostname detected by the Agent.
+    ## See https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
+    #
+    # os_host: <HOSTNAME>
 
-  ## @param nova_api_version - string - optional - default: v2.1
-  ## Nova API version to use - this check supports `v2` and `v2.1`.
-  #
-  # nova_api_version: v2.1
+    ## @param nova_api_version - string - optional - default: v2.1
+    ## Nova API version to use - this check supports `v2` and `v2.1`.
+    #
+    # nova_api_version: v2.1
 
-  ## @param hypervisor_ids - list of integers - optional
-  ## IDs of Nova Hypervisors to monitor
-  ## Required for OpenStack Kilo or `nova_api_version` v2 -indexing Hypervisors is restricted
-  ## to `admin`s in Compute API v2-.
-  ## On more recent versions, the check automatically discovers the locally running Hypervisor,
-  ## based on the `hypervisor_hostname`.
-  #
-  # hypervisor_ids:
-  #   - 1
-  #   - <ID>
+    ## @param hypervisor_ids - list of integers - optional
+    ## IDs of Nova Hypervisors to monitor
+    ## Required for OpenStack Kilo or `nova_api_version` v2 -indexing Hypervisors is restricted
+    ## to `admin`s in Compute API v2-.
+    ## On more recent versions, the check automatically discovers the locally running Hypervisor,
+    ## based on the `hypervisor_hostname`.
+    #
+    # hypervisor_ids:
+    #   - <1>
+    #   - <ID>
 
-  ## @param exclude_server_ids - list of strings - optional
-  ## IDs of servers to exclude from monitoring. By default the agent collects metrics from all
-  ## guest servers that are running on the host. Regex expressions for the server IDs are supported.
-  #
-  # exclude_server_ids:
-  #   - <SERVER_NAME>
-  #   - <SERVER_PREFIX>.*
+    ## @param exclude_server_ids - list of strings - optional - default: []
+    ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
+    ## Regex expressions for the server IDs are supported.
+    #
+    # exclude_server_ids:
+    #   - <SERVER_ID>
+    #   - <SERVER_ID_PREFIX>*
 
-  ## @param exclude_network_ids - list of strings - optional
-  ## IDs of networks to exclude from monitoring. By default the agent collects
-  ## metrics from networks returned by the neutron:get_networks operation
-  ## Regex expressions for the network IDs to exclude are supported.
-  #
-  # exclude_network_ids:
-  #   - <NETWORK_NAME>
-  #   - <NETWORK_PREFIX>.*
+    ## @param exclude_network_ids - list of strings - optional - default: []
+    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
+    ## neutron:get_networks operation)
+    ## Regex expressions for the network IDs to exclude are supported.
+    #
+    # exclude_network_ids:
+    #   - <NETWORK_ID>
+    #   - <NETWORK_ID_PREFIX>*
 
-  ## @param ssl_verify - boolean - optional - default: true
-  ## Whether to enable SSL certificate verification for HTTP requests. You may
-  ## need to set it to false when using self-signed certs.
-  #
-  # ssl_verify: true
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Whether to enable SSL certificate verification for HTTP requests. You may
+    ## need to set it to false when using self-signed certs.
+    #
+    # ssl_verify: true
 
-  ## @param use_agent_proxy - boolean - optional - default: true
-  ## Whether the dd-agent proxy should also be used for Openstack API requests (if set).
-  #
-  # use_agent_proxy: true
+    ## @param use_agent_proxy - boolean - optional - default: true
+    ## Whether the dd-agent proxy should also be used for Openstack API requests (if set).
+    #
+    # use_agent_proxy: true
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param name - string - required
@@ -63,22 +74,20 @@ instances:
     #
   - name: <INSTANCE_NAME>
 
-    ## @param user - object - required
-    ## User credentials
-    ## Password authentication is the only auth method supported.
-    ## `user` object expects the parameter `username`, `password`, and `user.domain.id`.
-    ##
-    ## `user` should resolve to a structure like:
-    ##
-    ##  {'password': '<PASSWORD>', 'name': '<USERNAME>', 'domain': {'id': '<DOMAINE_ID>'}}
+    ## @param user - mapping - required
+    ## Password authentication is the only auth method supported
+    ## User expects username, password, and user domain id
+    ## `user` should resolve to a structure like
+    ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+    ## The check uses the Unscoped token method to collect information about all available projects to the user.
     #
     user:
       password: <PASSWORD>
-      name: datadog
+      name: <USER_NAME>
       domain:
-        id: <DOMAINE_ID>
+        id: <DOMAIN_ID>
 
-    ## @param auth_scope - object - optional
+    ## @param auth_scope - mapping - optional
     ## The authorization scope that is used to request a token from Identity API v3
     ## The auth scope must resolve to 1 of the following structures:
     ##
@@ -108,11 +117,34 @@ instances:
     #
     # append_tenant_id: false
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## Log Section
+    ##
+    ## type - required - Type of log input source (tcp / udp / file / windows_event)
+    ## port / path / channel_path - required - Set port if type is tcp or udp.
+    ##                                         Set path if type is file.
+    ##                                         Set channel_path if type is windows_event.
+    ## source  - required - Attribute that defines which Integration sent the logs.
+    ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+    ##                       possible values are utf-16-le and utf-16-be.
+    ## service - optional - The name of the service that generates the log.
+    ##                      Overrides any `service` defined in the `init_config` section.
+    ## tags - optional - Add tags to the collected logs.
+    ##
+    ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+    #
+    # logs:
+    #   - type: file
+    #     path: /var/log/apache2/*.log
+    #     source: openstack
+    #   - type: file
+    #     path: /var/log/libvirt/*.log
+    #     source: openstack

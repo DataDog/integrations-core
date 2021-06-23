@@ -3,7 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+from collections import deque
 
+import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
@@ -54,3 +56,31 @@ def pg_instance():
 @pytest.fixture(scope='session')
 def e2e_instance():
     return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture()
+def mock_cursor_for_replica_stats():
+    with mock.patch('psycopg2.connect') as connect:
+        cursor = mock.MagicMock()
+        data = deque()
+        connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
+
+        def cursor_execute(query):
+            if "FROM pg_stat_replication" in query:
+                data.appendleft(['app1', 'streaming', 'async', 12, 12, 12])
+                data.appendleft(['app2', 'backup', 'sync', 13, 13, 13])
+            elif query == 'SHOW SERVER_VERSION;':
+                data.appendleft(['10.15'])
+
+        def cursor_fetchall():
+            while data:
+                yield data.pop()
+
+        def cursor_fetchone():
+            return data.pop()
+
+        cursor.execute = cursor_execute
+        cursor.fetchall = cursor_fetchall
+        cursor.fetchone = cursor_fetchone
+
+        yield

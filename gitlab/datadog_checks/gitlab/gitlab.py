@@ -40,13 +40,15 @@ class GitlabCheck(OpenMetricsBaseCheck):
             name, init_config, [self._create_gitlab_prometheus_instance(instances[0], init_config)]
         )
 
-    def check(self, instance):
-        # Metrics collection
-        endpoint = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
-        if endpoint is None:
+        self.endpoint = self.instance.get('prometheus_url', self.instance.get('prometheus_endpoint'))
+        if self.endpoint is None:
             raise CheckException("Unable to find `prometheus_url` or `prometheus_endpoint` in config file.")
 
-        scraper_config = self.config_map[endpoint]
+        self.url = self.instance.get('gitlab_url', None)
+        self.token = self.instance.get('api_token', None)
+
+    def check(self, _):
+        scraper_config = self.config_map[self.endpoint]
 
         try:
             self.process(scraper_config)
@@ -56,14 +58,14 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
-                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e),
+                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(self.endpoint, e),
             )
 
         # Service check to check Gitlab's health endpoints
         for check_type in self.ALLOWED_SERVICE_CHECKS:
-            self._check_health_endpoint(instance, check_type)
+            self._check_health_endpoint(check_type)
 
-        self.submit_version(instance)
+        self.submit_version()
 
     def _create_gitlab_prometheus_instance(self, instance, init_config):
         """
@@ -107,19 +109,17 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
 
-    def submit_version(self, instance):
+    def submit_version(self):
         if not self.is_metadata_collection_enabled():
             return
         try:
-            url = instance.get('gitlab_url', None)
-            token = instance.get('api_token', None)
-            if token is None:
+            if self.token is None:
                 self.log.debug(
                     "Gitlab token not found; please add one in your config to enable version metadata collection."
                 )
                 return
-            param = {'access_token': token}
-            response = self.http.get("{}/api/v4/version".format(url), params=param)
+            param = {'access_token': self.token}
+            response = self.http.get("{}/api/v4/version".format(self.url), params=param)
             version = response.json().get('version')
             self.set_metadata('version', version)
             self.log.debug("Set version %s for Gitlab", version)
@@ -134,13 +134,11 @@ class GitlabCheck(OpenMetricsBaseCheck):
     # - /-/health
     #
     # https://docs.gitlab.com/ce/user/admin_area/monitoring/health_check.html
-    def _check_health_endpoint(self, instance, check_type):
+    def _check_health_endpoint(self, check_type):
         if check_type not in self.ALLOWED_SERVICE_CHECKS:
             raise CheckException("Health endpoint {} is not a valid endpoint".format(check_type))
 
-        url = instance.get('gitlab_url')
-
-        if url is None:
+        if self.url is None:
             # Simply ignore this service check if not configured
             self.log.debug("gitlab_url not configured, service check %s skipped", check_type)
             return
@@ -148,7 +146,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # These define which endpoint is hit and which type of check is actually performed
         # TODO: parse errors and report for single sub-service failure?
         service_check_name = 'gitlab.{}'.format(check_type)
-        check_url = '{}/-/{}'.format(url, check_type)
+        check_url = '{}/-/{}'.format(self.url, check_type)
 
         try:
             self.log.debug("checking %s against %s", check_type, check_url)

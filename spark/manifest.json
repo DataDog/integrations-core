@@ -1,6 +1,7 @@
 {
   "categories": [
     "processing",
+    "log collection",
     "autodiscovery"
   ],
   "creates_events": false,
@@ -27,7 +28,13 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "spark": "assets/dashboards/spark_dashboard.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "spark"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

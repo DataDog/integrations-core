@@ -25,10 +25,17 @@
   "type": "check",
   "integration_id": "envoy",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Envoy - Overview": "assets/dashboards/envoy_overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "envoy"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

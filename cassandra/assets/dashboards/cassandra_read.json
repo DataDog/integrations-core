@@ -1,0 +1,720 @@
+{
+    "title": "Cassandra - Read Path",
+    "description": "You can use this dashboard to rapidly troubleshoot any read-related issues that you identified from the [Cassandra overview](https://app.datadoghq.com/dash/integration/23/cassandra---overview) dashboard. Aggregated metric graphs enable you to isolate issues to a particular table, host, or combination thereof. Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "environment",
+            "name": "environment"
+        },
+        {
+            "default": "*",
+            "prefix": "datacenter",
+            "name": "datacenter"
+        },
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        },
+        {
+            "default": "*",
+            "prefix": "keyspace",
+            "name": "keyspace"
+        },
+        {
+            "default": "*",
+            "prefix": "table",
+            "name": "table"
+        },
+        {
+            "default": "*",
+            "prefix": "columnfamily",
+            "name": "columnfamily"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.pending_tasks{$environment,$datacenter,$host,threadpools:readstage} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending reads per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:read} by{host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:range_slice} by{host,datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host,droppedmessage:paged_range} by{host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Dropped reads per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:jmx.gc.minor_collection_time{$environment,$datacenter,$host} by {datacenter,host} + avg:jmx.gc.major_collection_count{$environment,$datacenter,$host} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 150",
+                        "label": "15% of the time spent in Garbage Collection (STW GC)"
+                    }
+                ],
+                "title": "Stop the world GC average per datacenter (Minor + Major GC)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.read_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read count per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.read_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read count per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.read_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read count per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p75 & p95) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p75 & p95) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p75 & p95) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p95 & p99) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p95 & p99) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.read_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.read_latency.99th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read Latency (p95 & p99) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.range_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request count per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.range_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request count per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.range_latency.one_minute_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request count per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.range_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.range_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request latency (p75 & p95) per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.range_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.range_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request latency (p75 & p95) per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.range_latency.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.range_latency.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Range request latency (p75 & p95) per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Tombstones per read per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Tombstones per read per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.tombstone_scanned_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Tombstones per read per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Number of SSTable hit per read per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Number of SSTable hit per read per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.75th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.ss_tables_per_read_histogram.95th_percentile{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "style": {
+                            "line_type": "dashed"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Number of SSTable hit per read per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.key_cache_hit_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Key cache hit rate per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.key_cache_hit_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Key cache hit rate per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.key_cache_hit_rate{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Key cache hit rate per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.row_cache_hit_out_of_range.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_hit.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_miss.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Row cache stats per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.row_cache_hit_out_of_range.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_hit.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_miss.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Row cache stats per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.row_cache_hit_out_of_range.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_hit.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.row_cache_miss.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Row cache stats per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.bloom_filter_false_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Bloom Filters (BF) stats per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.bloom_filter_false_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Bloom Filters (BF) stats per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.bloom_filter_false_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Bloom Filters (BF) stats per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.r_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk read count (io.r/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.rkb_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk read throughput (io.rkb/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:system.io.r_await{$environment,$datacenter,$host} by {host,datacenter,device}, 10, 'mean', 'desc')",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk read latency (r_await) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.rrqm_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk read queued (io.rrqm/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.util{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk utilization (io.util%) per host and device"
+            }
+        }
+    ]
+}

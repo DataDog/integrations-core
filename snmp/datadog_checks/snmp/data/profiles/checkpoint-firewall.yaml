@@ -1,9 +1,12 @@
 extends:
   - _base.yaml
-  - _generic-router-if.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
-  - _generic-router-ip.yaml
+  - _generic-if.yaml
+  - _generic-tcp.yaml
+  - _generic-udp.yaml
+  - _generic-ip.yaml
+
+device:
+  vendor: "checkpoint"
 
 sysobjectid: 1.3.6.1.4.1.2620.1.*
 
@@ -29,33 +32,33 @@ metrics:
       name: multiProcTable
   - MIB: CHECKPOINT-MIB
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.2.7
+      OID: 1.3.6.1.4.1.2620.1.6.7.2.7.0
       name: procNum
     # Memory
   - MIB: CHECKPOINT-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.4.3
+      OID: 1.3.6.1.4.1.2620.1.6.7.4.3.0
       name: memTotalReal64
   - MIB: CHECKPOINT-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.4.4
+      OID: 1.3.6.1.4.1.2620.1.6.7.4.4.0
       name: memActiveReal64
   - MIB: CHECKPOINT-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.4.5
+      OID: 1.3.6.1.4.1.2620.1.6.7.4.5.0
       name: memFreeReal64
   - MIB: CHECKPOINT-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.4.1
+      OID: 1.3.6.1.4.1.2620.1.6.7.4.1.0
       name: memTotalVirtual64
   - MIB: CHECKPOINT-MIB
     forced_type: gauge
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.6.7.4.2
+      OID: 1.3.6.1.4.1.2620.1.6.7.4.2.0
       name: memActiveVirtual64
     # Disk
   - MIB: CHECKPOINT-MIB
@@ -126,23 +129,23 @@ metrics:
   - MIB: CHECKPOINT-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.1.4
+      OID: 1.3.6.1.4.1.2620.1.1.4.0
       name: fwAccepted
   - MIB: CHECKPOINT-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.1.6
+      OID: 1.3.6.1.4.1.2620.1.1.6.0
       name: fwDropped
   - MIB: CHECKPOINT-MIB
     forced_type: monotonic_count
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.1.5
+      OID: 1.3.6.1.4.1.2620.1.1.5.0
       name: fwRejected
   - MIB: CHECKPOINT-MIB
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.1.25.3
+      OID: 1.3.6.1.4.1.2620.1.1.25.3.0
       name: fwNumConn
   - MIB: CHECKPOINT-MIB
     symbol:
-      OID: 1.3.6.1.4.1.2620.1.1.25.4
+      OID: 1.3.6.1.4.1.2620.1.1.25.4.0
       name: fwPeakNumConn

@@ -4,6 +4,6 @@
 
 from .base_check import KubeLeaderElectionBaseCheck
 from .mixins import KubeLeaderElectionMixin
-from .record import ElectionRecord
+from .record import ElectionRecordAnnotation, ElectionRecordLease
 
-__all__ = ['KubeLeaderElectionMixin', 'ElectionRecord', 'KubeLeaderElectionBaseCheck']
+__all__ = ['KubeLeaderElectionMixin', 'ElectionRecordAnnotation', 'ElectionRecordLease', 'KubeLeaderElectionBaseCheck']

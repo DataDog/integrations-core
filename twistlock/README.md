@@ -2,25 +2,31 @@
 
 ## Overview
 
-[Twistlock][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
+[Prisma Cloud Compute Edition][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
 
 ## Setup
 
 ### Installation
 
-The Twistlock check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
+The Prisma Cloud Compute Edition check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
 1. Edit the `twistlock.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your twistlock performance data. See the [sample twistlock.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -115,6 +121,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 4. [Restart the Agent][4].
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `twistlock` under the Checks section.
@@ -127,17 +136,17 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
-Twistlock sends an event when a new CVE is found.
+Prisma Cloud Compute Edition sends an event when a new CVE is found.
 
 ### Service Checks
 
-Twistlock sends service checks when a scan fails.
+Prisma Cloud Compute Edition sends service checks when a scan fails.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
 
-[1]: https://www.twistlock.com
+[1]: https://www.paloaltonetworks.com/prisma/cloud
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

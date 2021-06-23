@@ -1,11 +1,12 @@
 import re
-from typing import List
+from typing import Any, Dict, List
 
 from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.types import InitConfigType
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
@@ -16,6 +17,7 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL,
     DEFAULT_TAGS_COLLECTOR_SIZE,
     DEFAULT_THREAD_COUNT,
+    DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL_RESOURCES,
@@ -27,8 +29,8 @@ from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, Met
 
 
 class VSphereConfig(object):
-    def __init__(self, instance, log):
-        # type: (InstanceConfig, CheckLoggingAdapter) -> None
+    def __init__(self, instance, init_config, log):
+        # type: (InstanceConfig, InitConfigType, CheckLoggingAdapter) -> None
         self.log = log
 
         # Connection parameters
@@ -38,6 +40,16 @@ class VSphereConfig(object):
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
         self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
+
+        self.rest_api_options = {
+            'username': self.username,
+            'password': self.password,
+            'tls_ca_cert': self.ssl_capath,
+            'tls_verify': self.ssl_verify,
+            'tls_ignore_warning': self.tls_ignore_warning,
+        }
+        self.rest_api_options.update(instance.get('rest_api_options', {}))
+        self.shared_rest_api_options = init_config.get('rest_api_options', {})  # type: Dict[str, Any]
 
         # vSphere options
         self.collection_level = instance.get("collection_level", 1)
@@ -55,6 +67,8 @@ class VSphereConfig(object):
         self.use_collect_events_fallback = instance.get("use_collect_events_fallback", False)
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
+        self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
+        self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
@@ -83,7 +97,7 @@ class VSphereConfig(object):
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             instance.get("collect_per_instance_filters", {})
         )
-
+        self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.validate_config()
 
     def is_historical(self):
@@ -134,6 +148,11 @@ class VSphereConfig(object):
                 raise ConfigurationError(
                     'Your configuration is incorrectly attempting to filter resources '
                     'by the `tag` property but `collect_tags` is disabled.'
+                )
+            if resource_filter['property'] == 'attribute' and not self.should_collect_attributes:
+                raise ConfigurationError(
+                    'Your configuration is incorrectly attempting to filter resources '
+                    'by the `attribute` property but `collect_attributes` is disabled.'
                 )
 
             # Check required fields and their types

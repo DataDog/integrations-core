@@ -11,9 +11,17 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 ### Installation
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
+To configure this check for an Agent running on a host:
+
 The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -35,6 +43,9 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
    See the [sample systemd.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

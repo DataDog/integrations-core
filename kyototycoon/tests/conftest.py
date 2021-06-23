@@ -19,7 +19,9 @@ def dd_environment():
     """
 
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml'), endpoints='{}/rpc/report'.format(URL)
+        compose_file=os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml'),
+        endpoints='{}/rpc/report'.format(URL),
+        mount_logs=True,
     ):
 
         # Generate a test database

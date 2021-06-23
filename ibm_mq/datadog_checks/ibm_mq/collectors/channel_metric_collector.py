@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, to_native_string
+from datadog_checks.base import AgentCheck, to_string
 
 from .. import metrics
 
@@ -47,17 +47,20 @@ class ChannelMetricCollector(object):
     def get_pcf_channel_metrics(self, queue_manager):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
-            pcf = pymqi.PCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
-            self.log.warning("Error getting CHANNEL stats %s", e)
+            # Don't warn if no messages, see:
+            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                self.log.warning("Error getting CHANNEL stats %s", e)
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(metrics.METRIC_PREFIX)
             self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
-                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
@@ -84,18 +87,18 @@ class ChannelMetricCollector(object):
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
-            pcf = pymqi.PCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
         except pymqi.MQMIError as e:
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
             if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
                 self.log.debug("Channel status not found for channel %s: %s", search_channel_name, e)
-            else:
+            elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
             for channel_info in response:
-                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]

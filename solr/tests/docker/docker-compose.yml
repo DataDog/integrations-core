@@ -14,3 +14,5 @@ services:
       # `java.rmi.server.hostname=localhost` is needed to local connect to JMX endpoint
       SOLR_OPTS: >-
         -Djava.rmi.server.hostname=localhost
+    volumes:
+      - ${DD_LOG_1}:/var/solr/logs/solr.log

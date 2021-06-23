@@ -76,11 +76,23 @@ class ClickhouseCheck(AgentCheck):
         if not self._server:
             raise ConfigurationError('the `server` setting is required')
 
+    def ping_clickhouse(self):
+        return self._client.connection.ping()
+
     def connect(self):
         if self._client is not None:
-            # Already connected.
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-            return
+            self.log.debug('Clickhouse client already exists. Pinging Clickhouse Server.')
+            try:
+                if self.ping_clickhouse():
+                    self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                    return
+                else:
+                    self.log.debug('Clickhouse connection ping failed. Attempting to reconnect')
+                    self._client = None
+            except Exception as e:
+                self.log.debug('Unexpected ping response from Clickhouse', exc_info=e)
+                self.log.debug('Attempting to reconnect')
+                self._client = None
 
         try:
             client = clickhouse_driver.Client(
@@ -94,8 +106,7 @@ class ClickhouseCheck(AgentCheck):
                 sync_request_timeout=self._connect_timeout,
                 compression=self._compression,
                 secure=self._tls_verify,
-                # Don't pollute the Agent logs
-                settings={'calculate_text_stack_trace': False},
+                settings={},
                 # Make every client unique for server logs
                 client_name='datadog-{}'.format(self.check_id),
             )

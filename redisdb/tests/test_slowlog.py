@@ -14,7 +14,7 @@ from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("redis_auth")]
 
 
 def test_slowlog(aggregator, redis_instance):

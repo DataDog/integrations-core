@@ -1,0 +1,50 @@
+- name: tls_verify
+  value:
+    example: true
+    type: boolean
+  description: |
+    Instructs the check to validate the TLS certificate(s) of the service(s).
+- name: tls_ca_cert
+  value:
+    example: <CA_CERT_PATH>
+    type: string
+  description: |
+    The path to a file of concatenated CA certificates in PEM format or a directory
+    containing several CA certificates in PEM format. If a directory, the directory
+    must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+
+    Setting this implicitly sets `tls_verify` to true.
+- name: tls_cert
+  value:
+    example: <CERT_PATH>
+    type: string
+  description: |
+    The path to a single file in PEM format containing a certificate as well as any
+    number of CA certificates needed to establish the certificate's authenticity for
+    use when connecting to services. It may also contain an unencrypted private key to use.
+
+    Setting this implicitly sets `tls_verify` to true.
+- name: tls_private_key
+  value:
+    example: <PRIVATE_KEY_PATH>
+    type: string
+  description: |
+    The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    required if `tls_cert` is set and it does not already contain a private key.
+
+    Setting this implicitly sets `tls_verify` to true.
+- name: tls_private_key_password
+  value:
+    example: <PRIVATE_KEY_PASSWORD>
+    type: string
+  description: |
+    Optional password to decrypt tls_private_key.
+
+    Setting this implicitly sets `tls_verify` to true.
+- name: tls_validate_hostname
+  value:
+    example: true
+    type: boolean
+  description: |
+    Verifies that the server's cert hostname matches the one requested.

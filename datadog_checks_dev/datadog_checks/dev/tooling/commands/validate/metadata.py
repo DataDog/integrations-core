@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from collections import defaultdict
 
 import click
 
-from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -18,6 +20,29 @@ ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
+
+EXCLUDE_INTEGRATIONS = [
+    'disk',
+    'go-expvar',  # This has a special case externally
+    'go-metro',
+    'hdfs_datanode',
+    'hdfs_namenode',
+    'http',
+    'kafka_consumer',
+    'kubelet',
+    'kubernetes',
+    'kubernetes_api_server_metrics',
+    'kubernetes_state',
+    'mesos_master',
+    'mesos_slave',
+    'network',
+    'ntp',
+    'process',
+    'riak_cs',
+    'system_core',
+    'system_swap',
+    'tcp',
+]
 
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
@@ -151,15 +176,34 @@ VALID_UNIT_NAMES = {
     'exacore',
     'build',
     'prediction',
+    'heap',
+    'volume',
     'watt',
     'kilowatt',
     'megawatt',
     'gigawatt',
     'terawatt',
-    'heap',
-    'volume',
+    'view',
+    'microdollar',
+    'euro',
+    'pound',
+    'penny',
+    'yen',
+    'milliwatt',
+    'microwatt',
+    'nanowatt',
+    'ampere',
+    'milliampere',
+    'volt',
+    'millivolt',
+    'deciwatt',
+    'decidegree celsius',
+    'span',
+    'exception',
+    'run',
 }
 
+ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
@@ -201,25 +245,24 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
+@click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def metadata(check, check_duplicates):
+def metadata(check, check_duplicates, show_warnings):
     """Validates metadata.csv files
 
-    If `check` is specified, only the check will be validated,
-    otherwise all metadata files in the repo will be.
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
     """
-    metric_sources = get_metric_sources()
+    checks = process_checks_option(check, source='metrics', validate=True)
+    echo_info(f"Validating metadata for {len(checks)} checks ...")
 
-    if check:
-        if check not in metric_sources:
-            abort(f'Metadata file `{get_metadata_file(check)}` does not exist.')
-        metric_sources = [check]
-    else:
-        metric_sources = sorted(metric_sources)
+    # If a check is specified, abort if it doesn't have a metadata file
+    if check not in ('all', 'changed') and not checks:
+        abort(f'Metadata file for {check} not found.')
 
     errors = False
 
-    for current_check in metric_sources:
+    for current_check in checks:
         if current_check.startswith('datadog_checks_'):
             continue
 
@@ -230,7 +273,10 @@ def metadata(check, check_duplicates):
         except KeyError:
             metric_prefix = None
 
+        display_name = manifest['display_name']
+
         metadata_file = get_metadata_file(current_check)
+        echo_debug(f"Checking {metadata_file}")
 
         # To make logging less verbose, common errors are counted for current check
         metric_prefix_count = defaultdict(int)
@@ -241,6 +287,9 @@ def metadata(check, check_duplicates):
         duplicate_description_set = set()
 
         metric_prefix_error_shown = False
+        if os.stat(metadata_file).st_size == 0:
+            errors = True
+            echo_failure(f"{current_check} metadata file is empty. This file needs the header row at minimum")
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
@@ -282,9 +331,10 @@ def metadata(check, check_duplicates):
 
             # metric_name header
             if metric_prefix:
-                if not row['metric_name'].startswith(metric_prefix):
-                    prefix = row['metric_name'].split('.')[0]
-                    metric_prefix_count[prefix] += 1
+                prefix = row['metric_name'].split('.')[0]
+                if prefix not in ALLOWED_PREFIXES:
+                    if not row['metric_name'].startswith(metric_prefix):
+                        metric_prefix_count[prefix] += 1
             else:
                 errors = True
                 if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
@@ -306,6 +356,15 @@ def metadata(check, check_duplicates):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
+            # integration header
+            integration = row['integration']
+            normalized_integration = normalize_display_name(display_name)
+            if integration != normalized_integration and normalized_integration not in EXCLUDE_INTEGRATIONS:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} integration: `{row['integration']}` should be: {normalized_integration}"
+                )
+
             # orientation header
             if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
                 errors = True
@@ -325,7 +384,7 @@ def metadata(check, check_duplicates):
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
 
             # check if there is unicode
-            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+            elif any(not content.isascii() for _, content in row.items()):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 
@@ -344,16 +403,15 @@ def metadata(check, check_duplicates):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
-        for header, count in empty_warning_count.items():
-            echo_warning(f'{current_check}: {header} is empty in {count} rows.')
-
         for prefix, count in metric_prefix_count.items():
-            # Don't spam this warning when we're validating everything
-            if check:
-                echo_warning(
-                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                    "defined in the manifest."
-                )
+            echo_failure(
+                f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                "defined in the manifest."
+            )
+
+        if show_warnings:
+            for header, count in empty_warning_count.items():
+                echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 
     if errors:
         abort()

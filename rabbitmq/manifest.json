@@ -27,12 +27,26 @@
   "type": "check",
   "integration_id": "rabbitmq",
   "assets": {
-    "monitors": {},
-    "dashboards": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "monitors": {
+      "disk_usage": "assets/monitors/disk_usage.json",
+      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
+    },
+    "dashboards": {
+      "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
+      "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
+    },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
-      "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json"
+      "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json",
+      "rabbitmq_processes": "assets/saved_views/rabbitmq_processes.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "rabbitmq"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

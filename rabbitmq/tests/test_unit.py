@@ -124,9 +124,9 @@ def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggre
         (
             "legacy auth config",
             {'rabbitmq_user': 'legacy_foo', 'rabbitmq_pass': 'legacy_bar'},
-            {'auth': ('legacy_foo', 'legacy_bar')},
+            {'auth': (b'legacy_foo', b'legacy_bar')},
         ),
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': (b'new_foo', b'new_bar')}),
         ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
         ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
     ],

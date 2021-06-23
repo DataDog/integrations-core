@@ -34,6 +34,7 @@ This check monitors [{integration_name}][1].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][1].
+Need help? Contact [Datadog support][2].
 
-[1]: https://docs.datadoghq.com/help/
+[1]: **LINK_TO_INTEGRATION_SITE**
+[2]: https://docs.datadoghq.com/help/
