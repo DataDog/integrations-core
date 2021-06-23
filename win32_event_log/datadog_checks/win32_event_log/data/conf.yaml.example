@@ -43,7 +43,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independent of the other.
 ## Everything under this section is sent as events.
 #
 instances:
@@ -219,7 +219,7 @@ instances:
     #
     # payload_size: 10
 
-    ## @param bookmark_frequency - integer - optional - default: <PAYLOAD_SIZE>
+    ## @param bookmark_frequency - integer - optional
     ## How often to save the last seen event as a factor of the number of seen events.
     ## By default, the value of `payload_size` will be used.
     ##
@@ -227,7 +227,7 @@ instances:
     #
     # bookmark_frequency: <BOOKMARK_FREQUENCY>
 
-    ## @param legacy_mode - boolean - optional - default: true
+    ## @param legacy_mode - boolean - optional - default: false
     ## Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
     ##
     ##    /\ WARNING /\
@@ -237,7 +237,7 @@ instances:
     #
     legacy_mode: false
 
-    ## @param host - string - optional - default: localhost
+    ## @param host - string - optional
     ## By default, the local machine's event logs are captured. To capture a remote
     ## machine's event logs, specify the machine name (DCOM has to be enabled on
     ## the remote machine).
@@ -263,7 +263,7 @@ instances:
     #
     # source_name: []
 
-    ## @param type - list of strings - optional - default: information
+    ## @param type - list of strings - optional
     ## The `type` filter instructs the check to only capture events
     ## that have one of the specified Types.
     ## Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
@@ -296,7 +296,7 @@ instances:
     #
     # message_filters: []
 
-    ## @param event_format - list of strings - optional - default: Message
+    ## @param event_format - list of strings - optional
     ## The `event_format` parameter instructs the check to generate
     ## Datadog's event bodies with the specified list of event properties.
     ## If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
