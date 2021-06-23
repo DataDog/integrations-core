@@ -2,9 +2,23 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import math
 import time
 
-from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, ConstantRateLimiter
+
+
+def test_constant_rate_limiter():
+    rate_limit = 8
+    test_duration_s = 0.5
+    ratelimiter = ConstantRateLimiter(rate_limit)
+    start = time.time()
+    sleep_count = 0
+    while time.time() - start < test_duration_s:
+        ratelimiter.sleep()
+        sleep_count += 1
+    max_expected_count = rate_limit * test_duration_s
+    assert max_expected_count - 1 <= sleep_count <= max_expected_count + 1
 
 
 def test_ratelimiting_ttl_cache():
