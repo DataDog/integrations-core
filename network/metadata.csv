@@ -80,7 +80,7 @@ system.net.tcp4.estab,gauge,,connection,,The number of open TCP IPv4 connections
 system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 established connections. ,0,system,tcp4 established
 system.net.tcp4.fin_wait_1,gauge,,connection,,The number of TCP IPv4 connections waiting for a connection termination request or an ack of a connection termination request sent previously.,0,system,tcp4 fin_wait_1
 system.net.tcp4.fin_wait_2,gauge,,connection,,The number of TCP IPv4 connections waiting for a connection termination request.,0,system,tcp4 fin_wait_2
-system.net.tcp4.listen,gauge,,connection,second,The number of TCP IPv4 listening connections.,0,system,tcp4 listen
+system.net.tcp4.listen,gauge,,connection,,The number of TCP IPv4 listening connections.,0,system,tcp4 listen
 system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening
 system.net.tcp4.opening,gauge,,connection,second,The number of TCP IPv4 opening connections. ,0,system,tcp4 opening
 system.net.tcp4.syn_recv,gauge,,connection,,The number of TCP IPv4 connections waiting for confirming connection request.,0,system,tcp4 syn_recv
@@ -94,7 +94,7 @@ system.net.tcp6.estab,gauge,,connection,,The number of open TCP IPv6 connections
 system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 established connections. ,0,system,tcp6 established
 system.net.tcp6.fin_wait_1,gauge,,connection,,The number of TCP IPv6 connections waiting for a connection termination request or an ack of a connection termination request sent previously.,0,system,tcp6 fin_wait_1
 system.net.tcp6.fin_wait_2,gauge,,connection,,The number of TCP IPv6 connections waiting for a connection termination request.,0,system,tcp6 fin_wait_2
-system.net.tcp6.listen,gauge,,connection,second,The number of TCP IPv6 listening connections.,0,system,tcp6 listen
+system.net.tcp6.listen,gauge,,connection,,The number of TCP IPv6 listening connections.,0,system,tcp6 listen
 system.net.tcp6.listening,gauge,,connection,second,The number of TCP IPv6 listening connections. ,0,system,tcp6 listening
 system.net.tcp6.opening,gauge,,connection,second,The number of TCP IPv6 opening connections. ,0,system,tcp6 opening
 system.net.tcp6.syn_recv,gauge,,connection,,The number of TCP IPv6 connections waiting for confirming connection request.,0,system,tcp6 syn_recv
