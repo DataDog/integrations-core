@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import PY2
-
 from copy import deepcopy
+
 import requests
+from six import PY2
 
 from ...errors import CheckException
 from .. import AgentCheck
