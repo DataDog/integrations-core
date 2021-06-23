@@ -111,15 +111,12 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
                 for tag in common_tags:
                     aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
 
-        aggregator.assert_all_metrics_covered()
-
         # Some of the metrics documented in the metadata.csv were sent through DogStatsD as `timer` as well.
         # We end up with some of the prometheus metrics having a different in-app type.
         # Example with `consul.raft.commitTime.count`:
         #  * It is a rate when submitting metrics with DogStatsD
         #  * It is a rate when submitting metrics with OpenMetricsBaseCheck
-        # TODO: solve conflict
-        # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     else:
         caplog.at_level(logging.WARNING)

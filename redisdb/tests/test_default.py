@@ -104,7 +104,7 @@ def test_service_check(aggregator, redis_auth, redis_instance):
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
-    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379']
 
 
 def test_disabled_config_get(aggregator, redis_auth, redis_instance):
@@ -115,7 +115,7 @@ def test_disabled_config_get(aggregator, redis_auth, redis_instance):
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
-    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379']
 
 
 @requires_static_version

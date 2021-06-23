@@ -13,7 +13,7 @@ from .mocks import MockTime, nxdomain_query_mock, success_query_mock
 RESULTS_TIMEOUT = 10
 
 
-@mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
+@mock.patch('datadog_checks.dns_check.dns_check.get_precise_time', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
 def test_success(mocked_query, mocked_time, aggregator):
     integration = DNSCheck('dns_check', {}, common.CONFIG_SUCCESS['instances'])
@@ -65,7 +65,7 @@ def test_success(mocked_query, mocked_time, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
+@mock.patch('datadog_checks.dns_check.dns_check.get_precise_time', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=nxdomain_query_mock)
 def test_success_nxdomain(mocked_query, mocked_time, aggregator):
     integration = DNSCheck('dns_check', {}, [common.CONFIG_SUCCESS_NXDOMAIN])
@@ -79,7 +79,7 @@ def test_success_nxdomain(mocked_query, mocked_time, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
+@mock.patch('datadog_checks.dns_check.dns_check.get_precise_time', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=Timeout())
 def test_default_timeout(mocked_query, mocked_time, aggregator):
     integration = DNSCheck(
@@ -100,7 +100,7 @@ def test_default_timeout(mocked_query, mocked_time, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
+@mock.patch('datadog_checks.dns_check.dns_check.get_precise_time', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=Timeout())
 def test_instance_timeout(mocked_query, mocked_time, aggregator):
     integration = DNSCheck('dns_check', {}, [common.CONFIG_INSTANCE_TIMEOUT])

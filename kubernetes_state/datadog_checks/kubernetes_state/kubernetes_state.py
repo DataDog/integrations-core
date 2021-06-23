@@ -477,6 +477,17 @@ class KubernetesState(OpenMetricsBaseCheck):
         if bool(sample[self.SAMPLE_VALUE]) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
 
+        metric_name = scraper_config['namespace'] + '.node.by_condition'
+        metric_tags = []
+        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            metric_tags += self._build_tags(label_name, label_value, scraper_config)
+        self.gauge(
+            metric_name,
+            sample[self.SAMPLE_VALUE],
+            tags=tags + metric_tags,
+            hostname=self.get_hostname_for_sample(sample, scraper_config),
+        )
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, sample[self.SAMPLE_LABELS])
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']

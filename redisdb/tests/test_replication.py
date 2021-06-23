@@ -32,7 +32,7 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_environm
     redis_check.check(replica_instance)
     metrics = aggregator.metrics(metric_name)
     assert len(metrics) == 1
-    assert metrics[0].value > 0
+    assert metrics[0].value != 0
 
 
 def test_redis_replication_service_check(aggregator, replica_instance, dd_environment):

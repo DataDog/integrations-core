@@ -42,31 +42,34 @@ Unless your masters' API uses a self-signed certificate. In that case, set `disa
 
 #### Log collection
 
-Datadog Agent >6.0 collects logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-Add these extra variables to the Datadog Agent run command to start collecting logs:
+    ```yaml
+    logs_enabled: true
+    ```
 
-- `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
-- `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
-- `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
+2. Add this configuration block to your `mesos_master.d/conf.yaml` file to start collecting your Mesos logs:
 
-This gives the following command:
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/mesos/*
+        source: mesos
+    ```
 
-```shell
-docker run -d --name datadog-agent \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
-  -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
-  -e MESOS_MASTER=true \
-  -e MARATHON_URL=http://leader.mesos:8080 \
-  -e DD_LOGS_ENABLED=true \
-  -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
-  datadog/agent:latest
-```
+    Change the `path` parameter value based on your environment, or use the default docker stdout:
 
-Use the [autodiscovery feature][4] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
+    ```yaml
+    logs:
+      - type: docker
+        source: mesos
+    ```
+
+    See the [sample mesos_master.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][8].
+
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
@@ -102,3 +105,5 @@ Need help? Contact [Datadog support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/deploy-datadog-dcos
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/

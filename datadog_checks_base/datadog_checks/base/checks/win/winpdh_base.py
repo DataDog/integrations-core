@@ -168,18 +168,25 @@ class PDHBaseCheck(AgentCheck):
 
         return nr
 
-    def check(self, instance):
-        self.log.debug("PDHBaseCheck: check()")
-
+    def do_refresh_counters(self):
         if self.refresh_counters:
+            self.log.debug('Refreshing counters')
             for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(counter_data=([counter], values))
 
+    def get_counter_values(self, counterobj):
+        if self.refresh_counters:
+            counterobj.collect_counters()
+        return counterobj.get_all_values()
+
+    def check(self, instance):
+        # Note: Any changes here may be need to be recreated in the IIS check.
+        self.log.debug("PDHBaseCheck: check()")
+        self.do_refresh_counters()
+
         for inst_name, dd_name, metric_func, counterobj in self._metrics[self.instance_hash]:
             try:
-                if self.refresh_counters:
-                    counterobj.collect_counters()
-                vals = counterobj.get_all_values()
+                vals = self.get_counter_values(counterobj)
                 for instance_name, val in iteritems(vals):
                     tags = list(self._tags.get(self.instance_hash, []))  # type: List[str]
 

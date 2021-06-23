@@ -36,10 +36,13 @@ mysql.performance.qcache_hits,gauge,,hit,second,The rate of query cache hits.,0,
 mysql.performance.questions,gauge,,query,second,The rate of statements executed by the server.,0,mysql,questions
 mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,mysql,slow queries
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited
+mysql.performance.table_locks_waited.rate,gauge,,,,"The rate of times that a request for a table lock could not be granted immediately and a wait was needed.",0,mysql,table locks waited rate
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running
+mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user
 mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds between the master and the slave.,-1,mysql,replication lag
+mysql.replication.seconds_behind_source,gauge,,second,,The lag in seconds between the source and the replica.,-1,mysql,replication lag
 mysql.replication.slave_running,gauge,,,,Deprecated. Use service check mysql.replication.replica_running instead. A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running
 mysql.replication.slaves_connected,gauge,,,,Deprecated. Use mysql.replication.replicas_connected instead. Number of slaves connected to a replication master.,0,mysql,slaves connected
 mysql.replication.replicas_connected,gauge,,,,Number of replicas connected to a replication source.,0,mysql,replicas connected
@@ -60,6 +63,16 @@ mysql.myisam.key_buffer_size,gauge,,byte,,"Size of the buffer used for index blo
 mysql.performance.qcache_size,gauge,,byte,,"The amount of memory allocated for caching query results.",0,mysql,mysql performance qcache_size
 mysql.performance.table_open_cache,gauge,,,,"The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.",0,mysql,mysql performance table_open_cache
 mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size
+mysql.innodb.active_transactions,gauge,,operation,,"The number of active transactions on InnoDB tables.",0,mysql,mysql innodb active_transactions
+mysql.innodb.ibuf_merged_delete_marks,gauge,,operation,,"Insert buffer and adaptative hash index merged delete marks",0,mysql,mysql innodb merged delete marks
+mysql.innodb.ibuf_merged_deletes,gauge,,operation,,"Insert buffer and adaptative hash index merged delete",0,mysql,mysql innodb merged deleted
+mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative hash index merged inserts",0,mysql,mysql innodb merged inserts
+mysql.innodb.ibuf_merged,gauge,,operation,,"Insert buffer and adaptative hash index merged",0,mysql,mysql innodb merged
+mysql.innodb.ibuf_merges,gauge,,operation,,"Insert buffer and adaptative hash index merges",0,mysql,mysql innodb merges
+mysql.innodb.lock_structs,gauge,,operation,,"Lock structs",0,mysql,mysql innodb lock structs
+mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync() operations performed by InnoDB.",0,mysql,mysql innodb os file fsyncs
+mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads
+mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes
 mysql.innodb.row_lock_current_waits,gauge,,,,"The number of row locks currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb row_lock_current_waits
 mysql.innodb.buffer_pool_dirty,gauge,,byte,,"The total current number of bytes held in dirty pages in the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_dirty
 mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests
@@ -94,6 +107,7 @@ mysql.performance.sort_range,gauge,,operation,second,"The number of sorts that w
 mysql.performance.sort_rows,gauge,,operation,second,"The number of sorted rows.",0,mysql,mysql performance sort_rows
 mysql.performance.sort_scan,gauge,,operation,second,"The number of sorts that were done by scanning the table.",0,mysql,mysql performance sort_scan
 mysql.performance.table_locks_immediate,gauge,,,,"The number of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate
+mysql.performance.table_locks_immediate.rate,gauge,,,,"The rate of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate rate
 mysql.performance.threads_cached,gauge,,thread,,"The number of threads in the thread cache.",0,mysql,mysql performance threads_cached
 mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created
 mysql.performance.table_cache_hits,gauge,,hit,second,"The number of hits for open tables cache lookups.",0,mysql,mysql performance table_cache_hits

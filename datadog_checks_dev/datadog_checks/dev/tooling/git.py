@@ -6,8 +6,8 @@ import re
 
 from semver import parse_version_info
 
+from ..fs import chdir
 from ..subprocess import run_command
-from ..utils import chdir
 from .constants import get_root
 
 

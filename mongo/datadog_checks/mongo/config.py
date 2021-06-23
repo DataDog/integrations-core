@@ -37,10 +37,11 @@ class MongoConfig(object):
             self.hosts = instance.get('hosts', [])
             self.username = instance.get('username')
             self.password = instance.get('password')
+            # Deprecated
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
-            self.auth_source = self.additional_options.get('authsource') or self.db_name or 'admin'
+            self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')
@@ -48,6 +49,9 @@ class MongoConfig(object):
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
+
+        if self.scheme != 'mongodb':
+            self.log.info("connection_scheme is deprecated and shouldn't be set to a value other than 'mongodb'")
 
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
@@ -59,6 +63,9 @@ class MongoConfig(object):
         # Authenticate
         self.do_auth = True
         self.use_x509 = self.ssl_params and not self.password
+        if not self.username:
+            self.log.info("Disabling authentication because a username was not provided.")
+            self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))

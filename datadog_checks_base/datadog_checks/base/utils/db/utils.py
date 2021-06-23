@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
+import decimal
 import logging
 import socket
 import time
 from itertools import chain
+
+from cachetools import TTLCache
 
 try:
     import datadog_agent
@@ -85,6 +89,23 @@ class ConstantRateLimiter:
         self.last_event = time.time()
 
 
+class RateLimitingTTLCache(TTLCache):
+    """
+    TTLCache wrapper used for rate limiting by key
+    """
+
+    def acquire(self, key):
+        """
+        :return: True if the key has not yet reached its rate limit
+        """
+        if len(self) >= self.maxsize:
+            return False
+        if key in self:
+            return False
+        self[key] = True
+        return True
+
+
 def resolve_db_host(db_host):
     agent_hostname = datadog_agent.get_hostname()
     if not db_host or db_host in {'localhost', '127.0.0.1'}:
@@ -115,3 +136,11 @@ def resolve_db_host(db_host):
         )
 
     return db_host
+
+
+def default_json_event_encoding(o):
+    if isinstance(o, decimal.Decimal):
+        return float(o)
+    if isinstance(o, (datetime.date, datetime.datetime)):
+        return o.isoformat()
+    raise TypeError

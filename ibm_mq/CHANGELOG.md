@@ -1,5 +1,25 @@
 # CHANGELOG - IBM MQ
 
+## 3.13.2 / 2021-06-09
+
+* [Fixed] Properly close internal reply queues. See [#9488](https://github.com/DataDog/integrations-core/pull/9488).
+
+## 3.13.1 / 2021-06-01
+
+* [Fixed] Don't emit any warnings if NO_MSG_AVAILABLE is received. See [#9452](https://github.com/DataDog/integrations-core/pull/9452).
+
+## 3.13.0 / 2021-05-25
+
+* [Added] Add runtime configuration validation. See [#8935](https://github.com/DataDog/integrations-core/pull/8935).
+* [Fixed] Try SSL connection when host not found. See [#9404](https://github.com/DataDog/integrations-core/pull/9404).
+* [Fixed] Don't emit warnings if there are no messages. See [#9400](https://github.com/DataDog/integrations-core/pull/9400).
+
+## 3.12.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Add flag to convert endianness. See [#8601](https://github.com/DataDog/integrations-core/pull/8601).
+* [Fixed] Use SSL authentication if SSL params are provided. See [#8531](https://github.com/DataDog/integrations-core/pull/8531).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 3.11.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Better explain ssl_key_repository_location. See [#8417](https://github.com/DataDog/integrations-core/pull/8417).

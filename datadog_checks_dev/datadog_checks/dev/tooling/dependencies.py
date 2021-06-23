@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from packaging.requirements import InvalidRequirement, Requirement
 
-from ..utils import stream_file_lines
+from ..fs import stream_file_lines
 from .constants import get_agent_requirements, get_root
 from .utils import get_valid_checks
 

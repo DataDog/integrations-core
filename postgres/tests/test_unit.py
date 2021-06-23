@@ -9,9 +9,7 @@ from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
-from datadog_checks.postgres import statements, util
-
-from .common import SCHEMA_NAME
+from datadog_checks.postgres import PostgreSql, util
 
 pytestmark = pytest.mark.unit
 
@@ -67,17 +65,20 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
     assert res['metrics'] == expected
 
 
-def test_get_instance_with_default(check):
+@pytest.mark.parametrize("collect_default_database", [True, False])
+def test_get_instance_with_default(pg_instance, collect_default_database):
     """
-    Test the contents of the query string with different `collect_default_db` values
+    Test the contents of the query string with different `collect_default_database` values
     """
-    version = VersionInfo(9, 2, 0)
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" in res['query']
-
-    check._config.collect_default_db = True
-    res = check.metrics_cache.get_instance_metrics(version)
-    assert "  AND psd.datname not ilike 'postgres'" not in res['query']
+    pg_instance['collect_default_database'] = collect_default_database
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._version = VersionInfo(9, 2, 0)
+    res = check.metrics_cache.get_instance_metrics(check._version)
+    dbfilter = " AND psd.datname not ilike 'postgres'"
+    if collect_default_database:
+        assert dbfilter not in res['query']
+    else:
+        assert dbfilter in res['query']
 
 
 def test_malformed_get_custom_queries(check):
@@ -230,24 +231,6 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_relation_filter():
-    relations_config = {'breed': {'relation_name': 'breed', 'schemas': ['public']}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
-
-
-def test_relation_filter_no_schemas():
-    relations_config = {'persons': {'relation_name': 'persons', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname = 'persons' )"
-
-
-def test_relation_filter_regex():
-    relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
-    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
-    assert query_filter == "( relname ~ 'b.*' )"
-
-
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
     pg_instance['password'] = ''
     pg_instance['query_timeout'] = 1000
@@ -260,75 +243,3 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
-
-
-def test_generate_synthetic_rows():
-    rows = [
-        {
-            'calls': 45,
-            'total_time': 1134,
-            'rows': 800,
-            'shared_blks_hit': 15,
-            'shared_blks_read': 5,
-            'shared_blks_dirtied': 10,
-            'shared_blks_written': 10,
-            'local_blks_hit': 10,
-            'local_blks_read': 10,
-            'local_blks_dirtied': 10,
-            'local_blks_written': 10,
-            'temp_blks_read': 10,
-            'temp_blks_written': 10,
-        },
-        {
-            'calls': 0,
-            'total_time': 0,
-            'rows': 0,
-            'shared_blks_hit': 0,
-            'shared_blks_read': 0,
-            'shared_blks_dirtied': 0,
-            'shared_blks_written': 0,
-            'local_blks_hit': 0,
-            'local_blks_read': 0,
-            'local_blks_dirtied': 0,
-            'local_blks_written': 0,
-            'temp_blks_read': 0,
-            'temp_blks_written': 10,
-        },
-    ]
-    result = statements.generate_synthetic_rows(rows)
-    assert result == [
-        {
-            'avg_time': 25.2,
-            'calls': 45,
-            'total_time': 1134,
-            'rows': 800,
-            'shared_blks_ratio': 0.75,
-            'shared_blks_hit': 15,
-            'shared_blks_read': 5,
-            'shared_blks_dirtied': 10,
-            'shared_blks_written': 10,
-            'local_blks_hit': 10,
-            'local_blks_read': 10,
-            'local_blks_dirtied': 10,
-            'local_blks_written': 10,
-            'temp_blks_read': 10,
-            'temp_blks_written': 10,
-        },
-        {
-            'avg_time': 0,
-            'calls': 0,
-            'total_time': 0,
-            'rows': 0,
-            'shared_blks_ratio': 0,
-            'shared_blks_hit': 0,
-            'shared_blks_read': 0,
-            'shared_blks_dirtied': 0,
-            'shared_blks_written': 0,
-            'local_blks_hit': 0,
-            'local_blks_read': 0,
-            'local_blks_dirtied': 0,
-            'local_blks_written': 0,
-            'temp_blks_read': 0,
-            'temp_blks_written': 10,
-        },
-    ]

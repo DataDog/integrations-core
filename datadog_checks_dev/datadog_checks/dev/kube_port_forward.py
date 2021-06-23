@@ -7,9 +7,10 @@ import os
 from contextlib import contextmanager
 
 from .env import environment_run
+from .fs import chdir
 from .ssh_tunnel import KillProcess, run_background_command
 from .structures import LazyFunction, TempDir
-from .utils import chdir, find_free_port, get_ip
+from .utils import find_free_port, get_ip
 
 PID_FILE = 'kubectl.pid'
 

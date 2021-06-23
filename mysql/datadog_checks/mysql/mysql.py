@@ -42,9 +42,12 @@ from .queries import (
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
     SQL_QUERY_SCHEMA_SIZE,
+    SQL_REPLICATION_ROLE_AWS_AURORA,
+    SQL_SERVER_ID_AWS_AURORA,
     SQL_WORKER_THREADS,
     show_replica_status_query,
 )
+from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
 from .version_utils import get_version
 
@@ -70,16 +73,18 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
+        self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._config.tags)
-        self._statement_metrics = MySQLStatementMetrics(self._config)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
+        self._statement_metrics = MySQLStatementMetrics(self, self._config)
+        self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -97,32 +102,41 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        tags = list(self._config.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
                 self._conn = db
+
+                if self._get_is_aurora(db):
+                    tags = tags + self._get_runtime_aurora_tags(db)
 
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db)
-                self._collect_system_metrics(self._config.host, db, self._config.tags)
+                self._collect_metrics(db, tags=tags)
+                self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.deep_database_monitoring:
-                    self._collect_statement_metrics(db, self._config.tags)
+                    dbm_tags = list(set(self.service_check_tags) | set(tags))
+                    self._statement_metrics.collect_per_statement_metrics(db, dbm_tags)
+                    self._statement_samples.run_sampler(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
 
                 # Custom queries
-                self._query_manager.execute()
+                self._query_manager.execute(extra_tags=tags)
 
             except Exception as e:
                 self.log.exception("error!")
                 raise e
             finally:
                 self._conn = None
+
+    def cancel(self):
+        self._statement_samples.cancel()
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -153,6 +167,7 @@ class MySql(AgentCheck):
         connection_args = {
             'ssl': ssl,
             'connect_timeout': self._config.connect_timeout,
+            'autocommit': True,
         }
         if self._config.charset:
             connection_args['charset'] = self._config.charset
@@ -196,7 +211,7 @@ class MySql(AgentCheck):
             if db:
                 db.close()
 
-    def _collect_metrics(self, db):
+    def _collect_metrics(self, db, tags):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
@@ -290,13 +305,13 @@ class MySql(AgentCheck):
             if src in results:
                 results[dst] = results[src]
 
-        self._submit_metrics(metrics, results, self._config.tags)
+        self._submit_metrics(metrics, results, tags)
 
         # Collect custom query metrics
         # Max of 20 queries allowed
         if isinstance(self._config.queries, list):
             for check in self._config.queries[: self._config.max_custom_queries]:
-                total_tags = self._config.tags + check.get('tags', [])
+                total_tags = tags + check.get('tags', [])
                 self._collect_dict(
                     check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
                 )
@@ -316,8 +331,6 @@ class MySql(AgentCheck):
         return REPLICA_VARS
 
     def _check_replication_status(self, results):
-        # get replica running form global status page
-        replica_running_status = AgentCheck.UNKNOWN
         # Replica_IO_Running: Whether the I/O thread for reading the source's binary log is running.
         # You want this to be Yes unless you have not yet started replication or have explicitly stopped it.
         replica_io_running = collect_type('Slave_IO_Running', results, dict)
@@ -334,44 +347,50 @@ class MySql(AgentCheck):
         binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
-        replicas = collect_scalar('Slaves_connected', results) or collect_scalar('Replicas_connected', results)
+        replicas = collect_scalar('Slaves_connected', results)
+        if replicas is None:
+            replicas = collect_scalar('Replicas_connected', results)
 
-        if not (replica_io_running is None and replica_sql_running is None):
-            if not replica_io_running and not replica_sql_running:
-                self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
-                replica_running_status = AgentCheck.CRITICAL
-            elif not replica_io_running or not replica_sql_running:
-                self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
-                replica_running_status = AgentCheck.WARNING
+        # If the host act as a source
+        source_repl_running_status = AgentCheck.UNKNOWN
+        if self._is_source_host(replicas, results):
+            if replicas > 0 and binlog_running:
+                self.log.debug("Host is master, there are replicas and binlog is running")
+                source_repl_running_status = AgentCheck.OK
+            else:
+                source_repl_running_status = AgentCheck.WARNING
 
-        if replica_running_status == AgentCheck.UNKNOWN:
-            if self._is_source_host(replicas, results):  # master
-                if replicas > 0 and binlog_running:
-                    self.log.debug("Host is master, there are replicas and binlog is running")
-                    replica_running_status = AgentCheck.OK
-                else:
+            self._submit_replication_status(source_repl_running_status, ['replication_mode:source'])
+
+        # If the host act as a replica
+        # A host can be both a source and a replica
+        # See https://dev.mysql.com/doc/refman/8.0/en/replication-solutions-performance.html
+        # get replica running form global status page
+        replica_running_status = AgentCheck.UNKNOWN
+        if self._is_replica_host(replicas, results):
+            if not (replica_io_running is None and replica_sql_running is None):
+                if not replica_io_running and not replica_sql_running:
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are not ok")
+                    replica_running_status = AgentCheck.CRITICAL
+                elif not replica_io_running or not replica_sql_running:
+                    self.log.debug("Either Replica_IO_Running or Replica_SQL_Running are not ok")
                     replica_running_status = AgentCheck.WARNING
-            else:  # replica (or standalone)
-                if not (replica_io_running is None and replica_sql_running is None):
-                    if replica_io_running and replica_sql_running:
-                        self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
-                        replica_running_status = AgentCheck.OK
+                else:
+                    self.log.debug("Replica_IO_Running and Replica_SQL_Running are ok")
+                    replica_running_status = AgentCheck.OK
 
+                self._submit_replication_status(replica_running_status, ['replication_mode:replica'])
+
+    def _submit_replication_status(self, status, additional_tags):
         # deprecated in favor of service_check("mysql.replication.slave_running")
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
-            value=1 if replica_running_status == AgentCheck.OK else 0,
-            tags=self._config.tags,
+            value=1 if status == AgentCheck.OK else 0,
+            tags=self._config.tags + additional_tags,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
-        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
-        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, replica_running_status, tags=self.service_check_tags)
-
-    def _collect_statement_metrics(self, db, tags):
-        tags = self.service_check_tags + tags
-        metrics = self._statement_metrics.collect_per_statement_metrics(db)
-        for metric_name, metric_value, metric_tags in metrics:
-            self.count(metric_name, metric_value, tags=list(set(tags + metric_tags)))
+        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
+        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
 
     def _is_source_host(self, replicas, results):
         # type: (float, Dict[str, Any]) -> bool
@@ -381,6 +400,9 @@ class MySql(AgentCheck):
             return True
 
         return False
+
+    def _is_replica_host(self, replicas, results):
+        return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
@@ -443,6 +465,21 @@ class MySql(AgentCheck):
         except Exception:
             self.warning("Error while running %s\n%s", query, traceback.format_exc())
             self.log.exception("Error while running %s", query)
+
+    def _get_runtime_aurora_tags(self, db):
+        runtime_tags = []
+
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
+                replication_role = cursor.fetchone()[0]
+
+                if replication_role in {'writer', 'reader'}:
+                    runtime_tags.append('replication_role:' + replication_role)
+        except Exception:
+            self.log.warning("Error occurred while fetching Aurora runtime tags: %s", traceback.format_exc())
+
+        return runtime_tags
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -510,6 +547,31 @@ class MySql(AgentCheck):
                     self.log.exception("Error while fetching mysql pid from psutil")
 
         return pid
+
+    def _get_is_aurora(self, db):
+        """
+        Tests if the instance is an AWS Aurora database and caches the result.
+        """
+        if self._is_aurora is not None:
+            return self._is_aurora
+
+        try:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(SQL_SERVER_ID_AWS_AURORA)
+                if len(cursor.fetchall()) > 0:
+                    self._is_aurora = True
+                else:
+                    self._is_aurora = False
+
+        except Exception:
+            self.warning(
+                "Unable to determine if server is Aurora. If this is an Aurora database, some "
+                "information may be unavailable: %s",
+                traceback.format_exc(),
+            )
+            return False
+
+        return self._is_aurora
 
     @classmethod
     def _get_stats_from_status(cls, db):
