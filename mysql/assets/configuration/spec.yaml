@@ -26,7 +26,7 @@ files:
               example: localhost
               display_default: null
 
-          - name: user
+          - name: username
             description: |
               Username used to connect to MySQL.
             enabled: true
@@ -35,7 +35,7 @@ files:
               example: datadog
               display_default: null
 
-          - name: pass
+          - name: password
             description: |
               Password associated to the MySQL user.
             enabled: true
