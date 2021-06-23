@@ -515,12 +515,11 @@ class MySQLStatementSamples(object):
 
         collection_errors = []
         if explain_errors:
-            for e in explain_errors:
-                strategy, explain_err_code, explain_err = e
+            for strategy, explain_err_code, explain_err in explain_errors:
                 collection_errors.append(
                     {
                         'strategy': strategy if strategy else None,
-                        'code': explain_err_code.value,
+                        'code': explain_err_code.value if explain_err_code else None,
                         'message': '{}'.format(type(explain_err)) if explain_err else None,
                     }
                 )
@@ -711,9 +710,9 @@ class MySQLStatementSamples(object):
             self._log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
             return None, [(None, DBExplainError.no_plans_possible, None)]
 
-        strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
-        if strategy_cache:
-            _, explain_err_code, _ = strategy_cache[0]  # (strategy, explain_err_code, explain_err)
+        cached_strategy = self._collection_strategy_cache.get(strategy_cache_key)
+        if cached_strategy:
+            _, explain_err_code, _ = cached_strategy[0]  # (strategy, explain_err_code, explain_err)
             if explain_err_code:
                 self._log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
                 return None, None
@@ -744,9 +743,9 @@ class MySQLStatementSamples(object):
 
         # Use a cached strategy for the schema, if any, or try each strategy to collect plans
         strategies = list(self._preferred_explain_strategies)
-        strategy_cache = self._collection_strategy_cache.get(strategy_cache_key)
-        if strategy_cache:
-            strategy, _, _ = strategy_cache[0]  # (strategy, explain_err_code, explain_err)
+        cached_strategy = self._collection_strategy_cache.get(strategy_cache_key)
+        if cached_strategy:
+            strategy, _, _ = cached_strategy[0]  # (strategy, explain_err_code, explain_err)
             strategies.remove(strategy)
             strategies.insert(0, strategy)
 
