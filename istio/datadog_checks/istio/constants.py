@@ -4,7 +4,7 @@
 
 # Istio namespaces
 MIXER_NAMESPACE = 'istio.mixer'
-MESH_NAMESPACE = 'istio.mesh'
+MESH_NAMESPACE = 'istio'
 PILOT_NAMESPACE = 'istio.pilot'
 GALLEY_NAMESPACE = 'istio.galley'
 CITADEL_NAMESPACE = 'istio.citadel'

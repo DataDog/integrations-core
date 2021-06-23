@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import PY2
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .constants import BLACKLIST_LABELS
 from .legacy_1_4 import LegacyIstioCheck_1_4
@@ -44,7 +44,7 @@ class Istio(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if not PY2 and 'use_openmetrics' in instance:
+        if not PY2 and is_affirmative(instance.get('use_openmetrics', False)):
             # TODO: when we drop Python 2 move this import up top
             from .check import IstioCheckV2
 
