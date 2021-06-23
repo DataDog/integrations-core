@@ -44,6 +44,11 @@ steps:
     ddev validate dashboards
   displayName: 'Validate dashboard definition files'
 
+- script: |
+    echo "ddev meta snmp validate-profile"
+    ddev meta snmp validate-profile
+  displayName: 'Validate snmp profiles'
+
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'true')) }}:
   - script: |
       echo "validate dep --require-base-check-version ${{ parameters.check }}"
