@@ -110,7 +110,7 @@
         },
         "sysobjectid": {
             "$id": "#/properties/sysobjectid",
-            "type": "string",
+            "type": ["array", "string"],
             "title": "The sysobjectid schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
@@ -509,9 +509,7 @@
                         "tag": "snmp_host"
                     }],
                     "required": [
-                        "OID",
-                        "symbol",
-                        "tag"
+                        "OID"
                     ],
                     "properties": {
                         "OID": {
@@ -543,6 +541,15 @@
                             "examples": [
                                 "snmp_host"
                             ]
+                        },
+                        "symbols":{
+                            "$id": "#/properties/metric_tags/items/anyOf/0/properties/symbols",
+                            "type": "array"
+
+                        },
+                        "table": {
+                            "$id": "#/properties/metric_tags/items/anyOf/0/properties/table",
+                            "type": "array"
                         }
                     },
                     "additionalProperties": true
