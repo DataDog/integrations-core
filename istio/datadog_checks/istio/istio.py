@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-Present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from six import PY2
+
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 from .constants import BLACKLIST_LABELS
@@ -41,7 +43,14 @@ class Istio(OpenMetricsBaseCheck):
 
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
-        if instance.get('istiod_endpoint'):
-            return super(Istio, cls).__new__(cls)
+
+        if not PY2 and 'use_openmetrics' in instance:
+            # TODO: when we drop Python 2 move this import up top
+            from .check import IstioCheckV2
+
+            return IstioCheckV2(name, init_config, instances)
         else:
-            return LegacyIstioCheck_1_4(name, init_config, instances)
+            if instance.get('istiod_endpoint'):
+                return super(Istio, cls).__new__(cls)
+            else:
+                return LegacyIstioCheck_1_4(name, init_config, instances)

@@ -314,3 +314,18 @@ ISTIOD_METRICS = {
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        # if raw_metric_name in type_overrides:
+        #     config[raw_metric_name]['type'] = type_overrides[raw_metric_name]
+
+        metrics.append(config)
+
+    return metrics
