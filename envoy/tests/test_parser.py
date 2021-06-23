@@ -29,6 +29,28 @@ def test_cds():
     assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
 
+def test_retry_metric():
+    metric = "cluster{}.upstream_cx_total"
+    untagged_metric = metric.format('')
+    tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
+    tag0 = 'service-foo.default.eu-west-3-prd.internal.a4d363d6-a669-b02c-a274-52c1df12bd41.consul'
+    tagged_metric = metric.format('.{}'.format(tag0))
+    assert parse_metric(tagged_metric, retry=True, disable_legacy_cluster_tag=True) == (
+        METRIC_PREFIX + untagged_metric,
+        ['{}:{}'.format(tags[0], tag0)],
+        METRICS[untagged_metric]['method'],
+    )
+
+
+def test_retry_invalid_metric():
+    with pytest.raises(UnknownMetric):
+        parse_metric(
+            "cluster.ms-catalog-category-appli.default.eu-west-3-stg.internal"
+            ".ba3374ca-fb2a-3f3e-9ea6-79e021188673.consul.http2.dropped_headers_with_underscores",
+            retry=True,
+        )
+
+
 def test_http_router_filter():
     metric = 'http{}.rq_total'
     untagged_metric = metric.format('')
@@ -51,9 +73,16 @@ def test_http_router_filter_vhost():
     tag1 = 'some_vcluster_name'
     tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
+        METRICS[untagged_metric]['method'],
+    )
+
+    # Legacy tag
+    assert parse_metric(tagged_metric) == (
+        METRIC_PREFIX + untagged_metric,
+        ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), 'virtual_cluster_name:{}'.format(tag1)],
         METRICS[untagged_metric]['method'],
     )
 
@@ -65,7 +94,7 @@ def test_http_rate_limit():
     tag0 = 'some_route_target_cluster'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -96,7 +125,7 @@ def test_grpc():
     tag2 = 'some_grpc_method'
     tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1), '.{}'.format(tag2))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), '{}:{}'.format(tags[2], tag2)],
         METRICS[untagged_metric]['method'],
@@ -439,9 +468,16 @@ def test_cluster():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
+        METRICS[untagged_metric]['method'],
+    )
+
+    # Legacy tag
+    assert parse_metric(tagged_metric) == (
+        METRIC_PREFIX + untagged_metric,
+        ['{}:{}'.format(tags[0], tag0), 'cluster_name:{}'.format(tag0)],
         METRICS[untagged_metric]['method'],
     )
 
@@ -453,7 +489,7 @@ def test_cluster_health_check():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -467,7 +503,7 @@ def test_cluster_outlier_detection():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -481,7 +517,7 @@ def test_cluster_dynamic_http():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -497,7 +533,7 @@ def test_cluster_dynamic_http_zones():
     tag2 = 'some_to_zone'
     tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1), '.{}'.format(tag2))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), '{}:{}'.format(tags[2], tag2)],
         METRICS[untagged_metric]['method'],
@@ -511,7 +547,7 @@ def test_cluster_load_balancer():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -525,7 +561,7 @@ def test_cluster_load_balancer_subsets():
     tag0 = 'some_name'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],
@@ -539,7 +575,7 @@ def test_tag_with_dots():
     tag0 = 'out.alerting-event-evaluator-test.datadog.svc.cluster.local|iperf'
     tagged_metric = metric.format('.{}'.format(tag0))
 
-    assert parse_metric(tagged_metric) == (
+    assert parse_metric(tagged_metric, disable_legacy_cluster_tag=True) == (
         METRIC_PREFIX + untagged_metric,
         ['{}:{}'.format(tags[0], tag0)],
         METRICS[untagged_metric]['method'],

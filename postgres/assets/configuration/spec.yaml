@@ -1,0 +1,306 @@
+name: Postgres
+files:
+- name: postgres.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      required: true
+      description: |
+        The hostname to connect to.
+        NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
+        provide a value for the sock key.
+      value:
+        example: localhost
+        type: string
+    - name: port
+      description: The port to use when connecting to PostgreSQL.
+      value:
+        type: integer
+        example: 5432
+    - name: username
+      required: true
+      description: The Datadog username created to connect to PostgreSQL.
+      value:
+          type: string
+          example: datadog
+    - name: password
+      description: The password associated with the Datadog user.
+      value:
+        type: string
+    - name: dbname
+      description: |
+        The name of the PostgresSQL database to monitor.
+        Note: If omitted, the default system Postgres database is queried.
+      value:
+        type: string
+        display_default: postgres
+    - name: dbstrict
+      description: |
+        Whether to restrict the scope of the check to just the database in question.
+        Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
+      value:
+        type: boolean
+        display_default: false
+        example: false
+    - name: ignore_databases
+      description: |
+        A list of database to ignore. No metrics or statement samples will be collected for these databases.
+        Each value can be a plain string or a Postgres pattern.
+        For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - 'template%'
+          - rdsadmin
+          - azure_maintenance
+          - postgres
+        default:
+          - 'template%'
+          - rdsadmin
+          - azure_maintenance
+          - postgres
+    - name: ssl
+      description: |
+        This option determines whether or not and with what priority a secure SSL TCP/IP connection
+        is negotiated with the server. There are six modes:
+        - `disable`: Only tries a non-SSL connection.
+        - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
+        - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+        - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+                     the same way as if verify-ca was specified.
+        - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+                       trusted certificate authority (CA).
+        - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+                         trusted CA and that the requested server host name matches the one in the certificate.
+
+        For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+
+        Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
+      value:
+        type: string
+        display_default: false
+        example: "false"
+    - name: query_timeout
+      description: |
+        Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+        to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+        starting from the time the command arrives at the server from the client. A value of zero turns this off.
+        Cancelled queries won't log any metrics.
+      value:
+        type: integer
+        example: 1000
+        display_default: null
+    - name: relations
+      description: |
+        The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
+        If enabled, `dbname` should be specified to collect database-specific relations metrics.
+        You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
+        from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
+        Each relation generates many metrics (10 + 10 per index).
+
+        By default all schemas are included. To track relations from specific schemas only,
+        you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
+
+        Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
+        metrics are are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+        collected only for user tables.
+        To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
+        as a list of the options:
+        * r = ordinary table
+        * i = index
+        * S = sequence
+        * t = TOAST table
+        * m = materialized view
+        * c = composite type
+        * f = foreign table
+        * p = partitioned table
+
+        Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
+        the list of table names. All schemas are included and regex are not supported.
+        relations:
+      value:
+        type: array
+        items:
+          anyOf:
+          - type: string
+          - type: object
+            properties:
+              - name: relation_name
+                type: string
+              - name: relation_schema
+                type: string
+              - name: schemas
+                type: array
+                items:
+                  type: string
+              - name: relation_regex
+                type: string
+              - name: relkind
+                type: array
+                items:
+                    type: string
+        example:
+          - relation_name: <TABLE_NAME>
+            schemas:
+              - <SCHEMA_NAME1>
+          - relation_regex: <TABLE_PATTERN>
+            relkind:
+              - r
+              - p
+    - name: max_relations
+      description: Determines the maximum number of relations to fetch.
+      value:
+        type: integer
+        example: 300
+    - name: collect_function_metrics
+      description: |
+        If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
+      value:
+        type: boolean
+        example: false
+    - name: collect_count_metrics
+      description: Collect count of user tables up to max_relations size from pg_stat_user_tables.
+      value:
+        type: boolean
+        example: true
+    - name: collect_activity_metrics
+      description: |
+        Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
+        has sufficient privileges to read from pg_stat_activity before enabling this option.
+      value:
+        type: boolean
+        example: false
+    - name: collect_database_size_metrics
+      description: Collect database size metrics.
+      value:
+        type: boolean
+        example: true
+    - name: collect_default_database
+      description: Include statistics from the default database 'postgres' in the check metrics.
+      value:
+        type: boolean
+        example: false
+    - name: tag_replication_role
+      description: Tag metrics and checks with `replication_role:<master|standby>`.
+      value:
+        type: boolean
+        example: false
+    - name: table_count_limit
+      description: The maximum number of tables to collect metrics from.
+      value:
+        type: integer
+        display_default: 200
+        example: 200
+    - name: custom_queries
+      description: |
+        Define custom queries to collect custom metrics from your PostgreSQL
+        See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
+        https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
+      value:
+        type: array
+        items:
+          type: object
+          properties: []
+        example:
+            - metric_prefix: postgresql
+              query: <QUERY>
+              columns:
+                - name: <COLUNMS_1_NAME>
+                  type: <COLUMNS_1_TYPE>
+                - name: <COLUNMS_2_NAME>
+                  type: <COLUMNS_2_TYPE>
+              tags:
+                - <TAG_KEY>:<TAG_VALUE>
+    - name: application_name
+      description: |
+        The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
+        It is typically set by an application upon connection to the server.
+        The name is displayed in the pg_stat_activity view and included in CSV log entries.
+      value:
+        type: string
+        example: "datadog-agent"
+    - name: deep_database_monitoring
+      description: |
+        Set to `true` to enable the ALPHA features for Deep Database Monitoring.
+
+        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
+        success manager or Datadog support.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: pg_stat_statements_view
+      description: |
+        Set this value if you want to define a custom view or function to allow the datadog user to query the
+        `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
+        Please note this is an ALPHA feature and is subject to change or deprecation without notice.
+      value:
+        type: string
+        example: show_pg_stat_statements()
+    - name: statement_samples
+      description: Configure collection of statement samples
+      options:
+        - name: enabled
+          description: |
+            Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collections_per_second
+          description: |
+            Set the maximum statement sample collection rate. Each collection involves a single query to
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+          value:
+            type: number
+            example: 1
+        - name: explain_function
+          description: |
+            Override the default function used to collect execution plans for statements.
+          value:
+            type: string
+            example: datadog.explain_statement
+        - name: explained_statements_per_hour_per_query
+          description: |
+            Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+          value:
+            type: integer
+            example: 60
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+            plan.
+          value:
+            type: integer
+            example: 15
+        - name: explained_statements_cache_maxsize
+          description: |
+            Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+            be increased for databases with a very large number unique normalized queries which exceed the cache's
+            limit.
+          value:
+            type: integer
+            example: 5000
+        - name: seen_samples_cache_maxsize
+          description: |
+            Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+          value:
+            type: integer
+            example: 10000
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path:  /path/to/postgres.log
+      source: postgresql
+      service: <SERVICE>
+      log_processing_rules:
+        - type: multi_line
+          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          name: new_log_start_with_date

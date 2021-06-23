@@ -1,0 +1,198 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides real-time insights into your Elasticsearch clusters, so you can monitor activity and resource utilization metrics from all your nodes and troubleshoot performance issues. Further reading for Elasticsearch monitoring:\n\n- [Datadog's guide to key Elasticsearch metrics](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n- [How to collect Elasticsearch metrics with native and open source tools](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n- [How to monitor Elasticsearch with Datadog](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n- [How to solve 5 Elasticsearch performance and scaling problems](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n- [How to resolve unassigned shards in Elasticsearch](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)\n\n- [Datadog's Elasticsearch integration docs](https://docs.datadoghq.com/integrations/elastic/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "Elasticsearch - Metrics",
+    "widgets": [
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "rate(elasticsearch.docs.count{$scope})"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch document count growth (per sec)",
+                "type": "timeseries"
+            },
+            "id": 0
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "( derivative(sum:elasticsearch.search.fetch.time{$scope}) + derivative(sum:elasticsearch.search.query.time{$scope}) ) * 1000 / derivative(sum:elasticsearch.search.query.total{$scope})"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch query latency (ms)",
+                "type": "timeseries"
+            },
+            "id": 1
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "( derivative(sum:elasticsearch.indexing.index.time{$scope}) * 1000  / derivative(sum:elasticsearch.indexing.index.total{$scope}))"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch indexing time (ms)",
+                "type": "timeseries"
+            },
+            "id": 2
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "elasticsearch.store.size{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch index memory size",
+                "type": "timeseries"
+            },
+            "id": 3
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "elasticsearch.number_of_nodes{$scope}"
+                    },
+                    {
+                        "q": "elasticsearch.number_of_data_nodes{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch nodes",
+                "type": "timeseries"
+            },
+            "id": 4
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "elasticsearch.active_shards{$scope}, elasticsearch.relocating_shards{$scope}, elasticsearch.initializing_shards{$scope}, elasticsearch.unassigned_shards{$scope}"
+                    },
+                    {
+                        "q": "elasticsearch.active_primary_shards{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch shards",
+                "type": "timeseries"
+            },
+            "id": 5
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "elasticsearch.active_shards{$scope} by {host}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Elasticsearch Active shards by host",
+                "type": "timeseries"
+            },
+            "id": 6
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "System load",
+                "type": "timeseries"
+            },
+            "id": 7
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "CPU usage (%)",
+                "type": "timeseries"
+            },
+            "id": 8
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "I/O wait (%)",
+                "type": "timeseries"
+            },
+            "id": 9
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "System memory",
+                "type": "timeseries"
+            },
+            "id": 10
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "show_legend": false,
+                "title": "Network traffic (per sec)",
+                "type": "timeseries"
+            },
+            "id": 11
+        }
+    ]
+}

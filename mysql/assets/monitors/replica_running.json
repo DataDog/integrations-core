@@ -1,0 +1,25 @@
+{
+	"name": "[MySQL] Replica {{host.name}} is not running properly",
+	"type": "service check",
+	"query": "\"mysql.replication.replica_running\".over(\"*\").last(2).count_by_status()",
+	"message": "Replica_IO_Running and/or Replica_SQL_Running is not running on replica {{host.name}}. Consider investigating to restore full data replication.",
+	"tags": [
+        "integration:mysql"
+    ],
+	"options": {
+        "notify_audit": false,
+		"renotify_interval": 0,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+        "notify_no_data": false,
+        "no_data_timeframe": 2,
+		"thresholds": {
+			"critical": 1,
+			"warning": 1,
+			"ok": 1
+		}
+	},
+    "recommended_monitor_metadata": {
+		"description": "Notify your team when a replica is not running properly."
+    }
+}

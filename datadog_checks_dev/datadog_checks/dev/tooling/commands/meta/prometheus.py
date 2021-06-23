@@ -9,7 +9,7 @@ import click
 import pyperclip
 import requests
 
-from ....utils import dir_exists, path_join, write_file_lines
+from ....fs import dir_exists, path_join, write_file_lines
 from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 

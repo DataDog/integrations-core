@@ -1,0 +1,18 @@
+[
+    {
+        "name": "mongodb.chunks.total",
+        "type": 0,
+        "value": 100.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.chunks.jumbo",
+        "type": 0,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

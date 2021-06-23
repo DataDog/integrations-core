@@ -6,10 +6,10 @@ from collections import deque
 from copy import deepcopy
 
 import toml
-from appdirs import user_data_dir
 from atomicwrites import atomic_write
+from platformdirs import user_data_dir
 
-from ..utils import ensure_parent_dir_exists, file_exists, read_file
+from ..fs import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', '')
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
@@ -27,7 +27,7 @@ SECRET_KEYS = {
 
 DEFAULT_CONFIG = {
     'repo': 'core',
-    'agent': '6',
+    'agent': 'master',
     'org': 'default',
     'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
     'dd_api_key': os.getenv('DD_API_KEY'),
@@ -39,10 +39,12 @@ DEFAULT_CONFIG = {
         'core': os.path.join('~', 'dd', 'integrations-core'),
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
+        'marketplace': os.path.join('~', 'dd', 'marketplace'),
     },
     'agents': {
-        '6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-        '5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
+        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+        '7': {'docker': 'datadog/agent:7', 'local': '7'},
+        '6': {'docker': 'datadog/agent:6', 'local': '6'},
     },
     'orgs': {
         'default': {
@@ -98,12 +100,6 @@ def restore_config():
 def update_config():
     config = copy_default_config()
     config.update(load_config())
-
-    # Support legacy config where agent5 and agent6 were strings
-    if isinstance(config['agent6'], str):
-        config['agent6'] = {'docker': config['agent6'], 'local': 'latest'}
-    if isinstance(config['agent5'], str):
-        config['agent5'] = {'docker': config['agent5'], 'local': 'latest'}
 
     save_config(config)
     return config

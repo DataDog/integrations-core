@@ -1,0 +1,166 @@
+{
+    "title": "SQLServer - Metrics",
+    "description": "This dashboard allows you to compare metrics from SQL Server with resource utilization metrics from your system. Further reading on SQL Server monitoring:\n\n- [Datadog's SQL Server integration docs](https://docs.datadoghq.com/integrations/sqlserver/)\n\n- [Key metrics for SQL Server monitoring](https://www.datadoghq.com/blog/sql-server-monitoring/)\n\n- [SQL Server monitoring tools](https://www.datadoghq.com/blog/sql-server-monitoring-tools/)\n\n- [Monitor SQL Server performance with Datadog](https://www.datadoghq.com/blog/sql-server-performance/)\n\n- [Custom SQL Server metrics for detailed monitoring](https://www.datadoghq.com/blog/sql-server-metrics/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.stats.connections{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server user connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.buffer.cache_hit_ratio{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server buffer cache hit ratio"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.stats.procs_blocked{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server processes blocked"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.access.page_splits{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server page splits (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.stats.batch_requests{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server batch requests (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.stats.sql_compilations{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server SQL compilations (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.buffer.page_life_expectancy{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server buffer page life expectancy"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:sqlserver.stats.lock_waits{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SQL Server lock waits (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

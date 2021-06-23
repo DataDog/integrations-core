@@ -83,13 +83,13 @@ Run `ddev config show` to see if your GitHub user and token is set.
 If not:
 
 1. Run `ddev config set github.user <YOUR_GITHUB_USERNAME>`
-1. Create a [personal access token][github-personal-access-token] with `public_repo` permissions
+1. Create a [personal access token][github-personal-access-token] with `public_repo` and `read:org` permissions
 1. Run `ddev config set github.token` then paste the token
 1. [Enable single sign-on][github-saml-single-sign-on] for the token
 
 ## Trello
 
-To participate as an [Agent release manager](../process/agent-release.md), you need to set `trello.key`/`trello.token` in your config file.
+To participate as an [Agent release manager](../process/agent-release/pre-release.md), you need to set `trello.key`/`trello.token` in your config file.
 
 Run `ddev config show` to see if your Trello key and token is set.
 
@@ -101,3 +101,7 @@ If not:
    where `<KEY>` is your API key and `<NAME>` is the name to give your token, e.g. `ReleaseTestingYourName`.
    Authorize access and copy your token.
 1. Run `ddev config set trello.token` and paste your token
+
+### Card Assignment
+
+When automatically assigning [QA cards](../process/agent-release/pre-release.md#create-items), the Trello users which are members of the `Agent Release Sprint` Trello board will be fetched and cards will be assigned at random to them. Make sure people in your team are all members of the `Agent Release Sprint` board.

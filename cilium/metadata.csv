@@ -1,14 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-cilium.agent.api_process_time.seconds.count,count,,second,,"Count of processing time for all API calls",0,cilium,api proc time count
+cilium.agent.api_process_time.seconds.count,count,,request,,"Count of processing time for all API calls",0,cilium,api proc time count
 cilium.agent.api_process_time.seconds.sum,gauge,,second,,"Sum of processing time for all API calls",0,cilium,api proc time sum
-cilium.agent.bootstrap.seconds.count,count,,second,,"Count of bootstrap durations",0,cilium,bootstrap time count
+cilium.agent.bootstrap.seconds.count,count,,,,"Count of bootstrap durations",0,cilium,bootstrap time count
 cilium.agent.bootstrap.seconds.sum,gauge,,second,,"Sum of bootstrap durations",0,cilium,bootstrap time sum
 cilium.bpf.map_ops.total,count,,operation,,"Total BPF map operations performed",0,cilium,bpf map ops
 cilium.controllers.failing.count,count,,error,,"Number of failing controllers",-1,cilium, fail controllers
-cilium.controllers.runs_duration.seconds.count,count,,second,,"Count of controller processes duration",0,cilium,controller dur count
+cilium.controllers.runs_duration.seconds.count,count,,operation,,"Count of controller processes duration",0,cilium,controller dur count
 cilium.controllers.runs_duration.seconds.sum,gauge,,second,,"Sum of controller processes duration",0,cilium,controller dur sum
 cilium.controllers.runs.total,count,,event,,"Total number of controller runs",0,cilium,controller runs
-cilium.datapath.conntrack_gc.duration.seconds.count,count,,second,,"Count of garbage collector process duration",0,cilium,gc dur count
+cilium.datapath.conntrack_gc.duration.seconds.count,count,,operation,,"Count of garbage collector process duration",0,cilium,gc dur count
 cilium.datapath.conntrack_gc.duration.seconds.sum,gauge,,second,,"Sum of garbage collector process duration",0,cilium,gc dur sum
 cilium.datapath.conntrack_gc.entries,gauge,,garbage collection,,"The number of alive and deleted conntrack entries",0,cilium,conntrack entries
 cilium.datapath.conntrack_gc.key_fallbacks.total,count,,garbage collection,,"The total number of conntrack entries",-1,cilium,conntrack entries total
@@ -17,7 +17,7 @@ cilium.datapath.errors.total,count,,error,,"Total number of errors in datapath m
 cilium.drop_bytes.total,count,,byte,,"Total dropped bytes",-1,cilium,drop bytes
 cilium.drop_count.total,count,,packet,,"Total dropped packets",-1,cilium,drop packets
 cilium.endpoint.count,count,,unit,,"Total ready endpoints managed by agent",0,cilium,total endpoints
-cilium.endpoint.regeneration_time_stats.seconds.count,count,,second,,"Count of endpoint regeneration time stats",0,cilium,endpoint regen time count
+cilium.endpoint.regeneration_time_stats.seconds.count,count,,operation,,"Count of endpoint regeneration time stats",0,cilium,endpoint regen time count
 cilium.endpoint.regeneration_time_stats.seconds.sum,gauge,,second,,"Sum of endpoint regeneration time stats",0,cilium,endpoint regen time sum
 cilium.endpoint.regenerations.count,count,,unit,,"Count of completed endpoint regenerations",1,cilium,endpoint regen count
 cilium.endpoint.state,gauge,,unit,,"Count of all endpoints",0,cilium,endpoint count
@@ -30,7 +30,7 @@ cilium.identity.count,gauge,,unit,,"Number of identities allocated",0,cilium,id 
 cilium.ip_addresses.count,gauge,,unit,,"Number of allocated ip_addresses",0,cilium,ip count
 cilium.ipam.events.total,count,,event,,"Number of IPAM events received by action and datapath family type",0,cilium,ipam total
 cilium.k8s_client.api_calls.count,count,,request,,"Number of API calls made to kube-apiserver",0,cilium,api call count
-cilium.k8s_client.api_latency_time.seconds.count,count,,second,,"Count of processed API call duration",-1,cilium,api latency count
+cilium.k8s_client.api_latency_time.seconds.count,count,,request,,"Count of processed API call duration",-1,cilium,api latency count
 cilium.k8s_client.api_latency_time.seconds.sum,gauge,,second,,"Sum of processed API call duration",-1,cilium,api latency sum
 cilium.kubernetes.events_received.total,count,,event,,"Number of Kubernetes received events processed",0,cilium,k8s events rcv count
 cilium.kubernetes.events.total,count,,event,,"Number of Kubernetes events processed",0,cilium,k8s events count
@@ -45,7 +45,7 @@ cilium.policy.l7_forwarded.total,count,,unit,,"Number of total L7 forwarded requ
 cilium.policy.l7_parse_errors.total,count,,error,,"Number of total L7 parse errors",-1,cilium,l7 policy error
 cilium.policy.l7_received.total,count,,unit,,"Number of total L7 received requests/responses",1,cilium,l7 policy received
 cilium.policy.max_revision,gauge,,unit,,"Highest policy revision number in the agent",0,cilium,max policy
-cilium.policy.regeneration_time_stats.seconds.count,count,,second,,"Policy regeneration time stats count",0,cilium,policy regen time count
+cilium.policy.regeneration_time_stats.seconds.count,count,,operation,,"Policy regeneration time stats count",0,cilium,policy regen time count
 cilium.policy.regeneration_time_stats.seconds.sum,gauge,,second,,"Policy regeneration time stats count",0,cilium,policy regen time sum
 cilium.policy.regeneration.total,count,,unit,,"Total number of successful policy regenerations",0,cilium,policy regen count
 cilium.process.cpu.seconds.total,gauge,,second,,"Process CPU time in seconds",0,cilium,proc cpu second
@@ -56,7 +56,7 @@ cilium.process.start_time.seconds,gauge,,second,,"Processes start time",0,cilium
 cilium.process.virtual_memory.bytes,gauge,,byte,,"Virtual memory bytes",0,cilium,virtual mem bytes
 cilium.process.virtual_memory.max.bytes,gauge,,byte,,"Maximum virtual memory bytes",0,cilium,max virtual mem bytes
 cilium.subprocess.start.total,count,,unit,,"Number of times that Cilium has started a subprocess",0,cilium,subproc start
-cilium.triggers_policy.update_call_duration.seconds.count,count,,second,,"Count of policy update trigger duration",0,cilium,trigger policy time count
+cilium.triggers_policy.update_call_duration.seconds.count,count,,operation,,"Count of policy update trigger duration",0,cilium,trigger policy time count
 cilium.triggers_policy.update_call_duration.seconds.sum,gauge,,second,,"Sum of policy update trigger duration",0,cilium,trigger policy time sum
 cilium.triggers_policy.update_folds,gauge,,unit,,"Number of folds",0,cilium,fold count
 cilium.triggers_policy.update.total,count,,unit,,"Total number of policy update trigger invocations",0,cilium,policy update trigger count
@@ -69,32 +69,32 @@ cilium.operator.process.resident_memory.bytes,gauge,,byte,,"Resident memory size
 cilium.operator.process.start_time.second,gauge,,second,,"Start time of the process since unix epoch in seconds",0,cilium,proc start time operator
 cilium.operator.process.virtual_memory.bytes,gauge,,byte,,"Virtual memory size in bytes",0,cilium,virtual mem size operator
 cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,"Maximum amount of virtual memory available in bytes",0,cilium,virtual mem size max operator
-cilium.kvstore.operations_duration.seconds.count,count,,second,,"Duration of kvstore operation count",0,cilium,kvstore op time count
+cilium.kvstore.operations_duration.seconds.count,count,,operation,,"Duration of kvstore operation count",0,cilium,kvstore op time count
 cilium.kvstore.operations_duration.seconds.sum,gauge,,second,,"Duration of kvstore operation sum",0,cilium,kvstore op time sum
-cilium.kvstore.events_queue.seconds.count,count,,second,,"Count of duration in seconds of received event was blocked before it could be queued",0,cilium,kvstore event block time count
+cilium.kvstore.events_queue.seconds.count,count,,,,"Count of duration in seconds of received event was blocked before it could be queued",0,cilium,kvstore event block time count
 cilium.kvstore.events_queue.seconds.sum,gauge,,second,,"Sum of duration in seconds received event was blocked before it could be queued",0,cilium,kvstore event block time count
 cilium.operator.eni.available,gauge,,unit,,"Number of ENI with addresses available",0,cilium,eni available
 cilium.operator.eni.available.ips_per_subnet,gauge,,unit,,"Number of available IPs per subnet ID",0,cilium,eni subnet ip
-cilium.operator.eni.aws_api_duration.seconds.count,count,,second,,"Count of duration of interactions with AWS API",0,cilium,aws api count
+cilium.operator.eni.aws_api_duration.seconds.count,count,,request,,"Count of duration of interactions with AWS API",0,cilium,aws api count
 cilium.operator.eni.aws_api_duration.seconds.sum,gauge,,second,,"Sum of duration of interactions with AWS API",0,cilium,aws api sum
-cilium.operator.eni.deficit_resolver.duration.seconds.count,count,,second,,"Count of duration of deficit resolver trigger runs",0,cilium,trigger run time
+cilium.operator.eni.deficit_resolver.duration.seconds.count,count,,operation,,"Count of duration of deficit resolver trigger runs",0,cilium,trigger run time
 cilium.operator.eni.deficit_resolver.duration.seconds.sum,gauge,,second,,"Sum of duration of deficit resolver trigger runs",0,cilium,trigger run time count
 cilium.operator.eni.deficit_resolver.folds,gauge,,unit,,"Current level of deficit resolver folding",0,cilium,fold level
-cilium.operator.eni.deficit_resolver.latency.seconds.count,count,,second,,"Count of latency between deficit resolver queue and trigger run",0,cilium,latency run count
+cilium.operator.eni.deficit_resolver.latency.seconds.count,count,,operation,,"Count of latency between deficit resolver queue and trigger run",0,cilium,latency run count
 cilium.operator.eni.deficit_resolver.latency.seconds.sum,gauge,,second,,"Sum of latency between deficit resolver queue and trigger run",0,cilium,latency run sum
 cilium.operator.eni.deficit_resolver.queued.total,gauge,,event,,"Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
-cilium.operator.eni.ec2_resync.duration.seconds.count,count,,second,,"Count of duration of ec2 resync trigger runs",0,cilium,resync trigger run count
+cilium.operator.eni.ec2_resync.duration.seconds.count,count,,operation,,"Count of duration of ec2 resync trigger runs",0,cilium,resync trigger run count
 cilium.operator.eni.ec2_resync.duration.seconds.sum,gauge,,second,,"Sum of duration of ec2 resync trigger runs",0,cilium,resync trigger run sum
 cilium.operator.eni.ec2_resync.folds,gauge,,unit,,"Current level of ec2 resync folding",0,cilium,resync folds
-cilium.operator.eni.ec2_resync.latency.seconds.count,count,,second,,"Count of latency between ec2 resync queue and trigger run",0,cilium,resync latency count
+cilium.operator.eni.ec2_resync.latency.seconds.count,count,,operation,,"Count of latency between ec2 resync queue and trigger run",0,cilium,resync latency count
 cilium.operator.eni.ec2_resync.latency.seconds.sum,gauge,,second,,"Sum of latency between ec2 resync queue and trigger run",0,cilium,resync latency sum
 cilium.operator.eni.ec2_resync.queued.total,gauge,,unit,,"Number of queued ec2 resync triggers",0,cilium,queued resync trigger
 cilium.operator.eni.interface_creation_ops,count,,operation,,"Number of ENIs allocated",0,cilium,eni allocated
 cilium.operator.eni.ips.total,gauge,,unit,,"Number of IPs allocated",0,cilium,ip allocated
-cilium.operator.eni.k8s_sync.duration.seconds.count,count,,second,,"Count of duration of k8s sync trigger run",0,cilium,k8s sync trigger count
+cilium.operator.eni.k8s_sync.duration.seconds.count,count,,operation,,"Count of duration of k8s sync trigger run",0,cilium,k8s sync trigger count
 cilium.operator.eni.k8s_sync.duration.seconds.sum,gauge,,second,,"Sum of duration of k8s sync trigger run",0,cilium,k8s sync trigger sum
 cilium.operator.eni.k8s_sync.folds,gauge,,second,,"Current level of k8s sync folding",0,cilium,k8s sync folds
-cilium.operator.eni.k8s_sync.latency.seconds.count,count,,second,,"Count of duration of k8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
+cilium.operator.eni.k8s_sync.latency.seconds.count,count,,operation,,"Count of duration of k8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
 cilium.operator.eni.k8s_sync.latency.seconds.sum,gauge,,second,,"Sum of duration of k8s sync latency between queue and trigger run",0,cilium,k8s sync latency sum
 cilium.operator.eni.k8s_sync.queued.total,gauge,,unit,,"Number of queued k8s sync triggers",0,cilium,k8s queue trigger
 cilium.operator.eni.nodes.total,gauge,,node,,"Number of nodes by category",0,cilium,eni node

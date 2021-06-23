@@ -1,0 +1,142 @@
+cluster-query:
+  meta:
+    uri: "/manage/v2?view=query"
+    current-time: '2020-07-20T12:13:03.265454Z'
+    elapsed-time:
+      units: sec
+      value: 0.014009
+  query-properties:
+    result-count: '28'
+  relations:
+    relation-group:
+    - typeref: databases
+      relation-count:
+        units: quantity
+        value: 10
+      relation:
+      - uriref: "/manage/v2/databases/App-Services"
+        idref: '255818103205892753'
+        nameref: App-Services
+      - uriref: "/manage/v2/databases/Documents"
+        idref: '5004266825873163057'
+        nameref: Documents
+      - uriref: "/manage/v2/databases/Extensions"
+        idref: '16851068239719039698'
+        nameref: Extensions
+      - uriref: "/manage/v2/databases/Fab"
+        idref: '8856275086743994731'
+        nameref: Fab
+      - uriref: "/manage/v2/databases/Last-Login"
+        idref: '6816197642999717526'
+        nameref: Last-Login
+      - uriref: "/manage/v2/databases/Meters"
+        idref: '12682928374639417132'
+        nameref: Meters
+      - uriref: "/manage/v2/databases/Modules"
+        idref: '6503289002923531207'
+        nameref: Modules
+      - uriref: "/manage/v2/databases/Schemas"
+        idref: '1666078100697577708'
+        nameref: Schemas
+      - uriref: "/manage/v2/databases/Security"
+        idref: '8685886462920786200'
+        nameref: Security
+      - uriref: "/manage/v2/databases/Triggers"
+        idref: '2554043170273433710'
+        nameref: Triggers
+    - typeref: forests
+      relation-count:
+        units: quantity
+        value: 10
+      relation:
+      - uriref: "/manage/v2/forests/Documents"
+        idref: '5198739379836946612'
+        nameref: Documents
+      - uriref: "/manage/v2/forests/App-Services"
+        idref: '13366707925516962600'
+        nameref: App-Services
+      - uriref: "/manage/v2/forests/Modules"
+        idref: '16024526243775340149'
+        nameref: Modules
+      - uriref: "/manage/v2/forests/Fab"
+        idref: '6362535838618150355'
+        nameref: Fab
+      - uriref: "/manage/v2/forests/Extensions"
+        idref: '17254568917360711355'
+        nameref: Extensions
+      - uriref: "/manage/v2/forests/Security"
+        idref: '1112331563215633422'
+        nameref: Security
+      - uriref: "/manage/v2/forests/Schemas"
+        idref: '5750304059804042419'
+        nameref: Schemas
+      - uriref: "/manage/v2/forests/Triggers"
+        idref: '13651426856376247219'
+        nameref: Triggers
+      - uriref: "/manage/v2/forests/Last-Login"
+        idref: '4160063021749064859'
+        nameref: Last-Login
+      - uriref: "/manage/v2/forests/Meters"
+        idref: '9374918776994601400'
+        nameref: Meters
+    - typeref: groups
+      relation-count:
+        units: quantity
+        value: 1
+      relation:
+      - uriref: "/manage/v2/groups/Default"
+        idref: '4940646765162118604'
+        nameref: Default
+    - typeref: hosts
+      relation-count:
+        units: quantity
+        value: 2
+      relation:
+      - uriref: "/manage/v2/hosts/9aea032c882e"
+        idref: '17797492400840985949'
+        nameref: 9aea032c882e
+      - uriref: "/manage/v2/hosts/ff0fef449486"
+        idref: '3428441913043145991'
+        nameref: ff0fef449486
+    - typeref: servers
+      relation-count:
+        units: quantity
+        value: 4
+      relation:
+      - qualifiers:
+          qualifier:
+          - uriref: "/manage/v2/groups/Default"
+            idref: '4940646765162118604'
+            nameref: Default
+        uriref: "/manage/v2/servers/Admin?group-id=Default"
+        idref: '9403936238896063877'
+        nameref: Admin
+      - qualifiers:
+          qualifier:
+          - uriref: "/manage/v2/groups/Default"
+            idref: '4940646765162118604'
+            nameref: Default
+        uriref: "/manage/v2/servers/App-Services?group-id=Default"
+        idref: '11308174715442220527'
+        nameref: App-Services
+      - qualifiers:
+          qualifier:
+          - uriref: "/manage/v2/groups/Default"
+            idref: '4940646765162118604'
+            nameref: Default
+        uriref: "/manage/v2/servers/HealthCheck?group-id=Default"
+        idref: '6175005334572251784'
+        nameref: HealthCheck
+      - qualifiers:
+          qualifier:
+          - uriref: "/manage/v2/groups/Default"
+            idref: '4940646765162118604'
+            nameref: Default
+        uriref: "/manage/v2/servers/Manage?group-id=Default"
+        idref: '2238518805167662531'
+        nameref: Manage
+  related-views:
+    related-view:
+    - view-type: root
+      view-name: default
+      view-uri: "/manage/v2"

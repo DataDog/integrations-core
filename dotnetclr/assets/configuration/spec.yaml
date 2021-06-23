@@ -1,0 +1,19 @@
+name: .NET CLR
+files:
+- name: dotnetclr.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      required: true
+      description: |
+        Host to monitor. "." means the current host,
+        any other value makes the Agent attempt to connect to a remote host.
+        Note: Remote access requires additional permissions.
+      value:
+        example: .
+        type: string
+    - template: instances/default

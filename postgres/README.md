@@ -26,6 +26,7 @@ For PostgreSQL version 10 and above, run:
 ```shell
 create user datadog with password '<PASSWORD>';
 grant pg_monitor to datadog;
+grant SELECT ON pg_stat_database to datadog;
 ```
 
 For older PostgreSQL versions, run:
@@ -34,8 +35,6 @@ For older PostgreSQL versions, run:
 create user datadog with password '<PASSWORD>';
 grant SELECT ON pg_stat_database to datadog;
 ```
-
-**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `CONNECT` permission on those tables to the `datadog` user.
 
 To verify the permissions are correct, run the following command:
 
@@ -59,9 +58,14 @@ CREATE VIEW pg_stat_activity_dd AS SELECT * FROM pg_stat_activity();
 grant SELECT ON pg_stat_activity_dd to datadog;
 ```
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section](#faq) for more information.
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -75,9 +79,6 @@ Follow the instructions below to configure this check for an Agent running on a 
      ## The hostname to connect to.
      ## NOTE: Even if the server name is "localhost", the agent connects to
      ## PostgreSQL using TCP/IP, unless you also provide a value for the sock key.
-     ## If `use_psycopg2` is enabled, use the directory containing
-     ## the UNIX socket (ex: `/run/postgresql/`) otherwise, use the full path to
-     ##  the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
      #
      - host: localhost
 
@@ -171,17 +172,102 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
 
 5. [Restart the Agent][4].
 
-#### Containerized
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+#### Docker
+
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                                           |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `postgres`                                                                      |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":5432,"username":"datadog","password":"<PASSWORD>"}` |
+Set [Autodiscovery Integrations Templates][20] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["postgres"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":"datadog","password":"<PASSWORD>"}]'
+```
+
+##### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][21].
+
+Then, set [Log Integrations][22] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"postgresql","service":"postgresql"}]'
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][31] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container that makes requests to Postgres][32] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][23] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][24].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  annotations:
+    ad.datadoghq.com/postgresql.check_names: '["postgres"]'
+    ad.datadoghq.com/postgresql.init_configs: '[{}]'
+    ad.datadoghq.com/postgresql.instances: |
+      [
+        {
+          "host": "%%host%%",
+          "port":"5432",
+          "username":"datadog",
+          "password":"<PASSWORD>"
+        }
+      ]
+spec:
+  containers:
+    - name: postgres
+```
+
+##### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][25].
+
+Then, set [Log Integrations][26] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][27].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  annotations:
+    ad.datadoghq.com/postgres.logs: '[{"source":"postgresql","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: postgres
+```
 
 ##### Trace collection
 
@@ -195,19 +281,72 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][33] and the [Kubernetes DaemonSet Setup][34] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container that makes requests to Postgres][32].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][28] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "postgres",
+    "image": "postgres:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"postgres\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"host\":\"%%host%%\", \"port\":5432,\"username\":\"datadog\",\"password\":\"<PASSWORD>\"}]"
+    }
+  }]
+}
+```
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][29].
 
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "postgresql", "service": "postgresql"}` |
+Then, set [Log Integrations][30] as Docker labels:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "postgres",
+    "image": "postgres:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"postgresql\",\"service\":\"postgresql\"}]"
+    }
+  }]
+}
+```
+
+##### Trace collection
+
+APM for containerized apps is supported on Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][31] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container that makes requests to Postgres][32] and set `DD_AGENT_HOST` to the [EC2 private IP address][33].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -264,3 +403,17 @@ Additional helpful documentation, links, and articles:
 [17]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com
 [18]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [19]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[20]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[22]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[25]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[26]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[27]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[28]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[29]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[30]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup

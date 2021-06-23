@@ -50,6 +50,7 @@ QUEUE_ATTRIBUTES = [
     ('active_consumers', 'active_consumers', float),
     ('consumers', 'consumers', float),
     ('consumer_utilisation', 'consumer_utilisation', float),
+    ('head_message_timestamp', 'head_message_timestamp', int),
     ('memory', 'memory', float),
     ('messages', 'messages', float),
     ('messages_details/rate', 'messages.rate', float),
@@ -144,6 +145,7 @@ class RabbitMQ(AgentCheck):
         'rabbitmq_pass': {'name': 'password'},
         'ssl_verify': {'name': 'tls_verify'},
         'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+        'use_legacy_auth_encoding': {'name': 'use_legacy_auth_encoding', 'default': False},
     }
 
     def __init__(self, name, init_config, instances=None):
@@ -323,18 +325,9 @@ class RabbitMQ(AgentCheck):
                     explicit_filters.remove(name)
                     continue
 
-                match_found = False
-                for p in regex_filters:
-                    match = re.search(p, name)
-                    if match:
-                        if is_affirmative(tag_families) and match.groups():
-                            if object_type == QUEUE_TYPE:
-                                data_line["queue_family"] = match.groups()[0]
-                            if object_type == EXCHANGE_TYPE:
-                                data_line["exchange_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
+                match_found = self._append_match_lines(
+                    regex_filters, name, tag_families, data_line, object_type, matching_lines
+                )
 
                 if match_found:
                     continue
@@ -348,21 +341,35 @@ class RabbitMQ(AgentCheck):
                     explicit_filters.remove(absolute_name)
                     continue
 
-                for p in regex_filters:
-                    match = re.search(p, absolute_name)
-                    if match:
-                        if is_affirmative(tag_families) and match.groups():
-                            if object_type == QUEUE_TYPE:
-                                data_line["queue_family"] = match.groups()[0]
-                            if object_type == EXCHANGE_TYPE:
-                                data_line["exchange_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
+                match_found = self._append_match_lines(
+                    regex_filters, absolute_name, tag_families, data_line, object_type, matching_lines
+                )
                 if match_found:
                     continue
             return matching_lines
         return data
+
+    def _append_match_lines(self, regex_filters, name, tag_families, data_line, object_type, matching_lines):
+        result = False
+        object_tag_name = "queue_family"
+        if object_type == EXCHANGE_TYPE:
+            object_tag_name = "exchange_family"
+        for p in regex_filters:
+            match = re.search(p, name)
+            if match:
+                if is_affirmative(tag_families) and match.groups():
+                    named_groups_dict = match.groupdict()
+                    if len(named_groups_dict) > 0:
+                        for key in named_groups_dict:
+                            key_name = object_tag_name + "_" + key
+                            data_line[key] = named_groups_dict[key]
+                            TAGS_MAP[object_type][key] = key_name
+                    else:
+                        data_line[object_tag_name] = match.groups()[0]
+                matching_lines.append(data_line)
+                result = True
+                break
+        return result
 
     def _get_tags(self, data, object_type, custom_tags):
         tags = []
@@ -370,110 +377,110 @@ class RabbitMQ(AgentCheck):
         for t in tag_list:
             tag = data.get(t)
             if tag:
-                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
+                # FIXME 8.x: remove this suffix or unify (sc doesn't have it)
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
     def _get_object_data(self, instance, base_url, object_type, limit_vhosts):
-        """ data is a list of nodes or queues:
-                data = [
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host',
-                        'name': 'queue1',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0,
-                            'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host,
-                        'name': 'queue10',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    {
-                        'status': 'running',
-                        'node': 'rabbit@host',
-                        'name': 'queue11',
-                        'consumers': 0,
-                        'vhost': '/',
-                        'backing_queue_status': {
-                            'q1': 0,
-                            'q3': 0,
-                            'q2': 0,
-                            'q4': 0,
-                            'avg_ack_egress_rate': 0.0,
-                            'ram_msg_count': 0,
-                            'ram_ack_count': 0,
-                            'len': 0,
-                            'persistent_count': 0,
-                            'target_ram_count': 'infinity',
-                            'next_seq_id': 0,
-                            'delta': ['delta', 'undefined', 0, 'undefined'],
-                            'pending_acks': 0,
-                            'avg_ack_ingress_rate': 0.0,
-                            'avg_egress_rate': 0.0,
-                            'avg_ingress_rate': 0.0
-                        },
-                        'durable': True,
-                        'idle_since': '2013-10-03 13:38:18',
-                        'exclusive_consumer_tag': '',
-                        'arguments': {},
-                        'memory': 10956,
-                        'policy': '',
-                        'auto_delete': False
-                    },
-                    ...
-                ]
+        """data is a list of nodes or queues:
+        data = [
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue1',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host,
+                'name': 'queue10',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue11',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            ...
+        ]
         """
         data = []
 
@@ -673,7 +680,12 @@ class RabbitMQ(AgentCheck):
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
-            aliveness_response = self._get_data(aliveness_url)
+            aliveness_response = {}
+            try:
+                aliveness_response = self._get_data(aliveness_url)
+            except Exception as e:
+                self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
+
             message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':

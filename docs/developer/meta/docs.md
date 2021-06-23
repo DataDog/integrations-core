@@ -11,18 +11,19 @@ with the beautiful [Material for MkDocs][docs-theme] theme.
 
 We use a select few [MkDocs plugins][mkdocs-plugins] to achieve the following:
 
-- minify HTML ([:octicons-octoface:][docs-plugin-minify])
-- display the date of the last Git modification of every page ([:octicons-octoface:][docs-plugin-revision-date])
-- automatically generate docs based on code and docstrings ([:octicons-octoface:][docs-plugin-auto-doc])
+- minify HTML ([:octicons-octoface-24:][docs-plugin-minify])
+- display the date of the last Git modification of every page ([:octicons-octoface-24:][docs-plugin-revision-date])
+- automatically generate docs based on code and docstrings ([:octicons-octoface-24:][docs-plugin-auto-doc])
+- export the site as a PDF ([:octicons-octoface-24:][docs-plugin-pdf-export])
 
 ## Extensions
 
 We also depend on a few [Python-Markdown extensions][python-markdown-extensions] to achieve the following:
 
-- support for emojis, collapsible elements, code highlighting, and other advanced features courtesy of the PyMdown extension suite ([:octicons-octoface:][docs-extension-pymdown])
-- ability to inline SVG icons from [Material][icons-material], [FontAwesome][icons-fontawesome], and [Octicons][icons-octicons] ([:octicons-octoface:][docs-extension-material])
-- allow arbitrary [scripts](#scripts) to modify MkDocs input files ([:octicons-octoface:][docs-extension-patcher])
-- automatically generate reference docs for [Click][click-github]-based command line interfaces ([:octicons-octoface:][docs-extension-auto-cli])
+- support for emojis, collapsible elements, code highlighting, and other advanced features courtesy of the PyMdown extension suite ([:octicons-octoface-24:][docs-extension-pymdown])
+- ability to inline SVG icons from [Material][icons-material], [FontAwesome][icons-fontawesome], and [Octicons][icons-octicons] ([:octicons-octoface-24:][docs-extension-material])
+- allow arbitrary [scripts](#scripts) to modify MkDocs input files ([:octicons-octoface-24:][docs-extension-patcher])
+- automatically generate reference docs for [Click][click-github]-based command line interfaces ([:octicons-octoface-24:][docs-extension-auto-cli])
 
 ## References
 
@@ -69,6 +70,8 @@ ddev docs serve
 ```
 
 By default, live reloading is enabled so any modification will be reflected in near-real time.
+
+**Note:** In order to export the site as a PDF, you can use the `--pdf` flag, but you will need some [external dependencies][weasyprint-dependencies].
 
 ## Deploy
 

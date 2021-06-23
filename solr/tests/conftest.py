@@ -14,7 +14,7 @@ from .common import HOST
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yml')):
+    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yml'), mount_logs=True):
         instance = load_jmx_config()
         instance['instances'][0]['host'] = HOST
         instance['instances'][0]['port'] = 18983

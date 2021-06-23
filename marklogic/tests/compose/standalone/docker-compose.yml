@@ -1,0 +1,13 @@
+version: '3.6'
+
+services:
+  bootstrap:
+    image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
+    environment:
+      - MARKLOGIC_INIT=true
+      - MARKLOGIC_ADMIN_USERNAME=admin
+      - MARKLOGIC_ADMIN_PASSWORD=admin
+    ports:
+      - 8000:8000
+      - 8001:8001
+      - 8002:8002

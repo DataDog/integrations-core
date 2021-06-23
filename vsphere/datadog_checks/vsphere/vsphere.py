@@ -4,6 +4,7 @@
 from __future__ import division
 
 import datetime as dt
+import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -14,6 +15,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -25,7 +27,7 @@ from datadog_checks.vsphere.constants import (
     REALTIME_METRICS_INTERVAL_ID,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.legacy.event import VSphereEvent
+from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
@@ -40,7 +42,7 @@ from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
     get_mapped_instance_tag,
-    get_parent_tags_recursively,
+    get_tags_recursively,
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
@@ -73,36 +75,46 @@ class VSphereCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(VSphereCheck, self).__init__(*args, **kwargs)
         instance = cast(InstanceConfig, self.instance)
-        self.config = VSphereConfig(instance, self.log)
+        self._config = VSphereConfig(instance, self.init_config, self.log)
 
-        self.latest_event_query = dt.datetime.now()
-        self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
+        self.latest_event_query = get_current_datetime()
+        self.infrastructure_cache = InfrastructureCache(interval_sec=self._config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
-            interval_sec=self.config.refresh_metrics_metadata_cache_interval
+            interval_sec=self._config.refresh_metrics_metadata_cache_interval
         )
         self.api = cast(VSphereAPI, None)
         self.api_rest = cast(VSphereRestAPI, None)
         # Do not override `AgentCheck.hostname`
         self._hostname = None
-        self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
+        self.thread_pool = ThreadPoolExecutor(max_workers=self._config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
     def initiate_api_connection(self):
         # type: () -> None
         try:
             self.log.debug(
-                "Connecting to the vCenter API %s with username %s...", self.config.hostname, self.config.username
+                "Connecting to the vCenter API %s with username %s...", self._config.hostname, self._config.username
             )
-            self.api = VSphereAPI(self.config, self.log)
+            self.api = VSphereAPI(self._config, self.log)
             self.log.debug("Connected")
         except APIConnectionError:
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
 
-        if self.config.should_collect_tags:
+        if self._config.should_collect_tags:
             try:
-                self.api_rest = VSphereRestAPI(self.config, self.log)
+                version_info = self.api.get_version()
+                major_version = int(version_info.version_str[0])
+
+                if major_version >= 7:
+                    try:
+                        # Try to connect to REST API vSphere v7
+                        self.api_rest = VSphereRestAPI(self._config, self.log, False)
+                        return
+                    except Exception:
+                        self.log.debug("REST API of vSphere 7 not detected, falling back to the old API.")
+                self.api_rest = VSphereRestAPI(self._config, self.log, True)
             except Exception as e:
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
@@ -113,29 +125,34 @@ class VSphereCheck(AgentCheck):
         """
         self.log.debug(
             "Refreshing the metrics metadata cache. Collecting all counters metadata for collection_level=%d",
-            self.config.collection_level,
+            self._config.collection_level,
         )
         t0 = Timer()
-        counters = self.api.get_perf_counter_by_level(self.config.collection_level)
+        counters = self.api.get_perf_counter_by_level(self._config.collection_level)
         self.gauge(
             "datadog.vsphere.refresh_metrics_metadata_cache.time",
             t0.total(),
-            tags=self.config.base_tags,
+            tags=self._config.base_tags,
             raw=True,
             hostname=self._hostname,
         )
         self.log.debug("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
 
-        for mor_type in self.config.collected_resource_types:
+        for mor_type in self._config.collected_resource_types:
             allowed_counters = []
             for c in counters:
                 metric_name = format_metric_name(c)
                 if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type] and not is_metric_excluded_by_filters(
-                    metric_name, mor_type, self.config.metric_filters
+                    metric_name, mor_type, self._config.metric_filters
                 ):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
+            self.log.debug(
+                "Set metadata for mor_type %s: %s",
+                mor_type,
+                metadata,
+            )
 
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
@@ -151,11 +168,11 @@ class VSphereCheck(AgentCheck):
 
         # In order to be more efficient in tag collection, the infrastructure data is filtered as much as possible.
         # All filters are applied except the ones based on tags of course.
-        resource_filters_without_tags = [f for f in self.config.resource_filters if not isinstance(f, TagFilter)]
+        resource_filters_without_tags = [f for f in self._config.resource_filters if not isinstance(f, TagFilter)]
         filtered_infra_data = {
             mor: props
             for mor, props in iteritems(infrastructure_data)
-            if isinstance(mor, tuple(self.config.collected_resource_types))
+            if isinstance(mor, tuple(self._config.collected_resource_types))
             and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
         }
 
@@ -167,7 +184,14 @@ class VSphereCheck(AgentCheck):
             self.log.error("Failed to collect tags: %s", e)
             return {}
 
-        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.gauge(
+            'datadog.vsphere.query_tags.time',
+            t0.total(),
+            tags=self._config.base_tags,
+            raw=True,
+            hostname=self._hostname,
+        )
+
         return mor_tags
 
     def refresh_infrastructure_cache(self):
@@ -181,26 +205,21 @@ class VSphereCheck(AgentCheck):
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),
-            tags=self.config.base_tags,
+            tags=self._config.base_tags,
             raw=True,
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.debug("Infrastructure cache: %s", infrastructure_data)
 
         all_tags = {}
-        if self.config.should_collect_tags:
+        if self._config.should_collect_tags:
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
         for mor, properties in iteritems(infrastructure_data):
-            if not isinstance(mor, tuple(self.config.collected_resource_types)):
+            if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
-                continue
-
-            if not is_resource_collected_by_filters(
-                mor, infrastructure_data, self.config.resource_filters, self.infrastructure_cache.get_mor_tags(mor)
-            ):
-                # The resource does not match the specified whitelist/blacklist patterns.
                 continue
 
             mor_name = to_string(properties.get("name", "unknown"))
@@ -223,7 +242,7 @@ class VSphereCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
-                if self.config.use_guest_hostname:
+                if self._config.use_guest_hostname:
                     hostname = properties.get("guest.hostName", mor_name)
                 else:
                     hostname = mor_name
@@ -232,8 +251,34 @@ class VSphereCheck(AgentCheck):
             else:
                 tags.append('vsphere_{}:{}'.format(mor_type_str, mor_name))
 
-            tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
+            parent = properties.get('parent')
+            runtime_host = properties.get('runtime.host')
+            if parent is not None:
+                tags.extend(get_tags_recursively(parent, infrastructure_data, self._config))
+            if runtime_host is not None:
+                tags.extend(
+                    get_tags_recursively(
+                        runtime_host, infrastructure_data, self._config, include_only=['vsphere_cluster']
+                    )
+                )
             tags.append('vsphere_type:{}'.format(mor_type_str))
+
+            # Attach tags from fetched attributes.
+            tags.extend(properties.get('attributes', []))
+
+            resource_tags = self.infrastructure_cache.get_mor_tags(mor) + tags
+            if not is_resource_collected_by_filters(
+                mor,
+                infrastructure_data,
+                self._config.resource_filters,
+                resource_tags,
+            ):
+                # The resource does not match the specified whitelist/blacklist patterns.
+                self.log.debug(
+                    "Skipping resource not matched by filters. resource=`%s` tags=`%s`", mor_name, resource_tags
+                )
+                continue
+
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
             if hostname:
@@ -269,10 +314,23 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
+            self.log.debug(
+                "Retrieved mor props for entity %s: %s",
+                results_per_mor.entity,
+                mor_props,
+            )
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
+                if self.log.isEnabledFor(logging.DEBUG):
+                    # Use isEnabledFor to avoid unnecessary processing
+                    self.log.debug(
+                        "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                        metric_name,
+                        resource_type,
+                        str(result).replace("\n", "\\n"),
+                    )
                 if not metric_name:
                     # Fail-safe
                     self.log.debug(
@@ -291,13 +349,14 @@ class VSphereCheck(AgentCheck):
                 if not valid_values:
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
-                        " is negative (i.e. the metric is not yet available).",
+                        " is negative (i.e. the metric is not yet available). values: %s",
                         to_string(metric_name),
+                        list(result.value),
                     )
                     continue
 
                 tags = []
-                if should_collect_per_instance_values(self.config, metric_name, resource_type) and (
+                if should_collect_per_instance_values(self._config, metric_name, resource_type) and (
                     metric_name in have_instance_value[resource_type]
                 ):
                     instance_value = result.id.instance
@@ -318,16 +377,23 @@ class VSphereCheck(AgentCheck):
                 else:
                     # Tags are (mostly) submitted as external host tags.
                     hostname = to_string(mor_props.get('hostname'))
-                    if self.config.excluded_host_tags:
-                        tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
+                    if self._config.excluded_host_tags:
+                        tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
 
-                tags.extend(self.config.base_tags)
+                tags.extend(self._config.base_tags)
 
                 value = valid_values[-1]
                 if metric_name in PERCENT_METRICS:
                     # Convert the percentage to a float.
                     value /= 100.0
 
+                self.log.debug(
+                    "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                    metric_name,
+                    value,
+                    hostname,
+                    tags,
+                )
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
                 self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
@@ -338,7 +404,13 @@ class VSphereCheck(AgentCheck):
         """
         t0 = Timer()
         metrics_values = self.api.query_metrics(query_specs)
-        self.histogram('datadog.vsphere.query_metrics.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.histogram(
+            'datadog.vsphere.query_metrics.time',
+            t0.total(),
+            tags=self._config.base_tags,
+            raw=True,
+            hostname=self._hostname,
+        )
         return metrics_values
 
     def make_query_specs(self):
@@ -346,7 +418,9 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
         """
-        for resource_type in self.config.collected_resource_types:
+        server_current_time = self.api.get_current_time()
+        self.log.debug("Server current datetime: %s", server_current_time)
+        for resource_type in self._config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
             metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
@@ -355,7 +429,7 @@ class VSphereCheck(AgentCheck):
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
                 # - Double-quotes ("") to specify aggregated statistics
                 # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
-                if should_collect_per_instance_values(self.config, metric_name, resource_type):
+                if should_collect_per_instance_values(self._config, metric_name, resource_type):
                     instance = "*"
                 else:
                     instance = ''
@@ -374,7 +448,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = dt.datetime.now() - dt.timedelta(hours=2)
+                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -432,15 +506,15 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif resource_type in REALTIME_RESOURCES or self.config.max_historical_metrics < 0:
+        elif resource_type in REALTIME_RESOURCES or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
-            max_batch_size = self.config.metrics_per_query
+            max_batch_size = self._config.metrics_per_query
         else:
             # Collection is limited by the value of `max_query_metrics`
-            if self.config.metrics_per_query < 0:
-                max_batch_size = self.config.max_historical_metrics
+            if self._config.metrics_per_query < 0:
+                max_batch_size = self._config.max_historical_metrics
             else:
-                max_batch_size = min(self.config.metrics_per_query, self.config.max_historical_metrics)
+                max_batch_size = min(self._config.metrics_per_query, self._config.max_historical_metrics)
 
         batch = defaultdict(list)  # type: MorBatch
         batch_size = 0
@@ -472,8 +546,8 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 mor_tags = mor_props['tags'] + mor_tags
-                tags = [t for t in mor_tags if t.split(':')[0] not in self.config.excluded_host_tags]
-                tags.extend(self.config.base_tags)
+                tags = [t for t in mor_tags if t.split(':')[0] not in self._config.excluded_host_tags]
+                tags.extend(self._config.base_tags)
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
         if external_host_tags:
@@ -481,31 +555,46 @@ class VSphereCheck(AgentCheck):
 
     def collect_events(self):
         # type: () -> None
-        self.log.debug("Starting events collection.")
+        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
+        latest_event_time = None
+        collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
             self.gauge(
                 'datadog.vsphere.collect_events.time',
                 t0.total(),
-                tags=self.config.base_tags,
+                tags=self._config.base_tags,
                 raw=True,
                 hostname=self._hostname,
             )
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
-                normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
+                self.log.debug(
+                    "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                )
+                normalized_event = VSphereEvent(event, event_config, self._config.base_tags)
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
+                    self.log.debug(
+                        "Submit event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                    )
                     self.event(event_payload)
+                if latest_event_time is None or event.createdTime > latest_event_time:
+                    latest_event_time = event.createdTime
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
+        if latest_event_time is not None:
+            self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_event_query` to `collect_start_time` as safeguard in case no events are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_event_query = collect_start_time
 
     def check(self, _):
         # type: (Any) -> None
@@ -518,27 +607,34 @@ class VSphereCheck(AgentCheck):
         except Exception:
             # Explicitly do not attach any host to the service checks.
             self.log.exception("The vCenter API is not responding. The check will not run.")
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.base_tags, hostname=None)
+
+        # Collect and submit events
+        if self._config.should_collect_events:
+            self.collect_events()
+
+        if self._config.collect_events_only:
+            return
 
         # Update the value of `max_query_metrics` if needed
-        if self.config.is_historical():
+        if self._config.is_historical():
             try:
                 vcenter_max_hist_metrics = self.api.get_max_query_metrics()
-                if vcenter_max_hist_metrics < self.config.max_historical_metrics:
+                if vcenter_max_hist_metrics < self._config.max_historical_metrics:
                     self.log.warning(
                         "The integration was configured with `max_query_metrics: %d` but your vCenter has a"
                         "limit of %d which is lower. Ignoring your configuration in favor of the vCenter value."
                         "To update the vCenter value, please update the `%s` field",
-                        self.config.max_historical_metrics,
+                        self._config.max_historical_metrics,
                         vcenter_max_hist_metrics,
                         MAX_QUERY_METRICS_OPTION,
                     )
-                    self.config.max_historical_metrics = vcenter_max_hist_metrics
+                    self._config.max_historical_metrics = vcenter_max_hist_metrics
             except Exception:
-                self.config.max_historical_metrics = DEFAULT_MAX_QUERY_METRICS
+                self._config.max_historical_metrics = DEFAULT_MAX_QUERY_METRICS
                 self.log.info(
                     "Could not fetch the value of %s, setting `max_historical_metrics` to %d.",
                     MAX_QUERY_METRICS_OPTION,
@@ -558,12 +654,8 @@ class VSphereCheck(AgentCheck):
             # Submit host tags as soon as we have fresh data
             self.submit_external_host_tags()
 
-        # Collect and submit events
-        if self.config.should_collect_events:
-            self.collect_events()
-
         # Submit the number of VMs that are monitored
-        for resource_type in self.config.collected_resource_types:
+        for resource_type in self._config.collected_resource_types:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
                 # Explicitly do not attach any host to those metrics.
@@ -571,11 +663,11 @@ class VSphereCheck(AgentCheck):
                 self.count(
                     '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
                     1,
-                    tags=self.config.base_tags + resource_tags,
+                    tags=self._config.base_tags + resource_tags,
                     hostname=None,
                 )
 
         # Creating a thread pool and starting metric collection
-        self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
+        self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")

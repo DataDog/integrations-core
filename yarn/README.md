@@ -22,9 +22,12 @@ The YARN check is included in the [Datadog Agent][3] package, so you don't need 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
 
@@ -55,6 +58,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6] to start sending YARN metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -64,6 +70,36 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `yarn`                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                           |
 | `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "<CLUSTER_NAME>"}` |
+
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][5] for all available configuration options.
+
+    ```yaml
+    logs:
+      - type: file
+        path: <LOG_FILE_PATH>
+        source: yarn
+        service: <SERVICE_NAME>
+        # To handle multi line that starts with yyyy-mm-dd use the following pattern
+        # log_processing_rules:
+        #   - type: multi_line
+        #     pattern: \d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2},\d{3}
+        #     name: new_log_start_with_date
+    ```
+
+3. [Restart the Agent][6].
+
+See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -81,12 +117,10 @@ The Yarn check does not include any events.
 
 ### Service Checks
 
-**yarn.can_connect**:
-
+**yarn.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
 
-**yarn.application.status**:
-
+**yarn.application.status**:<br>
 Returns per-application status according to the mapping specified in the [`conf.yaml`][5] file.
 
 ## Troubleshooting
@@ -113,3 +147,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
+[14]:  https://docs.datadoghq.com/agent/docker/log/

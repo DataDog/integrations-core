@@ -1,0 +1,1 @@
+Congrats! This file was obtained by mounting a directory from the NFS server.

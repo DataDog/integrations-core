@@ -275,3 +275,54 @@ gitlab.prometheus_target_skipped_scrapes_total,count,,request,second,The total n
 gitlab.prometheus_target_sync_length_seconds,gauge,,request,second,The actual interval to sync the scrape pool,0,gitlab,scrape pool sync interval
 gitlab.prometheus_treecache_watcher_goroutines,gauge,,request,second,The current number of watcher goroutines,0,gitlab,watcher goroutines
 gitlab.prometheus_treecache_zookeeper_failures_total,count,,request,second,The total number of ZooKeeper failures,0,gitlab,total Zookeeper failures
+gitlab.action_cable.active_connections,gauge,,connection,,Number of ActionCable WS clients currently connected,0,gitlab,action cable connections
+gitlab.db_partitions_missing,gauge,,,,"Number of database partitions currently expected, but not present",0,gitlab,db partitions missing
+gitlab.db_partitions_present,gauge,,,,Number of database partitions present,0,gitlab,db partitions present
+gitlab.geo.merge_request_diffs,gauge,,,,"Number of merge request diffs on primary",0,gitlab,geo merge request diffs
+gitlab.geo.merge_request_diffs_checksum_failed,gauge,,,,"Number of merge request diffs failed to calculate the checksum on primary",0,gitlab,geo merge request diffs checksum failed
+gitlab.geo.merge_request_diffs_checksummed,gauge,,,,"Number of merge request diffs checksummed on primary",0,gitlab,geo merge request diffs checksummed
+gitlab.geo.merge_request_diffs_failed,gauge,,,,"Number of syncable merge request diffs failed to sync on secondary",0,gitlab,geo merge request diffs failed
+gitlab.geo.merge_request_diffs_registry,gauge,,,,"Number of merge request diffs in the registry",0,gitlab,geo merge request diffs registry
+gitlab.geo.merge_request_diffs_synced,gauge,,,,"Number of syncable merge request diffs synced on secondary",0,gitlab,geo merge request diffs synced
+gitlab.geo.package_files,gauge,,,,"Number of package files on primary",0,gitlab,geo package files
+gitlab.geo.package_files_checksum_failed,gauge,,,,"Number of package files failed to calculate the checksum on primary",0,gitlab,geo package files checksum failed
+gitlab.geo.package_files_checksummed,gauge,,,,"Number of package files checksummed on primary",0,gitlab,geo package files checksummed
+gitlab.geo.package_files_failed,gauge,,,,"Number of syncable package files failed to sync on secondary",0,gitlab,geo package files failed
+gitlab.geo.package_files_registry,gauge,,,,"Number of package files in the registry",0,gitlab,geo package files registry
+gitlab.geo.package_files_synced,gauge,,,,"Number of syncable package files synced on secondary",0,gitlab,geo package files synced
+gitlab.geo.terraform_states,gauge,,,,"Number of terraform states on primary",0,gitlab,geo terraform states
+gitlab.geo.terraform_states_checksum_failed,gauge,,,,"Number of terraform states failed to calculate the checksum on primary",0,gitlab,geo terraform states checksum failed
+gitlab.geo.terraform_states_checksummed,gauge,,,,"Number of terraform states checksummed on primary",0,gitlab,geo terraform states checksummed
+gitlab.geo.terraform_states_failed,gauge,,,,"Number of syncable terraform states failed to sync on secondary",0,gitlab,geo terraform states failed
+gitlab.geo.terraform_states_registry,gauge,,,,"Number of terraform states in the registry",0,gitlab,geo terraform states registry
+gitlab.geo.terraform_states_synced,gauge,,,,"Number of syncable terraform states synced on secondary",0,gitlab,geo terraform states synced
+gitlab.ci_pipeline_creation_duration_seconds.count,count,,,,"The count of the time in seconds it takes to create a CI/CD pipeline",0,gitlab,ci pipeline creation seconds
+gitlab.ci_pipeline_creation_duration_seconds.sum,gauge,,second,,"The sum of the time in seconds it takes to create a CI/CD pipeline",0,gitlab,ci pipeline creation seconds
+gitlab.ci_pipeline_size_builds.count,count,,,,"The count of total number of builds within a pipeline grouped by a pipeline source",0,gitlab,ci pipeline size
+gitlab.ci_pipeline_size_builds.sum,gauge,,,,"The sum of total number of builds within a pipeline grouped by a pipeline source",0,gitlab,ci pipeline size
+gitlab.database.connection_pool_busy,gauge,,connection,,"Connections in use where the owner is still alive",0,gitlab,database connection busy
+gitlab.database.connection_pool_connections,gauge,,connection,,"Current connections in the pool",0,gitlab,database connection
+gitlab.database.connection_pool_dead,gauge,,connection,,"Connections in use where the owner is not alive",0,gitlab,database connection dead
+gitlab.database.connection_pool_idle,gauge,,connection,,"Connections not in use",0,gitlab,database connection idle
+gitlab.database.connection_pool_size,gauge,,connection,,"Total connection pool capacity",0,gitlab,database connection size
+gitlab.database.connection_pool_waiting,gauge,,thread,,"Threads currently waiting on this queue",0,gitlab,database connection waiting
+gitlab.redis.client_exceptions_total,count,,error,,"Number of Redis client exceptions, broken down by exception class",0,gitlab,redis client exceptions
+gitlab.redis.client_requests_total,count,,request,,"Number of Redis client requests",0,gitlab,redis client requests
+gitlab.redis.client_requests_duration_seconds.count,count,,,,"The count of redis request latency, excluding blocking commands",0,gitlab,redis requests duration
+gitlab.redis.client_requests_duration_seconds.sum,gauge,,second,,"The sum of redis request latency, excluding blocking commands",0,gitlab,redis requests duration
+gitlab.ruby.threads_max_expected_threads,gauge,,thread,,"Maximum number of threads expected to be running and performing application work",0,gitlab,ruby threads max
+gitlab.ruby.threads_running_threads,gauge,,thread,,"Number of running Ruby threads by name",0,gitlab,ruby threads running
+gitlab.global_search_awaiting_indexing_queue_size,gauge,,,,"Number of database updates waiting to be synchronized to Elasticsearch while indexing is paused",0,gitlab,global search
+gitlab.global_search_bulk_cron_queue_size,gauge,,,,"Number of database records waiting to be synchronized to Elasticsearch",0,gitlab,global search
+gitlab.http.elasticsearch_requests_duration_seconds.count,count,,,,"The count of elasticsearch requests duration during web transactions",0,gitlab,http elasticsearch requests
+gitlab.http.elasticsearch_requests_duration_seconds.sum,gauge,,second,,"The sum of elasticsearch requests duration during web transactions",0,gitlab,http elasticsearch requests
+gitlab.http.elasticsearch_requests_total,count,,request,,"Elasticsearch requests count during web transactions",0,gitlab,http elasticsearch requests
+gitlab.ruby.process_proportional_memory_bytes,gauge,,byte,,"Memory usage by process (PSS/Proportional Set Size)",0,gitlab,ruby process memory
+gitlab.ruby.process_unique_memory_bytes,gauge,,byte,,"Memory usage by process (USS/Unique Set Size)",0,gitlab,ruby process unique memory
+gitlab.ruby.sampler_duration_seconds,count,,second,,"Time spent collecting stats",0,gitlab,ruby sampler duration
+gitlab.sidekiq.elasticsearch_requests_duration_seconds.count,count,,,,"The count of duration in seconds that a Sidekiq job spent in requests to an Elasticsearch server",0,gitlab,sidekiq elastic duration
+gitlab.sidekiq.elasticsearch_requests_duration_seconds.sum,gauge,,second,,"The sum of duration in seconds that a Sidekiq job spent in requests to an Elasticsearch server",0,gitlab,sidekiq elastic duration
+gitlab.sidekiq.elasticsearch_requests_total,count,,request,,"Elasticsearch requests during a Sidekiq job execution",0,gitlab,sidekiq elastic requests
+gitlab.sidekiq.redis_requests_duration_seconds.count,count,,,,"The count of duration in seconds that a Sidekiq job spent querying a Redis server",0,gitlab,sidekiq redis duration
+gitlab.sidekiq.redis_requests_duration_seconds.sum,gauge,,second,,"The sum of duration in seconds that a Sidekiq job spent querying a Redis server",0,gitlab,sidekiq redis duration
+gitlab.sidekiq.redis_requests_total,count,,request,,"Redis requests during a Sidekiq job execution",0,gitlab,sidekiq redis requests

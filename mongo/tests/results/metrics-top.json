@@ -1,0 +1,5402 @@
+[
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 328.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 7.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 13.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 328.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 7.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 13.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 139460.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 913.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 186337.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 75594.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 27725.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 278.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 45509.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 4741.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 310.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 24.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 16540.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 67960.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 17272.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.commands.time",
+        "type": 0,
+        "value": 16686.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 1910.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 1910.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 7691619.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.getmore.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 13497.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 2878.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 3943.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.insert.time",
+        "type": 0,
+        "value": 738.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 128.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 227.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 27.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 20.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 128.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 227.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 27.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 20.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 298.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 389.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 836731.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 2007504.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 613.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 93.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 45550.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 591496.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.queries.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 128.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 227.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 27.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 23298.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 128.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 227.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 27.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 23298.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 298.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 976.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 836731.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 2007504.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 725.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 93.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 45550.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 278.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 2635075906.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 111522.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 136157.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.readlock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 220.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 405.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.remove.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 328.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 131.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 229.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 3577.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 30.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 23303.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 18.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 328.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 131.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 229.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 3577.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 30.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 23303.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 18.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 139460.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 298.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 26602.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 1036785.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 2038407.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 25371.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 5706320.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 93.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 73275.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 278.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 2635115240.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 126383.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 310.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 24.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 152697.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 70838.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 21215.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.total.time",
+        "type": 0,
+        "value": 17424.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 1316.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 1316.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 24898.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 30903.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 25269.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 3049235.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.update.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 3572.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.countps",
+        "type": 1,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 4.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 3.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 3572.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 9.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.count",
+        "type": 0,
+        "value": 2.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:$cmd.aggregate"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.roles"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 25626.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:system.version"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 200054.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.chunks.config.system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 30903.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.collections"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 25371.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:cache.databases"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 5705595.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:system.sessions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transaction_coordinators"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 80.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:config",
+            "collection:transactions"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 39116.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:oplog.rs"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 14861.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.election"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.minvalid"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 310.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:replset.oplogTruncateAfterPoint"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 24.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:startup_log"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 16540.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.replset"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 32.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:system.rollback.id"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 2878.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 3943.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.usage.writelock.time",
+        "type": 0,
+        "value": 738.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:orders"
+        ]
+    }
+]

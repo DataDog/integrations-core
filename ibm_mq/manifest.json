@@ -10,7 +10,8 @@
   "guid": "873153b6-5184-438a-8a32-1e2d2e490dde",
   "support": "core",
   "supported_os": [
-    "linux"
+    "linux",
+    "mac_os"
   ],
   "public_title": "Datadog-IBM MQ Integration",
   "categories": [
@@ -24,10 +25,16 @@
   "integration_id": "ibm-mq",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "IBM MQ": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
-    }
+    },
+    "logs": {
+      "source": "ibm_mq"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -32,7 +32,7 @@ except Exception:
 @pytest.fixture(autouse=True)
 def reset_process_list_cache():
     # Force process list cache flush in the next test
-    ProcessCheck.process_list_cache.last_ts = -ProcessCheck.process_list_cache.cache_duration - 1
+    ProcessCheck.process_list_cache.reset()
 
 
 class MockProcess(object):
@@ -102,11 +102,12 @@ def test_process_list_cache(aggregator):
     config = {
         'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
     }
-    process1 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][0]])
-    process2 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][1]])
+    process1 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][0]])
+    process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
-    process1.check(config['instances'][0])
-    process2.check(config['instances'][1])
+    with patch('datadog_checks.process.cache.ProcessListCache.reset'):
+        process1.check(config['instances'][0])
+        process2.check(config['instances'][1])
 
     # Should always succeed
     assert process1.process_list_cache.elements[0].name() == "Process 1"
@@ -116,7 +117,7 @@ def test_process_list_cache(aggregator):
 
 def test_ad_cache(aggregator):
     config = {'instances': [{'name': 'python', 'search_string': ['python'], 'ignore_denied_access': 'false'}]}
-    process = ProcessCheck(common.CHECK_NAME, {}, {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, {}, config['instances'])
 
     def deny_name(obj):
         raise psutil.AccessDenied()
@@ -309,8 +310,8 @@ def test_check_real_process_regex(aggregator):
 
 
 def test_relocated_procfs(aggregator):
-    import tempfile
     import shutil
+    import tempfile
     import uuid
 
     unique_process_name = str(uuid.uuid4())
@@ -360,7 +361,7 @@ def test_relocated_procfs(aggregator):
             }
         ],
     }
-    process = ProcessCheck(common.CHECK_NAME, config['init_config'], {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
         with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(

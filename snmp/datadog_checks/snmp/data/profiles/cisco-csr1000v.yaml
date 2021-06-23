@@ -1,5 +1,9 @@
 extends:
-  - _base_cisco.yaml
-  - _generic-router-ip.yaml
-  
+  - _base.yaml
+  - _cisco-generic.yaml
+  - _generic-ip.yaml
+
 sysobjectid: 1.3.6.1.4.1.9.1.1537
+
+device:
+  vendor: "cisco"

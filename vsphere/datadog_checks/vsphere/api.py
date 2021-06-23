@@ -7,11 +7,13 @@ import ssl
 from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapAdapter, vim, vmodl
+from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
+from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 
 CallableT = TypeVar('CallableT', bound=Callable)
@@ -66,7 +68,7 @@ class APIResponseError(Exception):
 class VersionInfo(object):
     def __init__(self, about_info):
         # type: (vim.AboutInfo) -> None
-        # Semver formatted version string
+        # SemVer formatted version string
         self.version_str = "{}+{}".format(about_info.version, about_info.build)
 
         # Text based information i.e 'VMware vCenter Server 6.7.0 build-14792544'
@@ -104,15 +106,11 @@ class VSphereAPI(object):
         context = None
         if not self.config.ssl_verify:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
-            context = ssl.SSLContext(
-                ssl.PROTOCOL_TLS  # type: ignore
-            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context.check_hostname = True
@@ -148,9 +146,9 @@ class VSphereAPI(object):
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
-    def check_health(self):
-        # type: () -> None
-        self._conn.CurrentTime()
+    def get_current_time(self):
+        # type: () -> dt.datetime
+        return self._conn.CurrentTime()
 
     @smart_retry
     def get_version(self):
@@ -168,18 +166,10 @@ class VSphereAPI(object):
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 
     @smart_retry
-    def get_infrastructure(self):
-        # type: () -> InfrastructureData
-        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
-
-        :return: {
-            'vim.VirtualMachine-VM0': {
-              'name': 'VM-0',
-              ...
-            }
-            ...
-        }
-        """
+    def _get_raw_infrastructure(self):
+        # type: () -> List[vmodl.query.PropertyCollector.ObjectContent]
+        """Traverse the whole vSphere infrastructure and returns the list of raw pyvmomi MOR objects with
+        the required pre-fetched attributes."""
         content = self._conn.content  # vim.ServiceInstanceContent reference from the connection
 
         property_specs = []
@@ -187,7 +177,9 @@ class VSphereAPI(object):
         for resource in ALL_RESOURCES:
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource
-            property_spec.pathSet = ["name", "parent", "customValue"]
+            property_spec.pathSet = ["name", "parent"]
+            if self.config.should_collect_attributes:
+                property_spec.pathSet.append("customValue")
             if resource == vim.VirtualMachine:
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
@@ -229,6 +221,30 @@ class VSphereAPI(object):
         finally:
             view_ref.Destroy()
 
+        return obj_content_list
+
+    @smart_retry
+    def _fetch_all_attributes(self):
+        # type: () -> List[vim.CustomFieldsManager.FieldDef]
+        """Retrieves all attributes for every single resource in vSphere. It is not possible to fetch
+        only the one we needs.
+        Note: Code is in a separate method so that it can be 'smart_retried' if the API call fails."""
+        return self._conn.content.customFieldsManager.field
+
+    def get_infrastructure(self):
+        # type: () -> InfrastructureData
+        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
+
+        :return: {
+            'vim.VirtualMachine-VM0': {
+              'name': 'VM-0',
+              ...
+            }
+            ...
+        }
+        """
+
+        obj_content_list = self._get_raw_infrastructure()
         # Build infrastructure data
         # Each `obj_content` contains the fields:
         #   - `obj`: `ManagedEntity` aka `mor`
@@ -239,8 +255,29 @@ class VSphereAPI(object):
             if obj_content.propSet
         }
 
+        # Add the root folder entity as it can't be fetched from the previous api calls.
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
+
+        if self.config.should_collect_attributes:
+            # Clean up attributes in infrastructure_data,
+            # at this point they are custom pyvmomi objects and the attribute keys are not resolved.
+
+            attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
+            for props in itervalues(infrastructure_data):
+                mor_attributes = []
+                if 'customValue' not in props:
+                    continue
+                for attribute in props.pop('customValue'):
+                    # The attribute key is always unique
+                    attr_key_name = attribute_keys.get(attribute.key)
+                    if attr_key_name is None:
+                        self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
+                        continue
+                    attr_value = attribute.value
+                    mor_attributes.append("{}{}:{}".format(self.config.attr_prefix, attr_key_name, attr_value))
+
+                props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)
 
     @smart_retry
@@ -248,6 +285,12 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
+        self.log.debug("Received %s values from QueryPerf", len(values))
+        self.log.trace(
+            "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
+            query_specs,
+            values,
+        )
         return values
 
     @smart_retry
@@ -257,13 +300,49 @@ class VSphereAPI(object):
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
-        return event_manager.QueryEvents(query_filter)
+        query_filter.type = ALLOWED_EVENTS
+        try:
+            events = event_manager.QueryEvents(query_filter)
+        except SoapAdapter.ParserError as e:
+            self.log.debug("Error parsing bulk events: %s", e)
 
-    @smart_retry
-    def get_latest_event_timestamp(self):
-        # type: () -> dt.datetime
+            if self.config.use_collect_events_fallback:
+                self.log.debug("Start fetching events one by one...")
+                events = self._get_new_events_one_by_one(query_filter)
+            else:
+                raise
+        return events
+
+    def _get_new_events_one_by_one(self, query_filter):
+        # type: (vim.event.EventFilterSpec) -> List[vim.event.Event]
+        """
+        Collecting events one by one and skip those with parsing error.
+
+        The parsing error is triggered by unknown types like `ContentLibrary`.
+        More info:
+            - https://github.com/vmware/pyvmomi/issues/190
+            - https://github.com/vmware/pyvmomi/issues/872
+
+        The event collection fallback is a workaround and can be removed when the upstream issues
+        mentioned above are solved.
+        """
         event_manager = self._conn.content.eventManager
-        return event_manager.latestEvent.createdTime
+        events = []
+        event_collector = event_manager.CreateCollectorForEvents(query_filter)
+        while True:
+            try:
+                collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
+            except SoapAdapter.ParserError as e:
+                self.log.debug("Cannot parse event, skipped: %s", e)
+                continue
+            if len(collected_events) == 0:
+                break
+            event = collected_events[0]
+            self.log.debug(
+                "Collect event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+            )
+            events.extend(collected_events)
+        return events
 
     @smart_retry
     def get_max_query_metrics(self):

@@ -11,6 +11,7 @@ from six import iteritems
 from six.moves.urllib.parse import quote, urljoin
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers
 from datadog_checks.couch import errors
 
@@ -60,14 +61,14 @@ class CouchDb(AgentCheck):
             raise
         return r.json()
 
-    def check(self, instance):
-        server = self.get_server(instance)
+    def check(self, _):
+        server = self.get_server()
         if self.checker is None:
-            name = instance.get('name', server)
-            tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
+            name = self.instance.get('name', server)
+            tags = ["instance:{0}".format(name)] + self.get_config_tags()
 
             try:
-                version = self.get(self.get_server(instance), tags, True)['version']
+                version = self.get(self.get_server(), tags, True)['version']
                 if version is not None:
                     self.set_metadata('version', version)
                 else:
@@ -76,23 +77,25 @@ class CouchDb(AgentCheck):
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
-            if version.startswith('1.'):
+            major_version = int(version.split('.')[0])
+            if major_version == 0:
+                raise errors.BadVersionError("Unknown version {}".format(version))
+            elif major_version <= 1:
                 self.checker = CouchDB1(self)
-            elif version.startswith('2.'):
-                self.checker = CouchDB2(self)
             else:
-                raise errors.BadVersionError("Unkown version {0}".format(version))
+                # v2 of the CouchDB check supports versions 2 and higher of Couch
+                self.checker = CouchDB2(self)
 
-        self.checker.check(instance)
+        self.checker.check()
 
-    def get_server(self, instance):
-        server = instance.get('server')
+    def get_server(self):
+        server = self.instance.get('server')
         if server is None:
-            raise errors.BadConfigError("A server must be specified")
+            raise ConfigurationError("A server must be specified")
         return server
 
-    def get_config_tags(self, instance):
-        tags = instance.get('tags', [])
+    def get_config_tags(self):
+        tags = self.instance.get('tags', [])
 
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
@@ -102,12 +105,14 @@ class CouchDb(AgentCheck):
 class CouchDB1:
     """Extracts stats from CouchDB via its REST API
     http://wiki.apache.org/couchdb/Runtime_Statistics
+    Note As of 2019, the 1.x line of CouchDB, has been deprecated due to security issues.
     """
 
     def __init__(self, agent_check):
-        self.db_blacklist = {}
+        self.db_exclude = {}
         self.agent_check = agent_check
         self.gauge = agent_check.gauge
+        self.instance = agent_check.instance
 
     def _create_metric(self, data, tags=None):
         overall_stats = data.get('stats', {})
@@ -125,13 +130,13 @@ class CouchDB1:
                     metric_tags.append('db:%s' % db_name)
                     self.gauge(metric_name, val, tags=metric_tags, device_name=db_name)
 
-    def check(self, instance):
-        server = self.agent_check.get_server(instance)
-        tags = ['instance:%s' % server] + self.agent_check.get_config_tags(instance)
-        data = self.get_data(server, instance, tags)
+    def check(self):
+        server = self.agent_check.get_server()
+        tags = ['instance:%s' % server] + self.agent_check.get_config_tags()
+        data = self.get_data(server, tags)
         self._create_metric(data, tags=tags)
 
-    def get_data(self, server, instance, tags):
+    def get_data(self, server, tags):
         # The dictionary to be returned.
         couchdb = {'stats': None, 'databases': {}}
 
@@ -144,7 +149,7 @@ class CouchDB1:
 
         # No overall stats? bail out now
         if overall_stats is None:
-            raise Exception("No stats could be retrieved from %s" % url)
+            raise CheckException("No stats could be retrieved from %s" % url)
 
         couchdb['stats'] = overall_stats
 
@@ -153,31 +158,32 @@ class CouchDB1:
 
         url = urljoin(server, endpoint)
 
-        # Get the list of whitelisted databases.
-        db_whitelist = instance.get('db_whitelist')
-        self.db_blacklist.setdefault(server, [])
-        self.db_blacklist[server].extend(instance.get('db_blacklist', []))
-        whitelist = set(db_whitelist) if db_whitelist else None
-        databases = set(self.agent_check.get(url, tags)) - set(self.db_blacklist[server])
-        databases = databases.intersection(whitelist) if whitelist else databases
+        # Get the list of included databases.
+        db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+        db_include = set(db_include) if db_include else None
+        self.db_exclude.setdefault(server, [])
+        self.db_exclude[server].extend(self.instance.get('db_exclude', self.instance.get('db_blacklist', [])))
+        databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
+        databases = databases.intersection(db_include) if db_include else databases
 
-        max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
+        max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         if len(databases) > max_dbs_per_check:
             self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
             databases = list(databases)[:max_dbs_per_check]
 
         for dbName in databases:
             url = urljoin(server, quote(dbName, safe=''))
+            db_stats = None
             try:
                 db_stats = self.agent_check.get(url, tags)
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
-                    self.db_blacklist[server].append(dbName)
+                    self.db_exclude[server].append(dbName)
 
-                    self.warning(
+                    self.agent_check.warning(
                         'Database %s is not readable by the configured user. '
-                        'It will be added to the blacklist. Please restart the agent to clear.',
+                        'It will be added to the exclusion list. Please restart the agent to clear.',
                         dbName,
                     )
                     del couchdb['databases'][dbName]
@@ -188,12 +194,14 @@ class CouchDB1:
 
 
 class CouchDB2:
+    """v2 of the CouchDB check. Supports all versions of Couch > 2.X, including Couch v3"""
 
     MAX_NODES_PER_CHECK = 20
 
     def __init__(self, agent_check):
         self.agent_check = agent_check
         self.gauge = agent_check.gauge
+        self.instance = agent_check.instance
 
     def _build_metrics(self, data, tags, prefix='couchdb'):
         for key, value in iteritems(data):
@@ -302,12 +310,12 @@ class CouchDB2:
                 metric = "db_compaction"
             self.gauge("{0}.{1}.count".format(prefix, metric), count, tags)
 
-    def _get_instance_names(self, server, instance):
-        name = instance.get('name')
+    def _get_instance_names(self, server):
+        name = self.instance.get('name')
         if name is None:
             url = urljoin(server, "/_membership")
             names = self.agent_check.get(url, [])['cluster_nodes']
-            return names[: instance.get('max_nodes_per_check', self.MAX_NODES_PER_CHECK)]
+            return names[: self.instance.get('max_nodes_per_check', self.MAX_NODES_PER_CHECK)]
         else:
             return [name]
 
@@ -327,22 +335,22 @@ class CouchDB2:
         size = int(math.ceil(len(dbs) / float(len(nodes))))
         return dbs[(idx * size) : ((idx + 1) * size)]
 
-    def check(self, instance):
-        server = self.agent_check.get_server(instance)
+    def check(self):
+        server = self.agent_check.get_server()
 
-        config_tags = self.agent_check.get_config_tags(instance)
-        max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
-        for name in self._get_instance_names(server, instance):
+        config_tags = self.agent_check.get_config_tags()
+        max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
+        for name in self._get_instance_names(server):
             tags = config_tags + ["instance:{0}".format(name)]
             self._build_metrics(self._get_node_stats(server, name, tags), tags)
             self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
-            db_whitelist = instance.get('db_whitelist')
-            db_blacklist = instance.get('db_blacklist', [])
+            db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+            db_exclude = self.instance.get('db_exclude', self.instance.get('db_blacklist', []))
             scanned_dbs = 0
             for db in self._get_dbs_to_scan(server, name, tags):
-                if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
+                if (db_include is None or db in db_include) and (db not in db_exclude):
                     db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
                     self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)

@@ -19,10 +19,10 @@
   description: |
     This overrides the `proxy` setting in `init_config`.
 
-    Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     to specify hosts that must bypass proxies.
 
-    The SOCKS protocol is also supported like so:
+    The SOCKS protocol is also supported, for example:
 
       socks5://user:pass@host:port
 
@@ -50,6 +50,7 @@
       - basic
         |__ username
         |__ password
+        |__ use_legacy_auth_encoding
       - digest
         |__ username
         |__ password
@@ -69,9 +70,15 @@
         |__ aws_host
         |__ aws_service
 
-    The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
-    Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. /noqa
+    Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials /noqa
 
+- name: use_legacy_auth_encoding
+  value:
+    example: true
+    type: boolean
+  description: |
+    When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
 - name: username
   value:
     type: string
@@ -83,11 +90,11 @@
   description: The password to use if services are behind basic or NTLM auth.
 - name: ntlm_domain
   value:
-    example: <NTLM_DOMAIN>/<USERNAME>
+    example: <NTLM_DOMAIN>\<USERNAME>
     type: string
   description: |
-    If your services use NTLM authentication, you can specify
-    a domain that is used in the check. For NTLM Auth, append
+    If your services use NTLM authentication, specify
+    the domain used in the check. For NTLM Auth, append
     the username to domain, not as the `username` parameter.
 - name: kerberos_auth
   value:
@@ -113,7 +120,7 @@
     example: false
     type: boolean
   description: |
-    Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
@@ -130,7 +137,7 @@
     type: string
   description: |
     Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    match its kerberos hostname (e.g. behind a content switch or load balancer).
+    match its Kerberos hostname, for example: behind a content switch or load balancer.
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
@@ -146,30 +153,66 @@
     example: <KEYTAB_FILE_PATH>
     type: string
   description: Set the path to your Kerberos key tab file.
+- name: auth_token
+  value:
+    example:
+      reader:
+        type: <READER_TYPE>
+        <OPTION_1>: <VALUE_1>
+        <OPTION_2>: <VALUE_2>
+      writer:
+        type: <WRITER_TYPE>
+        <OPTION_1>: <VALUE_1>
+        <OPTION_2>: <VALUE_2>
+    type: object
+    properties:
+    - name: reader
+      type: object
+      properties: []
+    - name: writer
+      type: object
+      properties: []
+  description: |
+    This allows for the use of authentication information from dynamic sources.
+    Both a reader and writer must be configured.
+
+    The available readers are:
+
+      - type: file
+        path (required): The absolute path for the file to read from.
+        pattern: A regular expression pattern with a single capture group used to find the
+                 token rather than using the entire file, for example: Your secret is (.+)
+
+    The available writers are:
+
+      - type: header
+        name (required): The name of the field, for example: Authorization
+        value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+        placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
 - name: aws_region
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the region.
+    If your services require AWS Signature Version 4 signing, set the region.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the host.
+    If your services require AWS Signature Version 4 signing, set the host.
 
-    Note that this setting is not necessary for official integrations.
+    Note: This setting is not necessary for official integrations.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_service
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the service code. For a list
+    If your services require AWS Signature Version 4 signing, set the service code. For a list
     of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
 
-    Note that this setting is not necessary for official integrations.
+    Note: This setting is not necessary for official integrations.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: tls_verify
@@ -190,6 +233,10 @@
   description: |
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
+
+    Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
+    If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    to true.
 - name: tls_cert
   value:
     example: <CERT_PATH>

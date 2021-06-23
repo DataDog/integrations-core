@@ -43,6 +43,10 @@ PLUS_API_STREAM_ENDPOINTS = {
     "stream/upstreams": ["stream", "upstreams"],
 }
 
+PLUS_API_V3_STREAM_ENDPOINTS = {
+    "stream/zone_sync": ["stream", "zone_sync"],
+}
+
 TAGGED_KEYS = {
     'caches': 'cache',
     'server_zones': 'server_zone',
@@ -51,6 +55,7 @@ TAGGED_KEYS = {
     'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot',
+    'zones': 'zone',
 }
 
 
@@ -78,7 +83,7 @@ class Nginx(AgentCheck):
 
         tags = instance.get('tags', [])
 
-        url, use_plus_api, plus_api_version = self._get_instance_params(instance)
+        url, use_plus_api, use_plus_api_stream, plus_api_version = self._get_instance_params(instance)
 
         if not use_plus_api:
             response, content_type, version = self._get_data(instance, url)
@@ -98,8 +103,27 @@ class Nginx(AgentCheck):
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
-            for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
+
+            if use_plus_api_stream:
+                plus_api_chain_list = chain(
+                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(plus_api_version)
+                )
+            else:
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
+
+            for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
+
+                if endpoint == 'nginx':
+                    try:
+                        if isinstance(response, dict):
+                            version_plus = response.get('version')
+                        else:
+                            version_plus = json.loads(response).get('version')
+                        self._set_version_metadata(version_plus)
+                    except Exception as e:
+                        self.log.debug("Couldn't submit nginx version: %s", e)
+
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
 
@@ -136,10 +160,6 @@ class Nginx(AgentCheck):
                 func = funcs[metric_type]
                 func(name, value, tags)
 
-                # for vts and plus versions
-                if name == 'nginx.version':
-                    self._set_version_metadata(value)
-
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
@@ -148,9 +168,10 @@ class Nginx(AgentCheck):
         url = instance.get('nginx_status_url')
 
         use_plus_api = instance.get("use_plus_api", False)
+        use_plus_api_stream = instance.get("use_plus_api_stream", True)
         plus_api_version = str(instance.get("plus_api_version", 2))
 
-        return url, use_plus_api, plus_api_version
+        return url, use_plus_api, use_plus_api_stream, plus_api_version
 
     def _get_data(self, instance, url):
         r = self._perform_service_check(instance, url)
@@ -194,6 +215,12 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
+    def _get_plus_api_stream_endpoints(self, plus_api_version):
+        endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
+        if int(plus_api_version) >= 3:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+        return endpoints
+
     def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
@@ -205,7 +232,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS:
+            if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
                 self.log.warning(
                     "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
                 )
@@ -214,6 +241,7 @@ class Nginx(AgentCheck):
 
         return payload
 
+    @AgentCheck.metadata_entrypoint
     def _set_version_metadata(self, version):
         if version and version != 'nginx':
             if '/' in version:
@@ -222,7 +250,7 @@ class Nginx(AgentCheck):
 
             self.log.debug("Nginx version `server`: %s", version)
         else:
-            self.log.warning(u"could not retrieve nginx version info")
+            self.log.debug(u"could not retrieve nginx version info")
 
     @classmethod
     def parse_text(cls, raw, tags=None):

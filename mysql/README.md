@@ -37,7 +37,9 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password b
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-**Note**: `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][5].
+**Note**: `@'localhost'` is only for local connections. For remote connections, use the hostname/IP of your Agent. For more information, see the [MySQL documentation][5].
+
+**Note**: If you encounter the following error message `(1045, u"Access denied for user 'datadog'@'127.0.0.1' (using password: YES)"))`, see the [MySQL Localhost Error documentation][18].
 
 Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
@@ -89,7 +91,12 @@ Query OK, 0 rows affected (0.00 sec)
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][7] for all available configuration options.
 
@@ -187,6 +194,13 @@ _Available for Agent versions >6.0_
            pattern: "# Time:"
            # If mysqld was started with `--log-short-format`, use:
            # pattern: "# Query_time:"
+           # If using mysql version <5.7, use the following rules instead:
+           # - type: multi_line
+           #   name: new_slow_query_log_entry
+           #   pattern: "# Time|# User@Host"
+           # - type: exclude_at_match
+           #   name: exclude_timestamp_only_line
+           #   pattern: "# Time:"
 
      - type: file
        path: "<GENERAL_LOG_FILE_PATH>"
@@ -197,11 +211,19 @@ _Available for Agent versions >6.0_
        #   - type: multi_line
        #     name: new_log_start_with_date
        #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+       # If the logs start with a date with the format yymmdd but include a timestamp with each new second, rather than with each log, uncomment the following processing rule
+       # log_processing_rules:
+       #   - type: multi_line
+       #     name: new_logs_do_not_always_start_with_timestamp
+       #     pattern: \t\t\s*\d+\s+|\d{6}\s+\d{,2}:\d{2}:\d{2}\t\s*\d+\s+
    ```
 
     See our [sample mysql.yaml][9] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][10].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -226,6 +248,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -386,8 +411,11 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
+**mysql.replication.replica_running**:<br>
+Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
+
 **mysql.replication.slave_running**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance, otherwise returns `OK`. See [this][16] for more details.
+Deprecated in favor of `mysql.replication.replica_running`. Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
 
 **mysql.can_connect**:<br>
 Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, otherwise returns `OK`.
@@ -412,7 +440,7 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [2]: https://mariadb.org
 [3]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
+[5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [8]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
@@ -432,5 +460,5 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [22]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi/
 [23]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
-[25]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure/
+[25]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [26]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics

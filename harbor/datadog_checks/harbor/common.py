@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 SYSTEM_INFO_URL = "{base_url}/api/systeminfo/"
+API_VERSION_URL = "{base_url}/api/version"
 LOGIN_URL = "{base_url}/c/login/"
 LOGIN_PRE_1_7_URL = "{base_url}/login/"
 HEALTH_URL = "{base_url}/api/health/"

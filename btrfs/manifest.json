@@ -25,7 +25,11 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "btrfs": "assets/dashboards/btrfs_dashboard.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

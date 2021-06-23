@@ -29,9 +29,20 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "docs": {
+      "spec": "assets/docs/spec.yaml"
+    },
+    "dashboards": {
+      "RethinkDB Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json"
+    "saved_views": {
+      "rethinkdb_processes": "assets/saved_views/rethinkdb_processes.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "rethinkdb"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

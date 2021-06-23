@@ -8,7 +8,8 @@ import pytest
 
 from datadog_checks.fluentd import Fluentd
 
-from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, EXPECTED_GAUGES, HOST
+from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST
+from .util import _get_metrics_by_version
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -31,7 +32,7 @@ def test_fluentd_with_tag_by_type(aggregator):
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(None)
 
-    for m in EXPECTED_GAUGES:
+    for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name)
 
@@ -50,7 +51,7 @@ def test_fluentd_with_tag_by_plugin_id(aggregator):
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(None)
 
-    for m in EXPECTED_GAUGES:
+    for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg1'])
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg2'])
@@ -69,7 +70,7 @@ def test_fluentd_with_custom_tags(aggregator):
 
     check.check(None)
 
-    for m in EXPECTED_GAUGES:
+    for m in _get_metrics_by_version():
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg1'] + custom_tags)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg2'] + custom_tags)

@@ -2,38 +2,26 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
+import datetime as dt
 import re
-from typing import Dict, List, Pattern
 
+from dateutil.tz import UTC
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.log import get_check_logger
+
+try:
+    from typing import Dict, List, Pattern
+except ImportError:
+    pass
 
 try:
     import pymqi
-except ImportError:
+except ImportError as e:
+    pymqiException = e
     pymqi = None
-else:
-    # Since pymqi is not be available/installed on win/macOS when running e2e,
-    # we load the following constants only pymqi import succeed
-
-    DEFAULT_CHANNEL_STATUS_MAPPING = {
-        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
-        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
-    }
-
-
-log = logging.getLogger(__file__)
 
 
 class IBMMQConfig:
@@ -53,6 +41,7 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
+        self.log = get_check_logger()
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
@@ -83,8 +72,12 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
+        self.collect_statistics_metrics = is_affirmative(
+            instance.get('collect_statistics_metrics', False)
+        )  # type: bool
+
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
-            log.warning(
+            self.log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
                 "together."
             )
@@ -94,6 +87,8 @@ class IBMMQConfig:
         self.channel_status_mapping = self.get_channel_status_mapping(
             instance.get('channel_status_mapping')
         )  # type: Dict[str, str]
+
+        self.convert_endianness = instance.get('convert_endianness', False)
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
@@ -107,12 +102,21 @@ class IBMMQConfig:
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
+        # SSL options
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
-
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
+        self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
+        if instance.get('ssl_auth') is None and (
+            instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
+        ):
+            self.log.info(
+                "ssl_auth has not been explictly enabled but other SSL options have been provided. "
+                "SSL will be used for connecting"
+            )
+            self.ssl = True
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
@@ -127,6 +131,8 @@ class IBMMQConfig:
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
 
+        self.instance_creation_datetime = dt.datetime.now(UTC)
+
     def add_queues(self, new_queues):
         # add queues without duplication
         self.queues = list(set(self.queues + new_queues))
@@ -140,11 +146,13 @@ class IBMMQConfig:
             try:
                 queue_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(',')]])
             except TypeError:
-                log.warning('%s is not a valid regular expression and will be ignored', regex_str)
+                self.log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         return queue_tag_list
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):
+        if pymqi is None:
+            raise pymqiException
         if channel_status_mapping_raw:
             custom_mapping = {}
             for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():
@@ -162,4 +170,16 @@ class IBMMQConfig:
                     raise ConfigurationError("Invalid mapping: {}".format(e))
             return custom_mapping
         else:
-            return DEFAULT_CHANNEL_STATUS_MAPPING
+            # Use a default mapping. (Can't be defined at top-level because pymqi may not be installed.)
+            return {
+                pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+                pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+                pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+                pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+            }

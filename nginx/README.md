@@ -64,6 +64,9 @@ server {
 
     # available only with NGINX Plus
     # status;
+
+    # ensures the version information can be retrieved
+    server_tokens on;
   }
 }
 ```
@@ -101,7 +104,12 @@ sudo nginx -t && sudo nginx -s reload
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
 
@@ -112,6 +120,7 @@ Follow the instructions below to configure this check for an Agent running on a 
     **NGINX Plus**:
 
       - For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
+      - Stream stats API calls are included by default for NGINX Plus. If you want to disable them, set the parameter `use_plus_api_stream` to `false` in your `nginx.d/conf.yaml` configuration file.
       - If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
           ```yaml
@@ -164,6 +173,9 @@ http {
 }
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
@@ -187,6 +199,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

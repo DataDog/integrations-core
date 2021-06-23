@@ -8,7 +8,8 @@ import time
 import click
 import pyperclip
 
-from ....utils import dir_exists, file_exists, path_join, running_on_ci
+from ....ci import running_on_ci
+from ....fs import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
@@ -47,8 +48,9 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
+@click.option('--dogstatsd', is_flag=True, help='Enable dogstatsd port on agent')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory):
+def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort(f'`{check}` is not a testable check.')
@@ -113,6 +115,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         profile_memory = False
         echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
 
+    if not dev and ctx.obj['repo_choice'] != 'core':
+        echo_warning('Be sure to run environment with --dev for extras or custom integrations.')
+
     echo_waiting(f'Setting up environment `{env}`... ', nl=False)
     config, metadata, error = start_environment(check, env)
 
@@ -129,14 +134,23 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_fallback = os.path.expanduser(ctx.obj.get('agent', ''))
+    if os.path.isdir(legacy_fallback):
+        legacy_fallback = ''
+
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
-        # TODO: remove this legacy fallback lookup eventually
+        # TODO: remove this legacy fallback lookup in any future major version bump
         ctx.obj.get(f'agent{agent_ver}', agent_ver),
     )
     if isinstance(agent_build, dict):
         agent_build = agent_build.get(env_type, env_type)
+
+    if agent_build == 'datadog/agent:6':
+        echo_warning('The Docker image for Agent 6 only ships with Python 2, will use that instead.')
+        python = 2
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -155,6 +169,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
 
+    if dogstatsd:
+        env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
+        env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
+
     if profile_memory:
         plat = platform.system()
         try:
@@ -164,7 +182,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             echo_warning(f'Unable to detect the current Git branch, defaulting to `{branch}`.')
 
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
-        env_vars['DD_TRACEMALLOC_WHITELIST'] = check
+        env_vars['DD_TRACEMALLOC_INCLUDE'] = check
 
         if on_ci:
             env_vars.setdefault('DD_AGGREGATOR_STOP_TIMEOUT', '10')
@@ -199,9 +217,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         log_url,
         python,
         not bool(agent),
+        dogstatsd,
     )
 
-    echo_waiting(f'Updating `{agent_build}`... ', nl=False)
+    echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
     environment.update_agent()
     echo_success('success!')
 
@@ -226,6 +245,14 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
+    post_install_commands = metadata.get('post_install_commands', [])
+
+    # for example, to install some tools inside container:
+    # export DDEV_AGENT_START_COMMAND="bash -c 'apt update && apt install -y vim less'"
+    extra_commands = os.getenv('DDEV_AGENT_START_COMMAND', None)
+    if extra_commands:
+        start_commands.append(extra_commands)
+
     if start_commands:
         echo_waiting('Running extra start-up commands... ', nl=False)
 
@@ -272,7 +299,25 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             environment.update_check()
             echo_success('success!')
 
-    if dev or base or start_commands:
+    if post_install_commands:
+        echo_waiting('Running extra post-install commands... ', nl=False)
+
+        for command in post_install_commands:
+            result = environment.exec_command(command, capture=True)
+            if result.code:
+                click.echo()
+                echo_info(result.stdout + result.stderr)
+                echo_failure('An error occurred.')
+                echo_waiting('Stopping the environment...')
+                stop_environment(check, env, metadata=metadata)
+                echo_waiting('Stopping the Agent...')
+                environment.stop_agent()
+                environment.remove_config()
+                abort()
+
+        echo_success('success!')
+
+    if dev or base or start_commands or post_install_commands:
         echo_waiting('Reloading the environment to reflect changes... ', nl=False)
         result = environment.restart_agent()
 
@@ -304,6 +349,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         config_message = 'Config file: '
     else:
         config_message = 'Config file (copied to your clipboard): '
+
+    echo_success('To edit config file, do: ', nl=False)
+    echo_info(f'ddev env edit {check} {env}')
 
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)

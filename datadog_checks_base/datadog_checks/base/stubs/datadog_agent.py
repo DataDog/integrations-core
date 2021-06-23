@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 
 
 class DatadogAgentStub(object):
@@ -15,6 +16,7 @@ class DatadogAgentStub(object):
 
     def __init__(self):
         self._metadata = {}
+        self._cache = {}
         self._config = self.get_default_config()
 
     def get_default_config(self):
@@ -22,6 +24,7 @@ class DatadogAgentStub(object):
 
     def reset(self):
         self._metadata.clear()
+        self._cache.clear()
         self._config = self.get_default_config()
 
     def assert_metadata(self, check_id, data):
@@ -55,6 +58,20 @@ class DatadogAgentStub(object):
 
     def tracemalloc_enabled(self, *args, **kwargs):
         return False
+
+    def write_persistent_cache(self, key, value):
+        self._cache[key] = value
+
+    def read_persistent_cache(self, key):
+        return self._cache.get(key, '')
+
+    def obfuscate_sql(self, query):
+        # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
+        return re.sub(r'\s+', ' ', query or '').strip()
+
+    def obfuscate_sql_exec_plan(self, plan, normalize=False):
+        # Passthrough stub: obfuscation implementation is in Go code.
+        return plan
 
 
 # Use the stub as a singleton

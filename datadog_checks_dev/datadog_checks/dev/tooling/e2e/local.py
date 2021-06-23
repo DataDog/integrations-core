@@ -43,6 +43,7 @@ class LocalAgentInterface(object):
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
+        dogstatsd=False,
     ):
         self.check = check
         self.env = env
@@ -56,6 +57,7 @@ class LocalAgentInterface(object):
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
+        self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
         self.config_dir = locate_config_dir(check, env)
@@ -142,6 +144,7 @@ class LocalAgentInterface(object):
         delay=None,
         log_level=None,
         as_json=False,
+        as_table=False,
         break_point=None,
         jmx_list=None,
     ):
@@ -167,6 +170,9 @@ class LocalAgentInterface(object):
 
             if as_json:
                 command += f' --json {as_json}'
+
+            if as_table:
+                command += ' --table'
 
             if break_point is not None:
                 command += f' --breakpoint {break_point}'

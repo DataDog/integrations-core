@@ -24,8 +24,10 @@ from .common import (
     YARN_AUTH_CONFIG,
     YARN_CLUSTER_METRICS_TAGS,
     YARN_CLUSTER_METRICS_VALUES,
+    YARN_CLUSTER_TAG,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
+    YARN_CONFIG_SPLIT_APPLICATION_TAGS,
     YARN_CONFIG_STATUS_MAPPING,
     YARN_NODE_METRICS_TAGS,
     YARN_NODE_METRICS_VALUES,
@@ -37,6 +39,8 @@ from .common import (
     YARN_SSL_VERIFY_FALSE_CONFIG,
     YARN_SSL_VERIFY_TRUE_CONFIG,
 )
+
+EXPECTED_TAGS = YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS
 
 
 def test_check(aggregator, mocked_request):
@@ -51,30 +55,30 @@ def test_check(aggregator, mocked_request):
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
-        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.CRITICAL,
-        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
     )
 
     # Check the YARN Cluster Metrics
     for metric, value in iteritems(YARN_CLUSTER_METRICS_VALUES):
-        aggregator.assert_metric(metric, value=value, tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS, count=1)
+        aggregator.assert_metric(metric, value=value, tags=EXPECTED_TAGS, count=1)
 
     # Check the YARN App Metrics
     for metric, value in iteritems(YARN_APP_METRICS_VALUES):
@@ -113,25 +117,25 @@ def test_check_mapping(aggregator, mocked_request):
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
-        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
     )
 
 
@@ -152,7 +156,7 @@ def test_check_excludes_app_metrics(aggregator, mocked_request):
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
-        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=3,
     )
 
@@ -169,19 +173,91 @@ def test_custom_mapping(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.UNKNOWN,
-        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
+    )
+
+
+def test_check_splits_yarn_application_tags(aggregator, mocked_request):
+    instance = YARN_CONFIG_SPLIT_APPLICATION_TAGS['instances'][0]
+
+    # Instantiate YarnCheck
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check once
+    yarn.check(instance)
+
+    # Check that the YARN application tags have been split for properly formatted tags
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=[
+            'app_queue:default',
+            'app_name:word count',
+            'app_key1:value1',
+            'app_key2:value2',
+        ]
+        + EXPECTED_TAGS,
+    )
+
+    # And check that the YARN application tags have not been split for other tags
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.WARNING,
+        tags=[
+            'app_queue:default',
+            'app_name:dead app',
+            'app_tags:tag1,tag2',
+        ]
+        + EXPECTED_TAGS,
+    )
+
+
+def test_disable_legacy_cluster_tag(aggregator, mocked_request):
+    instance = YARN_CONFIG_SPLIT_APPLICATION_TAGS['instances'][0]
+    instance['disable_legacy_cluster_tag'] = True
+
+    # Instantiate YarnCheck
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check once
+    yarn.check(instance)
+    # Check that the YARN application tags have been split for properly formatted tags without cluster_name tag
+    expected_tags = CUSTOM_TAGS
+    expected_tags.append(YARN_CLUSTER_TAG)
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=[
+            'app_queue:default',
+            'app_name:word count',
+            'app_key1:value1',
+            'app_key2:value2',
+        ]
+        + expected_tags,
+    )
+
+    # And check that the YARN application tags have not been split for other tags
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.WARNING,
+        tags=[
+            'app_queue:default',
+            'app_name:dead app',
+            'app_tags:tag1,tag2',
+        ]
+        + expected_tags,
     )
 
 
@@ -198,7 +274,7 @@ def test_auth(aggregator, mocked_auth_request):
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
-        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=4,
     )
 
@@ -216,7 +292,7 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         aggregator.assert_service_check(
             SERVICE_CHECK_NAME,
             status=YarnCheck.CRITICAL,
-            tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+            tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
             count=1,
         )
         pass
@@ -230,7 +306,7 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
-        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=4,
     )
 

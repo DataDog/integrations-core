@@ -4,7 +4,7 @@ services:
   cockroachdb:
     container_name: cockroachdb
     image: cockroachdb/cockroach:${COCKROACHDB_VERSION}
-    command: start --insecure --store=attrs=ssd,path=/var/lib/cockroach/
+    command: ${COCKROACHDB_START_COMMAND} --insecure --store=attrs=ssd,path=/var/lib/cockroach/
     restart: always
     expose:
       - "8080"

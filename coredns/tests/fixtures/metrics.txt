@@ -148,6 +148,9 @@ coredns_health_request_duration_seconds_count 1.32441e+06
 # HELP coredns_panic_count_total A metrics that counts the number of panics.
 # TYPE coredns_panic_count_total counter
 coredns_panic_count_total 0
+# HELP coredns_forward_max_concurrent_rejects_total Counter of the number of queries rejected because the concurrent queries were at maximum.
+# TYPE coredns_forward_max_concurrent_rejects_total counter
+coredns_forward_max_concurrent_rejects_total 0
 # HELP coredns_forward_request_count_total Counter of requests made per upstream.
 # TYPE coredns_forward_request_count_total counter
 coredns_forward_request_count_total{to="10.0.0.2:53"} 22000
@@ -245,6 +248,9 @@ go_memstats_heap_objects 189233
 # HELP go_memstats_heap_released_bytes_total Total number of heap bytes released to OS.
 # TYPE go_memstats_heap_released_bytes_total counter
 go_memstats_heap_released_bytes_total 0
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 5.9359232e+07
 # HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
 # TYPE go_memstats_heap_sys_bytes gauge
 go_memstats_heap_sys_bytes 3.8076416e+07
@@ -302,3 +308,16 @@ process_start_time_seconds 1.53315401874e+09
 # HELP process_virtual_memory_bytes Virtual memory size in bytes.
 # TYPE process_virtual_memory_bytes gauge
 process_virtual_memory_bytes 7.8966784e+07
+
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.14.4"} 1
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 0.026803372433412194
+# HELP coredns_plugin_enabled A metric that indicates whether a plugin is enabled on per server and zone basis.
+# TYPE coredns_plugin_enabled gauge
+coredns_plugin_enabled{name="cache",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="errors",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="forward",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="prometheus",server="dns://:53",zone="."} 1

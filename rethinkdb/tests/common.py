@@ -169,7 +169,12 @@ SERVER_STATUS_METRICS = (
 )  # type: Tuple[Tuple[str, int], ...]
 
 JOBS_METRICS = (
-    ('rethinkdb.system_jobs.jobs', AggregatorStub.GAUGE, 1, ['job_type:query'],),
+    (
+        'rethinkdb.system_jobs.jobs',
+        AggregatorStub.GAUGE,
+        1,
+        ['job_type:query'],
+    ),
 )  # type: Tuple[Tuple[str, int, int, List[str]], ...]
 
 CURRENT_ISSUES_METRICS = (

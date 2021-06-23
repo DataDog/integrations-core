@@ -41,3 +41,4 @@ openshift.appliedclusterquota.services.nodeports.remaining,gauge,,,,Remaining av
 openshift.appliedclusterquota.services.loadbalancers.used,gauge,,,,Observed service load balancers usage by cluster resource quota and namespace,0,openshift,acq loadbalancers used
 openshift.appliedclusterquota.services.loadbalancers.limit,gauge,,,,Hard limit for service load balancers by cluster resource quota and namespace,0,openshift,acq loadbalancers limit
 openshift.appliedclusterquota.services.loadbalancers.remaining,gauge,,,,Remaining available service load balancers by cluster resource quota and namespace,1,openshift,acq loadbalancers remaining
+openshift.clusterquota.cpu.requests.used,gauge,,,,Observed cpu usage by cluster resource for request,0,openshift,cq cpu req used

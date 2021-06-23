@@ -40,6 +40,8 @@ class MoreUnixCheck(AgentCheck):
         self.get_stat_info()
         self.get_entropy_info()
         self.get_process_states()
+        if self.instance.get('include_interrupt_metrics', False):
+            self.get_interrupts_info()
 
     def set_paths(self):
         proc_location = (datadog_agent.get_config('procfs_path') or '/proc').rstrip('/')
@@ -48,6 +50,7 @@ class MoreUnixCheck(AgentCheck):
             "inode_info": "sys/fs/inode-nr",
             "stat_info": "stat",
             "entropy_info": "sys/kernel/random/entropy_avail",
+            "interrupts_info": "interrupts",
         }
 
         for key, path in iteritems(self.proc_path_map):
@@ -99,3 +102,15 @@ class MoreUnixCheck(AgentCheck):
             prio_tags = list(self.tags)
             prio_tags.append("priority:" + prio)
             self.gauge('system.processes.priorities', float(prio_counts[prio]), prio_tags)
+
+    def get_interrupts_info(self):
+        with open(self.proc_path_map['interrupts_info'], 'r') as interrupts_info:
+            lines = [line.strip() for line in interrupts_info.readlines()]
+            cpu_count = len(lines[0].split())
+            for line in lines[1:]:
+                parts = line.split()
+                irq_id = parts[0].replace(":", "")
+                for cpu_id, part in enumerate(parts[1 : cpu_count + 1]):
+                    irq_count = int(part)
+                    tags = self.tags + ['irq:{}'.format(irq_id), 'cpu_id:{}'.format(cpu_id)]
+                    self.monotonic_count("system.linux.irq", irq_count, tags=tags)

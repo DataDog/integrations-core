@@ -8,7 +8,9 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 - Metric delays
 - Gaps in graphs of metrics
 
-Default NTP servers reached:
+By default, the check will detect which cloud provider the agent is running on and use the private
+NTP server of that cloud provider if available. If no cloud provider is detected, the agent will
+default to the NTP servers below:
 
 - `0.datadog.pool.ntp.org`
 - `1.datadog.pool.ntp.org`
@@ -43,8 +45,7 @@ The NTP check does not include any events.
 
 ### Service Checks
 
-`ntp.in_sync`:
-
+**ntp.in_sync**:<br>
 Returns `CRITICAL` if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise `OK`.
 
 ## Troubleshooting

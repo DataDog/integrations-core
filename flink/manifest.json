@@ -17,8 +17,6 @@
   "public_title": "Datadog-Flink Integration",
   "categories": [
     "processing",
-    "data streams",
-    "dataflow",
     "log collection"
   ],
   "type": "check",
@@ -33,6 +31,10 @@
     },
     "saved_views": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "flink"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

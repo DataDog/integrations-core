@@ -8,6 +8,7 @@ import io
 import logging
 import math
 import os
+import re
 
 import mock
 import pytest
@@ -15,7 +16,6 @@ import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -42,8 +42,11 @@ class MockResponse:
         pass
 
 
+FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+
+
 PROMETHEUS_CHECK_INSTANCE = {
-    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'prometheus_url': FAKE_ENDPOINT,
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'prometheus',
     # Defaults for checks that were based on PrometheusCheck
@@ -264,6 +267,29 @@ def test_submit_gauge_with_labels_and_hostname_override(
         54927360.0,
         tags=['my_1st_label:my_1st_label_value', 'node:foo'],
         hostname="foo-cluster-blue",
+        count=1,
+    )
+
+
+def test_submit_gauge_with_labels_and_hostname_override_empty_label(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    """ submitting metrics that contain empty label_to_hostname """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
+    )
+    ref_gauge.add_metric(['my_1st_label_value', ''], 54927360.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-name'
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=['my_1st_label:my_1st_label_value', 'node:'],
+        hostname="",
         count=1,
     )
 
@@ -498,6 +524,7 @@ def test_submit_summary(
     _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
+    _sum.add_sample("my_summary", {}, 25764.0)  # Quantile-less not supported yet and should be skipped.
     check = mocked_prometheus_check
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
 
@@ -507,6 +534,7 @@ def test_submit_summary(
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25764.0, tags=[], count=0)
 
     # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
     if count_monotonic_gauge:
@@ -516,7 +544,7 @@ def test_submit_summary(
 
     if sum_monotonic_gauge:
         aggregator.assert_metric(
-            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
         )
 
     aggregator.assert_all_metrics_covered()
@@ -529,18 +557,10 @@ def assert_histogram_counts(aggregator, count_type, suffix=False):
     if suffix:
         metric_name += '.total'
 
-    aggregator.assert_metric(
-        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
-    )
+    aggregator.assert_metric(metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type)
+    aggregator.assert_metric(metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type)
 
 
 @pytest.mark.parametrize(
@@ -601,9 +621,7 @@ def test_submit_histograms(
         sum_type = aggregator.MONOTONIC_COUNT
 
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
-    _histo.add_metric(
-        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
-    )
+    _histo.add_metric([], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337)
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config.update(config)
 
@@ -1686,6 +1704,113 @@ def test_ignore_metrics_multiple_wildcards(
         aggregator.assert_all_metrics_covered()
 
 
+def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    """ submitting metrics that contain labels should result in tags on the gauge call """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
+    )
+    ref_gauge.add_metric(['worker_1', 'foo'], 54927360.0)
+    ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': ['*']}
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check.log.debug.assert_called_with(
+        'Skipping metric `%s` due to label key matching: %s', 'process.vm.bytes', 'worker'
+    )
+    # Ignored metric
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo'])
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0, tags=['worker:worker_2', 'node:bar'])
+
+
+def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    """ submitting metrics that contain labels should result in tags on the gauge call """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node', 'worker_name']
+    )
+    ref_gauge.add_metric(['worker_1', 'foo', 'joe'], 54927360.0)
+    ref_gauge.add_metric(['worker_2', 'bar', 'tom'], 1009345.0)
+    ref_gauge.add_metric(['worker_3', 'bar', 'worker_1'], 45000.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': ['worker_1']}
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+
+    check.log.debug.assert_called_with(
+        'Skipping metric `%s` due to label `%s` value matching: %s', 'process.vm.bytes', 'worker', 'worker_1'
+    )
+    # Ignored metric
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=0, tags=['worker:worker_1', 'node:foo', 'worker_name:joe']
+    )
+
+    # Not ignored metric
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=1, tags=['worker:worker_2', 'node:bar', 'worker_name:tom']
+    )
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes', count=1, tags=['worker:worker_3', 'node:bar', 'worker_name:worker_1']
+    )
+
+
+def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    """ submitting metrics that contain labels should result in tags on the gauge call """
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
+    )
+    ref_gauge.add_metric(['worker_2', 'bar'], 1009345.0)
+
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['ignore_metrics_by_labels'] = {'worker': []}
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check.log.debug.assert_called_with(
+        "Skipping filter label `%s` with an empty values list, did you mean to use '*' wildcard?", 'worker'
+    )
+
+
+def test_metrics_with_ignore_label_values(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+):
+    """
+    Test that metrics that matched an ignored label values is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['metrics'] = [
+        {
+            # Ignore counter by label values 'system': ['auth', 'recursive']
+            'skydns_skydns_dns_error_count_total': 'skydns.dns.error.count',
+            # Ignore counter by label key 'cache'
+            'skydns_skydns_dns_cachemiss_count_total': 'skydns.dns.cache_missed',
+            # Expected metric
+            'go_memstats_mspan_inuse_bytes': 'go_memstats.mspan.inuse_bytes',
+        }
+    ]
+    instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': ['*']}
+    config = check.create_scraper_configuration(instance)
+    expected_tags = ['cause:nxdomain']
+    mock_response = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process(config)
+
+        # Make sure metrics are ignored
+        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:auth'])
+        aggregator.assert_metric(
+            'prometheus.skydns.dns.error.count', count=0, tags=expected_tags + ['system:recursive']
+        )
+        aggregator.assert_metric('prometheus.skydns.dns.cache_missed', count=0)
+        # Make sure we don't ignore other metrics
+        aggregator.assert_metric('prometheus.skydns.dns.error.count', count=1, tags=expected_tags + ['system:reverse'])
+        aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=1)
+
+        aggregator.assert_all_metrics_covered()
+
+
 def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
     """
     Test that a matched metric is properly collected.
@@ -1738,6 +1863,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_global_labels': {'label_to_match': '*', 'labels_to_get': ['*']},
+        'kube_local_labels': {'labels_to_match': ['*'], 'labels_to_get': ['foo']},
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
         'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
         'kube_deployment_labels': {
@@ -1767,6 +1894,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
@@ -1782,6 +1911,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-6dj58',
             'namespace:kube-system',
             'condition:true',
@@ -1799,6 +1930,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
@@ -1816,6 +1949,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:heapster-v1.4.3-2027615481-lmjm5',
             'namespace:kube-system',
             'condition:true',
@@ -1831,6 +1966,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
@@ -1845,6 +1982,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
@@ -1859,6 +1998,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-autoscaler-97162954-mf6d3',
             'namespace:kube-system',
             'condition:true',
@@ -1873,6 +2014,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.ready',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'namespace:kube-system',
             'condition:true',
@@ -1887,6 +2030,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
             'namespace:default',
             'condition:true',
@@ -1902,6 +2047,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
@@ -1917,6 +2064,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-6dj58',
             'namespace:kube-system',
             'condition:true',
@@ -1934,6 +2083,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
@@ -1951,6 +2102,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:heapster-v1.4.3-2027615481-lmjm5',
             'namespace:kube-system',
             'condition:true',
@@ -1966,6 +2119,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
@@ -1980,6 +2135,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.pod.scheduled',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
@@ -1994,6 +2151,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:event-exporter-v0.1.7',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
@@ -2006,6 +2165,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:heapster-v1.4.3',
             'label_k8s_app:heapster',
@@ -2018,6 +2179,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         2.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kube-dns',
             'label_kubernetes_io_cluster_service:true',
@@ -2030,6 +2193,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kube-dns-autoscaler',
             'label_kubernetes_io_cluster_service:true',
@@ -2042,6 +2207,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:kubernetes-dashboard',
             'label_kubernetes_io_cluster_service:true',
@@ -2054,6 +2221,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'ksm.deploy.replicas.available',
         1.0,
         tags=[
+            'leader:true',
+            'foo:bar',
             'namespace:kube-system',
             'deployment:l7-default-backend',
             'label_k8s_app:glbc',
@@ -2063,12 +2232,15 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         count=1,
     )
     aggregator.assert_metric(
-        'ksm.deploy.replicas.available', 1.0, tags=['namespace:kube-system', 'deployment:tiller-deploy'], count=1
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=['leader:true', 'foo:bar', 'namespace:kube-system', 'deployment:tiller-deploy'],
+        count=1,
     )
     aggregator.assert_metric(
         'ksm.deploy.replicas.available',
         1.0,
-        tags=['namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
+        tags=['leader:true', 'foo:bar', 'namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
         count=1,
     )
 
@@ -2078,7 +2250,11 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
-        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
+        'kube_persistentvolumeclaim_info': {
+            'labels_to_match': ['persistentvolumeclaim', 'namespace'],
+            'labels_to_get': ['storageclass'],
+        },
     }
     mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
     # dry run to build mapping
@@ -2114,6 +2290,9 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
     text_data = mock_get.replace('dd-agent-62bgh', 'dd-agent-1337')
+    pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
+    text_data = pvc_replace.sub('', text_data)
+
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
@@ -2475,7 +2654,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_data):
+def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, text_data):
     instance = dict(
         {
             'prometheus_url': 'https://www.example.com',
@@ -2487,14 +2666,17 @@ def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_dat
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with pytest.warns(None) as record:
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
-    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
+    for _, _, message in caplog.record_tuples:
+        assert message != expected_message
 
 
-def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_factory, text_data):
+def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, text_data):
     instance = dict(
         {
             'prometheus_url': 'https://www.example.com',
@@ -2509,11 +2691,14 @@ def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_facto
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with pytest.warns(None) as record:
+    with caplog.at_level(logging.DEBUG):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
-    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    expected_message = 'An unverified HTTPS request is being made to https://httpbin.org/get'
+    for _, _, message in caplog.record_tuples:
+        assert message != expected_message
 
 
 def test_http_handler(mocked_openmetrics_check_factory):
@@ -2532,3 +2717,127 @@ def test_http_handler(mocked_openmetrics_check_factory):
 
     assert http_handler.options['headers']['accept-encoding'] == 'gzip'
     assert http_handler.options['headers']['accept'] == 'text/plain'
+
+
+def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"process_virtual_memory_bytes": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 0
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 1
+
+
+def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"*_virtual_memory_*": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    # assert the pattern was stored correctly
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 1
+    assert list(check.config_map[FAKE_ENDPOINT]['_type_override_patterns'].values())[0] == 'counter'
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 0
+
+
+def test_empty_namespace(aggregator, mocked_prometheus_check, text_data, ref_gauge):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['namespace'] = ''
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('process.vm.bytes', count=1)
+
+
+def test_ignore_tags_match(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patterns are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['foo', 'bar:baz']
+    wanted_tags = ['bar', 'bar:bar']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+def test_ignore_tags_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patters with wildcards are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['foo*', '.*baz']
+    wanted_tags = ['bar', 'bar:bar']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that tags matching ignored tag patters with regex are properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    all_tags = ['foo', 'foobar', 'bar:baz', 'bar:bar']
+    ignored_tags = ['^foo', '.+:bar$']
+    wanted_tags = ['bar:baz']
+    instance['tags'] = all_tags
+    instance['ignore_tags'] = ignored_tags
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)

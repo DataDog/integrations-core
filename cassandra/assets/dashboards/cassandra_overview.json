@@ -1,0 +1,412 @@
+{
+    "title": "Cassandra - Overview",
+    "description": "This overview dashboard displays the high-level health of your Cassandra clusters. You can use it as a jumping-off point for troubleshooting with our more specialized dashboards covering the [read path](https://app.datadoghq.com/dash/integration/24/cassandra---read-path), [write path](https://app.datadoghq.com/dash/integration/25/cassandra---write-path), and [SSTable management](https://app.datadoghq.com/dash/integration/234/cassandra---sstable-management). Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "environment",
+            "name": "environment"
+        },
+        {
+            "default": "*",
+            "prefix": "datacenter",
+            "name": "datacenter"
+        },
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:cassandra.nodetool.status.status{$environment,$datacenter,$host} by {node_address, node_id}, 10, 'last', 'asc')",
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red",
+                                "value": 1,
+                                "comparator": "<"
+                            },
+                            {
+                                "palette": "white_on_green",
+                                "value": 1,
+                                "comparator": ">="
+                            }
+                        ]
+                    }
+                ],
+                "type": "toplist",
+                "title": "Node status"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:system.disk.in_use{$environment,$datacenter,$host} by {host, device}, 10, 'max', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red",
+                                "value": 0.8,
+                                "comparator": ">"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "value": 0.5,
+                                "comparator": ">="
+                            },
+                            {
+                                "palette": "white_on_green",
+                                "value": 0.5,
+                                "comparator": "<"
+                            }
+                        ]
+                    }
+                ],
+                "type": "toplist",
+                "title": "Total disk usage"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.dropped.one_minute_rate{$environment,$datacenter,$host} by {host,droppedmessage,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 50",
+                        "label": "That many dropped messages is definitely an issue!"
+                    },
+                    {
+                        "display_type": "warning solid",
+                        "value": "y = 10",
+                        "label": "It happens that some messages get dropped..."
+                    }
+                ],
+                "title": "Dropped messages"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:read} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read request counts"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:write} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write request counts"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:casread} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:caswrite} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:rangeslice} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.one_minute_rate{$environment,$datacenter,$host,clientrequest:viewwrite} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Other operations request counts"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:read,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:read,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Read latencies - 75 and 95th percentiles"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:write,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:write,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Write latencies - 75 and 95th percentiles"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:casread,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:caswrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:rangeslice,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.75th_percentile{type:clientrequest,clientrequest:viewwrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:casread,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:caswrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:rangeslice,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.latency.95th_percentile{type:clientrequest,clientrequest:viewwrite,$environment,$datacenter,$host} by {datacenter,clientrequest}",
+                        "style": {
+                            "line_type": "dotted"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Other operations latencies - 75 and 95th percentiles"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.live_ss_table_count{$environment,$datacenter,$host} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SSTable count"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.pending_compactions{$environment,$datacenter,$host} by {environment, host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 10",
+                        "label": "Some pending compactions are not an issue..."
+                    },
+                    {
+                        "display_type": "error solid",
+                        "value": "y = 100",
+                        "label": "This is too many pending compactions!"
+                    }
+                ],
+                "title": "Pending compactions per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:cassandra.max_partition_size{$environment,$datacenter,$host} by {host,table}, 10, 'max', 'desc')"
+                    }
+                ],
+                "type": "toplist",
+                "title": "Max partition size per host and table (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:cassandra.max_row_size{$environment,$datacenter,$host} by {host,columnfamily}, 10, 'max', 'desc')"
+                    }
+                ],
+                "type": "toplist",
+                "title": "Max row size per host and table (pre- C*3.0)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:jmx.gc.minor_collection_time{$environment,$datacenter,$host} by {datacenter,host} + avg:jmx.gc.major_collection_count{$environment,$datacenter,$host} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 150",
+                        "label": "15% of the time spent in Garbage Collection (STW GC)"
+                    }
+                ],
+                "title": "Stop the world GC average per datacenter (Minor + Major GC)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.load.1{$environment,$datacenter,$host} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Unix CPU load per node (1 minute)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.cpu.idle{$environment,$datacenter,$host}, avg:system.cpu.user{$environment,$datacenter,$host}, avg:system.cpu.guest{$environment,$datacenter,$host}, avg:system.cpu.iowait{$environment,$datacenter,$host}, avg:system.cpu.stolen{$environment,$datacenter,$host}, avg:system.cpu.system{$environment,$datacenter,$host}"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 75",
+                        "label": "75 %"
+                    }
+                ],
+                "title": "CPU usage"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "avg:system.mem.total{$environment,$datacenter,$host} - avg:system.mem.usable{$environment,$datacenter,$host}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.net.bytes_rcvd{$environment,$datacenter,$host} by {datacenter}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:system.net.bytes_sent{$environment,$datacenter,$host} by {datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.io.await{$environment,$datacenter,$host} by {environment,datacenter,host,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:ntp.offset{$environment,$datacenter,$host} by {host,datacenter}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = 0.01",
+                        "label": "y = 0.01"
+                    },
+                    {
+                        "display_type": "error dashed",
+                        "value": "y = -0.01",
+                        "label": "y = -0.01"
+                    }
+                ],
+                "title": "Clock drift"
+            }
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+[
+    {
+        "name": "mongodb.oplog.logsizemb",
+        "type": 0,
+        "value": 16.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplog.usedsizemb",
+        "type": 0,
+        "value": 0.87,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplog.timediff",
+        "type": 0,
+        "value": 65605.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

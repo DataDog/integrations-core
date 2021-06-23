@@ -15,8 +15,9 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 #### Prerequisites
 
 - [MapR monitoring][3] is running correctly.
-- You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user. If you want the user to be called `dd-agent`, create it before installing the Agent.
-- You have generated a [service long-lived ticket][5] for this user that is readable by the `dd-agent` user.
+- You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user.
+- **On a non-secure cluster**: Follow [this guide][12] so that the `dd-agent` user can impersonate this MapR user.
+- **On a secure cluster**: Generate a [long-lived service ticket][5] for this user that is readable by the `dd-agent` user.
 
 Installation steps for each node:
 
@@ -86,8 +87,8 @@ See [metadata.csv][10] for a list of default metrics provided by this integratio
 
 ### Service Checks
 
-- `mapr.can_connect`:
-  Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
+**mapr.can_connect**:
+Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
 
 ### Events
 
@@ -121,3 +122,4 @@ Need more help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
 [11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datafabric.hpe.com/52/SecurityGuide/t_config_impersonation_notsecure.html?hl=secure%2Ccluster

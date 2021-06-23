@@ -26,7 +26,11 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "windows_server": "assets/dashboards/windows_server_dashboard.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

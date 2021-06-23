@@ -1,0 +1,30 @@
+{
+  "guid": "event_guid",
+  "created_at": "2020-06-08T00:00:02Z",
+  "updated_at": "2020-06-08T00:00:02Z",
+  "type": "event_type",
+  "actor": {
+    "guid": "actor_guid",
+    "type": "actor_type",
+    "name": "actor_name"
+  },
+  "target": {
+    "guid": "target_guid",
+    "type": "target_type",
+    "name": "target_name"
+  },
+  "data": {
+      "some": "metadata"
+  },
+  "space": {
+    "guid": "space_guid"
+  },
+  "organization": {
+    "guid": "org_guid"
+  },
+  "links": {
+    "self": {
+      "href": ""
+    }
+  }
+}

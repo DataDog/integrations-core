@@ -7,12 +7,10 @@ from mock import patch
 
 from datadog_checks.wmi_check import WMICheck
 
-from .common import INSTANCE
-
 
 @pytest.fixture
 def check():
-    return WMICheck('wmi_check', {}, {}, [INSTANCE])
+    return lambda instance: WMICheck('wmi_check', {}, [instance])
 
 
 class MockSampler:

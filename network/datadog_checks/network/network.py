@@ -6,9 +6,12 @@
 Collects network metrics.
 """
 
+import array
+import distutils.spawn
 import os
 import re
 import socket
+import struct
 from collections import defaultdict
 
 import psutil
@@ -18,6 +21,16 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 if PY3:
     long = int
@@ -33,6 +46,25 @@ SOLARIS_TCP_METRICS = [
     (re.compile(r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.retrans_segs'),
     (re.compile(r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.in_segs'),
     (re.compile(r"\s*tcpInSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.out_segs'),
+]
+
+# constants for extracting ethtool data via ioctl
+SIOCETHTOOL = 0x8946
+ETHTOOL_GSTRINGS = 0x0000001B
+ETHTOOL_GSSET_INFO = 0x00000037
+ETHTOOL_GSTATS = 0x0000001D
+ETH_SS_STATS = 0x1
+ETH_GSTRING_LEN = 32
+
+# ENA metrics that we're collecting
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-network-performance.html
+ENA_METRIC_PREFIX = "aws.ec2."
+ENA_METRIC_NAMES = [
+    "bw_in_allowance_exceeded",
+    "bw_out_allowance_exceeded",
+    "conntrack_allowance_exceeded",
+    "linklocal_allowance_exceeded",
+    "pps_allowance_exceeded",
 ]
 
 
@@ -55,8 +87,12 @@ class Network(AgentCheck):
             )
 
         self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_cx_queues = instance.get('collect_connection_queues', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
+        self._collect_ena_metrics = instance.get('collect_aws_ena_metrics', False)
+        if fcntl is None and self._collect_ena_metrics:
+            raise ConfigurationError("fcntl not importable, collect_aws_ena_metrics should be disabled")
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -244,6 +280,24 @@ class Network(AgentCheck):
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
 
+    def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return False
+
+        metric_tags = [] if tags is None else tags[:]
+        metric_tags.append('device:{}'.format(iface))
+
+        allowed = [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
+        for m in vals_by_metric:
+            assert m in allowed
+
+        count = 0
+        for metric, val in iteritems(vals_by_metric):
+            self.gauge('system.net.%s' % metric, val, tags=metric_tags)
+            count += 1
+        self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
+
     def _parse_value(self, v):
         try:
             return long(v)
@@ -270,8 +324,16 @@ class Network(AgentCheck):
             return False
 
         if proc_location != "/proc":
-            self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
-            return False
+            # If we have `ss`, we're fine with a non-standard `/proc` location
+            if distutils.spawn.find_executable("ss") is None:
+                self.warning(
+                    "Cannot collect connection state: `ss` cannot be found and "
+                    "currently with a custom /proc path: %s",
+                    proc_location,
+                )
+                return False
+            else:
+                return True
 
         return True
 
@@ -281,7 +343,10 @@ class Network(AgentCheck):
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
-        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        proc_location = datadog_agent.get_config('procfs_path')
+        if not proc_location:
+            proc_location = '/proc'
+        proc_location = proc_location.rstrip('/')
         custom_tags = instance.get('tags', [])
 
         net_proc_base_location = self._get_net_proc_base_location(proc_location)
@@ -290,6 +355,17 @@ class Network(AgentCheck):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
+                ss_env = {"PROC_ROOT": net_proc_base_location}
+
+                # By providing the environment variables in ss_env, the PATH will be overriden. In CentOS,
+                # datadog-agent PATH is "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", while sh PATH
+                # will be '/usr/local/bin:/usr/bin'. In CentOS, ss is located in /sbin and /usr/sbin, not
+                # in the sh PATH, which will result in network metric collection failure.
+                #
+                # The line below will set sh PATH explicitly as the datadog-agent PATH to fix that issue.
+                if "PATH" in os.environ:
+                    ss_env["PATH"] = os.environ["PATH"]
+
                 metrics = self._get_metrics()
                 for ip_version in ['4', '6']:
                     # Call `ss` for each IP version because there's no built-in way of distinguishing
@@ -298,7 +374,7 @@ class Network(AgentCheck):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -310,15 +386,22 @@ class Network(AgentCheck):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
+
+                    if self._collect_cx_queues:
+                        cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
+                        output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
+                        for (state, recvq, sendq) in self._parse_queues("ss", output):
+                            self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                            self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
-            except OSError:
-                self.log.info("`ss` not found: using `netstat` as a fallback")
+            except OSError as e:
+                self.log.info("`ss` invocation failed: %s. Using `netstat` as a fallback", str(e))
                 output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
                 lines = output.splitlines()
                 # Active Internet connections (w/o servers)
@@ -334,8 +417,14 @@ class Network(AgentCheck):
                 metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
+
+                if self._collect_cx_queues:
+                    for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                        self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
+                        self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
+
             except SubprocessOutputEmptyError:
-                self.log.exception("Error collecting connection stats.")
+                self.log.exception("Error collecting connection states.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         try:
@@ -366,6 +455,12 @@ class Network(AgentCheck):
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
+
+                # read ENA metrics, if configured and available
+                if self._collect_ena_metrics:
+                    ena_metrics = self._collect_ena(iface)
+                    if ena_metrics:
+                        self._submit_ena_metrics(iface, ena_metrics, custom_tags)
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
@@ -633,6 +728,32 @@ class Network(AgentCheck):
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
+        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+
+        net_proc_base_location = self._get_net_proc_base_location(proc_location)
+
+        if self._is_collect_cx_state_runnable(net_proc_base_location):
+            try:
+                self.log.debug("Using `netstat` to collect connection state")
+                output_TCP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)
+                output_UDP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "udp"], self.log)
+                lines = output_TCP.splitlines() + output_UDP.splitlines()
+                # Active Internet connections (w/o servers)
+                # Proto Recv-Q Send-Q Local Address           Foreign Address         State
+                # tcp        0      0 46.105.75.4:80          79.220.227.193:2032     SYN_RECV
+                # tcp        0      0 46.105.75.4:143         90.56.111.177:56867     ESTABLISHED
+                # tcp        0      0 46.105.75.4:50468       107.20.207.175:443      TIME_WAIT
+                # tcp6       0      0 46.105.75.4:80          93.15.237.188:58038     FIN_WAIT2
+                # tcp6       0      0 46.105.75.4:80          79.220.227.193:2029     ESTABLISHED
+                # udp        0      0 0.0.0.0:123             0.0.0.0:*
+                # udp6       0      0 :::41458                :::*
+
+                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                for metric, value in iteritems(metrics):
+                    self.gauge(metric, value, tags=custom_tags)
+            except SubprocessOutputEmptyError:
+                self.log.exception("Error collecting connection states.")
+
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
@@ -809,3 +930,101 @@ class Network(AgentCheck):
         protocol = self.PSUTIL_TYPE_MAPPING.get(conn.type, '')
         family = self.PSUTIL_FAMILY_MAPPING.get(conn.family, '')
         return '{}{}'.format(protocol, family)
+
+    def _parse_queues(self, tool, ss_output):
+        """
+        for each line of `ss_output`, returns a triplet with:
+        * a connection state (`established`, `listening`)
+        * the receive queue size
+        * the send queue size
+        """
+        for line in ss_output.splitlines():
+            fields = line.split()
+
+            if len(fields) < (6 if tool == "netstat" else 3):
+                continue
+
+            state_column = 0 if tool == "ss" else 5
+
+            try:
+                state = self.tcp_states[tool][fields[state_column]]
+            except KeyError:
+                continue
+
+            yield (state, fields[1], fields[2])
+
+    def _collect_ena(self, iface):
+        """
+        Collect ENA metrics for given interface.
+
+        ENA metrics are collected via the ioctl SIOCETHTOOL call. At the time of writing
+        this method, there are no maintained Python libraries that do this. The solution
+        is based on:
+
+        * https://github.com/safchain/ethtool
+        * https://gist.github.com/yunazuno/d7cd7e1e127a39192834c75d85d45df9
+        """
+        ethtool_socket = None
+        try:
+            ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+            return self._get_ena_metrics(iface, ethtool_socket)
+        except OSError as e:
+            # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
+            self.log.debug('OSError while trying to collect ENA metrics for interface %s: %s', iface, str(e))
+        except Exception:
+            self.log.exception('Unable to collect ENA metrics for interface %s', iface)
+        finally:
+            if ethtool_socket is not None:
+                ethtool_socket.close()
+        return {}
+
+    def _send_ethtool_ioctl(self, iface, sckt, data):
+        """
+        Send an ioctl SIOCETHTOOL call for given interface with given data.
+        """
+        ifr = struct.pack('16sP', iface.encode('utf-8'), data.buffer_info()[0])
+        fcntl.ioctl(sckt.fileno(), SIOCETHTOOL, ifr)
+
+    def _get_ethtool_gstringset(self, iface, sckt):
+        """
+        Retrieve names of all ethtool stats for given interface.
+        """
+        sset_info = array.array('B', struct.pack('IIQI', ETHTOOL_GSSET_INFO, 0, 1 << ETH_SS_STATS, 0))
+        self._send_ethtool_ioctl(iface, sckt, sset_info)
+        sset_mask, sset_len = struct.unpack('8xQI', sset_info)
+        if sset_mask == 0:
+            sset_len = 0
+
+        strings = array.array('B', struct.pack('III', ETHTOOL_GSTRINGS, ETH_SS_STATS, sset_len))
+        strings.extend([0] * sset_len * ETH_GSTRING_LEN)
+        self._send_ethtool_ioctl(iface, sckt, strings)
+
+        all_names = []
+        for i in range(sset_len):
+            offset = 12 + ETH_GSTRING_LEN * i
+            s = strings[offset : offset + ETH_GSTRING_LEN]
+            s = s.tobytes() if PY3 else s.tostring()
+            s = s.partition(b'\x00')[0].decode('utf-8')
+            all_names.append(s)
+        return all_names
+
+    def _get_ena_metrics(self, iface, sckt):
+        """
+        Get all ENA metrics specified in ENA_METRICS_NAMES list and their values from ethtool.
+        """
+        stats_names = list(self._get_ethtool_gstringset(iface, sckt))
+        stats_count = len(stats_names)
+
+        stats = array.array('B', struct.pack('II', ETHTOOL_GSTATS, stats_count))
+        # we need `stats_count * (length of uint64)` for the result
+        stats.extend([0] * len(struct.pack('Q', 0)) * stats_count)
+        self._send_ethtool_ioctl(iface, sckt, stats)
+
+        metrics = {}
+        for i, stat_name in enumerate(stats_names):
+            if stat_name in ENA_METRIC_NAMES:
+                offset = 8 + 8 * i
+                value = struct.unpack('Q', stats[offset : offset + 8])[0]
+                metrics[ENA_METRIC_PREFIX + stat_name] = value
+
+        return metrics

@@ -84,7 +84,18 @@ def test_backoff_success(check, instance, aggregator, payload):
         ("legacy ssl config True", {'disable_ssl_validation': False}, {'verify': True}),
         ("legacy ssl config False", {'disable_ssl_validation': True}, {'verify': False}),
         ("legacy ssl config unset", {}, {'verify': True}),
-        ("http_host header", {"http_host": "foo"}, {'headers': {'User-Agent': 'Datadog Agent/0.0.0', 'Host': 'foo'}}),
+        (
+            "http_host header",
+            {"http_host": "foo"},
+            {
+                'headers': {
+                    'User-Agent': 'Datadog Agent/0.0.0',
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Host': 'foo',
+                }
+            },
+        ),
     ],
 )
 def test_config(test_case, extra_config, expected_http_kwargs):

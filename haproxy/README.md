@@ -18,6 +18,22 @@ The Haproxy check is included in the [Datadog Agent][2] package, so you don't ne
 
 #### Prepare HAProxy
 
+##### Using Prometheus
+
+The recommended way to set up this integration is by enabling the Prometheus endpoint on HAProxy. This endpoint is built into HAProxy starting with version 2 (enterprise version 1.9rc1). If you are using an older version, consider setting up the [HAProxy Prometheus exporter][17], or alternatively set up the legacy socket-based integration described in the next section.
+
+1. Configure your `haproxy.conf` using the [official guide][16].
+
+2. [Enable](#configuration) the setting `use_prometheus` in `haproxy.d/conf.yaml`.
+
+3. [Restart HAProxy to enable the Prometheus endpoint][3].
+
+4. [Restart the Agent][6].
+
+##### Using the stats endpoint
+
+**Note**: This configuration strategy is provided as a reference for legacy users. If you are setting up the integration for the first time, consider using the Prometheus-based strategy described in the previous section.
+
 The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
@@ -37,9 +53,12 @@ The Agent collects metrics via a stats endpoint:
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection). See the [sample haproxy.d/conf.yaml][5] for all available configuration options.
 
@@ -62,8 +81,6 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 2. [Restart the Agent][6].
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
@@ -90,43 +107,146 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
     ```bash
     sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
     ```
-    
+
     Verify the setup is correct by running the `getcap` command:
-    
+
     ```bash
     sudo getcap /opt/datadog-agent/bin/agent/agent
     ```
-    
+
     With the expected output:
     ```bash
     /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
     ```
-    
+
     **Note:** Re-run this `setcap` command every time you upgrade the Agent.
-    
+
 4. [Restart the Agent][6].
 
-#### Containerized
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+#### Docker
+
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                     |
-| -------------------- | ----------------------------------------- |
-| `<INTEGRATION_NAME>` | `haproxy`                                 |
-| `<INIT_CONFIG>`      | blank or `{}`                             |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%/admin?stats"}` |
+Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["haproxy"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
+```
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
+
+Then, set [Log Integrations][21] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"haproxy","service":"<SERVICE_NAME>"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][23].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: haproxy
+  annotations:
+    ad.datadoghq.com/haproxy.check_names: '["haproxy"]'
+    ad.datadoghq.com/haproxy.init_configs: '[{}]'
+    ad.datadoghq.com/haproxy.instances: |
+      [
+        {
+          "url": "https://%%host%%/admin?stats"
+        }
+      ]
+spec:
+  containers:
+    - name: haproxy
+```
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
 
-| Parameter      | Value                                                |
-| -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "haproxy", "service": "<SERVICE_NAME>"}` |
+Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: haproxy
+  annotations:
+    ad.datadoghq.com/haproxy.logs: '[{"source":"haproxy","service":"<SERVICE_NAME>"}]'
+spec:
+  containers:
+    - name: haproxy
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][27] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "haproxy",
+    "image": "haproxy:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"haproxy\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"url\": \"https://%%host%%/admin?stats\"}]"
+    }
+  }]
+}
+```
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][28].
+
+Then, set [Log Integrations][29] as Docker labels:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "haproxy",
+    "image": "haproxy:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"haproxy\",\"service\":\"<SERVICE_NAME>\"}]"
+    }
+  }]
+}
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -161,7 +281,7 @@ Need help? Contact [Datadog support][11].
 - [HA Proxy Multi Process Configuration][15]
 - [How to collect HAProxy metrics][13]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.haproxy.org/download/1.7/doc/management.txt
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -176,3 +296,16 @@ Need help? Contact [Datadog support][11].
 [13]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
 [14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
 [15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
+[16]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
+[17]: https://github.com/prometheus/haproxy_exporter
+[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[26]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[27]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[28]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[29]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

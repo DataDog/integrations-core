@@ -7,8 +7,9 @@ import click
 from ...console import CONTEXT_SETTINGS
 from .status import status
 from .testable import testable
+from .update_rc_links import update_rc_links
 
-ALL_COMMANDS = [status, testable]
+ALL_COMMANDS = [status, testable, update_rc_links]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Tools for interacting with Trello')

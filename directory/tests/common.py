@@ -13,9 +13,9 @@ FILE_METRICS = [
     "system.disk.directory.file.created_sec_ago",
 ]
 
-COMMON_METRICS = ["system.disk.directory.files", "system.disk.directory.bytes"]
+DIR_METRICS = ["system.disk.directory.files", "system.disk.directory.bytes"]
 
-EXPECTED_METRICS = FILE_METRICS + COMMON_METRICS
+EXPECTED_METRICS = FILE_METRICS + DIR_METRICS
 
 
 EXPECTED_TAGS = ['name:.', 'optional:tag1']

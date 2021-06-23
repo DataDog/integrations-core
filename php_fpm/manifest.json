@@ -36,8 +36,18 @@
   "type": "check",
   "integration_id": "php-fpm",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "php-fpm": "assets/dashboards/php-fpm_dashboard.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "php-fpm_processes": "assets/saved_views/php-fpm_processes.json"
+    }
   }
 }

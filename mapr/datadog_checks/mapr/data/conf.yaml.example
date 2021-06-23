@@ -1,6 +1,18 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
+
   -
     ## @param ticket_location - string - optional
     ## The path to the MapR user ticket, if included it overrides the MAPR_TICKETFILE_LOCATION environment variable.
@@ -8,7 +20,7 @@ instances:
     #
     # ticket_location: <TICKETFILE_LOCATION>
 
-    ## @param hostname - string - optional - default: `socket.getfqdn()`
+    ## @param hostname - string - optional
     ## The MapR host to monitor. This is used to find the correct topic to read metrics from.
     ## https://mapr.com/docs/61/AdministratorGuide/spyglass-on-streams.html
     #
@@ -19,14 +31,14 @@ instances:
     #
     # stream_path: /var/mapr/mapr.monitoring/metricstreams
 
-    ## @param metric_whitelist - list - optional
+    ## @param metric_whitelist - list of strings - optional
     ## List of regexes for metrics to collect. Note that you can only collect metrics starting with "mapr.",
     ## see https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/common.py
     ## for the list of metrics you can collect.
     ## Collect all mapr related metrics by default
     #
     # metric_whitelist:
-    #   - '.*'
+    #   - .*
 
     ## @param streams_count - integer - optional - default: 1
     ## The mapr setting for the number of monitoring streams.
@@ -35,11 +47,31 @@ instances:
     #
     # streams_count: 1
 
-    ## @param tags  - list of key:value elements - optional
-    ## A list of tags to attach to every metric, event, and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

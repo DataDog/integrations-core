@@ -10,9 +10,7 @@ import redis
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
-
-HERE = os.path.dirname(os.path.abspath(__file__))
+from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
 
 
 class CheckCluster(LazyFunction):
@@ -68,7 +66,7 @@ def dd_environment(master_instance):
     Start a cluster with one master, one replica, and one unhealthy replica.
     """
     with docker_run(
-        os.path.join(HERE, 'compose', '1m-2s.compose'),
+        DOCKER_COMPOSE_PATH,
         conditions=[
             CheckCluster({'port': MASTER_PORT, 'db': 14, 'host': HOST}, {'port': REPLICA_PORT, 'db': 14, 'host': HOST})
         ],
@@ -78,7 +76,14 @@ def dd_environment(master_instance):
 
 @pytest.fixture
 def redis_instance():
-    return {'host': HOST, 'port': PORT, 'password': PASSWORD, 'keys': ['test_*'], 'tags': ["foo:bar"]}
+    return {
+        'host': HOST,
+        'port': PORT,
+        'password': PASSWORD,
+        'keys': ['test_*'],
+        'tags': ["foo:bar"],
+        'collect_client_metrics': True,
+    }
 
 
 @pytest.fixture
@@ -88,7 +93,7 @@ def replica_instance():
 
 @pytest.fixture(scope='session')
 def master_instance():
-    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*']}
+    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'collect_client_metrics': True}
 
 
 @pytest.fixture

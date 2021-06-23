@@ -16,24 +16,30 @@ The Gitlab check is included in the [Datadog Agent][2] package, so you don't nee
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
 1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][13]. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][12] for further information about its metric collection.
+2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled. You will need to have administrator access. For more information on how to enable metric collection, see the [Gitlab documentation][12].
 
-2. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
+3. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
 
     ```
     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '192.168.0.1']
     ```
-    **Note** Save and reconfigure Gitlab to see the changes.
+    **Note** Save and restart Gitlab to see the changes.
 
-2. [Restart the Agent][5]
+4. [Restart the Agent][5].
+
+**Note**: The metrics in [gitlab/metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][12] for further information about its metric collection.
+
 
 ##### Log collection
 
@@ -63,6 +69,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
@@ -83,6 +92,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "gitlab", "service": "gitlab"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `gitlab` under the Checks section.
@@ -101,10 +113,17 @@ The Gitlab check does not include any events.
 
 The Gitlab check includes health, readiness, and liveness service checks.
 
-`gitlab.prometheus_endpoint_up`: Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance.
-`gitlab.health`: Returns `CRITICAL` if the check cannot access the Gitlab instance.
-`gitlab.liveness`: Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers.
-`gitlab.readiness`: Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers.
+**gitlab.prometheus_endpoint_up**:<br>
+Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance.
+
+**gitlab.health**:<br>
+Returns `CRITICAL` if the check cannot access the Gitlab instance.
+
+**gitlab.liveness**:<br>
+Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers.
+
+**gitlab.readiness**:<br>
+Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers.
 
 ## Troubleshooting
 

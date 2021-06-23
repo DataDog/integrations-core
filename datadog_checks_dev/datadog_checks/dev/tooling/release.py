@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import sys
 
 from ..errors import ManifestError
+from ..fs import chdir, read_file, read_file_lines, write_file, write_file_lines
 from ..subprocess import run_command
-from ..utils import chdir, read_file, read_file_lines, write_file, write_file_lines
 from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
@@ -113,12 +114,18 @@ def update_agent_requirements(req_file, check, newline):
 
 def build_package(package_path, sdist):
     with chdir(package_path):
-        result = run_command('python setup.py bdist_wheel --universal', capture='out')
+        # Clean up: Files built previously and now deleted might still persist in build directory
+        # and will be included in the final wheel. Cleaning up before avoids that.
+        result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
+        if result.code != 0:
+            return result
+
+        result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
         if result.code != 0:
             return result
 
         if sdist:
-            result = run_command('python setup.py sdist', capture='out')
+            result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
             if result.code != 0:
                 return result
 

@@ -19,6 +19,18 @@ div.doc-contents:not(.first) {
   padding: 0.5em 1em;
 }
 
+/* Brighter links for dark mode */
+[data-md-color-scheme=slate] {
+  --md-text-link-color: var(--md-primary-fg-color--light);
+}
+
+/* FiraCode https://github.com/tonsky/FiraCode */
+code { font-family: 'Fira Code', monospace; }
+
+@supports (font-variation-settings: normal) {
+  code { font-family: 'Fira Code VF', monospace; }
+}
+
 /* https://facelessuser.github.io/pymdown-extensions/extensions/progressbar/ */
 
 /* TODO: replace all this when there is an updated example https://github.com/facelessuser/pymdown-extensions/issues/912 */

@@ -1,0 +1,10 @@
+name: Setup
+header_level: 2
+description: |
+  Follow the instructions below to install and configure this check for an Agent running on a host. For
+  containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these
+  instructions.
+
+  [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+
+

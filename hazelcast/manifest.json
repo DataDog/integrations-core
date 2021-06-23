@@ -24,15 +24,21 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "hazelcast",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Hazelcast Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "saved_views": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "hazelcast"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

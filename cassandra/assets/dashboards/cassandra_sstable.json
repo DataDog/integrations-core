@@ -1,0 +1,670 @@
+{
+    "title": "Cassandra - SSTable Management",
+    "description": "You can use this dashboard to rapidly troubleshoot any issues with Cassandra's SSTables that you identified from the [Cassandra overview](https://app.datadoghq.com/dash/integration/23/cassandra---overview) dashboard. Aggregated metric graphs enable you to isolate issues to a particular table, host, or combination thereof. Further reading on Cassandra monitoring:\n\n- [Datadog's blog post describing our suite of Cassandra dashboards](https://www.datadoghq.com/blog/tlp-cassandra-dashboards/)\n\n- [Our guide to key metrics for Cassandra monitoring](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)\n\n- [How to collect Cassandra metrics using built-in Cassandra and JDK tools](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)\n\n- [How to monitor Cassandra using Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)\n\n- [Datadog's integration docs for Cassandra](https://docs.datadoghq.com/integrations/cassandra/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "environment",
+            "name": "environment"
+        },
+        {
+            "default": "*",
+            "prefix": "datacenter",
+            "name": "datacenter"
+        },
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        },
+        {
+            "default": "*",
+            "prefix": "keyspace",
+            "name": "keyspace"
+        },
+        {
+            "default": "*",
+            "prefix": "table",
+            "name": "table"
+        },
+        {
+            "default": "*",
+            "prefix": "columnfamily",
+            "name": "columnfamily"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:system.disk.in_use{$environment,$datacenter,$host} by {host,device}, 10, 'max', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red",
+                                "value": 0.8,
+                                "comparator": ">"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "value": 0.5,
+                                "comparator": ">="
+                            },
+                            {
+                                "palette": "white_on_green",
+                                "value": 0.5,
+                                "comparator": "<"
+                            }
+                        ]
+                    }
+                ],
+                "type": "toplist",
+                "title": "Disk space used per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:cassandra.pending_compactions{$environment,$datacenter,$host} by {host}, 10, 'max', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red",
+                                "value": 100,
+                                "comparator": ">"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "value": 10,
+                                "comparator": ">="
+                            },
+                            {
+                                "palette": "white_on_green",
+                                "value": 0,
+                                "comparator": ">="
+                            }
+                        ]
+                    }
+                ],
+                "type": "toplist",
+                "title": "Compactions pending per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(max:cassandra.live_ss_table_count{$environment,$datacenter,$host} by {host}, 10, 'max', 'desc')"
+                    }
+                ],
+                "type": "toplist",
+                "title": "Number of SSTables per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.live_ss_table_count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SSTable count per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.live_ss_table_count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SSTable count per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.live_ss_table_count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "SSTable count per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_compactions{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending compactions per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_compactions{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending compactions per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_compactions{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending compactions per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.compaction_bytes_written.count{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Compacted data per table and DC (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.compaction_bytes_written.count{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Compacted data per host (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.compaction_bytes_written.count{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Compacted data per host and table (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending Flushes per table and DC (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending Flushes per host (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:cassandra.pending_flushes.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending Flushes per host and table (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.bytes_flushed.count{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Flushed data per table and DC (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.bytes_flushed.count{$environment,$datacenter,$host,$keyspace,$table} by {datacenter,host})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Flushed data per host (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "per_second(avg:cassandra.bytes_flushed.count{$environment,$datacenter,$host,$keyspace,$table} by {host,datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Flushed data per host and table (C*3+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "derivative(avg:cassandra.live_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Live space growth per table and DC (Max rate per second)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "derivative(avg:cassandra.live_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Live space growth per host (Max rate per second)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "derivative(avg:cassandra.live_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace})",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Live space growth per host and table (Max rate per second)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.total_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Total space used per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.total_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Total space used per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.total_disk_space_used.count{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Total space used per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.snapshots_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Snapshot real size on disk per table and DC (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.snapshots_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Snapshot real size on disk per host (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:cassandra.snapshots_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Snapshot real size on disk per host and table (C*2.1+)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.compression_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.9",
+                        "label": "Inefficient compression"
+                    },
+                    {
+                        "display_type": "ok dashed",
+                        "value": "y = 0.1",
+                        "label": "Good compression"
+                    }
+                ],
+                "title": "Compression ratio per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.compression_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.9",
+                        "label": "Inefficient compression"
+                    },
+                    {
+                        "display_type": "ok dashed",
+                        "value": "y = 0.1",
+                        "label": "Good compression"
+                    }
+                ],
+                "title": "Compression ratio per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.compression_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.9",
+                        "label": "Inefficient compression"
+                    },
+                    {
+                        "display_type": "ok dashed",
+                        "value": "y = 0.1",
+                        "label": "Good compression"
+                    }
+                ],
+                "title": "Compression ratio per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.db.droppable_tombstone_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.33",
+                        "label": "A third of the data is deleted data"
+                    },
+                    {
+                        "display_type": "error solid",
+                        "value": "y = 0.8",
+                        "label": "80 % of the data is droppable"
+                    }
+                ],
+                "title": "Droppable tombstone ratio per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.db.droppable_tombstone_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.33",
+                        "label": "A third of the data is deleted data"
+                    },
+                    {
+                        "display_type": "error solid",
+                        "value": "y = 0.8",
+                        "label": "80 % of the data is droppable"
+                    }
+                ],
+                "title": "Droppable tombstone ratio per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.db.droppable_tombstone_ratio{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "markers": [
+                    {
+                        "display_type": "warning dashed",
+                        "value": "y = 0.33",
+                        "label": "A third of the data is deleted data"
+                    },
+                    {
+                        "display_type": "error solid",
+                        "value": "y = 0.8",
+                        "label": "80 % of the data is droppable"
+                    }
+                ],
+                "title": "Droppable tombstone ratio per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per table and DC"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {datacenter,host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per host"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:cassandra.max_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_partition_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,table,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.max_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:cassandra.mean_row_size{$environment,$datacenter,$host,$keyspace,$table,$columnfamily} by {host,datacenter,columnfamily,keyspace}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Max / Mean partition size per host and table"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.w_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk write count (io.w/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.wkb_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk write throughput (io.wkb/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "top(avg:system.io.w_await{$environment,$datacenter,$host} by {host,datacenter,device}, 10, 'mean', 'desc')",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk write latency (w_await) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.wrqm_s{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk write queued (io.wrqm/s) per host and device"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.io.util{$environment,$datacenter,$host} by {host,datacenter,device}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Disk utilization (io.util%) per host and device"
+            }
+        }
+    ]
+}

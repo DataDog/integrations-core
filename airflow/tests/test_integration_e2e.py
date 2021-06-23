@@ -12,7 +12,7 @@ from . import common
 @pytest.mark.usefixtures('dd_environment')
 def test_service_checks_integration(aggregator):
     check = AirflowCheck('airflow', common.FULL_CONFIG, [common.INSTANCE])
-    check.check(common.INSTANCE)
+    check.check(None)
 
     assert_service_checks(aggregator)
 

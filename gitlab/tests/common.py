@@ -5,6 +5,7 @@
 import os
 
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.gitlab import GitlabCheck
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -64,6 +65,10 @@ METRICS = [
     "ruby.process_max_fds",
     "ruby.process_resident_memory_bytes",
     "ruby.process_start_time_seconds",
+    "ruby.gc_duration_seconds.count",
+    "ruby.gc_duration_seconds.sum",
+    "sql_duration_seconds.count",
+    "sql_duration_seconds.sum",
     "ruby.gc_stat.count",
     "ruby.gc_stat.heap_allocated_pages",
     "ruby.gc_stat.heap_sorted_length",
@@ -76,6 +81,7 @@ METRICS = [
     "ruby.gc_stat.heap_eden_pages",
     "ruby.gc_stat.heap_tomb_pages",
     "ruby.gc_stat.total_allocated_pages",
+    "ruby.gc_stat.total_freed_objects",
     "ruby.gc_stat.total_freed_pages",
     "ruby.gc_stat.total_allocated_objects",
     "ruby.gc_stat.malloc_increase_bytes",
@@ -94,7 +100,7 @@ METRICS = [
 ]
 
 METRICS_TO_TEST = [
-    "unicorn.workers",
+    "puma.workers",
     "rack.http_requests_total",
     "ruby.process_start_time_seconds",
     "rack.http_request_duration_seconds.sum",
@@ -151,3 +157,22 @@ BAD_CONFIG = {
         }
     ],
 }
+
+
+def assert_check(aggregator, metrics):
+    """
+    Basic Test for gitlab integration.
+    """
+    # Make sure we're receiving gitlab service checks
+    for service_check in GitlabCheck.ALLOWED_SERVICE_CHECKS:
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check), status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
+        )
+
+    # Make sure we're receiving prometheus service checks
+    aggregator.assert_service_check(
+        GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
+    )
+
+    for metric in metrics:
+        aggregator.assert_metric("gitlab.{}".format(metric))

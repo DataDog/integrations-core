@@ -110,8 +110,8 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
 
 def test__is_excluded():
     """
-     * Exclude hosts/vms not compliant with the user's `*_include` configuration.
-     * Exclude "non-labeled" virtual machines when the user configuration instructs to.
+    * Exclude hosts/vms not compliant with the user's `*_include` configuration.
+    * Exclude "non-labeled" virtual machines when the user configuration instructs to.
     """
     # Sample(s)
     include_regexes = {'host_include': "f[o]+", 'vm_include': "f[o]+"}
@@ -551,7 +551,7 @@ def test__collect_metrics_async_hostname(vsphere, instance, aggregator):
     aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="foo")
 
 
-def test_check(vsphere, instance):
+def test_check_run(vsphere, instance):
     """
     Test the check() method
     """

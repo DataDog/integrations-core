@@ -26,14 +26,23 @@
   "is_public": true,
   "integration_id": "nginx-ingress-controller",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "nginx_ingress_controller": "assets/dashboards/overview.json"
+    },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "nginx-ingress-controller"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

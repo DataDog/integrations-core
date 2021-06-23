@@ -184,14 +184,22 @@
                                     "name": "VM4-9",
                                     "mo_id": "VM4-9-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "customValue": {
+                                        "attr_key": "attr_val2",
+                                        "foo": "bar1"
+                                    }
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-15",
                                     "mo_id": "VM4-15-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "customValue": {
+                                        "attr_key": "attr_val",
+                                        "foo": "bar2"
+                                    }
                                 },
                                 {
                                     "spec": "VirtualMachine",

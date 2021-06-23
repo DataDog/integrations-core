@@ -22,11 +22,7 @@ class Istio(OpenMetricsBaseCheck):
         metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
 
         # Include default and user configured labels
-        exclude_labels = instance.get('exclude_labels', [])
-        exclude_labels.extend(BLACKLIST_LABELS)
-
-        # Support additional configured metric mappings
-        metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
+        exclude_labels = instance.get('exclude_labels', []) + BLACKLIST_LABELS
 
         instance.update(
             {

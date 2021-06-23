@@ -13,6 +13,7 @@ JVM_E2E_METRICS = [
     'jvm.cpu_load.system',
     'jvm.gc.cms.count',
     'jvm.gc.eden_size',
+    'jvm.gc.metaspace_size',
     'jvm.gc.old_gen_size',
     'jvm.gc.parnew.time',
     'jvm.gc.survivor_size',
@@ -28,3 +29,15 @@ JVM_E2E_METRICS = [
     'jvm.os.open_file_descriptors',
     'jvm.thread_count',
 ]
+
+JMX_E2E_METRICS = [
+    'jmx.gc.major_collection_count',
+    'jmx.gc.major_collection_time',
+    'jmx.gc.minor_collection_count',
+    'jmx.gc.minor_collection_time',
+]
+
+JVM_E2E_METRICS_NEW = list(JVM_E2E_METRICS)
+JVM_E2E_METRICS_NEW.remove('jvm.gc.cms.count')
+JVM_E2E_METRICS_NEW.remove('jvm.gc.parnew.time')
+JVM_E2E_METRICS_NEW.extend(m.replace('jmx.', 'jvm.', 1) for m in JMX_E2E_METRICS)

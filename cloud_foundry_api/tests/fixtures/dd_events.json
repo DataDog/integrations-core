@@ -1,0 +1,53 @@
+{
+  "event1": {
+    "msg_title": "Event audit.app.restage happened for app hello-datadog-cf-ruby-full",
+    "msg_text": "Triggered by user admin",
+    "timestamp": 1591574402,
+    "priority": "normal",
+    "host": "datadog-firehose-nozzle-0-datadog-4d8cf259bea20811c5a3",
+    "tags": [
+      "app_guid:1d386537-c90b-46ca-b14c-6d73ac0feab1",
+      "app_name:hello-datadog-cf-ruby-full",
+      "event_type:audit.app.restage",
+      "org_guid:7b6fdcb8-c2c2-4b2c-9c9a-682de9cf607f",
+      "space_guid:fe712d4e-91a9-46f2-b82c-fa26da40dc53",
+      "user_guid:7e84e3d9-6f17-4bab-8c1e-7b2d9521c287",
+      "user_name:admin"
+    ],
+    "source_type_name": "Cloud Foundry"
+  },
+  "event2": {
+    "msg_title": "Event audit.app.update happened for app hello-datadog-cf-ruby-full",
+    "msg_text": "Triggered by user admin",
+    "timestamp": 1591574401,
+    "priority": "normal",
+    "host": "datadog-firehose-nozzle-0-datadog-4d8cf259bea20811c5a3",
+    "tags": [
+      "app_guid:1d386537-c90b-46ca-b14c-6d73ac0feab1",
+      "app_name:hello-datadog-cf-ruby-full",
+      "event_type:audit.app.update",
+      "org_guid:7b6fdcb8-c2c2-4b2c-9c9a-682de9cf607f",
+      "space_guid:fe712d4e-91a9-46f2-b82c-fa26da40dc53",
+      "user_guid:7e84e3d9-6f17-4bab-8c1e-7b2d9521c287",
+      "user_name:admin"
+    ],
+    "source_type_name": "Cloud Foundry"
+  },
+  "event3": {
+    "msg_title": "Event app.crash happened for app hello-datadog-cf-ruby-full",
+    "msg_text": "Triggered by user admin",
+    "timestamp": 1591574400,
+    "priority": "normal",
+    "host": "datadog-firehose-nozzle-0-datadog-4d8cf259bea20811c5a3",
+    "tags": [
+      "app_guid:1d386537-c90b-46ca-b14c-6d73ac0feab1",
+      "app_name:hello-datadog-cf-ruby-full",
+      "event_type:audit.app.create",
+      "org_guid:7b6fdcb8-c2c2-4b2c-9c9a-682de9cf607f",
+      "space_guid:fe712d4e-91a9-46f2-b82c-fa26da40dc53",
+      "user_guid:7e84e3d9-6f17-4bab-8c1e-7b2d9521c287",
+      "user_name:admin"
+    ],
+    "source_type_name": "Cloud Foundry"
+  }
+}

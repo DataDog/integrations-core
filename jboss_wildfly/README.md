@@ -8,15 +8,18 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don’t need to install anything else on your JBoss/WildFly host.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don't need to install anything else on your JBoss/WildFly host.
 
 ### Configuration
 
 This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, visit the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -55,6 +58,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][8].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -70,6 +76,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "jboss_wildfly", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

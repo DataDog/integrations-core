@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "languages"
+    "languages",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "ASP.NET",
@@ -21,8 +22,15 @@
   "type": "check",
   "integration_id": "aspdotnet",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "dashboards": {
+      "ASP.NET - Overview": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

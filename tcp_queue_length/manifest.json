@@ -1,0 +1,29 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "tcp_queue.",
+  "metric_to_check": "tcp_queue.read_buffer_max_usage_pct",
+  "name": "tcp_queue_length",
+  "short_description": "Track the size of the TCP buffers with Datadog.",
+  "guid": "0468b098-43bd-4157-8a01-14065cfdcb7b",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Datadog-TCP Queue Length Integration",
+  "categories": [
+    "network"
+  ],
+  "type": "check",
+  "is_public": true,
+  "display_name": "TCP Queue Length",
+  "creates_events": false,
+  "integration_id": "tcp-queue-length",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

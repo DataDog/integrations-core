@@ -29,9 +29,12 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric Collection
 
@@ -48,10 +51,84 @@ Follow the instructions below to configure this check for an Agent running on a 
      #
      - url: http://localhost:8500
    ```
-
+   
 2. [Restart the Agent][6].
 
-Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
+###### OpenMetrics
+
+Optionally, you can enable the `use_prometheus_endpoint` configuration option to get an additional set of metrics from the Consul Prometheus endpoint.
+
+**Note**: Use the DogStatsD or Prometheus method, do not enable both for the same instance.
+
+1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
+
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "prometheus_retention_time": "360h"
+      },
+      ...
+    }
+    ```
+
+2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the Prometheus endpoint.
+    ```yaml
+    instances:
+        - url: <EXAMPLE>
+          use_prometheus_endpoint: true
+    ```
+
+3. [Restart the Agent][6].
+
+##### DogStatsD
+
+Instead of using the Prometheus endpoint, you can configure Consul to send the same set of additional metrics to the Agent through [DogStatsD][3].
+
+1. Configure Consul to send DogStatsD metrics by adding the `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
+
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "dogstatsd_addr": "127.0.0.1:8125"
+      },
+      ...
+    }
+    ```
+
+2. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
+
+   ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
+   dogstatsd_mapper_profiles:
+     - name: consul
+       prefix: "consul."
+       mappings:
+         - match: 'consul\.http\.([a-zA-Z]+)\.(.*)'
+           match_type: "regex"
+           name: "consul.http.request"
+           tags:
+             method: "$1"
+             path: "$2"
+         - match: 'consul\.raft\.replication\.appendEntries\.logs\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.appendEntries.logs"
+           tags:
+             peer_id: "$1"
+         - match: 'consul\.raft\.replication\.appendEntries\.rpc\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.appendEntries.rpc"
+           tags:
+             peer_id: "$1"
+         - match: 'consul\.raft\.replication\.heartbeat\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.heartbeat"
+           tags:
+             peer_id: "$1"
+   ```
+
+3. [Restart the Agent][6].
 
 ##### Log collection
 
@@ -63,7 +140,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
+2. Edit this configuration block in your `consul.yaml` file to collect Consul logs:
 
    ```yaml
    logs:
@@ -77,6 +154,9 @@ _Available for Agent versions >6.0_
    See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
 3. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -94,25 +174,15 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "consul", "service": "<SERVICE_NAME>"}` |
 
-#### DogStatsD
 
-Alternatively, you can configure Consul to send data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from Consul. To achieve this, add your `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
-
-```conf
-{
-  ...
-  "telemetry": {
-    "dogstatsd_addr": "127.0.0.1:8125"
-  },
-  ...
-}
-```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -186,3 +256,5 @@ Need help? Contact [Datadog support][13].
 [13]: https://docs.datadoghq.com/help/
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog
+[16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time

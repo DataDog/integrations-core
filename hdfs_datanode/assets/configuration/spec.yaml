@@ -1,0 +1,31 @@
+name: HDFS Datanode
+files:
+  - name: hdfs_datanode.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: hdfs_datanode_jmx_uri
+            description: |
+              The HDFS DataNode check retrieves metrics from the HDFS DataNode's JMX
+              interface via HTTP(S) (not a JMX remote connection). This check must be installed on a HDFS DataNode. The HDFS
+              DataNode JMX URI is composed of the DataNode's hostname and port.
+              
+              The hostname and port can be found in the hdfs-site.xml conf file under
+              the property dfs.datanode.http.address
+              https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
+            required: true
+            value:
+              example: http://localhost:50075
+              type: string
+          - template: instances/http
+          - template: instances/default
+      - template: logs
+        example:
+        - type: file
+          path: /var/log/hadoop-hdfs/*.log
+          source: hdfs_datanode
+          service: <SERVICE_NAME>

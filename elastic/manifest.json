@@ -30,8 +30,26 @@
   "type": "check",
   "integration_id": "elasticsearch",
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "monitors": {
+      "[ElasticSearch] Unsuccessful requests rate is high": "assets/monitors/elastic_requests.json",
+      "[ElasticSearch] Query load is high": "assets/monitors/elastic_query_load_high.json",
+      "[ElasticSearch] Time spent on queries is high": "assets/monitors/elastic_query_latency_high.json",
+      "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json"
+    },
+    "dashboards": {
+      "elasticsearch": "assets/dashboards/overview.json",
+      "elasticsearch_timeboard": "assets/dashboards/metrics.json"
+    },
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "elasticsearch"
+    },
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"
+    }
   }
 }

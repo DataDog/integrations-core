@@ -14,7 +14,21 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 class Fluentd(AgentCheck):
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'fluentd.is_ok'
-    GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
+    GAUGES = [
+        'retry_count',
+        'buffer_total_queued_size',
+        'buffer_queue_length',
+        'emit_records',
+        'emit_count',
+        'write_count',
+        'rollback_count',
+        'slow_flush_count',
+        'flush_time_count',
+        'buffer_stage_length',
+        'buffer_stage_byte_size',
+        'buffer_queue_byte_size',
+        'buffer_available_buffer_space_ratios',
+    ]
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
     VERSION_PATTERN = r'.* (?P<version>[0-9\.]+)'
 
@@ -120,13 +134,13 @@ class Fluentd(AgentCheck):
         try:
             out, _, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
         except OSError as exc:
-            self.log.warning("Error collecting fluentd version: %s", exc)
+            self.log.debug("Error collecting fluentd version: %s", exc)
             return None
 
         match = re.match(self.VERSION_PATTERN, out)
 
         if match is None:
-            self.log.warning("fluentd version not found in stdout: `%s`", out)
+            self.log.debug("fluentd version not found in stdout: `%s`", out)
             return None
 
         return match.group('version')

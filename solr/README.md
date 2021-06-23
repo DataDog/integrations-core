@@ -16,13 +16,28 @@ This check is JMX-based, so you need to enable JMX Remote on your Solr servers. 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample solr.d/conf.yaml][6] for all available configuration options.
 
    ```yaml
+   init_config:
+
+     ## @param is_jmx - boolean - required
+     ## Whether or not this file is a configuration for a JMX integration.
+     #
+     is_jmx: true
+
+     ## @param collect_default_metrics - boolean - required
+     ## Whether or not the check should collect all default metrics.
+     #
+     collect_default_metrics: true
+    
    instances:
      ## @param host - string - required
      ## Solr host to connect to.
@@ -113,9 +128,50 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
       bean: second_bean_name
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery with JMX][2] guide.
+
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+      ```yaml
+       logs_enabled: true
+     ```
+
+2. Solr uses the `log4j` logger by default. To customize the logging format, edit the [`server/resources/log4j2.xml`][12] file. By default, Datadog's integration pipeline supports the following conversion [pattern][11]:
+
+   ```text
+   %maxLen{%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p (%t) [%X{collection} %X{shard} %X{replica} %X{core}] %c{1.} %m%notEmpty{ =>%ex{short}}}{10240}%n
+   ```
+
+    Clone and edit the [integration pipeline][13] if you have a different format.
+
+
+3. Uncomment and edit the logs configuration block in your `solr.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample solr.d/solr.yaml][6] for all available configuration options.
+
+      ```yaml
+       logs:
+         - type: file
+           path: /var/solr/logs/solr.log
+           source: solr
+           # To handle multi line that starts with yyyy-mm-dd use the following pattern
+           # log_processing_rules:
+           #   - type: multi_line
+           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           #     name: new_log_start_with_date
+     ```
+
+4. [Restart the Agent][7].
+
+See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -188,3 +244,7 @@ attribute:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
+[10]: https://docs.datadoghq.com/agent/docker/log/
+[11]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
+[12]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
+[13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines

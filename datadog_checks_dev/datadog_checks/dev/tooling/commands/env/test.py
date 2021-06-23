@@ -43,16 +43,18 @@ from .stop import stop
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
+@click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
+@click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, test_filter, changed):
     """Test an environment."""
-    check_envs = get_tox_envs(checks, e2e_tests_only=True)
+    check_envs = get_tox_envs(checks, e2e_tests_only=True, changed_only=changed)
     tests_ran = False
 
-    # If no checks are specified it means we're testing what has changed compared
+    # If no checks or a subset of checks are specified it means we're testing what has changed compared
     # to master, probably on CI rather than during local development. In this case,
     # ensure environments and Agents are spun up and down.
-    if not checks:
+    if not checks or changed:
         new_env = True
 
     # Default to testing the local development version.
@@ -64,7 +66,9 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
 
     for check, envs in check_envs:
         if not envs:
-            echo_warning(f'No end-to-end environments found for `{check}`')
+            echo_warning(
+                f'No end-to-end environments found for `{check}`. Make sure to add them to the {check}/tox.ini file.'
+            )
             continue
 
         config_envs = get_configured_envs(check)
@@ -101,6 +105,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,
+                        test_filter=test_filter,
                     )
             finally:
                 if new_env:

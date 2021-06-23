@@ -1,0 +1,49 @@
+name: PowerDNS Recursor
+files:
+- name: powerdns_recursor.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      required: true
+      description: Host running the recursor.
+      value:
+        type: string
+        example: 127.0.0.1
+    - name: port
+      required: true
+      description: Recursor web server port.
+      value:
+        type: integer
+        example: 8082
+    - name: api_key
+      required: true
+      description: Recursor web server api key.
+      value:
+        type: string
+    - name: version
+      description: |
+        Version 3 or 4 of PowerDNS Recursor to connect to.
+        The PowerDNS Recursor in v4 has a production ready web server that allows for
+        statistics gathering. In version 3.x the server was marked as experimental.
+
+        As the server was marked as experimental in version 3 many of the metrics have
+        changed names and the API structure (paths) have also changed. With these changes
+        there has been a need to separate the two concerns. The check now has a key value
+        version: which if set to version 4 queries with the correct API path on the
+        non-experimental web server.
+
+        https://doc.powerdns.com/md/httpapi/api_spec/#url-apiv1serversserver95idstatistics
+      value:
+        type: integer
+        example: 3
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+      - type: journald
+        source: powerdns

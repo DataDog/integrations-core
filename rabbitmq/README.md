@@ -40,24 +40,16 @@ rabbitmqctl set_user_tags datadog monitoring
 
 Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][5] for more information.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
 1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
-
-   ```yaml
-   init_config:
-
-   instances:
-     ## @param rabbit_api_url - string - required
-     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-     ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
-     #
-     - rabbitmq_api_url: http://localhost:15672/api/
-   ```
 
     **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
 
@@ -80,7 +72,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
+3. Edit the `logs` section of your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
    ```yaml
    logs:
@@ -96,6 +88,9 @@ _Available for Agent versions >6.0_
 
 4. [Restart the Agent][8].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
@@ -106,7 +101,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | -------------------------------------------- |
 | `<INTEGRATION_NAME>` | `rabbitmq`                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                |
-| `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/"}` |
+| `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/","username": <USERNAME>, "password": <PASSWORD>}` |
 
 ##### Log collection
 
@@ -116,7 +111,10 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": {"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}}` |
+| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": [{"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}]}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

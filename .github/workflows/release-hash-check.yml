@@ -1,0 +1,39 @@
+name: release-hash-check
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .in-toto/*.link
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - id: files
+      run: |
+        git fetch origin master
+        FILES=$(git --no-pager diff --name-only origin/master -- .in-toto | xargs echo)
+        echo "::set-output name=all::$FILES"
+
+    - id: merge
+      name: Merge branch into latest master
+      env:
+        HEAD_BRANCH: ${{ github.head_ref }}
+      run: |
+        git fetch origin $HEAD_BRANCH
+        git checkout origin/master
+        git config user.name "release-hash-check"
+        git config user.email "<>"
+        git merge --no-commit --no-edit origin/$HEAD_BRANCH
+
+    - run: python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}

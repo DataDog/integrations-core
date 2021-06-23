@@ -36,7 +36,9 @@ def mock_db_data():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"},
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': "text/plain"},
         ),
     ):
         yield

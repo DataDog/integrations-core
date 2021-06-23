@@ -6,8 +6,8 @@ import re
 
 from semver import parse_version_info
 
+from ..fs import chdir
 from ..subprocess import run_command
-from ..utils import chdir
 from .constants import get_root
 
 
@@ -32,6 +32,15 @@ def get_current_branch():
 
     with chdir(get_root()):
         return run_command(command, capture='out').stdout.strip()
+
+
+def content_changed(file_glob="*"):
+    """
+    Return the content changed in the current branch compared to `master`
+    """
+    with chdir(get_root()):
+        output = run_command(f'git diff master -U0 -- "{file_glob}"', capture='out')
+    return output.stdout
 
 
 def files_changed(include_uncommitted=True):
@@ -89,7 +98,7 @@ def git_commit(targets, message, force=False, sign=False, update=False):
     """
     Commit the changes for the given targets.
 
-    `targets` - be files or directiries
+    `targets` - be files or directories
     `message` - the commit message
     `force` - (optional) force the commit
     `sign` - sign with `-S` option
@@ -126,13 +135,16 @@ def git_tag(tag_name, push=False):
         return result
 
 
-def git_tag_list(pattern=None):
+def git_tag_list(pattern=None, contains=None):
     """
     Return a list of all the tags in the git repo matching a regex passed in
     `pattern`. If `pattern` is None, return all the tags.
     """
     with chdir(get_root()):
-        result = run_command('git tag', capture=True).stdout
+        cmd = ['git', 'tag']
+        if contains:
+            cmd.extend(['--contains', contains])
+        result = run_command(cmd, capture=True).stdout
         result = result.splitlines()
 
     if not pattern:
@@ -151,8 +163,11 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
     all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
-    # reverse so we have descendant order
-    return list(reversed(all_tags))[0][1]
+    if not all_tags:
+        return
+    else:
+        # reverse so we have descending order
+        return list(reversed(all_tags))[0][1]
 
 
 def get_latest_commit_hash(root=None):

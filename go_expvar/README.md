@@ -20,9 +20,12 @@ The Go Expvar check is packaged with the Agent, so [install the Agent][3] anywhe
 
 If your Go service doesn't use the [expvar package][4] already, import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar - i.e. you only want to collect your service's memory metrics - import the package using the blank identifier (`import _ "expvar"`). If your service doesn't already listen for HTTP requests (with the http package), [make it listen][5] locally just for the Datadog Agent.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Connect the Agent
 
@@ -34,6 +37,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 **Note**: The Go Expvar integration can potentially emit [custom metrics][9], which may impact your [billing][10]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][11].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying the parameters below.
@@ -43,6 +49,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][12
 | `<INTEGRATION_NAME>` | `go_expvar`                              |
 | `<INIT_CONFIG>`      | blank or `{}`                            |
 | `<INSTANCE_CONFIG>`  | `{"expvar_url": "http://%%host%%:8080"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

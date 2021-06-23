@@ -1,7 +1,7 @@
 version: '2'
 services:
   gitlab_runner:
-    image: gitlab/gitlab-runner:v10.8.0
+    image: gitlab/gitlab-runner:v${GITLAB_RUNNER_VERSION}
     depends_on:
       - gitlab
     volumes:

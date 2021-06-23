@@ -56,13 +56,13 @@ Arguments:
 
 ### Optional parameters
 
-An optional parameter must be commented by default. Before every line the parameter spans on, add `#` (note the space) with the same indentation as the `@param` specification.
+An optional parameter must be commented by default. Before every line the parameter spans on, add `#` with the same indentation as the `@param` specification.
 
 ### Block comments
 
 You can add a block comment anywhere in the configuration file with the following rules:
 
-- Comments start with `##` (note the space)
+- Comments start with `##`
 - Comments should be indented like any variable (the hyphen doesn't count)
 
 For more information about YAML syntax, see [Wikipedia][2]. Feel free to play around with the [Online YAML Parser][3], too!
@@ -84,7 +84,7 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | `maintainer`                | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
 | `manifest_version`          | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
 | `name`                      | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
-| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> integration`.                                                                                   |
+| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `<INTEGRATION_NAME>`.                                                                                   |
 | `short_description`         | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page. Maximum 80 characters.                                                                         |
 | `support`                   | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
 | `supported_os`              | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |

@@ -27,7 +27,7 @@ If you assign the new metric a category of My_New_Metric, the WMI path is
 
 If the metric isn't showing up in WMI, try running `winmgmt /resyncperf` to force the computer to reregister the performance libraries with WMI.
 
-## Configuration
+### Configuration
 
 1. Click the **Install Integration** button on the WMI Integration Tile.
 2. Open the Datadog Agent Manager on the Windows server.
@@ -64,6 +64,71 @@ The metrics definitions include three components:
 - Metric name as it appears in Datadog.
 - The metric type.
 
+The following sample configuration populates many more metrics on a Windows 2012 server.
+```yaml
+init_config:
+
+instances:
+  # Fetch the number of processes and users.
+  - class: Win32_OperatingSystem
+    metrics:
+      - [NumberOfProcesses, system.proc.count, gauge]
+      - [NumberOfUsers, system.users.count, gauge]
+
+# Paging info
+  - class: Win32_PerfFormattedData_PerfOS_Memory
+    metrics:
+      - [PageFaultsPersec, system.mem.page.faults, gauge]
+      - [PageReadsPersec, system.mem.page.reads, gauge]
+      - [PagesInputPersec, system.mem.page.input, gauge]
+      - [AvailableMBytes, system.mem.avail, gauge]
+      - [CommitLimit, system.mem.limit, gauge]
+      # Cache bytes metric for disk info
+      - [CacheBytes, system.mem.fs_cache, gauge]
+
+# Paging file
+  - class: Win32_PerfFormattedData_PerfOS_PagingFile
+    metrics:
+      - [PercentUsage, system.mem.page.pct, gauge]
+    tag_by: Name
+  # Fetch the number of processes
+  - class: Win32_PerfFormattedData_PerfOS_System
+    metrics:
+      - [ProcessorQueueLength, system.proc.queue, gauge]
+
+  - class: Win32_PerfFormattedData_PerfOS_Processor
+    metrics:
+      - [PercentProcessorTime, system.cpu.pct, gauge]
+      - [PercentPrivilegedTime, system.cpu.priv.pct, gauge]
+      - [PercentDPCTime, system.cpu.dpc.pct, gauge]
+      - [PercentInterruptTime, system.cpu.interrupt.pct, gauge]
+      - [DPCsQueuedPersec, system.cpu.dpc.queue, gauge]
+    tag_by: Name
+
+# Context switches
+  - class: Win32_PerfFormattedData_PerfProc_Thread
+    metrics:
+      - [ContextSwitchesPersec, system.proc.context_switches, gauge]
+    filters:
+      - Name: _total/_total
+
+# Disk info
+  - class: Win32_PerfFormattedData_PerfDisk_LogicalDisk
+    metrics:
+      - [PercentFreeSpace, system.disk.free.pct, gauge]
+      - [PercentIdleTime, system.disk.idle, gauge]
+      - [AvgDisksecPerRead, system.disk.read_sec, gauge]
+      - [AvgDisksecPerWrite, system.disk.write_sec, gauge]
+      - [DiskWritesPersec, system.disk.writes, gauge]
+      - [DiskReadsPersec, system.disk.reads, gauge]
+      - [AvgDiskQueueLength, system.disk.queue, gauge]
+    tag_by: Name
+
+  - class: Win32_PerfFormattedData_Tcpip_TCPv4
+    metrics:
+      - [SegmentsRetransmittedPersec, system.net.tcp.retrans_seg, gauge]
+    tag_by: Name
+```
 #### Configuration Options
 
 _This feature is available starting with version 5.3 of the agent_
@@ -106,10 +171,6 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 
 The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number will be removed from tag_by values i.e. name:process#1 => name:process. NB: The agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
 
-#### Metrics collection
-
-The WMI check can potentially emit [custom metrics][9], which may impact your [billing][10].
-
 ### Validation
 
 [Run the Agent's `status` subcommand][11] and look for `wmi_check` under the Checks section.
@@ -118,7 +179,7 @@ The WMI check can potentially emit [custom metrics][9], which may impact your [b
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+All metrics collected by the WMI check are forwarded to Datadog as [custom metrics][9], which may impact your [billing][10].
 
 ### Events
 

@@ -1,0 +1,82 @@
+[
+    {
+        "name": "mongodb.stats.avgobjsize",
+        "type": 0,
+        "value": 214.15696166042088,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.datasize",
+        "type": 0,
+        "value": 1485821.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexes",
+        "type": 0,
+        "value": 6.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.indexsize",
+        "type": 0,
+        "value": 98304.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.numextents",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.objects",
+        "type": 0,
+        "value": 6938.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.storagesize",
+        "type": 0,
+        "value": 430080.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    },
+    {
+        "name": "mongodb.stats.collections",
+        "type": 0,
+        "value": 7.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
+    }
+]

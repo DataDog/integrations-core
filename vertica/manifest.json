@@ -23,10 +23,17 @@
   "is_public": true,
   "integration_id": "vertica",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Vertica Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "vertica"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

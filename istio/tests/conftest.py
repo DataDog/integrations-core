@@ -50,11 +50,15 @@ def dd_environment():
                     for (deployment, port) in DEPLOYMENTS_LEGACY
                 ]
                 instance = {
-                    'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                    'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                    'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
-                    'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
-                    'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4]),
+                    'instances': [
+                        {
+                            'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                            'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                            'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
+                            'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
+                        },
+                        {'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4])},
+                    ]
                 }
                 page = 'http://{}:{}/productpage'.format(*ip_ports[5])
                 # Check a bit to make sure it's available
@@ -112,12 +116,20 @@ def istiod_mixture_fixture():
 
 
 @pytest.fixture
-def mesh_mixture_fixture():
+def mesh_fixture():
     mesh_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mesh.txt')
-    mixer_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mixer.txt')
     responses = []
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def mixture_fixture():
+    mixer_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mixer.txt')
+    responses = []
     with open(mixer_file_path, 'r') as f:
         responses.append(f.read())
 

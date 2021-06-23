@@ -22,6 +22,8 @@ sudo modprobe nf_conntrack_ipv4
 sudo modprobe nf_conntrack_ipv6
 ```
 
+*Note*: You may need to install the conntrack binary in the Agent image.
+
 ### Configuration
 
 1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample network.d/conf.yaml][4] for all available configuration options:
@@ -36,6 +38,15 @@ sudo modprobe nf_conntrack_ipv6
      ## the command `netstat` from the system package `net-tools` to be installed
      #
      - collect_connection_state: false
+
+     ## @param collect_connection_queues - boolean - optional
+     ## Set to true to enable connection queues collection
+     ## Note: connection queues collections require both
+     ## `collect_connection_state` and `collect_connection_queues` to be true
+     ## because it also requires the command `ss` from system package `iproute2` or
+     ## the command `netstat` from the system package `net-tools` to be installed
+     #
+     - collect_connection_queues: false
    ```
 
 2. [Restart the Agent][5] to effect any configuration changes.

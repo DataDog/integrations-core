@@ -28,7 +28,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[Vault] S3 time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
+    },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview.json"
     },
@@ -37,6 +39,10 @@
       "service_name_overview": "assets/saved_views/service_name_overview.json",
       "vault_patern": "assets/saved_views/vault_patern.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "vault"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

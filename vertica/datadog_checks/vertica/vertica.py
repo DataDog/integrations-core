@@ -3,17 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import logging
 import ssl
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import datetime
 from itertools import chain
-from os.path import expanduser, isdir
 
 import vertica_python as vertica
 from six import iteritems
 from vertica_python.vertica.column import timestamp_tz_parse
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
@@ -28,13 +29,21 @@ class VerticaCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_NODE_STATE = 'node_state'
 
+    # This remapper is used to support legacy Vertica integration config values
+    TLS_CONFIG_REMAPPER = {
+        'cert': {'name': 'tls_cert'},
+        'private_key': {'name': 'tls_private_key'},
+        'ca_cert': {'name': 'tls_ca_cert'},
+        'validate_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(VerticaCheck, self).__init__(name, init_config, instances)
 
-        self._db = self.instance.get('db', '')
-        self._server = self.instance.get('server', '')
+        self._server = self.instance.get('server', 'localhost')
         self._port = int(self.instance.get('port', 5433))
-        self._username = self.instance.get('username', '')
+        self._username = self.instance.get('username')
+        self._db = self.instance.get('db', self._username)
         self._password = self.instance.get('password', '')
         self._backup_servers = [
             (bs.get('server', self._server), int(bs.get('port', self._port)))
@@ -44,31 +53,15 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
-        self._client_lib_log_level = self.instance.get('client_lib_log_level')
+        self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
-        self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
-        self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
+        # If `tls_verify` is explicitly set to true, set `use_tls` to true (for legacy support)
+        # `tls_verify` used to do what `use_tls` does now
+        self._tls_verify = is_affirmative(self.instance.get('tls_verify'))
+        self._use_tls = is_affirmative(self.instance.get('use_tls', False))
 
-        self._cert = self.instance.get('cert', '')
-        if self._cert:  # no cov
-            self._cert = expanduser(self._cert)
-            self._tls_verify = True
-
-        self._private_key = self.instance.get('private_key', '')
-        if self._private_key:  # no cov
-            self._private_key = expanduser(self._private_key)
-
-        self._cafile = None
-        self._capath = None
-        ca_cert = self.instance.get('ca_cert', '')
-        if ca_cert:  # no cov
-            ca_cert = expanduser(ca_cert)
-            if isdir(ca_cert):
-                self._capath = ca_cert
-            else:
-                self._cafile = ca_cert
-
-            self._tls_verify = True
+        if self._tls_verify and not self._use_tls:
+            self._use_tls = True
 
         custom_queries = self.instance.get('custom_queries', [])
         use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
@@ -91,7 +84,18 @@ class VerticaCheck(AgentCheck):
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
 
-    def check(self, instance):
+        self._metric_groups = []
+
+        self.check_initializations.append(self.parse_metric_groups)
+
+    def _get_default_client_lib_log_level(self):
+        if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
+            # Automatically collect library logs for debug flares.
+            return logging.DEBUG
+        # Default to no library logs, since they're too verbose even at the INFO level.
+        return None
+
+    def _connect(self):
         if self._connection is None:
             connection = self.get_connection()
             if connection is None:
@@ -101,22 +105,16 @@ class VerticaCheck(AgentCheck):
         elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
 
+    def check(self, _):
+        self._connect()
         # The order of queries is important as some results are cached for later re-use
         try:
-            self.query_licenses()
-            self.query_license_audits()
-            self.query_system()
-            self.query_nodes()
-            self.query_projections()
-            self.query_projection_storage()
-            self.query_storage_containers()
-            self.query_host_resources()
-            self.query_query_metrics()
-            self.query_resource_pool_status()
-            self.query_disk_storage()
-            self.query_resource_usage()
+            for method in self._metric_groups:
+                method()
+
             self.query_version()
             self.query_custom()
+
         finally:
             self._view.clear()
 
@@ -578,33 +576,12 @@ class VerticaCheck(AgentCheck):
             # but we still get logs via parent root logger
             connection_options['log_path'] = ''
 
-        if self._tls_verify:  # no cov
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-            # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
-            tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-            tls_context.verify_mode = ssl.CERT_REQUIRED
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-            tls_context.check_hostname = self._validate_hostname
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-            if self._cafile or self._capath:
-                tls_context.load_verify_locations(self._cafile, self._capath, None)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-            else:
-                tls_context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
-            if self._cert:
-                tls_context.load_cert_chain(self._cert, keyfile=self._private_key)
-
+        if self._use_tls:
+            tls_context = self.get_tls_context()
             connection_options['ssl'] = tls_context
 
         try:
-            connection = vertica.connect(**connection_options)
+            connection = vertica.connect(**exclude_undefined_keys(connection_options))
         except Exception as e:
             self.log.error('Unable to connect to database `%s` as user `%s`: %s', self._db, self._username, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
@@ -618,3 +595,46 @@ class VerticaCheck(AgentCheck):
 
         for row in cursor.iterate():
             yield row
+
+    def parse_metric_groups(self):
+        # If you create a new function, please add this to `default_metric_groups` below and
+        # the config file (under `metric_groups`).
+        default_metric_groups = OrderedDict(
+            (
+                ('licenses', self.query_licenses),
+                ('license_audits', self.query_license_audits),
+                ('system', self.query_system),
+                ('nodes', self.query_nodes),
+                ('projections', self.query_projections),
+                ('projection_storage', self.query_projection_storage),
+                ('storage_containers', self.query_storage_containers),
+                ('host_resources', self.query_host_resources),
+                ('query_metrics', self.query_query_metrics),
+                ('resource_pool_status', self.query_resource_pool_status),
+                ('disk_storage', self.query_disk_storage),
+                ('resource_usage', self.query_resource_usage),
+            )
+        )
+
+        metric_groups = self.instance.get('metric_groups') or list(default_metric_groups)
+
+        # Ensure all metric groups are valid
+        invalid_groups = []
+
+        for group in metric_groups:
+            if group not in default_metric_groups:
+                invalid_groups.append(group)
+
+        if invalid_groups:
+            raise ConfigurationError(
+                'Invalid metric_groups found in vertica conf.yaml: {}'.format(', '.join(invalid_groups))
+            )
+
+        # License query needs to be run before getting system
+        if 'system' in metric_groups and 'licenses' not in metric_groups:
+            self.log.debug('Detected `system` metric group, adding the `licenses` to metric_groups.')
+            metric_groups.insert(0, 'licenses')
+
+        self._metric_groups.extend(
+            default_metric_groups[group] for group in default_metric_groups if group in metric_groups
+        )

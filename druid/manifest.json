@@ -24,10 +24,17 @@
   "is_public": true,
   "integration_id": "druid",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Druid Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": "druid"
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

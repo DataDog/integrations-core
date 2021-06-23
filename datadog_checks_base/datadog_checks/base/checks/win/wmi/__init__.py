@@ -118,9 +118,7 @@ class WinWMICheck(AgentCheck):
 
         Returns: tag or TagQueryUniquenessFailure exception.
         """
-        self.log.debug(
-            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query,
-        )
+        self.log.debug(u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
 
         # Extract query information
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
@@ -182,32 +180,42 @@ class WinWMICheck(AgentCheck):
             for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
-                if wmi_property.lower() not in (s.lower() for s in wmi_sampler.property_names):
+
+                # skip wmi_property "foo,bar"; there will be a separate wmi_property for each "foo" and "bar"
+                if ',' in wmi_property:
+                    continue
+
+                normalized_wmi_property = wmi_property.lower()
+                for s in wmi_sampler.property_names:
+                    if normalized_wmi_property in s.lower():
+                        # wmi_property: "foo" should be found in property_names ["foo,bar", "name"]
+                        break
+                else:
                     continue
                 # Tag with `tag_by` parameter
-                if wmi_property == tag_by:
-                    tag_value = str(wmi_value).lower()
-                    if tag_queries and tag_value.find("#") > 0:
-                        tag_value = tag_value[: tag_value.find("#")]
+                for t in tag_by.split(','):
+                    t = t.strip()
+                    if wmi_property == t:
+                        tag_value = str(wmi_value).lower()
+                        if tag_queries and tag_value.find("#") > 0:
+                            tag_value = tag_value[: tag_value.find("#")]
 
-                    tags.append("{name}:{value}".format(name=tag_by, value=tag_value))
-                    continue
+                        tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        continue
 
-                # No metric extraction on 'Name' property
-                if wmi_property == 'name':
+                # No metric extraction on 'Name' and properties in tag_by
+                if wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
                     continue
 
                 try:
                     extracted_metrics.append(WMIMetric(wmi_property, float(wmi_value), tags))
                 except ValueError:
                     self.log.warning(
-                        u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property,
+                        u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property
                     )
                     continue
                 except TypeError:
-                    self.log.warning(
-                        u"When extracting metrics with WMI, found a missing property '%s'", wmi_property,
-                    )
+                    self.log.warning(u"When extracting metrics with WMI, found a missing property '%s'", wmi_property)
                     continue
         return extracted_metrics
 

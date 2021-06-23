@@ -7,109 +7,54 @@ from contextlib import closing
 import psycopg2
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck
+from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.statement_samples import PostgresStatementSamples
+from datadog_checks.postgres.statements import PostgresStatementMetrics
 
-from .util import (
-    ACTIVITY_DD_METRICS,
-    ACTIVITY_METRICS_8_3,
-    ACTIVITY_METRICS_9_2,
-    ACTIVITY_METRICS_9_6,
-    ACTIVITY_METRICS_LT_8_3,
-    ACTIVITY_QUERY_10,
-    ACTIVITY_QUERY_LT_10,
-    ALL_SCHEMAS,
-    COMMON_ARCHIVER_METRICS,
-    COMMON_BGW_METRICS,
-    COMMON_METRICS,
-    CONNECTION_METRICS,
-    COUNT_METRICS,
-    DATABASE_SIZE_METRICS,
-    FUNCTION_METRICS,
-    IDX_METRICS,
-    LOCK_METRICS,
-    NEWER_91_BGW_METRICS,
-    NEWER_92_BGW_METRICS,
-    NEWER_92_METRICS,
-    REL_METRICS,
-    REPLICATION_METRICS,
-    REPLICATION_METRICS_9_1,
-    REPLICATION_METRICS_9_2,
-    REPLICATION_METRICS_10,
-    SIZE_METRICS,
-    STATIO_METRICS,
-    build_relations_filter,
-    fmt,
-    get_schema_field,
-)
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
+from .config import PostgresConfig
+from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
+from .version_utils import V9, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
-TABLE_COUNT_LIMIT = 200
-
-# https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 
 
 class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     SOURCE_TYPE_NAME = 'postgresql'
-    RATE = AgentCheck.rate
-    GAUGE = AgentCheck.gauge
-    MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
-    METADATA_TRANSFORMERS = {'version': transform_version}
+    METADATA_TRANSFORMERS = {'version': VersionUtils.transform_version}
 
     def __init__(self, name, init_config, instances):
-        AgentCheck.__init__(self, name, init_config, instances)
-        self._clean_state()
+        super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._version = None
-        self.custom_metrics = None
-
+        self._is_aurora = None
+        self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
-        self.host = self.instance.get('host', '')
-        self.port = self.instance.get('port', '')
-        if self.port != '':
-            self.port = int(self.port)
-        self.dbname = self.instance.get('dbname', 'postgres')
-        self.relations = self.instance.get('relations', [])
-        if self.relations and not self.dbname:
-            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
+        self._config = PostgresConfig(self.instance)
+        self.metrics_cache = PostgresMetricsCache(self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config)
+        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self._relations_manager = RelationsManager(self._config.relations)
+        self._clean_state()
+        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
 
-        self.tags = self._build_tags(self.instance.get('tags', []), self.host, self.port, self.dbname)
-
-    def _build_tags(self, custom_tags, host, port, dbname):
-        # Clean up tags in case there was a None entry in the instance
-        # e.g. if the yaml contains tags: but no actual tags
-        if custom_tags is None:
-            tags = []
-        else:
-            tags = list(set(custom_tags))
-
-        # preset tags to host
-        tags.append('server:{}'.format(host))
-        if port:
-            tags.append('port:{}'.format(port))
-        else:
-            tags.append('port:socket')
-
-        # preset tags to the database name
-        tags.extend(["db:%s" % dbname])
-        return tags
+    def cancel(self):
+        self.statement_samples.cancel()
 
     def _clean_state(self):
+        self.log.debug("Cleaning state")
         self._version = None
-        self.instance_metrics = None
-        self.bgw_metrics = None
-        self.archiver_metrics = None
-        self.replication_metrics = None
-        self.activity_metrics = None
+        self._is_aurora = None
+        self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
         cursor = self.db.cursor()
@@ -121,192 +66,18 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            raw_version = get_raw_version(self.db)
-            self._version = parse_version(raw_version)
+            raw_version = self._version_utils.get_raw_version(self.db)
+            self._version = self._version_utils.parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
 
-    def _get_instance_metrics(self, database_size_metrics, collect_default_db):
-        """
-        Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
-        version is 9.2 or later.
+    @property
+    def is_aurora(self):
+        if self._is_aurora is None:
+            self._is_aurora = self._version_utils.is_aurora(self.db)
+        return self._is_aurora
 
-        Store the list of metrics in the check instance to avoid rebuilding it at
-        every collection cycle.
-
-        In case we have multiple instances pointing to the same postgres server
-        monitoring different databases, we want to collect server metrics
-        only once. See https://github.com/DataDog/dd-agent/issues/1211
-        """
-        metrics = self.instance_metrics
-
-        if metrics is None:
-            # select the right set of metrics to collect depending on postgres version
-            if self.version >= V9_2:
-                self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
-            else:
-                self.instance_metrics = dict(COMMON_METRICS)
-
-            # add size metrics if needed
-            if database_size_metrics:
-                self.instance_metrics.update(DATABASE_SIZE_METRICS)
-
-            metrics = self.instance_metrics
-
-        res = {
-            'descriptors': [('psd.datname', 'db')],
-            'metrics': metrics,
-            'query': "SELECT psd.datname, {metrics_columns} "
-            "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname "
-            "WHERE psd.datname not ilike 'template%%' "
-            "  AND psd.datname not ilike 'rdsadmin' "
-            "  AND psd.datname not ilike 'azure_maintenance' ",
-            'relation': False,
-        }
-
-        if not collect_default_db:
-            res["query"] += "  AND psd.datname not ilike 'postgres'"
-
-        return res
-
-    def _get_bgw_metrics(self):
-        """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
-        depending on the postgres version.
-        Uses a dictionary to save the result for each instance
-        """
-        # Extended 9.2+ metrics if needed
-        metrics = self.bgw_metrics
-
-        if metrics is None:
-            self.bgw_metrics = dict(COMMON_BGW_METRICS)
-
-            if self.version >= V9_1:
-                self.bgw_metrics.update(NEWER_91_BGW_METRICS)
-            if self.version >= V9_2:
-                self.bgw_metrics.update(NEWER_92_BGW_METRICS)
-
-            metrics = self.bgw_metrics
-
-        if not metrics:
-            return None
-
-        return {
-            'descriptors': [],
-            'metrics': metrics,
-            'query': "select {metrics_columns} FROM pg_stat_bgwriter",
-            'relation': False,
-        }
-
-    def _get_count_metrics(self, table_count_limit):
-        metrics = dict(COUNT_METRICS)
-        metrics['query'] = COUNT_METRICS['query'].format(
-            metrics_columns="{metrics_columns}", table_count_limit=table_count_limit
-        )
-        return metrics
-
-    def _get_archiver_metrics(self):
-        """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
-        defined in 9.4 (first version to have this table).
-        Uses a dictionary to save the result for each instance
-        """
-        # While there's only one set for now, prepare for future additions to
-        # the table, mirroring _get_bgw_metrics()
-        metrics = self.archiver_metrics
-
-        if metrics is None and self.version >= V9_4:
-            self.archiver_metrics = dict(COMMON_ARCHIVER_METRICS)
-            metrics = self.archiver_metrics
-
-        if not metrics:
-            return None
-
-        return {
-            'descriptors': [],
-            'metrics': metrics,
-            'query': "select {metrics_columns} FROM pg_stat_archiver",
-            'relation': False,
-        }
-
-    def _get_replication_metrics(self):
-        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
-        REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
-        postgres version.
-        Uses a dictionnary to save the result for each instance
-        """
-        metrics = self.replication_metrics
-        if self.version >= V10 and metrics is None:
-            self.replication_metrics = dict(REPLICATION_METRICS_10)
-            metrics = self.replication_metrics
-        elif self.version >= V9_1 and metrics is None:
-            self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if self.version >= V9_2:
-                self.replication_metrics.update(REPLICATION_METRICS_9_2)
-            metrics = self.replication_metrics
-        return metrics
-
-    def _get_activity_metrics(self, user):
-        """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
-        depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
-        Uses a dictionnary to save the result for each instance
-        """
-        metrics_data = self.activity_metrics
-
-        if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if self.version >= V10 else ACTIVITY_QUERY_LT_10
-            if self.version >= V9_6:
-                metrics_query = ACTIVITY_METRICS_9_6
-            elif self.version >= V9_2:
-                metrics_query = ACTIVITY_METRICS_9_2
-            elif self.version >= V8_3:
-                metrics_query = ACTIVITY_METRICS_8_3
-            else:
-                metrics_query = ACTIVITY_METRICS_LT_8_3
-
-            for i, q in enumerate(metrics_query):
-                if '{dd__user}' in q:
-                    metrics_query[i] = q.format(dd__user=user)
-
-            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
-            self.activity_metrics = (metrics, query)
-        else:
-            metrics, query = metrics_data
-
-        return {'descriptors': [('datname', 'db')], 'metrics': metrics, 'query': query, 'relation': False}
-
-    def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility
-        """
-        config = {}
-
-        for element in yamlconfig:
-            if isinstance(element, str):
-                config[element] = {'relation_name': element, 'schemas': [ALL_SCHEMAS]}
-            elif isinstance(element, dict):
-                if not ('relation_name' in element or 'relation_regex' in element):
-                    self.log.warning(
-                        "Parameter 'relation_name' or 'relation_regex' is required for relation element %s", element
-                    )
-                    continue
-                if 'relation_name' in element and 'relation_regex' in element:
-                    self.log.warning(
-                        "Expecting only of parameters 'relation_name', 'relation_regex' for relation element %s",
-                        element,
-                    )
-                    continue
-                schemas = element.get('schemas', [])
-                if not isinstance(schemas, list):
-                    self.log.warning("Expected a list of schemas for %s", element)
-                    continue
-                name = element.get('relation_name') or element['relation_regex']
-                config[name] = element.copy()
-                if len(schemas) == 0:
-                    config[name]['schemas'] = [ALL_SCHEMAS]
-            else:
-                self.log.warning('Unhandled relations config type: %s', element)
-        return config
-
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
+    def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
             return None
         if scope == REPLICATION_METRICS or not self.version >= V9:
@@ -314,33 +85,27 @@ class PostgreSql(AgentCheck):
         else:
             log_func = self.log.warning
 
-        # build query
-        cols = list(scope['metrics'])  # list of metrics to query, in some order
-        # we must remember that order to parse results
-
-        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
-        # to a tag name (e.g. 'schema').
-        descriptors = scope['descriptors']
-
         results = None
+        is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
-            if scope['relation'] and len(relations_config) > 0:
+            if is_relations:
                 schema_field = get_schema_field(descriptors)
-                relations_filter = build_relations_filter(relations_config, schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
-                cursor.execute(query.format(relations=relations_filter))
+                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                cursor.execute(formatted_query)
             else:
-                self.log.debug("Running query: %s", query)
+                self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
+            # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
+            self.log.debug("Disabling replication metrics")
+            self._is_aurora = False
+            self.metrics_cache.replication_metrics = {}
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -361,6 +126,32 @@ class PostgreSql(AgentCheck):
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
+
+        if is_relations and len(results) > self._config.max_relations:
+            self.warning(
+                "Query: %s returned more than %s results (%s). "
+                "Truncating. You can edit this limit by setting the `max_relations` config option",
+                query,
+                self._config.max_relations,
+                len(results),
+            )
+            results = results[: self._config.max_relations]
+
+        return results
+
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics):
+        if scope is None:
+            return None
+        # build query
+        cols = list(scope['metrics'])  # list of metrics to query, in some order
+        # we must remember that order to parse results
+
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
+        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
+        if not results:
+            return None
 
         # Parse and submit results.
 
@@ -409,72 +200,84 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    def _collect_stats(
-        self,
-        user,
-        instance_tags,
-        relations,
-        custom_metrics,
-        table_count_limit,
-        collect_function_metrics,
-        collect_count_metrics,
-        collect_activity_metrics,
-        collect_database_size_metrics,
-        collect_default_db,
-    ):
+    def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-        db_instance_metrics = self._get_instance_metrics(collect_database_size_metrics, collect_default_db)
-        bgw_instance_metrics = self._get_bgw_metrics()
-        archiver_instance_metrics = self._get_archiver_metrics()
+        db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
+        bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
+        archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
 
-        if collect_function_metrics:
+        if self._config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
-        if collect_count_metrics:
-            metric_scope.append(self._get_count_metrics(table_count_limit))
+        if self._config.collect_count_metrics:
+            metric_scope.append(self.metrics_cache.get_count_metrics())
 
         # Do we need relation-specific metrics?
-        relations_config = {}
-        if relations:
-            metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
-            relations_config = self._build_relations_config(relations)
+        if self._config.relations:
+            metric_scope.extend(RELATION_METRICS)
 
-        replication_metrics = self._get_replication_metrics()
-        if replication_metrics is not None:
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
+        if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
+        replication_stats_metrics = self.metrics_cache.get_replication_stats_metrics(self.version)
+        if replication_stats_metrics:
+            metric_scope.append(replication_stats_metrics)
+
         cursor = self.db.cursor()
-        results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False, relations_config)
+        results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
             self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
 
-        self._query_scope(cursor, bgw_instance_metrics, instance_tags, False, relations_config)
-        self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
+        self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
+        self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
-        if collect_activity_metrics:
-            activity_metrics = self._get_activity_metrics(user)
-            self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
+        if self._config.collect_activity_metrics:
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+            self._query_scope(cursor, activity_metrics, instance_tags, False)
 
-        for scope in list(metric_scope) + custom_metrics:
-            self._query_scope(cursor, scope, instance_tags, scope in custom_metrics, relations_config)
+        for scope in list(metric_scope) + self._config.custom_metrics:
+            self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
         cursor.close()
 
-    @classmethod
-    def _get_service_check_tags(cls, host, tags):
-        service_check_tags = ["host:%s" % host]
-        service_check_tags.extend(tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
+    def _new_connection(self, dbname):
+        if self._config.host == 'localhost' and self._config.password == '':
+            # Use ident method
+            connection_string = "user=%s dbname=%s application_name=%s" % (
+                self._config.user,
+                dbname,
+                self._config.application_name,
+            )
+            if self._config.query_timeout:
+                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
+            conn = psycopg2.connect(connection_string)
+        else:
+            args = {
+                'host': self._config.host,
+                'user': self._config.user,
+                'password': self._config.password,
+                'database': dbname,
+                'sslmode': self._config.ssl_mode,
+                'application_name': self._config.application_name,
+            }
+            if self._config.port:
+                args['port'] = self._config.port
+            if self._config.query_timeout:
+                args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            conn = psycopg2.connect(**args)
+        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
+        conn.set_session(autocommit=True)
+        return conn
 
-    def _connect(self, host, port, user, password, dbname, ssl, query_timeout):
+    def _connect(self):
         """Get and memoize connections to instances"""
         if self.db and self.db.closed:
             # Reset the connection object to retry to connect
@@ -485,32 +288,13 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            if host == 'localhost' and password == '':
-                # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent")
-                if query_timeout:
-                    connection_string += " options='-c statement_timeout=%s'" % query_timeout
-                self.db = psycopg2.connect(connection_string)
-            else:
-                args = {
-                    'host': host,
-                    'user': user,
-                    'password': password,
-                    'database': dbname,
-                    'sslmode': ssl,
-                    'application_name': "datadog-agent",
-                }
-                if port:
-                    args['port'] = port
-                if query_timeout:
-                    args['options'] = '-c statement_timeout=%s' % query_timeout
-                self.db = psycopg2.connect(**args)
+            self.db = self._new_connection(self._config.dbname)
 
-    def _get_custom_queries(self, tags, custom_queries):
+    def _collect_custom_queries(self, tags):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
-        for custom_query in custom_queries:
+        for custom_query in self._config.custom_queries:
             metric_prefix = custom_query.get('metric_prefix')
             if not metric_prefix:
                 self.log.error("custom query field `metric_prefix` is required")
@@ -602,109 +386,41 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
-    def _get_custom_metrics(self, custom_metrics):
-        # Pre-processed cached custom_metrics
-        if self.custom_metrics is not None:
-            return self.custom_metrics
-
-        # Otherwise pre-process custom metrics and verify definition
-        required_parameters = ("descriptors", "metrics", "query", "relation")
-
-        for m in custom_metrics:
-            for param in required_parameters:
-                if param not in m:
-                    raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
-
-            self.log.debug("Metric: %s", m)
-
-            # Old formatting to new formatting. The first params is always the columns names from which to
-            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
-            # relations names.
-            if m['relation']:
-                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
-            else:
-                m['query'] = m['query'] % '{metrics_columns}'
-
-            try:
-                for ref, (_, mtype) in iteritems(m['metrics']):
-                    cap_mtype = mtype.upper()
-                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                        raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
-                        )
-
-                    m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
-                    self.log.debug("Method: %s", mtype)
-            except Exception as e:
-                raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
-
-        self.custom_metrics = custom_metrics
-        return custom_metrics
-
-    def check(self, instance):
-        ssl = self.instance.get('ssl', False)
-        if ssl not in SSL_MODES:
-            ssl = 'require' if is_affirmative(ssl) else 'disable'
-
-        user = self.instance.get('username', '')
-        password = self.instance.get('password', '')
-        query_timeout = self.instance.get('query_timeout')
-
-        table_count_limit = self.instance.get('table_count_limit', TABLE_COUNT_LIMIT)
-        collect_function_metrics = is_affirmative(self.instance.get('collect_function_metrics', False))
-        # Default value for `count_metrics` is True for backward compatibility
-        collect_count_metrics = is_affirmative(self.instance.get('collect_count_metrics', True))
-        collect_activity_metrics = is_affirmative(self.instance.get('collect_activity_metrics', False))
-        collect_database_size_metrics = is_affirmative(self.instance.get('collect_database_size_metrics', True))
-        collect_default_db = is_affirmative(self.instance.get('collect_default_database', False))
-
-        custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
-        custom_queries = instance.get('custom_queries', [])
-
-        if not self.host:
-            raise ConfigurationError('Please specify a Postgres host to connect to.')
-        elif not user:
-            raise ConfigurationError('Please specify a user to connect to Postgres as.')
-
-        self.log.debug("Custom metrics: %s", custom_metrics)
-
-        tag_replication_role = is_affirmative(self.instance.get('tag_replication_role', False))
-        tags = self.tags
-
-        service_check_tags = self._get_service_check_tags(self.host, tags)
+    def check(self, _):
+        tags = copy.copy(self._config.tags)
         # Collect metrics
         try:
             # Check version
-            self._connect(self.host, self.port, user, password, self.dbname, ssl, query_timeout)
-            if tag_replication_role:
+            self._connect()
+            if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s", str(self.version))
-            self._collect_stats(
-                user,
-                tags,
-                self.relations,
-                custom_metrics,
-                table_count_limit,
-                collect_function_metrics,
-                collect_count_metrics,
-                collect_activity_metrics,
-                collect_database_size_metrics,
-                collect_default_db,
-            )
-            self._get_custom_queries(tags, custom_queries)
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+            self._collect_stats(tags)
+            self._collect_custom_queries(tags)
+            if self._config.deep_database_monitoring:
+                self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
+                self.statement_samples.run_sampler(tags)
+
         except Exception as e:
             self.log.error("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                self.host, self.port, self.dbname, str(e)
+                self._config.host, self._config.port, self._config.dbname, str(e)
             )
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags, message=message
+            )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (self.host, self.port, self.dbname)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, message=message)
+            message = u'Established connection to postgres://%s:%s/%s' % (
+                self._config.host,
+                self._config.port,
+                self._config.dbname,
+            )
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags, message=message
+            )
             try:
                 # commit to close the current query transaction
                 self.db.commit()

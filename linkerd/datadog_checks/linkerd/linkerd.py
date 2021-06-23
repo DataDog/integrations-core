@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import PY2
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
@@ -9,11 +10,23 @@ from .metrics import METRIC_MAP, TYPE_OVERRIDES
 
 class LinkerdCheck(OpenMetricsBaseCheck):
     """
-    Collect linkerd metrics from Prometheus
+    Collect linkerd metrics from Prometheus.
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
     DEFAULT_METRIC_LIMIT = 0
     HEALTH_METRIC = 'linkerd.prometheus.health'
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if not PY2 and 'openmetrics_endpoint' in instance:
+            # TODO: when we drop Python 2 move this import up top
+            from .check import LinkerdCheckV2
+
+            return LinkerdCheckV2(name, init_config, instances)
+        else:
+            return super(LinkerdCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         labels_mapper = {'rt': 'linkerd_router', 'client': 'linkerd_client', 'service': 'linkerd_service'}

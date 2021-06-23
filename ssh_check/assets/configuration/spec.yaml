@@ -1,0 +1,66 @@
+name: SSH
+
+files:
+  - name: ssh_check.yaml
+
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+
+      - template: instances
+        options:
+          - name: host
+            required: true
+            description: Host to connect to.
+            value:
+              example: localhost
+              type: string
+
+          - name: username
+            required: true
+            description: Username to use for the SSH connection.
+            value:
+              type: string
+
+          - name: password
+            description: |
+              Password to use for the SSH connection.
+              If an encrypted SSH private key is specified in `private_key_file`, 
+                the given password will be used to decrypt the key.
+            value:
+              type: string
+
+          - name: port
+            description: Port used for SSH connection.
+            value:
+              example: 22
+              type: integer
+
+          - name: sftp_check
+            description: Open SFTP session on the existing connection to check the status of SFTP.
+            value:
+              example: true
+              type: boolean
+
+          - name: private_key_file
+            description: |
+              File path to a SSH private key.
+              If the SSH private key is encrypted, `password` will be used to decrypt the key.
+              See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
+            value:
+              type: string
+
+          - name: private_key_type
+            description: Private key type to choose between `rsa` or `ecdsa`.
+            value:
+              example: rsa
+              type: string
+
+          - name: add_missing_keys
+            description: Automatically add host key to known hosts when it is missing.
+            value:
+              example: false
+              type: boolean
+
+          - template: instances/default

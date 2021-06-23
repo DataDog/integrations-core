@@ -9,7 +9,7 @@ from io import StringIO
 import click
 from semver import parse_version_info
 
-from ....utils import stream_file_lines, write_file
+from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
@@ -25,12 +25,16 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)
+@click.option('--organization', '-r', default='DataDog')
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
+@click.option('--no-semver', '-ns', default=False, is_flag=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix):
+def changelog(
+    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization
+):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -40,7 +44,13 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
-    if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
+    if not cur_version:
+        abort(
+            'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
+            'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
+        )
+
+    if not no_semver and parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
         cur_version.replace(tag_prefix, '', 1)
     ):
         abort(f'Current version is {cur_version}, cannot bump to {version}')
@@ -68,7 +78,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
     generated_changelogs = 0
     for pr_num in pr_numbers:
         try:
-            payload = get_pr(pr_num, user_config)
+            payload = get_pr(pr_num, user_config, org=organization)
         except Exception as e:
             echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
             continue
@@ -111,7 +121,8 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
             thanks_note = ''
             if entry.from_contributor:
                 thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-            new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
+            title_period = "." if not entry.title.endswith(".") else ""
+            new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
     # read the old contents

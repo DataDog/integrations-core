@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...git import git_tag
+from ...git import git_tag, git_tag_list
 from ...release import get_release_tag_string
 from ...utils import complete_valid_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
@@ -39,6 +39,7 @@ def tag(check, version, push, dry_run):
 
     # Check for any new tags
     tagged = False
+    existing_tags = git_tag_list()
 
     for check in checks:
         echo_info(f'{check}:')
@@ -52,8 +53,13 @@ def tag(check, version, push, dry_run):
         echo_waiting(f'Tagging HEAD with {release_tag}... ', indent=True, nl=False)
 
         if dry_run:
+            # Get latest tag for check
+            if release_tag in existing_tags:
+                echo_warning('already exists (dry-run)')
+            else:
+                tagged = True
+                echo_success("success! (dry-run)")
             version = None
-            click.echo()
             continue
 
         result = git_tag(release_tag, push)
