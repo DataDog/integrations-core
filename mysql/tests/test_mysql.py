@@ -22,7 +22,7 @@ from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql, statements
-from datadog_checks.mysql.statement_samples import MySQLStatementSamples
+from datadog_checks.mysql.statement_samples import MySQLStatementSamples, StatementTruncationState
 from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
@@ -406,17 +406,19 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
-    "schema,statement,expected_collection_errors",
+    "schema,statement,expected_collection_errors,expected_statement_truncated",
     [
         (
             None,
             'select name as nam from testdb.users',
             [{'strategy': 'PROCEDURE', 'code': 'procedure_strategy_requires_default_schema', 'message': None}],
+            StatementTruncationState.not_truncated.value,
         ),
         (
             'information_schema',
             'select * from testdb.users',
             [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            StatementTruncationState.not_truncated.value,
         ),
         (
             'testdb',
@@ -428,6 +430,22 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
                     'message': "<class 'pymysql.err.ProgrammingError'>",
                 }
             ],
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            'testdb',
+            'SELECT {} FROM users where '
+            'name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
+                ", ".join("name as name{}".format(i) for i in range(243))
+            ),
+            [
+                {
+                    'strategy': None,
+                    'code': 'statement_truncated',
+                    'message': None,
+                }
+            ],
+            StatementTruncationState.truncated.value,
         ),
     ],
 )
@@ -441,6 +459,7 @@ def test_statement_samples_collect(
     schema,
     statement,
     expected_collection_errors,
+    expected_statement_truncated,
     aurora_replication_role,
     caplog,
 ):
@@ -486,8 +505,24 @@ def test_statement_samples_collect(
         logger.debug("done second check")
 
     events = aggregator.get_event_platform_events("dbm-samples")
-    matching = [e for e in events if e['db']['statement'] == statement]
+
+    # Match against the statement itself if it's below the statement length limit or its truncated form
+    # (the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...')
+    expected_statement_prefixes = [
+        statement[:1021] + '...' if len(statement) > 1024 else statement,
+        statement[:4093] + '...' if len(statement) > 4096 else statement,
+    ]
+
+    matching = []
+    for e in events:
+        for p in expected_statement_prefixes:
+            print("trying match of \n{}\nagainst \n{}".format(e['db']['statement'], p))
+            if p.startswith(e['db']['statement']):
+                matching.append(e)
+                break
+
     assert len(matching) > 0, "should have collected an event"
+
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
         # explain via the FQ_PROCEDURE will fail if a query contains non-fully-qualified tables because it will
@@ -500,13 +535,14 @@ def test_statement_samples_collect(
     elif not schema and explain_strategy == 'PROCEDURE':
         # if there is no default schema then we cannot use the non-fully-qualified procedure strategy
         assert not with_plans, "should not have collected any plans"
-    else:
+    elif not expected_statement_truncated:
         event = with_plans[0]
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
         assert set(event['ddtags'].split(',')) == expected_tags
 
     # Validate the events to ensure we've provided an explanation for not providing an exec plan
     for event in matching:
+        assert e['db']['statement_truncated'] == expected_statement_truncated
         if event['db']['plan']['definition'] is None:
             assert event['db']['plan']['collection_errors'] == expected_collection_errors
         else:
