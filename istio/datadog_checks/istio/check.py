@@ -29,7 +29,7 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         if mesh_endpoint:
             self.scraper_configs.append(self._generate_config(mesh_endpoint, MESH_METRICS, MESH_NAMESPACE))
         if istiod_endpoint:
-            self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, ISTIOD_METRICS))
+            self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, ISTIOD_NAMESPACE))
 
     def _generate_config(self, endpoint, metrics, namespace):
         config = {'openmetrics_endpoint': endpoint, 'metrics': construct_metrics_config(metrics, TYPE_OVERRIDES), 'namespace': namespace}
@@ -40,4 +40,4 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
     def get_config_with_defaults(self, config):
-        return ChainMap(config, {'metrics': config.pop('metrics')})
+        return ChainMap(config, {'metrics': config.pop('metrics'), 'namespace': config.pop('namespace')})
