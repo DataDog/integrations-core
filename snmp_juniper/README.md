@@ -8,7 +8,7 @@ Juniper Networks develops and markets networking products, including routers, sw
 - Juniper MX Routers
 - Juniper SRX Firewalls
 
-For details of monitored metrics see the [SNMP Data Collected][3] section.
+For details of monitored metrics see the [NDM Data Collected][3] section.
 
 ## Setup
 
@@ -18,7 +18,7 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 ### Metrics
 
-For details of monitored metrics see the [SNMP Data Collected][3] section.
+For details of monitored metrics see the [NDM Data Collected][3] section.
 
 ### Service Checks
 
@@ -33,7 +33,9 @@ Juniper does not include any events.
 Additional helpful documentation, links, and articles:
 
 - [Monitor SNMP with Datadog][2]
+- [Monitor Juniper network devices with Datadog][4]
 
-[1]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
+[1]: https://docs.datadoghq.com/network_monitoring/devices/setup/
 [2]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
-[3]: https://docs.datadoghq.com/network_performance_monitoring/devices/data/
+[3]: https://docs.datadoghq.com/network_monitoring/devices/data/
+[4]: https://www.datadoghq.com/blog/monitor-juniper-network-devices-with-datadog/

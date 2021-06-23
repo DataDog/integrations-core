@@ -1,5 +1,16 @@
 # CHANGELOG - Openstack_controller
 
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Openstack controller log support. See [#9115](https://github.com/DataDog/integrations-core/pull/9115).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+* [Fixed] Add config spec for Openstack Controller. See [#9092](https://github.com/DataDog/integrations-core/pull/9092).
+
+## 1.10.3 / 2021-02-11 / Agent 7.27.0
+
+* [Fixed] Remove SimpleApi cache. See [#8583](https://github.com/DataDog/integrations-core/pull/8583).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.10.2 / 2020-09-21 / Agent 7.23.0
 
 * [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
@@ -82,4 +93,3 @@
 ## 1.0.0 / 2019-02-04
 
 * [Added] OpenStack Controller. See [#2496](https://github.com/DataDog/integrations-core/pull/2496).
-

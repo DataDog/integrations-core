@@ -1,6 +1,16 @@
 # CHANGELOG - spark
 
-## 1.19.1 / 2021-01-25
+## 1.21.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8986](https://github.com/DataDog/integrations-core/pull/8986).
+
+## 1.20.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Rename cluster_name tag to spark_cluster. See [#8592](https://github.com/DataDog/integrations-core/pull/8592).
+* [Fixed] Skip apps which have the UI disabled. See [#8558](https://github.com/DataDog/integrations-core/pull/8558).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.19.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update check signature. See [#8259](https://github.com/DataDog/integrations-core/pull/8259).
 

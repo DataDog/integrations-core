@@ -1,0 +1,528 @@
+{
+    "title": "TokuMX - Metrics",
+    "description": "An overview of your TokuMX metrics. Clone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.opcounters.insertps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcounters.updateps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcounters.deleteps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcounters.queryps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcounters.commandps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcounters.getmoreps{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Opcounters"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.opcountersRepl.insertps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcountersRepl.updateps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcountersRepl.deleteps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcountersRepl.queryps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcountersRepl.commandps{$scope}"
+                    },
+                    {
+                        "q": "sum:tokumx.opcountersRepl.getmoreps{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Opcounters (repl)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.connections.current{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.cursors.totalOpen{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Cursors"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "100 * tokumx.ft.cachetable.size.current{$scope} by {host,server} / tokumx.ft.cachetable.size.limit{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Cache table utilization (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.stats.coll.storageSize{$scope} by {db,coll}",
+                        "display_type": "area"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Storage size"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.asserts.msgps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.asserts.regularps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.asserts.userps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.asserts.warningps{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Asserts"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.replSet.replicationLag{$scope,role:secondary} by {replset,host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Replication lag (s)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.checkpoint.write.leaf.bytes.compressedps{$scope} by {host,server} + tokumx.ft.checkpoint.write.nonleaf.bytes.compressedps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Checkpoint bytes written"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.checkpoint.lastComplete.time{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Checkpoint duration (s)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.log.bytesps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Bytes logged"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "1000 * tokumx.ft.log.timeps{$scope} by {host,server} / tokumx.ft.log.countps{$scope} by {host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Log write latency (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.fsync.timeps{$scope} by {server,host} / 1000",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "fsync time (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.fsync.timeps{$scope} by {host,server} / tokumx.ft.fsync.countps{$scope} by {host,server} * 1000"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "fsync latency (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "1000 * tokumx.ft.cachetable.miss.timeps{$scope} by {server,host}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Cachetable miss time (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "1000 * tokumx.ft.cachetable.miss.timeps{$scope} by {host,server} / tokumx.ft.cachetable.miss.countps{$scope} by {host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Cachetable miss latency (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "1000 * tokumx.ft.cachetable.evictions.full.leaf.dirty.timeps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "1000 * tokumx.ft.cachetable.evictions.full.nonleaf.dirty.timeps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Dirty eviction time (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "1000 * tokumx.ft.cachetable.evictions.full.leaf.dirty.timeps{$scope} by {host,server} / tokumx.ft.cachetable.evictions.full.leaf.dirty.countps{$scope} by {host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Dirty eviction latency (ms)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.full.leaf.clean.countps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.full.nonleaf.clean.countps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Clean full evictions"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.full.leaf.clean.bytesps{$scope} by {host,server} / tokumx.ft.cachetable.evictions.full.leaf.clean.countps{$scope} by {host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Clean full eviction size"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.partial.leaf.clean.countps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    },
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.partial.nonleaf.clean.countps{$scope} by {host,server}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Clean partial evictions"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.ft.cachetable.evictions.partial.leaf.clean.bytesps{$scope} by {host,server} / tokumx.ft.cachetable.evictions.partial.leaf.clean.countps{$scope} by {host,server}"
+                    }
+                ],
+                "type": "heatmap",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Clean partial eviction size"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.metrics.queryExecutor.scannedps{$scope} / tokumx.metrics.document.returnedps{$scope} by {host}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Index selectivity"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "tokumx.stats.idx.size{$scope} / tokumx.stats.idx.storageSize{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Compression ratio"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.sharding.chunks{$scope} by {shard}",
+                        "display_type": "bars"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Sharding chunk balance"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:tokumx.ft.alerts.checkpointFailures{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.locktreeRequestsPending{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.logBufferWaitps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.fsync.countps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.cachePressure.countps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.checkpointBegin.countps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.locktreeWait.countps{$scope} by {host,server}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:tokumx.ft.alerts.longWaitEvents.locktreeWaitEscalation.countps{$scope} by {host,server}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "events": [
+                    {
+                        "q": "$scope"
+                    }
+                ],
+                "title": "Alerts"
+            }
+        }
+    ]
+}

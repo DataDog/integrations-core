@@ -16,9 +16,20 @@ instances:
     #   - <KEY_2>:<VALUE_2>
 
     ## @param leader_election - boolean - optional - default: true
-    ## Monitor the leader-election process on the kube-system:kube-controller-manager endpoints
+    ## Monitor the leader-election process on the kube-system:kube-controller-manager.
     #
     # leader_election: true
+
+    ## @param leader_election_kind - string - optional - default: auto
+    ## Kind of object to look at for the leader election.
+    ## Can be:
+    ##   * auto
+    ##   * lease
+    ##   * endpoints
+    ##   * configmap
+    ## auto makes the check try lease first and fallback to endpoints if lease isn't available
+    #
+    # leader_election_kind: auto
 
     ## @param prometheus_timeout - integer - optional - default: 10
     ## Overrides the default timeout value in second

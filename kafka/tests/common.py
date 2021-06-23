@@ -59,4 +59,7 @@ KAFKA_E2E_METRICS = [
     "kafka.session.zookeeper.expire.rate",
     "kafka.session.zookeeper.readonly.rate",
     "kafka.session.zookeeper.sync.rate",
+    # Session
+    "kafka.session.fetch.count",
+    "kafka.session.fetch.eviction",
 ]

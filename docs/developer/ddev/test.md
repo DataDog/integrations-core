@@ -21,7 +21,7 @@ def dd_environment():
 ```
 
 This is not only used for regular tests, but is also the basis of our [E2E testing](../e2e.md). The
-[start](cli.md#start) command executes everything before the `yield` and the [stop](cli.md#stop)
+[start](cli.md#ddev-env-start) command executes everything before the `yield` and the [stop](cli.md#ddev-env-stop)
 command executes everything after it.
 
 We provide a few utilities for common environment types.
@@ -112,8 +112,8 @@ envlist =
 [testenv:bench]
 ```
 
-By default, the [test](cli.md#test_1) command skips all benchmark environments and tests. To run only benchmark
-environments and tests use the `--bench`/`-b` flag. The results are sorted by `tottime`, which is the total
+By default, the [test](cli.md#ddev-test) command skips all benchmark environments. To run only benchmark
+environments use the `--bench`/`-b` flag. The results are sorted by `tottime`, which is the total
 time spent in the given function (and excluding time made in calls to sub-functions).
 
 ## Logs
@@ -151,9 +151,9 @@ We provide an easy way to utilize [log collection][integration-log-collection] w
      - ${DD_LOG_2}:/usr/local/apache2/logs/error_log
      ```
 
-1. When [starting](cli.md#start) the environment, pass `-e DD_LOGS_ENABLED=true` to activate the Logs Agent.
+1. When [starting](cli.md#ddev-env-start) the environment, pass `-e DD_LOGS_ENABLED=true` to activate the Logs Agent.
 
-1. To send logs to a custom url, pass `-e DD_LOGS_CONFIG_LOGS_DD_URL=[CUSTOM_URL]:[CUSTOM_PORT]` when [starting](cli.md#start) the environment
+1. To send logs to a custom url, pass `-e DD_LOGS_CONFIG_LOGS_DD_URL=[CUSTOM_URL]:[CUSTOM_PORT]` when [starting](cli.md#ddev-env-start) the environment
 
 ## Reference
 

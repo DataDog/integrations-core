@@ -18,7 +18,7 @@ files:
       description: Define your namespace that is prefixed to all metrics collected by this check.
       value:
         type: string
-        default: go_expvar
+        display_default: go_expvar
     - name: metrics
       description: |
         These metrics are just here as examples.

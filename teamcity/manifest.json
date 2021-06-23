@@ -34,6 +34,9 @@
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "teamcity_processes": "assets/saved_views/teamcity_processes.json"
+    }
   }
 }

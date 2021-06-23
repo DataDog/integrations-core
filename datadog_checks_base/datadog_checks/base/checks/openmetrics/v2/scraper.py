@@ -15,7 +15,7 @@ from prometheus_client.parser import text_fd_to_metric_families as parse_metric_
 from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
-from ....utils.common import no_op
+from ....utils.functions import no_op, return_true
 from ....utils.http import RequestsWrapper
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
@@ -118,7 +118,7 @@ class OpenMetricsScraper:
         elif exclude_metrics_by_labels:
             for label, values in exclude_metrics_by_labels.items():
                 if values is True:
-                    self.exclude_metrics_by_labels[label] = lambda label_value: True
+                    self.exclude_metrics_by_labels[label] = return_true
                 elif isinstance(values, list):
                     for i, value in enumerate(values, 1):
                         if not isinstance(value, str):
@@ -143,6 +143,16 @@ class OpenMetricsScraper:
         for i, entry in enumerate(custom_tags, 1):
             if not isinstance(entry, str):
                 raise ConfigurationError(f'Entry #{i} of setting `tags` must be a string')
+
+        # Some tags can be ignored to reduce the cardinality.
+        # This can be useful for cost optimization in containerized environments
+        # when the openmetrics check is configured to collect custom metrics.
+        # Even when the Agent's Tagger is configured to add low-cardinality tags only,
+        # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
+        ignore_tags = config.get('ignore_tags', [])
+        if ignore_tags:
+            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
         # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
         # https://www.bittorrent.org/beps/bep_0003.html

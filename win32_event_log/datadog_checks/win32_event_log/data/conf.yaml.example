@@ -50,10 +50,8 @@ instances:
 
   -
     ## @param path - string - optional
-    ## The check will subscribe to the path for events. It can be one of the following:
-    ##
-    ##   - the name of an Admin or Operational channel (you cannot subscribe to Analytic or Debug channels)
-    ##   - the full path to a log file, usually ending in .evt, .evtx, or .etl
+    ## The check will subscribe to the path for events. It must be the name of an Admin or Operational
+    ## channel (you cannot subscribe to Analytic or Debug channels).
     ##
     ## The path is required if `legacy_mode` is set to `false`.
     #
@@ -112,6 +110,9 @@ instances:
     #   type:
     #   - Error
     #   - Warning
+    #   - Information
+    #   - Success Audit
+    #   - Failure Audit
     #   id:
     #   - 9000
 

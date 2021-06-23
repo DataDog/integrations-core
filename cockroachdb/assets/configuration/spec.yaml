@@ -10,3 +10,12 @@ files:
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:8080/_status/vars
+  - template: logs
+    example:
+    - type: file
+      path: /var/lib/cockroach/logs/cockroach.log
+      source: cockroachdb
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_status_and_date
+        pattern: \[A-Z]\d{6}\s\d+\:\d+\:\d+\.\d+

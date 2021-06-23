@@ -16,17 +16,17 @@ class MetadataCollector(object):
     def __init__(self, log):
         self.log = log
 
-    def collect_metadata(self, queue_manager):
+    def collect_metadata(self, queue_manager, convert=False):
         try:
-            raw_version = self._get_version(queue_manager)
+            raw_version = self._get_version(queue_manager, convert=convert)
             self.log.debug('IBM MQ version: %s', raw_version)
             return raw_version
         except Exception as e:
             self.log.debug("Version could not be retreived: %s", e)
             return
 
-    def _get_version(self, queue_manager):
-        pcf = pymqi.PCFExecute(queue_manager)
+    def _get_version(self, queue_manager, convert):
+        pcf = pymqi.PCFExecute(queue_manager, convert=convert)
         resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
 
         try:

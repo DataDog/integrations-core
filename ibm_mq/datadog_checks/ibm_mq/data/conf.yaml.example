@@ -121,13 +121,19 @@ instances:
     #
     # mqcd_version: 6
 
+    ## @param convert_endianness - boolean - optional - default: false
+    ## If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
+    ## set this field to true.
+    #
+    # convert_endianness: false
+
     ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
     #
     # ssl_auth: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
-    ## The ssl cipher to use.
+    ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
     #
     # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
 

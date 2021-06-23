@@ -1,0 +1,125 @@
+{
+    "title": "PgBouncer - Metrics",
+    "description": "This dashboard provides a high-level overview of PgBouncer, so you can monitor connection pool performance metrics and track traffic to and from your PostgreSQL database. Further reading on PgBouncer monitoring:\n\n- [Datadog's PgBouncer integration docs](https://docs.datadoghq.com/integrations/pgbouncer/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.sv_idle{$scope}"
+                    },
+                    {
+                        "q": "sum:pgbouncer.pools.sv_used{$scope}"
+                    },
+                    {
+                        "q": "sum:pgbouncer.pools.sv_active{$scope}"
+                    },
+                    {
+                        "q": "sum:pgbouncer.pools.sv_tested{$scope}"
+                    },
+                    {
+                        "q": "sum:pgbouncer.pools.sv_login{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "PgBouncer server connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.sv_used{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Server connections in use"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.sv_active{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Server connections active"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.sv_idle{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Server connections idle"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.cl_active{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Active client connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.pools.cl_waiting{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Client connections waiting"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:pgbouncer.pools.maxwait{$scope} by {host}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Longest client wait for a server connection"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:pgbouncer.stats.avg_query{$scope} by {host} / 1000"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Slowest query times as seen by pgbouncer, in milliseconds"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:pgbouncer.stats.requests_per_second{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Requests proxied per second"
+            }
+        }
+    ]
+}

@@ -18,7 +18,7 @@
   value:
     type: string
     example: <PREFIX>_
-    default: null
+    display_default: null
 - name: metrics  # Only shown for the `openmetrics` provider integration
   hidden: true
   description: |
@@ -62,11 +62,11 @@
   value:
     type: array
     items:
-      oneOf:
+      anyOf:
       - type: string
       - type: object
         additionalProperties:
-          oneOf:
+          anyOf:
           - type: string
           - type: object
             properties:
@@ -118,11 +118,11 @@
   value:
     type: array
     items:
-      oneOf:
+      anyOf:
       - type: string
       - type: object
         additionalProperties:
-          oneOf:
+          anyOf:
           - type: string
           - type: object
             properties:
@@ -155,7 +155,7 @@
   value:
     type: object
     additionalProperties:
-      oneOf:
+      anyOf:
       - type: boolean
       - type: array
         items:
@@ -216,6 +216,14 @@
   value:
     example: false
     type: boolean
+- name: collect_counters_with_distributions
+  description: |
+    Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    `histogram_buckets_as_distributions` option.
+  value:
+    example: false
+    type: boolean
 - name: share_labels
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
@@ -247,7 +255,7 @@
   value:
     type: object
     additionalProperties:
-      oneOf:
+      anyOf:
       - type: boolean
       - type: object
         properties:
@@ -292,5 +300,16 @@
   value:
     example: false
     type: boolean
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

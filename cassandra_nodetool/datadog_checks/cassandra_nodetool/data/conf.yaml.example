@@ -2,7 +2,7 @@
 #
 init_config:
 
-    ## @param nodetool - string - required
+    ## @param nodetool - string - optional - default: /usr/bin/nodetool
     ## The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
     ## can be overwritten on an instance.
     ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
@@ -11,7 +11,7 @@ init_config:
     ## and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
     ## You should set those environment variables as system-wide variables.
     #
-    nodetool: nodetool
+    # nodetool: /usr/bin/nodetool
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -58,6 +58,19 @@ instances:
     ## Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
     #
     # ssl: false
+
+    ## @param nodetool - string - optional
+    ## The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
+    ## can be overwritten on an instance.
+    ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
+    ## access to the nodetool installation directory for the check to work.
+    ## The nodetool installation also sets some environment variables (for example, `CASSANDRA_HOME`
+    ## and `DSCINSTALLDIR`), but sets them as variables only for the user doing the nodetool installation.
+    ## You should set those environment variables as system-wide variables.
+    ##
+    ## This overrides `nodetool` defined in `init_config`.
+    #
+    # nodetool: <NODETOOL>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

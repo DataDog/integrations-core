@@ -29,6 +29,13 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
+        self.statement_samples_config = instance.get('statement_samples', {}) or {}
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

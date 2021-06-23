@@ -30,11 +30,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "postfix": "assets/dashboards/postfix_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "postfix"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "postfix_processes": "assets/saved_views/postfix_processes.json"
+    }
   }
 }

@@ -1,0 +1,80 @@
+{
+    "title": "PHP-FPM - Metrics",
+    "description": "An overview of your PHP-FPM metrics by pool. Clone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.processes.active{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Active processes by pool"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.processes.total{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Total processes by pool"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.processes.max_reached{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Process limit reached events by pool"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.requests.accepted{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Accepted requests by pool"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.requests.slow{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Slow requests by pool"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "php_fpm.listen_queue.size{$scope} by {pool}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Pending connections by pool"
+            }
+        }
+    ]
+}

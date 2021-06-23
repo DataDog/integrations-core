@@ -88,6 +88,8 @@ class IBMMQConfig:
             instance.get('channel_status_mapping')
         )  # type: Dict[str, str]
 
+        self.convert_endianness = instance.get('convert_endianness', False)
+
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [
             "queue_manager:{}".format(self.queue_manager_name),

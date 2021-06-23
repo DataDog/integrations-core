@@ -30,11 +30,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "kyototycoon": "assets/dashboards/kyototycoon_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "kyototycoon"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "kyoto-tycoon_processes": "assets/saved_views/kyoto-tycoon_processes.json"
+    }
   }
 }

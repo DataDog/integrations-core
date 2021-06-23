@@ -39,7 +39,7 @@ def test_config():
 def test_default_authentication(instance):
     # Test default auth
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.authenticator == 'snowflake'
+    assert check._config.authenticator == 'snowflake'
 
 
 def test_invalid_oauth(oauth_instance):
@@ -159,7 +159,7 @@ def test_proxy_settings(instance):
 
 def test_default_metric_groups(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == [
+    assert check._config.metric_groups == [
         'snowflake.query',
         'snowflake.billing',
         'snowflake.storage',
@@ -187,7 +187,7 @@ def test_additional_metric_groups(instance):
     instance = copy.deepcopy(instance)
     instance['metric_groups'] = ['snowflake.logins', 'snowflake.data_transfer']
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    assert check.config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
+    assert check._config.metric_groups == ['snowflake.logins', 'snowflake.data_transfer']
 
     assert check.metric_queries == [
         queries.LoginMetrics,

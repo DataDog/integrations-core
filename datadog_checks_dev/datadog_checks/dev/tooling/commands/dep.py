@@ -7,7 +7,7 @@ import click
 from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
-from ...utils import read_file_lines, write_file_lines
+from ...fs import read_file_lines, write_file_lines
 from ..constants import get_agent_requirements
 from ..dependencies import read_check_dependencies
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info

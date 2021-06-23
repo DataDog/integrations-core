@@ -30,8 +30,7 @@ class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
-    JDBC_CONNECT_STRING = "jdbc:oracle:thin:@//{}/{}"
-    CX_CONNECT_STRING = "{}/{}@//{}/{}"
+    JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
 
@@ -112,21 +111,10 @@ class Oracle(AgentCheck):
     @property
     def _connection(self):
         if self._cached_connection is None:
-            try:
-                # Check if the instantclient is available
-                cx_Oracle.clientversion()
-            except cx_Oracle.DatabaseError as e:
-                # Fallback to JDBC
-                use_oracle_client = False
-                self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-                connect_string = self.JDBC_CONNECT_STRING.format(self._server, self._service)
-            else:
-                use_oracle_client = True
-                self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
-                connect_string = self.CX_CONNECT_STRING.format(self._user, self._password, self._server, self._service)
-
-            if use_oracle_client:
-                connection = cx_Oracle.connect(connect_string)
+            if self.can_use_oracle_client():
+                connection = cx_Oracle.connect(
+                    user=self._user, password=self._password, dsn="{}/{}".format(self._server, self._service)
+                )
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
                 self.log.error(
@@ -136,6 +124,7 @@ class Oracle(AgentCheck):
                 )
                 raise JDBC_IMPORT_ERROR
             else:
+                connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
                 try:
                     if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                         jpype.attachThreadToJVM()
@@ -165,3 +154,15 @@ class Oracle(AgentCheck):
             self._cached_connection = connection
 
         return self._cached_connection
+
+    def can_use_oracle_client(self):
+        try:
+            # Check if the instantclient is available
+            cx_Oracle.clientversion()
+        except cx_Oracle.DatabaseError as e:
+            # Fallback to JDBC
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
+            return False
+        else:
+            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
+            return True

@@ -12,7 +12,7 @@ files:
             Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
             Only available for Istio >= v1.5.
           value:
-            default: null
+            display_default: null
             example: http://istiod.istio-system:15014/metrics
             type: string
         - name: istio_mesh_endpoint
@@ -25,7 +25,7 @@ files:
             When collecting mesh metrics in Istio < v1.5, use
             istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
           value:
-            default: null
+            display_default: null
             example: http://istio-proxy.istio-system:15090/stats/prometheus
             type: string
         - name: mixer_endpoint
@@ -35,7 +35,7 @@ files:
             If using Istio < v1.1, replace port 15014 with port 9093. See the changes here:
             https://istio.io/about/notes/1.1/#configuration-management
           value:
-            default: null
+            display_default: null
             example: http://istio-telemetry.istio-system:15014/metrics
             type: string
         - name: pilot_endpoint
@@ -43,7 +43,7 @@ files:
             Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process.
             Only available for Istio >= v1.1.
           value:
-            default: null
+            display_default: null
             example: http://istio-pilot.istio-system:15014/metrics
             type: string
         - name: galley_endpoint
@@ -51,7 +51,7 @@ files:
             Define the galley endpoint in order to collect all Prometheus metrics on the Galley process.
             Only available for Istio >= v1.1.
           value:
-            default: null
+            display_default: null
             example: http://istio-galley.istio-system:15014/metrics
             type: string
         - name: citadel_endpoint
@@ -59,7 +59,7 @@ files:
             Define the citadel endpoint in order to collect all Prometheus metrics on the Citadel process.
             Only available for Istio >= v1.1.
           value:
-            default: null
+            display_default: null
             example: http://istio-citadel.istio-system:15014/metrics
             type: string
         - template: instances/openmetrics_legacy

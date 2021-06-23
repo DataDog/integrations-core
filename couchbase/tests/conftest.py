@@ -21,6 +21,7 @@ from .common import (
     PASSWORD,
     PORT,
     QUERY_URL,
+    SG_URL,
     URL,
     USER,
 )
@@ -40,6 +41,18 @@ def instance_query():
         'timeout': 0.5,
         'tags': CUSTOM_TAGS,
         'query_monitoring_url': QUERY_URL,
+    }
+
+
+@pytest.fixture
+def instance_sg():
+    return {
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 0.5,
+        'tags': CUSTOM_TAGS,
+        'sync_gateway_url': SG_URL,
     }
 
 

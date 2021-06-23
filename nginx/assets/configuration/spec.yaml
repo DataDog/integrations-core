@@ -44,12 +44,12 @@ files:
       value:
         type: boolean
         example: false
-        default: true
+        display_default: true
     - name: plus_api_version
       description: Specify the version of the Plus API to use. The check supports versions 1-3.
       value:
         type: integer
-        default: 2
+        display_default: 2
     - name: use_vts
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.

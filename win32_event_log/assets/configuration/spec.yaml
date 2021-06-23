@@ -23,6 +23,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: interpret_messages
       description: |
         Whether or not to interpret event messages for unknown sources or sources that have not been registered
@@ -51,10 +54,8 @@ files:
     options:
     - name: path
       description: |
-        The check will subscribe to the path for events. It can be one of the following:
-
-          - the name of an Admin or Operational channel (you cannot subscribe to Analytic or Debug channels)
-          - the full path to a log file, usually ending in .evt, .evtx, or .etl
+        The check will subscribe to the path for events. It must be the name of an Admin or Operational
+        channel (you cannot subscribe to Analytic or Debug channels).
 
         The path is required if `legacy_mode` is set to `false`.
       value:
@@ -74,6 +75,9 @@ files:
       value:
         type: string
         example: now
+        enum:
+        - now
+        - oldest
     - name: query
       description: |
         A raw XPath or structured XML query used to filter events.
@@ -108,6 +112,26 @@ files:
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
       value:
         type: object
+        properties:
+        - name: source
+          type: array
+          items:
+            type: string
+        - name: type
+          type: array
+          items:
+            type: string
+            enum:
+            - success
+            - error
+            - warning
+            - information
+            - success audit
+            - failure audit
+        - name: id
+          type: array
+          items:
+            type: integer
         example:
           source:
            - Microsoft-Windows-Ntfs
@@ -115,6 +139,9 @@ files:
           type:
            - Error
            - Warning
+           - Information
+           - Success Audit
+           - Failure Audit
           id:
            - 9000
     - name: included_messages
@@ -172,6 +199,9 @@ files:
       value:
         type: string
         example: normal
+        enum:
+        - normal
+        - low
     - name: auth_type
       description: |
         The type of authentication to use. The available types are:
@@ -186,6 +216,11 @@ files:
       value:
         type: string
         example: default
+        enum:
+        - default
+        - negotiate
+        - kerberos
+        - ntlm
     - name: server
       description: |
         The name of the remote computer to connect to.
@@ -240,7 +275,7 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
-        default: <PAYLOAD_SIZE>
+        display_default: <PAYLOAD_SIZE>
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
@@ -252,7 +287,7 @@ files:
       enabled: true
       value:
         type: boolean
-        default: true
+        display_default: true
         example: false
     - name: host
       description: |
@@ -264,7 +299,7 @@ files:
       value:
         type: string
         example: <REMOTE_HOSNAME>
-        default: localhost
+        display_default: localhost
     - name: log_file
       description: |
         The `log_file` filter instructs the check to only capture events
@@ -299,7 +334,7 @@ files:
           type: string
         example:
           - information
-        default: information
+        display_default: information
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -340,7 +375,7 @@ files:
         type: array
         items:
           type: string
-        default: Message
+        display_default: Message
         example:
           - Message
     - template: instances/default

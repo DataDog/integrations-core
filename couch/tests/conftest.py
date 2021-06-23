@@ -55,7 +55,7 @@ def dd_environment():
             env_vars={'COUCH_PORT': common.PORT},
             conditions=[
                 CheckEndpoints([common.URL]),
-                CheckDockerLogs('couchdb-1', ['CouchDB has started']),
+                CheckDockerLogs('couchdb-1', ['CouchDB has started', 'Application couch_index started']),
                 WaitFor(generate_data, args=(couch_version,)),
             ],
         ):

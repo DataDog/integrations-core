@@ -12,6 +12,10 @@ omit =
     */test_bench.py
     */test_e2e.py
 
+    # Configuration models
+    # TODO: remove when python 2 is dropped
+    */datadog_checks/*/config_models/*
+
     # Vendored dependencies
     */datadog_checks/*/vendor/*
 

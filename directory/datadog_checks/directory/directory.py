@@ -41,21 +41,21 @@ class DirectoryCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(DirectoryCheck, self).__init__(*args, **kwargs)
 
-        self.config = DirectoryConfig(self.instance)
+        self._config = DirectoryConfig(self.instance)
 
     def check(self, _):
-        service_check_tags = ['dir_name:{}'.format(self.config.name)]
-        service_check_tags.extend(self.config.tags)
-        if not exists(self.config.abs_directory):
+        service_check_tags = ['dir_name:{}'.format(self._config.name)]
+        service_check_tags.extend(self._config.tags)
+        if not exists(self._config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
-                "have permissions to access it, skipping.".format(self.config.abs_directory)
+                "have permissions to access it, skipping.".format(self._config.abs_directory)
             )
             # report missing directory
             self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, tags=service_check_tags, message=msg)
 
             # raise exception if `ignore_missing` is False
-            if not self.config.ignore_missing:
+            if not self._config.ignore_missing:
                 raise CheckException(msg)
 
             self.log.warning(msg)
@@ -67,15 +67,15 @@ class DirectoryCheck(AgentCheck):
         self._get_stats()
 
     def _get_stats(self):
-        dirtags = ['{}:{}'.format(self.config.dirtagname, self.config.name)]
-        dirtags.extend(self.config.tags)
+        dirtags = ['{}:{}'.format(self._config.dirtagname, self._config.name)]
+        dirtags.extend(self._config.tags)
         directory_bytes = 0
         directory_files = 0
-        max_filegauge_balance = self.config.max_filegauge_count
+        max_filegauge_balance = self._config.max_filegauge_count
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(self.config.abs_directory, self.config.follow_symlinks)
-        if not self.config.recursive:
+        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+        if not self._config.recursive:
             # Only visit the first directory.
             walker = [next(walker)]
 
@@ -86,21 +86,21 @@ class DirectoryCheck(AgentCheck):
             matched_files = []
             adjust_max_filegauge = False
 
-            if self.config.exclude_dirs_pattern is not None:
-                if self.config.dirs_patterns_full:
-                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.path)]
+            if self._config.exclude_dirs_pattern is not None:
+                if self._config.dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
                 else:
-                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.name)]
+                    dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
 
-            if self.config.pattern is not None:
+            if self._config.pattern is not None:
                 # Check if the path of the file relative to the directory
                 # matches the pattern. Also check if the absolute path of the
                 # filename matches the pattern, for compatibility with previous
                 # agent versions.
                 for file_entry in files:
                     filename = join(root, file_entry.name)
-                    if fnmatch(filename, self.config.pattern) or fnmatch(
-                        relpath(filename, self.config.abs_directory), self.config.pattern
+                    if fnmatch(filename, self._config.pattern) or fnmatch(
+                        relpath(filename, self._config.abs_directory), self._config.pattern
                     ):
                         matched_files.append(file_entry)
             else:
@@ -110,20 +110,20 @@ class DirectoryCheck(AgentCheck):
             directory_files += matched_files_length
 
             # We're just looking to count the files.
-            if self.config.countonly:
+            if self._config.countonly:
                 continue
 
             for file_entry in matched_files:
                 try:
-                    file_stat = file_entry.stat(follow_symlinks=self.config.stat_follow_symlinks)
+                    file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
 
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
-                    if self.config.filegauges and matched_files_length <= max_filegauge_balance:
-                        filetags = ['{}:{}'.format(self.config.filetagname, join(root, file_entry.name))]
+                    if self._config.filegauges and matched_files_length <= max_filegauge_balance:
+                        filetags = ['{}:{}'.format(self._config.filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
                         self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                         self.gauge(
@@ -148,5 +148,5 @@ class DirectoryCheck(AgentCheck):
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)
 
         # total file size
-        if not self.config.countonly:
+        if not self._config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)

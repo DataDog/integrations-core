@@ -1,5 +1,14 @@
 # CHANGELOG - go_expvar
 
+## 1.12.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8922](https://github.com/DataDog/integrations-core/pull/8922).
+
+## 1.11.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.11.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add config specs. See [#8006](https://github.com/DataDog/integrations-core/pull/8006).
