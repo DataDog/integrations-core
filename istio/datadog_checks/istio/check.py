@@ -26,13 +26,14 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
             raise ConfigurationError("Must specify at least one of the following endpoints: `istio_mesh_endpoint` or `istiod_endpoint`.")
 
         if mesh_endpoint:
-            config = {'openmetrics_endpoint': mesh_endpoint, 'metrics': construct_metrics_config(MESH_METRICS)}
-            config.update(self.instance)
-            self.scraper_configs.append(config)
+            self.scraper_configs.append(self._generate_config(mesh_endpoint, MESH_METRICS))
         if istiod_endpoint:
-            config = {'openmetrics_endpoint': istiod_endpoint, 'metrics': construct_metrics_config(ISTIOD_METRICS)}
-            config.update(self.instance)
-            self.scraper_configs.append(config)
+            self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS))
+
+    def _generate_config(self, endpoint, metrics):
+        config = {'openmetrics_endpoint': endpoint, 'metrics': construct_metrics_config(metrics)}
+        config.update(self.instance)
+        return config
 
     def create_scraper(self, config):
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
