@@ -58,7 +58,7 @@
             "$id": "#/properties/extends",
             "type": "array",
             "title": "The extends schema",
-            "description": "An explanation about the purpose of this instance.",
+            "description": "Optional list of base profiles to extend from",
             "default": [],
             "examples": [
                 [
@@ -72,21 +72,19 @@
                 "anyOf": [{
                     "$id": "#/properties/extends/items/anyOf/0",
                     "type": "string",
-                    "title": "The first anyOf schema",
-                    "description": "An explanation about the purpose of this instance.",
+                    "title": "Base profile name",
+                    "description": "Base profiles to extend from",
                     "default": "",
-                    "examples": [
-                        "_base.yaml",
-                        "_generic-ip.yaml"
-                    ]
+                    "examples":
+                        "_base.yaml"
                 }]
             }
         },
         "device": {
             "$id": "#/properties/device",
             "type": "object",
-            "title": "The device schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "Device-specific tag",
+            "description": "Adds tag for the device vendor",
             "default": {},
             "examples": [{
                 "vendor": "f5"
@@ -98,8 +96,8 @@
                 "vendor": {
                     "$id": "#/properties/device/properties/vendor",
                     "type": "string",
-                    "title": "The vendor schema",
-                    "description": "An explanation about the purpose of this instance.",
+                    "title": "Device vendor",
+                    "description": "Device vendor",
                     "default": "",
                     "examples": [
                         "f5"
@@ -112,7 +110,7 @@
             "$id": "#/properties/sysobjectid",
             "type": ["array", "string"],
             "title": "The sysobjectid schema",
-            "description": "An explanation about the purpose of this instance.",
+            "description": "List of sysobjectids that the profile is configured for",
             "default": "",
             "examples": [
                 "1.3.6.1.4.1.3375.2.1.3.4.*"
@@ -121,8 +119,8 @@
         "metrics": {
             "$id": "#/properties/metrics",
             "type": "array",
-            "title": "The metrics schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "Metrics",
+            "description": "List of metrics this profile will collect",
             "default": [],
             "examples": [
                 [{
@@ -164,21 +162,103 @@
                 "anyOf": [{
                         "$id": "#/properties/metrics/items/anyOf/0",
                         "type": "object",
-                        "title": "The first anyOf schema",
-                        "description": "An explanation about the purpose of this instance.",
+                        "title": "Scalar metric",
+                        "description": "Legacy configuration for scalar metric",
                         "default": {},
                         "examples": [{
-                            "MIB": "F5-BIGIP-SYSTEM-MIB",
-                            "forced_type": "gauge",
-                            "symbol": {
                                 "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
                                 "name": "sysStatMemoryTotal"
-                            }
-                        }],
+                            }],
                         "required": [
-                            "MIB",
-                            "forced_type",
-                            "symbol"
+                            "OID",
+                            "name"
+                        ],
+                        "properties":{
+                                    "OID": {
+                                        "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/OID",
+                                        "type": "string",
+                                        "title": "OID to collect metrics from",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "1.3.6.1.4.1.3375.2.1.1.2.1.44.0"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/name",
+                                        "type": "string",
+                                        "title": "The name schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "sysStatMemoryTotal"
+                                        ]
+                                    },
+
+                                    "forced_type": {
+                                    "$id": "#/properties/metrics/items/anyOf/0/properties/forced_type",
+                                    "type": "string",
+                                    "title": "The forced_type schema",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": "",
+                                    "examples": [
+                                        "gauge"
+                                    ]
+                            },
+                            "options": {
+                                    "$id": "#/properties/metrics/items/anyOf/0/properties/options",
+                                    "type": "object",
+                                    "title": "Options",
+                                    "description": "Options for placement and metric suffix",
+                                    "default": "",
+                                    "examples": [{
+                                "placement": "8",
+                                "metric_suffix": "AVRTrimActive"
+                            }],
+                                "required": [
+                                    "placement", "metric_suffix"
+                                ]
+                                },
+
+                        "properties": {
+                "placement": {
+                    "$id": "#/properties/metrics/items/anyOf/0/properties/options/placement",
+                    "type": "string",
+                    "title": "Placement",
+                    "description": "placement",
+                    "default": "",
+                    "placement": [
+                        "8"
+                    ]
+                }},
+
+                "metric suffix": {
+                    "$id": "#/properties/metrics/items/anyOf/0/properties/options/metric_suffix",
+                    "type": "string",
+                    "title": "metric suffix",
+                    "description": "suffix for metric",
+                    "default": "",
+                    "metric_suffix": [
+                        "AVRTrimActive"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },{
+                        "additionalProperties": false
+                    },
+                    {"$id": "#/properties/metrics/items/anyOf/1",
+                        "type": "object",
+                        "title": "Scalar metric",
+                        "description": "Collect a scalar metric",
+                        "default": {},
+                        "examples": [{
+                                "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
+                                "name": "sysStatMemoryTotal"
+                            }],
+                        "required": [
+                            "OID",
+                            "name"
                         ],
                         "properties": {
                             "MIB": {
