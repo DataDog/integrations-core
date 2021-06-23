@@ -35,12 +35,16 @@
       "cassandra-overview": "assets/dashboards/cassandra_overview.json",
       "cassandra-read": "assets/dashboards/cassandra_read.json",
       "cassandra-sstables": "assets/dashboards/cassandra_sstable.json",
-      "cassandra-write": "assets/dashboards/cassandra_write.json"
+      "cassandra-write": "assets/dashboards/cassandra_write.json",
+      "cassandra-overview-screenboard": "assets/dashboards/cassandra_overview_screenboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "cassandra"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "cassandra_processes": "assets/saved_views/cassandra_processes.json"
+    }
   }
 }

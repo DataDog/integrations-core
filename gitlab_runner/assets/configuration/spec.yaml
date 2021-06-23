@@ -72,7 +72,7 @@ files:
         value:
           type: string
           example: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
-      - template: instances/openmetrics
+      - template: instances/openmetrics_legacy
         overrides:
           prometheus_url.hidden: true
   - template: logs

@@ -1,0 +1,2 @@
+- template: init_config/http
+- template: init_config/default

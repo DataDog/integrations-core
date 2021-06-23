@@ -1,5 +1,14 @@
 # CHANGELOG - Hive
 
+## 1.5.2 / 2021-05-28
+
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+
+## 1.5.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.5.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError
 
-from .constants import EVENT_TYPES
+from .constants import EVENT_TYPES_TO_KEYWORD, EVENT_TYPES_TO_LEVEL
 
 
 def construct_xpath_query(filters):
@@ -18,9 +18,7 @@ def construct_xpath_query(filters):
 
     # Make sources come first to produce nicer looking queries
     for property_filter, values in sorted(filters.items(), key=lambda item: (item[0] != 'source', item[0])):
-        if property_filter not in PROPERTY_CONSTRUCTORS:
-            raise ConfigurationError('Unknown property filter: {}'.format(property_filter))
-        elif not values:
+        if not values:
             raise ConfigurationError('No values set for property filter: {}'.format(property_filter))
 
         query_parts.append(PROPERTY_CONSTRUCTORS[property_filter](values))
@@ -29,43 +27,31 @@ def construct_xpath_query(filters):
 
 
 def construct_sources(sources):
-    event_sources = set()
-
-    for event_source in sources:
-        if not isinstance(event_source, str):
-            raise ConfigurationError('Values for event filter `source` must be strings.')
-
-        event_sources.add(event_source)
+    event_sources = set(sources)
 
     parts = ['@Name={}'.format(value_to_xpath_string(value)) for value in sorted(event_sources)]
     return 'Provider[{}]'.format(combine_value_parts(parts))
 
 
 def construct_types(types):
-    event_types = set()
+    event_levels = set()
+    event_keywords = set()
 
     for event_type in types:
-        if not isinstance(event_type, str):
-            raise ConfigurationError('Values for event filter `type` must be strings.')
-
-        event_type = event_type.lower()
-        if event_type not in EVENT_TYPES:
+        if event_type in EVENT_TYPES_TO_LEVEL:
+            event_levels.add(EVENT_TYPES_TO_LEVEL[event_type])
+        elif event_type in EVENT_TYPES_TO_KEYWORD:
+            event_keywords.add(EVENT_TYPES_TO_KEYWORD[event_type])
+        else:
             raise ConfigurationError('Unknown value for event filter `type`: {}'.format(event_type))
 
-        event_types.add(EVENT_TYPES[event_type])
-
-    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_types)]
+    parts = ['Level={}'.format(value_to_xpath_string(value)) for value in sorted(event_levels)]
+    parts.extend('Keywords={}'.format(value_to_xpath_string(value)) for value in sorted(event_keywords))
     return combine_value_parts(parts)
 
 
 def construct_ids(ids):
-    event_ids = set()
-
-    for event_id in ids:
-        if not isinstance(event_id, int):
-            raise ConfigurationError('Values for event filter `id` must be integers.')
-
-        event_ids.add(event_id)
+    event_ids = set(ids)
 
     parts = ['EventID={}'.format(value_to_xpath_string(value)) for value in sorted(event_ids)]
     return combine_value_parts(parts)

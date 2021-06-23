@@ -4,7 +4,7 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/openmetrics
+    - template: init_config/openmetrics_legacy
   - template: instances
     options:
     - name: metric_groups
@@ -31,16 +31,16 @@ files:
         - scylla.sstables
         - scylla.thrift
         - scylla.tracing
-    - template: instances/openmetrics
+    - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:9180/metrics
         prometheus_url.display_priority: 1
         send_histograms_buckets.hidden: true
-    - template: logs
-      example:
-      - type: file
-        source: scylla
-        log_processing_rules:
-        - type: multi_line
-          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-          name: new_log_start_with_date
+  - template: logs
+    example:
+    - type: file
+      source: scylla
+      log_processing_rules:
+      - type: multi_line
+        pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+        name: new_log_start_with_date

@@ -3,6 +3,8 @@ parameters:
   pip_cache_config: null
   run_py2_tests: true
   force_base_package: false
+  test_e2e: true
+  ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -10,6 +12,8 @@ jobs:
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
     force_base_package: ${{ parameters.force_base_package }}
+    test_e2e: ${{ parameters.test_e2e }}
+    ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -56,9 +60,6 @@ jobs:
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
       os: linux
-    - checkName: azure_iot_edge
-      displayName: Azure IoT Edge
-      os: windows
     - checkName: btrfs
       displayName: Btrfs
       os: linux
@@ -291,8 +292,11 @@ jobs:
       displayName: Nagios
       os: linux
     - checkName: network
-      displayName: Network
+      displayName: Network (Linux)
       os: linux
+    - checkName: network
+      displayName: Network (Windows)
+      os: windows
     - checkName: nfsstat
       displayName: NFSstat
       os: linux
@@ -318,7 +322,7 @@ jobs:
       displayName: Oracle Database
       os: linux
     - checkName: pdh_check
-      displayName: PDH
+      displayName: PDH (Windows)
       os: windows
     - checkName: pgbouncer
       displayName: PGBouncer
@@ -360,7 +364,7 @@ jobs:
       displayName: Riak
       os: linux
     - checkName: riakcs
-      displayName: Riak CS
+      displayName: RiakCS
       os: linux
     - checkName: sap_hana
       displayName: SAP HANA
@@ -419,9 +423,10 @@ jobs:
     - checkName: tls
       displayName: TLS
       os: linux
-    - checkName: tokumx
-      displayName: TokuMX
-      os: linux
+    - ${{ if eq(parameters.run_py2_tests, 'true') }}:
+      - checkName: tokumx
+        displayName: TokuMX
+        os: linux
     - checkName: tomcat
       displayName: Tomcat
       os: linux

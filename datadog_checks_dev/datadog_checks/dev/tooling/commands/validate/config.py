@@ -9,13 +9,13 @@ from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERIT
 from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
 from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer
 
-from ....utils import basepath, file_exists, path_join, read_file, write_file
+from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ...testing import process_checks_option
 from ...utils import (
     complete_valid_checks,
     get_config_files,
     get_config_spec,
     get_data_directory,
-    get_valid_checks,
     get_version_string,
     load_manifest,
 )
@@ -25,6 +25,8 @@ FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
 
+TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
@@ -32,20 +34,23 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def config(ctx, check, sync, verbose):
-    """Validate default configuration files."""
+    """Validate default configuration files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
     repo_choice = ctx.obj['repo_choice']
-    if check:
-        checks = [check]
-    elif repo_choice == 'agent':
+    if repo_choice == 'agent':
         checks = ['agent']
     else:
-        checks = sorted(get_valid_checks())
+        checks = process_checks_option(check, source='valid_checks')
 
     files_failed = {}
     files_warned = {}
     file_counter = []
 
-    echo_waiting('Validating default configuration files...')
+    echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
         check_display_queue = []
 
@@ -156,9 +161,9 @@ def validate_default_template(spec_file):
         return True
 
     for line in spec_file.split('\n'):
-        if any(template in line for template in ['init_config/default', 'init_config/openmetrics', 'init_config/jmx']):
+        if any("init_config/{}".format(template) in line for template in TEMPLATES):
             init_config_default = True
-        if any(template in line for template in ['instances/default', 'instances/openmetrics', 'instances/jmx']):
+        if any("instances/{}".format(template) in line for template in TEMPLATES):
             instances_default = True
 
         if instances_default and init_config_default:

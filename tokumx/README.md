@@ -12,7 +12,7 @@ This check collects TokuMX metrics, including:
 
 ### Installation
 
-The TokuMX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your TokuMX servers.
+The TokuMX check is included in the [Datadog Agent][2] package for Agent versions <=6.x, so you don't need to install anything else on your TokuMX servers.
 
 ### Configuration
 

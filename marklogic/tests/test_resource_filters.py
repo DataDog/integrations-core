@@ -93,19 +93,19 @@ def test_get_resources_to_monitor():
     }
 
     # No exclude list
-    check.config.resource_filters['excluded'] = []
+    check._config.resource_filters['excluded'] = []
     filtered_res = check.get_resources_to_monitor()
     assert filtered_res == complete_filtered
 
     # Useless exclude list
-    check.config.resource_filters['excluded'] = check.config.build_resource_filters(
+    check._config.resource_filters['excluded'] = check._config.build_resource_filters(
         [{'resource_type': 'forest', 'pattern': 'Security', 'group': 'Default'}]
     )['excluded']
     filtered_res = check.get_resources_to_monitor()
     assert filtered_res == complete_filtered
 
     # No include list
-    check.config.resource_filters['included'] = []
+    check._config.resource_filters['included'] = []
     filtered_res = check.get_resources_to_monitor()
     assert filtered_res == {
         'forest': [],

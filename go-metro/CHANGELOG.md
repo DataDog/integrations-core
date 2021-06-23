@@ -1,5 +1,9 @@
 # CHANGELOG - go-metro
 
+## 1.3.1 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.3.0 / 2020-12-11
 
 * [Added] Add config specs. See [#8005](https://github.com/DataDog/integrations-core/pull/8005).

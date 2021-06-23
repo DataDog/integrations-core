@@ -4,7 +4,7 @@ files:
     options:
       - template: init_config
         options:
-          - template: init_config/openmetrics
+          - template: init_config/openmetrics_legacy
       - template: instances
         options:
           - name: edge_hub_prometheus_url
@@ -21,6 +21,6 @@ files:
             value:
               type: string
               example: http://edgeAgent:9600/metrics
-          - template: instances/openmetrics
+          - template: instances/openmetrics_legacy
             overrides:
               prometheus_url.hidden: true

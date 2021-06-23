@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
+    'consul_client_rpc': 'client.rpc',
+    'consul_client_rpc_failed': 'client.rpc.failed',
     'consul_memberlist_degraded': 'memberlist.degraded',
     'consul_memberlist_gossip': 'memberlist.gossip',
     'consul_memberlist_health_score': 'memberlist.health.score',
@@ -21,6 +23,7 @@ METRIC_MAP = {
     'consul_raft_commitTime': 'raft.commitTime',
     'consul_raft_leader_dispatchLog': 'raft.leader.dispatchLog',
     'consul_raft_leader_lastContact': 'raft.leader.lastContact',
+    'consul_runtime_gc_pause_ns': 'runtime.gc_pause_ns',
     'consul_serf_events': 'serf.events',
     'consul_serf_coordinate_adjustment_ms': 'serf.coordinate.adjustment_ms',
     'consul_serf_member_flap': 'serf.member.flap',

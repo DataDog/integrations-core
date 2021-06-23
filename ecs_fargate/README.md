@@ -50,14 +50,14 @@ The instructions below show you how to configure the task using the [AWS CLI too
 11. Scroll down to the **Advanced container configuration** section and enter `10` in **CPU units**.
 12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][5] as the value. _If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][6]._
 13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
-14. (Optional) If you use datadog.eu, add another environment variable using the **Key** `DD_SITE` and the value `datadoghq.eu`.
+14. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
 15. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 16. Click **Create** to create the task definition.
 
 ##### AWS CLI
 
 1. Download [datadog-agent-ecs-fargate][8]. **Note**: If you are using IE, this may download as gzip file, which contains the JSON file mentioned below.**
-2. Update the JSON with a **TASK_NAME** and your [Datadog API Key][5]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
+2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][5], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 4. Execute the following command to register the ECS task definition:
 
@@ -171,6 +171,15 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 #### Other environment variables
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][15] page. **Note**: Some variables are not be available for Fargate.
+
+
+| Environment Variable               | Description                                    |
+|------------------------------------|------------------------------------------------|
+| `DD_DOCKER_LABELS_AS_TAGS`         | Extract docker container labels                |
+| `DD_DOCKER_ENV_AS_TAGS`            | Extract docker container environment variables |
+| `DD_KUBERNETES_POD_LABELS_AS_TAGS` | Extract pod labels                             |
+| `DD_CHECKS_TAG_CARDINALITY`        | Add tags to check metrics                      |
+| `DD_DOGSTATSD_TAG_CARDINALITY`     | Add tags to custom metrics                     |
 
 For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your Docker container labels. This requires you to add the appropriate labels to your other Docker containers. Labels can be added directly in the [task definition][16].
 
@@ -324,7 +333,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Trace Collection
 
-1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings.
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 
 2. [Instrument your application][32] based on your setup.
 
@@ -354,6 +363,9 @@ Need help? Contact [Datadog support][19].
 - Blog post: [Monitor AWS Fargate applications with Datadog][34]
 - FAQ: [Integration Setup for ECS Fargate][7]
 - Blog post: [Monitor your Fargate container logs with FireLens and Datadog][24]
+- Blog post: [Key metrics for monitoring AWS Fargate][38]
+- Blog post: [How to collect metrics and logs from AWS Fargate workloads][39]
+- Blog post: [AWS Fargate monitoring with Datadog][40]
 
 [1]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
@@ -391,3 +403,6 @@ Need help? Contact [Datadog support][19].
 [35]: https://aws.amazon.com/cloudformation/
 [36]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [37]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-secret.html
+[38]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/

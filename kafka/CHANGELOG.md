@@ -1,5 +1,23 @@
 # CHANGELOG - kafka
 
+## 2.7.0 / 2021-05-28
+
+* [Added] Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+
+## 2.6.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8941](https://github.com/DataDog/integrations-core/pull/8941).
+
+## 2.5.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.5.0 / 2021-01-25 / Agent 7.26.0
+
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+
 ## 2.4.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).

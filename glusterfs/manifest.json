@@ -18,10 +18,11 @@
     "gluster"
   ],
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "glusterfs",
   "assets": {
     "configuration": {
@@ -33,9 +34,13 @@
     "monitors": {
       "brick status": "assets/monitors/brick_status.json"
     },
-    "saved_views": {},
+    "saved_views": {
+      "glusterfs_processes": "assets/saved_views/glusterfs_processes.json"
+    },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "glusterfs"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

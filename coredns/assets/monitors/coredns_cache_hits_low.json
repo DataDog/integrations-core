@@ -1,0 +1,32 @@
+{
+	"name": "[CoreDNS] Cache hits count is low",
+	"type": "query alert",
+	"query": "avg(last_4h):anomalies(avg:coredns.cache_hits_count{*}.as_count(), 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+	"message": "The number of cache hits is lower than usual",
+	"tags": [
+		"integration:coredns"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"threshold_windows": {
+			"trigger_window": "last_15m",
+			"recovery_window": "last_15m"
+		}
+	},
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when the number of cache hits is lower than usual."
+    }
+}

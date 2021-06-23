@@ -1,5 +1,27 @@
 # CHANGELOG - Vertica
 
+## 2.1.1 / 2021-06-07
+
+* [Fixed] Fix required values in vertica. See [#9479](https://github.com/DataDog/integrations-core/pull/9479).
+
+## 2.1.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9003](https://github.com/DataDog/integrations-core/pull/9003).
+
+## 2.0.2 / 2021-04-19 / Agent 7.28.0
+
+* [Fixed] Fix logs section in example config file. See [#8876](https://github.com/DataDog/integrations-core/pull/8876).
+
+## 2.0.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.0.0 / 2021-01-25 / Agent 7.26.0
+
+* [Added] Update Vertica to use use_tls config. See [#8250](https://github.com/DataDog/integrations-core/pull/8250).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+* [Changed] Update Vertica TLS implementation with in-house TLS library. See [#8228](https://github.com/DataDog/integrations-core/pull/8228).
+
 ## 1.9.0 / 2020-12-11 / Agent 7.25.0
 
 * [Added] Add option to limit metric collection. See [#7997](https://github.com/DataDog/integrations-core/pull/7997).

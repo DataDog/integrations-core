@@ -34,7 +34,7 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
 
 ##### Connect Airflow to DogStatsD
 
-Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics:
+Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflow `statsd` feature to collect metrics. For more information about the metrics reported by the Airflow version that is being used, and about the additional options available in Airflow, see the [Airflow documentation][16].
 
 **Note**: Presence or absence of StatsD metrics reported by Airflow might vary depending on the Airflow Executor used. For example: `airflow.ti_failures/successes, airflow.operator_failures/successes, airflow.dag.task.duration` are [not reported for `KubernetesExecutor`][13].
 
@@ -70,6 +70,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.job.end"
            tags:
              job_name: "$1"
+         - match: "airflow.*_heartbeat_failure"
+           name: airflow.job.heartbeat.failure
+           tags:
+             job_name: "$1"
          - match: "airflow.operator_failures_*"
            name: "airflow.operator_failures"
            tags:
@@ -93,6 +97,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
            name: "airflow.dag.loading_duration"
            tags:
              dag_file: "$1"
+         - match: "airflow.dagrun.*.first_task_scheduling_delay"
+           name: "airflow.dagrun.first_task_scheduling_delay"
+           tags:
+             dag_id: "$1"
          - match: "airflow.pool.open_slots.*"
            name: "airflow.pool.open_slots"
            tags:
@@ -268,7 +276,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 |----------------------|-----------------------|
 | `<INTEGRATION_NAME>` | `airflow`             |
 | `<INIT_CONFIG>`      | blank or `{}`         |
-| `<INSTANCE_CONFIG>`  | `{"url": "%%host%%"}` |
+| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%"}` |
 
 ##### Log collection
 
@@ -337,8 +345,9 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.datadoghq.com/developers/dogstatsd/
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[11]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/_modules/airflow/providers/datadog/hooks/datadog.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample
+[16]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html

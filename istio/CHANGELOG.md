@@ -1,5 +1,34 @@
 # CHANGELOG - istio
 
+## 3.12.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+
+## 3.11.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+* [Added] Add runtime configuration validation. See [#8939](https://github.com/DataDog/integrations-core/pull/8939).
+
+## 3.10.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Add sidecar injection failed and skipped metrics. See [#8751](https://github.com/DataDog/integrations-core/pull/8751).
+
+## 3.9.1 / 2021-02-26
+
+* [Fixed] Allow custom metrics for legacy istio. See [#8700](https://github.com/DataDog/integrations-core/pull/8700).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+
+## 3.9.0 / 2021-01-24 / Agent 7.26.0
+
+* [Added] Revert "Update base package pin (#8426)". See [#8436](https://github.com/DataDog/integrations-core/pull/8436).
+* [Fixed] Remove class substitution logic for new OpenMetrics base class. See [#8435](https://github.com/DataDog/integrations-core/pull/8435).
+
+## 3.8.0 / 2021-01-22
+
+* [Added] Update base package pin. See [#8426](https://github.com/DataDog/integrations-core/pull/8426).
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 3.7.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
+from typing import Callable, Iterable, List, Sequence, Union
+
+from datadog_checks.base import AgentCheck
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -34,7 +37,15 @@ class QueryManager(object):
     ```
     """
 
-    def __init__(self, check, executor, queries=None, tags=None, error_handler=None):
+    def __init__(
+        self,
+        check,  # type: AgentCheck
+        executor,  # type:  Callable[[str], Union[Sequence, Iterable]]
+        queries=None,  # type: List[str]
+        tags=None,  # type: List[str]
+        error_handler=None,  # type: Callable[[str], str]
+        hostname=None,  # type: str
+    ):  # type: (...) -> QueryManager
         """
         - **check** (_AgentCheck_) - an instance of a Check
         - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
@@ -44,13 +55,14 @@ class QueryManager(object):
         - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
           a sanitized string, useful for scrubbing potentially sensitive information libraries emit
         """
-        self.check = check
-        self.executor = executor
+        self.check = check  # type: AgentCheck
+        self.executor = executor  # type:  Callable[[str], Union[Sequence, Iterable]]
         self.tags = tags or []
         self.error_handler = error_handler
-        self.queries = [Query(payload) for payload in queries or []]
-        custom_queries = list(self.check.instance.get('custom_queries', []))
-        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)
+        self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
+        self.hostname = hostname  # type: str
+        custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
+        use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
         # Handle overrides
         if use_global_custom_queries == 'extend':
@@ -83,7 +95,11 @@ class QueryManager(object):
     def execute(self, extra_tags=None):
         """This method is what you call every check run."""
         logger = self.check.log
-        global_tags = list(set(self.tags + (extra_tags or [])))
+        if extra_tags:
+            global_tags = list(extra_tags)
+            global_tags.extend(self.tags)
+        else:
+            global_tags = self.tags
 
         for query in self.queries:
             query_name = query.name
@@ -144,11 +160,11 @@ class QueryManager(object):
                         submission_queue.append((transformer, value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags)
+                    transformer(sources, value, tags=tags, hostname=self.hostname)
 
                 for name, transformer in query_extras:
                     try:
-                        result = transformer(sources, tags=tags)
+                        result = transformer(sources, tags=tags, hostname=self.hostname)
                     except Exception as e:
                         logger.error('Error transforming %s: %s', name, e)
                         continue

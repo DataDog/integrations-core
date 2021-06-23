@@ -4,7 +4,7 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/openmetrics
+    - template: init_config/openmetrics_legacy
   - template: instances
     options:
       - name: use_preview
@@ -12,7 +12,7 @@ files:
         value:
           type: boolean
           example: true
-      - template: instances/openmetrics
+      - template: instances/openmetrics_legacy
         overrides:
           prometheus_url.value.example: http://localhost:2379/metrics
       - name: leader_tag

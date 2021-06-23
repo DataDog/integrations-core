@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
@@ -66,10 +65,10 @@ class StatsCollector(object):
                     self._collect_queue_stats(stats)
                 else:
                     self.log.debug('Unknown/NotImplemented command: %s', header.Command)
-        except pymqi.MQMIError as err:
-            if err.reason == MQRC_NO_MSG_AVAILABLE:
-                pass
-            else:
+        except pymqi.MQMIError as e:
+            # Don't warn if no messages, see:
+            # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
                 raise
         finally:
             queue.close()

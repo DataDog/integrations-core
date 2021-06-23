@@ -218,3 +218,145 @@ IndexMetrics = {
         {'name': 'index.memory_estimate', 'type': 'gauge'},
     ],
 }
+
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatexport
+# One row per export stream per partition.
+ExportMetrics = {
+    'name': 'export',
+    'query': '@Statistics:[EXPORT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        {'name': 'partition_id', 'type': 'tag'},
+        {'name': 'export_source', 'type': 'tag'},
+        {'name': 'export_target', 'type': 'tag'},
+        {'name': 'active', 'type': 'tag'},
+        {'name': 'export.records_queued', 'type': 'monotonic_count'},
+        {'name': 'export.records_pending', 'type': 'gauge'},
+        {'name': '_source.last_queued_ms', 'type': 'source'},
+        {'name': '_source.last_acked_ms', 'type': 'source'},
+        {'name': 'export.latency.avg', 'type': 'gauge'},
+        {'name': 'export.latency.max', 'type': 'gauge'},
+        {'name': 'export.queue_gap', 'type': 'gauge'},
+        {'name': 'export_status', 'type': 'tag'},
+    ],
+    'extras': [
+        {
+            'name': '_source.last_queued_s',
+            'expression': '_source.last_queued_ms / 1000',
+        },
+        {
+            'name': 'export.time_since_last_queued',
+            'type': 'time_elapsed',
+            'format': 'unix_time',
+            'source': '_source.last_queued_s',
+        },
+        {
+            'name': '_source.last_acked_s',
+            'expression': '_source.last_acked_ms / 1000',
+        },
+        {
+            'name': 'export.time_since_last_acked',
+            'type': 'time_elapsed',
+            'format': 'unix_time',
+            'source': '_source.last_acked_s',
+        },
+    ],
+}
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatimport
+# One row per import stream per server.
+ImportMetrics = {
+    'name': 'import',
+    'query': '@Statistics:[IMPORT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        {'name': 'importer_name', 'type': 'tag'},
+        {'name': 'procedure_name', 'type': 'tag'},
+        {'name': 'import.successes', 'type': 'monotonic_gauge'},
+        {'name': 'import.failures', 'type': 'monotonic_gauge'},
+        {'name': 'import.outstanding_requests', 'type': 'gauge'},
+        {'name': 'import.retries', 'type': 'monotonic_gauge'},
+    ],
+}
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatqueue
+# One row per partition and host listing the current state of the process queue.
+QueueMetrics = {
+    'name': 'queue',
+    'query': '@Statistics:[QUEUE]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        {'name': 'queue.current_depth', 'type': 'gauge'},
+        # The next metric is the number of tasks that left the queue in the past 5 seconds.
+        # We compute a rate by dividing this value by 5.
+        {'name': '_source.poll_count', 'type': 'source'},
+        {'name': 'queue.avg_wait', 'type': 'gauge'},
+        {'name': 'queue.max_wait', 'type': 'gauge'},
+    ],
+    'extras': [{'name': 'queue.poll_count_per_sec', 'expression': '_source.poll_count / 5.0', 'submit_type': 'gauge'}],
+}
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatidletime
+# One row per execution site and host.
+IdleTimeMetrics = {
+    'name': 'idletime',
+    'query': '@Statistics:[IDLETIME]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'host_id', 'type': 'tag'},
+        {'name': 'voltdb_hostname', 'type': 'tag'},
+        {'name': 'site_id', 'type': 'tag'},
+        {'name': 'idletime.wait', 'type': 'monotonic_gauge'},
+        {'name': 'idletime.wait.pct', 'type': 'gauge'},
+        {'name': 'idletime.avg_wait', 'type': 'gauge'},
+        {'name': 'idletime.min_wait', 'type': 'gauge'},
+        {'name': 'idletime.max_wait', 'type': 'gauge'},
+        {'name': 'idletime.stddev', 'type': 'gauge'},
+    ],
+}
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureoutput
+# One row per procedure, summarized accross the cluster.
+ProcedureOutputMetrics = {
+    'name': 'procedureoutput',
+    'query': '@Statistics:[PROCEDUREOUTPUT]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'procedure', 'type': 'tag'},
+        {'name': 'procedureoutput.weighted_perc', 'type': 'gauge'},
+        {'name': 'procedureoutput.invocations', 'type': 'monotonic_gauge'},
+        {'name': 'procedureoutput.min_result_size', 'type': 'gauge'},
+        {'name': 'procedureoutput.max_result_size', 'type': 'gauge'},
+        {'name': 'procedureoutput.avg_result_size', 'type': 'gauge'},
+        {'name': 'procedureoutput.total_result_size', 'type': 'gauge'},
+    ],
+}
+
+
+# See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureprofile
+# One row per procedure, summarized accross the cluster.
+ProcedureProfileMetrics = {
+    'name': 'procedureprofile',
+    'query': '@Statistics:[PROCEDUREPROFILE]',
+    'columns': [
+        None,  # TIMESTAMP
+        {'name': 'procedure', 'type': 'tag'},
+        {'name': 'procedureprofile.weighted_perc', 'type': 'gauge'},
+        {'name': 'procedureprofile.invocations', 'type': 'monotonic_gauge'},
+        {'name': 'procedureprofile.avg_time', 'type': 'gauge'},
+        {'name': 'procedureprofile.min_time', 'type': 'gauge'},
+        {'name': 'procedureprofile.max_time', 'type': 'gauge'},
+        {'name': 'procedureprofile.aborts', 'type': 'monotonic_gauge'},
+        {'name': 'procedureprofile.failures', 'type': 'monotonic_gauge'},
+    ],
+}

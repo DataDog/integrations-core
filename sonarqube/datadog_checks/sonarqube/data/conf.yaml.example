@@ -2,12 +2,12 @@
 #
 init_config:
 
-    ## @param is_jmx - boolean - required
+    ## @param is_jmx - boolean - optional - default: false
     ## Whether or not this file is a configuration for a JMX integration.
     #
-    is_jmx: false
+    # is_jmx: false
 
-    ## @param collect_default_metrics - boolean - required
+    ## @param collect_default_metrics - boolean - optional - default: false
     ## Whether or not the check should collect all default metrics.
     #
     collect_default_metrics: true
@@ -20,7 +20,7 @@ init_config:
     ##                       jvm.gc.major_collection_time
     ## The default value is false to ensure backward compatibility.
     #
-    # new_gc_metrics: false
+    new_gc_metrics: true
 
     ## @param service_check_prefix - string - optional
     ## Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
@@ -87,9 +87,12 @@ instances:
 
   -
     ## @param web_endpoint - string - optional
-    ## The SonarQube web endpoint which should expose its API at `/api`.
+    ## The SonarQube web endpoint which should expose its API at `/api`. For example:
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ##   web_endpoint: http://<WEB_ENDPOINT>:<PORT>
+    ##
+    ## NOTE: This only takes effect when `is_jmx` is set to `false` and is required for all
+    ## API metrics.
     #
     # web_endpoint: <WEB_ENDPOINT>
 
@@ -121,13 +124,14 @@ instances:
     # default_exclude: []
 
     ## @param components - mapping - optional
-    ## The components for which metrics should be collected. Each object may override the default options.
-    ## For example:
+    ## The components for which metrics should be collected. Each object may override the default
+    ## options. For example, the following will gather all default metrics for "some-project",
+    ## and only what is included/excluded for "another-project":
     ##
     ##   components:
-    ##     default-component:
     ##     some-project:
-    ##       tag: project
+    ##     another-project:
+    ##       tag: project-2
     ##       include:
     ##         - issues.
     ##         - maintainability.
@@ -135,27 +139,28 @@ instances:
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ## NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true`
+    ## or `false.
     #
     # components: {}
 
-    ## @param host - string - required
+    ## @param host - string - optional
     ## JMX hostname to connect to.
     #
-    host: <HOST>
+    # host: <HOST>
 
-    ## @param port - integer - required
+    ## @param port - integer - optional
     ## JMX port to connect to.
     #
-    port: <PORT>
+    # port: <PORT>
 
     ## @param user - string - optional
-    ## User to use when connecting to JMX.
+    ## User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # user: <USER>
 
     ## @param password - string - optional
-    ## Password to use when connecting to JMX or HTTP (depending on the value of `is_jmx`).
+    ## Password to use when connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # password: <PASSWORD>
 

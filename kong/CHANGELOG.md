@@ -1,5 +1,20 @@
 # CHANGELOG - kong
 
+## 1.14.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] [OpenMetricsV2] Add an option to send sum and count information when using distribution metrics. See [#9301](https://github.com/DataDog/integrations-core/pull/9301).
+
+## 1.13.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add new implementation based on the official Prometheus plugin. See [#9031](https://github.com/DataDog/integrations-core/pull/9031).
+* [Fixed] Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).
+* [Fixed] Bump minimum base package version. See [#9096](https://github.com/DataDog/integrations-core/pull/9096).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.12.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

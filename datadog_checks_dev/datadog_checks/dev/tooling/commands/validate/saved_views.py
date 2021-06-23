@@ -5,8 +5,9 @@ import json
 
 import click
 
-from ...utils import complete_valid_checks, get_assets_from_manifest, get_valid_integrations, load_saved_views
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_assets_from_manifest, load_saved_views
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
 
@@ -14,9 +15,9 @@ OPTIONAL_HEADERS = {'options', 'timerange', 'visible_facets'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_TYPES = {'logs', 'trace'}
+VALID_TYPES = {'logs', 'trace', 'process'}
 
-VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces'}
+VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces', 'process_overview'}
 
 NO_OPTIONS_PAGES = {'insights', 'patterns', 'traces'}
 
@@ -32,26 +33,24 @@ STREAM_OPTIONS = {
 
 ANALYTICS_OPTIONS = {"aggregations", "group_bys", "limit", "order", "step_ms", "widget"}
 
+PROCESS_OPTIONS = {"sort", "graph_options", "view_options", "filter", "selected_top_graph", "enabled_columns"}
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate saved view files')
-@click.argument('integration', autocompletion=complete_valid_checks, required=False)
-def saved_views(integration):
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def saved_views(check):
     """Validates saved view files
 
-    If `check` is specified, only the check will be validated,
-    otherwise all saved views files in the repo will be.
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
     """
     errors = False
-    all_saved_views = {}
-    if integration:
-        all_saved_views[integration], _ = get_assets_from_manifest(integration, 'saved_views')
-    else:
-        integrations = sorted(get_valid_integrations())
-        all_saved_views = {}
-        for integration in integrations:
-            all_saved_views[integration], _ = get_assets_from_manifest(integration, 'saved_views')
 
-    for integration, saved_views in all_saved_views.items():
+    integrations = process_checks_option(check, source='integrations')
+    echo_info(f"Validating saved views for {len(integrations)} checks ...")
+
+    for integration in integrations:
+        saved_views, _ = get_assets_from_manifest(integration, 'saved_views')
 
         for saved_view in saved_views:
 
@@ -113,6 +112,13 @@ def saved_views(integration):
                 echo_failure(
                     f"{integration} saved view ({view['name']}) has an invalid options "
                     f"for page `analytics`: {view_options_set}"
+                )
+
+            elif view_page == "process_overview" and not view_options_set.issubset(PROCESS_OPTIONS):
+                errors = True
+                echo_failure(
+                    f"{integration} saved view ({view['name']}) has an invalid options "
+                    f"for page `process_overview`: {view_options_set}"
                 )
 
             elif view_page in NO_OPTIONS_PAGES and view_options:

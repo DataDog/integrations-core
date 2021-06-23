@@ -1,5 +1,26 @@
 # CHANGELOG - vsphere
 
+## 5.10.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9005](https://github.com/DataDog/integrations-core/pull/9005).
+* [Added] Use new REST API when possible. See [#9293](https://github.com/DataDog/integrations-core/pull/9293).
+* [Fixed] Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+
+## 5.9.0 / 2021-04-01 / Agent 7.28.0
+
+* [Added] Add rest_api_options to expose all RequestsWrapper options. See [#9070](https://github.com/DataDog/integrations-core/pull/9070).
+* [Fixed] Tag collection only available from vSphere 6.5. See [#8864](https://github.com/DataDog/integrations-core/pull/8864).
+
+## 5.8.1 / 2021-02-23 / Agent 7.27.0
+
+* [Fixed] Add `vsphere_cluster` tag from host parent. See [#8674](https://github.com/DataDog/integrations-core/pull/8674).
+
+## 5.8.0 / 2021-02-12
+
+* [Added] Support filtering by tags set by integration. See [#8603](https://github.com/DataDog/integrations-core/pull/8603).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 5.7.1 / 2020-10-31 / Agent 7.24.0
 
 * [Fixed] Re-add empty_default_hostname to configuration by default. See [#7732](https://github.com/DataDog/integrations-core/pull/7732).

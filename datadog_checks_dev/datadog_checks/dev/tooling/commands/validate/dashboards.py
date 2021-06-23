@@ -6,7 +6,8 @@ import json
 import click
 
 from ....utils import read_file
-from ...utils import get_assets_from_manifest, get_valid_integrations
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_assets_from_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
@@ -28,13 +29,20 @@ def _is_dashboard_format(payload):
 
 
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
-def dashboards():
-    """Validate all Dashboard definition files."""
-    echo_info("Validating all Dashboard definition files...")
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def dashboards(check):
+    """Validate all Dashboard definition files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in sorted(get_valid_integrations()):
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating Dashboard definition files for {len(checks)} checks...")
+
+    for check_name in checks:
         display_queue = []
         file_failed = False
 

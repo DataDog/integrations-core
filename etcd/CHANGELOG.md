@@ -1,5 +1,13 @@
 # CHANGELOG - etcd
 
+## 2.7.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
+## 2.6.1 / 2021-01-25 / Agent 7.26.0
+
+* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+
 ## 2.6.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).

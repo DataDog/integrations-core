@@ -81,7 +81,7 @@ def test_unsafe():
         yaml.dump_all([dummy], stream=f)
         f.seek(0)  # rewind
 
-        doc_unsafe = yaml.load(f)
+        doc_unsafe = yaml.load(f, Loader=yaml.Loader)
         assert type(doc_unsafe) is Dummy
 
         monkey_patch_pyyaml()

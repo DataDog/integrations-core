@@ -139,3 +139,7 @@ def get_integration_changelog(check):
     Return the full path to the integration changelog.
     """
     return os.path.join(get_root(), check, 'CHANGELOG.md')
+
+
+def get_license_attribution_file():
+    return os.path.join(get_root(), 'LICENSE-3rdparty.csv')

@@ -31,3 +31,22 @@ SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+
+SQL_SERVER_ID_AWS_AURORA = """\
+SHOW VARIABLES LIKE 'aurora_server_id'"""
+
+SQL_REPLICATION_ROLE_AWS_AURORA = """\
+SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
+FROM information_schema.replica_host_status
+WHERE server_id = @@aurora_server_id"""
+
+
+def show_replica_status_query(version, is_mariadb, channel=''):
+    if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
+        base_query = "SHOW REPLICA STATUS"
+    else:
+        base_query = "SHOW SLAVE STATUS"
+    if channel and not is_mariadb:
+        return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
+    else:
+        return "{0};".format(base_query)

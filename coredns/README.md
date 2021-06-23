@@ -6,38 +6,149 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying these instructions.
-
 ### Installation
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
 ### Configuration
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Docker" xxx -->
+#### Docker
 
-#### Containerized
+To configure this check for an Agent running on a container:
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+##### Metric collection
 
-#### Metric Collection
+Set [Autodiscovery Integration Templates][9] as Docker labels on your application container:
 
-| Parameter            | Value                                                                            |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `coredns`                                                                        |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                    |
-| `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}` |
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["coredns"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
+```
 
-**Note:**
+**Notes**:
 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+
+Then, set [Log Integrations][11] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"coredns","service":"<SERVICE_NAME>"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][13].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: coredns
+  annotations:
+    ad.datadoghq.com/coredns.check_names: '["coredns"]'
+    ad.datadoghq.com/coredns.init_configs: '[{}]'
+    ad.datadoghq.com/coredns.instances: |
+      [
+        {
+          "prometheus_url": "http://%%host%%:9153/metrics", 
+          "tags": ["dns-pod:%%host%%"]
+        }
+      ]
+  labels:
+    name: coredns
+spec:
+  containers:
+    - name: coredns
+```
+
+**Notes**:
+
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
+- The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
+
+Then, set [Log Integrations][15] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][16].
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: coredns
+  annotations:
+    ad.datadoghq.com/coredns.logs: '[{"source": "coredns", "service": "<SERVICE_NAME>"}]'
+  labels:
+    name: coredns
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][17] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "coredns",
+    "image": "coredns:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"coredns\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"prometheus_url\":\"http://%%host%%:9153/metrics\", \"tags\":[\"dns-pod:%%host%%\"]}]"
+    }
+  }]
+}
+```
+
+**Notes**:
+
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
+- The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
+
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
-| Parameter      | Value                                     |
-|----------------|-------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "coredns", "service": "<SERVICE_NAME>"}` |
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][18].
+
+Then, set [Log Integrations][19] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "coredns",
+    "image": "coredns:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"coredns\",\"service\":\"<SERVICE_NAME>\"}]"
+    }
+  }]
+}
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -75,3 +186,13 @@ for more details about how to test and develop Agent based integrations.
 [6]: http://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
+[15]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=kubernetes#examples---datadog-redis-integration
+[16]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file
+[17]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
+[18]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[19]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations

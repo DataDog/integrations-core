@@ -70,7 +70,7 @@
       "id": 2,
       "definition": {
         "type": "image",
-        "url": "https://cri-o.io/logo/crio-logo.svg",
+        "url": "/static/images/logos/cri-o_small.svg",
         "sizing": "fit"
       },
       "layout": {

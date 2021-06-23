@@ -1,5 +1,23 @@
 # CHANGELOG - yarn
 
+## 1.19.1 / 2021-06-07
+
+* [Fixed] Remove required when there are default values. See [#9475](https://github.com/DataDog/integrations-core/pull/9475).
+
+## 1.19.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9009](https://github.com/DataDog/integrations-core/pull/9009).
+
+## 1.18.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Rename cluster_name tag to yarn_cluster. See [#8579](https://github.com/DataDog/integrations-core/pull/8579).
+* [Added] Yarn config option to disable node metrics collection. See [#8591](https://github.com/DataDog/integrations-core/pull/8591).
+
+## 1.17.1 / 2021-02-09
+
+* [Fixed] Avoid failing on KeyError. See [#8563](https://github.com/DataDog/integrations-core/pull/8563).
+* [Fixed] Bump minimum package. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.17.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

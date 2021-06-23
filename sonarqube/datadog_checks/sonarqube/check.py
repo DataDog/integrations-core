@@ -198,4 +198,9 @@ class SonarqubeCheck(AgentCheck):
 
     @staticmethod
     def is_valid_metric(metric):
-        return not metric['hidden'] and metric['type'] in NUMERIC_TYPES
+        return (
+            not metric['hidden']
+            and metric['type'] in NUMERIC_TYPES
+            # https://github.com/DataDog/integrations-core/pull/8552
+            and not metric['key'].startswith('new_')
+        )

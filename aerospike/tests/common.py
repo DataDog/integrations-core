@@ -3,13 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-HOST = get_docker_hostname()
+# from datadog_checks.dev import get_docker_hostname
+# HOST = get_docker_hostname()
+# get_docker_hostname value value causes socket error on azure CI, so we have
+# to hardcode the ip 127.0.0.1 to make it work.
+# get_docker_hostname is still useful to test locally.
+HOST = "127.0.0.1"
 PORT = 3000
+VERSION = os.environ.get('AEROSPIKE_VERSION')
 
 NAMESPACE_METRICS = [
     'objects',
@@ -19,14 +23,27 @@ NAMESPACE_METRICS = [
     'tombstones',
     'retransmit_all_batch_sub_dup_res',
     'truncate_lut',
-    'tps.write',
-    'tps.read',
     'ops_sub_write_success',
 ]
 
-SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
+TPS_METRICS = [
+    'tps.write',
+    'tps.read',
+]
 
-ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
+LEGACY_SET_METRICS = [
+    'tombstones',
+    'memory_data_bytes',
+    'truncate_lut',
+    'objects',
+    'stop_writes_count',
+    'disable_eviction',
+]
+
+SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
+SET_METRICS.extend(LEGACY_SET_METRICS)
+
+ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
 STATS_METRICS = [
     'cluster_size',
@@ -49,6 +66,24 @@ LAZY_METRICS = [
     'aerospike.namespace.latency.batch_index_over_8ms',
     'aerospike.namespace.latency.batch_index_over_1ms',
     'aerospike.namespace.latency.batch_index_ops_sec',
+]
+
+LATENCIES_METRICS = [
+    'aerospike.namespace.latency.read_over_1ms',
+    'aerospike.namespace.latency.read_over_8ms',
+    'aerospike.namespace.latency.read_over_64ms',
+    'aerospike.namespace.latency.read',
+    'aerospike.namespace.latency.read_ops_sec',
+    'aerospike.namespace.latency.write_ops_sec',
+    'aerospike.namespace.latency.write_over_1ms',
+    'aerospike.namespace.latency.write_over_64ms',
+    'aerospike.namespace.latency.write',
+    'aerospike.namespace.latency.write_over_8ms',
+    'aerospike.namespace.latency.batch_index_ops_sec',
+    'aerospike.namespace.latency.batch_index_over_1ms',
+    'aerospike.namespace.latency.batch_index_over_64ms',
+    'aerospike.namespace.latency.batch_index',
+    'aerospike.namespace.latency.batch_index_over_8ms',
 ]
 
 INSTANCE = {
@@ -80,6 +115,10 @@ MOCK_DATACENTER_METRICS = [
     'dc_as_size=2',
 ]
 
+MOCK_XDR_DATACENTER_METRICS = """
+ip-10-10-17-247.ec2.internal:3000 (10.10.17.247) returned:\n
+lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered_out=0;retry_no_node=0;retry_conn_reset=775483;retry_dest=0;recoveries=293;recoveries_pending=0;hot_keys=20291210;uncompressed_pct=0.000;compression_ratio=1.000;throughput=0;latency_ms=17;lap_us=348
+"""
 
 DATACENTER_METRICS = [
     'aerospike.datacenter.dc_timelag',
@@ -97,4 +136,25 @@ DATACENTER_METRICS = [
     'aerospike.datacenter.dc_size',
     'aerospike.datacenter.dc_as_open_conn',
     'aerospike.datacenter.dc_as_size',
+]
+
+XDR_DC_METRICS = [
+    'aerospike.xdr_dc.lag',
+    'aerospike.xdr_dc.in_queue',
+    'aerospike.xdr_dc.in_progress',
+    'aerospike.xdr_dc.success',
+    'aerospike.xdr_dc.abandoned',
+    'aerospike.xdr_dc.not_found',
+    'aerospike.xdr_dc.filtered_out',
+    'aerospike.xdr_dc.retry_no_node',
+    'aerospike.xdr_dc.retry_conn_reset',
+    'aerospike.xdr_dc.retry_dest',
+    'aerospike.xdr_dc.recoveries',
+    'aerospike.xdr_dc.recoveries_pending',
+    'aerospike.xdr_dc.hot_keys',
+    'aerospike.xdr_dc.uncompressed_pct',
+    'aerospike.xdr_dc.compression_ratio',
+    'aerospike.xdr_dc.throughput',
+    'aerospike.xdr_dc.latency_ms',
+    'aerospike.xdr_dc.lap_us',
 ]

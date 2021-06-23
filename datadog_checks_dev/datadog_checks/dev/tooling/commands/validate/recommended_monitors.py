@@ -8,12 +8,13 @@ import os
 import click
 
 from ....utils import read_file
-from ...utils import get_assets_from_manifest, get_valid_integrations, load_manifest
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_assets_from_manifest, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
-ALLOWED_MONITOR_TYPES = ['metric alert', 'query alert', 'event alert', 'service check']
+ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
 
 
 @click.command(
@@ -21,13 +22,21 @@ ALLOWED_MONITOR_TYPES = ['metric alert', 'query alert', 'event alert', 'service 
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate recommended monitor definition JSON files',
 )
-def recommended_monitors():
-    """Validate all recommended monitors definition files."""
-    echo_info("Validating all recommended monitors...")
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def recommended_monitors(check):
+    """Validate all recommended monitors definition files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating recommended monitors for {len(checks)} checks ...")
+
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in sorted(get_valid_integrations()):
+    for check_name in checks:
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)

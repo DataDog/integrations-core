@@ -6,7 +6,7 @@
             "id": 0,
             "definition": {
                 "type": "image",
-                "url": "/static/images/saas_logos/bot/hivemq@2x.png",
+                "url": "/static/images/logos/hivemq_small.svg",
                 "sizing": "zoom"
             },
             "layout": {

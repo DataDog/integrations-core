@@ -9,8 +9,10 @@ from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
+from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
-from datadog_checks.mongo.common import get_state_name
+from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
+from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
@@ -88,6 +90,28 @@ def test_state_translation(check, instance):
     assert 'UNKNOWN' == get_state_name(500)
 
 
+def test_uri_fields(check, instance):
+    """
+    Unit test for functionality of parse_mongo_uri
+    """
+    server_names = (
+        (
+            "mongodb://myDBReader:D1fficultP%40ssw0rd@mongodb0.example.com:27017/?authSource=authDB",
+            (
+                "myDBReader",
+                "D1fficultP@ssw0rd",
+                None,
+                [('mongodb0.example.com', 27017)],
+                'mongodb://myDBReader:*****@mongodb0.example.com:27017/?authSource=authDB',
+                'authDB',
+            ),
+        ),
+    )
+
+    for server, expected_parse in server_names:
+        assert expected_parse == parse_mongo_uri(server)
+
+
 def test_server_uri_sanitization(check, instance):
     # Batch with `sanitize_username` set to False
     server_names = (
@@ -134,13 +158,14 @@ def test_parse_server_config(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    config = check(instance).config
+    config = check(instance)._config
     assert config.username == 'john doe'
     assert config.password == 'p@ss\\word'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
     assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz'
     assert config.auth_source == 'test'
+    assert config.do_auth is True
 
 
 def test_username_no_password(check):
@@ -152,12 +177,74 @@ def test_username_no_password(check):
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
-    config = check(instance).config
+    config = check(instance)._config
     assert config.username == 'john doe'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == ('mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz')
+    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz'
     assert config.auth_source == 'test'
+    assert config.do_auth is True
+
+
+def test_no_auth(check):
+    """Configuring the check without a username should be allowed to support mongo instances with access control
+    disabled."""
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'database': 'test',
+        'options': {'replicaSet': 'bar!baz'},  # Special character
+    }
+    config = check(instance)._config
+    assert config.username is None
+    assert config.db_name == 'test'
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?replicaSet=bar!baz"
+    assert config.auth_source == 'test'
+    assert config.do_auth is False
+
+
+def test_auth_source(check):
+    """
+    Configuring the check with authSource.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'options': {'authSource': 'authDB'},
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/?authSource=authDB"
+    assert config.auth_source == 'authDB'
+    assert config.do_auth is False
+
+
+def test_no_auth_source(check):
+    """
+    Configuring the check without authSource and without database should default authSource to 'admin'.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/"
+    assert config.auth_source == 'admin'
+    assert config.do_auth is False
+
+
+def test_no_auth_source_with_db(check):
+    """
+    Configuring the check without authSource but with database should default authSource to database.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'database': 'test',
+    }
+    config = check(instance)._config
+    assert config.hosts == ['localhost', 'localhost:27018']
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test"
+    assert config.auth_source == 'test'
+    assert config.do_auth is False
 
 
 @pytest.mark.parametrize(
@@ -201,3 +288,90 @@ def test_collector_submit_payload(check, aggregator):
     aggregator.assert_metric('mongodb.foo.x.y.zps', 1, tags, metric_type=aggregator.RATE)
     aggregator.assert_metric('mongodb.foo.bar1', 1, tags, metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
+
+
+def test_api_alibaba_mongos(aggregator):
+    log = mock.MagicMock()
+    config = MongoConfig(common.INSTANCE_BASIC, log)
+    payload = {'isMaster': {'msg': 'isdbgrid'}}
+    mocked_client = mock.MagicMock()
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        api = MongoApi(config, log)
+        deployment_type = api._get_alibaba_deployment_type()
+        assert isinstance(deployment_type, MongosDeployment)
+
+
+def test_api_alibaba_mongod_shard(aggregator):
+    log = mock.MagicMock()
+    config = MongoConfig(common.INSTANCE_BASIC, log)
+
+    payload = {
+        'isMaster': {},
+        'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
+        'shardingState': {'enabled': True},
+    }
+    mocked_client = mock.MagicMock()
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        api = MongoApi(config, log)
+        deployment_type = api._get_alibaba_deployment_type()
+        assert isinstance(deployment_type, ReplicaSetDeployment)
+        assert deployment_type.cluster_role == 'shardsvr'
+        assert deployment_type.replset_state_name == 'primary'
+        assert deployment_type.use_shards is True
+        assert deployment_type.is_primary is True
+        assert deployment_type.is_secondary is False
+        assert deployment_type.is_arbiter is False
+        assert deployment_type.replset_state == 1
+        assert deployment_type.replset_name == 'foo'
+
+
+def test_api_alibaba_configsvr(aggregator):
+    log = mock.MagicMock()
+    config = MongoConfig(common.INSTANCE_BASIC, log)
+
+    payload = {'isMaster': {}, 'replSetGetStatus': {'myState': 2, 'set': 'config', 'configsvr': True}}
+    mocked_client = mock.MagicMock()
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        api = MongoApi(config, log)
+        deployment_type = api._get_alibaba_deployment_type()
+        assert isinstance(deployment_type, ReplicaSetDeployment)
+        assert deployment_type.cluster_role == 'configsvr'
+        assert deployment_type.replset_state_name == 'secondary'
+        assert deployment_type.use_shards is True
+        assert deployment_type.is_primary is False
+        assert deployment_type.is_secondary is True
+        assert deployment_type.is_arbiter is False
+        assert deployment_type.replset_state == 2
+        assert deployment_type.replset_name == 'config'
+
+
+def test_api_alibaba_mongod(aggregator):
+    log = mock.MagicMock()
+    config = MongoConfig(common.INSTANCE_BASIC, log)
+
+    payload = {
+        'isMaster': {},
+        'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
+        'shardingState': {'enabled': False},
+    }
+    mocked_client = mock.MagicMock()
+    mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        api = MongoApi(config, log)
+        deployment_type = api._get_alibaba_deployment_type()
+        assert isinstance(deployment_type, ReplicaSetDeployment)
+        assert deployment_type.cluster_role is None
+        assert deployment_type.replset_state_name == 'primary'
+        assert deployment_type.use_shards is False
+        assert deployment_type.is_primary is True
+        assert deployment_type.is_secondary is False
+        assert deployment_type.is_arbiter is False
+        assert deployment_type.replset_state == 1
+        assert deployment_type.replset_name == 'foo'

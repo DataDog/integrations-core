@@ -193,6 +193,11 @@ def test_parse_metrics(lcd_mock, caplog):
     assert column_tag.column == 'baz'
     assert column_tag.parsed_metric_tag.name == 'test'
 
+    # Invalid extract value pattern
+    metrics = [{"MIB": "foo_mib", "symbol": {"OID": "1.2.3", "name": "hey", "extract_value": "[aa-"}}]
+    with pytest.raises(Exception, match="Failed to compile regular expression"):
+        config.parse_metrics(metrics)
+
 
 def test_ignore_ip_addresses():
     # type: () -> None

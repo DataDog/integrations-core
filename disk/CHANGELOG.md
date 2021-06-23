@@ -1,5 +1,25 @@
 # CHANGELOG - disk
 
+## 4.3.0 / 2021-03-24 / Agent 7.28.0
+
+* [Added] Log something if a disk is excluded. See [#8829](https://github.com/DataDog/integrations-core/pull/8829).
+
+## 4.2.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Report read_time and write_time as a count of millis. See [#7323](https://github.com/DataDog/integrations-core/pull/7323).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 4.1.1 / 2021-01-28 / Agent 7.26.0
+
+* [Fixed] Fix example config for `create_mounts`. See [#8480](https://github.com/DataDog/integrations-core/pull/8480).
+
+## 4.1.0 / 2021-01-25
+
+* [Added] Support network drives on Windows. See [#8273](https://github.com/DataDog/integrations-core/pull/8273).
+* [Added] Add device_label tag in addition to label tag. See [#8306](https://github.com/DataDog/integrations-core/pull/8306).
+* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+
 ## 4.0.0 / 2020-10-31 / Agent 7.24.0
 
 * [Changed] Rename whitelist/blacklist to include/exclude. See [#7627](https://github.com/DataDog/integrations-core/pull/7627).

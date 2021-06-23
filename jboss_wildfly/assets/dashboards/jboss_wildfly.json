@@ -238,7 +238,7 @@
             "definition": {
                 "sizing": "fit",
                 "type": "image",
-                "url": "/static/images/saas_logos/small/jboss_wildfly@2x.png"
+                "url": "/static/images/logos/jboss-wildfly_large.svg"
             },
             "id": 31,
             "layout": {

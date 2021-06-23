@@ -62,6 +62,8 @@ class OpenMetricsScraperMixin(object):
 
         A default mixin configuration will be returned if there is no instance.
         """
+        if 'openmetrics_endpoint' in instance:
+            raise CheckException('The setting `openmetrics_endpoint` is only available for Agent version 7 or later')
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:
@@ -315,6 +317,16 @@ class OpenMetricsScraperMixin(object):
 
         # Custom tags that will be sent with each metric
         config['custom_tags'] = instance.get('tags', [])
+
+        # Some tags can be ignored to reduce the cardinality.
+        # This can be useful for cost optimization in containerized environments
+        # when the openmetrics check is configured to collect custom metrics.
+        # Even when the Agent's Tagger is configured to add low-cardinality tags only,
+        # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
+        ignore_tags = instance.get('ignore_tags', default_instance.get('ignore_tags', []))
+        if ignore_tags:
+            ignored_tags_re = compile('|'.join(set(ignore_tags)))
+            config['custom_tags'] = [tag for tag in config['custom_tags'] if not ignored_tags_re.search(tag)]
 
         # Additional tags to be sent with each metric
         config['_metric_tags'] = []
@@ -731,6 +743,10 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
+            # check for wilcards in transformers
+            for transformer_name, transformer in iteritems(metric_transformers):
+                if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
+                    transformer(metric, scraper_config, transformer_name)
 
             # try matching wildcards
             if scraper_config['_wildcards_re'] and scraper_config['_wildcards_re'].search(metric.name):
@@ -1070,6 +1086,7 @@ class OpenMetricsScraperMixin(object):
             True,
             hostname,
             tags,
+            flush_first_value=scraper_config['_successfully_executed'],
         )
 
     def _submit_distribution_count(

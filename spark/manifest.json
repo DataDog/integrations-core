@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "spark": "assets/dashboards/spark_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "spark"
