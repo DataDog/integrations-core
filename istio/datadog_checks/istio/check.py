@@ -11,7 +11,6 @@ from .metrics import construct_metrics_config, ISTIOD_METRICS, MESH_METRICS, TYP
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
-    __NAMESPACE__ = 'istio'
 
     DEFAULT_METRIC_LIMIT = 0
 
