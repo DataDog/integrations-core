@@ -10,29 +10,33 @@ import jsonschema
 
 import yaml
 
-from ...console import CONTEXT_SETTINGS,echo_info, abort, echo_failure, echo_success
+from ...console import CONTEXT_SETTINGS, echo_info, abort, echo_failure, echo_success
 from datadog_checks.dev.tooling.commands.meta.snmp.snmp_profile_schema import get_profile_schema
 from ....constants import get_root
 from .....fs import dir_exists, path_join, read_file, file_exists
 
+
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
-@click.option('-d','--directory', help="Path to a directory of profiles to validate")
-@click.option('-v','--verbose', help="Increase verbosity of error messages", is_flag=True)
+@click.option('-d', '--directory', help="Path to a directory of profiles to validate")
+@click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
 def validate_profile(file, directory, verbose):
     profiles_list = find_profiles(file, directory)
     contents = read_profile(profiles_list)
     errors = validate_with_jsonschema(contents, verbose)
     produce_errors(errors, verbose)
 
-class Profile():
+
+class Profile:
     def __init__(self):
         self.file_path = ""
         self.errors = []
         self.invalid = False
         self.contents = ""
+
     def __repr__(self):
         return self.file_path
+
 
 def find_profiles(file, directory):
     profiles_list = []
@@ -47,14 +51,15 @@ def find_profiles(file, directory):
         return profiles_list
 
     else:
-        profiles_path = os.path.join(get_root(), "snmp","datadog_checks", "snmp","data","profiles")
-        file_extensions = [".yaml", ".yml"] #use .lower()?
+        profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
+        file_extensions = [".yaml", ".yml"]  # use .lower()?
         profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
-        profiles_path = os.path.join("dd", "integrations-core", "snmp","datadog_checks","snmp","data","profiles")
+        profiles_path = os.path.join("dd", "integrations-core", "snmp", "datadog_checks", "snmp", "data", "profiles")
         profiles_list = get_all_profiles_from_dir(profiles_path)
         return profiles_list
 
     return profiles_list
+
 
 def get_all_profiles_from_dir(directory):
     profiles_list = []
@@ -66,7 +71,7 @@ def get_all_profiles_from_dir(directory):
         abort()
     for file in dir_contents:
         profile = Profile()
-        profile.file_path = os.path.join(profiles_path,file)
+        profile.file_path = os.path.join(profiles_path, file)
         profiles_list.append(profile)
     return profiles_list
 
@@ -86,12 +91,21 @@ def read_profile(profiles_list):
             abort()
         read_profiles.append(profile)
 
-
     return read_profiles
 
 
 def validate_with_jsonschema(profiles_list, verbose):
-    schema_file = os.path.join(get_root(),"datadog_checks_dev", "datadog_checks", "dev", "tooling", "commands", "meta", "snmp","snmp_profile.json")
+    schema_file = os.path.join(
+        get_root(),
+        "datadog_checks_dev",
+        "datadog_checks",
+        "dev",
+        "tooling",
+        "commands",
+        "meta",
+        "snmp",
+        "snmp_profile.json",
+    )
     with open(schema_file, "r") as f:
         contents = f.read()
         schema = json.loads(contents)
@@ -103,10 +117,11 @@ def validate_with_jsonschema(profiles_list, verbose):
     for error in errors:
         profile.errors.append(error)
 
-    #TODO - condition if there are no errors found
+    # TODO - condition if there are no errors found
     return profiles_list
 
-def produce_errors(profiles_list,verbose):
+
+def produce_errors(profiles_list, verbose):
     error_list = []
     for profile in profiles_list:
         if profile.errors:
@@ -120,7 +135,7 @@ def produce_errors(profiles_list,verbose):
             echo_failure("Error found in profile: " + str(profile))
             for error in profile.errors:
                 yaml_error = convert_to_yaml(error.instance)
-                echo_failure("The file failed to parse near these lines: " +"\n" + yaml_error)
+                echo_failure("The file failed to parse near these lines: " + "\n" + yaml_error)
                 echo_failure(error.message)
 
                 if verbose:
@@ -129,32 +144,26 @@ def produce_errors(profiles_list,verbose):
         abort()
 
 
-
 def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error))
     yaml_error = yaml.dump(json_error, indent=2)
     return yaml_error
 
 
-
-#integrations-core validation only
-#friendlier verbose error output - what was expected - expecting this, got this instead
-
+# integrations-core validation only
+# friendlier verbose error output - what was expected - expecting this, got this instead
 
 
-
-#good condition
+# good condition
 # find errors in support cases
-#group errors by file
-#number of errors by file
+# group errors by file
+# number of errors by file
 # 0 errors found
 # fix path to jsonschema and profiles
-#check on extract tags pattern - check per dev documentation
+# check on extract tags pattern - check per dev documentation
 # features not supported in core check - name but not oid
 # https://docs.google.com/document/d/1OMMEOMuB9NWOz2uJgf89lNzudqHvQqGA-0Eeg8o81D0/edit#heading=h.klntf3xonn2j - raise warning on not supported? deprecated schema - create card
 
-#report all errors for a file together, under the same filename?
+# report all errors for a file together, under the same filename?
 # report files that passed validation
-#translate json from error message into yaml, then find in file, potentially?
-
-
+# translate json from error message into yaml, then find in file, potentially?
