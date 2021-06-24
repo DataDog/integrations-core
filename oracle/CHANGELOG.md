@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 3.3.1 / 2021-06-23
+
+* [Fixed] Dont use connection string for client. See [#9219](https://github.com/DataDog/integrations-core/pull/9219).
+
 ## 3.3.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
