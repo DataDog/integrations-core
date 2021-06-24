@@ -68,6 +68,7 @@ Returns `CRITICAL` if the Agent cannot connect to vCenter to collect metrics, ot
 ## Troubleshooting
 
 - [Can I limit the number of VMs that are pulled in via the VMWare integration?][10]
+- [My vSpehre VMs are duplicated in the Infrastructure List view][13]
 
 ## Further Reading
 
@@ -85,3 +86,4 @@ See our [blog post][11] on monitoring vSphere environments with Datadog.
 [10]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration/
 [11]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
 [12]: https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.monitoring.doc/GUID-25800DE4-68E5-41CC-82D9-8811E27924BC.html
+[13]: https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/
