@@ -82,6 +82,8 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('statement_samples', {}) or {}
+        # Options that configure how the SQL obfuscator behaves
+        self.quantize_sql_tables = instance.get('quantize_sql_tables', False)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance

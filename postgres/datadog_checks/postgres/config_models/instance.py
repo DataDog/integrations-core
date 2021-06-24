@@ -68,6 +68,7 @@ class InstanceConfig(BaseModel):
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]
     username: str
+    quantize_sql_tables: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

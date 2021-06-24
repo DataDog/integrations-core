@@ -206,10 +206,11 @@ class PostgresStatementMetrics(object):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+        obfuscate_options = {'quantize_sql_tables': self._config.quantize_sql_tables}
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], obfuscate_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
