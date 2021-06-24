@@ -384,7 +384,8 @@ class PostgresStatementSamples(object):
 
     def _collect_plan_for_statement(self, row):
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            obfuscate_options = {'quantize_sql_tables': self._config.quantize_sql_tables}
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], obfuscate_options)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
