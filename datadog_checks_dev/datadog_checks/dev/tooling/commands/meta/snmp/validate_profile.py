@@ -7,13 +7,10 @@ from os.path import isfile, join
 
 import click
 import jsonschema
-
 import yaml
 
-from ...console import CONTEXT_SETTINGS, echo_info, abort, echo_failure, echo_success
-from datadog_checks.dev.tooling.commands.meta.snmp.snmp_profile_schema import get_profile_schema
 from ....constants import get_root
-from .....fs import dir_exists, path_join, read_file, file_exists
+from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
@@ -52,9 +49,8 @@ def find_profiles(file, directory):
 
     else:
         profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
-        file_extensions = [".yaml", ".yml"]  # use .lower()?
         profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
-        profiles_path = os.path.join(get_root(),"snmp", "datadog_checks", "snmp", "data", "profiles")
+        profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
         profiles_list = get_all_profiles_from_dir(profiles_path)
         return profiles_list
 
@@ -87,7 +83,7 @@ def read_profile(profiles_list):
             echo_failure("Profile file not found, or could not be read")
             abort()
         if not file_contents:
-            echo_failure("File contents returned None: " + profile_path)
+            echo_failure("File contents returned None: " + str(profile))
             abort()
         read_profiles.append(profile)
 
@@ -148,22 +144,3 @@ def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error))
     yaml_error = yaml.dump(json_error, indent=2)
     return yaml_error
-
-
-# integrations-core validation only
-# friendlier verbose error output - what was expected - expecting this, got this instead
-
-
-# good condition
-# find errors in support cases
-# group errors by file
-# number of errors by file
-# 0 errors found
-# fix path to jsonschema and profiles
-# check on extract tags pattern - check per dev documentation
-# features not supported in core check - name but not oid
-# https://docs.google.com/document/d/1OMMEOMuB9NWOz2uJgf89lNzudqHvQqGA-0Eeg8o81D0/edit#heading=h.klntf3xonn2j - raise warning on not supported? deprecated schema - create card
-
-# report all errors for a file together, under the same filename?
-# report files that passed validation
-# translate json from error message into yaml, then find in file, potentially?
