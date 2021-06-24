@@ -37,7 +37,7 @@ class InstanceConfig(BaseModel):
     service_name: str
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
-    user: str
+    username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
