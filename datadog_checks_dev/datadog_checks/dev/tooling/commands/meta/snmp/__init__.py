@@ -7,7 +7,7 @@ from ...console import CONTEXT_SETTINGS
 from .generate_profile import generate_profile_from_mibs
 from .translate_profile import translate_profile
 from .validate_mib_filenames import validate_mib_filenames
-from .validate_profile import validate_profile
+from ....snmp_profile_validator.validate_profile import validate_profile
 
 ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, validate_profile]
 
