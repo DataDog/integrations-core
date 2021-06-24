@@ -716,13 +716,23 @@
                                 ]
                             },
                             "match": {
-                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/tag",
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/match",
                                 "type": "string",
                                 "title": "Match",
                                 "description": "Regex matching values to extract",
                                 "default": "",
                                 "examples": [
                                     "(.*)-(.*)"
+                                ]
+                            },
+                            "index": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/index",
+                                "type": "string",
+                                "title": "Index",
+                                "description": "Index",
+                                "default": "",
+                                "examples": [
+                                    "1"
                                 ]
                             },
                             "symbols": {
