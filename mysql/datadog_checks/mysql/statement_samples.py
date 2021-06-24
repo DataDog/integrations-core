@@ -461,8 +461,9 @@ class MySQLStatementSamples(object):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the digest text to match query metrics
 
+        obfuscate_options = {'quantize_sql_tables': self._config.quantize_sql_tables}
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'])
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], obfuscate_options)
             obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'])
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters

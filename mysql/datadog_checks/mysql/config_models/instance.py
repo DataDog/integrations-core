@@ -90,6 +90,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     user: Optional[str]
+    quantize_sql_tables: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

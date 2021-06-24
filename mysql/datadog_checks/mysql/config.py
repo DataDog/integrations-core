@@ -36,6 +36,8 @@ class MySQLConfig(object):
         )
         self.statement_samples_config = instance.get('statement_samples', {}) or {}
         self.min_collection_interval = instance.get('min_collection_interval', 15)
+        # Options that configure how the SQL obfuscator behaves
+        self.quantize_sql_tables = instance.get('quantize_sql_tables', False)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):
