@@ -67,7 +67,7 @@ jobs:
     parameters:
       test_run: '${{ coalesce(parameters.job_name, parameters.check) }}.windows'
       check: ${{ parameters.check }}
-      test: false
+      test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       dd_flag: ${{ parameters.ddtrace_flag }}
       benchmark: ${{ parameters.benchmark }}
