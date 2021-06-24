@@ -408,4 +408,4 @@ Need help? Contact [Datadog support][19].
 [38]: https://www.datadoghq.com/blog/aws-fargate-metrics/
 [39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
-[41]:  http://docs.datadoghq.com/integrations/eks_fargate
+[41]: http://docs.datadoghq.com/integrations/eks_fargate
