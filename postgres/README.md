@@ -43,10 +43,11 @@ Configure the following [Postgres parameters][35]. These parameters are required
 
 ### Agent Database Access
 
-The Datadog Agent requires read-only access to the database in order to collect statistics and queries.
-Connect to the **postgres** database and run the following SQL commands with superuser or a user with sufficient permissions to execute these commands. This can be done manually with [psql][43] or using any automated configuration you use for managing your databases.
+The Datadog Agent requires read-only access to the database server in order to collect statistics and queries. 
 
-For example, connect to the `postgres` database to execute the SQL commands in the following steps:
+Choose a PostgreSQL database on the database server to which the agent will connect. The agent is able to collect telemetry from all databases on the database server regardless of which one it connects to so we recommend simply using the default `postgres` database. The only reason to choose a different database is if you need to have the agent run [custom queries against data unique to that database][11].
+
+Connect to the chosen database and run the following SQL commands as a superuser (or any other user with sufficient permissions). For example, if your chosen database is `postgres` here is how to connect as the `postgres` user using [psql][43]:
  ```bash
  psql -h mydb.example.com -d postgres -U postgres
  ```
