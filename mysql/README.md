@@ -31,16 +31,16 @@ Some setup is required to begin using the MySQL integration:
 
 #### Performance schema
 
-In order to collect query metrics, samples, and execution plans for [Deep Database Monitoring](#deep-database-monitoring), the [MySQL Performance Schema][28] needs to be enabled.   
+In order to collect query metrics, samples, and execution plans for [Deep Database Monitoring](#deep-database-monitoring), the [MySQL Performance Schema][39] needs to be enabled.   
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Self-hosted" xxx -->
 
-Configure the following [Performance Schema Options][29]. They can be configured on the command-line or in option files (for example,`mysql.conf`).  
+Configure the following [Performance Schema Options][40]. They can be configured on the command-line or in option files (for example,`mysql.conf`).  
 
 | Parameter | Value | Description |
 | --- | --- | --- |
-| `performance_schema` | `ON` | Required. Enables the [Performance Schema][30]. |
+| `performance_schema` | `ON` | Required. Enables the [Performance Schema][41]. |
 | `performance-schema-consumer-events-statements-current` | `ON` | Required. Enables monitoring of currently running queries. |
 | `performance-schema-consumer-events-statements-history` | `ON` | Optional. Enables tracking recent query history per thread. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
 | `performance-schema-consumer-events-statements-history-long` | `ON` | Optional. Enables tracking of a larger number of recent queries across all threads. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
@@ -53,25 +53,25 @@ Configure the following [Performance Schema Options][29]. They can be configured
 <!-- xxz tab xxx -->
 <!-- xxx tab "Amazon RDS MySQL" xxx -->
 
-Configure the following in the [DB Parameter Group][31]:
+Configure the following in the [DB Parameter Group][42]:
 
 | Parameter | Value | Description |
 | --- | --- | --- |
-| `performance_schema` | `1` | Required. Enables the [Performance Schema][30]. |
+| `performance_schema` | `1` | Required. Enables the [Performance Schema][41]. |
 | `max_digest_length` | `4096` | Required for collection of larger queries. Increases the size of SQL digest text in `events_statements_*` tables. If left at the default value then queries longer than `1024` characters will not be collected. |
 | `performance_schema_max_digest_length` | `4096` | Must match `max_digest_length`. |
 | `performance_schema_max_sql_text_length` | `4096` | Must match `max_digest_length`. |
 
-**Note**: For Amazon RDS MySQL, there is no way to configure the `events-statements_*` consumers in the [DB Parameter Group][31] so they must enabled dynamically at runtime. See [Runtime Setup Consumers](#runtime-setup-consumers).
+**Note**: For Amazon RDS MySQL, there is no way to configure the `events-statements_*` consumers in the [DB Parameter Group][42] so they must enabled dynamically at runtime. See [Runtime Setup Consumers](#runtime-setup-consumers).
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Amazon RDS Aurora MySQL" xxx -->
 
-Configure the following in the [DB Parameter Group][32]:
+Configure the following in the [DB Parameter Group][43]:
 
 | Parameter | Value | Description |
 | --- | --- | --- |
-| `performance_schema` | `ON` | Required. Enables the [Performance Schema][30]. |
+| `performance_schema` | `ON` | Required. Enables the [Performance Schema][41]. |
 | <code style="word-break:break-all;">performance_schema_consumer_events_statements_current</code> | `ON` | Required. Enables monitoring of currently running queries. |
 | <code style="word-break:break-all;">performance_schema_consumer_events_statements_history</code> | `ON` | Optional. Enables tracking recent query history per thread. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
 | <code style="word-break:break-all;">performance_schema_consumer_events_statements_history_long</code> | `ON` | Optional. Enables tracking of a larger number of recent queries across all threads. If enabled it increases the likelihood of capturing execution details from infrequent queries. |
@@ -467,7 +467,7 @@ instances:
       enabled: true
 ```
 
-Once enabled, visit the [Databases][27] page to get started!
+Once enabled, visit the [Databases][38] page to get started!
 
 ## Data Collected
 
@@ -686,10 +686,9 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [35]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [36]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [37]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-# TODO: fix
-[27]: https://app.datadoghq.com/databases
-[28]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-quick-start.html
-[29]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-options.html
-[30]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html
-[31]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
-[32]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html
+[38]: https://app.datadoghq.com/databases
+[39]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-quick-start.html
+[40]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema-options.html
+[41]: https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html
+[42]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html
+[43]: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html
