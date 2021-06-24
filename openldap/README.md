@@ -66,7 +66,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
 #### Configure the OpenLDAP integration
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -124,7 +124,7 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][3].
 
-#<!-- xxz tab xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
