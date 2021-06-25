@@ -6,8 +6,8 @@ from collections import ChainMap
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
-from .constants import MESH_NAMESPACE, ISTIOD_NAMESPACE
-from .metrics import construct_metrics_config, ISTIOD_METRICS, MESH_METRICS, TYPE_OVERRIDES
+from .constants import ISTIOD_NAMESPACE, MESH_NAMESPACE
+from .metrics import ISTIOD_METRICS, MESH_METRICS, TYPE_OVERRIDES, construct_metrics_config
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
@@ -23,7 +23,9 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         mesh_endpoint = self.instance.get("istio_mesh_endpoint")
         istiod_endpoint = self.instance.get("istiod_endpoint")
         if not mesh_endpoint and not istiod_endpoint:
-            raise ConfigurationError("Must specify at least one of the following endpoints: `istio_mesh_endpoint` or `istiod_endpoint`.")
+            raise ConfigurationError(
+                "Must specify at least one of the following endpoints: `istio_mesh_endpoint` or `istiod_endpoint`."
+            )
 
         if mesh_endpoint:
             self.scraper_configs.append(self._generate_config(mesh_endpoint, MESH_METRICS, MESH_NAMESPACE))
@@ -31,7 +33,11 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, ISTIOD_NAMESPACE))
 
     def _generate_config(self, endpoint, metrics, namespace):
-        config = {'openmetrics_endpoint': endpoint, 'metrics': construct_metrics_config(metrics, TYPE_OVERRIDES), 'namespace': namespace}
+        config = {
+            'openmetrics_endpoint': endpoint,
+            'metrics': construct_metrics_config(metrics),
+            'namespace': namespace,
+        }
         config.update(self.instance)
         return config
 
