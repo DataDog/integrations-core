@@ -100,8 +100,6 @@ def validate_with_jsonschema(profiles_list, verbose):
         schema = json.loads(contents)
     validator = jsonschema.Draft7Validator(schema)
     for profile in profiles_list:
-        if verbose:
-            echo_info("Validating file: " + profile.file_path)
         errors = validator.iter_errors(profile.contents)
     for error in errors:
         profile.errors.append(error)
@@ -113,14 +111,12 @@ def validate_with_jsonschema(profiles_list, verbose):
 
 
 def produce_errors(profiles_list, verbose):
-    error_list = []
-    for profile in profiles_list:
-        if profile.errors:
-            error_list.append(profile)
-            profiles_list.remove(profile)
+    error_list = collect_invalid_profiles(profiles_list)
+    valid_profiles = collect_valid_profiles(profiles_list)
     if verbose:
-        for profile in profiles_list:
-            echo_success("Profile validated successfully: " + str(profile))
+        echo_info("The following profiles validated successfully: ")
+        for profile in valid_profiles:
+            echo_info(str(profile))
     if error_list:
         for profile in error_list:
             echo_failure("Error found in profile: " + str(profile))
@@ -136,10 +132,13 @@ def produce_errors(profiles_list, verbose):
 
 
 
-def remove_profiles_with_errors(profiles_list):
+def collect_invalid_profiles(profiles_list):
     invalid_profiles = [profile for profile in profiles_list if profile.valid ==False]
-
     return invalid_profiles
+
+def collect_valid_profiles(profiles_list):
+    valid_profiles = [profile for profile in profiles_list if profile.valid ==True]
+    return valid_profiles
 
 def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error))
