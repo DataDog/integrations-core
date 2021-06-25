@@ -28,7 +28,7 @@ class Profile:
     def __init__(self):
         self.file_path = ""
         self.errors = []
-        self.invalid = False
+        self.valid = True
         self.contents = ""
 
     def __repr__(self):
@@ -106,7 +106,9 @@ def validate_with_jsonschema(profiles_list, verbose):
     for error in errors:
         profile.errors.append(error)
 
-    # TODO - condition if there are no errors found
+    if profile.errors:
+        profile.valid = False
+
     return profiles_list
 
 
@@ -132,6 +134,12 @@ def produce_errors(profiles_list, verbose):
                     echo_failure(error)
         abort()
 
+
+
+def remove_profiles_with_errors(profiles_list):
+    invalid_profiles = [profile for profile in profiles_list if profile.valid ==False]
+
+    return invalid_profiles
 
 def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error))
