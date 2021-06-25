@@ -1,5 +1,5 @@
 ---
-title: Create a new integration
+title: Create a New Integration
 kind: documentation
 aliases:
   - /developers/integrations/integration_sdk/
@@ -265,7 +265,7 @@ ddev test -m integration awesome
 
 The check is almost done. Let's add the final touches by adding the integration configurations.
 
-### Create the Check assets
+### Create the check assets
 
 The set of assets created by the ddev scaffolding must be populated in order for a check to be considered for inclusion:
 
