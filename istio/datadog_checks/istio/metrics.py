@@ -315,17 +315,7 @@ ISTIOD_METRICS = {
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
 
-
-TYPE_OVERRIDES = {
-    'istio_requests': 'counter_gauge',
-    'istio_tcp_connections_closed': 'counter_gauge',
-    'istio_tcp_connections_opened': 'counter_gauge',
-    'istio_tcp_received_bytes': 'counter_gauge',
-    'istio_tcp_sent_bytes': 'counter_gauge',
-}
-
-
-def construct_metrics_config(metric_map, type_overrides):
+def construct_metrics_config(metric_map, type_overrides={}):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
         if raw_metric_name.endswith('_total'):

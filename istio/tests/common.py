@@ -4,6 +4,11 @@
 
 CHECK_NAME = 'istio'
 
+MOCK_V2_MESH_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+    'use_openmetrics': True,
+}
+
 MOCK_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
 }
