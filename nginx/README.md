@@ -104,7 +104,7 @@ Reload NGINX to enable the status or API endpoint. There's no need for a full re
 ```shell
 sudo nginx -t && sudo nginx -s reload
 ```
-<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
 The following ConfigMap defines the integration template for NGINX containers:
