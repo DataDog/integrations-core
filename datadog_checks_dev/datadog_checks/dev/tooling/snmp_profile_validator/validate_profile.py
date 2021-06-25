@@ -47,12 +47,11 @@ def find_profiles(file, directory):
         profiles_list = get_all_profiles_from_dir(directory)
         return profiles_list
 
-    else:
-        profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
-        profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
-        profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
-        profiles_list = get_all_profiles_from_dir(profiles_path)
-        return profiles_list
+    profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
+    profiles_list = [f for f in os.listdir(profiles_path) if isfile(join(profiles_path, f))]
+    profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
+    profiles_list = get_all_profiles_from_dir(profiles_path)
+    return profiles_list
 
     return profiles_list
 
