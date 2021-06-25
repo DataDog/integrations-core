@@ -6,7 +6,7 @@ import yaml
 from ..constants import get_root
 from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-#from ....snmp.datadog_checks.snmp.utils import get_profile_definition - can I do this?
+from ....snmp.datadog_checks.snmp.utils import get_profile_definition
 
 
 @click.command("check-duplicates", short_help="Check SNMP profiles for duplicate metrics", context_settings=CONTEXT_SETTINGS)
@@ -70,6 +70,7 @@ def extract_extended_profiles(profile):
 
 
 def find_duplicates(profile):
+    pass
 # metrics need to be associated with their filenames
 # Counter like object that can keep the metric-filename link
 
