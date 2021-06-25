@@ -1,3 +1,5 @@
+from collections import Counter
+
 import click
 import yaml
 
@@ -22,7 +24,6 @@ from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info,
 # extract metrics
 # compare for duplicates
 
-#object - file paths in extends, metrics defined [],
 
 def check_duplicate_metrics(file, verbose):
     m = create_profile(file)
@@ -37,9 +38,6 @@ class Profile:
         self.has_duplicates = False
     def __repr__(self):
         return self.path
-
-
-
 
 def get_file(file):
       with open(file) as f:
@@ -70,11 +68,15 @@ def extract_extended_profiles(profile):
 
 
 
-def extract_metrics(profile):
-    pass
 
 def find_duplicates(profile):
-    pass
+# metrics need to be associated with their filenames
+# Counter like object that can keep the metric-filename link
+
+
+
+
+#collections.Counter(a).items() if count > 1]
 
 def report_duplicates(profile):
     # duplicate metric oid and files it is defined in, line no?
