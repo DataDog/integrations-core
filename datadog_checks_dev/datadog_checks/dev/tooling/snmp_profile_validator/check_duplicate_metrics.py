@@ -1,4 +1,4 @@
-from collections import Counter
+
 
 import click
 import yaml
@@ -6,7 +6,7 @@ import yaml
 from ..constants import get_root
 from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-from ....snmp.datadog_checks.snmp.utils import get_profile_definition
+#from ....snmp.datadog_checks.snmp.utils import get_profile_definition
 
 
 @click.command("check-duplicates", short_help="Check SNMP profiles for duplicate metrics", context_settings=CONTEXT_SETTINGS)
@@ -27,13 +27,14 @@ from ....snmp.datadog_checks.snmp.utils import get_profile_definition
 
 def check_duplicate_metrics(file, verbose):
     m = create_profile(file)
-    extract_extended_profiles(m)
+    #extract_extended_profiles(m)
 
 
 class Profile:
     def __init__(self):
-        self.extends = [] #paths to files in extends section
-        self.metrics = [] # metrics defined
+        self.extends = []
+        self.metrics = []
+        self.extended_metrics = {} # file path : metrics
         self.path = ""
         self.has_duplicates = False
     def __repr__(self):
@@ -48,16 +49,34 @@ def create_profile(file):
     profile = Profile()
     profile.path = file
     config = get_file(file)
-    profile.extends = config['extends']
     profile.metrics = config['metrics']
+    profile.extends = config['extends']
+    for file in profile.extends:
+        extended_profiles = extract_extended_profiles(file)
+        echo_info("extended profile" + str(extended_profiles))
     return profile
 
 
-def extract_extended_profiles(profile):
-    for filename in profile.extends:
-        config = get_file(filename)
-        profile.metrics = profile.metrics + config['metrics']
-    return profile
+
+def extract_extended_profiles(file):
+    extended_files = {}
+    config = get_file(file)
+    extended_files[file] = config['metrics']
+        for file_name in config['extends']:
+            echo_info("config extends: " + config['extends'])
+            extract_extended_profiles(file_name)
+            return extended_files
+
+    return extended_files
+
+
+
+
+
+
+
+
+
 
 # {'MIB': 'CISCO-ENTITY-SENSOR-MIB', 'table': {'OID': '1.3.6.1.4.1.9.9.91.1.1.1', 'name': 'entSensorValueTable'}}
 # {'MIB': 'CISCO-ENTITY-SENSOR-MIB', 'table': {'OID': '1.3.6.1.4.1.9.9.91.1.1.1', 'name': 'entSensorValueTable'}}
