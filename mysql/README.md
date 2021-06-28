@@ -94,7 +94,7 @@ The following instructions grant the agent permission to login from any host usi
 ```SQL
 CREATE USER datadog@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 ALTER USER datadog@'%' WITH MAX_USER_CONNECTIONS 5;
-GRANT REPLICATION CLIENT ON *.* TO datadog@'%'
+GRANT REPLICATION CLIENT ON *.* TO datadog@'%';
 GRANT PROCESS ON *.* TO datadog@'%';
 GRANT SELECT ON performance_schema.* TO datadog@'%';
 ```
@@ -116,8 +116,8 @@ The following schema and procedures are required for [Deep Database Monitoring](
 
 ```SQL
 CREATE SCHEMA IF NOT EXISTS datadog;
-GRANT EXECUTE ON datadog.* to datadog@'%'
-GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO datadog@'%';
+GRANT EXECUTE ON datadog.* to datadog@'%';
+GRANT CREATE TEMPORARY TABLES ON datadog.* TO datadog@'%';
 ```
 
 Create the procedures to enable the agent to collect execution plans. The `explain_statement` procedure must be created in every schema from which you want to collect execution plans.   
