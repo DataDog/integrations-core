@@ -115,10 +115,18 @@ class MaprCheck(AgentCheck):
                     self.log.warning("Received unexpected message %s, wont be processed", msg.value())
                     self.log.exception(e)
             elif msg.error().code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
-                raise CheckException(
-                    "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
-                    "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
-                )
+                if self.auth_ticket:
+                    raise CheckException(
+                        "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
+                        "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
+                    )
+                else:
+                    raise CheckException(
+                        "dd-agent user could not consume topic '%s'. Please ensure that:\n"
+                        "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
+                        "\t* The dd-agent user has the 'consume' permission on topic %s or "
+                        "impersonation is correctly configured." % (self.topic_path, self.topic_path)
+                    )
             elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
                 # Partition EOF is expected anytime we reach the end of one partition in the topic.
                 # This is expected at least once per partition per check run.

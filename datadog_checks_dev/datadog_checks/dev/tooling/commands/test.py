@@ -110,7 +110,8 @@ def test(
         # Environment variables we need tox to pass down
         'TOX_TESTENV_PASSENV': (
             # Used in .coveragerc for whether or not to show missing line numbers for coverage
-            'DDEV_COV_MISSING '
+            # or for generic tag checking
+            'DDEV_* '
             # Necessary for compilation on Windows: PROGRAMDATA, PROGRAMFILES, PROGRAMFILES(X86)
             'PROGRAM* '
             # Necessary for getting the user on Windows https://docs.python.org/3/library/getpass.html#getpass.getuser

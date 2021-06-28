@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "languages"
+    "languages",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "ASP.NET",

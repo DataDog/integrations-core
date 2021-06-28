@@ -198,17 +198,11 @@ class Redis(AgentCheck):
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
+        tags = list(self.tags)
         try:
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
 
-            tags = list(self.tags)
-            if info.get("role"):
-                tags.append("redis_role:{}".format(info["role"]))
-            else:
-                self.log.debug("Redis role was not found")
-
-            self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -219,11 +213,18 @@ class Redis(AgentCheck):
         else:
             self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
 
+        if info.get("role"):
+            tags.append("redis_role:{}".format(info["role"]))
+        else:
+            self.log.debug("Redis role was not found")
+
+        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+
         try:
             config = conn.config_get("maxclients")
         except redis.ResponseError:
             # config_get is disabled on some environments
-            self.log.debug("Error querying config")
+            self.log.debug("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
             config = {}
 
         # Save the database statistics.
@@ -263,11 +264,15 @@ class Redis(AgentCheck):
                 self.gauge(metric_name, value, tags=tags)
 
         if self.collect_client_metrics:
-            # Save client connections statistics
-            clients = conn.client_list()
-            clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-            for name, count in clients_by_name.items():
-                self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            try:
+                # Save client connections statistics
+                clients = conn.client_list()
+                clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+                for name, count in clients_by_name.items():
+                    self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            except redis.ResponseError:
+                # client_list is disabled on some environments
+                self.log.debug("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
@@ -474,6 +479,7 @@ class Redis(AgentCheck):
                     max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
             # No config on AWS Elasticache
             except redis.ResponseError:
+                self.log.debug("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))

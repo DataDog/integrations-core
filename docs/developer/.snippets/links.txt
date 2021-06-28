@@ -104,6 +104,7 @@
 [pyenv-github]: https://github.com/pyenv/pyenv
 [pyflakes-github]: https://github.com/PyCQA/pyflakes
 [pytest-benchmark-github]: https://github.com/ionelmc/pytest-benchmark
+[pytest-ddtrace]: https://github.com/DataDog/dd-trace-py
 [pytest-fixtures]: https://docs.pytest.org/en/latest/fixture.html
 [pytest-github]: https://github.com/pytest-dev/pytest
 [pytest-markers]: http://doc.pytest.org/en/latest/example/markers.html

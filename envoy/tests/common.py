@@ -11,6 +11,7 @@ except ImportError:
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+FLAVOR = os.getenv('FLAVOR', 'api_v3')
 
 HOST = get_docker_hostname()
 PORT = '8001'
