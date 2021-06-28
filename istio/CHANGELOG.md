@@ -1,5 +1,8 @@
 # CHANGELOG - istio
 
+## 3.13.0-beta.1 / 2021-06-28
+
+
 ## 3.12.0 / 2021-05-28
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
