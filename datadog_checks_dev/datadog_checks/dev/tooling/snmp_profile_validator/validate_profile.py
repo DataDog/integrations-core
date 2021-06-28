@@ -11,18 +11,14 @@ import yaml
 
 from ..constants import get_root
 from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...fs import file_exists
 
-
-@click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
-@click.option('-f', '--file', help="Path to a profile file to validate")
-@click.option('-d', '--directory', help="Path to a directory of profiles to validate")
-@click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
 def validate_profile(file, directory, verbose):
+
     profiles_list = find_profiles(file, directory)
     contents = read_profile(profiles_list)
     errors = validate_with_jsonschema(contents, verbose)
     produce_errors(errors, verbose)
-
 
 class Profile:
     def __init__(self):
@@ -55,9 +51,7 @@ def find_profiles(file, directory):
 def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
-    try:
-        dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
-    except FileNotFoundError:
+    dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
         echo_failure("Directory not found, or could not be read")
         abort()
     for file in dir_contents:
@@ -70,13 +64,9 @@ def get_all_profiles_from_dir(directory):
 def read_profile(profiles_list):
     read_profiles = []
     for profile in profiles_list:
-        try:
-            with open(profile.file_path) as f:
-                file_contents = yaml.safe_load(f.read())
-                profile.contents = file_contents
-        except OSError:
-            echo_failure("Profile file not found, or could not be read")
-            abort()
+        with open(profile.file_path) as f:
+            file_contents = yaml.safe_load(f.read())
+            profile.contents = file_contents
         if not file_contents:
             echo_failure("File contents returned None: " + str(profile))
             abort()
