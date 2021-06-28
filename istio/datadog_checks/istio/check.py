@@ -7,7 +7,7 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .constants import ISTIOD_NAMESPACE, MESH_NAMESPACE
-from .metrics import ISTIOD_METRICS, MESH_METRICS, TYPE_OVERRIDES, construct_metrics_config
+from .metrics import ISTIOD_METRICS, MESH_METRICS, construct_metrics_config
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
