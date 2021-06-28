@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
+from os.path import join
+from os import listdir, isfile
 
 import click
 import jsonschema
@@ -43,7 +45,7 @@ def find_profiles(file, directory):
         profiles_list = get_all_profiles_from_dir(directory)
         return profiles_list
 
-    profiles_path = os.path.join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
+    profiles_path = join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
     profiles_list = get_all_profiles_from_dir(profiles_path)
     return profiles_list
 
@@ -51,10 +53,10 @@ def find_profiles(file, directory):
 def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
-    dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
+    dir_contents = [file for file in listdir(profiles_path) if isfile(join(profiles_path, file))]
     for file in dir_contents:
         profile = Profile()
-        profile.file_path = os.path.join(profiles_path, file)
+        profile.file_path = join(profiles_path, file)
         profiles_list.append(profile)
     return profiles_list
 
@@ -102,7 +104,7 @@ def produce_errors(profiles_list, verbose):
     error_list = collect_invalid_profiles(profiles_list)
     valid_profiles = collect_valid_profiles(profiles_list)
     if verbose:
-        get("The following profiles validated successfully: ")
+        echo_info("The following profiles validated successfully: ")
         for profile in valid_profiles:
             echo_info(str(profile))
     if error_list:
