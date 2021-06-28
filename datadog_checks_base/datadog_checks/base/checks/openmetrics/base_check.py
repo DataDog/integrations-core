@@ -117,7 +117,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                     else:
                         self.log.error(
                             "The agent could connect to none of the following URL: %s.",
-                            str(instance['prometheus_possible_urls']),
+                            possible_urls,
                         )
                 else:
                     self.get_scraper_config(instance)
