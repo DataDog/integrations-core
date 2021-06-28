@@ -248,3 +248,11 @@ METRIC_ROLLBACK_COMPAT_MAP = {
     'vault_route_rollback_sys_': 'vault.route.rollback.sys',
     'vault_route_rollback_secret_': 'vault.route.rollback.secret',
 }
+
+ROUTE_METRICS_TO_TRANSFORM = [
+    'vault_route_create_',
+    'vault_route_delete_',
+    'vault_route_list_',
+    'vault_route_read_',
+    'vault_route_rollback_',
+]

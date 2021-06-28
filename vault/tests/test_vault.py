@@ -613,6 +613,13 @@ class TestVault:
         c.parse_config()
 
         content = (
+            '# HELP vault_route_create_foobar_ vault_route_create_foobar_\n'
+            '# TYPE vault_route_create_foobar_ summary\n'
+            'vault_route_create_foobar_{quantile="0.5"} 1\n'
+            'vault_route_create_foobar_{quantile="0.9"} 2\n'
+            'vault_route_create_foobar_{quantile="0.99"} 3\n'
+            'vault_route_create_foobar__sum 571.073808670044\n'
+            'vault_route_create_foobar__count 18\n'
             '# HELP vault_route_rollback_sys_ vault_route_rollback_sys_\n'
             '# TYPE vault_route_rollback_sys_ summary\n'
             'vault_route_rollback_sys_{quantile="0.5"} 3\n'
@@ -633,14 +640,21 @@ class TestVault:
             for quantile in [0.5, 0.9, 0.99]:
                 quantile_tag = 'quantile:{}'.format(quantile)
                 aggregator.assert_metric('vault.vault.route.rollback.sys.quantile', tags=global_tags + [quantile_tag])
-                aggregator.assert_metric('vault.route.rollback.quantile',
-                                         tags=global_tags + [quantile_tag, 'mountpoint:sys'])
-                aggregator.assert_metric('vault.route.rollback.quantile',
-                                         tags=global_tags + [quantile_tag, 'mountpoint:sys'])
+                aggregator.assert_metric(
+                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
+                )
+                aggregator.assert_metric(
+                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
+                )
+                aggregator.assert_metric(
+                    'vault.route.create.quantile', tags=global_tags + [quantile_tag, 'mountpoint:foobar']
+                )
 
             aggregator.assert_metric('vault.vault.route.rollback.sys.sum', tags=global_tags)
             aggregator.assert_metric('vault.vault.route.rollback.sys.count', tags=global_tags)
             aggregator.assert_metric('vault.route.rollback.sum', tags=global_tags + ['mountpoint:sys'])
             aggregator.assert_metric('vault.route.rollback.count', tags=global_tags + ['mountpoint:sys'])
+            aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
+            aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
 
         aggregator.assert_all_metrics_covered()
