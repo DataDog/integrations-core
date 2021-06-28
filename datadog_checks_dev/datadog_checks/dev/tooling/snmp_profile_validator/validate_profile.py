@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
-from os.path import join
-from os import listdir, isfile
+from os.path import join, isfile
+from os import listdir
 
 import click
 import jsonschema
