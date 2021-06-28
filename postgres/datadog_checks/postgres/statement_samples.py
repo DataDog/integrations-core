@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update'})
+SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 # columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
 # under other standard keys
