@@ -147,6 +147,8 @@ files:
               - name: replication
                 description: |
                   Set to `true` to collect replication metrics.
+                  These metrics are only collected from the specified `host`. If you want to collect replication metrics
+                  from the source node and the replica nodes you need to set separate check instances to collect them.
                 value:
                   type: boolean
                   example: false
