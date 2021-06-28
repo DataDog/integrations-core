@@ -5,6 +5,7 @@ import yaml
 
 from ..constants import get_root
 from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...fs import file_exists
 
 #from ....snmp.datadog_checks.snmp.utils import get_profile_definition
 
@@ -25,9 +26,18 @@ from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info,
 # compare for duplicates
 
 
+#are the metrics i'm looking at correct?
+# chain of validators
+
+
+
 def check_duplicate_metrics(file, verbose):
-    m = create_profile(file)
-    #extract_extended_profiles(m)
+    if not file_exists(file):
+        echo_failure("File " + file + " not found, or could not be read")
+        abort()
+
+    profile = create_profile(file)
+    compare_for_duplicates(profile)
 
 
 class Profile:
@@ -41,9 +51,9 @@ class Profile:
         return self.path
 
 def get_file(file):
-      with open(file) as f:
+    with open(file) as f:
         return yaml.safe_load(f)
-# {'extends': ['_base.yaml', '_generic-if.yaml'], 'metrics': [{'MIB': 'HOST-RESOURCES-MIB', 'table': {'name': 'hrSWRunPerfTable', 'OID': '1.3.6.1.2.1.25.5.1'}, 'symbols': [{'name': 'hrSWRunPerfMem', 'OID': '1.3.6.1.2.1.25.5.1.1.2'}, {'name': 'hrSWRunPerfCPU', 'OID': '1.3.6.1.2.1.25.5.1.1.1'}], 'metric_tags': [{'column': {'name': 'hrSWRunIndex', 'OID': '1.3.6.1.2.1.25.4.2.1.1'}, 'table': 'hrSWRunTable', 'tag': 'run_index'}]}]}
+{'extends': ['_base.yaml', '_generic-if.yaml'], 'metrics': [{'MIB': 'HOST-RESOURCES-MIB', 'table': {'name': 'hrSWRunPerfTable', 'OID': '1.3.6.1.2.1.25.5.1'}, 'symbols': [{'name': 'hrSWRunPerfMem', 'OID': '1.3.6.1.2.1.25.5.1.1.2'}, {'name': 'hrSWRunPerfCPU', 'OID': '1.3.6.1.2.1.25.5.1.1.1'}], 'metric_tags': [{'column': {'name': 'hrSWRunIndex', 'OID': '1.3.6.1.2.1.25.4.2.1.1'}, 'table': 'hrSWRunTable', 'tag': 'run_index'}]}]}
 
 def create_profile(file):
     profile = Profile()
@@ -53,26 +63,33 @@ def create_profile(file):
     profile.extends = config['extends']
     for file in profile.extends:
         extended_profiles = extract_extended_profiles(file)
-        echo_info("extended profile" + str(extended_profiles))
+    profile.extended_metrics = extended_profiles
     return profile
 
 
 
 def extract_extended_profiles(file):
+    #make recursive? handle IndexError?
     extended_files = {}
     config = get_file(file)
     extended_files[file] = config['metrics']
-        for file_name in config['extends']:
-            echo_info("config extends: " + config['extends'])
-            extract_extended_profiles(file_name)
-            return extended_files
-
     return extended_files
 
 
+# collections.counter on OIDs? - just use strings to compare OIDs
 
+def compare_for_duplicates(profile):
+    echo_info([el for el in profile.metrics if el in profile.extended_metrics.values()])
 
+#break recursion on IndexError
 
+#make giant structure of metrics then check for duplicate oids - from root profile and extended profiles
+
+    #why does this not work?
+    # for metric in profile.metrics:
+    #     for value in profile.extended_metrics.values():
+    #         if metric == value:
+    #             echo_info(metric)
 
 
 
