@@ -2,16 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
-import os
-from os.path import isfile, join
 
 import click
 import jsonschema
 import yaml
 
-from ..constants import get_root
-from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...fs import file_exists
+from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
+from ..constants import get_root
+
 
 def validate_profile(file, directory, verbose):
 
@@ -19,6 +18,7 @@ def validate_profile(file, directory, verbose):
     contents = read_profile(profiles_list)
     errors = validate_with_jsonschema(contents, verbose)
     produce_errors(errors, verbose)
+
 
 class Profile:
     def __init__(self):
@@ -52,8 +52,6 @@ def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
     dir_contents = [file for file in os.listdir(profiles_path) if isfile(join(profiles_path, file))]
-        echo_failure("Directory not found, or could not be read")
-        abort()
     for file in dir_contents:
         profile = Profile()
         profile.file_path = os.path.join(profiles_path, file)
@@ -104,7 +102,7 @@ def produce_errors(profiles_list, verbose):
     error_list = collect_invalid_profiles(profiles_list)
     valid_profiles = collect_valid_profiles(profiles_list)
     if verbose:
-        echo_info("The following profiles validated successfully: ")
+        get("The following profiles validated successfully: ")
         for profile in valid_profiles:
             echo_info(str(profile))
     if error_list:
@@ -121,14 +119,15 @@ def produce_errors(profiles_list, verbose):
         abort()
 
 
-
 def collect_invalid_profiles(profiles_list):
-    invalid_profiles = [profile for profile in profiles_list if profile.valid ==False]
+    invalid_profiles = [profile for profile in profiles_list if profile.valid == False]
     return invalid_profiles
 
+
 def collect_valid_profiles(profiles_list):
-    valid_profiles = [profile for profile in profiles_list if profile.valid ==True]
+    valid_profiles = [profile for profile in profiles_list if profile.valid == True]
     return valid_profiles
+
 
 def convert_to_yaml(error):
     json_error = json.loads(json.dumps(error))
