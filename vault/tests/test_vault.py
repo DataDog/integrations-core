@@ -618,8 +618,8 @@ class TestVault:
             'vault_route_rollback_sys_{quantile="0.5"} 3\n'
             'vault_route_rollback_sys_{quantile="0.9"} 3\n'
             'vault_route_rollback_sys_{quantile="0.99"} 4\n'
-            'vault_route_rollback_sys_ 3.2827999591827393\n'
-            'vault_route_rollback_sys_ 1'
+            'vault_route_rollback_sys__sum 3.2827999591827393\n'
+            'vault_route_rollback_sys__count 1'
         )
 
         def iter_lines(**_):
@@ -633,8 +633,14 @@ class TestVault:
             for quantile in [0.5, 0.9, 0.99]:
                 quantile_tag = 'quantile:{}'.format(quantile)
                 aggregator.assert_metric('vault.vault.route.rollback.sys.quantile', tags=global_tags + [quantile_tag])
-                aggregator.assert_metric(
-                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
-                )
+                aggregator.assert_metric('vault.route.rollback.quantile',
+                                         tags=global_tags + [quantile_tag, 'mountpoint:sys'])
+                aggregator.assert_metric('vault.route.rollback.quantile',
+                                         tags=global_tags + [quantile_tag, 'mountpoint:sys'])
+
+            aggregator.assert_metric('vault.vault.route.rollback.sys.sum', tags=global_tags)
+            aggregator.assert_metric('vault.vault.route.rollback.sys.count', tags=global_tags)
+            aggregator.assert_metric('vault.route.rollback.sum', tags=global_tags + ['mountpoint:sys'])
+            aggregator.assert_metric('vault.route.rollback.count', tags=global_tags + ['mountpoint:sys'])
 
         aggregator.assert_all_metrics_covered()
