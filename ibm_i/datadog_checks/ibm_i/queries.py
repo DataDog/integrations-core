@@ -2,19 +2,43 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-DiskUsage = {
-    'name': 'disk_usage',
+BaseDiskUsage = {
+    'name': 'base_disk_usage',
     'query': (
-        'SELECT ASP_NUMBER, UNIT_NUMBER, UNIT_TYPE, UNIT_STORAGE_CAPACITY, '
+        # Use DISTINCT because one serial number can have multiple lines with different RESOURCE NAMEs,
+        # but we only want one metric per disk for disk space usage.
+        'SELECT DISTINCT ASP_NUMBER, UNIT_NUMBER, UNIT_TYPE, SERIAL_NUMBER, UNIT_STORAGE_CAPACITY, '
         'UNIT_SPACE_AVAILABLE, PERCENT_USED FROM QSYS2.SYSDISKSTAT'
     ),
     'columns': [
         {'name': 'asp_number', 'type': 'tag'},
         {'name': 'unit_number', 'type': 'tag'},
         {'name': 'unit_type', 'type': 'tag'},
+        {'name': 'serial_number', 'type': "tag"},
         {'name': 'ibm_i.asp.unit_storage_capacity', 'type': 'gauge'},
         {'name': 'ibm_i.asp.unit_space_available', 'type': 'gauge'},
         {'name': 'ibm_i.asp.percent_used', 'type': 'gauge'},
+    ],
+}
+
+DiskUsage = {
+    'name': 'disk_usage',
+    'query': (
+        # For IO / busy metrics, tag per connection as each connection as its own metrics
+        "SELECT A.ASP_NUMBER, A.UNIT_NUMBER, A.UNIT_TYPE, A.SERIAL_NUMBER, A.RESOURCE_NAME, "
+        "A.ELAPSED_PERCENT_BUSY, A.ELAPSED_IO_REQUESTS "
+        # Two queries: one to fetch the stats, another to reset them
+        "FROM TABLE(QSYS2.SYSDISKSTAT('NO')) A INNER JOIN TABLE(QSYS2.SYSDISKSTAT('YES')) B "
+        "ON A.ASP_NUMBER = B.ASP_NUMBER AND A.UNIT_NUMBER = B.UNIT_NUMBER AND A.RESOURCE_NAME = B.RESOURCE_NAME"
+    ),
+    'columns': [
+        {'name': 'asp_number', 'type': 'tag'},
+        {'name': 'unit_number', 'type': 'tag'},
+        {'name': 'unit_type', 'type': 'tag'},
+        {'name': 'serial_number', 'type': "tag"},
+        {'name': 'resource_name', 'type': "tag"},
+        {'name': 'ibm_i.asp.percent_busy', 'type': 'gauge'},
+        {'name': 'ibm_i.asp.io_requests_per_s', 'type': 'gauge'},
     ],
 }
 
