@@ -15,9 +15,9 @@ from ..constants import get_root
 def validate_profile(file, directory, verbose):
 
     profiles_list = find_profiles(file, directory)
-    #contents = read_profile(profiles_list)
-    #errors = validate_with_jsonschema(profiles_list, verbose)
-    produce_errors(profiles_list, verbose)
+    # contents = read_profile(profiles_list)
+    # errors = validate_with_jsonschema(profiles_list, verbose)
+    report_errors(profiles_list, verbose)
 
 
 class Profile:
@@ -35,18 +35,18 @@ class Profile:
             file_contents = yaml.safe_load(f.read())
             self.contents = file_contents
         if not file_contents:
-            echo_failure("File contents returned None: " + str(profile))
+            echo_failure("File contents returned None: " + self.file_path)
             abort()
 
     def validate(self):
         schema_file = join(
-        get_root(),
-        "datadog_checks_dev",
-        "datadog_checks",
-        "dev",
-        "tooling",
-        "snmp_profile_validator",
-        "snmp_profile.json",
+            get_root(),
+            "datadog_checks_dev",
+            "datadog_checks",
+            "dev",
+            "tooling",
+            "snmp_profile_validator",
+            "snmp_profile.json",
         )
         with open(schema_file, "r") as f:
             contents = f.read()
@@ -59,6 +59,7 @@ class Profile:
 
         if self.errors:
             self.valid = False
+
 
 def construct_profile(file):
     profile = Profile()
@@ -83,6 +84,7 @@ def find_profiles(file, directory):
     profiles_list = get_all_profiles_from_dir(profiles_path)
     return profiles_list
 
+
 def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
@@ -94,8 +96,7 @@ def get_all_profiles_from_dir(directory):
     return profiles_list
 
 
-
-def produce_errors(profiles_list, verbose):
+def report_errors(profiles_list, verbose):
     error_list = collect_invalid_profiles(profiles_list)
     valid_profiles = collect_valid_profiles(profiles_list)
     if verbose:
