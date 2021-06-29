@@ -15,8 +15,8 @@ from ..constants import get_root
 def validate_profile(file, directory, verbose):
 
     profiles_list = find_profiles(file, directory)
-    contents = read_profile(profiles_list)
-    errors = validate_with_jsonschema(contents, verbose)
+    #contents = read_profile(profiles_list)
+    errors = validate_with_jsonschema(profiles_list, verbose)
     produce_errors(errors, verbose)
 
 
@@ -30,47 +30,48 @@ class Profile:
     def __repr__(self):
         return self.file_path
 
+    def load_from_file(self, file_path):
+        with open(file_path) as f:
+            file_contents = yaml.safe_load(f.read())
+            self.contents = file_contents
+        if not file_contents:
+            echo_failure("File contents returned None: " + str(profile))
+            abort()
+
+
+def construct_profile(file):
+    profile = Profile()
+    profile.file_path = file
+    profile.load_from_file(file)
+    return profile
+
 
 def find_profiles(file, directory):
-    profiles_list = []
-    profile = Profile()
+
     if file:
-        profile.file_path = file
+        profiles_list = []
+        profile = construct_profile(file)
         profiles_list.append(profile)
         return profiles_list
 
-    if directory:
-        profiles_list = get_all_profiles_from_dir(directory)
-        return profiles_list
 
-    profiles_path = join(get_root(), "snmp", "datadog_checks", "snmp", "data", "profiles")
+    dd_profiles_path = join("snmp", "datadog_checks", "snmp", "data", "profiles")
+    profiles_path = join(get_root(), dd_profiles_path)
+
+    if directory:
+        profiles_path = directory
     profiles_list = get_all_profiles_from_dir(profiles_path)
     return profiles_list
-
 
 def get_all_profiles_from_dir(directory):
     profiles_list = []
     profiles_path = directory
     dir_contents = [file for file in listdir(profiles_path) if isfile(join(profiles_path, file))]
     for file in dir_contents:
-        profile = Profile()
-        profile.file_path = join(profiles_path, file)
+        file_path = join(profiles_path, file)
+        profile = construct_profile(file_path)
         profiles_list.append(profile)
     return profiles_list
-
-
-def read_profile(profiles_list):
-    read_profiles = []
-    for profile in profiles_list:
-        with open(profile.file_path) as f:
-            file_contents = yaml.safe_load(f.read())
-            profile.contents = file_contents
-        if not file_contents:
-            echo_failure("File contents returned None: " + str(profile))
-            abort()
-        read_profiles.append(profile)
-
-    return read_profiles
 
 
 def validate_with_jsonschema(profiles_list, verbose):
@@ -89,8 +90,8 @@ def validate_with_jsonschema(profiles_list, verbose):
     validator = jsonschema.Draft7Validator(schema)
     for profile in profiles_list:
         errors = validator.iter_errors(profile.contents)
-    for error in errors:
-        profile.errors.append(error)
+        for error in errors:
+            profile.errors.append(error)
 
     if profile.errors:
         profile.valid = False
