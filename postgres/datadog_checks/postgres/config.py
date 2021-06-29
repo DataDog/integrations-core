@@ -69,9 +69,8 @@ class PostgresConfig:
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
         self.min_collection_interval = instance.get('min_collection_interval', 15)
-
-        # Deep Database monitoring adds additional telemetry for statement metrics
-        self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
+        # database monitoring adds additional telemetry for query metrics & samples
+        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1

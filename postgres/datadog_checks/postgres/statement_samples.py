@@ -120,7 +120,7 @@ class PostgresStatementSamples(object):
         self._tags = None
         self._tags_no_db = None
         self._db_hostname = resolve_db_host(self._config.host)
-        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', False))
+        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
         # The value is loaded when connecting to the main database
         self._max_query_size = UNKNOWN_VALUE

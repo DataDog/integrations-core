@@ -249,6 +249,20 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         assert check._config.tags == expected_tags
 
 
+dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
+@pytest.mark.parametrize("dbm_enabled", [True, False])
+def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
+    # test to make sure we continue to support the old key
+    for k in dbm_enabled_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[dbm_enabled_key] = dbm_enabled
+    check = integration_check(dbm_instance)
+    assert check._config.dbm_enabled == dbm_enabled
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
@@ -339,7 +353,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
 
 
 def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
-    pg_instance['deep_database_monitoring'] = True
+    pg_instance['dbm'] = True
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -386,7 +400,7 @@ def bob_conn():
 
 @pytest.fixture
 def dbm_instance(pg_instance):
-    pg_instance['deep_database_monitoring'] = True
+    pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}

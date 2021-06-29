@@ -48,9 +48,9 @@ class InstanceConfig(BaseModel):
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
+    dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
-    deep_database_monitoring: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]

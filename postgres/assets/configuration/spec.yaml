@@ -225,12 +225,9 @@ files:
       value:
         type: string
         example: "datadog-agent"
-    - name: deep_database_monitoring
+    - name: dbm
       description: |
-        Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-        success manager or Datadog support.
+        Set to `true` to enable Database Monitoring.
       value:
         type: boolean
         example: false
@@ -248,10 +245,10 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+            Enable collection of statement samples. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collections_per_second
           description: |
             Set the maximum statement sample collection rate. Each collection involves a single query to
