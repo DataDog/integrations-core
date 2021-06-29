@@ -1,4 +1,4 @@
-
+from collections import Counter
 
 import click
 import yaml
@@ -37,7 +37,7 @@ def check_duplicate_metrics(file, verbose):
         abort()
 
     profile = create_profile(file)
-    compare_for_duplicates(profile)
+    find_duplicates(profile)
 
 
 class Profile:
@@ -62,26 +62,47 @@ def create_profile(file):
     profile.extends = config['extends']
     extended_profiles = extract_extended_profiles(file)
     profile.metrics = profile.metrics.update(extended_profiles)
+    import pdb; pdb.set_trace()
     return profile
-
+#why is profile.metrics coming up empty?
 
 
 def extract_extended_profiles(file):
     extended_metrics = {}
     config = get_file(file)
     extended_metrics[file] = config['metrics']
-
     try:
         for file in config['extends']:
-            extended_metrics[file] = config['metrics']
+            profile.metrics[file] = config['metrics']
             extract_extended_profiles(file)
-
     except KeyError:
-        pass
-
-    echo_info(extended_metrics)
+        echo_failure("KeyError")
     return extended_metrics
 
+
+# def check_duplicates(profile):
+#     def do_check_duplicates(profile, oids):
+
+
+    #hidden function in recursion
+    # get profiles at top of tree, add metrics to set
+    # find loops
+    #symbol and metrics - ignore table top OIDs
+
+
+
+    # function to extract oids from profile
+    # set of visited profiles
+    # set of seen oids
+
+
+
+
+
+
+
+# depth-first search
+#set of seen
 
 # collections.counter on OIDs? - just use strings to compare OIDs
 
@@ -114,7 +135,7 @@ def compare_for_duplicates(profile):
 
 
 def find_duplicates(profile):
-    pass
+    echo_info(profile.metrics)
 # metrics need to be associated with their filenames
 # Counter like object that can keep the metric-filename link
 
