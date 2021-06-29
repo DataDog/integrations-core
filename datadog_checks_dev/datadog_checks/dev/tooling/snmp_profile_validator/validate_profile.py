@@ -16,8 +16,8 @@ def validate_profile(file, directory, verbose):
 
     profiles_list = find_profiles(file, directory)
     #contents = read_profile(profiles_list)
-    errors = validate_with_jsonschema(profiles_list, verbose)
-    produce_errors(errors, verbose)
+    #errors = validate_with_jsonschema(profiles_list, verbose)
+    produce_errors(profiles_list, verbose)
 
 
 class Profile:
@@ -38,22 +38,42 @@ class Profile:
             echo_failure("File contents returned None: " + str(profile))
             abort()
 
+    def validate(self):
+        schema_file = join(
+        get_root(),
+        "datadog_checks_dev",
+        "datadog_checks",
+        "dev",
+        "tooling",
+        "snmp_profile_validator",
+        "snmp_profile.json",
+        )
+        with open(schema_file, "r") as f:
+            contents = f.read()
+            schema = json.loads(contents)
+        validator = jsonschema.Draft7Validator(schema)
+
+        errors = validator.iter_errors(self.contents)
+        for error in errors:
+            self.errors.append(error)
+
+        if self.errors:
+            self.valid = False
 
 def construct_profile(file):
     profile = Profile()
     profile.file_path = file
     profile.load_from_file(file)
+    profile.validate()
     return profile
 
 
 def find_profiles(file, directory):
-
     if file:
         profiles_list = []
         profile = construct_profile(file)
         profiles_list.append(profile)
         return profiles_list
-
 
     dd_profiles_path = join("snmp", "datadog_checks", "snmp", "data", "profiles")
     profiles_path = join(get_root(), dd_profiles_path)
@@ -73,30 +93,6 @@ def get_all_profiles_from_dir(directory):
         profiles_list.append(profile)
     return profiles_list
 
-
-def validate_with_jsonschema(profiles_list, verbose):
-    schema_file = join(
-        get_root(),
-        "datadog_checks_dev",
-        "datadog_checks",
-        "dev",
-        "tooling",
-        "snmp_profile_validator",
-        "snmp_profile.json",
-    )
-    with open(schema_file, "r") as f:
-        contents = f.read()
-        schema = json.loads(contents)
-    validator = jsonschema.Draft7Validator(schema)
-    for profile in profiles_list:
-        errors = validator.iter_errors(profile.contents)
-        for error in errors:
-            profile.errors.append(error)
-
-    if profile.errors:
-        profile.valid = False
-
-    return profiles_list
 
 
 def produce_errors(profiles_list, verbose):
