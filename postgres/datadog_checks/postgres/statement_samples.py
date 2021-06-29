@@ -416,7 +416,7 @@ class PostgresStatementSamples(object):
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)),
             )
-            return None, db_explain_error, type(err)
+            return None, db_explain_error, '{}'.format(type(err))
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
@@ -427,7 +427,7 @@ class PostgresStatementSamples(object):
                 1,
                 tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
             )
-            return None, DBExplainError.database_error, type(e)
+            return None, DBExplainError.database_error, '{}'.format(type(err))
 
     def _collect_plan_for_statement(self, row):
         try:
@@ -455,7 +455,7 @@ class PostgresStatementSamples(object):
         )
         collection_error = None
         if explain_err_code:
-            collection_error = {'code': explain_err_code.value, 'message': '{}'.format(err_msg) if err_msg else None}
+            collection_error = {'code': explain_err_code.value, 'message': err_msg if err_msg else None}
 
         plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
         if plan_dict:
