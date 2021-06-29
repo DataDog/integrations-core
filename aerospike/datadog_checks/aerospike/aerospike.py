@@ -106,6 +106,9 @@ class AerospikeCheck(AgentCheck):
         # We'll connect on the first check run
         self._client = None
 
+        # Cache for the entirety of each check run
+        self._node_name = None
+
     def check(self, _):
         if self._client is None:
             client = self.get_client()
@@ -113,6 +116,8 @@ class AerospikeCheck(AgentCheck):
                 return
 
             self._client = client
+
+        self._node_name = None
 
         # https://www.aerospike.com/docs/reference/info/#statistics
         self.collect_info('statistics', CLUSTER_METRIC_TYPE, required_keys=self._metrics, tags=self._tags)
@@ -289,12 +294,33 @@ class AerospikeCheck(AgentCheck):
             self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return client
 
+    @property
+    def node_name(self):
+        if self._node_name is None:
+            host, port = self._host[:2]
+            node_data = self._client.get_node_names()
+            for data in node_data:
+                if data['address'] == host and data['port'] == port:
+                    self._node_name = data['node_name']
+                    break
+            else:
+                raise Exception('Could not find node name for {}:{} among: {}'.format(host, port, node_data))
+
+        return self._node_name
+
+    def get_node_info(self, command):
+        # Aerospike deprecated `info_node` as of v6.0
+        if hasattr(self._client, 'get_node_names'):
+            return self._client.info_single_node(command, self.node_name, self._info_policies)
+        else:
+            return self._client.info_node(command, self._host, self._info_policies)
+
     def get_info(self, command, separator=';'):
         # type: (str, str) -> List[str]
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         try:
-            data = self._client.info_node(command, self._host, self._info_policies)
+            data = self.get_node_info(command)
             self.log.debug(
                 "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
                 command,
@@ -315,6 +341,8 @@ class AerospikeCheck(AgentCheck):
         if not data:
             return []
 
+        # Get rid of any trailing separators before splitting
+        data = data.rstrip(';')
         return data.split(separator)
 
     def collect_datacenter(self, datacenter):

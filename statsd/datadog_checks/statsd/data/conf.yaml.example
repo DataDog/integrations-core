@@ -13,15 +13,16 @@ init_config:
 #
 instances:
 
-    ## @param host - string - required
+  -
+    ## @param host - string - optional - default: localhost
     ## Host to collect StatsD data from.
     #
-  - host: localhost
+    # host: localhost
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 8126
     ## Port to use to collect StatsD data.
     #
-    port: 8126
+    # port: 8126
 
     ## @param timeout - integer - optional - default: 10
     ## Custom timeout for your check request.

@@ -300,6 +300,10 @@ The Databricks integration does not include any events.
 
 Need help? Contact [Datadog support][3].
 
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://databricks.com/
 [2]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
 [3]: https://docs.datadoghq.com/help/

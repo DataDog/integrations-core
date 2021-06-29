@@ -10,7 +10,7 @@ ceph.num_up_osds,gauge,,item,,Number of online storage daemons,1,ceph,up osds
 ceph.num_pgs,gauge,,item,,Number of placement groups available,0,ceph,num pgs
 ceph.num_mons,gauge,,item,,Number of monitor daemons,1,ceph,num mons
 ceph.aggregate_pct_used,gauge,,percent,,Overall capacity usage metric,0,ceph,pct used
-ceph.total_objects,gauge,,item,,Object count from the underlying object store,0,ceph,objects
+ceph.total_objects,gauge,,item,,Object count from the underlying object store. [v<=3 only],0,ceph,objects
 ceph.num_objects,gauge,,item,,Object count for a given pool,0,ceph,pool objects
 ceph.read_bytes,gauge,,byte,,Per-pool read bytes,0,ceph,pool read
 ceph.write_bytes,gauge,,byte,,Per-pool write bytes,0,ceph,pool write

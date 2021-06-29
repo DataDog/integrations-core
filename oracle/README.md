@@ -48,7 +48,7 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 [14]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
 [4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 
-<!-- xxz tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
