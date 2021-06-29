@@ -1,15 +1,9 @@
-
-import os
-from os.path import isfile, join
-
-
 import click
 
-
-from ..constants import get_root
-from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ...fs import file_exists, dir_exists
+from ...fs import dir_exists, file_exists
+from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure
 from .validate_profile import validate_profile
+
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
@@ -26,8 +20,7 @@ def click_options(file, directory, verbose):
             abort()
     validate_profile(file, directory, verbose)
 
-#only click-related stuff in a separate file
-#different click options for each validator - jsonschema, duplicates
+
+# only click-related stuff in a separate file
+# different click options for each validator - jsonschema, duplicates
 # tests - unit tests independent of click
-
-

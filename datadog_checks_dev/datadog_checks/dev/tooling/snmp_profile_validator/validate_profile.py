@@ -2,15 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
-from os.path import join, isfile
 from os import listdir
+from os.path import isfile, join
 
-import click
 import jsonschema
 import yaml
 
-from ...fs import file_exists
-from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
+from ..commands.console import abort, echo_failure, echo_info
 from ..constants import get_root
 
 
@@ -76,7 +74,7 @@ def read_profile(profiles_list):
 
 
 def validate_with_jsonschema(profiles_list, verbose):
-    schema_file = os.path.join(
+    schema_file = join(
         get_root(),
         "datadog_checks_dev",
         "datadog_checks",
@@ -122,12 +120,12 @@ def produce_errors(profiles_list, verbose):
 
 
 def collect_invalid_profiles(profiles_list):
-    invalid_profiles = [profile for profile in profiles_list if profile.valid == False]
+    invalid_profiles = [profile for profile in profiles_list if profile.valid is False]
     return invalid_profiles
 
 
 def collect_valid_profiles(profiles_list):
-    valid_profiles = [profile for profile in profiles_list if profile.valid == True]
+    valid_profiles = [profile for profile in profiles_list if profile.valid is True]
     return valid_profiles
 
 
