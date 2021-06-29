@@ -12,8 +12,22 @@ def test_istiod(aggregator, istiod_mixture_fixture):
     """
     Test the istiod deployment endpoint for v1.5+ check
     """
-    check = Istio('istio', {}, [common.MOCK_ISTIOD_INSTANCE])
-    check.check(common.MOCK_ISTIOD_INSTANCE)
+    check = Istio('istio', {}, [common.MOCK_V2_ISTIOD_INSTANCE])
+    check.check(common.MOCK_V2_ISTIOD_INSTANCE)
+
+    for metric in common.ISTIOD_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_legacy_istiod(aggregator, istiod_mixture_fixture):
+    """
+    Test the istiod deployment endpoint for v1.5+ check
+    """
+    check = Istio('istio', {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
+    check.check(common.MOCK_LEGACY_ISTIOD_INSTANCE)
 
     for metric in common.ISTIOD_METRICS:
         aggregator.assert_metric(metric)
@@ -59,9 +73,9 @@ def test_istio_proxy_mesh_exclude(aggregator, istio_proxy_mesh_fixture):
 
 
 def test_version_metadata(datadog_agent, istiod_mixture_fixture):
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_ISTIOD_INSTANCE])
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     check.check_id = 'test:123'
-    check.check(common.MOCK_ISTIOD_INSTANCE)
+    check.check(common.MOCK_V2_ISTIOD_INSTANCE)
 
     # Use version mocked from istiod 1.5 fixture
     MOCK_VERSION = '1.5.0'

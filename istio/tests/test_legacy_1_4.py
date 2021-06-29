@@ -12,8 +12,8 @@ def test_legacy_mesh(aggregator, mesh_fixture):
     """
     Test the mesh endpoint
     """
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_MESH_INSTANCE])
-    check.check(common.MOCK_MESH_INSTANCE)
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_MESH_INSTANCE])
+    check.check(common.MOCK_LEGACY_MESH_INSTANCE)
 
     for metric in common.MESH_METRICS + common.MESH_METRICS_1_4:
         _assert_metric(aggregator, metric)
@@ -82,8 +82,8 @@ def test_legacy_galley_only(aggregator, new_galley_fixture):
 
 
 def test_scraper_creator():
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_MESH_INSTANCE, common.MOCK_MIXTURE_INSTANCE])
-    istio_mesh_config = check.config_map.get(common.MOCK_MESH_INSTANCE['istio_mesh_endpoint'])
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_MESH_INSTANCE, common.MOCK_MIXTURE_INSTANCE])
+    istio_mesh_config = check.config_map.get(common.MOCK_LEGACY_MESH_INSTANCE['istio_mesh_endpoint'])
     mixer_scraper_dict = check.config_map.get(common.MOCK_MIXTURE_INSTANCE['mixer_endpoint'])
 
     assert istio_mesh_config['namespace'] == MESH_NAMESPACE

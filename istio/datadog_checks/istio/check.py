@@ -7,7 +7,7 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .constants import ISTIOD_NAMESPACE, MESH_NAMESPACE
-from .metrics import ISTIOD_METRICS, MESH_METRICS, construct_metrics_config
+from .metrics import ISTIOD_METRICS, ISTIOD_VERSION, MESH_METRICS, construct_metrics_config
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
@@ -33,9 +33,11 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, ISTIOD_NAMESPACE))
 
     def _generate_config(self, endpoint, metrics, namespace):
+        metrics = construct_metrics_config(metrics)
+        metrics.append(ISTIOD_VERSION)
         config = {
             'openmetrics_endpoint': endpoint,
-            'metrics': construct_metrics_config(metrics),
+            'metrics': metrics,
             'namespace': namespace,
         }
         config.update(self.instance)

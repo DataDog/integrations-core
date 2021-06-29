@@ -9,7 +9,7 @@ MOCK_V2_MESH_INSTANCE = {
     'use_openmetrics': True,
 }
 
-MOCK_MESH_INSTANCE = {
+MOCK_LEGACY_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
 }
 
@@ -30,7 +30,12 @@ NEW_MOCK_PILOT_ONLY_INSTANCE = {'pilot_endpoint': 'http://istio-pilot:15014/metr
 
 NEW_MOCK_GALLEY_ONLY_INSTANCE = {'galley_endpoint': 'http://istio-galley:15014/metrics'}
 
-MOCK_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
+MOCK_V2_ISTIOD_INSTANCE = {
+    'istiod_endpoint': 'http://localhost:8080/metrics',
+    'use_openmetrics': True,
+}
+
+MOCK_LEGACY_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
 
 MOCK_ISTIO_PROXY_MESH_INSTANCE = {'istio_mesh_endpoint': 'http://localhost:15090/metrics'}
 
@@ -342,6 +347,8 @@ MESH_METRICS_MAPPER = {
     'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
     'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
     'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_request_messages_total': 'request.messages.total',
+    'istio_response_messages_total': 'response.messages.total',
 }
 
 
