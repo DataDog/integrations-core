@@ -46,3 +46,7 @@ def instance_tags(field, value):
 
 def instance_username(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_severity_threshold(field, value):
+    return 50

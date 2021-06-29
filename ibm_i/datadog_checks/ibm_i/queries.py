@@ -165,7 +165,7 @@ JobsInJobQueueInfo = {
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'job_queue_name', 'type': 'tag'},
         {'name': 'job_queue_status', 'type': 'tag'},
-        {'name': 'ibm_i.job.in_jobq', 'type': 'gauge'}
+        {'name': 'ibm_i.job.in_jobq', 'type': 'gauge'},
     ],
 }
 
@@ -187,19 +187,22 @@ JobQueueInfo = {
     ],
 }
 
-MessageQueueInfo = {
-    'name': 'message_queue_info',
-    'query': (
-        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 70 THEN 1 ELSE 0 END) '
-        'FROM QSYS2.MESSAGE_QUEUE_INFO GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
-    ),
-    'columns': [
-        {'name': 'message_queue_name', 'type': 'tag'},
-        {'name': 'message_queue_library', 'type': 'tag'},
-        {'name': 'ibm_i.message_queue.size', 'type': 'gauge'},
-        {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
-    ],
-}
+
+def get_message_queue_info(sev):
+    return {
+        'name': 'message_queue_info',
+        'query': (
+            f'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= {sev} THEN 1 ELSE 0 END) '  # noqa:E501
+            'FROM QSYS2.MESSAGE_QUEUE_INFO GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+        ),
+        'columns': [
+            {'name': 'message_queue_name', 'type': 'tag'},
+            {'name': 'message_queue_library', 'type': 'tag'},
+            {'name': 'ibm_i.message_queue.size', 'type': 'gauge'},
+            {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
+        ],
+    }
+
 
 IBMMQInfo = {
     'name': 'ibm_mq_info',

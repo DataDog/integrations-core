@@ -27,6 +27,7 @@ class InstanceConfig(BaseModel):
     system: Optional[str]
     tags: Optional[Sequence[str]]
     username: Optional[str]
+    severity_threshold: Optional[int]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
