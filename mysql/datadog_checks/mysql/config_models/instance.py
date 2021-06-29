@@ -73,7 +73,7 @@ class InstanceConfig(BaseModel):
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
-    deep_database_monitoring: Optional[bool]
+    dbm: Optional[bool]
     defaults_file: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]

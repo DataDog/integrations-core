@@ -248,7 +248,7 @@ class MySQLStatementSamples(object):
         self._rate_limiter = ConstantRateLimiter(1)
         self._config = config
         self._db_hostname = resolve_db_host(self._config.host)
-        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', False))
+        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
         self._collections_per_second = self._config.statement_samples_config.get('collections_per_second', -1)
         self._events_statements_row_limit = self._config.statement_samples_config.get(

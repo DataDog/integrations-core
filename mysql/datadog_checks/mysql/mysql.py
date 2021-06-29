@@ -126,7 +126,7 @@ class MySql(AgentCheck):
                 # Metric collection
                 self._collect_metrics(db, tags=tags)
                 self._collect_system_metrics(self._config.host, db, tags)
-                if self._config.deep_database_monitoring:
+                if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.collect_per_statement_metrics(db, dbm_tags)
                     self._statement_samples.run_sampler(dbm_tags)
