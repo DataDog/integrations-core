@@ -265,7 +265,7 @@ istio.mesh.tcp.connections_closed.total,gauge,,,,Total closed connections,0,isti
 istio.mesh.tcp.connections_opened.total,gauge,,,,Total opened connections,0,istio,
 istio.mesh.tcp.received_bytes.total,gauge,,byte,,Size of total bytes received during request in case of a TCP connection,0,istio,
 istio.mesh.tcp.send_bytes.total,gauge,,byte,,Size of total bytes sent during response in case of a TCP connection,0,istio,
-istio.mesh.request.count.total,count,,byte,,The number of requests as monotonic count,0,istio,
+istio.mesh.request.count.total,count,,request,,The number of requests as monotonic count,0,istio,
 istio.mesh.request.duration.milliseconds.count.total,count,,,,Total count of observed values for duration of requests as monotonic count,0,istio,
 istio.mesh.request.duration.milliseconds.sum.total,count,,,,Total sum of observed values for duration of requests as monotonic count,0,istio,
 istio.mesh.request.size.count.total,count,,,,Count of observed request sizes as monotonic count,0,istio,
