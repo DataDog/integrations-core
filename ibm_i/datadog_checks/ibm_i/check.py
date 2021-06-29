@@ -127,7 +127,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.MemoryInfo,
                 queries.JobsInJobQueueInfo,
                 queries.JobQueueInfo,
-                queries.MessageQueueInfo,
+                queries.get_message_queue_info(self.config.severity_threshold),
             ]
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
                 query_list.append(queries.DiskUsage)
