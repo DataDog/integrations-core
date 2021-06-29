@@ -5,7 +5,7 @@ ibm_i.asp.percent_used,gauge,,percent,,Percentage that has been consumed from th
 ibm_i.asp.percent_busy,gauge,,percent,,Percentage of time where the disk unit is being used,0,ibm_i,asp percent busy
 ibm_i.asp.io_requests_per_s,gauge,,unit,second,Average number of I/O requests for read and write operations that occurred per second,0,ibm_i,asp io requests
 ibm_i.system.cpu_usage,gauge,,,,The average CPU utilization for all the active processors.,0,ibm_i,cpu usage
-ibm_i.job.active,gauge,,,,Whether a job is currently active,0,ibm_i,job active
+ibm_i.job.status,gauge,,,,Whether a job is currently active or not.,0,ibm_i,job status
 ibm_i.job.cpu_usage,gauge,,,,CPU usage by a job,0,ibm_i,job cpu
 ibm_i.job.temp_storage,gauge,,mebibyte,,The amount of temporary storage that is currently allocated to a job ,0,ibm_i,job storage
 ibm_i.pool.size,gauge,,mebibyte,,The amount of main storage in a pool,0,ibm_i,pool size
