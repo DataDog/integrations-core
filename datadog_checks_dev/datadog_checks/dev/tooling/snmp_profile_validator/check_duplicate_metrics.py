@@ -43,8 +43,7 @@ def check_duplicate_metrics(file, verbose):
 class Profile:
     def __init__(self):
         self.extends = []
-        self.metrics = []
-        self.extended_metrics = {} # file path : metrics
+        self.metrics = {}
         self.path = ""
         self.has_duplicates = False
     def __repr__(self):
@@ -53,33 +52,42 @@ class Profile:
 def get_file(file):
     with open(file) as f:
         return yaml.safe_load(f)
-{'extends': ['_base.yaml', '_generic-if.yaml'], 'metrics': [{'MIB': 'HOST-RESOURCES-MIB', 'table': {'name': 'hrSWRunPerfTable', 'OID': '1.3.6.1.2.1.25.5.1'}, 'symbols': [{'name': 'hrSWRunPerfMem', 'OID': '1.3.6.1.2.1.25.5.1.1.2'}, {'name': 'hrSWRunPerfCPU', 'OID': '1.3.6.1.2.1.25.5.1.1.1'}], 'metric_tags': [{'column': {'name': 'hrSWRunIndex', 'OID': '1.3.6.1.2.1.25.4.2.1.1'}, 'table': 'hrSWRunTable', 'tag': 'run_index'}]}]}
+#{'extends': ['_base.yaml', '_generic-if.yaml'], 'metrics': [{'MIB': 'HOST-RESOURCES-MIB', 'table': {'name': 'hrSWRunPerfTable', 'OID': '1.3.6.1.2.1.25.5.1'}, 'symbols': [{'name': 'hrSWRunPerfMem', 'OID': '1.3.6.1.2.1.25.5.1.1.2'}, {'name': 'hrSWRunPerfCPU', 'OID': '1.3.6.1.2.1.25.5.1.1.1'}], 'metric_tags': [{'column': {'name': 'hrSWRunIndex', 'OID': '1.3.6.1.2.1.25.4.2.1.1'}, 'table': 'hrSWRunTable', 'tag': 'run_index'}]}]}
 
 def create_profile(file):
     profile = Profile()
     profile.path = file
     config = get_file(file)
-    profile.metrics = config['metrics']
+    profile.metrics[profile.path] = config['metrics']
     profile.extends = config['extends']
-    for file in profile.extends:
-        extended_profiles = extract_extended_profiles(file)
-    profile.extended_metrics = extended_profiles
+    extended_profiles = extract_extended_profiles(file)
+    profile.metrics = profile.metrics.update(extended_profiles)
     return profile
 
 
 
 def extract_extended_profiles(file):
-    #make recursive? handle IndexError?
-    extended_files = {}
+    extended_metrics = {}
     config = get_file(file)
-    extended_files[file] = config['metrics']
-    return extended_files
+    extended_metrics[file] = config['metrics']
+
+    try:
+        for file in config['extends']:
+            extended_metrics[file] = config['metrics']
+            extract_extended_profiles(file)
+
+    except KeyError:
+        pass
+
+    echo_info(extended_metrics)
+    return extended_metrics
 
 
 # collections.counter on OIDs? - just use strings to compare OIDs
 
 def compare_for_duplicates(profile):
-    echo_info([el for el in profile.metrics if el in profile.extended_metrics.values()])
+    #collections.counter?
+    pass
 
 #break recursion on IndexError
 
