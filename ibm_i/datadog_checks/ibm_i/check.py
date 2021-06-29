@@ -119,7 +119,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
         system_info = self.fetch_system_info()
         if system_info:
             query_list = [
-                queries.DiskUsage,
+                queries.BaseDiskUsage,
                 queries.CPUUsage,
                 queries.InactiveJobStatus,
                 queries.ActiveJobStatus,
@@ -130,6 +130,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.MessageQueueInfo,
             ]
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
+                query_list.append(queries.DiskUsage)
                 query_list.append(queries.SubsystemInfo)
 
             if self.config.fetch_ibm_mq_metrics and self.ibm_mq_check():
