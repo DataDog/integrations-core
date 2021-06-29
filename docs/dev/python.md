@@ -1,5 +1,5 @@
 ---
-title: Python environment for Agent integration development
+title: Python for Agent Integration Development
 kind: documentation
 ---
 
@@ -36,7 +36,7 @@ Windows does not normally have a Python environment present. The [official Pytho
 
 Each integration has its own set of dependencies that must be added to Python in order to run the tests, or just to try out the collection code. To avoid polluting your Python installation with libraries and packages that would only be used by an Integration, use a "virtual environment". A virtual environment is a self contained directory tree that contains an isolated Python installation. When a virtual environment is active, any package you install goes into that directory without affecting the system wide Python installation.
 
-### Virtualenv and Virtualenvwrapper
+### Virtualenv and virtualenvwrapper
 
 Datadog recommends using [Virtualenv][7] to manage Python virtual environments, and [virtualenvwrapper][8] to make the process smoother. There's a [comprehensive guide][9] in the Hitchhiker's Guide to Python describing how to set up these two tools.
 

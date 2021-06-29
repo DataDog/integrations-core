@@ -17,7 +17,12 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import (
+    ConstantRateLimiter,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    resolve_db_host,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -106,14 +111,14 @@ class PostgresStatementSamples(object):
             ttl=self._config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
         )
 
-        # explained_statements_cache: limit how often we try to re-explain the same query
-        self._explained_statements_cache = TTLCache(
+        # explained_statements_ratelimiter: limit how often we try to re-explain the same query
+        self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=int(self._config.statement_samples_config.get('explained_statements_cache_maxsize', 5000)),
             ttl=60 * 60 / int(self._config.statement_samples_config.get('explained_statements_per_hour_per_query', 60)),
         )
 
-        # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
-        self._seen_samples_cache = TTLCache(
+        # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
+        self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
             maxsize=int(self._config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
@@ -284,12 +289,12 @@ class PostgresStatementSamples(object):
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
-            len(self._seen_samples_cache),
+            len(self._seen_samples_ratelimiter),
             tags=self._tags,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
-            len(self._explained_statements_cache),
+            len(self._explained_statements_ratelimiter),
             tags=self._tags,
         )
 
@@ -395,9 +400,8 @@ class PostgresStatementSamples(object):
         # limit the rate of explains done to the database
         query_signature = compute_sql_signature(obfuscated_statement)
         cache_key = (row['datname'], query_signature)
-        if cache_key in self._explained_statements_cache:
+        if not self._explained_statements_ratelimiter.acquire(cache_key):
             return None
-        self._explained_statements_cache[cache_key] = True
 
         # Plans have several important signatures to tag events with. Note that for postgres, the
         # query_signature and resource_hash will be the same value.
@@ -416,8 +420,7 @@ class PostgresStatementSamples(object):
             plan_cost = plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0
 
         statement_plan_sig = (query_signature, plan_signature)
-        if statement_plan_sig not in self._seen_samples_cache:
-            self._seen_samples_cache[statement_plan_sig] = True
+        if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._db_hostname,
                 "ddsource": "postgres",

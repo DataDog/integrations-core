@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 20.0.1 / 2021-06-24
+
+* [Fixed] Fix Python 2 integer division bug in db.util `ConstantRateLimiter`. See [#9592](https://github.com/DataDog/integrations-core/pull/9592).
+
+## 20.0.0 / 2021-06-22
+
+* [Added] Add `RateLimitingTTLCache` to `db.utils`. See [#9582](https://github.com/DataDog/integrations-core/pull/9582).
+* [Added] Bump pymongo to 3.8. See [#9557](https://github.com/DataDog/integrations-core/pull/9557).
+* [Added] Upgrade `aerospike` dependency on Python 3. See [#9552](https://github.com/DataDog/integrations-core/pull/9552).
+* [Fixed] Upgrade pydantic to 1.8.2. See [#9533](https://github.com/DataDog/integrations-core/pull/9533).
+* [Changed] Remove monotonic count from ignored types in no duplicate assertion. See [#9463](https://github.com/DataDog/integrations-core/pull/9463).
+* [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
+
 ## 19.0.0 / 2021-05-28
 
 * [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
