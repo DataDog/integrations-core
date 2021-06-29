@@ -39,4 +39,10 @@ files:
       value:
         type: boolean
         example: true
+    - name: severity_threshold
+      description: |
+        The minimum severity level for a message to be considered 'critical' (see ibm_i.message_queue.critical_size).
+      value:
+        type: integer
+        example: 50
     - template: instances/default
