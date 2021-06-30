@@ -165,7 +165,6 @@ ISTIOD_METRICS = [
 
 V2_MESH_METRICS = [
     'istio.mesh.tcp.connections_closed.count',
-    'istio.mesh.tcp.send_bytes.total',
     'istio.mesh.tcp.connections_opened.count',
     'istio.mesh.tcp.received_bytes.count',
     'istio.mesh.request.count',
@@ -178,12 +177,15 @@ V2_MESH_METRICS = [
     'istio.mesh.request.size.bucket',
     'istio.mesh.request.size.sum',
     'istio.mesh.request.size.count',
-    'istio.mesh.tcp.connections_closed.total',
-    'istio.mesh.tcp.connections_opened.total',
-    'istio.mesh.tcp.received_bytes.total',
     'istio.mesh.tcp.send_bytes.count',
 ]
 
+V2_MESH_COUNTER_GAUGE = [
+    'istio.mesh.tcp.connections_closed.total',
+    'istio.mesh.tcp.connections_opened.total',
+    'istio.mesh.tcp.received_bytes.total',
+    'istio.mesh.tcp.send_bytes.total',
+]
 ISTIOD_V2_METRICS = [
     'istio.citadel.server.root_cert_expiry_timestamp',
     'istio.galley.endpoint_no_pod',

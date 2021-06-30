@@ -34,8 +34,6 @@ def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
     for metric in common.V2_MESH_METRICS:
-        if metric.endswith('.total'):
-            metric = '{}'.format(metric[:-6])
         aggregator.assert_metric(metric)
 
     _assert_tags_excluded(aggregator, [])
@@ -54,7 +52,7 @@ def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     dd_run_check(check)
     # Type override should match old implementation submission names
     # Does not apply to summary/histogram
-    for metric in common.V2_MESH_METRICS:
+    for metric in common.V2_MESH_METRICS + common.V2_MESH_COUNTER_GAUGE:
         aggregator.assert_metric(metric)
 
     _assert_tags_excluded(aggregator, [])
