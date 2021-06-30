@@ -1,7 +1,7 @@
 import click
 
-from ...fs import dir_exists, file_exists
-from ..commands.console import CONTEXT_SETTINGS, abort, echo_failure
+from .....fs import dir_exists, file_exists
+from ...console import CONTEXT_SETTINGS, abort, echo_failure
 from .validate_profile import validate_profile
 
 
