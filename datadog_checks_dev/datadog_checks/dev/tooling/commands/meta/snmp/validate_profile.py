@@ -8,8 +8,8 @@ from os.path import isfile, join
 import jsonschema
 import yaml
 
-from ..commands.console import abort, echo_failure, echo_info
-from ..constants import get_root
+from ....constants import get_root
+from ...console import abort, echo_failure, echo_info
 
 
 def validate_profile(file, directory, verbose):
@@ -45,7 +45,9 @@ class Profile:
             "datadog_checks",
             "dev",
             "tooling",
-            "snmp_profile_validator",
+            "commands",
+            "meta",
+            "snmp",
             "snmp_profile.json",
         )
         with open(schema_file, "r") as f:
