@@ -402,7 +402,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "events_statements_table",
-    ["events_statements_current", "events_statements_history", "events_statements_history_long", None],
+    ["events_statements_history_long"],
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
@@ -436,20 +436,24 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
             'testdb',
             'SELECT {} FROM users where '
             'name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
-                ", ".join("name as name{}".format(i) for i in range(243))
+                ", ".join("name as name{}".format(i) for i in range(244))
             ),
             [
                 {
                     'strategy': None,
                     'code': 'statement_truncated',
-                    'message': None,
+                    'message': 'truncated length: {}'.format(
+                        4096
+                        if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+                        else 1024
+                    ),
                 }
             ],
             StatementTruncationState.truncated.value,
         ),
     ],
 )
-@pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
+@pytest.mark.parametrize("aurora_replication_role", ["reader"])
 def test_statement_samples_collect(
     aggregator,
     dbm_instance,
@@ -506,21 +510,18 @@ def test_statement_samples_collect(
 
     events = aggregator.get_event_platform_events("dbm-samples")
 
-    # Match against the statement itself if it's below the statement length limit or its truncated form
-    # (the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...')
-    expected_statement_prefixes = [
-        statement[:1021] + '...' if len(statement) > 1024 else statement,
-        statement[:4093] + '...' if len(statement) > 4096 else statement,
-    ]
+    # Match against the statement itself if it's below the statement length limit or its truncated form which is
+    # the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...'
+    expected_statement_prefix = (
+        statement[:1021] + '...'
+        if len(statement) > 1024
+        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        else statement[:4093] + '...'
+        if len(statement) > 4096
+        else statement
+    )
 
-    matching = []
-    for e in events:
-        for p in expected_statement_prefixes:
-            print("trying match of \n{}\nagainst \n{}".format(e['db']['statement'], p))
-            if p.startswith(e['db']['statement']):
-                matching.append(e)
-                break
-
+    matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
     assert len(matching) > 0, "should have collected an event"
 
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
@@ -542,7 +543,7 @@ def test_statement_samples_collect(
 
     # Validate the events to ensure we've provided an explanation for not providing an exec plan
     for event in matching:
-        assert e['db']['statement_truncated'] == expected_statement_truncated
+        assert event['db']['statement_truncated'] == expected_statement_truncated
         if event['db']['plan']['definition'] is None:
             assert event['db']['plan']['collection_errors'] == expected_collection_errors
         else:

@@ -503,7 +503,8 @@ class MySQLStatementSamples(object):
             return None
 
         plan, explain_errors = None, None
-        if self._is_statement_truncated(row['sql_text']) == StatementTruncationState.truncated:
+        truncated = self._is_statement_truncated(row['sql_text'])
+        if truncated == StatementTruncationState.truncated:
             self._check.count(
                 "dd.mysql.statement_samples.error",
                 1,
@@ -513,7 +514,7 @@ class MySQLStatementSamples(object):
                 (
                     None,
                     DBExplainError.statement_truncated,
-                    None,
+                    'truncated length: {}'.format(len(row['sql_text'])),
                 )
             ]
         else:
@@ -535,7 +536,7 @@ class MySQLStatementSamples(object):
                     {
                         'strategy': strategy if strategy else None,
                         'code': explain_err_code.value if explain_err_code else None,
-                        'message': '{}'.format(type(explain_err)) if explain_err else None,
+                        'message': explain_err if explain_err else None,
                     }
                 )
 
@@ -570,7 +571,7 @@ class MySQLStatementSamples(object):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
-                    "statement_truncated": self._is_statement_truncated(row['sql_text']).value,
+                    "statement_truncated": truncated.value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -741,7 +742,7 @@ class MySQLStatementSamples(object):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
-            explain_errors = [(None, DBExplainError.use_schema_error, e)]
+            explain_errors = [(None, DBExplainError.use_schema_error, '{}'.format(type(e)))]
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_errors
             self._check.count(
@@ -795,7 +796,7 @@ class MySQLStatementSamples(object):
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
-                explain_errors.append((strategy, DBExplainError.database_error, e))
+                explain_errors.append((strategy, DBExplainError.database_error, '{}'.format(type(e))))
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
