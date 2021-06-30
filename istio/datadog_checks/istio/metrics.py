@@ -317,9 +317,7 @@ ISTIOD_METRICS = {
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
 
-ISTIOD_VERSION = {
-    'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}
-}
+ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
 
 
 def construct_metrics_config(metric_map):
