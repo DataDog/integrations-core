@@ -1,4 +1,4 @@
-from collections import Counter
+from queue import Queue
 
 import click
 import yaml
@@ -61,23 +61,35 @@ def create_profile(file):
     profile.metrics[profile.path] = config['metrics']
     profile.extends = config['extends']
     extended_profiles = extract_extended_profiles(file)
-    profile.metrics = profile.metrics.update(extended_profiles)
-    import pdb; pdb.set_trace()
+    #profile.metrics = profile.metrics.update(extended_profiles)
+
     return profile
-#why is profile.metrics coming up empty?
 
 
 def extract_extended_profiles(file):
-    extended_metrics = {}
-    config = get_file(file)
-    extended_metrics[file] = config['metrics']
-    try:
-        for file in config['extends']:
-            profile.metrics[file] = config['metrics']
-            extract_extended_profiles(file)
-    except KeyError:
-        echo_failure("KeyError")
-    return extended_metrics
+    to_visit = Queue()
+    seen = set()
+    to_visit.put(file)
+    while not to_visit.empty():
+        file = to_visit.get()
+        if file not in seen:
+            config = get_file(file)
+            try:
+                for extended_profile in config['extends']:
+                    to_visit.put(extended_profile)
+            except KeyError:
+                pass
+            seen.add(file)
+    echo_info(seen)
+    return seen
+
+
+        #get extended files, IndexError
+
+
+
+
+
 
 
 # def check_duplicates(profile):
@@ -88,6 +100,8 @@ def extract_extended_profiles(file):
     # get profiles at top of tree, add metrics to set
     # find loops
     #symbol and metrics - ignore table top OIDs
+    # duplicates within same file
+    # tables can appear twice - separate rates and gauges - ignore top-level table
 
 
 
@@ -135,7 +149,7 @@ def compare_for_duplicates(profile):
 
 
 def find_duplicates(profile):
-    echo_info(profile.metrics)
+    pass
 # metrics need to be associated with their filenames
 # Counter like object that can keep the metric-filename link
 
