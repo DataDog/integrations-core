@@ -107,8 +107,8 @@
                 "vendor": {
                     "$id": "#/properties/device/properties/vendor",
                     "type": "string",
-                    "title": "Device vendor",
-                    "description": "Device vendor",
+                    "title": "Vendor tag",
+                    "description": "Tag device by vendor",
                     "default": "",
                     "examples": [
                         "f5"
@@ -124,7 +124,7 @@
                 "string"
             ],
             "title": "The sysobjectid schema",
-            "description": "List of sysobjectids that the profile is configured for",
+            "description": "List of sysobjectids to collect metrics from",
             "default": "",
             "examples": [
                 "1.3.6.1.4.1.3375.2.1.3.4.*"
@@ -134,7 +134,7 @@
             "$id": "#/properties/metrics",
             "type": "array",
             "title": "Metrics",
-            "description": "List of metrics this profile will collect",
+            "description": "List of metrics to collect",
             "default": [],
             "examples": [
                 [
