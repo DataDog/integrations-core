@@ -100,7 +100,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         if instances is not None:
             for instance in instances:
-                possible_urls = instance.get('prometheus_possible_urls')
+                possible_urls = instance.get('possible_prometheus_urls')
                 if possible_urls is not None:
                     for url in possible_urls:
                         try:
