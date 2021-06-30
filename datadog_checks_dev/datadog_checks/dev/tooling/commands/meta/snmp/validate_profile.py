@@ -48,7 +48,7 @@ class Profile:
             "commands",
             "meta",
             "snmp",
-            "snmp_profile.json",
+            "profile_schema.json",
         )
         with open(schema_file, "r") as f:
             contents = f.read()
