@@ -73,6 +73,7 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
+        self.is_mariadb = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
@@ -108,12 +109,13 @@ class MySql(AgentCheck):
             try:
                 self._conn = db
 
-                if self._get_is_aurora(db):
-                    tags = tags + self._get_runtime_aurora_tags(db)
-
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
+
+                self.is_mariadb = self.version.flavor == "MariaDB"
+                if self._get_is_aurora(db):
+                    tags = tags + self._get_runtime_aurora_tags(db)
 
                 # Metric collection
                 self._collect_metrics(db, tags=tags)
@@ -323,9 +325,8 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        is_mariadb = self.version.flavor == "MariaDB"
         replication_channel = self._config.options.get('replication_channel')
-        results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
+        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
         nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
         results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
@@ -539,7 +540,10 @@ class MySql(AgentCheck):
         if pid is None and PSUTIL_AVAILABLE:
             for proc in psutil.process_iter():
                 try:
-                    if proc.name() == PROC_NAME:
+                    process_name = PROC_NAME
+                    if self.is_mariadb and self.version.version_compatible((10, 5, 0)):
+                        process_name = "mariadbd"
+                    if proc.name() == process_name:
                         pid = proc.pid
                 except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
                     continue
