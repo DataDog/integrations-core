@@ -294,7 +294,7 @@ class NewKafkaConsumerCheck(object):
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
-            self.validate_consumer_group()
+            self.validate_consumer_groups()
             for consumer_group in self._consumer_groups:
                 find_coordinator_future = self.kafka_client._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
