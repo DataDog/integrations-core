@@ -9,6 +9,18 @@ MOCK_V2_MESH_INSTANCE = {
     'use_openmetrics': True,
 }
 
+MOCK_V2_MESH_OVERRIDE_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': True,
+    'extra_metrics': [
+        {'istio_request': {'name': 'request', 'type': 'counter_gauge'}},
+        {'istio_tcp_connections_closed': {'name': 'tcp.connections_closed', 'type': 'counter_gauge'}},
+        {'istio_tcp_connections_opened': {'name': 'tcp.connections_opened', 'type': 'counter_gauge'}},
+        {'istio_tcp_received_bytes': {'name': 'tcp.received_bytes', 'type': 'counter_gauge'}},
+        {'istio_tcp_sent_bytes': {'name': 'tcp.send_bytes', 'type': 'counter_gauge'}},
+    ],
+}
+
 MOCK_LEGACY_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:15090/metrics',
 }
@@ -153,7 +165,7 @@ ISTIOD_METRICS = [
 
 V2_MESH_METRICS = [
     'istio.mesh.tcp.connections_closed.count',
-    'istio.mesh.tcp.send_bytes.count',
+    'istio.mesh.tcp.send_bytes.total',
     'istio.mesh.tcp.connections_opened.count',
     'istio.mesh.tcp.received_bytes.count',
     'istio.mesh.request.count',
@@ -166,6 +178,10 @@ V2_MESH_METRICS = [
     'istio.mesh.request.size.bucket',
     'istio.mesh.request.size.sum',
     'istio.mesh.request.size.count',
+    'istio.mesh.tcp.connections_closed.total',
+    'istio.mesh.tcp.connections_opened.total',
+    'istio.mesh.tcp.received_bytes.total',
+    'istio.mesh.tcp.send_bytes.count',
 ]
 
 ISTIOD_V2_METRICS = [

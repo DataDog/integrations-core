@@ -44,6 +44,25 @@ def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
 
 
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
+    """
+    Test proxy mesh check for V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_OVERRIDE_INSTANCE])
+    dd_run_check(check)
+    # Type override should match old implementation submission names
+    # Does not apply to summary/histogram
+    for metric in common.V2_MESH_METRICS:
+        aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, [])
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
     """
     Test metadata version collection with V2 implementation
@@ -65,4 +84,3 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-
