@@ -102,7 +102,9 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check_id = 'test:123'
 
-    version_data = [str(part) for part in kafka_consumer_check.kafka_client._client.check_version()]
+    kafka_client = kafka_consumer_check.create_kafka_client()
+    version_data = [str(part) for part in kafka_client.check_version()]
+    kafka_client.close()
     version_parts = {'version.{}'.format(name): part for name, part in zip(('major', 'minor', 'patch'), version_data)}
     version_parts['version.scheme'] = 'semver'
     version_parts['version.raw'] = '.'.join(version_data)
