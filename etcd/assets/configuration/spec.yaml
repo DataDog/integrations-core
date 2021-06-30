@@ -44,12 +44,12 @@ files:
     options: []
   - template: instances
     options:
-    - name: prometheus_possible_urls
+    - name: possible_prometheus_urls
       required: true
       description: |
         The URLs to try to get your application metrics that are exposed by Prometheus.
         The check will try each URLs in the list and will use the first working one.
-        One of prometheus_possible_urls or prometheus_url parameter is required.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
       value:
         type: array
         items:
@@ -60,7 +60,7 @@ files:
     - name: prometheus_url
       description: |
         Prometheus endpoint of your etcd instance.
-        One of prometheus_possible_urls or prometheus_url parameter is required.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
 
         Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
       required: false
