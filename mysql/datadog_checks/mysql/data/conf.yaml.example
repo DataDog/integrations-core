@@ -32,15 +32,15 @@ instances:
     #
   - host: localhost
 
-    ## @param user - string - optional
+    ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
-    user: datadog
+    username: datadog
 
-    ## @param pass - string - optional
+    ## @param password - string - optional
     ## Password associated to the MySQL user.
     #
-    pass: <PASS>
+    password: <PASSWORD>
 
     ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.

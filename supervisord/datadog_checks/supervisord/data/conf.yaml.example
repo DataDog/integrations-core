@@ -37,15 +37,15 @@ instances:
     #
     # socket: <SOCKETFILE_PATH>
 
-    ## @param user - string - optional
+    ## @param username - string - optional
     ## Required only if a username is configured.
     #
-    # user: <USERNAME>
+    # username: <USERNAME>
 
-    ## @param pass - string - optional
+    ## @param password - string - optional
     ## Required only if a password is configured.
     #
-    # pass: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param proc_regex - list of strings - optional
     ## Regex pattern[s] matching the names of processes to monitor.
