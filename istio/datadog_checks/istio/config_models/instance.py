@@ -97,6 +97,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     pilot_endpoint: Optional[str]
     prometheus_metrics_prefix: Optional[str]
+    prometheus_url: str
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     send_distribution_buckets: Optional[bool]
