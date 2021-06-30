@@ -465,7 +465,6 @@ class PostgresStatementSamples(object):
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
-            plan_cost = plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0
 
         statement_plan_sig = (query_signature, plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
@@ -485,7 +484,6 @@ class PostgresStatementSamples(object):
                     "instance": row.get('datname', None),
                     "plan": {
                         "definition": obfuscated_plan,
-                        "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_error": collection_error,
                     },
