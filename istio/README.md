@@ -22,7 +22,7 @@ Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your I
 
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options.
 
-#### Metric Collection
+#### Metric collection
 
 Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
 

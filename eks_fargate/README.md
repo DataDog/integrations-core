@@ -32,7 +32,7 @@ To get the best observability coverage monitoring workloads in AWS EKS Fargate, 
 
 Also, set up integrations for any other AWS services you are running with EKS (for example, [ELB][12]).
 
-#### Manual Installation
+#### Manual installation
 
 To install, download the custom Agent image: `datadog/agent` with version v7.17 or above.
 
@@ -140,7 +140,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Metrics Collection
+## Metrics collection
 
 ### Integration metrics
 
@@ -262,7 +262,7 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][22] page. To enable live processes, [enable shareProcessNamespace in the pod spec][23].
 
-## Log Collection
+## Log collection
 
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
@@ -287,8 +287,7 @@ You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs.
             auto_create_group On
    ```
 
-
-## Traces Collection
+## Traces collection
 
 Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][19].
 
@@ -345,7 +344,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Events Collection
+## Events collection
 
 To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
 
@@ -356,7 +355,7 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
-## Process Collection
+## Process collection
 
 For Agent 6.19+/7.19+, [Process Collection][24] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
 

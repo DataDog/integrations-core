@@ -36,7 +36,7 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Consul metrics. See the [sample consul.d/conf.yaml][5] for all available configuration options.
 

@@ -53,7 +53,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 

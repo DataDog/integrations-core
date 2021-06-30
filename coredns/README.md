@@ -34,7 +34,6 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 #### Log collection
 
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
 
 Then, set [Log Integrations][11] as Docker labels:
@@ -83,7 +82,6 @@ spec:
 
 #### Log collection
 
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
 
 Then, set [Log Integrations][15] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][16].
@@ -130,7 +128,6 @@ Set [Autodiscovery Integrations Templates][17] as Docker labels on your applicat
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 ##### Log collection
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][18].
 
