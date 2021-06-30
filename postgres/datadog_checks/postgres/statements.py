@@ -140,7 +140,7 @@ class PostgresStatementMetrics(object):
         # each query came from.
         tags = [t for t in tags if not t.startswith("db:")]
         try:
-            rows = self._collect_metrics_rows(db)
+            rows = self._collect_metrics_rows(db, tags)
             if not rows:
                 return
             for event in self._rows_to_fqt_events(rows, tags):
@@ -163,6 +163,18 @@ class PostgresStatementMetrics(object):
             db.rollback()
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
+
+    def _load_pg_stat_statements_safe(self, db, tags):
+        try:
+            self._load_pg_stat_statements(db)
+        except psycopg2.errors.ObjectNotInPrerequisiteState as e:
+            if 'pg_stat_statements must be loaded via shared_preload_librarie' in str(e):
+                self._check.count("postgresql.setup.error", 1, tags=tags + ["reason:pg_stat_statements_not_enabled"])
+                self._log.warning("Unable to collect statement metrics because pg_stat_statements must be loaded "
+                                  "via shared_preload_libraries")
+                return []
+            else:
+                raise
 
     def _load_pg_stat_statements(self, db):
         available_columns = set(self._get_pg_stat_statements_columns(db))
@@ -191,8 +203,8 @@ class PostgresStatementMetrics(object):
             params=params,
         )
 
-    def _collect_metrics_rows(self, db):
-        rows = self._load_pg_stat_statements(db)
+    def _collect_metrics_rows(self, db, tags):
+        rows = self._load_pg_stat_statements_safe(db, tags)
 
         rows = self._normalize_queries(rows)
         if not rows:
