@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....snmp_profile_validator.snmp_validation_click import click_options
+from .snmp_validation_click import click_options
 from ...console import CONTEXT_SETTINGS
 from .generate_profile import generate_profile_from_mibs
 from .translate_profile import translate_profile
