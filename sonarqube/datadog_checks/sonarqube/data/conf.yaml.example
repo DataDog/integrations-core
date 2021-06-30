@@ -154,6 +154,12 @@ instances:
     #
     # port: <PORT>
 
+    ## @param is_jmx - boolean - optional - default: false
+    ## Whether or not this instance is a configuration for a JMX integration.
+    ## If `is_jmx` flag is set to true at init_config level, this flag is ignored.
+    #
+    # is_jmx: false
+
     ## @param user - string - optional
     ## User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
     #
