@@ -205,6 +205,16 @@
                                     "1.3.6.1.4.1.3375.2.1.1.2.1.44.0"
                                 ]
                             },
+                            "MIB": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/MIB",
+                                "type": "string",
+                                "title": "MIB to collect metrics from",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "MIB: NETAPP-MIB"
+                                ]
+                            },
                             "name": {
                                 "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/name",
                                 "type": "string",
