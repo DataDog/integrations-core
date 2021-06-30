@@ -7,6 +7,7 @@ from ...utils import get_model_consumer, normalize_yaml
 
 pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_model]
 
+
 def test():
     consumer = get_model_consumer(
         """
