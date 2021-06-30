@@ -545,7 +545,6 @@ class MySQLStatementSamples(object):
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
-            plan_cost = self._parse_execution_plan_cost(plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
@@ -564,7 +563,6 @@ class MySQLStatementSamples(object):
                     "instance": row['current_schema'],
                     "plan": {
                         "definition": obfuscated_plan,
-                        "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_errors": collection_errors if collection_errors else None,
                     },
@@ -839,14 +837,6 @@ class MySQLStatementSamples(object):
     @staticmethod
     def _can_explain(obfuscated_statement):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
-
-    @staticmethod
-    def _parse_execution_plan_cost(execution_plan):
-        """
-        Parses the total cost from the execution plan, if set. If not set, returns cost of 0.
-        """
-        cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.0)
-        return float(cost or 0.0)
 
     @staticmethod
     def _get_truncation_state(statement):
