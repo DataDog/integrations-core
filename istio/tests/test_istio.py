@@ -1,4 +1,4 @@
- (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
