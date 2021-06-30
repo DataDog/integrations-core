@@ -14,12 +14,12 @@ init_config:
 #
 instances:
 
-    ## @param prometheus_possible_urls - list of strings - required
+    ## @param possible_prometheus_urls - list of strings - required
     ## The URLs to try to get your application metrics that are exposed by Prometheus.
     ## The check will try each URLs in the list and will use the first working one.
-    ## One of prometheus_possible_urls or prometheus_url parameter is required.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     #
-  - prometheus_possible_urls:
+  - possible_prometheus_urls:
       - https://%%host%%:10259/metrics
       - https://localhost:10259/metrics
       - http://%%host%%:10251/metrics
@@ -27,7 +27,7 @@ instances:
 
     ## @param prometheus_url - string - optional - default: http://%%host%%:10251/metrics
     ## The URL where your application metrics are exposed by Prometheus.
-    ## One of prometheus_possible_urls or prometheus_url parameter is required.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     #
     # prometheus_url: http://%%host%%:10251/metrics
 
