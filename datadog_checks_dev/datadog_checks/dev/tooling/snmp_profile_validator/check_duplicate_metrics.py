@@ -67,14 +67,19 @@ class Profile:
 
     def extract_oids(self, metrics):
         OIDs_list = []
-
+        # no
         for el in metrics:
-                for k in el:
-                    if k == 'OID':
-                        OIDs_list.append(el[k])
-                    if isinstance(el[k], dict):
-                        for result in self.extract_oids(k):
-                            return result
+                for key in el:
+                    if key == 'OID':
+                        OIDs_list.append(el[key])
+
+                        if isinstance(el[key], dict):
+                            for result in self.extract_oids(key):
+                                return result
+                        if isinstance(el, list):
+                            for item in el:
+                                for result in self.extract_oids(item):
+                                    return result
         return OIDs_list
 
 
