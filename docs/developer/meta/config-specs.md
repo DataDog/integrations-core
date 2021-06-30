@@ -65,8 +65,8 @@ Every option has 10 possible attributes:
 
 - `multiple` - Whether or not options may be selected multiple times like `instances` or just once
   like `init_config`
-- `metadata_tags` - A list of tags that can be used for unexpected use cases. Tags currently supported:
-    - `multiple_instances:true` - Used to split the configuration options into multiple instances. Helpful for the `conf.yaml.example` generation to be more readable.
+- `multiple_instances_defined` - Whether or not we separate the definition into multiple instances or just one
+- `metadata_tags` - A list of tags (like `docs:foo`) that can be used for unexpected use cases
 - `options` - Nested options, indicating that this is a section like `instances` or `logs`
 - `value` - The expected type data
 

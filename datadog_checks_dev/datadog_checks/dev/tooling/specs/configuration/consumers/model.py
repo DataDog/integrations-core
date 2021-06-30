@@ -101,7 +101,6 @@ class ModelConsumer:
 
             for section in sorted(file['options'], key=lambda s: s['name']):
                 errors = []
-                metadata_tags = section.get('metadata_tags', [])
 
                 section_name = section['name']
                 if section_name == 'init_config':
@@ -112,7 +111,7 @@ class ModelConsumer:
                     model_id = 'instance'
                     model_file_name = f'{model_id}.py'
                     schema_name = 'InstanceConfig'
-                    if 'multiple_instances:true' in metadata_tags:
+                    if section['multiple_instances_defined']:
                         section = self._merge_instances(section, errors)
                 # Skip anything checks don't use directly
                 else:

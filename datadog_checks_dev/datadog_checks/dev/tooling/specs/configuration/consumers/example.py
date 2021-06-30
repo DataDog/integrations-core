@@ -181,11 +181,10 @@ def write_option(option, writer, indent='', start_list=False):
 
         if 'options' in option:
             multiple = option['multiple']
-            metadata_tags = option.get('metadata_tags', [])
-            multiple_instances = 'multiple_instances:true' in metadata_tags
+            multiple_instances_defined = option.get('multiple_instances_defined')
 
             writer.write(indent, option_name, ':', '\n')
-            if multiple and multiple_instances:
+            if multiple and multiple_instances_defined:
                 for instance in option['options']:
                     write_sub_option(instance, writer, indent, multiple, include_top_description=True)
             else:
