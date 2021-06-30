@@ -15,7 +15,7 @@ from .utils import _assert_tags_excluded, get_fixture_path, get_response
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_istiod(aggregator, dd_run_check, mock_http_response):
     """
-    Test the istiod deployment endpoint for v1.5+ check
+    Test the istiod deployment endpoint for V2 implementation
     """
     mock_http_response(file_path=get_fixture_path('1.5', 'istiod.txt'))
     check = Istio('istio', {}, [common.MOCK_V2_ISTIOD_INSTANCE])
@@ -24,6 +24,49 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
     for metric in common.ISTIOD_V2_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
+    """
+    Test proxy mesh check for V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
+    dd_run_check(check)
+    for metric in common.V2_MESH_METRICS:
+        if metric.endswith('.total'):
+            metric = '{}'.format(metric[:-6])
+        aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, [])
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
+    """
+    Test metadata version collection with V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istiod.txt'))
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    # Use version mocked from istiod 1.5 fixture
+    MOCK_VERSION = '1.5.0'
+
+    major, minor, patch = MOCK_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': MOCK_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 def test_legacy_istiod(aggregator):
@@ -42,18 +85,17 @@ def test_legacy_istiod(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-
-def test_proxy_mesh(aggregator):
+def test_legacy_proxy_mesh(aggregator):
     """
     Test proxy mesh check
     """
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_ISTIO_PROXY_MESH_INSTANCE])
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_MESH_INSTANCE])
 
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://localhost:15090/metrics', text=get_response('1.5', 'istio-proxy.txt'))
-        check.check(common.MOCK_ISTIO_PROXY_MESH_INSTANCE)
+        check.check(common.MOCK_LEGACY_MESH_INSTANCE)
 
-    for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
+    for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
     _assert_tags_excluded(aggregator, [])
@@ -67,7 +109,7 @@ def test_istio_proxy_mesh_exclude(aggregator):
     Test proxy mesh check
     """
     exclude_tags = ['destination_app', 'destination_principal']
-    instance = common.MOCK_ISTIO_PROXY_MESH_INSTANCE
+    instance = common.MOCK_LEGACY_MESH_INSTANCE
     instance['exclude_labels'] = exclude_tags
 
     check = Istio(common.CHECK_NAME, {}, [instance])
@@ -76,7 +118,7 @@ def test_istio_proxy_mesh_exclude(aggregator):
         metric_request.get('http://localhost:15090/metrics', text=get_response('1.5', 'istio-proxy.txt'))
         check.check(instance)
 
-    for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
+    for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
     _assert_tags_excluded(aggregator, exclude_tags)

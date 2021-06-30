@@ -47,9 +47,11 @@ class Istio(OpenMetricsBaseCheck):
 
         if is_affirmative(instance.get('use_openmetrics', False)):
             if PY2:
-                raise ConfigurationError("Openmetrics on this integration is only available when using py3. "
-                                         "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                                         "for more information")
+                raise ConfigurationError(
+                    "Openmetrics on this integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information"
+                )
             # TODO: when we drop Python 2 move this import up top
             from .check import IstioCheckV2
 

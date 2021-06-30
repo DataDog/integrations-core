@@ -5,12 +5,12 @@
 CHECK_NAME = 'istio'
 
 MOCK_V2_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
     'use_openmetrics': True,
 }
 
 MOCK_LEGACY_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
 }
 
 MOCK_V2_ISTIOD_INSTANCE = {
@@ -20,9 +20,7 @@ MOCK_V2_ISTIOD_INSTANCE = {
 
 MOCK_LEGACY_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
 
-MOCK_ISTIO_PROXY_MESH_INSTANCE = {'istio_mesh_endpoint': 'http://localhost:15090/metrics'}
-
-MESH_METRICS = [
+LEGACY_MESH_METRICS = [
     'istio.mesh.request.count',
     'istio.mesh.request.size.count',
     'istio.mesh.request.size.sum',
@@ -53,7 +51,6 @@ MESH_MERICS_1_5 = [
     'istio.mesh.tcp.received_bytes.total.total',
     'istio.mesh.tcp.send_bytes.total.total',
 ]
-
 
 MESH_METRICS_MAPPER = {
     'istio_request_duration_milliseconds': 'request.duration.milliseconds',
@@ -152,6 +149,23 @@ ISTIOD_METRICS = [
     'istio.process.virtual_memory_max_bytes',
     'istio.sidecar_injection.requests_total',
     'istio.sidecar_injection.success_total',
+]
+
+V2_MESH_METRICS = [
+    'istio.mesh.tcp.connections_closed.count',
+    'istio.mesh.tcp.send_bytes.count',
+    'istio.mesh.tcp.connections_opened.count',
+    'istio.mesh.tcp.received_bytes.count',
+    'istio.mesh.request.count',
+    'istio.mesh.request.duration.milliseconds.bucket',
+    'istio.mesh.request.duration.milliseconds.sum',
+    'istio.mesh.request.duration.milliseconds.count',
+    'istio.mesh.response.size.bucket',
+    'istio.mesh.response.size.sum',
+    'istio.mesh.response.size.count',
+    'istio.mesh.request.size.bucket',
+    'istio.mesh.request.size.sum',
+    'istio.mesh.request.size.count',
 ]
 
 ISTIOD_V2_METRICS = [
