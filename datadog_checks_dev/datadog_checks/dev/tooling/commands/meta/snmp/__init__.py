@@ -5,9 +5,9 @@ import click
 
 from ...console import CONTEXT_SETTINGS
 from .generate_profile import generate_profile_from_mibs
-from .validators.snmp_validation_click import click_options
 from .translate_profile import translate_profile
 from .validate_mib_filenames import validate_mib_filenames
+from .validators.snmp_validation_click import click_options
 
 ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, click_options]
 
@@ -19,4 +19,3 @@ def snmp():
 
 for command in ALL_COMMANDS:
     snmp.add_command(command)
-
