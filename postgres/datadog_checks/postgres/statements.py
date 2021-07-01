@@ -205,6 +205,7 @@ class PostgresStatementMetrics(object):
                     "dd.postgres.statement_metrics.error", 1, tags=tags + ["error:database-{}".format(type(e).__name__)]
                 )
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
+            return []
         except psycopg2.Error as e:
             self._check.count(
                 "dd.postgres.statement_metrics.error", 1, tags=tags + ["error:database-{}".format(type(e).__name__)]

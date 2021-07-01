@@ -657,6 +657,46 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
+@pytest.mark.parametrize(
+    "error,expected_error_tag",
+    [
+        (
+            psycopg2.errors.ObjectNotInPrerequisiteState(
+                'pg_stat_statements must be loaded via shared_preload_libraries'
+            ),
+            'error:pg_stat_statements_not_enabled',
+        ),
+        (
+            psycopg2.errors.ObjectNotInPrerequisiteState('cannot insert into view'),
+            'error:database-ObjectNotInPrerequisiteState',
+        ),
+        (
+            psycopg2.errors.DatabaseError('some generic error'),
+            'error:database-DatabaseError',
+        ),
+    ],
+)
+def test_statement_metrics_database_errors(aggregator, integration_check, dbm_instance, error, expected_error_tag):
+    # don't need samples for this test
+    dbm_instance['statement_samples'] = {'enabled': False}
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with mock.patch(
+        'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns', side_effect=error
+    ):
+        check.check(dbm_instance)
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        expected_error_tag,
+    ]
+
+    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
+
+
 def assert_state_clean(check):
     assert check.metrics_cache.instance_metrics is None
     assert check.metrics_cache.bgw_metrics is None
