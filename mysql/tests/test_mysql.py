@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def dbm_instance(instance_complex):
-    instance_complex['deep_database_monitoring'] = True
+    instance_complex['dbm'] = True
     instance_complex['statement_samples'] = {
         'enabled': True,
         # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
@@ -41,6 +41,20 @@ def dbm_instance(instance_complex):
         'collections_per_second': 1,
     }
     return instance_complex
+
+
+dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
+@pytest.mark.parametrize("dbm_enabled", [True, False])
+def test_dbm_enabled_config(dbm_instance, dbm_enabled_key, dbm_enabled):
+    # test to make sure we continue to support the old key
+    for k in dbm_enabled_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[dbm_enabled_key] = dbm_enabled
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._config.dbm_enabled == dbm_enabled
 
 
 @pytest.fixture(autouse=True)
