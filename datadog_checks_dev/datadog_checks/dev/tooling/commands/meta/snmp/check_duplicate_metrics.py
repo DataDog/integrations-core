@@ -72,7 +72,7 @@ class Profile:
             if len(counter[oid]) == 1:
                 echo_failure("found duplicate oid " + oid + " in " + str(counter[oid]))
 
-
+            #collect duplicate oids by filename
 
             #where files are imported - in list
 
