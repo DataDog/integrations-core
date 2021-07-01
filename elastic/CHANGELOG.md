@@ -1,6 +1,14 @@
 # CHANGELOG - elastic
 
-## 2.1.0 / 2021-04-19
+## 3.0.0 / 2021-05-28
+
+* [Added] Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
+
+## 2.2.0 / 2021-05-17
+
+* [Added] Update version supported for Cat Allocation metrics. See [#9339](https://github.com/DataDog/integrations-core/pull/9339).
+
+## 2.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8911](https://github.com/DataDog/integrations-core/pull/8911).
 * [Fixed] Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).

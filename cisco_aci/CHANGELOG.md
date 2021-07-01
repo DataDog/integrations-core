@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-## 1.15.0 / 2021-04-19
+## 1.15.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
 

@@ -22,7 +22,7 @@ The OpenStack Controller integration is designed to collect information from all
 
 Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` file. This user requires admin read-only permissions across your environment so that it can be run from a single node and read high level system information about all nodes and servers.
 
-#### Agent Configuration
+#### Agent configuration
 
 1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OpenStack Controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
 

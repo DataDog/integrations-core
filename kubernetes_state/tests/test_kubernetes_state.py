@@ -140,8 +140,6 @@ TAGS = {
         'condition:ready',
         'status:true',
         'status:false',
-        'status:unknown',
-        'node:minikube',
     ],
     NAMESPACE
     + '.pod.status_phase': [

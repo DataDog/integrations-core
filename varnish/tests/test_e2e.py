@@ -11,4 +11,4 @@ from . import common
 def test_check(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     for mname in common.COMMON_METRICS:
-        aggregator.assert_metric(mname, tags=['cluster:webs', 'varnish_name:default'])
+        aggregator.assert_metric(mname, tags=['varnish_cluster:webs', 'varnish_name:default'])

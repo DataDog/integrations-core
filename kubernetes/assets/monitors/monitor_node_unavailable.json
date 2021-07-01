@@ -1,8 +1,8 @@
 {
 	"name": "[kubernetes] Monitor Unschedulable Kubernetes Nodes",
 	"type": "query alert",
-	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kubernetes_cluster} * 100 / sum:kubernetes_state.node.status{*} by {kubernetes_cluster} < 80",
-	"message": "More than 20% of nodes are unschedulable on ({{kubernetes_cluster.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
+	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kube_cluster_name} * 100 / sum:kubernetes_state.node.status{*} by {kube_cluster_name} < 80",
+	"message": "More than 20% of nodes are unschedulable on ({{kube_cluster_name.name}} cluster). \n Keep in mind that this might be expected based on your infrastructure.",
 	"tags": [
 		"integration:kubernetes"
 	],

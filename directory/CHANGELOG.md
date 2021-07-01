@@ -1,6 +1,6 @@
 # CHANGELOG - directory
 
-## 1.10.0 / 2021-04-19
+## 1.10.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8904](https://github.com/DataDog/integrations-core/pull/8904).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

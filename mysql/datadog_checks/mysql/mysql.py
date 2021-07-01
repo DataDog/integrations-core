@@ -73,6 +73,7 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.version = None
+        self.is_mariadb = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
@@ -102,26 +103,33 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+
+        if self.instance.get('pass'):
+            self._log_deprecation('_config_renamed', 'pass', 'password')
+
         tags = list(self._config.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
                 self._conn = db
 
-                if self._get_is_aurora(db):
-                    tags.extend(self._get_runtime_aurora_tags(db))
-                    tags = list(set(tags))
-
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
 
+                self.is_mariadb = self.version.flavor == "MariaDB"
+                if self._get_is_aurora(db):
+                    tags = tags + self._get_runtime_aurora_tags(db)
+
                 # Metric collection
                 self._collect_metrics(db, tags=tags)
                 self._collect_system_metrics(self._config.host, db, tags)
-                if self._config.deep_database_monitoring:
-                    self._statement_metrics.collect_per_statement_metrics(db, self.service_check_tags)
-                    self._statement_samples.run_sampler(self.service_check_tags)
+                if self._config.dbm_enabled:
+                    dbm_tags = list(set(self.service_check_tags) | set(tags))
+                    self._statement_metrics.collect_per_statement_metrics(db, dbm_tags)
+                    self._statement_samples.run_sampler(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -167,6 +175,7 @@ class MySql(AgentCheck):
         connection_args = {
             'ssl': ssl,
             'connect_timeout': self._config.connect_timeout,
+            'autocommit': True,
         }
         if self._config.charset:
             connection_args['charset'] = self._config.charset
@@ -322,9 +331,8 @@ class MySql(AgentCheck):
 
     def _collect_replication_metrics(self, db, results, above_560):
         # Get replica stats
-        is_mariadb = self.version.flavor == "MariaDB"
         replication_channel = self._config.options.get('replication_channel')
-        results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
+        results.update(self._get_replica_stats(db, self.is_mariadb, replication_channel))
         nonblocking = is_affirmative(self._config.options.get('replication_non_blocking_status', False))
         results.update(self._get_replica_status(db, above_560, nonblocking))
         return REPLICA_VARS
@@ -538,7 +546,10 @@ class MySql(AgentCheck):
         if pid is None and PSUTIL_AVAILABLE:
             for proc in psutil.process_iter():
                 try:
-                    if proc.name() == PROC_NAME:
+                    process_name = PROC_NAME
+                    if self.is_mariadb and self.version.version_compatible((10, 5, 0)):
+                        process_name = "mariadbd"
+                    if proc.name() == process_name:
                         pid = proc.pid
                 except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
                     continue

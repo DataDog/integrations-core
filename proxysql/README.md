@@ -33,7 +33,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -75,7 +75,7 @@ To configure this check for an Agent running on a host:
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-#### Metric Collection
+#### Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|

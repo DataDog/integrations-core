@@ -1,5 +1,10 @@
 # CHANGELOG - nginx-ingress-controller
 
+## 1.9.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#8963](https://github.com/DataDog/integrations-core/pull/8963).
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
 ## 1.8.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

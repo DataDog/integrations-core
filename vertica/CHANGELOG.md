@@ -1,6 +1,14 @@
 # CHANGELOG - Vertica
 
-## 2.0.2 / 2021-04-19
+## 2.1.1 / 2021-06-07
+
+* [Fixed] Fix required values in vertica. See [#9479](https://github.com/DataDog/integrations-core/pull/9479).
+
+## 2.1.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9003](https://github.com/DataDog/integrations-core/pull/9003).
+
+## 2.0.2 / 2021-04-19 / Agent 7.28.0
 
 * [Fixed] Fix logs section in example config file. See [#8876](https://github.com/DataDog/integrations-core/pull/8876).
 

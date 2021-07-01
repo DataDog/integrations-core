@@ -135,6 +135,9 @@
   description: |
     A list of metrics to exclude, with each entry being either
     the exact metric name or a regular expression.
+    In order to exclude all metrics but the ones matching a specific filter,
+    you can use a negative lookahead regex like:
+      - ^(?!foo).*$
   value:
     type: array
     items:
@@ -300,5 +303,16 @@
   value:
     example: false
     type: boolean
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

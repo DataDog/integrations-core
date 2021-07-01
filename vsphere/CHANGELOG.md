@@ -1,6 +1,12 @@
 # CHANGELOG - vsphere
 
-## 5.9.0 / 2021-04-01
+## 5.10.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9005](https://github.com/DataDog/integrations-core/pull/9005).
+* [Added] Use new REST API when possible. See [#9293](https://github.com/DataDog/integrations-core/pull/9293).
+* [Fixed] Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+
+## 5.9.0 / 2021-04-01 / Agent 7.28.0
 
 * [Added] Add rest_api_options to expose all RequestsWrapper options. See [#9070](https://github.com/DataDog/integrations-core/pull/9070).
 * [Fixed] Tag collection only available from vSphere 6.5. See [#8864](https://github.com/DataDog/integrations-core/pull/8864).

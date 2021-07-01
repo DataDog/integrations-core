@@ -197,3 +197,4 @@ def assert_metrics(aggregator, expected_tags):
         aggregator.assert_metric(mname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_no_duplicate_metrics()

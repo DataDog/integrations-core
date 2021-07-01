@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
@@ -10,7 +10,9 @@ ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
 RELATION_REGEX = 'relation_regex'
 SCHEMAS = 'schemas'
+RELKIND = 'relkind'
 
+# The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
     'descriptors': [
         ('mode', 'lock_mode'),
@@ -38,6 +40,9 @@ SELECT mode,
     'relation': True,
 }
 
+# The pg_stat_all_tables contain one row for each table in the current database,
+# showing statistics about accesses to that specific table.
+# pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -59,6 +64,10 @@ SELECT relname,schemaname,{metrics_columns}
     'relation': True,
 }
 
+
+# The pg_stat_all_indexes view will contain one row for each index in the current database,
+# showing statistics about accesses to that specific index.
+# The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
 IDX_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
     'metrics': {
@@ -76,6 +85,9 @@ SELECT relname,
     'relation': True,
 }
 
+
+# The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
+# For this integration we are restricting the query to ordinary tables.
 SIZE_METRICS = {
     'descriptors': [('nspname', 'schema'), ('relname', 'table')],
     'metrics': {
@@ -97,6 +109,10 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   {relations}""",
 }
 
+
+# The pg_statio_all_tables view will contain one row for each table in the current database,
+# showing statistics about I/O on that specific table. The pg_statio_user_tables views contain the same information,
+# but filtered to only show user tables.
 STATIO_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -119,17 +135,22 @@ SELECT relname,
 }
 
 
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+
+
 class RelationsManager(object):
+    """Builds queries to collect metrics about relations"""
+
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
+        self.has_relations = len(self.config) > 0
 
-    def build_relations_filter(self, schema_field):
-        # type (str) -> str
-        """Build a WHERE clause filtering relations based on relations_config."""
+    def filter_relation_query(self, query, schema_field):
+        # type (str, str) -> str
+        """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
-
         for r in self.config.values():
             relation_filter = []
             if r.get(RELATION_NAME):
@@ -141,13 +162,20 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
+            if r.get(RELKIND) and 'FROM pg_locks' in query:
+                relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
+                relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
+
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        return ' OR '.join(relations_filter)
+        relations_filter = ' OR '.join(relations_filter)
+        self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
+        return query.format(relations=relations_filter)
 
-    def validate_relations_config(self, yamlconfig):
-        # type: (Dict) -> None
+    @staticmethod
+    def validate_relations_config(yamlconfig):
+        # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
             if isinstance(element, dict):
                 if not (RELATION_NAME in element or RELATION_REGEX in element):
@@ -166,20 +194,24 @@ class RelationsManager(object):
                     )
                 if not isinstance(element.get(SCHEMAS, []), list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
-            else:
+                if not isinstance(element.get(RELKIND, []), list):
+                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
+            elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
-    def _build_relations_config(self, yamlconfig):
+    @staticmethod
+    def _build_relations_config(yamlconfig):
+        # type:  (List[Union[str, Dict]]) -> Dict[str, Dict[str, Any]]
         """Builds a dictionary from relations configuration while maintaining compatibility"""
         config = {}
         for element in yamlconfig:
             if isinstance(element, str):
                 config[element] = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                relname = element.get(RELATION_NAME)
-                rel_regex = element.get(RELATION_REGEX)
-                schemas = element.get(SCHEMAS, [])
-                name = relname or rel_regex
+                relname = str(element.get(RELATION_NAME))  # type: str
+                rel_regex = str(element.get(RELATION_REGEX))  # type: str
+                schemas = element.get(SCHEMAS, [])  # type: List
+                name = relname or rel_regex  # type: str
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name][SCHEMAS] = [ALL_SCHEMAS]

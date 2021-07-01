@@ -88,19 +88,12 @@ def test():
         from . import defaults, validators
 
 
-        class Obj(BaseModel):
-            class Config:
-                allow_mutation = False
-
-            __root__: Sequence[float]
-
-
         class InstanceConfig(BaseModel):
             class Config:
                 allow_mutation = False
 
             foo: str
-            obj: Optional[Mapping[str, Obj]]
+            obj: Optional[Mapping[str, Sequence[float]]]
 
             @root_validator(pre=True)
             def _initial_validation(cls, values):

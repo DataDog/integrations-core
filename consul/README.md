@@ -36,7 +36,7 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Consul metrics. See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
@@ -54,61 +54,36 @@ To configure this check for an Agent running on a host:
    
 2. [Restart the Agent][6].
 
-Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
+###### OpenMetrics
 
-##### Log collection
+Optionally, you can enable the `use_prometheus_endpoint` configuration option to get an additional set of metrics from the Consul Prometheus endpoint.
 
-_Available for Agent versions >6.0_
+**Note**: Use the DogStatsD or Prometheus method, do not enable both for the same instance.
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
+1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
 
-   ```yaml
-   logs_enabled: true
-   ```
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "prometheus_retention_time": "360h"
+      },
+      ...
+    }
+    ```
 
-2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
-
-   ```yaml
-   logs:
-     - type: file
-       path: /var/log/consul_server.log
-       source: consul
-       service: myservice
-   ```
-
-   Change the `path` and `service` parameter values and configure them for your environment.
-   See the [sample consul.d/conf.yaml][5] for all available configuration options.
+2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the Prometheus endpoint.
+    ```yaml
+    instances:
+        - url: <EXAMPLE>
+          use_prometheus_endpoint: true
+    ```
 
 3. [Restart the Agent][6].
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+##### DogStatsD
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
-
-##### Metric collection
-
-| Parameter            | Value                              |
-| -------------------- | ---------------------------------- |
-| `<INTEGRATION_NAME>` | `consul`                           |
-| `<INIT_CONFIG>`      | blank or `{}`                      |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:8500"}` |
-
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
-
-| Parameter      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "consul", "service": "<SERVICE_NAME>"}` |
-
-#### DogStatsD
-
-Optionally, you can configure Consul to also send data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from Consul. 
+Instead of using the Prometheus endpoint, you can configure Consul to send the same set of additional metrics to the Agent through [DogStatsD][3].
 
 1. Configure Consul to send DogStatsD metrics by adding the `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
 
@@ -155,33 +130,56 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
 
 3. [Restart the Agent][6].
 
-#### OpenMetrics
+##### Log collection
 
-Instead of using DogStatsD, you can enable the `use_prometheus_endpoint` configuration option to get the same metrics from the Prometheus endpoint. 
+_Available for Agent versions >6.0_
 
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
 
-**Note**: Use either the DogStatsD method or the Prometheus method, do not enable both for the same instance.
+   ```yaml
+   logs_enabled: true
+   ```
 
-1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
+2. Edit this configuration block in your `consul.yaml` file to collect Consul logs:
 
-    ```conf
-    {
-      ...
-      "telemetry": {
-        "prometheus_retention_time": "360h"
-      },
-      ...
-    }
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/consul_server.log
+       source: consul
+       service: myservice
+   ```
 
-2. Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start using the prometheus endpoint.
-    ```yaml
-    instances:
-        - url: <EXAMPLE>
-          use_prometheus_endpoint: true
-    ```
+   Change the `path` and `service` parameter values and configure them for your environment.
+   See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
 3. [Restart the Agent][6].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                              |
+| -------------------- | ---------------------------------- |
+| `<INTEGRATION_NAME>` | `consul`                           |
+| `<INIT_CONFIG>`      | blank or `{}`                      |
+| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:8500"}` |
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][8].
+
+| Parameter      | Value                                               |
+| -------------- | --------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "consul", "service": "<SERVICE_NAME>"}` |
+
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

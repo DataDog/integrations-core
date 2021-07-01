@@ -1,6 +1,6 @@
 # CHANGELOG - nginx
 
-## 3.12.0 / 2021-04-19
+## 3.12.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8962](https://github.com/DataDog/integrations-core/pull/8962).
 

@@ -1,5 +1,9 @@
 # CHANGELOG - Scylla
 
+## 1.4.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
 ## 1.3.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Fix logs section placement in example config. See [#8605](https://github.com/DataDog/integrations-core/pull/8605).

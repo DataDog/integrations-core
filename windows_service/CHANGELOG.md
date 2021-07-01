@@ -1,6 +1,10 @@
 # CHANGELOG - windows_service
 
-## 3.1.0 / 2021-04-19
+## 3.2.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9007](https://github.com/DataDog/integrations-core/pull/9007).
+
+## 3.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
 

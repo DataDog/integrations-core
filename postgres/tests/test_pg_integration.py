@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import socket
 import time
+from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
@@ -13,7 +15,7 @@ from semver import VersionInfo
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.statement_samples import DBExplainSetupState, PostgresStatementSamples
+from datadog_checks.postgres.statement_samples import DBExplainError, PostgresStatementSamples
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -34,6 +36,16 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
+    (
+        "bob",
+        "bob",
+        "datadog_test",
+        "SELECT hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid, "
+        "hello_how_is_it_going_this_is_a_very_long_table_alias_name.lastname "
+        "FROM persons hello_how_is_it_going_this_is_a_very_long_table_alias_name JOIN persons B "
+        "ON hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid = B.personid WHERE B.city = %s",
+        "hello",
+    ),
     ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
@@ -278,8 +290,11 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['min_collection_interval']
-    assert set(event['tags']) == {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test'}
+    expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
+    assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
         expected_query = query % obfuscated_param
@@ -288,14 +303,35 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
             continue
+
+        # metrics
         assert len(matching_rows) == 1
         row = matching_rows[0]
         assert row['calls'] == 1
         assert row['datname'] == dbname
         assert row['rolname'] == username
-        assert row['query'] == expected_query
-        for col in PG_STAT_STATEMENTS_METRICS_COLUMNS:
+        assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
+        available_columns = set(row.keys())
+        metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        for col in metric_columns:
             assert type(row[col]) in (float, int)
+
+        # full query text
+        fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
+        assert len(fqt_events) > 0
+        matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+        assert len(matching) == 1
+        fqt_event = matching[0]
+        assert fqt_event['ddsource'] == "postgres"
+        assert fqt_event['db']['statement'] == expected_query
+        assert fqt_event['postgres']['datname'] == dbname
+        assert fqt_event['postgres']['rolname'] == username
+        assert fqt_event['timestamp'] > 0
+        assert fqt_event['host'] == 'stubbed.hostname'
+        assert set(fqt_event['ddtags'].split(',')) == expected_dbm_metrics_tags | {
+            "db:" + fqt_event['postgres']['datname'],
+            "rolname:" + fqt_event['postgres']['rolname'],
+        }
 
     for conn in connections.values():
         conn.close()
@@ -357,33 +393,35 @@ def dbm_instance(pg_instance):
 
 
 @pytest.mark.parametrize(
-    "dbname,expected_explain_setup_state",
+    "dbname,expected_db_explain_error",
     [
-        ("datadog_test", DBExplainSetupState.ok),
-        ("dogs", DBExplainSetupState.ok),
-        ("dogs_noschema", DBExplainSetupState.invalid_schema),
-        ("dogs_nofunc", DBExplainSetupState.failed_function),
+        ("datadog_test", None),
+        ("dogs", None),
+        ("dogs_noschema", DBExplainError.invalid_schema),
+        ("dogs_nofunc", DBExplainError.failed_function),
     ],
 )
-def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, expected_explain_setup_state):
+def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, expected_db_explain_error):
     check = integration_check(dbm_instance)
     check._connect()
-    assert check.statement_samples._get_db_explain_setup_state(dbname) == expected_explain_setup_state
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error == expected_db_explain_error
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_error",
     [
-        ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None),
-        ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None),
+        ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None, None),
+        ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None, None),
         (
             "dd_admin",
             "dd_admin",
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainSetupState.invalid_schema),
+            "error:explain-{}".format(DBExplainError.invalid_schema),
+            {'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"},
         ),
         (
             "dd_admin",
@@ -391,7 +429,8 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-{}".format(DBExplainSetupState.failed_function),
+            "error:explain-{}".format(DBExplainError.failed_function),
+            {'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"},
         ),
     ],
 )
@@ -406,6 +445,7 @@ def test_statement_samples_collect(
     query,
     arg,
     expected_error_tag,
+    expected_collection_error,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -449,6 +489,13 @@ def test_statement_samples_collect(
             # we expect to get a duration because the connections are in "idle" state
             assert event['duration']
 
+        # validate the events to ensure we've provided an explanation for not providing an exec plan
+        for event in matching:
+            if event['db']['plan']['definition'] is None:
+                assert event['db']['plan']['collection_error'] == expected_collection_error
+            else:
+                assert event['db']['plan']['collection_error'] is None
+
     finally:
         conn.close()
 
@@ -484,27 +531,68 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         conn.close()
 
 
-def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
+def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
+    # test the main collection loop rate limit
+    collections_per_second = 10
+    dbm_instance['statement_samples']['collections_per_second'] = collections_per_second
     dbm_instance['statement_samples']['run_sync'] = False
-    # one collection every two seconds
-    dbm_instance['statement_samples']['collections_per_second'] = 0.5
     check = integration_check(dbm_instance)
     check._connect()
-    query = "SELECT city FROM persons WHERE city = 'hello'"
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_collections = int(collections_per_second * sleep_time) + 1
+    check.cancel()
+    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+
+def test_statement_samples_unique_plans_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
+    # tests rate limiting ingestion of samples per unique (query, plan)
+    cache_max_size = 10
+    dbm_instance['statement_samples']['seen_samples_cache_maxsize'] = cache_max_size
+    # samples_per_hour_per_query set very low so that within this test we will have at most one sample per
+    # (query, plan)
+    dbm_instance['statement_samples']['samples_per_hour_per_query'] = 1
+    # run it synchronously with a high rate limit specifically for the test
+    dbm_instance['statement_samples']['collections_per_second'] = 100
+    dbm_instance['statement_samples']['run_sync'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    query_template = "SELECT {} FROM persons WHERE city = 'hello'"
+    # queries that have different numbers of columns are considered different queries
+    # i.e. "SELECT city, city FROM persons where city= 'hello'"
+    queries = [query_template.format(','.join(["city"] * i)) for i in range(1, 15)]
+
     # leave bob's connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
     cursor = bob_conn.cursor()
-    for _ in range(5):
-        cursor.execute(query)
-        check.check(dbm_instance)
-        time.sleep(1)
+    for _ in range(3):
+        # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
+        for q in queries:
+            cursor.execute(q)
+            check.check(dbm_instance)
     cursor.close()
 
-    matching = [e for e in aggregator.get_event_platform_events("dbm-samples") if e['db']['statement'] == query]
-    assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
+    def _sample_key(e):
+        return e['db']['query_signature'], e['db'].get('plan', {}).get('signature')
 
-    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
-    assert 2 < len(metrics) < 6
+    dbm_samples = [e for e in aggregator.get_event_platform_events("dbm-samples") if e.get('dbm_type') != 'fqt']
+    statement_counts = Counter(_sample_key(e) for e in dbm_samples)
+    assert len(statement_counts) == cache_max_size, "expected to collect at most {} unique statements".format(
+        cache_max_size
+    )
+
+    for _, count in statement_counts.items():
+        assert count == 1, "expected to collect exactly one sample per statement during this time"
+
+    # in addition to the test query, dbm_samples will also contain samples from other queries that the postgres
+    # integration is running
+    pattern = query_template.format("(city,?)+")
+    matching = [e for e in dbm_samples if re.match(pattern, e['db']['statement'])]
+
+    assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
 def test_statement_samples_collection_loop_inactive_stop(aggregator, integration_check, dbm_instance):
@@ -526,7 +614,9 @@ def test_statement_samples_collection_loop_cancel(aggregator, integration_check,
     # wait for it to stop and make sure it doesn't throw any exceptions
     check.statement_samples._collection_loop_future.result()
     assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
-    assert check.statement_samples._db_pool[dbm_instance['dbname']] is None, "db connection should be gone"
+    # if the thread doesn't start until after the cancel signal is set then the db connection will never
+    # be created in the first place
+    assert check.statement_samples._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
     aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
 
 
