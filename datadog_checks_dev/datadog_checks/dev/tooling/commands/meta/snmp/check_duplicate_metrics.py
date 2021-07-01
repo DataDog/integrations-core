@@ -32,17 +32,18 @@ def check_duplicate_metrics(file, verbose):
 
     profile = create_profile(file)
 
-
 class Profile:
     def __init__(self):
-        self.extends = []
+        self.extends = set()
         self.metrics = []
-        self.oids = {}
+        self.counter = {}
+        self.oids = []
         self.path = ""
         self.has_duplicates = False
+
+
     def __repr__(self):
         return self.path
-
 
     def extract_extended_files(self, file):
         to_visit = Queue()
@@ -81,21 +82,41 @@ class Profile:
         duplicates = {k:v for (k,v) in counter.items() if v > 1}
 
         if duplicates:
+            #extract filename as string
+            # duplicate oids are an error
             echo_failure("Duplicate value found in " + str(oids.keys()) + " at OIDS:")
             for el in duplicates:
                 echo_failure(str(el))
 
-
+            #where files are imported
+            #class for oids - oid and profile
+            # reverse lookup? find where oid is defined - key is oid and value is list of files
 
 def create_profile(file):
     profile = Profile()
     profile.path = file
     profile.extract_extended_files(file)
-    config = get_file(file)
-    profile.metrics = config['metrics']
-    profile.oids[profile.path]= profile.extract_oids(profile.metrics)
-    profile.find_duplicates(profile.oids)
+    for extended_profile in profile.extends:
+        config = get_file(file)
+        profile.metrics.append(config['metrics'])
+    for blob in profile.metrics:
+        profile.oids = profile.extract_oids(blob)
+    profile.counter = construct_oid_counter(profile)
     return profile
+
+
+
+def construct_oid_counter(profile):
+    #{oid: [path, path]}
+    counter = {}
+    for oid in profile.oids:
+        for path in profile.extends:
+            if oid in counter:
+                counter[oid].append(path)
+            counter[oid] = [path]
+    return counter
+
+
 
 
 def extract_oids_from_metric(metric_dict):
@@ -126,42 +147,8 @@ def get_file(file):
 
 
 
-#check for oid, symbol, table keys  - snmp check folder - load profile
 
 
-#_base.yaml [{'MIB': 'CPI-UNITY-MIB', 'symbol': {'OID': '1.3.6.1.4.1.30932.1.1.2.58.2.0', 'name': 'pduRole'}}, {'MIB': 'CPI-UNITY-MIB', 'symbol': {'OID': '1.3.6.1.4.1.30932.1.1.2.58.12.0', 'name': 'outOfService'}}]
-{'_base.yaml', '_more.yaml'}
-
-#more.yaml [{'MIB': 'JUNIPER-COS-MIB', 'table': {'OID': '1.3.6.1.4.1.2636.3.15.10', 'name': 'jnxCosIfsetQstatTable'}, 'forced_type': 'monotonic_count', 'symbols': [{'OID': '1.3.6.1.4.1.2636.3.15.10.1.3', 'name': 'jnxCosIfsetQstatQedPkts'}, {'OID': '1.3.6.1.4.1.2636.3.15.10.1.5', 'name': 'jnxCosIfsetQstatQedBytes'}, {'OID': '1.3.6.1.4.1.2636.3.15.10.1.7', 'name': 'jnxCosIfsetQstatTxedPkts'}]}]
-{'_more.yaml'}
-
-#_generic-if.yaml [{'MIB': 'CISCO-ENTITY-SENSOR-MIB', 'table': {'OID': '1.3.6.1.4.1.9.9.91.1.1.1', 'name': 'entSensorValueTable'}}, {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.1.0', 'name': 'panSessionUtilization'}}, {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.2.0', 'name': 'panSessionMax'}}, {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.3.0', 'name': 'panSessionActive'}}]
-{'_generic-if.yaml'}
-
-#bad.yaml [{'MIB': 'NETAPP-MIB', 'OID': '1.3.6.1.4.1.789.1.2.3.8', 'name': 'cfInterconnectStatus'}, {'MIB': 'NETAPP-MIB', 'OID': '1.3.6.1.4.1.789.1.2.2.23.0', 'name': 'miscCacheAge'}, {'MIB': 'NETAPP-MIB', 'OID': '1.3.6.1.4.1.789.1.8.3.6.36', 'name': 'ncHttpActiveCliConns'}, {'MIB': 'NETAPP-MIB', 'OID': '1.3.6.1.4.1.789.1.26.8', 'name': 'extcache64Hits', 'forced_type': 'monotonic_count'}]
-
-
-
-# >>> for el in generic:
-# ...     print(el)
-# ...
-# {'MIB': 'CISCO-ENTITY-SENSOR-MIB', 'table': {'OID': '1.3.6.1.4.1.9.9.91.1.1.1', 'name': 'entSensorValueTable'}}
-# {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.1.0', 'name': 'panSessionUtilization'}}
-# {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.2.0', 'name': 'panSessionMax'}}
-# {'MIB': 'PAN-COMMON-MIB', 'symbol': {'OID': '1.3.6.1.4.1.25461.2.1.2.3.3.0', 'name': 'panSessionActive'}}
-# >>> for el in more:
-# ...     print(el)
-# ...
-# {'MIB': 'JUNIPER-COS-MIB', 'table': {'OID': '1.3.6.1.4.1.2636.3.15.10', 'name': 'jnxCosIfsetQstatTable'}, 'forced_type': 'monotonic_count', 'symbols': [{'OID': '1.3.6.1.4.1.2636.3.15.10.1.3', 'name': 'jnxCosIfsetQstatQedPkts'}, {'OID': '1.3.6.1.4.1.2636.3.15.10.1.5', 'name': 'jnxCosIfsetQstatQedBytes'}, {'OID': '1.3.6.1.4.1.2636.3.15.10.1.7', 'name': 'jnxCosIfsetQstatTxedPkts'}]}
-# >>> for el in base:
-# ...     print(el)
-# ...
-# {'MIB': 'CPI-UNITY-MIB', 'symbol': {'OID': '1.3.6.1.4.1.30932.1.1.2.58.2.0', 'name': 'pduRole'}}
-# {'MIB': 'CPI-UNITY-MIB', 'symbol': {'OID': '1.3.6.1.4.1.30932.1.1.2.58.12.0', 'name': 'outOfService'}}
-
-
-
-# collections.counter on OIDs? - use strings to compare OIDs
 
 
 
