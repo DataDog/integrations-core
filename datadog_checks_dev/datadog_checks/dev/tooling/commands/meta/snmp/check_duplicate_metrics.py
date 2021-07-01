@@ -1,4 +1,3 @@
-from collections import Counter
 from queue import Queue
 
 import click
@@ -14,16 +13,6 @@ from .....fs import file_exists
 # @click.option('-d', '--directory', help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
 
-#open file
-#extract extended profiles
-# extract metrics
-# compare for duplicates
-
-
-#are the metrics i'm looking at correct?
-# chain of validators
-
-
 
 def check_duplicate_metrics(file, verbose):
     if not file_exists(file):
@@ -31,6 +20,7 @@ def check_duplicate_metrics(file, verbose):
         abort()
 
     profile = create_profile(file)
+
 
 class Profile:
     def __init__(self):
@@ -75,22 +65,17 @@ class Profile:
                 self.oids_list = self.oids_list + oids
         return(self.oids_list)
 
-    def find_duplicates(self, oids):
-        for oid in oids.values():
-            counter = Counter(oid) #oid:count
+    def find_duplicates(self, counter):
+        #{oid:[path, path]}
 
-        duplicates = {k:v for (k,v) in counter.items() if v > 1}
+        for oid in counter:
+            if len(counter[oid]) == 1:
+                echo_failure("found duplicate oid " + oid + " in " + str(counter[oid]))
 
-        if duplicates:
-            #extract filename as string
-            # duplicate oids are an error
-            echo_failure("Duplicate value found in " + str(oids.keys()) + " at OIDS:")
-            for el in duplicates:
-                echo_failure(str(el))
 
-            #where files are imported
-            #class for oids - oid and profile
-            # reverse lookup? find where oid is defined - key is oid and value is list of files
+
+            #where files are imported - in list
+
 
 def create_profile(file):
     profile = Profile()
@@ -102,8 +87,8 @@ def create_profile(file):
     for blob in profile.metrics:
         profile.oids = profile.extract_oids(blob)
     profile.counter = construct_oid_counter(profile)
+    profile.find_duplicates(profile.counter)
     return profile
-
 
 
 def construct_oid_counter(profile):
@@ -117,15 +102,13 @@ def construct_oid_counter(profile):
     return counter
 
 
-
-
 def extract_oids_from_metric(metric_dict):
     oids_list = []
     oids_list.append(metric_dict['symbol']['OID'])
     return oids_list
 
 
-def extract_oids_from_table(metric_dict): # not sure about this one?
+def extract_oids_from_table(metric_dict):
     oids_list = []
     for item in metric_dict['symbols']:
         oids_list.append(item['OID'])
