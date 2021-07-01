@@ -138,12 +138,12 @@ class PostgresStatementMetrics(object):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
-        tags = [t for t in tags if not t.startswith("db:")]
+        tags_no_db = [t for t in tags if not t.startswith("db:")]
         try:
             rows = self._collect_metrics_rows(db, tags)
             if not rows:
                 return
-            for event in self._rows_to_fqt_events(rows, tags):
+            for event in self._rows_to_fqt_events(rows, tags_no_db):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
             # truncate query text to the maximum length supported by metrics tags
             for row in rows:
@@ -152,7 +152,7 @@ class PostgresStatementMetrics(object):
                 'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._config.min_collection_interval,
-                'tags': tags,
+                'tags': tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': 'v{major}.{minor}.{patch}'.format(
                     major=db_version.major, minor=db_version.minor, patch=db_version.patch
@@ -164,47 +164,67 @@ class PostgresStatementMetrics(object):
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
-    def _load_pg_stat_statements_safe(self, db, tags):
+    def _load_pg_stat_statements(self, db, tags):
         try:
-            self._load_pg_stat_statements(db)
-        except psycopg2.errors.ObjectNotInPrerequisiteState as e:
-            if 'pg_stat_statements must be loaded via shared_preload_librarie' in str(e):
-                self._check.count("postgresql.setup.error", 1, tags=tags + ["reason:pg_stat_statements_not_enabled"])
-                self._log.warning("Unable to collect statement metrics because pg_stat_statements must be loaded "
-                                  "via shared_preload_libraries")
+            available_columns = set(self._get_pg_stat_statements_columns(db))
+            missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
+            if len(missing_columns) > 0:
+                self._log.warning(
+                    'Unable to collect statement metrics because required fields are unavailable: %s',
+                    ', '.join(list(missing_columns)),
+                )
                 return []
-            else:
-                raise
 
-    def _load_pg_stat_statements(self, db):
-        available_columns = set(self._get_pg_stat_statements_columns(db))
-        missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
-        if len(missing_columns) > 0:
-            self._log.warning(
-                'Unable to collect statement metrics because required fields are unavailable: %s',
-                ', '.join(list(missing_columns)),
+            query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
+            params = ()
+            filters = ""
+            if self._config.dbstrict:
+                filters = "AND pg_database.datname = %s"
+                params = (self._config.dbname,)
+            return self._execute_query(
+                db.cursor(cursor_factory=psycopg2.extras.DictCursor),
+                STATEMENTS_QUERY.format(
+                    cols=', '.join(query_columns),
+                    pg_stat_statements_view=self._config.pg_stat_statements_view,
+                    filters=filters,
+                    limit=DEFAULT_STATEMENTS_LIMIT,
+                ),
+                params=params,
             )
+        except psycopg2.errors.ObjectNotInPrerequisiteState as e:
+            if 'pg_stat_statements must be loaded' in str(e):
+                self._check.count(
+                    "dd.postgres.statement_metrics.error",
+                    1,
+                    tags=tags + ["error:pg_stat_statements_not_enabled"]
+                )
+                self._log.warning(
+                    "Unable to collect statement metrics because pg_stat_statements must be loaded via "
+                    "shared_preload_libraries"
+                )
+            else:
+                self._check.count(
+                    "dd.postgres.statement_metrics.error",
+                    1,
+                    tags=tags + ["error:database-{}".format(type(e).__name__)]
+                )
+                self._log.warning(
+                    "Unable to collect statement metrics because of an error running queries: %s", e
+                )
+        except psycopg2.Error as e:
+            self._check.count(
+                "dd.postgres.statement_metrics.error",
+                1,
+                tags=tags + ["error:database-{}".format(type(e).__name__)]
+            )
+            self._log.warning(
+                "Unable to collect statement metrics because of an error running queries: %s", e
+            )
+
             return []
 
-        query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
-        params = ()
-        filters = ""
-        if self._config.dbstrict:
-            filters = "AND pg_database.datname = %s"
-            params = (self._config.dbname,)
-        return self._execute_query(
-            db.cursor(cursor_factory=psycopg2.extras.DictCursor),
-            STATEMENTS_QUERY.format(
-                cols=', '.join(query_columns),
-                pg_stat_statements_view=self._config.pg_stat_statements_view,
-                filters=filters,
-                limit=DEFAULT_STATEMENTS_LIMIT,
-            ),
-            params=params,
-        )
-
     def _collect_metrics_rows(self, db, tags):
-        rows = self._load_pg_stat_statements_safe(db, tags)
+        rows = self._load_pg_stat_statements(db, tags)
 
         rows = self._normalize_queries(rows)
         if not rows:
