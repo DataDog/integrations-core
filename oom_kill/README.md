@@ -23,7 +23,8 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: CentOS/RHEL versions < 8 are not supported.
+**Note**: A kernel version 4.9 or more recent is required for the OOM Kill check to work.
+In particular, CentOS/RHEL versions < 8 are not supported.
 
 ### Configuration
 
