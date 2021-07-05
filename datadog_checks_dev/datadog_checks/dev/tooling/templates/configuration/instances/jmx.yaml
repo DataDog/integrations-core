@@ -13,7 +13,7 @@
 - name: is_jmx
   description: |
    Whether or not this instance is a configuration for a JMX integration.
-   If `is_jmx` flag is set to true at init_config level, this flag is ignored.
+   If `is_jmx` is set to true at the init_config level, this flag is ignored.
   hidden: true
   value:
     example: false
