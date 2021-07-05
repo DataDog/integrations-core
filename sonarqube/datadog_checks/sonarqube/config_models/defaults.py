@@ -101,7 +101,7 @@ def instance_host(field, value):
 
 
 def instance_is_jmx(field, value):
-    return True
+    return False
 
 
 def instance_java_bin_path(field, value):
