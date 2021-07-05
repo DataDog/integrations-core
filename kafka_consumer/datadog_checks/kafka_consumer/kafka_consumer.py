@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
 from time import time
 
 from kafka import KafkaAdminClient, KafkaClient
@@ -69,6 +72,11 @@ class KafkaCheck(AgentCheck):
                             assert isinstance(partition, int)
 
     def _init_check_based_on_kafka_version(self):
+        """Set the sub_check attribute before allowing the `check` method to run. If something fails, this method will
+        be retried regularly."""
+        self.sub_check = self._make_sub_check()
+
+    def _make_sub_check(self):
         """Determine whether to use old legacy KafkaClient implementation or the new KafkaAdminClient implementation.
 
         The legacy version of this check uses the KafkaClient and handrolls things like looking up the GroupCoordinator,
@@ -87,6 +95,9 @@ class KafkaCheck(AgentCheck):
 
         To clarify: This check still allows fetching offsets from zookeeper/older kafka brokers, it just uses the
         legacy code path."""
+        if self.instance.get('zk_connect_str'):
+            return LegacyKafkaCheck_0_10_2(self)
+
         kafka_version = self.instance.get('kafka_client_api_version')
         if isinstance(kafka_version, str):
             kafka_version = tuple(map(int, kafka_version.split(".")))
@@ -96,10 +107,10 @@ class KafkaCheck(AgentCheck):
             kafka_version = kafka_client.config['api_version']
             kafka_client.close()
 
-        if self.instance.get('zk_connect_str') or kafka_version < (0, 10, 2):
-            self.sub_check = LegacyKafkaCheck_0_10_2(self)
-        else:
-            self.sub_check = NewKafkaConsumerCheck(self)
+        if kafka_version < (0, 10, 2):
+            return LegacyKafkaCheck_0_10_2(self)
+
+        return NewKafkaConsumerCheck(self)
 
     def _create_kafka_client(self, clazz):
         kafka_connect_str = self.instance.get('kafka_connect_str')
