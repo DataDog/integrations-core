@@ -90,6 +90,11 @@ files:
         is_jmx.hidden: false
         host.required: false
         port.required: false
+        is_jmx.description: |
+          Whether or not this instance is a configuration for a JMX integration.
+          If `is_jmx` is set to true at the init_config level, this flag is ignored.
+
+          NOTE: Setting `is_jmx` to true disables some configuration options.
         user.description: |
           User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
         password.description: |

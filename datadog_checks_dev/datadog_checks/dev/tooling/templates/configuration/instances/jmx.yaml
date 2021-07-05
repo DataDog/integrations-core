@@ -16,7 +16,7 @@
    If `is_jmx` is set to true at the init_config level, this flag is ignored.
   hidden: true
   value:
-    example: false
+    example: true
     type: boolean
 
 - name: jmx_url
