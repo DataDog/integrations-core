@@ -20,6 +20,7 @@ def dd_environment(integration_instance):
     # We need a custom condition to wait a bit longer
     with docker_run(
         compose_file=compose_file,
+        build=True,
         conditions=[
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
