@@ -108,7 +108,6 @@ VIRTUAL_SERVICE_METRICS = {
         "name": "l4_client.max_open_conns",
         "type": "gauge",
     },
-
     "avi_l7_client_apdexr": {
         "name": "l7_client.apdexr",
         "type": "gauge",
@@ -341,7 +340,7 @@ POOL_METRICS = {
         "type": "gauge",
     },
     "avi_l7_server_avg_resp_5xx": {
-        "name": "l7_server,avg_resp_5xx",
+        "name": "l7_server.avg_resp_5xx",
         "type": "gauge",
     },
 }

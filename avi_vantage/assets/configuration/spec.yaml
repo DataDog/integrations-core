@@ -14,13 +14,6 @@ files:
       value:
         example: https://<AVI_CONTROLLER_HOSTNAME>/
         type: string
-    - name: collect_events
-      required: false
-      hidden: true
-      description: Whether or not to collect Avi Vantage Events and send them as Datadog logs.
-      value:
-        example: false
-        type: boolean
     - name: entities
       required: false
       description: |
@@ -38,48 +31,6 @@ files:
         items:
           type: string
           enum: *avi_entities
-    - name: resource_filters
-      required: false
-      description: |
-        Filter which entities to monitor.
-      value:
-        type: array
-        example:
-          - type: include
-            property: name
-            entity: '"serviceengine"'
-            patterns:
-              - "^.*-prod$"
-          - type: exclude
-            property: id
-            entity: controller
-            patterns:
-              - "1de12feacb4"
-        items:
-          type: object
-          properties:
-          - name: type
-            type: string
-            enum:
-              - include
-              - exclude
-          - name: property
-            type: string
-            enum:
-              - id
-              - name
-          - name: entity
-            type: string
-            enum: *avi_entities
-          - name: patterns
-            type: array
-            items:
-              type: string
-          required:
-            - type
-            - property
-            - entity
-            - patterns
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.hidden: true

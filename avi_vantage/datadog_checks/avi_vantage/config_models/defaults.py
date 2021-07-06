@@ -48,10 +48,6 @@ def instance_collect_counters_with_distributions(field, value):
     return False
 
 
-def instance_collect_events(field, value):
-    return False
-
-
 def instance_collect_histogram_buckets(field, value):
     return True
 
@@ -198,10 +194,6 @@ def instance_rename_labels(field, value):
 
 def instance_request_size(field, value):
     return 16
-
-
-def instance_resource_filters(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_service(field, value):

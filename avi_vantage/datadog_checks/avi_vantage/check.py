@@ -3,11 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
 from copy import deepcopy
-from datetime import timedelta
-from typing import Any
 
-from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.avi_vantage import metrics
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import CheckException
 
 from .config_models import ConfigMixin
@@ -31,6 +29,9 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.collect_events = False
         self.last_event_time = None
 
+    def get_resource_filters_for_entity(self, entity):
+        return
+
     def configure_scrapers(self):
         scrapers = {}
 
@@ -40,11 +41,12 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 raise CheckException(
                     f"Entity {entity} is not valid. Must be one of {', '.join(RESOURCE_METRICS.keys())}."
                 )
-            metrics = RESOURCE_METRICS[entity]
+            resource_metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
             endpoint = base_url + entity
             instance_copy['openmetrics_endpoint'] = endpoint
-            instance_copy['metrics'] = [metrics]
+            instance_copy['metrics'] = [resource_metrics]
+
             scrapers[endpoint] = self.create_scraper(instance_copy)
 
         self.scrapers.clear()
@@ -55,15 +57,14 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         base_url = self.config.avi_controller_url.rstrip('/')
         login_url = base_url + "/login"
         logout_url = base_url + "/logout"
-        login_resp = self.http.post(login_url, data={'username': self.config.username, 'password': self.config.password})
+        login_resp = self.http.post(
+            login_url, data={'username': self.config.username, 'password': self.config.password}
+        )
         login_resp.raise_for_status()
         yield
         csrf_token = self.http.session.cookies.get('csrftoken')
         if csrf_token:
-            logout_resp = self.http.post(
-                logout_url,
-                extra_headers={'X-CSRFToken': csrf_token, 'Referer': base_url}
-            )
+            logout_resp = self.http.post(logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': base_url})
             logout_resp.raise_for_status()
 
     def create_scraper(self, config):
@@ -87,4 +88,3 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             super(AviVantageCheck, self).check(None)
             if self.collect_events:
                 self._collect_events()
-

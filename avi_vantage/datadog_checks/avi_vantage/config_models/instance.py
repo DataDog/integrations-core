@@ -48,16 +48,6 @@ class Proxy(BaseModel):
     no_proxy: Optional[Sequence[str]]
 
 
-class ResourceFilter(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    entity: Literal['controller', 'pool', 'serviceengine', 'virtualservice']
-    patterns: Sequence[str]
-    property: Literal['id', 'name']
-    type: Literal['include', 'exclude']
-
-
 class ShareLabel(BaseModel):
     class Config:
         allow_mutation = False
@@ -78,7 +68,6 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cache_metric_wildcards: Optional[bool]
     collect_counters_with_distributions: Optional[bool]
-    collect_events: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
     empty_default_hostname: Optional[bool]
@@ -116,7 +105,6 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[float]
     rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
-    resource_filters: Optional[Sequence[ResourceFilter]]
     service: Optional[str]
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
