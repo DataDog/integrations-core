@@ -513,14 +513,7 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
-**mysql.replication.replica_running**:<br>
-Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
-
-**mysql.replication.slave_running**:<br>
-Deprecated in favor of `mysql.replication.replica_running`. Returns `CRITICAL` for a replica that's not running both `Replica_IO_Running` and `Replica_SQL_Running`; `WARNING` if one of the two is not running; Returns `OK` otherwise. See [this][16] for more details.
-
-**mysql.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, otherwise returns `OK`.
+See [service_checks.json][38] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -575,3 +568,4 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [35]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [36]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [37]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[38]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/service_checks.json

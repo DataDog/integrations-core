@@ -111,14 +111,13 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-### Service Checks
-
-**voltdb.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot reach the configured VoltDB URL, `OK` otherwise.
-
 ### Events
 
 This check does not include any events.
+
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -137,3 +136,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
+[10]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json

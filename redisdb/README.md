@@ -290,11 +290,7 @@ The Redis check does not include any events.
 
 ### Service Checks
 
-**redis.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Redis to collect metrics, otherwise returns `OK`.
-
-**redis.replication.master_link_status**:<br>
-Returns `CRITICAL` if this Redis instance is unable to connect to its master instance, otherwise returns `OK`.
+See [service_checks.json][28] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -355,3 +351,4 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
 [26]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [27]: https://docs.datadoghq.com/agent/guide/secrets-management/?tab=linux
+[28]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json

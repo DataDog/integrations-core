@@ -69,19 +69,21 @@ CPU, memory, block I/O, or huge page table metrics are collected out of the box.
 
 See [metadata.csv][4] for a list of metrics provided by this Integration.
 
-### Service Checks
-
-Containerd includes a Service Check `containerd.health` to notify on the health of the connection to the Containerd Socket.
-
 ### Events
 
 The Containerd Check can collect events. Use `filters` to select the relevant events. Refer to the [sample containerd.d/conf.yaml][1] to have more details.
+
+### Service Checks
+
+See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][2].
 
+
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/containerd.d/conf.yaml.default
 [2]: https://docs.datadoghq.com/help/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/containerd/metadata.csv
+[5]: https://github.com/DataDog/integrations-core/blob/master/containerd/assets/service_checks.json

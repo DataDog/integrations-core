@@ -125,8 +125,7 @@ The Varnish check does not include any events.
 
 ### Service Checks
 
-**varnish.backend_healthy**:<br>
-The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<BACKEND_NAME>`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -154,3 +153,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
 [14]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
 [15]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog
+[16]: https://github.com/DataDog/integrations-core/blob/master/varnish/assets/service_checks.json

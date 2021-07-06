@@ -366,8 +366,11 @@ The PostgreSQL check does not include any events.
 
 ### Service Checks
 
-**postgres.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance, otherwise returns `OK`.
+See [service_checks.json][34] for a list of service checks provided by this integration.
+
+## Troubleshooting
+
+Need help? Contact [Datadog support][35].
 
 ## Further Reading
 
@@ -417,3 +420,5 @@ Additional helpful documentation, links, and articles:
 [31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
 [33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[34]: https://github.com/DataDog/integrations-core/blob/master/postgres/assets/service_checks.json
+[35]: https://docs.datadoghq.com/help

@@ -381,8 +381,7 @@ The NGINX check does not include any events.
 
 ### Service Checks
 
-**nginx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, otherwise returns `OK`.
+See [service_checks.json][25] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -422,3 +421,4 @@ Additional helpful documentation, links, and articles:
 [22]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
 [23]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
 [24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[25]: https://github.com/DataDog/integrations-core/blob/master/nginx/assets/service_checks.json
