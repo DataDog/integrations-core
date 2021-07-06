@@ -463,7 +463,7 @@ class MySQLStatementSamples(object):
 
         try:
             obfuscate_options = json.dumps(
-                {'quantize_sql_tables': self._config.options.get('quantize_sql_tables', False)}
+                {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
             )
             obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], obfuscate_options)
             obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], obfuscate_options)

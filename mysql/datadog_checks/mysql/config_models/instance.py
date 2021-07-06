@@ -35,7 +35,6 @@ class Options(BaseModel):
     replication_channel: Optional[str]
     replication_non_blocking_status: Optional[bool]
     schema_size_metrics: Optional[bool]
-    quantize_sql_tables: Optional[bool]
 
 
 class Ssl(BaseModel):
@@ -67,6 +66,13 @@ class StatementSamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -91,6 +97,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     user: Optional[str]
+    obfuscator_options: Optional[ObfuscatorOptions]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

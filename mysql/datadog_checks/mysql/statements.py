@@ -148,7 +148,9 @@ class MySQLStatementMetrics(object):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
-        obfuscate_options = json.dumps({'quantize_sql_tables': self._config.options.get('quantize_sql_tables', False)})
+        obfuscate_options = json.dumps(
+            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        )
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
