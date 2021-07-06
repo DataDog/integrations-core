@@ -61,21 +61,6 @@ instances:
     #   - serviceengine
     #   - virtualservice
 
-    ## @param resource_filters - list of mappings - optional
-    ## Filter which entities to monitor.
-    #
-    # resource_filters:
-    #   - type: include
-    #     property: name
-    #     entity: '"serviceengine"'
-    #     patterns:
-    #     - ^.*-prod$
-    #   - type: exclude
-    #     property: id
-    #     entity: controller
-    #     patterns:
-    #     - 1de12feacb4
-
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
