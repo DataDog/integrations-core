@@ -37,6 +37,13 @@ class StatementSamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -68,7 +75,7 @@ class InstanceConfig(BaseModel):
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]
     username: str
-    quantize_sql_tables: Optional[bool]
+    obfuscator_options: Optional[ObfuscatorOptions]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
