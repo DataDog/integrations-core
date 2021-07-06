@@ -78,7 +78,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 **Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
 
-#### Agent Configuration
+#### Agent configuration
 
 1. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] with the configuration below. See the [sample openstack.d/conf.yaml][4] for all available configuration options:
 

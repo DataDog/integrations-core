@@ -12,15 +12,16 @@ files:
         example: false
         type: boolean
       description: |
-        Enable to preview the new version of the check which supports HAProxy version 2+ 
+        Enable to preview the new version of the check which supports HAProxy version 2+
         or environments using the HAProxy exporter.
 
         Prometheus-related options take effect only when this is set to `true`.
     - name: url
-      required: true
+      enabled: true
       value:
         example: http://localhost/admin?stats
         type: string
+        display_default: null
       description: |
         Haproxy URL to connect to gather metrics.
         Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
@@ -39,8 +40,10 @@ files:
         NOTE: This only takes effect when `use_prometheus` is set to `false`.
     - name: collect_aggregates_only
       value:
+        anyOf:
+          - type: boolean
+          - type: string
         example: true
-        type: boolean
       description: |
         This parameter instructs the check to collect metrics only from the aggregate frontend/backend
         status lines from the stats output instead of for each backend. With this parameter set to false the agent
@@ -174,6 +177,8 @@ files:
 
         NOTE: This only takes effect when `use_prometheus` is set to `false`.
     - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.required: false
   - template: logs
     example:
     - type: udp

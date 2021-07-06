@@ -19,7 +19,7 @@ IS_RETHINKDB_2_3 = RAW_VERSION.startswith('2.3.')
 
 HOST = get_docker_hostname()
 
-TAGS = ['env:testing']
+TAGS = ['rethinkdb_env:testing']
 
 # Servers.
 # NOTE: server information is tightly coupled to the Docker Compose setup.

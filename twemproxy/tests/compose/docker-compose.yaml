@@ -44,3 +44,5 @@ services:
       - ETCD_HOST=etcd0:4001
     depends_on:
       - etcd0
+    volumes:
+      - ${DD_LOG_1}:/var/log/twemproxy/stderr.log

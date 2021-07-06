@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 1.21.0 / 2021-04-19
+## 1.21.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8986](https://github.com/DataDog/integrations-core/pull/8986).
 

@@ -2,6 +2,7 @@ parameters:
   check: null
   repo: 'core'
   ispr: false
+  validate_codeowners: false
 
 steps:
 - ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
@@ -16,7 +17,7 @@ steps:
       ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
 
-- ${{ if eq(parameters.repo, 'extras') }}:
+- ${{ if eq(parameters.validate_codeowners, 'true') }}:
   - script: |
       echo "ddev validate codeowners"
       ddev validate codeowners
@@ -34,8 +35,8 @@ steps:
   displayName: 'Validate default configuration files'
 
 - script: |
-    echo "ddev validate models"
-    ddev validate models
+    echo "ddev validate models ${{ parameters.check }}"
+    ddev validate models ${{ parameters.check }}
   displayName: 'Validate configuration data models'
 
 - script: |
@@ -99,6 +100,12 @@ steps:
     echo "ddev validate jmx-metrics"
     ddev validate jmx-metrics
   displayName: 'Validate JMX integrations metrics.yaml'
+
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: |
+      echo "ddev validate licenses"
+      ddev validate licenses
+    displayName: 'Validate third-party license list'
 
 - ${{ if eq(parameters.repo, 'marketplace') }}:
   - script: |

@@ -17,6 +17,7 @@ elasticsearch.cache.field.evictions,gauge,,eviction,,The total number of evictio
 elasticsearch.cache.field.size,gauge,,byte,,The size of the field cache.,0,elasticsearch,field cache size
 elasticsearch.cache.filter.count,gauge,,item,,The number of items in the filter cache.,0,elasticsearch,filter cache elements
 elasticsearch.cache.filter.evictions,gauge,,eviction,,The total number of evictions from the filter cache.,0,elasticsearch,filter cache evictions
+elasticsearch.cache.filter.evictions.count,count,,eviction,,The total number of evictions from the filter cache.,0,elasticsearch,filter cache evictions
 elasticsearch.cache.filter.size,gauge,,byte,,The size of the filter cache.,0,elasticsearch,filter cache size
 elasticsearch.cluster_status,gauge,,,,"The elasticsearch cluster health as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,cluster status
 elasticsearch.docs.count,gauge,,document,,The total number of documents in the cluster across all shards.,0,elasticsearch,docs count
@@ -27,9 +28,12 @@ elasticsearch.disk.percent,gauge,,percent,,The total percentage of disk space in
 elasticsearch.disk.total,gauge,,byte,,The total disk space for the node including in-use and available space.,0,elasticsearch,disk total
 elasticsearch.disk.used,gauge,,byte,,The total disk space in use.,0,elasticsearch,disk used
 elasticsearch.fielddata.evictions,gauge,,eviction,,The total  number of evictions from the fielddata cache.,0,elasticsearch,fielddata cache evictions
+elasticsearch.fielddata.evictions.count,count,,eviction,,The total  number of evictions from the fielddata cache.,0,elasticsearch,fielddata cache evictions
 elasticsearch.fielddata.size,gauge,,byte,,The size of the fielddata cache.,0,elasticsearch,fielddata cache size
 elasticsearch.flush.total,gauge,,flush,,The total number of index flushes to disk since start.,0,elasticsearch,total index flushes
+elasticsearch.flush.total.count,count,,flush,,The total number of index flushes to disk since start.,0,elasticsearch,total index flushes
 elasticsearch.flush.total.time,gauge,,second,,The total time spent flushing the index to disk.,0,elasticsearch,total index flush time
+elasticsearch.flush.total.time.count,count,,second,,The total time spent flushing the index to disk.,0,elasticsearch,total index flush time
 elasticsearch.fs.total.available_in_bytes,gauge,,byte,,The total number of bytes available to this Java virtual machine on this file store.,0,elasticsearch,fs total available bytes
 elasticsearch.fs.total.disk_io_op,gauge,,operation,,The total I/O operations on the file store.,0,elasticsearch,fs total i/o ops
 elasticsearch.fs.total.disk_io_size_in_bytes,gauge,,byte,,Total bytes used for all I/O operations on the file store.,0,elasticsearch,fs total disk io bytes
@@ -41,34 +45,53 @@ elasticsearch.fs.total.free_in_bytes,gauge,,byte,,The total number of unallocate
 elasticsearch.fs.total.total_in_bytes,gauge,,byte,,The total size in bytes of the file store.,0,elasticsearch,fs total size
 elasticsearch.get.current,gauge,,request,,The number of get requests currently running.,0,elasticsearch,current gets
 elasticsearch.get.exists.time,gauge,,second,,The total time spent on get requests where the document existed.,0,elasticsearch,get exists time
+elasticsearch.get.exists.time.count,count,,second,,The total time spent on get requests where the document existed.,0,elasticsearch,get exists time
 elasticsearch.get.exists.total,gauge,,request,,The total number of get requests where the document existed.,0,elasticsearch,get exists total
+elasticsearch.get.exists.total.count,count,,request,,The total number of get requests where the document existed.,0,elasticsearch,get exists total
 elasticsearch.get.missing.time,gauge,,second,,The total time spent on get requests where the document was missing.,0,elasticsearch,get missing time
+elasticsearch.get.missing.time.count,count,,second,,The total time spent on get requests where the document was missing.,0,elasticsearch,get missing time
 elasticsearch.get.missing.total,gauge,,request,,The total number of get requests where the document was missing.,0,elasticsearch,get missing total
+elasticsearch.get.missing.total.count,count,,request,,The total number of get requests where the document was missing.,0,elasticsearch,get missing total
 elasticsearch.get.time,gauge,,second,,The total time spent on get requests.,0,elasticsearch,total get request time
+elasticsearch.get.time.count,count,,second,,The total time spent on get requests.,0,elasticsearch,total get request time
 elasticsearch.get.total,gauge,,request,,The total number of get requests.,0,elasticsearch,total get requests
+elasticsearch.get.total.count,count,,request,,The total number of get requests.,0,elasticsearch,total get requests
 elasticsearch.http.current_open,gauge,,connection,,The number of current open HTTP connections.,0,elasticsearch,current open HTTP
 elasticsearch.http.total_opened,gauge,,connection,,The total number of opened HTTP connections.,0,elasticsearch,total opened HTTP
+elasticsearch.http.total_opened.count,count,,connection,,The total number of opened HTTP connections.,0,elasticsearch,total opened HTTP
 elasticsearch.id_cache.size,gauge,,byte,,The size of the id cache,0,elasticsearch,id cache size
 elasticsearch.indexing.delete.current,gauge,,document,,The number of documents currently being deleted from an index.,0,elasticsearch,current index deletes
 elasticsearch.indexing.delete.time,gauge,,second,,The total time spent deleting documents from an index.,0,elasticsearch,total index delete time
+elasticsearch.indexing.delete.time.count,count,,second,,The total time spent deleting documents from an index.,0,elasticsearch,total index delete time
 elasticsearch.indexing.delete.total,gauge,,document,,The total number of documents deleted from an index.,0,elasticsearch,total index deletes
+elasticsearch.indexing.delete.total.count,count,,document,,The total number of documents deleted from an index.,0,elasticsearch,total index deletes
 elasticsearch.indexing.index.current,gauge,,document,,The number of documents currently being indexed to an index.,0,elasticsearch,current indexing
 elasticsearch.indexing.index.time,gauge,,second,,The total time spent indexing documents to an index.,0,elasticsearch,total indexing time
+elasticsearch.indexing.index.time.count,count,,second,,The total time spent indexing documents to an index.,0,elasticsearch,total indexing time
 elasticsearch.indexing.index.total,gauge,,document,,The total number of documents indexed to an index.,0,elasticsearch,total indexed
+elasticsearch.indexing.index.total.count,count,,document,,The total number of documents indexed to an index.,0,elasticsearch,total indexed
 elasticsearch.indices.count,gauge,,index,,The number of indices in the cluster.,0,elasticsearch,number of indices
 elasticsearch.indices.indexing.index_failed,gauge,,,,The number of failed indexing operations.,-1,elasticsearch,index fails
 elasticsearch.indices.indexing.throttle_time,gauge,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
+elasticsearch.indices.indexing.throttle_time.count,count,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
 elasticsearch.indices.query_cache.evictions,gauge,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions
+elasticsearch.indices.query_cache.evictions.count,count,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions
 elasticsearch.indices.query_cache.hit_count,gauge,,hit,,The number of query cache hits.,0,elasticsearch,query cache hits
+elasticsearch.indices.query_cache.hit_count.count,count,,hit,,The number of query cache hits.,0,elasticsearch,query cache hits
 elasticsearch.indices.query_cache.memory_size_in_bytes,gauge,,byte,,The memory used by the query cache.,0,elasticsearch,query cache mem
 elasticsearch.indices.query_cache.miss_count,gauge,,miss,,The number of query cache misses.,0,elasticsearch,query cache misses
+elasticsearch.indices.query_cache.miss_count.count,count,,miss,,The number of query cache misses.,0,elasticsearch,query cache misses
 elasticsearch.indices.recovery.current_as_source,gauge,,,,The number of ongoing recoveries for which a shard serves as a source.,0,elasticsearch,index recoveries shard src
 elasticsearch.indices.recovery.current_as_target,gauge,,,,The number of ongoing recoveries for which a shard serves as a target.,0,elasticsearch,index recoveries shard tgt
 elasticsearch.indices.recovery.throttle_time,gauge,,millisecond,,The total time recoveries waited due to throttling.,-1,elasticsearch,index recoveries throttle
+elasticsearch.indices.recovery.throttle_time.count,count,,millisecond,,The total time recoveries waited due to throttling.,-1,elasticsearch,index recoveries throttle
 elasticsearch.indices.request_cache.evictions,gauge,,eviction,,The number of request cache evictions.,0,elasticsearch,req cache evictions
+elasticsearch.indices.request_cache.evictions.count,count,,eviction,,The number of request cache evictions.,0,elasticsearch,req cache evictions
 elasticsearch.indices.request_cache.hit_count,gauge,,hit,,The number of request cache hits.,0,elasticsearch,req cache hits
+elasticsearch.indices.request_cache.hit_count.count,count,,hit,,The number of request cache hits.,0,elasticsearch,req cache hits
 elasticsearch.indices.request_cache.memory_size_in_bytes,gauge,,byte,,The memory used by the request cache.,0,elasticsearch,req cache mem
 elasticsearch.indices.request_cache.miss_count,gauge,,miss,,The number of request cache misses.,0,elasticsearch,req cache misses
+elasticsearch.indices.request_cache.miss_count.count,count,,miss,,The number of request cache misses.,0,elasticsearch,req cache misses
 elasticsearch.indices.segments.count,gauge,,segment,,The number of segments in an index shard.,0,elasticsearch,shard segments count
 elasticsearch.indices.segments.doc_values_memory_in_bytes,gauge,,byte,,The memory used by doc values.,0,elasticsearch,doc values memory
 elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes,gauge,,byte,,The memory used by fixed bit set.,0,elasticsearch,fixed bit set memory
@@ -87,9 +110,13 @@ elasticsearch.merges.current,gauge,,merge,,The number of currently active segmen
 elasticsearch.merges.current.docs,gauge,,document,,The number of documents across segments currently being merged.,0,elasticsearch,current merge docs
 elasticsearch.merges.current.size,gauge,,byte,,The size of the segments currently being merged.,0,elasticsearch,current merge size
 elasticsearch.merges.total,gauge,,merge,,The total number of segment merges.,0,elasticsearch,total merges
+elasticsearch.merges.total.count,count,,merge,,The total number of segment merges.,0,elasticsearch,total merges
 elasticsearch.merges.total.docs,gauge,,document,,The total number of documents across all merged segments.,0,elasticsearch,total merge docs
+elasticsearch.merges.total.docs.count,count,,document,,The total number of documents across all merged segments.,0,elasticsearch,total merge docs
 elasticsearch.merges.total.size,gauge,,byte,,The total size of all merged segments.,0,elasticsearch,total merge size
+elasticsearch.merges.total.size.count,count,,byte,,The total size of all merged segments.,0,elasticsearch,total merge size
 elasticsearch.merges.total.time,gauge,,second,,The total time spent on segment merging.,0,elasticsearch,total merge time
+elasticsearch.merges.total.time.count,count,,second,,The total time spent on segment merging.,0,elasticsearch,total merge time
 elasticsearch.number_of_data_nodes,gauge,,node,,The number of data nodes in the cluster.,0,elasticsearch,number of data nodes
 elasticsearch.number_of_nodes,gauge,,node,,The total number of nodes in the cluster.,0,elasticsearch,number of nodes
 elasticsearch.pending_tasks_priority_high,gauge,,task,,The number of high priority pending tasks.,0,elasticsearch,pending high priority tasks
@@ -133,20 +160,28 @@ elasticsearch.primaries.search.query.total,gauge,,query,,The total number of que
 elasticsearch.primaries.store.size,gauge,,byte,,The total size of all the primary shards.,0,elasticsearch,primary size
 elasticsearch.process.open_fd,gauge,,file,,"The number of opened file descriptors associated with the current process, or -1 if not supported.",0,elasticsearch,open file descriptors
 elasticsearch.refresh.total,gauge,,refresh,,The total number of index refreshes.,0,elasticsearch,total refreshes
+elasticsearch.refresh.total.count,count,,refresh,,The total number of index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.total.time,gauge,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
+elasticsearch.refresh.total.time.count,count,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.refresh.external_total,gauge,,refresh,,The total number of external index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are relocating from one node to another.,0,elasticsearch,relocating shards
 elasticsearch.search.fetch.current,gauge,,fetch,,The number of search fetches currently running.,0,elasticsearch,current fetches
 elasticsearch.search.fetch.open_contexts,gauge,,query,,The number of active searches.,0,elasticsearch,active searches
 elasticsearch.search.fetch.time,gauge,,second,,The total time spent on the search fetch.,0,elasticsearch,total fetch time
+elasticsearch.search.fetch.time.count,count,,second,,The total time spent on the search fetch.,0,elasticsearch,total fetch time
 elasticsearch.search.fetch.total,gauge,,fetch,,The total number of search fetches.,0,elasticsearch,total fetches
+elasticsearch.search.fetch.total.count,count,,fetch,,The total number of search fetches.,0,elasticsearch,total fetches
 elasticsearch.search.query.current,gauge,,query,,The number of currently active queries.,0,elasticsearch,current queries
 elasticsearch.search.query.time,gauge,,second,,The total time spent on queries.,0,elasticsearch,total query time
+elasticsearch.search.query.time.count,count,,second,,The total time spent on queries.,0,elasticsearch,total query time
 elasticsearch.search.query.total,gauge,,query,,The total number of queries.,0,elasticsearch,total queries
+elasticsearch.search.query.total.count,count,,query,,The total number of queries.,0,elasticsearch,total queries
 elasticsearch.search.scroll.current,gauge,,query,,The number of currently active scroll queries.,0,elasticsearch,current scroll queries
 elasticsearch.search.scroll.time,gauge,,second,,The total time spent on scroll queries.,0,elasticsearch,total scroll query time
+elasticsearch.search.scroll.time.count,count,,second,,The total time spent on scroll queries.,0,elasticsearch,total scroll query time
 elasticsearch.search.scroll.total,gauge,,query,,The total number of scroll queries.,0,elasticsearch,total scroll queries
+elasticsearch.search.scroll.total.count,count,,query,,The total number of scroll queries.,0,elasticsearch,total scroll queries
 elasticsearch.shards,gauge,,shard,,Number of primary and replica shards assigned to the node.,0,elasticsearch,shards
 elasticsearch.slm.snapshot_deletion_failures,gauge,,error,,The total number of snapshot deletion failures.,0,elasticsearch,slm del fail
 elasticsearch.slm.snapshots_deleted,gauge,,,,The total number of deleted snapshots.,0,elasticsearch,slm del
@@ -156,8 +191,11 @@ elasticsearch.store.size,gauge,,byte,,The total size in bytes of the store.,0,el
 elasticsearch.thread_pool.bulk.active,gauge,,thread,,The number of active threads in the bulk pool.,0,elasticsearch,active bulk threads
 elasticsearch.thread_pool.bulk.queue,gauge,,thread,,The number of queued threads in the bulk pool.,0,elasticsearch,queued bulk threads
 elasticsearch.thread_pool.bulk.threads,gauge,,thread,,The total number of threads in the bulk pool.,0,elasticsearch,total bulk threads
+elasticsearch.thread_pool.bulk.threads.count,count,,thread,,The total number of threads in the bulk pool.,0,elasticsearch,total bulk threads
 elasticsearch.thread_pool.bulk.rejected,gauge,,thread,,The number of rejected threads in the bulk pool.,0,elasticsearch,rejected bulk threads
+elasticsearch.thread_pool.bulk.rejected.count,count,,thread,,The number of rejected threads in the bulk pool.,0,elasticsearch,rejected bulk threads
 elasticsearch.thread_pool.bulk.completed,gauge,,thread,,The number of completed threads in the bulk pool.,0,elasticsearch,completed bulk threads
+elasticsearch.thread_pool.bulk.completed.count,count,,thread,,The number of completed threads in the bulk pool.,0,elasticsearch,completed bulk threads
 elasticsearch.thread_pool.fetch_shard_started.active,gauge,,thread,,The number of active threads in the fetch shard started pool.,0,elasticsearch,active fetch shard started threads
 elasticsearch.thread_pool.fetch_shard_started.threads,gauge,,thread,,The total number of threads in the fetch shard started pool.,0,elasticsearch,total fetch shard started threads
 elasticsearch.thread_pool.fetch_shard_started.queue,gauge,,thread,,The number of queued threads in the fetch shard started pool.,0,elasticsearch,total fetch shard started threads
@@ -169,8 +207,11 @@ elasticsearch.thread_pool.fetch_shard_store.rejected,gauge,,thread,,The number o
 elasticsearch.thread_pool.flush.active,gauge,,thread,,The number of active threads in the flush queue.,0,elasticsearch,active flush threads
 elasticsearch.thread_pool.flush.queue,gauge,,thread,,The number of queued threads in the flush pool.,0,elasticsearch,queued flush threads
 elasticsearch.thread_pool.flush.threads,gauge,,thread,,The total number of threads in the flush pool.,0,elasticsearch,total flush threads
+elasticsearch.thread_pool.flush.threads.count,count,,thread,,The total number of threads in the flush pool.,0,elasticsearch,total flush threads
 elasticsearch.thread_pool.flush.rejected,gauge,,thread,,The number of rejected threads in the flush pool.,0,elasticsearch,rejected flush threads
+elasticsearch.thread_pool.flush.rejected.count,count,,thread,,The number of rejected threads in the flush pool.,0,elasticsearch,rejected flush threads
 elasticsearch.thread_pool.flush.completed,gauge,,thread,,The number of completed threads in the flush pool.,0,elasticsearch,completed flush threads
+elasticsearch.thread_pool.flush.completed.count,count,,thread,,The number of completed threads in the flush pool.,0,elasticsearch,completed flush threads
 elasticsearch.thread_pool.force_merge.active,gauge,,thread,,The number of active threads for force merge operations.,0,elasticsearch,active force merge threads
 elasticsearch.thread_pool.force_merge.threads,gauge,,thread,,The total number of threads for force merge operations.,0,elasticsearch,total force merge threads
 elasticsearch.thread_pool.force_merge.queue,gauge,,thread,,The number of queued threads for force merge operations.,0,elasticsearch,rejected force merge threads
@@ -178,28 +219,43 @@ elasticsearch.thread_pool.force_merge.rejected,gauge,,thread,,The number of reje
 elasticsearch.thread_pool.generic.active,gauge,,thread,,The number of active threads in the generic pool.,0,elasticsearch,active generic threads
 elasticsearch.thread_pool.generic.queue,gauge,,thread,,The number of queued threads in the generic pool.,0,elasticsearch,queued generic threads
 elasticsearch.thread_pool.generic.threads,gauge,,thread,,The total number of threads in the generic pool.,0,elasticsearch,total generic threads
+elasticsearch.thread_pool.generic.threads.count,count,,thread,,The total number of threads in the generic pool.,0,elasticsearch,total generic threads
 elasticsearch.thread_pool.generic.rejected,gauge,,thread,,The number of rejected threads in the generic pool.,0,elasticsearch,rejected generic threads
+elasticsearch.thread_pool.generic.rejected.count,count,,thread,,The number of rejected threads in the generic pool.,0,elasticsearch,rejected generic threads
 elasticsearch.thread_pool.generic.completed,gauge,,thread,,The number of completed threads in the generic pool.,0,elasticsearch,completed generic threads
+elasticsearch.thread_pool.generic.completed.count,count,,thread,,The number of completed threads in the generic pool.,0,elasticsearch,completed generic threads
 elasticsearch.thread_pool.get.active,gauge,,thread,,The number of active threads in the get pool.,0,elasticsearch,active get threads
 elasticsearch.thread_pool.get.queue,gauge,,thread,,The number of queued threads in the get pool.,0,elasticsearch,queued get threads
 elasticsearch.thread_pool.get.threads,gauge,,thread,,The total number of threads in the get pool.,0,elasticsearch,total get threads
+elasticsearch.thread_pool.get.threads.count,count,,thread,,The total number of threads in the get pool.,0,elasticsearch,total get threads
 elasticsearch.thread_pool.get.rejected,gauge,,thread,,The number of rejected threads in the get pool.,0,elasticsearch,rejected get threads
+elasticsearch.thread_pool.get.rejected.count,count,,thread,,The number of rejected threads in the get pool.,0,elasticsearch,rejected get threads
 elasticsearch.thread_pool.get.completed,gauge,,thread,,The number of completed threads in the get pool.,0,elasticsearch,completed get threads
+elasticsearch.thread_pool.get.completed.count,count,,thread,,The number of completed threads in the get pool.,0,elasticsearch,completed get threads
 elasticsearch.thread_pool.index.active,gauge,,thread,,The number of active threads in the index pool.,0,elasticsearch,active index threads
 elasticsearch.thread_pool.index.queue,gauge,,thread,,The number of queued threads in the index pool.,0,elasticsearch,queued index threads
 elasticsearch.thread_pool.index.threads,gauge,,thread,,The total number of threads in the index pool.,0,elasticsearch,total index threads
+elasticsearch.thread_pool.index.threads.count,count,,thread,,The total number of threads in the index pool.,0,elasticsearch,total index threads
 elasticsearch.thread_pool.index.rejected,gauge,,thread,,The number of rejected threads in the index pool.,0,elasticsearch,rejected index threads
+elasticsearch.thread_pool.index.rejected.count,count,,thread,,The number of rejected threads in the index pool.,0,elasticsearch,rejected index threads
 elasticsearch.thread_pool.index.completed,gauge,,thread,,The number of completed threads in the index pool.,0,elasticsearch,completed index threads
+elasticsearch.thread_pool.index.completed.count,count,,thread,,The number of completed threads in the index pool.,0,elasticsearch,completed index threads
 elasticsearch.thread_pool.listener.active,gauge,,thread,,The number of active threads in the listener pool.,0,elasticsearch,active listener threads
 elasticsearch.thread_pool.listener.queue,gauge,,thread,,The number of queued threads in the listener pool.,0,elasticsearch,queued listener threads
 elasticsearch.thread_pool.listener.threads,gauge,,thread,,The total number of threads in the listener pool.,0,elasticsearch,total listener threads
+elasticsearch.thread_pool.listener.threads.count,count,,thread,,The total number of threads in the listener pool.,0,elasticsearch,total listener threads
 elasticsearch.thread_pool.listener.rejected,gauge,,thread,,The number of rejected threads in the listener pool.,0,elasticsearch,rejected listener threads
+elasticsearch.thread_pool.listener.rejected.count,count,,thread,,The number of rejected threads in the listener pool.,0,elasticsearch,rejected listener threads
 elasticsearch.thread_pool.listener.completed,gauge,,thread,,The number of completed threads in the listener pool.,0,elasticsearch,completed listener threads
+elasticsearch.thread_pool.listener.completed.count,count,,thread,,The number of completed threads in the listener pool.,0,elasticsearch,completed listener threads
 elasticsearch.thread_pool.management.active,gauge,,thread,,The number of active threads in the management pool.,0,elasticsearch,active management threads
 elasticsearch.thread_pool.management.queue,gauge,,thread,,The number of queued threads in the management pool.,0,elasticsearch,queued management threads
 elasticsearch.thread_pool.management.threads,gauge,,thread,,The total number of threads in the management pool.,0,elasticsearch,total management threads
+elasticsearch.thread_pool.management.threads.count,count,,thread,,The total number of threads in the management pool.,0,elasticsearch,total management threads
 elasticsearch.thread_pool.management.rejected,gauge,,thread,,The number of rejected threads in the management pool.,0,elasticsearch,rejected management threads
+elasticsearch.thread_pool.management.rejected.count,count,,thread,,The number of rejected threads in the management pool.,0,elasticsearch,rejected management threads
 elasticsearch.thread_pool.management.completed,gauge,,thread,,The number of completed threads in the management pool.,0,elasticsearch,completed management threads
+elasticsearch.thread_pool.management.completed.count,count,,thread,,The number of completed threads in the management pool.,0,elasticsearch,completed management threads
 elasticsearch.thread_pool.merge.active,gauge,,thread,,The number of active threads in the merge pool.,0,elasticsearch,active merge threads
 elasticsearch.thread_pool.merge.queue,gauge,,thread,,The number of queued threads in the merge pool.,0,elasticsearch,queued merge threads
 elasticsearch.thread_pool.merge.threads,gauge,,thread,,The total number of threads in the merge pool.,0,elasticsearch,total merge threads
@@ -211,28 +267,44 @@ elasticsearch.thread_pool.percolate.rejected,gauge,,thread,,The number of reject
 elasticsearch.thread_pool.refresh.active,gauge,,thread,,The number of active threads in the refresh pool.,0,elasticsearch,active refresh threads
 elasticsearch.thread_pool.refresh.queue,gauge,,thread,,The number of queued threads in the refresh pool.,0,elasticsearch,queued refresh threads
 elasticsearch.thread_pool.refresh.threads,gauge,,thread,,The total number of threads in the refresh pool.,0,elasticsearch,total refresh threads
+elasticsearch.thread_pool.refresh.threads.count,count,,thread,,The total number of threads in the refresh pool.,0,elasticsearch,total refresh threads
 elasticsearch.thread_pool.refresh.rejected,gauge,,thread,,The number of rejected threads in the refresh pool.,0,elasticsearch,rejected refresh threads
+elasticsearch.thread_pool.refresh.rejected.count,count,,thread,,The number of rejected threads in the refresh pool.,0,elasticsearch,rejected refresh threads
 elasticsearch.thread_pool.refresh.completed,gauge,,thread,,The number of completed threads in the refresh pool.,0,elasticsearch,completed refresh threads
+elasticsearch.thread_pool.refresh.completed.count,count,,thread,,The number of completed threads in the refresh pool.,0,elasticsearch,completed refresh threads
 elasticsearch.thread_pool.search.active,gauge,,thread,,The number of active threads in the search pool.,0,elasticsearch,active search threads
 elasticsearch.thread_pool.search.queue,gauge,,thread,,The number of queued threads in the search pool.,0,elasticsearch,queued search threads
 elasticsearch.thread_pool.search.threads,gauge,,thread,,The total number of threads in the search pool.,0,elasticsearch,total search threads
+elasticsearch.thread_pool.search.threads.count,count,,thread,,The total number of threads in the search pool.,0,elasticsearch,total search threads
 elasticsearch.thread_pool.search.rejected,gauge,,thread,,The number of rejected threads in the search pool.,0,elasticsearch,rejected search threads
+elasticsearch.thread_pool.search.rejected.count,count,,thread,,The number of rejected threads in the search pool.,0,elasticsearch,rejected search threads
 elasticsearch.thread_pool.search.completed,gauge,,thread,,The number of completed threads in the search pool.,0,elasticsearch,completed search threads
+elasticsearch.thread_pool.search.completed.count,count,,thread,,The number of completed threads in the search pool.,0,elasticsearch,completed search threads
 elasticsearch.thread_pool.snapshot.active,gauge,,thread,,The number of active threads in the snapshot pool.,0,elasticsearch,active snapshot threads
 elasticsearch.thread_pool.snapshot.queue,gauge,,thread,,The number of queued threads in the snapshot pool.,0,elasticsearch,queued snapshot threads
 elasticsearch.thread_pool.snapshot.threads,gauge,,thread,,The total number of threads in the snapshot pool.,0,elasticsearch,total snapshot threads
+elasticsearch.thread_pool.snapshot.threads.count,count,,thread,,The total number of threads in the snapshot pool.,0,elasticsearch,total snapshot threads
 elasticsearch.thread_pool.snapshot.rejected,gauge,,thread,,The number of rejected threads in the snapshot pool.,0,elasticsearch,rejected snapshot threads
+elasticsearch.thread_pool.snapshot.rejected.count,count,,thread,,The number of rejected threads in the snapshot pool.,0,elasticsearch,rejected snapshot threads
 elasticsearch.thread_pool.snapshot.completed,gauge,,thread,,The number of completed threads in the snapshot pool.,0,elasticsearch,completed snapshot threads
+elasticsearch.thread_pool.snapshot.completed.count,count,,thread,,The number of completed threads in the snapshot pool.,0,elasticsearch,completed snapshot threads
 elasticsearch.thread_pool.write.active,gauge,,thread,,The number of active threads in the write pool.,0,elasticsearch,active write threads
 elasticsearch.thread_pool.write.queue,gauge,,thread,,The number of queued threads in the write pool.,0,elasticsearch,queued write threads
 elasticsearch.thread_pool.write.threads,gauge,,thread,,The total number of threads in the write pool.,0,elasticsearch,total write threads
+elasticsearch.thread_pool.write.threads.count,count,,thread,,The total number of threads in the write pool.,0,elasticsearch,total write threads
 elasticsearch.thread_pool.write.rejected,gauge,,thread,,The number of rejected threads in the write pool.,0,elasticsearch,rejected write threads
+elasticsearch.thread_pool.write.rejected.count,count,,thread,,The number of rejected threads in the write pool.,0,elasticsearch,rejected write threads
 elasticsearch.thread_pool.write.completed,gauge,,thread,,The number of completed threads in the write pool.,0,elasticsearch,completed write threads
+elasticsearch.thread_pool.write.completed.count,count,,thread,,The number of completed threads in the write pool.,0,elasticsearch,completed write threads
 elasticsearch.transport.rx_count,gauge,,packet,,The total number of packets received in cluster communication.,0,elasticsearch,transport packets received
+elasticsearch.transport.rx_count.count,count,,packet,,The total number of packets received in cluster communication.,0,elasticsearch,transport packets received
 elasticsearch.transport.rx_size,gauge,,byte,,The total size of data received in cluster communication.,0,elasticsearch,transport bytes received
+elasticsearch.transport.rx_size.count,count,,byte,,The total size of data received in cluster communication.,0,elasticsearch,transport bytes received
 elasticsearch.transport.server_open,gauge,,connection,,The number of connections opened for cluster communication.,0,elasticsearch,transport open connections
 elasticsearch.transport.tx_count,gauge,,packet,,The total number of packets sent in cluster communication.,0,elasticsearch,transport packets sent
+elasticsearch.transport.tx_count.count,count,,packet,,The total number of packets sent in cluster communication.,0,elasticsearch,transport packets sent
 elasticsearch.transport.tx_size,gauge,,byte,,The total size of data sent in cluster communication.,0,elasticsearch,transport bytes sent
+elasticsearch.transport.tx_size.count,count,,byte,,The total size of data sent in cluster communication.,0,elasticsearch,transport bytes sent
 elasticsearch.unassigned_shards,gauge,,shard,,The number of shards that are unassigned to a node.,0,elasticsearch,unassigned shards
 elasticsearch.delayed_unassigned_shards,gauge,,shard,,The number of shards whose allocation has been delayed.,0,elasticsearch,delayed unassigned shards
 jvm.gc.collection_count,gauge,,garbage collection,,The total number of garbage collections run by the JVM.,0,elasticsearch,jvm gc count

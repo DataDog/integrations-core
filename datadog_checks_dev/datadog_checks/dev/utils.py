@@ -68,6 +68,9 @@ def load_jmx_config():
     example_config = yaml.safe_load(read_file(example_config_path))
     metrics_config = yaml.safe_load(read_file(metrics_config_path))
 
+    if example_config['init_config'] is None:
+        example_config['init_config'] = {}
+
     # Avoid having to potentially mount multiple files by putting the default metrics
     # in the user-defined metric location.
     example_config['init_config']['conf'] = metrics_config['jmx_metrics']

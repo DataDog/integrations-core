@@ -1,56 +1,22 @@
 ## WARNING: This configuration files is for SNMP v1, v2 and v3
 ## Check carefully all variables depending of your SNMP version.
-## To learn more about SNMP v3 configuration check:
-## http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+##
+## NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
 
 init_config:
 
   ## @param loader - string - optional - default: python
   ## Check loader to use for all instances. Available loaders:
-  ## - core: (recommended) will use new corecheck SNMP integration
+  ## - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
   ## - python: will use legacy python SNMP integration
   #
   loader: core
-
-  ## @param mibs_folder - string - optional
-  ## Specify an additional folder for your custom mib files (python format).
-  #
-  # mibs_folder: /path/to/your/mibs/folder
-
-  ## @param ignore_nonincreasing_oid - boolean - optional - default: false
-  ## Set to true to ignore non increasing oid.
-  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
-  #
-  # ignore_nonincreasing_oid: false
 
   ## @param oid_batch_size - integer - optional - default: 10 (python), 60 (core)
   ## The number of OIDs handled by each batch. Increasing this number improves performance but
   ## uses more resources.
   #
   # oid_batch_size: 10
-
-  ## @param optimize_mib_memory_usage - boolean - optional - default: false
-  ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
-  ## MIB information. This shares internal MIB data across instances.
-  ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
-  #
-  # optimize_mib_memory_usage: false
-
-  ## @param refresh_oids_cache_interval - integer - optional - default: 0
-  ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
-  ## the cache is refreshed.
-  ## This option works best when `oid_batch_size` is set to 128 or 256.
-  ## This is useful to improve performance when fetching metrics from large tables.
-  ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
-  ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
-  ## The caching is disabled if the interval is set to `0` (default).
-  ##
-  ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
-  ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
-  ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
-  ##         the OIDs will be refreshed only according to the refresh interval.
-  #
-  # refresh_oids_cache_interval: 3600
 
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
@@ -84,34 +50,44 @@ init_config:
   #     definition_file: f5-big-ip.yaml
   #   router:
   #     definition_file: generic-router.yaml
-  #   cisco-3850:
-  #     definition_file: cisco-3850.yaml
-  #   meraki-cloud-controller:
-  #     definition_file: meraki-cloud-controller.yaml
-  #   idrac:
-  #     definition_file: idrac.yaml
-  #   cisco-nexus:
-  #     definition_file: cisco-nexus.yaml
-  #   dell-poweredge:
-  #     definition_file: dell-poweredge.yaml
-  #   hp-ilo4:
-  #     definition_file: hp-ilo4.yaml
-  #   hpe-proliant:
-  #     definition_file: hpe-proliant.yaml
-  #   palo-alto:
-  #     definition_file: palo-alto.yaml
-  #   cisco-asa-5525:
-  #     definition_file: cisco-asa-5525.yaml
-  #   checkpoint-firewall:
-  #     definition_file: checkpoint-firewall.yaml
-  #   isilon:
-  #     definition_file: isilon.yaml
-  #   apc-ups:
-  #     definition_file: apc-ups.yaml
-  #   fortinet-fortigate:
-  #     definition_file: fortinet-fortigate.yaml
-  #   netapp:
-  #     definition_file: netapp.yaml
+  #   [...]
+
+  ## @param refresh_oids_cache_interval - integer - optional - default: 0
+  ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
+  ## the cache is refreshed.
+  ## This option works best when `oid_batch_size` is set to 128 or 256.
+  ## This is useful to improve performance when fetching metrics from large tables.
+  ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+  ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
+  ## The caching is disabled if the interval is set to `0` (default).
+  ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+  ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
+  ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+  ##         the OIDs will be refreshed only according to the refresh interval.
+  ## Only available using python SNMP integration
+  #
+  # refresh_oids_cache_interval: 3600
+
+  ## @param optimize_mib_memory_usage - boolean - optional - default: false
+  ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
+  ## MIB information. This shares internal MIB data across instances.
+  ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
+  ## Only available using python SNMP integration
+  #
+  # optimize_mib_memory_usage: false
+
+  ## @param mibs_folder - string - optional
+  ## Specify an additional folder for your custom mib files (python format).
+  ## Only available using python SNMP integration
+  #
+  # mibs_folder: /path/to/your/mibs/folder
+
+  ## @param ignore_nonincreasing_oid - boolean - optional - default: false
+  ## Set to true to ignore non increasing oid.
+  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
+  ## Only available using python SNMP integration
+  #
+  # ignore_nonincreasing_oid: false
 
 instances:
   -
@@ -120,18 +96,6 @@ instances:
     ## One of ip_address and network_address must be provided.
     #
     # ip_address: <IP_ADDRESS>
-
-    ## @param network_address - string - optional
-    ## The network address of the devices to scan for monitor.
-    #
-    # network_address: <NETWORK_ADRESS>
-
-    ## @param ignored_ip_addresses - list of string - optional
-    ## A list of IP addresses to ignore when scanning the network.
-    #
-    # ignored_ip_addresses:
-    #   - <IP_ADDRESS_1>
-    #   - <IP_ADDRESS_2>
 
     ## @param port - integer - optional - default: 161
     ## Default SNMP port.
@@ -144,8 +108,8 @@ instances:
     # community_string: public
 
     ## @param snmp_version - integer - optional - default: 2
-    ## If you are using SNMP v1 set snmp_version to 1 (required)
-    ## If you are using SNMP v3 set snmp_version to 3 (required)
+    ## If you are using SNMP v1 set snmp_version to 1
+    ## If you are using SNMP v3 set snmp_version to 3
     #
     # snmp_version: 2
 
@@ -159,32 +123,6 @@ instances:
     #
     # retries: 5
 
-    ## @param discovery_interval - integer - optional - default: 3600
-    ## Interval between 2 discovery starts, in seconds.
-    #
-    # discovery_interval: 3600
-
-    ## @param discovery_allowed_failures - integer - optional - default: 3
-    ## Number of times a discovered host can fail before we remove it from the discovered list.
-    #
-    # discovery_allowed_failures: 3
-
-    ## @param workers - integer - optional - default: 5
-    ## Number of workers used for check when using discovery.
-    #
-    # workers: 5
-
-    ## @param enforce_mib_constraints - boolean - optional - default: true
-    ## If set to false we will not check the values returned meet the MIB constraints.
-    #
-    # enforce_mib_constraints: true
-
-    ## @param bulk_threshold - integer - optional - default: 0
-    ## The number of symbols in each table that triggers a BULK request.
-    ## Only relevant for SNMP > 1.
-    #
-    # bulk_threshold: 0
-
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
@@ -194,11 +132,23 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## SNMP v3 specific configuration
-    ## Learn more about SNMP v3 configuration here: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+    ## @param loader - string - optional - default: python
+    ## Check loader to use. Available loaders:
+    ## - core: (recommended) will use new corecheck SNMP integration
+    ## - python: will use legacy python SNMP integration
+    #
+    # loader: core
+
+    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    ## Only available for corecheck implementation (`loader: core`).
+    #
+    # oid_batch_size: 10
 
     ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
+    ## SNMP v3 specific configuration
     #
     # user: <USERNAME>
 
@@ -206,11 +156,13 @@ instances:
     ## Authentication type to use when connecting to your SNMP devices.
     ## It can be one of: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
     ## Default to MD5 when `authKey` is specified.
+    ## SNMP v3 specific configuration
     #
     # authProtocol: <AUTHENTICATION_PROTOCOL>
 
     ## @param authKey - string - optional
     ## Authentication key to use with your Authentication type.
+    ## SNMP v3 specific configuration
     #
     # authKey: <AUTHENTICATION_TYPE_KEY>
 
@@ -218,22 +170,26 @@ instances:
     ## Privacy type to use when connecting to your SNMP devices.
     ## It can be one of: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
     ## Default to DES when `privKey` is specified.
+    ## SNMP v3 specific configuration
     #
     # privProtocol: <PRIVACY_TYPE>
 
     ## @param privKey - string - optional
     ## Privacy type key to use with your Privacy type.
+    ## SNMP v3 specific configuration
     #
     # privKey: <PRIVACY_TYPE_KEY>
 
     ## @param context_engine_id - string - optional
     ## ID of your context engine; typically unneeded.
     ## (optional SNMP v3-only parameter)
+    ## SNMP v3 specific configuration
     #
     # context_engine_id: <CONTEXT_ENGINE_ID>
 
     ## @param context_name - string - optional
     ## Name of your context (optional SNMP v3-only parameter).
+    ## SNMP v3 specific configuration
     #
     # context_name: <CONTEXT_NAME>
 
@@ -281,6 +237,51 @@ instances:
     #        host: \2
     #        device_type: \1
 
+    ## @param network_address - string - optional
+    ## The network address of the devices to scan for monitor.
+    ## Only available using python SNMP integration
+    #
+    # network_address: <NETWORK_ADRESS>
+
+    ## @param ignored_ip_addresses - list of string - optional
+    ## A list of IP addresses to ignore when scanning the network.
+    ## Only available using python SNMP integration
+    #
+    # ignored_ip_addresses:
+    #   - <IP_ADDRESS_1>
+    #   - <IP_ADDRESS_2>
+
+    ## @param discovery_interval - integer - optional - default: 3600
+    ## Interval between 2 discovery starts, in seconds.
+    ## Only available using python SNMP integration
+    #
+    # discovery_interval: 3600
+
+    ## @param discovery_allowed_failures - integer - optional - default: 3
+    ## Number of times a discovered host can fail before we remove it from the discovered list.
+    ## Only available using python SNMP integration
+    #
+    # discovery_allowed_failures: 3
+
+    ## @param workers - integer - optional - default: 5
+    ## Number of workers used for check when using discovery.
+    ## Only available using python SNMP integration
+    #
+    # workers: 5
+
+    ## @param enforce_mib_constraints - boolean - optional - default: true
+    ## If set to false we will not check the values returned meet the MIB constraints.
+    ## Only available using python SNMP integration
+    #
+    # enforce_mib_constraints: true
+
+    ## @param bulk_threshold - integer - optional - default: 0
+    ## The number of symbols in each table that triggers a BULK request.
+    ## Only relevant for SNMP > 1.
+    ## Only available using python SNMP integration
+    #
+    # bulk_threshold: 0
+
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
     ## the cache is refreshed.
@@ -294,19 +295,6 @@ instances:
     ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
     ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
     ##         the OIDs will be refreshed only according to the refresh interval.
+    ## Only available using python SNMP integration
     #
     # refresh_oids_cache_interval: 3600
-
-    ## @param loader - string - optional - default: python
-    ## Check loader to use. Available loaders:
-    ## - core: (recommended) will use new corecheck SNMP integration
-    ## - python: will use legacy python SNMP integration
-    #
-    # loader: core
-
-    ## @param oid_batch_size - integer - optional - default: 60 (core)
-    ## The number of OIDs handled by each batch. Increasing this number improves performance but
-    ## uses more resources.
-    ## Only available for corecheck implementation (`loader: core`).
-    #
-    # oid_batch_size: 10

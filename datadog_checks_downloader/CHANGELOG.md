@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.3.0 / 2021-05-28
+
+* [Added] Better error message if the integration doesn't have the expected type. See [#9403](https://github.com/DataDog/integrations-core/pull/9403).
+
 ## 3.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Security] Update TUF, in-toto and securesystemslib. See [#7844](https://github.com/DataDog/integrations-core/pull/7844).

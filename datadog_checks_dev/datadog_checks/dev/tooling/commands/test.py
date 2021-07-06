@@ -14,7 +14,7 @@ from ...utils import ON_WINDOWS, get_next
 from ..constants import get_root
 from ..dependencies import read_check_base_dependencies
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
-from ..utils import complete_testable_checks
+from ..utils import code_coverage_enabled, complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -110,7 +110,8 @@ def test(
         # Environment variables we need tox to pass down
         'TOX_TESTENV_PASSENV': (
             # Used in .coveragerc for whether or not to show missing line numbers for coverage
-            'DDEV_COV_MISSING '
+            # or for generic tag checking
+            'DDEV_* '
             # Necessary for compilation on Windows: PROGRAMDATA, PROGRAMFILES, PROGRAMFILES(X86)
             'PROGRAM* '
             # Necessary for getting the user on Windows https://docs.python.org/3/library/getpass.html#getpass.getuser
@@ -266,7 +267,7 @@ def test(
             if result.code:
                 abort('\nFailed!', code=result.code)
 
-            if coverage and file_exists('.coverage'):
+            if coverage and file_exists('.coverage') and code_coverage_enabled(check):
                 if not cov_keep:
                     echo_info('\n---------- Coverage report ----------\n')
 

@@ -73,6 +73,9 @@ class SnowflakeCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+
         self.connect()
 
         if self._conn is not None:

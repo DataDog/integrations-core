@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Note**: This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's [ECS Fargate integration][22].
+
 Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
 
 ## Setup
@@ -30,7 +32,7 @@ To get the best observability coverage monitoring workloads in AWS EKS Fargate, 
 
 Also, set up integrations for any other AWS services you are running with EKS (for example, [ELB][12]).
 
-#### Manual Installation
+#### Manual installation
 
 To install, download the custom Agent image: `datadog/agent` with version v7.17 or above.
 
@@ -138,7 +140,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Metrics Collection
+## Metrics collection
 
 ### Integration metrics
 
@@ -195,11 +197,11 @@ spec:
 **Notes**:
 
 - Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
-- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent.
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent. The [Live Containers][16] view will report 0 for CPU and Memory.
 
 ### DogStatsD
 
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][16] from your application container to Datadog.
+Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][17] from your application container to Datadog.
 
 ```yaml
 apiVersion: apps/v1
@@ -252,10 +254,19 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Log Collection
+### Live Containers
+
+Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][21] page.
+
+### Live Processes
+
+Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][22] page. To enable live processes, [enable shareProcessNamespace in the pod spec][23].
+
+## Log collection
+
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
-You can use [Fluent Bit][25] to route EKS logs to CloudWatch Logs. 
+You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs. 
 
 1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap will specify the log group, region, prefix string, and whether to automatically create the log group.
 
@@ -276,9 +287,9 @@ You can use [Fluent Bit][25] to route EKS logs to CloudWatch Logs.
             auto_create_group On
    ```
 
-## Traces Collection
+## Traces collection
 
-Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][17].
+Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][19].
 
 ```yaml
 apiVersion: apps/v1
@@ -333,20 +344,20 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
-## Events Collection
+## Events collection
 
 To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
 
-1. [Setup the Datadog Cluster Agent][18].
-2. [Enable Event collection for your Cluster Agent][19].
+1. [Setup the Datadog Cluster Agent][20].
+2. [Enable Event collection for your Cluster Agent][21].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
-## Process Collection
+## Process collection
 
-For Agent 6.19+/7.19+, [Process Collection][21] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
+For Agent 6.19+/7.19+, [Process Collection][24] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
 
 ```
 apiVersion: v1
@@ -376,13 +387,13 @@ eks_fargate does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][20].
+Need help? Contact [Datadog support][22].
 
 ## Further Reading
 
-- Blog post: [Key metrics for monitoring AWS Fargate][22]
-- Blog post: [How to collect metrics and logs from AWS Fargate workloads][23]
-- Blog post: [AWS Fargate monitoring with Datadog][24]
+- Blog post: [Key metrics for monitoring AWS Fargate][24]
+- Blog post: [How to collect metrics and logs from AWS Fargate workloads][25]
+- Blog post: [AWS Fargate monitoring with Datadog][26]
 
 [1]: http://docs.datadoghq.com/integrations/amazon_eks/
 [2]: http://docs.datadoghq.com/integrations/system
@@ -401,11 +412,13 @@ Need help? Contact [Datadog support][20].
 [15]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
 [16]: https://docs.datadoghq.com/developers/dogstatsd/
 [17]: http://docs.datadoghq.com/tracing/setup
-[18]: http://docs.datadoghq.com/agent/cluster_agent/setup
+[18]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
-[20]: https://docs.datadoghq.com/help/
-[21]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
-[22]: https://www.datadoghq.com/blog/aws-fargate-metrics/
-[23]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
-[24]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
-[25]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
+[20]: https://docs.datadoghq.com/help
+[21]: https://app.datadoghq.com/containers
+[22]: https://app.datadoghq.com/process
+[23]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+[24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
+[25]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
+[26]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+

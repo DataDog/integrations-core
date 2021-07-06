@@ -24,7 +24,7 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_deep_database_monitoring(field, value):
+def instance_dbm(field, value):
     return False
 
 
@@ -52,7 +52,7 @@ def instance_options(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_pass_(field, value):
+def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
@@ -76,10 +76,6 @@ def instance_ssl(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_statement_metrics_limits(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_statement_samples(field, value):
     return get_default_field_value(field, value)
 
@@ -92,5 +88,5 @@ def instance_use_global_custom_queries(field, value):
     return 'true'
 
 
-def instance_user(field, value):
+def instance_username(field, value):
     return 'datadog'

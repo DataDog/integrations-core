@@ -5,10 +5,13 @@ import simplejson as json
 from six import PY2
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
 class Kong(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
 
     METRIC_PREFIX = 'kong.'
 
@@ -19,7 +22,13 @@ class Kong(AgentCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if not PY2 and 'openmetrics_endpoint' in instance:
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
             # TODO: when we drop Python 2 move this import up top
             from .check import KongCheck
 

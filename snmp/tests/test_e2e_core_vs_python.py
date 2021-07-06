@@ -44,7 +44,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=509 + 5)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -61,7 +61,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=509 + 5)
 
 
 def test_e2e_regex_match(dd_agent_check, aggregator):
@@ -209,7 +209,7 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=5106 + 5)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):

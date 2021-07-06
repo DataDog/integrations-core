@@ -44,6 +44,7 @@ init_config:
     # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
+## Everything under this section is sent as events.
 #
 instances:
 

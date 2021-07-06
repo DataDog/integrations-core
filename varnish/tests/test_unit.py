@@ -89,7 +89,7 @@ def test_command_line_manually_unhealthy(mock_subprocess, mock_version, mock_get
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy", status=check.CRITICAL, tags=['backend:default', 'cluster:webs'], count=1
+        "varnish.backend_healthy", status=check.CRITICAL, tags=['backend:default', 'varnish_cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('4.1.0'), 'xml'
@@ -126,7 +126,7 @@ def test_command_line_post_varnish4(mock_subprocess, mock_version, mock_geteuid,
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('4.1.0'), 'xml'
@@ -171,7 +171,7 @@ def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid,
         '-p',
     ]
     aggregator.assert_service_check(
-        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('5.0.0'), 'json'
@@ -216,7 +216,7 @@ def test_command_line_post_varnish6_5(mock_subprocess, mock_version, mock_geteui
         '-p',
     ]
     aggregator.assert_service_check(
-        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'varnish_cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('6.5.0'), 'json'
@@ -253,5 +253,5 @@ def test_command_line(mock_subprocess, mock_version, mock_geteuid, aggregator, c
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy", status=check.OK, tags=['backend:default', 'cluster:webs'], count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:default', 'varnish_cluster:webs'], count=1
     )

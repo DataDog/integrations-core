@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -45,7 +45,7 @@ class InstanceConfig(BaseModel):
     collect_response_time: Optional[bool]
     connect_timeout: Optional[float]
     content_match: Optional[str]
-    data: Optional[Mapping[str, Any]]
+    data: Optional[Union[Mapping[str, Any], str]]
     days_critical: Optional[int]
     days_warning: Optional[int]
     empty_default_hostname: Optional[bool]

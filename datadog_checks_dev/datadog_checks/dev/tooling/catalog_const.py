@@ -11,6 +11,8 @@ SECONDARY_DASHBOARDS = {
 # Integrations that either do not emit metrics or have a too customer-specific setup to have an OOTBD
 DASHBOARD_NOT_POSSIBLE = {
     'agent_metrics',  # Not for the end user
+    'amazon_eks',  # collects metrics from Kubernetes, AWS, AWS EC2 integrations
+    'go-metro',  # for agent 5 only
     'snmp',  # Too custom
     'openmetrics',  # No default metrics
     'pdh_check',  # No default metrics
@@ -36,21 +38,26 @@ DASHBOARD_NOT_POSSIBLE = {
 
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
-INTEGRATION_LOGS_NOT_POSSIBLE = (
+INTEGRATION_LOGS_NOT_POSSIBLE = {
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',
     'datadog_checks_downloader',
     'directory',  # OS
+    'dns_check',  # not a specific service
     'dotnetclr',  # No relevant logs
     'external_dns',  # remote connection
+    'go-metro',  # for agent 5 only
+    'go_expvar',  # its a go package
     'http_check',  # Its not a service
     'linux_proc_extras',
     'ntp',  # the integration is for a remote ntp server
     'openmetrics',  # base class
+    'oracle',  # TODO: requires submitting logs via agent
     'pdh_check',  # base class
     'process',  # system
     'prometheus',  # base class
+    'riakcs',  # would require installing agent on each node
     'sap_hana',  # see open questions in the architecture rfc
     'snmp',  # remote connection to the devices
     'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
@@ -59,6 +66,20 @@ INTEGRATION_LOGS_NOT_POSSIBLE = (
     'system_swap',  # system
     'tcp_check',  # remote connection
     'tls',  # remote connection
+    'tokumx',  # eoled, only available in py2
     'windows_service',  # OS
     'wmi_check',  # base class
-)
+}
+
+
+INTEGRATION_REC_MONITORS_NOT_POSSIBLE = {
+    'go-metro',  # agent 5 only
+}
+
+PROCESS_SIGNATURE_EXCLUDE = {
+    'datadog_checks_base',
+    'datadog_checks_dev',
+    'datadog_checks_downloader',
+    'snowflake',
+    'go-metro',
+}

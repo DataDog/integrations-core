@@ -12,13 +12,23 @@ from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, N
 
 
 class AmazonMskCheck(OpenMetricsBaseCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
     SERVICE_CHECK_CONNECT = 'aws.msk.can_connect'
     DEFAULT_METRIC_LIMIT = 0
 
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if not PY2 and is_affirmative(instance.get('use_openmetrics', False)):
+        if is_affirmative(instance.get('use_openmetrics', False)):
+            if PY2:
+                raise ConfigurationError(
+                    "Openmetrics on this integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information"
+                )
             # TODO: when we drop Python 2 move this import up top
             from .check import AmazonMskCheckV2
 
