@@ -86,6 +86,7 @@ class HDFSDataNode(AgentCheck):
         bean = next(iter(beans))
         bean_name = bean.get('name')
 
+        # This is a change
         self.log.debug("Bean name retrieved: %s", bean_name)
 
         for metric, (metric_name, metric_type) in iteritems(self.HDFS_METRICS):

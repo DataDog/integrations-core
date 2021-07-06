@@ -8,6 +8,7 @@ parameters:
   benchmark: true
   latest_metrics: false
   validate: false
+  validate_changed: null
   validate_codeowners: false
   repo: 'core'
   ispr: false
@@ -52,6 +53,7 @@ jobs:
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
       parameters:
+        changed: ${{ parameters.changed }}
         check: ${{ parameters.check }}
         repo: ${{ parameters.repo }}
         ispr: ${{ parameters.ispr }}
