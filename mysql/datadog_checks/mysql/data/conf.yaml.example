@@ -146,7 +146,7 @@ instances:
     #     type: <METRIC_TYPE>
     #     field: <FIELD_NAME>
 
-    ## Enable options to collect extra metrics or change the behavior of your MySQL integration.
+    ## Enable options to collect extra metrics from your MySQL integration.
     #
     options:
 
