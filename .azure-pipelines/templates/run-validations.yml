@@ -2,7 +2,7 @@ parameters:
   check: null
   repo: 'core'
   ispr: false
-  validate_changed: null
+  validate_changed: ''
   validate_codeowners: false
 
 steps:

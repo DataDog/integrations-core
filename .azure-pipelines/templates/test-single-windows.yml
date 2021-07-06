@@ -8,7 +8,7 @@ parameters:
   benchmark: false
   latest_metrics: false
   validate: false
-  validate_changed: null
+  validate_changed: ''
   validate_codeowners: false
   repo: 'core'
   ispr: false
