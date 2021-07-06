@@ -198,7 +198,7 @@ class PostgresStatementMetrics(object):
             )
         except psycopg2.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
-            self._log.warning("TYPE: %s, error: %s", type(e), e.pgerror)
+
             if (
                 isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
