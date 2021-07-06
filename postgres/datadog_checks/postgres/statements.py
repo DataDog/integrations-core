@@ -194,7 +194,9 @@ class PostgresStatementMetrics(object):
         except psycopg2.errors.ObjectNotInPrerequisiteState as e:
             if 'pg_stat_statements must be loaded' in str(e):
                 self._check.count(
-                    "dd.postgres.statement_metrics.error", 1, tags=tags + ["error:pg_stat_statements_not_enabled"]
+                    "dd.postgres.statement_metrics.error",
+                    1,
+                    tags=tags + ["error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled"],
                 )
                 self._log.warning(
                     "Unable to collect statement metrics because pg_stat_statements must be loaded via "

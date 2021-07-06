@@ -664,7 +664,7 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
             psycopg2.errors.ObjectNotInPrerequisiteState(
                 'pg_stat_statements must be loaded via shared_preload_libraries'
             ),
-            'error:pg_stat_statements_not_enabled',
+            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled',
         ),
         (
             psycopg2.errors.ObjectNotInPrerequisiteState('cannot insert into view'),
