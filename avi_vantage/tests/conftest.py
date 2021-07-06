@@ -15,7 +15,7 @@ HERE = get_here()
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(integration_instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     # We need a custom condition to wait a bit longer
     with docker_run(
@@ -24,13 +24,27 @@ def dd_environment():
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
     ):
-        yield
+        yield integration_instance
 
 
 @pytest.fixture
-def expected_metrics():
-    with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
-        return json.load(f)
+def get_expected_metrics():
+    def _get_metrics(endpoint=None):
+        with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
+            expected_metrics = json.load(f)
+        if endpoint is None:
+            return expected_metrics
+
+        transformed_expected_metrics = []
+        for metric in expected_metrics:
+            tags = [t.replace('https://34.123.32.255/', endpoint) for t in metric['tags']]
+            transformed_expected_metrics.append(
+                {"name": metric['name'], "type": metric['type'], "value": metric['value'], "tags": tags}
+            )
+
+        return transformed_expected_metrics
+
+    return _get_metrics
 
 
 @pytest.fixture
@@ -49,7 +63,7 @@ def mock_client():
         yield
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def unit_instance():
     return {
         "avi_controller_url": "https://34.123.32.255/",
@@ -59,6 +73,6 @@ def unit_instance():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def integration_instance():
     return {"avi_controller_url": f"http://{get_docker_hostname()}:5000/", "username": "user1", "password": "dummyPass"}
