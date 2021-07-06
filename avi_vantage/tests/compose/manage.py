@@ -63,6 +63,11 @@ def get_metrics(resource):
     return content, 200
 
 
+@app.route("/api/cluster/version")
+def cluster_version():
+    return jsonify(Version="20.1.5")
+
+
 cli = FlaskGroup(app)
 
 

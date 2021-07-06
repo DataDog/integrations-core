@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  web:
+  avi:
     build: .
     ports:
       - 5000:5000

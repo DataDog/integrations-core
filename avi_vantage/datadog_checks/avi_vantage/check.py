@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 
 from datadog_checks.avi_vantage import metrics
-from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.errors import CheckException
 
 from .config_models import ConfigMixin
@@ -67,6 +67,14 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             logout_resp = self.http.post(logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': base_url})
             logout_resp.raise_for_status()
 
+    @AgentCheck.metadata_entrypoint
+    def collect_avi_version(self):
+        base_url = self.config.avi_controller_url.rstrip('/')
+        response = self.http.get(base_url + "/api/cluster/version")
+        response.raise_for_status()
+        version = response.json()['Version']
+        self.set_metadata('version', version)
+
     def create_scraper(self, config):
         scraper = super(AviVantageCheck, self).create_scraper(config)
         scraper.http = self.http
@@ -85,6 +93,10 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def check(self, _):
         with self.login():
+            try:
+                self.collect_avi_version()
+            except Exception:
+                self.log.debug("Unable to fetch Avi version", exc_info=True)
             super(AviVantageCheck, self).check(None)
             if self.collect_events:
                 self._collect_events()
