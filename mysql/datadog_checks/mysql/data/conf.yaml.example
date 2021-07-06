@@ -146,7 +146,7 @@ instances:
     #     type: <METRIC_TYPE>
     #     field: <FIELD_NAME>
 
-    ## Enable options to collect extra metrics from your MySQL integration.
+    ## Enable options to collect extra metrics or change the behavior of your MySQL integration.
     #
     options:
 
@@ -223,6 +223,13 @@ instances:
         ## MySQL integration tile in the Datadog Web UI for further instructions.
         #
         # extra_performance_metrics: false
+
+        ## @param quantize_sql_tables - boolean - optional - default: false
+        ## Set to `true` to perform quantization on your SQL tables.
+        ##
+        ## Note that this option only applies when `deep_database_monitoring` is enabled.
+        #
+        # quantize_sql_tables: false
 
     ## @param deep_database_monitoring - boolean - optional - default: false
     ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.

@@ -148,10 +148,11 @@ class MySQLStatementMetrics(object):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+        obfuscate_options = json.dumps({'quantize_sql_tables': self._config.options.get('quantize_sql_tables', False)})
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], obfuscate_options)
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue

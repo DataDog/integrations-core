@@ -263,7 +263,7 @@ def test_complex_config_replica(aggregator, instance_complex):
     )
 
 
-def _obfuscate_sql(query):
+def _obfuscate_sql(query, options=None):
     return re.sub(r'\s+', ' ', query or '').strip()
 
 
@@ -363,7 +363,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
-    def obfuscate_sql(query):
+    def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
             return normalized_query
         return query
