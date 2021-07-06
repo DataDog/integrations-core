@@ -173,6 +173,11 @@ class PostgresStatementMetrics(object):
                     'Unable to collect statement metrics because required fields are unavailable: %s',
                     ', '.join(list(missing_columns)),
                 )
+                self._check.count(
+                    "dd.postgres.statement_metrics.error",
+                    1,
+                    tags=tags + ["error:database-missing_pg_stat_statements_required_columns"],
+                )
                 return []
 
             query_columns = sorted(list(available_columns & PG_STAT_ALL_DESIRED_COLUMNS))
@@ -191,28 +196,21 @@ class PostgresStatementMetrics(object):
                 ),
                 params=params,
             )
-        except psycopg2.errors.ObjectNotInPrerequisiteState as e:
-            if 'pg_stat_statements must be loaded' in str(e):
-                self._check.count(
-                    "dd.postgres.statement_metrics.error",
-                    1,
-                    tags=tags + ["error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled"],
-                )
+        except psycopg2.Error as e:
+            error_tag = "error:database-{}".format(type(e).__name__)
+            self._log.warning("TYPE: %s, error: %s", type(e), e.pgerror)
+            if (
+                isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
+            ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
+                error_tag = "error:database-{}-pg_stat_statements_not_enabled".format(type(e).__name__)
                 self._log.warning(
-                    "Unable to collect statement metrics because pg_stat_statements must be loaded via "
-                    "shared_preload_libraries"
+                    "Unable to collect statement metrics because pg_stat_statements is not installed "
+                    "in this database"
                 )
             else:
-                self._check.count(
-                    "dd.postgres.statement_metrics.error", 1, tags=tags + ["error:database-{}".format(type(e).__name__)]
-                )
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
-            return []
-        except psycopg2.Error as e:
-            self._check.count(
-                "dd.postgres.statement_metrics.error", 1, tags=tags + ["error:database-{}".format(type(e).__name__)]
-            )
-            self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
+
+            self._check.count("dd.postgres.statement_metrics.error", 1, tags=tags + [error_tag])
 
             return []
 
