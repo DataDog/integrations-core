@@ -118,7 +118,7 @@ JobMemoryUsage = {
         {'name': 'job_user', 'type': 'tag'},
         {'name': 'job_name', 'type': 'tag'},
         {'name': 'subsystem_name', 'type': 'tag'},
-        {'name': 'job_status', 'type': 'tag'},
+        {'name': 'job_active_status', 'type': 'tag'},
         {'name': 'memory_pool_name', 'type': 'tag'},
         {'name': 'ibm_i.job.temp_storage', 'type': 'gauge'},
     ],
