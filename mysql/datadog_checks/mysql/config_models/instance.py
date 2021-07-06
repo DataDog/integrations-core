@@ -96,7 +96,7 @@ class InstanceConfig(BaseModel):
     statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
-    user: Optional[str]
+    username: Optional[str]
     obfuscator_options: Optional[ObfuscatorOptions]
 
     @root_validator(pre=True)
