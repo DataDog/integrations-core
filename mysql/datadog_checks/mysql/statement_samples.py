@@ -503,7 +503,7 @@ class MySQLStatementSamples(object):
             return None
 
         plan, explain_errors = None, None
-        truncated = self._is_statement_truncated(row['sql_text'])
+        truncated = self._get_truncation_state(row['sql_text'])
         if truncated == StatementTruncationState.truncated:
             self._check.count(
                 "dd.mysql.statement_samples.error",
@@ -849,7 +849,7 @@ class MySQLStatementSamples(object):
         return float(cost or 0.0)
 
     @staticmethod
-    def _is_statement_truncated(statement):
+    def _get_truncation_state(statement):
         # Mysql adds 3 dots at the end of truncated statements so we use this to check if
         # a statement is truncated
         truncated = statement[-3:] == '...'
