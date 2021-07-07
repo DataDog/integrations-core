@@ -64,7 +64,7 @@ avi_vantage.l7_client.sum_total_responses,gauge,15,response,,Total number of HTT
 avi_vantage.l7_client.sum_uri_length,gauge,15,,,Total length of HTTP request URIs.,0,avi_vantage,
 avi_vantage.l7_server.avg_resp_5xx,gauge,15,response,second,Rate of 5xx HTTP responses sent per second,0,avi_vantage,
 avi_vantage.l7_server.avg_complete_responses,gauge,15,response,second,Rate of HTTP responses sent per second,0,avi_vantage,
-avi_vantage.l7_server.avg_error_responses,gauge,15,response,second,Rate of HTTP error responses sent per second. It does not include errors excluded in analytics profile.,0,avi_vantage,
+avi_vantage.l7_server.avg_error_responses,gauge,15,response,second,Rate of HTTP error responses sent per second. Does not include errors excluded in analytics profile.,0,avi_vantage,
 avi_vantage.l7_server.avg_frustrated_responses,gauge,15,request,,Avg number of HTTP requests that completed within frustrated latency,0,avi_vantage,
 avi_vantage.l7_server.avg_resp_4xx,gauge,15,response,second,Rate of 4xx HTTP responses sent per second,0,avi_vantage,
 avi_vantage.l7_server.avg_total_requests,gauge,15,request,second,Average rate of HTTP requests received by a pool's server per second.,0,avi_vantage,
