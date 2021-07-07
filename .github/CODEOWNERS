@@ -95,6 +95,13 @@ assets/               @DataDog/agent-integrations
 /otel/                                    @DataDog/agent-integrations @DataDog/agent-platform
 /nvidia_jetson/                           @DataDog/agent-integrations @DataDog/agent-platform
 
+
+# Database monitoring
+**/postgres/statements.py                    @DataDog/agent-integrations @DataDog/database-monitoring
+**/postgres/statement_samples.py             @DataDog/agent-integrations @DataDog/database-monitoring
+**/mysql/statements.py                       @DataDog/agent-integrations @DataDog/database-monitoring
+**/mysql/statement_samples.py                @DataDog/agent-integrations @DataDog/database-monitoring
+
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
 /datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations

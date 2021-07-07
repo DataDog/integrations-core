@@ -24,7 +24,7 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_deep_database_monitoring(field, value):
+def instance_dbm(field, value):
     return False
 
 
@@ -52,7 +52,7 @@ def instance_options(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_pass_(field, value):
+def instance_password(field, value):
     return get_default_field_value(field, value)
 
 

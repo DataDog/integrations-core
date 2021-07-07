@@ -1,4 +1,4 @@
-# Agent Check: Kafka Consumer
+# Kafka Consumer Integration
 
 ![Kafka Dashboard][111]
 

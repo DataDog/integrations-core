@@ -38,7 +38,7 @@ Additionally, as the metrics for current license usage use the values from the m
 
 [Restart the Agent][7] to start sending Vertica metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

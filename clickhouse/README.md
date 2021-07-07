@@ -21,13 +21,13 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 
 To configure this check for an Agent running on a host:
 
-#### Metric Collection
+#### Metric collection
 
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -56,7 +56,7 @@ To configure this check for an Agent running on a host:
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-#### Metric Collection
+#### Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|

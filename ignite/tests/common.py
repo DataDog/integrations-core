@@ -6,7 +6,7 @@ import os
 from pkg_resources import parse_version
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 HERE = get_here()
 
@@ -163,7 +163,7 @@ GAUGES = [
     'ignite.jobs.waiting.average',
     'ignite.checkpoint.last_copied_on_write_pages',
     'ignite.wal.last_rollover',
-] + JVM_E2E_METRICS
+] + JVM_E2E_METRICS_NEW
 
 if IS_PRE_2_9:
     GAUGES += [

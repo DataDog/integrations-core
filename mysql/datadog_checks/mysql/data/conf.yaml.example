@@ -32,15 +32,15 @@ instances:
     #
   - host: localhost
 
-    ## @param user - string - optional
+    ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
-    user: datadog
+    username: datadog
 
-    ## @param pass - string - optional
+    ## @param password - string - optional
     ## Password associated to the MySQL user.
     #
-    pass: <PASS>
+    password: <PASSWORD>
 
     ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
@@ -152,6 +152,8 @@ instances:
 
         ## @param replication - boolean - optional - default: false
         ## Set to `true` to collect replication metrics.
+        ## These metrics are only collected from the specified `host`. If you want to collect replication metrics
+        ## from the source node and the replica nodes you need to set separate check instances to collect them.
         #
         # replication: false
 
@@ -224,22 +226,19 @@ instances:
         #
         # extra_performance_metrics: false
 
-    ## @param deep_database_monitoring - boolean - optional - default: false
-    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` enable Database Monitoring.
     #
-    # deep_database_monitoring: false
+    # dbm: false
 
     ## Configure collection of statement samples
     #
     statement_samples:
 
-        ## @param enabled - boolean - optional - default: false
-        ## Enables collection of statement samples. Requires `deep_database_monitoring: true`.
+        ## @param enabled - boolean - optional - default: true
+        ## Enables collection of statement samples. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collections_per_second - number - optional - default: 1
         ## Sets the maximum statement sample collection rate. Each collection involves a single query to one

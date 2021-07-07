@@ -18,7 +18,7 @@ No additional installation is needed on your server.
 Using the API or the Admin interface, create a user for the Datadog Agent with the [`manage-user`][3] role permissions at minimum.
 If you plan to use the `enable_health_service_checks` configuration, give the Datadog MarkLogic user at least the [`manage-admin`][4] role.
 
-##### Using the API
+##### API
 
 1. Create the Datadog user by modifying this request with your specific values:
     ```shell
@@ -32,7 +32,7 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
     curl -X GET --anyauth --user <USER>:<PASSWORD> -i http://<HOSTNAME>:8002/manage/v2
     ```
 
-##### Using the Admin interface
+##### Admin interface
 
 1. Log into the QConsole with an admin account. By default, the QConsole is available at `http://<HOSTNAME>:8000/qconsole`.
 

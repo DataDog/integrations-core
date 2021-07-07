@@ -51,6 +51,7 @@ class Envoy(AgentCheck):
 
         self.caching_metrics = None
         self.parse_unknown_metrics = is_affirmative(self.instance.get('parse_unknown_metrics', False))
+        self.disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
 
     def check(self, _):
         self._collect_metadata()
@@ -88,7 +89,11 @@ class Envoy(AgentCheck):
                 continue
 
             try:
-                metric, tags, method = parse_metric(envoy_metric, retry=self.parse_unknown_metrics)
+                metric, tags, method = parse_metric(
+                    envoy_metric,
+                    retry=self.parse_unknown_metrics,
+                    disable_legacy_cluster_tag=self.disable_legacy_cluster_tag,
+                )
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `%s`', envoy_metric)

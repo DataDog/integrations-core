@@ -27,6 +27,9 @@ def test_datacenter_metrics(aggregator):
 
     check.get_info = mock_get_info
     check._client = mock.MagicMock()
+    check._client.get_node_names = mock.MagicMock(
+        side_effect=lambda: [{'address': common.HOST, 'port': common.PORT, 'node_name': 'test'}]
+    )
     check.get_namespaces = mock.MagicMock()
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
@@ -151,7 +154,7 @@ def test_collect_empty_data(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
 
     check._client = mock.MagicMock()
-    check._client.info_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
+    check._client.info_single_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
     check.log = mock.MagicMock()
     assert [] == check.get_info('sets/test/ci')
 

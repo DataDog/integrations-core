@@ -29,6 +29,7 @@ jobs:
 
   variables:
     DDEV_E2E_AGENT: datadog/agent-dev:master-py3-win-servercore
+    # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
