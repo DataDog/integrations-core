@@ -10,3 +10,8 @@ in-toto==1.0.1
 # version of the library.
 #
 securesystemslib[crypto,pynacl]==0.20.1
+#
+# Pin cryptography versions for Python 2 and Python 3
+#
+cryptography==3.3.2; python_version < "3.0"
+cryptography==3.4.6; python_version > "3.0"
