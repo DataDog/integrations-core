@@ -15,7 +15,7 @@ HERE = get_here()
 
 
 @pytest.fixture(scope='session')
-def dd_environment(integration_instance):
+def dd_environment(unit_instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     # We need a custom condition to wait a bit longer
     with docker_run(
@@ -25,7 +25,7 @@ def dd_environment(integration_instance):
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
     ):
-        yield integration_instance
+        yield unit_instance
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def unit_instance():
         "avi_controller_url": "https://34.123.32.255/",
         "tls_verify": False,
         "username": "admin",
-        # "password": os.environ['DOCKER_AVI_PASS']
+        "password": os.environ['DOCKER_AVI_PASS']
     }
 
 

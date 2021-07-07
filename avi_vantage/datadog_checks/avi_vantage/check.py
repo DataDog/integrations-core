@@ -54,6 +54,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @contextmanager
     def login(self):
+        self.http._session = None
         base_url = self.config.avi_controller_url.rstrip('/')
         login_url = base_url + "/login"
         logout_url = base_url + "/logout"
