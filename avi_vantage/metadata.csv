@@ -75,7 +75,7 @@ avi_vantage.l7_server.sum_post_resp_latency,gauge,15,second,,Total latency from 
 avi_vantage.se_stats.avg_connection_mem_usage,gauge,15,percent,,Connection memory usage as percentage of total allowed for connections,0,avi_vantage,
 avi_vantage.se_stats.avg_connections,gauge,15,connection,,Average number of connections including the  dropped connections and ones due to policy drops. This would be same as number of SYNS seen by SE on any VS,0,avi_vantage,
 avi_vantage.se_stats.avg_connections_dropped,gauge,15,connection,,Total number of connections dropped excluding the  dropped connections and ones due to policy drops. This would be same as number of SYNS seen by SE on any VS. It include both connections that failed to establish,0,avi_vantage,
-avi_vantage.se_stats.avg_cpu_usage,gauge,15,percent,,"This is the host's view of the CPU usage as amount of actively used virtual CPU, as a percentage of total available CPU",0,avi_vantage,
+avi_vantage.se_stats.avg_cpu_usage,gauge,15,percent,,"The host's view of the CPU usage as amount of actively used virtual CPU, as a percentage of total available CPU",0,avi_vantage,
 avi_vantage.se_stats.avg_disk1_usage,gauge,15,,,SE disk 1 capacity usage.,0,avi_vantage,
 avi_vantage.se_stats.avg_dynamic_mem_usage,gauge,15,percent,,Percentage of SE's dynamic memory usage.,0,avi_vantage,
 avi_vantage.se_stats.avg_mem_usage,gauge,15,percent,,Memory usage as percentage of total configured or available memory,0,avi_vantage,
