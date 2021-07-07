@@ -32,7 +32,7 @@ avi_vantage.l4_server.sum_rtt,gauge,15,,,Total RTT across all connections,0,avi_
 avi_vantage.l7_client.apdexr,gauge,15,,,Measure of quality of server response based on latency,0,avi_vantage,
 avi_vantage.l7_client.avg_client_txn_latency,gauge,15,second,,Average client transaction latency computed by adding response latencies across all HTTP requests.,0,avi_vantage,
 avi_vantage.l7_client.avg_complete_responses,gauge,15,response,second,Rate of HTTP responses sent per second,0,avi_vantage,
-avi_vantage.l7_client.avg_frustrated_responses,gauge,15,request,,Avg number of HTTP requests that completed within frustrated latency,0,avi_vantage,
+avi_vantage.l7_client.avg_frustrated_responses,gauge,15,request,,Average number of HTTP requests that completed within frustrated latency,0,avi_vantage,
 avi_vantage.l7_client.avg_resp_2xx,gauge,15,response,second,Rate of 2xx HTTP responses sent per second,0,avi_vantage,
 avi_vantage.l7_client.avg_resp_4xx,gauge,15,response,second,Rate of 4xx HTTP responses sent per second,0,avi_vantage,
 avi_vantage.l7_client.avg_resp_4xx_avi_errors,gauge,15,response,second,Rate of 4xx HTTP responses as errors sent by avi. Does not include any error codes excluded in the analytics profile and pool server errors,0,avi_vantage,
