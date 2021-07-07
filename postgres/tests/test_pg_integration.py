@@ -657,6 +657,72 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
+class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState):
+    """
+    A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
+    has it as read-only and not settable at construction-time
+    """
+
+    def __init__(self, pg_error):
+        self.pg_error = pg_error
+
+    def __getattribute__(self, attr):
+        if attr == 'pgerror':
+            return self.pg_error
+        else:
+            return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
+
+
+@pytest.mark.parametrize(
+    "error,metric_columns,expected_error_tag",
+    [
+        (
+            ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
+            [],
+            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled',
+        ),
+        (
+            ObjectNotInPrerequisiteState('cannot insert into view'),
+            [],
+            'error:database-ObjectNotInPrerequisiteState',
+        ),
+        (
+            psycopg2.errors.DatabaseError(),
+            [],
+            'error:database-DatabaseError',
+        ),
+        (
+            None,
+            [],
+            'error:database-missing_pg_stat_statements_required_columns',
+        ),
+    ],
+)
+def test_statement_metrics_database_errors(
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag
+):
+    # don't need samples for this test
+    dbm_instance['statement_samples'] = {'enabled': False}
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with mock.patch(
+        'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
+        return_value=metric_columns,
+        side_effect=error,
+    ):
+        check.check(dbm_instance)
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        expected_error_tag,
+    ]
+
+    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
+
+
 def assert_state_clean(check):
     assert check.metrics_cache.instance_metrics is None
     assert check.metrics_cache.bgw_metrics is None
