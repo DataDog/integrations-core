@@ -88,7 +88,7 @@ def instance_use_global_custom_queries(field, value):
     return 'true'
 
 
-def instance_user(field, value):
+def instance_username(field, value):
     return 'datadog'
 
 
