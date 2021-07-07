@@ -4,7 +4,7 @@ avi_vantage.controller_stats.avg_disk_usage,gauge,15,percent,,Average disk usage
 avi_vantage.controller_stats.avg_disk_write_bytes,gauge,15,byte,second,Average number of bytes per second written to disk.,0,avi_vantage,
 avi_vantage.controller_stats.avg_mem_usage,gauge,15,percent,,Memory usage as percentage of total configured or available memory,0,avi_vantage,
 avi_vantage.l4_client.apdexc,gauge,15,,,apdex measuring quality of network connections to servers,0,avi_vantage,
-avi_vantage.l4_client.avg_application_dos_attacks,gauge,15,,,Number of Application DDOS attacks occurring,0,avi_vantage,
+avi_vantage.l4_client.avg_application_dos_attacks,gauge,15,,,Number of application DDOS attacks occurring,0,avi_vantage,
 avi_vantage.l4_client.avg_bandwidth,gauge,15,,,Average transmit and receive network bandwidth between client and virtual service.,0,avi_vantage,
 avi_vantage.l4_client.avg_complete_conns,gauge,15,connection,second,Rate of total connections per second,0,avi_vantage,
 avi_vantage.l4_client.avg_connections_dropped,gauge,15,connection,second,Rate of dropped connections per second,0,avi_vantage,
