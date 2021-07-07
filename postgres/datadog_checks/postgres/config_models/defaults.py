@@ -106,3 +106,7 @@ def instance_tag_replication_role(field, value):
 
 def instance_tags(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
