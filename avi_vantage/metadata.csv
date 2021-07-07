@@ -19,7 +19,7 @@ avi_vantage.l4_client.max_open_conns,gauge,15,connection,,Max number of open con
 avi_vantage.l4_client.sum_end_to_end_rtt,gauge,15,,,Sum of end to end network RTT experienced by end clients. Higher value increases response times experienced by clients.,0,avi_vantage,
 avi_vantage.l4_server.avg_bandwidth,gauge,15,,,Average transmit and receive network bandwidth between client and virtual service.,0,avi_vantage,
 avi_vantage.l4_server.avg_errored_connections,gauge,15,connection,second,Rate of total errored connections per second,0,avi_vantage,
-avi_vantage.l4_server.avg_new_established_conns,gauge,15,connection,second,Average rate new pool server connections established as per second,0,avi_vantage,
+avi_vantage.l4_server.avg_new_established_conns,gauge,15,connection,second,Average rate of new pool server connections established per second,0,avi_vantage,
 avi_vantage.l4_server.avg_open_conns,gauge,15,connection,,Avg number of open connections,0,avi_vantage,
 avi_vantage.l4_server.avg_pool_complete_conns,gauge,15,connection,second,Avg. Rate of total connections per second across all servers,0,avi_vantage,
 avi_vantage.l4_server.avg_pool_open_conns,gauge,15,connection,second,Average per server open connections in the pool,0,avi_vantage,
