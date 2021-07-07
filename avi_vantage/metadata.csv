@@ -16,7 +16,7 @@ avi_vantage.l4_client.avg_rx_pkts,gauge,15,packet,second,Average rate of packets
 avi_vantage.l4_client.avg_tx_bytes,gauge,15,byte,second,Average rate of bytes transmitted per second,0,avi_vantage,
 avi_vantage.l4_client.avg_tx_pkts,gauge,15,packet,second,Average rate of packets transmitted per second,0,avi_vantage,
 avi_vantage.l4_client.max_open_conns,gauge,15,connection,,Max number of open connections,0,avi_vantage,
-avi_vantage.l4_client.sum_end_to_end_rtt,gauge,15,,,Sum of end to end network RTT experienced by end clients. Higher value would increase response times experienced by clients.,0,avi_vantage,
+avi_vantage.l4_client.sum_end_to_end_rtt,gauge,15,,,Sum of end to end network RTT experienced by end clients. Higher value increases response times experienced by clients.,0,avi_vantage,
 avi_vantage.l4_server.avg_bandwidth,gauge,15,,,Average transmit and receive network bandwidth between client and virtual service.,0,avi_vantage,
 avi_vantage.l4_server.avg_errored_connections,gauge,15,connection,second,Rate of total errored connections per second,0,avi_vantage,
 avi_vantage.l4_server.avg_new_established_conns,gauge,15,connection,second,Average rate new pool server connections established as per second,0,avi_vantage,
