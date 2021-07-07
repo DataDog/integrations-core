@@ -28,7 +28,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "Amazon MSK (Agent) Overview": "assets/dashboards/overview.json"
+      "Amazon MSK Overview": "assets/dashboards/overview.json"
     },
     "saved_views": {},
     "monitors": {},
