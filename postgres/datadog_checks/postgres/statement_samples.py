@@ -397,7 +397,7 @@ class PostgresStatementSamples(object):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        if self._is_statement_truncated(max_query_size, statement) == StatementTruncationState.truncated:
+        if self._get_truncation_state(max_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -494,7 +494,7 @@ class PostgresStatementSamples(object):
                     "application": row.get('application_name', None),
                     "user": row['usename'],
                     "statement": obfuscated_statement,
-                    "statement_truncated": self._is_statement_truncated(self._max_query_size, row['query']).value,
+                    "statement_truncated": self._get_truncation_state(self._max_query_size, row['query']).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
@@ -543,7 +543,7 @@ class PostgresStatementSamples(object):
             )
 
     @staticmethod
-    def _is_statement_truncated(max_query_size, statement):
+    def _get_truncation_state(max_query_size, statement):
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
         if max_query_size == UNKNOWN_VALUE:
