@@ -52,7 +52,7 @@ instances:
 
     ## @param entities - list of strings - optional
     ## List of entity types to collect metrics from. Valid options are
-    ## "controller", "pool", "service engine" and "virtual service". By default all types
+    ## `controller`, `pool`, `serviceengine` and `virtualservice`. By default all types
     ## are monitored.
     #
     # entities:
