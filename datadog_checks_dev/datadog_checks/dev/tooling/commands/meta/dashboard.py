@@ -13,7 +13,7 @@ from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_success
 
-BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.*'
+BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)'
 DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
 REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
 
