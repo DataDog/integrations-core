@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-avi_vantage.controller_stats.avg_cpu_usage,gauge,15,percent,,"This is the host's view of the CPU usage as amount of actively used virtual CPU, as a percentage of total available CPU",0,avi_vantage,
+avi_vantage.controller_stats.avg_cpu_usage,gauge,15,percent,,"The host's view of the CPU usage as amount of actively used virtual CPU, as a percentage of total available CPU",0,avi_vantage,
 avi_vantage.controller_stats.avg_disk_usage,gauge,15,percent,,Average disk usage,0,avi_vantage,
 avi_vantage.controller_stats.avg_disk_write_bytes,gauge,15,byte,second,Average number of bytes per second written to disk.,0,avi_vantage,
 avi_vantage.controller_stats.avg_mem_usage,gauge,15,percent,,Memory usage as percentage of total configured or available memory,0,avi_vantage,
