@@ -37,7 +37,7 @@ avi_vantage.l7_client.avg_resp_2xx,gauge,15,response,second,Rate of 2xx HTTP res
 avi_vantage.l7_client.avg_resp_4xx,gauge,15,response,second,Rate of 4xx HTTP responses sent per second,0,avi_vantage,
 avi_vantage.l7_client.avg_resp_4xx_avi_errors,gauge,15,response,second,Rate of 4xx HTTP responses as errors sent by avi. Does not include any error codes excluded in the analytics profile and pool server errors,0,avi_vantage,
 avi_vantage.l7_client.avg_resp_5xx,gauge,15,response,second,Rate of 5xx HTTP responses sent per second,0,avi_vantage,
-avi_vantage.l7_client.avg_resp_5xx_avi_errors,gauge,15,response,second,Rate of 5xx HTTP responses as errors sent by avi. It does not include any error codes excluded in the analytics profile and pool server errors,0,avi_vantage,
+avi_vantage.l7_client.avg_resp_5xx_avi_errors,gauge,15,response,second,Rate of 5xx HTTP responses as errors sent by avi. Does not include any error codes excluded in the analytics profile and pool server errors,0,avi_vantage,
 avi_vantage.l7_client.avg_ssl_connections,gauge,15,,,Average SSL Sessions,0,avi_vantage,
 avi_vantage.l7_client.avg_ssl_handshakes_new,gauge,15,,,Average new successful SSL sessions,0,avi_vantage,
 avi_vantage.l7_client.avg_waf_attacks,gauge,15,transaction,second,Average number of transactions per second identified by WAF as attacks.,0,avi_vantage,
