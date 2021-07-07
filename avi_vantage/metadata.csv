@@ -10,7 +10,7 @@ avi_vantage.l4_client.avg_complete_conns,gauge,15,connection,second,Rate of tota
 avi_vantage.l4_client.avg_connections_dropped,gauge,15,connection,second,Rate of dropped connections per second,0,avi_vantage,
 avi_vantage.l4_client.avg_lossy_connections,gauge,15,connection,second,Rate of lossy connections per second,0,avi_vantage,
 avi_vantage.l4_client.avg_new_established_conns,gauge,15,connection,second,Averaged rate of new client connections per second.,0,avi_vantage,
-avi_vantage.l4_client.avg_policy_drops,gauge,15,connection,second,"Rate of total connections dropped due to VS policy per second. It includes drops due to rate limits, security policy drops, connection limits etc.",0,avi_vantage,
+avi_vantage.l4_client.avg_policy_drops,gauge,15,connection,second,"Rate of total connections dropped due to VS policy per second. Includes drops due to rate limits, security policy drops, connection limits, etc.",0,avi_vantage,
 avi_vantage.l4_client.avg_rx_bytes,gauge,15,byte,second,Average rate of bytes received per second,0,avi_vantage,
 avi_vantage.l4_client.avg_rx_pkts,gauge,15,packet,second,Average rate of packets received per second,0,avi_vantage,
 avi_vantage.l4_client.avg_tx_bytes,gauge,15,byte,second,Average rate of bytes transmitted per second,0,avi_vantage,
