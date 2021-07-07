@@ -78,7 +78,7 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 3. [Restart the Agent][4].
 
-#### Log Collection
+#### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

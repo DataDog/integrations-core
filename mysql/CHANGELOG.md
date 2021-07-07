@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 4.1.0 / 2021-06-30
+
+* [Added] Provide a reason for not having an execution plan (MySQL). See [#9569](https://github.com/DataDog/integrations-core/pull/9569).
+* [Fixed] Look for mariadbd process for MariaDB 10.5+. See [#9543](https://github.com/DataDog/integrations-core/pull/9543).
+* [Fixed] Fix insufficient rate limiting of statement samples . See [#9585](https://github.com/DataDog/integrations-core/pull/9585).
+
 ## 4.0.3 / 2021-06-08
 
 * [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).

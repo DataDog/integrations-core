@@ -1,4 +1,4 @@
-# Agent Check: Cassandra Nodetool
+# Cassandra Nodetool Integration
 
 ![Cassandra default dashboard][1]
 

@@ -19,7 +19,7 @@ The Harbor check is included in the [Datadog Agent][2] package. No additional in
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][4] for all available configuration options.
 
@@ -27,7 +27,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 

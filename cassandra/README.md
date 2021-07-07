@@ -28,13 +28,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 

@@ -9,7 +9,16 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import LATENCIES_METRICS, LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS, TPS_METRICS, VERSION
+from .common import (
+    LATENCIES_METRICS,
+    LAZY_METRICS,
+    LEGACY_SET_METRICS,
+    NAMESPACE_METRICS,
+    SET_METRICS,
+    STATS_METRICS,
+    TPS_METRICS,
+    VERSION,
+)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -58,11 +67,12 @@ def test_e2e(dd_agent_check, instance):
 
 
 def _test_check(aggregator):
+    version_parts = [int(p) for p in VERSION.split('.')]
 
     for metric in NAMESPACE_METRICS:
         aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
-    if VERSION == '5.3.0.6':
+    if version_parts >= [5, 3]:
         for metric in LATENCIES_METRICS:
             aggregator.assert_metric(metric)
         aggregator.assert_metric('aerospike.set.device_data_bytes')
@@ -77,8 +87,12 @@ def _test_check(aggregator):
     for metric in STATS_METRICS:
         aggregator.assert_metric("aerospike.{}".format(metric))
 
-    for metric in SET_METRICS:
-        aggregator.assert_metric("aerospike.set.{}".format(metric))
+    if version_parts >= [5, 6]:
+        for metric in SET_METRICS:
+            aggregator.assert_metric("aerospike.set.{}".format(metric))
+    else:
+        for metric in LEGACY_SET_METRICS:
+            aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     aggregator.assert_all_metrics_covered()
 

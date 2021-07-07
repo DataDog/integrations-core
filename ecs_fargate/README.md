@@ -2,12 +2,14 @@
 
 ## Overview
 
+**Note**: This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's [EKS Fargate integration][41].
+
 Get metrics from all your containers running in ECS Fargate:
 
 - CPU/Memory usage & limit metrics
 - Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
-The Datadog Agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint. According to the [ECS Documentation][1] on that endpoint:
+The Datadog Agent retrieves metrics for the task definition's containers with the ECS task metadata endpoint. According to the [ECS Documentation][1] on that endpoint:
 
 > This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats][2] in the Docker API documentation.
 
@@ -25,13 +27,13 @@ Tasks that do not have the Datadog Agent still report metrics via Cloudwatch, ho
 
 To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each task definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
 
-1. **Add an ECS Fargate Task**
+1. **Create an ECS Fargate task**
 2. **Create or Modify your IAM Policy**
-3. **Run the Task as a Replica Service**
+3. **Run the task as a replica service**
 
-#### Create an ECS Fargate Task
+#### Create an ECS Fargate task
 
-The primary unit of work in Fargate is the Task, which is configured in the task definition. A task definition is comparable to a pod in Kubernetes. A task definition must contain one or more containers. In order to run the Datadog Agent, create your task definition to run your application container(s), as well as the Datadog Agent container.
+The primary unit of work in Fargate is the task, which is configured in the task definition. A task definition is comparable to a pod in Kubernetes. A task definition must contain one or more containers. In order to run the Datadog Agent, create your task definition to run your application container(s), as well as the Datadog Agent container.
 
 The instructions below show you how to configure the task using the [AWS CLI tools][3] or the [Amazon Web Console][4].
 
@@ -41,7 +43,7 @@ The instructions below show you how to configure the task using the [AWS CLI too
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button.
 3. Select **Fargate** as the launch type, then click the **Next step** button.
 4. Enter a **Task Definition Name**, such as `my-app-and-datadog`.
-5. Select a Task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](#create-or-modify-your-iam-policy) section below.
+5. Select a task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](#create-or-modify-your-iam-policy) section below.
 6. Choose **Task memory** and **Task CPU** based on your needs.
 7. Click the **Add container** button.
 8. For **Container name** enter `datadog-agent`.
@@ -106,7 +108,7 @@ Resources:
 
 For more information on CloudFormation templating and syntax, review the [AWS CloudFormation documentation][36].
 
-#### Create or Modify your IAM Policy
+#### Create or modify your IAM policy
 
 Add the following permissions to your [Datadog IAM policy][9] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][10].
 
@@ -116,7 +118,7 @@ Add the following permissions to your [Datadog IAM policy][9] to collect ECS Far
 | `ecs:ListContainerInstances`     | List instances of a cluster.                                      |
 | `ecs:DescribeContainerInstances` | Describe instances to add metrics on resources and tasks running. |
 
-#### Run the Task as a Replica Service
+#### Run the task as a replica service
 
 The only option in ECS Fargate is to run the task as a [Replica Service][11]. The Datadog Agent runs in the same task definition as your application and integration containers.
 
@@ -156,7 +158,7 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 11. **Auto Scaling** is optional based on your preference.
 12. Click the **Next step** button, then click the **Create service** button.
 
-### Metric Collection
+### Metric collection
 
 After the Datadog Agent is setup as described above, the [ecs_fargate check][12] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
@@ -217,7 +219,7 @@ If these are the only metrics you need, you could rely on this integration for c
 
 Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you need a faster crawl schedule, contact [Datadog support][19] for availability. **Note**: There are cost increases involved on the AWS side as CloudWatch bills for API calls.
 
-### Log Collection
+### Log collection
 
 You can monitor Fargate logs by using the AWS FireLens integration built on Datadogs Fluentbit output plugin to send logs to Datadog, or by using the `awslogs` log driver and a Lambda function to route logs to Datadog. Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
 
@@ -299,7 +301,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
 <!-- xxz tab xxx -->
 <!-- xxx tab "logDriver" xxx -->
 
-#### AWS logDriver
+#### AWS log driver
 
 Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to route logs to Datadog.
 
@@ -331,7 +333,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-### Trace Collection
+### Trace collection
 
 1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 
@@ -406,3 +408,4 @@ Need help? Contact [Datadog support][19].
 [38]: https://www.datadoghq.com/blog/aws-fargate-metrics/
 [39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[41]: http://docs.datadoghq.com/integrations/eks_fargate

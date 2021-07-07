@@ -25,6 +25,8 @@ PROMETHEUS_ENDPOINT_AVAILABLE = version.parse(CONSUL_VERSION) > version.parse('1
 # raft.replication.installSnapshot and raft.replication.appendEntries.logs are not tested
 # since our testing environment does not easily expose them.
 PROMETHEUS_METRICS = [
+    'consul.client.rpc',
+    'consul.client.rpc.failed',
     'consul.memberlist.msg.alive',
     'consul.memberlist.tcp.accept',
     'consul.memberlist.tcp.connect',
@@ -48,6 +50,7 @@ PROMETHEUS_HIST_METRICS = [
     'consul.raft.leader.dispatchLog.',
     'consul.raft.replication.appendEntries.rpc.',
     'consul.raft.replication.heartbeat.',
+    'consul.runtime.gc_pause_ns.',
     'consul.serf.coordinate.adjustment_ms.',
     'consul.serf.msgs.sent.',
     'consul.serf.msgs.received.',

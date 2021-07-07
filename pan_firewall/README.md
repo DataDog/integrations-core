@@ -4,7 +4,7 @@
 
 Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse and analyze Palo Alto Networks firewall logs. This log integration relies on the HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
 
-### Key Use Cases
+### Key use cases
 #### Respond to high severity threat events
 Firewall threat logs provide rich context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
 
@@ -16,7 +16,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ## Setup
 
-### Set up Palo Alto Networks Firewall log collection 
+### Log collection 
 
  1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet.
  2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps][2]. Same steps listed below.

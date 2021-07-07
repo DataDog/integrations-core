@@ -14,7 +14,7 @@ The Memcache check is included in the [Datadog Agent][2] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
 
-#### Metric Collection
+#### Metric collection
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -73,7 +73,7 @@ See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] 
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
-#### Log Collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 

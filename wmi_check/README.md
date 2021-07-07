@@ -129,7 +129,7 @@ instances:
       - [SegmentsRetransmittedPersec, system.net.tcp.retrans_seg, gauge]
     tag_by: Name
 ```
-#### Configuration Options
+#### Configuration options
 
 _This feature is available starting with version 5.3 of the agent_
 

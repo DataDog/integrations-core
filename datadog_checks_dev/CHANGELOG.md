@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.1.0 / 2021-06-29
+
+* [Added] log collection category validation. See [#9514](https://github.com/DataDog/integrations-core/pull/9514).
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+* [Added] Add metric_to_check validation in pricing. See [#9289](https://github.com/DataDog/integrations-core/pull/9289).
+* [Added] Update 3rd party license validation. See [#9450](https://github.com/DataDog/integrations-core/pull/9450).
+* [Fixed] Allow example for anyOf configuration option. See [#9474](https://github.com/DataDog/integrations-core/pull/9474).
+
 ## 12.0.0 / 2021-05-28
 
 * [Added] Add validation for third-party licenses. See [#9436](https://github.com/DataDog/integrations-core/pull/9436).

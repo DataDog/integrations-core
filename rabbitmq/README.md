@@ -150,8 +150,6 @@ Need help? Contact [Datadog support][13].
 
 Additional helpful documentation, links, and articles:
 
-### Datadog Blog
-
 - [Key metrics for RabbitMQ monitoring][14]
 - [Collecting metrics with RabbitMQ monitoring tools][15]
 - [Monitoring RabbitMQ performance with Datadog][16]

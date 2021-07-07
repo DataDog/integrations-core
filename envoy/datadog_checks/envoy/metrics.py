@@ -264,6 +264,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster_manager.cds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'cluster_manager.cds.version': {
         'tags': (
             (),
@@ -337,7 +345,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_1xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -345,7 +353,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_2xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -353,7 +361,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_3xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -361,7 +369,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_4xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -369,7 +377,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_5xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -377,7 +385,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -385,7 +393,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_limit_exceeded': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -393,7 +401,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_overflow': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -401,7 +409,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_success': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -409,7 +417,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_time': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
@@ -417,7 +425,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_timeout': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -425,14 +433,14 @@ METRICS = {
     'vhost.vcluster.upstream_rq_total': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.ratelimit.ok': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -440,7 +448,7 @@ METRICS = {
     },
     'cluster.ratelimit.error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -448,7 +456,7 @@ METRICS = {
     },
     'cluster.ratelimit.over_limit': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -480,7 +488,7 @@ METRICS = {
     },
     'cluster.grpc.success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -488,7 +496,7 @@ METRICS = {
     },
     'cluster.grpc.failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -496,7 +504,7 @@ METRICS = {
     },
     'cluster.grpc.total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -602,6 +610,14 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'http.rds.update_time': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'http.rds.version': {
         'tags': (
@@ -1496,6 +1512,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'listener_manager.lds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'listener_manager.lds.version': {
         'tags': (
             (),
@@ -1560,6 +1584,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_cx_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_cx_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1637,6 +1668,13 @@ METRICS = {
         'method': 'gauge',
     },
     'http.downstream_cx_http2_active': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.downstream_cx_http3_active': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1728,6 +1766,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_rq_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_rq_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -2023,308 +2068,322 @@ METRICS = {
     },
     'cluster.assignment_stale': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.assignment_timeout_received': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_http1_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_http2_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.upstream_cx_http3_total': {
+        'tags': (
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_fail': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_attempts_exceeded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_ms': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.upstream_cx_length_ms': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.upstream_cx_destroy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_close_notify': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_buffered': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_tx_bytes_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_tx_bytes_buffered': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_protocol_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_max_requests': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_none_healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_idle_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_cx_pool_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_rq_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_rq_pending_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_failure_eject': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_rq_cancelled': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_maintenance_mode': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.upstream_rq_max_duration_reached': {
+        'tags': (
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_per_try_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_rx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_tx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.client_ssl_socket_factory.ssl_context_update_by_sds': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2332,7 +2391,7 @@ METRICS = {
     },
     'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2340,7 +2399,7 @@ METRICS = {
     },
     'cluster.ssl.connection_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2348,7 +2407,7 @@ METRICS = {
     },
     'cluster.ssl.handshake': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2356,7 +2415,7 @@ METRICS = {
     },
     'cluster.ssl.session_reused': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2364,7 +2423,7 @@ METRICS = {
     },
     'cluster.ssl.no_certificate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2372,7 +2431,7 @@ METRICS = {
     },
     'cluster.ssl.fail_no_sni_match': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2380,7 +2439,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_no_cert': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2388,7 +2447,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2396,7 +2455,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_san': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2404,7 +2463,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_cert_hash': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2412,7 +2471,7 @@ METRICS = {
     },
     'cluster.ssl.ciphers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('cipher', ),
         ),
@@ -2420,7 +2479,7 @@ METRICS = {
     },
     'cluster.ssl.curves': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('curve', ),
         ),
@@ -2428,7 +2487,7 @@ METRICS = {
     },
     'cluster.ssl.sigalgs': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('sigalg', ),
         ),
@@ -2436,7 +2495,7 @@ METRICS = {
     },
     'cluster.ssl.versions': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('version', ),
         ),
@@ -2444,161 +2503,161 @@ METRICS = {
     },
     'cluster.upstream_flow_control_paused_reading_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_resumed_reading_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_backed_up_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_drained_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_internal_redirect_failed_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_internal_redirect_succeeded_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.membership_change': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.membership_degraded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_excluded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.retry_or_shadow_abandoned': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.config_reload': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_attempt': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_empty': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_no_rebuild': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.version': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.max_host_weight': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.bind_errors': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.original_dst_host_invalid': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.health_check.attempt': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2606,7 +2665,7 @@ METRICS = {
     },
     'cluster.health_check.success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2614,7 +2673,7 @@ METRICS = {
     },
     'cluster.health_check.failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2622,7 +2681,7 @@ METRICS = {
     },
     'cluster.health_check.passive_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2630,7 +2689,7 @@ METRICS = {
     },
     'cluster.health_check.network_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2638,7 +2697,7 @@ METRICS = {
     },
     'cluster.health_check.verify_cluster': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2646,7 +2705,7 @@ METRICS = {
     },
     'cluster.health_check.healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2654,7 +2713,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2662,7 +2721,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2670,7 +2729,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2678,7 +2737,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2686,7 +2745,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2694,7 +2753,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2702,7 +2761,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2710,7 +2769,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2718,7 +2777,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2726,7 +2785,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2734,7 +2793,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2742,7 +2801,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_local_origin_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2750,7 +2809,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_local_origin_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2758,7 +2817,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_failure_percentage': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2766,7 +2825,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_failure_percentage': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2774,7 +2833,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2782,7 +2841,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2790,7 +2849,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.cx_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2798,7 +2857,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.cx_pool_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2806,7 +2865,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2814,7 +2873,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_pending_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2822,7 +2881,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_retry_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2830,7 +2889,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_cx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2838,7 +2897,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_pending': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2846,7 +2905,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2854,7 +2913,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_retries': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2862,56 +2921,56 @@ METRICS = {
     },
     'cluster.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.canary.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2919,7 +2978,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2927,7 +2986,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2935,7 +2994,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2943,7 +3002,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2951,7 +3010,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2959,7 +3018,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2967,7 +3026,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2975,7 +3034,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2983,7 +3042,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2991,7 +3050,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2999,7 +3058,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3007,7 +3066,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3015,7 +3074,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3023,7 +3082,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3031,7 +3090,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3039,7 +3098,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3047,7 +3106,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3055,7 +3114,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3063,7 +3122,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3071,7 +3130,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3079,7 +3138,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3087,7 +3146,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3095,7 +3154,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3103,7 +3162,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3111,7 +3170,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3119,7 +3178,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3127,112 +3186,112 @@ METRICS = {
     },
     'cluster.lb_recalculate_zone_structures': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_healthy_panic': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_cluster_too_small': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_all_directly': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_sampled': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_cross_zone': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_local_cluster_not_ok': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_number_differs': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_no_capacity_left': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.lb_subsets_created': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_removed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_selected': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_fallback': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_fallback_panic': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.http1.dropped_headers_with_underscores': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3240,7 +3299,7 @@ METRICS = {
     },
     'cluster.http1.metadata_not_supported_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3248,7 +3307,7 @@ METRICS = {
     },
     'cluster.http1.response_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3256,7 +3315,7 @@ METRICS = {
     },
     'cluster.http1.requests_rejected_with_underscores_in_headers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3264,7 +3323,7 @@ METRICS = {
     },
     'cluster.http2.header_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3272,7 +3331,7 @@ METRICS = {
     },
     'cluster.http2.headers_cb_no_stream': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3280,7 +3339,7 @@ METRICS = {
     },
     'cluster.http2.inbound_empty_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3288,7 +3347,7 @@ METRICS = {
     },
     'cluster.http2.inbound_priority_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3296,7 +3355,7 @@ METRICS = {
     },
     'cluster.http2.inbound_window_update_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3304,7 +3363,7 @@ METRICS = {
     },
     'cluster.http2.outbound_control_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3312,7 +3371,7 @@ METRICS = {
     },
     'cluster.http2.outbound_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3320,7 +3379,7 @@ METRICS = {
     },
     'cluster.http2.rx_messaging_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3328,7 +3387,7 @@ METRICS = {
     },
     'cluster.http2.rx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3336,7 +3395,7 @@ METRICS = {
     },
     'cluster.http2.too_many_header_frames': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3344,7 +3403,7 @@ METRICS = {
     },
     'cluster.http2.trailers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3352,8 +3411,15 @@ METRICS = {
     },
     'cluster.http2.tx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'sds.key_rotation_failed': {
+        'tags': (
+            ('envoy_secret', ),
             (),
         ),
         'method': 'monotonic_count',
