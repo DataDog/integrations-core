@@ -13,6 +13,13 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -37,13 +44,6 @@ class StatementSamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
-class ObfuscatorOptions(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    quantize_sql_tables: Optional[bool]
-
-
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -63,6 +63,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
@@ -75,7 +76,6 @@ class InstanceConfig(BaseModel):
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]
     username: str
-    obfuscator_options: Optional[ObfuscatorOptions]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
