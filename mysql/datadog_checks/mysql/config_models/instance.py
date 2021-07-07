@@ -22,6 +22,13 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class Options(BaseModel):
     class Config:
         allow_mutation = False
@@ -66,13 +73,6 @@ class StatementSamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
-class ObfuscatorOptions(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    quantize_sql_tables: Optional[bool]
-
-
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -86,6 +86,7 @@ class InstanceConfig(BaseModel):
     host: Optional[str]
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     options: Optional[Options]
     password: Optional[str]
     port: Optional[float]
@@ -97,7 +98,6 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     username: Optional[str]
-    obfuscator_options: Optional[ObfuscatorOptions]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
