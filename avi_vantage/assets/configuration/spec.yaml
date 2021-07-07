@@ -18,7 +18,7 @@ files:
       required: false
       description: |
         List of entity types to collect metrics from. Valid options are
-        "controller", "pool", "service engine" and "virtual service". By default all types
+        `controller`, `pool`, `serviceengine` and `virtualservice`. By default all types
         are monitored.
       value:
         type: array
@@ -35,4 +35,3 @@ files:
       overrides:
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
-
