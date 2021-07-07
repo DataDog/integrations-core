@@ -29,8 +29,8 @@ class TCPCheck(AgentCheck):
         except Exception:
             raise ConfigurationError("{} is not a correct port.".format(str(port)))
         try:
-            self.url = instance.get('host', None)
-            split_url = self.url.split(":")
+            self.host = instance.get('host', None)
+            split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
             raise ConfigurationError("A valid url must be specified")
 
@@ -40,7 +40,7 @@ class TCPCheck(AgentCheck):
         ] + custom_tags
 
         self.service_check_tags = custom_tags + [
-            'target_host:{}'.format(self.url),
+            'target_host:{}'.format(self.host),
             'port:{}'.format(self.port),
             'instance:{}'.format(self.instance_name),
         ]
@@ -49,20 +49,20 @@ class TCPCheck(AgentCheck):
         if len(split_url) == 8:  # It may then be a IP V6 address, we check that
             for block in split_url:
                 if len(block) != 4:
-                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.url))
+                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.host))
             # It's a correct IP V6 address
-            self.addr = self.url
+            self.addr = self.host
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
             try:
                 self.resolve_ip()
             except Exception:
-                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
+                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.host)
                 raise ConfigurationError(msg)
 
     def resolve_ip(self):
-        self.addr = socket.gethostbyname(self.url)
+        self.addr = socket.gethostbyname(self.host)
 
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
@@ -72,7 +72,7 @@ class TCPCheck(AgentCheck):
             response_time = get_precise_time() - start
             return response_time
 
-    def check(self, instance):
+    def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
         self.log.debug("Connecting to %s %d", self.addr, self.port)
         try:
