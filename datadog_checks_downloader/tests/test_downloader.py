@@ -148,7 +148,7 @@ def test_downloader():
             if not match:
                 continue
             integration_name = match.group(1)
-            if integration_name not in integrations_metadata:
+            if integration_name not in integrations_metadata and integration_name not in EXCLUDED_INTEGRATIONS:
                 raise Exception(
                     "Integration '{}' is in the simple index but does not have tuf metadata.".format(integration_name)
                 )
