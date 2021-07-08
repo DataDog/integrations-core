@@ -111,6 +111,8 @@ class ModelConsumer:
                     model_id = 'instance'
                     model_file_name = f'{model_id}.py'
                     schema_name = 'InstanceConfig'
+                    if section['multiple_instances_defined']:
+                        section = self._merge_instances(section, errors)
                 # Skip anything checks don't use directly
                 else:
                     continue
@@ -384,6 +386,35 @@ class ModelConsumer:
             files[file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
         return files
+
+    def _merge_instances(self, section, errors):
+        new_section = {
+            'name': section['name'],
+            'options': [],
+        }
+        # If one of these option is different for 2 options with the same name, an error is raised
+        required_consistent_options = ['required', 'deprecation', 'metadata_tags']
+        # Cache the option index to ease option checking before merging
+        options_name_idx = {}
+
+        for instance in section['options']:
+            for opt in instance['options']:
+                if options_name_idx.get(opt['name']) is not None:
+                    cached_opt = new_section['options'][options_name_idx[opt['name']]]
+
+                    for opt_name in required_consistent_options:
+                        if cached_opt[opt_name] != opt[opt_name]:
+                            errors.append(
+                                f'Options {cached_opt} and {opt} have a different value for attribute `{opt_name}`'
+                            )
+                    if cached_opt['value']['type'] != opt['value']['type']:
+                        errors.append(f'Options {cached_opt} and {opt} have a different value for attribute `type`')
+
+                else:
+                    new_section['options'].append(opt)
+                    options_name_idx[opt['name']] = len(new_section['options']) - 1
+
+        return new_section
 
     @staticmethod
     def create_code_formatter():
