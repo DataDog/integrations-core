@@ -13,6 +13,27 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class QuerySamples(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+    explain_function: Optional[str]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
+    samples_per_hour_per_query: Optional[int]
+    seen_samples_cache_maxsize: Optional[int]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -22,27 +43,6 @@ class Relation(BaseModel):
     relation_schema: Optional[str]
     relkind: Optional[Sequence[str]]
     schemas: Optional[Sequence[str]]
-
-
-class StatementMetrics(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-
-
-class StatementSamples(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    explain_function: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
 
 
 class InstanceConfig(BaseModel):
@@ -67,12 +67,12 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
+    query_metrics: Optional[QueryMetrics]
+    query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
-    statement_metrics: Optional[StatementMetrics]
-    statement_samples: Optional[StatementSamples]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]

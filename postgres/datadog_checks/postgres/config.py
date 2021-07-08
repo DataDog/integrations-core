@@ -75,13 +75,12 @@ class PostgresConfig:
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
-        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
-        self.statement_samples_config = instance.get('statement_samples', {}) or {}
-        self.statement_metrics_config = instance.get('statement_metrics', {}) or {}
+        self.statement_samples_config = instance.get('query_samples', {}) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
