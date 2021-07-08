@@ -64,6 +64,14 @@ def instance_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_samples(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
@@ -73,14 +81,6 @@ def instance_sock(field, value):
 
 
 def instance_ssl(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_statement_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_statement_samples(field, value):
     return get_default_field_value(field, value)
 
 
