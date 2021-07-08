@@ -397,7 +397,7 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            if self._config.deep_database_monitoring:
+            if self._config.dbm_enabled:
                 self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
                 self.statement_samples.run_sampler(tags)
 

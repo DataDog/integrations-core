@@ -186,13 +186,10 @@ instances:
     #
     # application_name: datadog-agent
 
-    ## @param deep_database_monitoring - boolean - optional - default: false
-    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    # deep_database_monitoring: false
+    # dbm: false
 
     ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -205,10 +202,10 @@ instances:
     #
     statement_samples:
 
-        ## @param enabled - boolean - optional - default: false
-        ## Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of statement samples. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collections_per_second - number - optional - default: 1
         ## Set the maximum statement sample collection rate. Each collection involves a single query to
