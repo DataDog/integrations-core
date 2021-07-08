@@ -540,7 +540,7 @@ class MySQLStatementSamples(object):
                     }
                 )
 
-        normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None
+        normalized_plan, obfuscated_plan, plan_signature = None, None, None
         if plan:
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
