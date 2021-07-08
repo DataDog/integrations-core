@@ -252,7 +252,7 @@ instances:
         ## @param quantize_sql_tables - boolean - optional - default: false
         ## Set to `true` to perform quantization on your SQL tables.
         ##
-        ## Note that this option only applies when `deep_database_monitoring` is enabled.
+        ## Note that this option only applies when `dbm` is enabled.
         #
         # quantize_sql_tables: false
 
