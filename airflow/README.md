@@ -303,24 +303,6 @@ Tips for Kubernetes installations:
 
 [Run the Agent's status subcommand][5] and look for `airflow` under the Checks section.
 
-## Data Collected
-
-### Metrics
-
-See [metadata.csv][6] for a list of metrics provided by this check.
-
-### Service Checks
-
-**airflow.can_connect**:<br>
-Returns `CRITICAL` if unable to connect to Airflow. Returns `OK` otherwise.
-
-**airflow.healthy**:<br>
-Returns `CRITICAL` if Airflow is not healthy. Returns `OK` otherwise.
-
-### Events
-
-The Airflow check does not include any events.
-
 ## Annexe
 
 ### Airflow DatadogHook
@@ -331,9 +313,24 @@ In addition, [Airflow DatadogHook][11] can be used to interact with Datadog:
 - Query Metric
 - Post Event
 
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][6] for a list of metrics provided by this check.
+
+### Events
+
+The Airflow check does not include any events.
+
+### Service Checks
+
+See [service_checks.json][17] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://airflow.apache.org/docs/stable/metrics.html
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -351,3 +348,4 @@ Need help? Contact [Datadog support][7].
 [14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [15]: https://github.com/DataDog/integrations-core/tree/master/airflow/tests/k8s_sample
 [16]: https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html
+[17]: https://github.com/DataDog/integrations-core/blob/master/airflow/assets/service_checks.json

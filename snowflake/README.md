@@ -201,18 +201,18 @@ To verify the result, search for the metrics using [Metrics Summary][11]:
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-**snowflake.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot authenticate and connect to Snowflake, `OK` otherwise.
-
 ### Events
 
 Snowflake does not include any events.
 
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://www.snowflake.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -227,3 +227,4 @@ Need help? Contact [Datadog support][7].
 [11]: https://docs.datadoghq.com/metrics/summary/
 [12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
 [13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
+[14]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json

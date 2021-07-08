@@ -26,7 +26,7 @@ files:
               example: localhost
               display_default: null
 
-          - name: user
+          - name: username
             description: |
               Username used to connect to MySQL.
             enabled: true
@@ -35,7 +35,7 @@ files:
               example: datadog
               display_default: null
 
-          - name: pass
+          - name: password
             description: |
               Password associated to the MySQL user.
             enabled: true
@@ -147,6 +147,8 @@ files:
               - name: replication
                 description: |
                   Set to `true` to collect replication metrics.
+                  These metrics are only collected from the specified `host`. If you want to collect replication metrics
+                  from the source node and the replica nodes you need to set separate check instances to collect them.
                 value:
                   type: boolean
                   example: false
@@ -235,12 +237,9 @@ files:
                   type: boolean
                   example: false
 
-          - name: deep_database_monitoring
+          - name: dbm
             description: |
-              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-              success manager or Datadog support.
+              Set to `true` enable Database Monitoring.
             enabled: false
             value:
               type: boolean
@@ -251,10 +250,10 @@ files:
             options:
               - name: enabled
                 description: |
-                  Enables collection of statement samples. Requires `deep_database_monitoring: true`.
+                  Enables collection of statement samples. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collections_per_second
                 description: |
                   Sets the maximum statement sample collection rate. Each collection involves a single query to one

@@ -36,15 +36,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_dbm(field, value):
+    return False
+
+
 def instance_dbname(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_dbstrict(field, value):
-    return False
-
-
-def instance_deep_database_monitoring(field, value):
     return False
 
 

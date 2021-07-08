@@ -1,5 +1,10 @@
 # CHANGELOG - Envoy
 
+## 1.23.0 / 2021-06-17
+
+* [Added] Add v3 API metrics. See [#9468](https://github.com/DataDog/integrations-core/pull/9468).
+* [Added] Rename cluster_name tag to envoy_cluster. See [#9430](https://github.com/DataDog/integrations-core/pull/9430).
+
 ## 1.22.0 / 2021-05-06
 
 * [Added] Add collect_server_info config option. See [#9298](https://github.com/DataDog/integrations-core/pull/9298).

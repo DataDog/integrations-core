@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -73,14 +73,14 @@ class InstanceConfig(BaseModel):
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
-    deep_database_monitoring: Optional[bool]
+    dbm: Optional[bool]
     defaults_file: Optional[str]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
     options: Optional[Options]
-    pass_: Optional[str] = Field(None, alias='pass')
+    password: Optional[str]
     port: Optional[float]
     queries: Optional[Sequence[Mapping[str, Any]]]
     service: Optional[str]
@@ -89,7 +89,7 @@ class InstanceConfig(BaseModel):
     statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
-    user: Optional[str]
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

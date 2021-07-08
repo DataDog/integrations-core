@@ -10,7 +10,7 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 from datadog_checks.base.utils.serialization import json
 
 from .config_models import ConfigMixin
-from .metrics import construct_jmx_metrics_config, construct_node_metrics_config
+from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
 
 
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -81,10 +81,29 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     scraper = self.create_scraper({'openmetrics_endpoint': url, 'metrics': metrics, **self.instance})
                     scraper.static_tags += self._static_tags
                     scraper.set_dynamic_tags(broker_id_tag)
+                    self.configure_additional_transformers(scraper.metric_transformer.transformer_data)
 
                     scrapers[url] = scraper
 
         self.scrapers = scrapers
+
+    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name, metric_type):
+        method = getattr(self, metric_type)
+
+        def transform(metric, sample_data, runtime_data):
+            for sample, tags, hostname in sample_data:
+                method(legacy_name, sample.value, tags=tags, hostname=hostname)
+
+                tag = sample.labels.pop(label_name)
+                tags.remove('{}:{}'.format(label_name, tag))
+
+                method('{}.{}'.format(new_name, tag), sample.value, tags=tags, hostname=hostname)
+
+        return transform
+
+    def configure_additional_transformers(self, transformer_data):
+        for metric, data in METRICS_WITH_NAME_AS_LABEL.items():
+            transformer_data[metric] = None, self.configure_transformer_with_metric_label(**data)
 
     def parse_config(self):
         self._region_name = self.config.region_name

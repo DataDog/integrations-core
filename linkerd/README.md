@@ -87,12 +87,12 @@ Simply follow the examples present in the [default configuration][4].
 
 ### Service Checks
 
-**linkerd.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent fails to connect to the prometheus endpoint, otherwise returns `OK`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
+
 
 [1]: https://linkerd.io
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -107,3 +107,4 @@ Need help? Contact [Datadog support][11].
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://linkerd.io/2/tasks/modifying-proxy-log-level/
+[14]: https://github.com/DataDog/integrations-core/blob/master/linkerd/assets/service_checks.json

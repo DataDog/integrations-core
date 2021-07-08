@@ -122,19 +122,7 @@ The Kong check does not include any events.
 
 ### Service Checks
 
-**kong.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Kong to collect metrics, otherwise returns `OK`.
-
-When using the Agent 7+ implementation by setting `openmetrics_endpoint`:
-
-**kong.openmetrics.health**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
-
-**kong.datastore.reachable**:<br>
-Returns `CRITICAL` if Kong is unable to connect to the datastore, otherwise returns `OK`.
-
-**kong.upstream.target.health**:<br>
-Returns `CRITICAL` if the target is unhealthy, otherwise returns `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -154,3 +142,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-kong-datadog
+[11]: https://github.com/DataDog/integrations-core/blob/master/kong/assets/service_checks.json

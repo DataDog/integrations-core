@@ -264,10 +264,7 @@ The Haproxy check does not include any events.
 
 ### Service Checks
 
-**haproxy.backend_up**:<br>
-Converts the HAProxy status page into service checks.
-Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
-Returns `OK` for `maint`, `ok` and any other state.
+See [service_checks.json][30] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -309,3 +306,4 @@ Need help? Contact [Datadog support][11].
 [27]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [28]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [29]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[30]: https://github.com/DataDog/integrations-core/blob/master/haproxy/assets/service_checks.json

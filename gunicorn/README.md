@@ -111,8 +111,7 @@ The Gunicorn check does not include any events.
 
 ### Service Checks
 
-**gunicorn.is_running**:<br>
-Returns `CRITICAL` if the Agent cannot find a Gunicorn master process, or any working or idle worker processes, otherwise returns `OK`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -166,3 +165,4 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv
 [13]: https://www.datadoghq.com/blog/monitor-gunicorn-performance
+[14]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/assets/service_checks.json

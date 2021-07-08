@@ -158,6 +158,7 @@ def _init_datadog_sample_collection(conn):
     cur = conn.cursor()
     cur.execute("CREATE DATABASE datadog")
     cur.execute("GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO 'dog'@'%'")
+    cur.execute("GRANT EXECUTE on `datadog`.*  TO 'dog'@'%'")
     _create_explain_procedure(conn, "datadog")
     _create_explain_procedure(conn, "mysql")
     _create_enable_consumers_procedure(conn)
@@ -180,7 +181,8 @@ def _create_explain_procedure(conn, schema):
             schema=schema
         )
     )
-    cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
+    if schema != 'datadog':
+        cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
     cur.close()
 
 
@@ -196,7 +198,6 @@ def _create_enable_consumers_procedure(conn):
         END;
     """
     )
-    cur.execute("GRANT EXECUTE ON PROCEDURE datadog.enable_events_statements_consumers to 'dog'@'%'")
     cur.close()
 
 
@@ -230,6 +231,9 @@ def _add_dog_user(conn):
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
     if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
+    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
+        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
     else:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
