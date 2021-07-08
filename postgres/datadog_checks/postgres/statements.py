@@ -10,10 +10,10 @@ import psycopg2
 import psycopg2.extras
 from cachetools import TTLCache
 
-from datadog_checks.base.log import get_check_logger
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -81,20 +81,37 @@ def _row_key(row):
     return row['query_signature'], row['datname'], row['rolname']
 
 
-class PostgresStatementMetrics(object):
+DEFAULT_COLLECTION_INTERVAL = 10
+
+
+class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
-    def __init__(self, check, config):
-        self._check = check
+    def __init__(self, check, config, shutdown_callback):
+        collection_interval = float(
+            config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        )
+        if collection_interval <= 0:
+            collection_interval = DEFAULT_COLLECTION_INTERVAL
+        super(PostgresStatementMetrics, self).__init__(
+            check,
+            run_sync=is_affirmative(config.statement_metrics_config.get('run_sync', False)),
+            enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
+            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            min_collection_interval=config.min_collection_interval,
+            config_host=config.host,
+            dbms="postgres",
+            rate_limit=1 / float(collection_interval),
+            job_name="statement-metrics",
+            shutdown_callback=shutdown_callback,
+        )
         self._config = config
-        self._db_hostname = None
-        self._log = get_check_logger()
         self._state = StatementMetrics()
         self._stat_column_cache = []
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
-            maxsize=self._config.full_statement_text_cache_max_size,
-            ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
+            maxsize=config.full_statement_text_cache_max_size,
+            ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
 
     def _execute_query(self, cursor, query, params=()):
@@ -109,7 +126,7 @@ class PostgresStatementMetrics(object):
             self._log.warning('Statement-level metrics are unavailable: %s', e)
             return []
 
-    def _get_pg_stat_statements_columns(self, db):
+    def _get_pg_stat_statements_columns(self):
         """
         Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
         version is not a reliable way to determine the available columns on `pg_stat_statements`. The database can
@@ -122,7 +139,7 @@ class PostgresStatementMetrics(object):
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
         )
-        cursor = db.cursor()
+        cursor = self._check._get_db(self._config.dbname).cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
         col_names = [desc[0] for desc in cursor.description] if cursor.description else []
         self._stat_column_cache = col_names
@@ -134,16 +151,19 @@ class PostgresStatementMetrics(object):
         self._db_hostname = resolve_db_host(self._config.host)
         return self._db_hostname
 
-    def collect_per_statement_metrics(self, db, db_version, tags):
+    def run_job(self):
+        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        self.collect_per_statement_metrics()
+
+    def collect_per_statement_metrics(self):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
-        tags_no_db = [t for t in tags if not t.startswith("db:")]
         try:
-            rows = self._collect_metrics_rows(db, tags)
+            rows = self._collect_metrics_rows()
             if not rows:
                 return
-            for event in self._rows_to_fqt_events(rows, tags_no_db):
+            for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
             # truncate query text to the maximum length supported by metrics tags
             for row in rows:
@@ -152,21 +172,20 @@ class PostgresStatementMetrics(object):
                 'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._config.min_collection_interval,
-                'tags': tags_no_db,
+                'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': 'v{major}.{minor}.{patch}'.format(
-                    major=db_version.major, minor=db_version.minor, patch=db_version.patch
+                    major=self._check._version.major, minor=self._check._version.minor, patch=self._check._version.patch
                 ),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
-            db.rollback()
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
-    def _load_pg_stat_statements(self, db, tags):
+    def _load_pg_stat_statements(self):
         try:
-            available_columns = set(self._get_pg_stat_statements_columns(db))
+            available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
                 self._log.warning(
@@ -176,7 +195,7 @@ class PostgresStatementMetrics(object):
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
                     1,
-                    tags=tags + ["error:database-missing_pg_stat_statements_required_columns"],
+                    tags=self._tags + ["error:database-missing_pg_stat_statements_required_columns"],
                 )
                 return []
 
@@ -187,7 +206,7 @@ class PostgresStatementMetrics(object):
                 filters = "AND pg_database.datname = %s"
                 params = (self._config.dbname,)
             return self._execute_query(
-                db.cursor(cursor_factory=psycopg2.extras.DictCursor),
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
                 STATEMENTS_QUERY.format(
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
@@ -210,12 +229,12 @@ class PostgresStatementMetrics(object):
             else:
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
 
-            self._check.count("dd.postgres.statement_metrics.error", 1, tags=tags + [error_tag])
+            self._check.count("dd.postgres.statement_metrics.error", 1, tags=self._tags + [error_tag])
 
             return []
 
-    def _collect_metrics_rows(self, db, tags):
-        rows = self._load_pg_stat_statements(db, tags)
+    def _collect_metrics_rows(self):
+        rows = self._load_pg_stat_statements()
 
         rows = self._normalize_queries(rows)
         if not rows:
@@ -244,13 +263,13 @@ class PostgresStatementMetrics(object):
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows, tags):
+    def _rows_to_fqt_events(self, rows):
         for row in rows:
             query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            row_tags = tags + [
+            row_tags = self._tags_no_db + [
                 "db:{}".format(row['datname']),
                 "rolname:{}".format(row['rolname']),
             ]
