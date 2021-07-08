@@ -24,11 +24,19 @@ class Relation(BaseModel):
     schemas: Optional[Sequence[str]]
 
 
+class StatementMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
 class StatementSamples(BaseModel):
     class Config:
         allow_mutation = False
 
-    collections_per_second: Optional[float]
+    collection_interval: Optional[float]
     enabled: Optional[bool]
     explain_function: Optional[str]
     explained_statements_cache_maxsize: Optional[int]
@@ -63,6 +71,7 @@ class InstanceConfig(BaseModel):
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
+    statement_metrics: Optional[StatementMetrics]
     statement_samples: Optional[StatementSamples]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
