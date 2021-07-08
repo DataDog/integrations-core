@@ -353,8 +353,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-**fargate_check**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
+See [service_checks.json][42] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -409,3 +408,4 @@ Need help? Contact [Datadog support][19].
 [39]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [40]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [41]: http://docs.datadoghq.com/integrations/eks_fargate
+[42]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json

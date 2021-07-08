@@ -204,6 +204,15 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
 )
 
 
+class StatementTruncationState(Enum):
+    """
+    Denotes the various possible states of a statement's truncation
+    """
+
+    truncated = 'truncated'
+    not_truncated = 'not_truncated'
+
+
 class DBExplainError(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
@@ -223,6 +232,9 @@ class DBExplainError(Enum):
 
     # agent may not have access to the default schema
     use_schema_error = 'use_schema_error'
+
+    # a truncated statement can't be explained
+    statement_truncated = 'statement_truncated'
 
 
 class MySQLStatementSamples(object):
@@ -455,7 +467,6 @@ class MySQLStatementSamples(object):
 
     def _filter_valid_statement_rows(self, rows):
         num_sent = 0
-        num_truncated = 0
 
         for row in rows:
             if not row or not all(row):
@@ -464,26 +475,12 @@ class MySQLStatementSamples(object):
             sql_text = row['sql_text']
             if not sql_text:
                 continue
-            # The SQL_TEXT column will store 1024 chars by default. Plans cannot be captured on truncated
-            # queries, so the `performance_schema_max_sql_text_length` variable must be raised.
-            if sql_text[-3:] == '...':
-                num_truncated += 1
-                continue
             yield row
             # only save the checkpoint for rows that we have successfully processed
             # else rows that we ignore can push the checkpoint forward causing us to miss some on the next run
             if row['timer_start'] > self._checkpoint:
                 self._checkpoint = row['timer_start']
             num_sent += 1
-
-        if num_truncated > 0:
-            self._log.warning(
-                'Unable to collect %d/%d statement samples due to truncated SQL text. Consider raising '
-                '`performance_schema_max_sql_text_length` to capture these queries.',
-                num_truncated,
-                num_truncated + num_sent,
-            )
-            self._check.count("dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:truncated-sql-text"])
 
     def _collect_plan_for_statement(self, row):
         # Plans have several important signatures to tag events with:
@@ -509,16 +506,31 @@ class MySQLStatementSamples(object):
             return None
 
         plan, explain_errors = None, None
-        with closing(self._get_db_connection().cursor()) as cursor:
-            try:
-                plan, explain_errors = self._explain_statement(
-                    cursor, row['sql_text'], row['current_schema'], obfuscated_statement
+        truncated = self._get_truncation_state(row['sql_text'])
+        if truncated == StatementTruncationState.truncated:
+            self._check.count(
+                "dd.mysql.statement_samples.error",
+                1,
+                tags=self._tags + ["error:explain-{}".format(DBExplainError.statement_truncated)],
+            )
+            explain_errors = [
+                (
+                    None,
+                    DBExplainError.statement_truncated,
+                    'truncated length: {}'.format(len(row['sql_text'])),
                 )
-            except Exception as e:
-                self._check.count(
-                    "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
-                )
-                self._log.exception("Failed to explain statement: %s", obfuscated_statement)
+            ]
+        else:
+            with closing(self._get_db_connection().cursor()) as cursor:
+                try:
+                    plan, explain_errors = self._explain_statement(
+                        cursor, row['sql_text'], row['current_schema'], obfuscated_statement
+                    )
+                except Exception as e:
+                    self._check.count(
+                        "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
+                    )
+                    self._log.exception("Failed to explain statement: %s", obfuscated_statement)
 
         collection_errors = []
         if explain_errors:
@@ -527,7 +539,7 @@ class MySQLStatementSamples(object):
                     {
                         'strategy': strategy if strategy else None,
                         'code': explain_err_code.value if explain_err_code else None,
-                        'message': '{}'.format(type(explain_err)) if explain_err else None,
+                        'message': explain_err if explain_err else None,
                     }
                 )
 
@@ -562,6 +574,7 @@ class MySQLStatementSamples(object):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "statement_truncated": truncated.value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -732,7 +745,7 @@ class MySQLStatementSamples(object):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
-            explain_errors = [(None, DBExplainError.use_schema_error, e)]
+            explain_errors = [(None, DBExplainError.use_schema_error, '{}'.format(type(e)))]
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_errors
             self._check.count(
@@ -786,7 +799,7 @@ class MySQLStatementSamples(object):
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
-                explain_errors.append((strategy, DBExplainError.database_error, e))
+                explain_errors.append((strategy, DBExplainError.database_error, '{}'.format(type(e))))
                 self._check.count(
                     "dd.mysql.statement_samples.error",
                     1,
@@ -837,3 +850,10 @@ class MySQLStatementSamples(object):
         """
         cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.0)
         return float(cost or 0.0)
+
+    @staticmethod
+    def _get_truncation_state(statement):
+        # Mysql adds 3 dots at the end of truncated statements so we use this to check if
+        # a statement is truncated
+        truncated = statement[-3:] == '...'
+        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

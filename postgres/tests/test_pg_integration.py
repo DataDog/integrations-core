@@ -11,11 +11,12 @@ import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
+from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.statement_samples import DBExplainError, PostgresStatementSamples
+from datadog_checks.postgres.statement_samples import DBExplainError, PostgresStatementSamples, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -248,6 +249,20 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         assert check._config.tags == expected_tags
 
 
+dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
+@pytest.mark.parametrize("dbm_enabled", [True, False])
+def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
+    # test to make sure we continue to support the old key
+    for k in dbm_enabled_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[dbm_enabled_key] = dbm_enabled
+    check = integration_check(dbm_instance)
+    assert check._config.dbm_enabled == dbm_enabled
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
@@ -338,7 +353,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
 
 
 def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
-    pg_instance['deep_database_monitoring'] = True
+    pg_instance['dbm'] = True
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -385,7 +400,7 @@ def bob_conn():
 
 @pytest.fixture
 def dbm_instance(pg_instance):
-    pg_instance['deep_database_monitoring'] = True
+    pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}
@@ -410,10 +425,28 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_error_tag,expected_collection_error",
+    "user,password,dbname,query,arg,expected_error_tag,expected_collection_error,expected_statement_truncated",
     [
-        ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None, None),
-        ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None, None),
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "SELECT city FROM persons WHERE city = %s",
+            "hello",
+            None,
+            None,
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            "dd_admin",
+            "dd_admin",
+            "dogs",
+            "SELECT * FROM breed WHERE name = %s",
+            "Labrador",
+            None,
+            None,
+            StatementTruncationState.not_truncated.value,
+        ),
         (
             "dd_admin",
             "dd_admin",
@@ -422,6 +455,7 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
             123,
             "error:explain-{}".format(DBExplainError.invalid_schema),
             {'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"},
+            StatementTruncationState.not_truncated.value,
         ),
         (
             "dd_admin",
@@ -431,6 +465,30 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
             123,
             "error:explain-{}".format(DBExplainError.failed_function),
             {'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"},
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            u"SELECT city as city0, city as city1, city as city2, city as city3, "
+            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+            "city as city58, city as city59, city as city60, city as city61 "
+            "FROM persons WHERE city = %s",
+            # Use some multi-byte characters (the euro symbol) so we can validate that the code is correctly
+            # looking at the length in bytes when testing for truncated statements
+            u'\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC\u20AC',
+            "error:explain-{}".format(DBExplainError.statement_truncated),
+            {'code': 'statement_truncated', 'message': 'track_activity_query_size=1024'},
+            StatementTruncationState.truncated.value,
         ),
     ],
 )
@@ -446,6 +504,7 @@ def test_statement_samples_collect(
     arg,
     expected_error_tag,
     expected_collection_error,
+    expected_statement_truncated,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -468,8 +527,13 @@ def test_statement_samples_collect(
         check.check(dbm_instance)
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
-        matching = [e for e in dbm_samples if e['db']['statement'] == expected_query]
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+
+        # Find matching events by checking if the expected query starts with the event statement. Using this
+        # instead of a direct equality check covers cases of truncated statements
+        matching = [
+            e for e in dbm_samples if expected_query.encode("utf-8").startswith(e['db']['statement'].encode("utf-8"))
+        ]
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
             # pg_monitor role exists only in version 10+
@@ -478,6 +542,7 @@ def test_statement_samples_collect(
 
         assert len(matching) == 1, "missing captured event"
         event = matching[0]
+        assert event['db']['statement_truncated'] == expected_statement_truncated
 
         if expected_error_tag:
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
@@ -516,7 +581,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for _, _, dbname, query, arg in SAMPLE_QUERIES:
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
         matching = [e for e in dbm_samples if e['db']['statement'] == expected_query]
         if not dbstrict or dbname == dbm_instance['dbname']:
             # when dbstrict=True we expect to only capture those queries for the initial database to which the
@@ -655,6 +720,72 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
     }
     with pytest.raises(ValueError):
         integration_check(pg_instance)
+
+
+class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState):
+    """
+    A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
+    has it as read-only and not settable at construction-time
+    """
+
+    def __init__(self, pg_error):
+        self.pg_error = pg_error
+
+    def __getattribute__(self, attr):
+        if attr == 'pgerror':
+            return self.pg_error
+        else:
+            return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
+
+
+@pytest.mark.parametrize(
+    "error,metric_columns,expected_error_tag",
+    [
+        (
+            ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
+            [],
+            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled',
+        ),
+        (
+            ObjectNotInPrerequisiteState('cannot insert into view'),
+            [],
+            'error:database-ObjectNotInPrerequisiteState',
+        ),
+        (
+            psycopg2.errors.DatabaseError(),
+            [],
+            'error:database-DatabaseError',
+        ),
+        (
+            None,
+            [],
+            'error:database-missing_pg_stat_statements_required_columns',
+        ),
+    ],
+)
+def test_statement_metrics_database_errors(
+    aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag
+):
+    # don't need samples for this test
+    dbm_instance['statement_samples'] = {'enabled': False}
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    with mock.patch(
+        'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
+        return_value=metric_columns,
+        side_effect=error,
+    ):
+        check.check(dbm_instance)
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        expected_error_tag,
+    ]
+
+    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
 
 
 def assert_state_clean(check):

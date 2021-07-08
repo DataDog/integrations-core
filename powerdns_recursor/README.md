@@ -143,19 +143,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-
 ### Events
 
 The PowerDNS Recursor check does not include any events.
 
 ### Service Checks
 
-**powerdns.recursor.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the recursor's statistics API, otherwise `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -166,4 +165,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
-
+[10]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/assets/service_checks.json

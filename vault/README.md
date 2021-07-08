@@ -197,17 +197,7 @@ This event fires when the cluster leader changes.
 
 ### Service Checks
 
-**vault.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Vault, otherwise `OK`.
-
-**vault.unsealed**:<br>
-Returns `CRITICAL` if Vault is sealed, otherwise `OK`.
-
-**vault.initialized**:<br>
-Returns `CRITICAL` if Vault is not yet initialized, otherwise `OK`.
-
-**vault.prometheus.health**:<br>
-Returns `CRITICAL` if the check cannot access the metrics endpoint. Otherwise, returns `OK`.
+See [service_checks.json][20] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -241,3 +231,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/
 [18]: https://www.datadoghq.com/blog/vault-monitoring-tools
 [19]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog
+[20]: https://github.com/DataDog/integrations-core/blob/master/vault/assets/service_checks.json

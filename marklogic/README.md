@@ -101,24 +101,18 @@ _Available for Agent versions >6.0_
 
 See [metadata.csv][10] for a list of metrics provided by this check.
 
-### Service Checks
-
-**marklogic.can_connect**:<br>
-Returns `CRITICAL` if the Agent is enabled to reach the query endpoint. Returns `OK` otherwise.
-
-**marklogic.database.health**:<br>
-Returns `CRITICAL` if the database state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
-
-**marklogic.forest.health**:<br>
-Returns `CRITICAL` if the forest state is `critical`; `WARNING` if it is `maintenance`, `offline`, or `at-risk`; and `OK` otherwise.
-
 ### Events
 
 MarkLogic does not include any events.
 
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
+
 
 [1]: https://www.marklogic.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations
@@ -131,3 +125,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/marklogic/metadata.csv
 [11]: https://docs.datadoghq.com/help
+[12]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json

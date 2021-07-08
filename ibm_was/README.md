@@ -107,14 +107,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][8] for a list of metrics provided by this check.
 
-### Service Checks
-
-**ibm_was.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason, otherwise returns `OK`.
-
 ### Events
 
 IBM WAS does not include any events.
+
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -129,3 +128,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/assets/service_checks.json

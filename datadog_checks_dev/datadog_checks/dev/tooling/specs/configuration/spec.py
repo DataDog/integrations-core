@@ -344,6 +344,14 @@ def options_validator(options, loader, file_name, *sections):
                     )
                 )
 
+            option.setdefault('multiple_instances_defined', False)
+            if not isinstance(option['multiple_instances_defined'], bool):
+                loader.errors.append(
+                    '{}, {}, {}{}: Attribute `multiple` must be true or false'.format(
+                        loader.source, file_name, sections_display, option_name
+                    )
+                )
+
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)

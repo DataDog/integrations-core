@@ -62,8 +62,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 
 ### Service Checks
 
-**vcenter.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to vCenter to collect metrics, otherwise `OK`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -87,3 +86,4 @@ See our [blog post][11] on monitoring vSphere environments with Datadog.
 [11]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
 [12]: https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.monitoring.doc/GUID-25800DE4-68E5-41CC-82D9-8811E27924BC.html
 [13]: https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/
+[14]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
