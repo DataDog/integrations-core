@@ -283,6 +283,9 @@ class MySQLStatementSamples(object):
             'STATEMENT': self._run_explain,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
+        self._obfuscate_options = json.dumps(
+            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        )
         self._init_caches()
 
     def _init_caches(self):
@@ -489,11 +492,8 @@ class MySQLStatementSamples(object):
         # - `query_signature` - hash computed from the digest text to match query metrics
 
         try:
-            obfuscate_options = json.dumps(
-                {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
-            )
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], obfuscate_options)
-            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], obfuscate_options)
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options)
+            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
