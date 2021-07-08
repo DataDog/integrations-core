@@ -92,6 +92,9 @@ class PostgresStatementSamples(object):
         self._tags = None
         self._tags_no_db = None
         self._db_hostname = resolve_db_host(self._config.host)
+        self._obfuscate_options = json.dumps(
+            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        )
         self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', False))
         self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
         self._rate_limiter = ConstantRateLimiter(
@@ -384,10 +387,7 @@ class PostgresStatementSamples(object):
 
     def _collect_plan_for_statement(self, row):
         try:
-            obfuscate_options = json.dumps(
-                {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
-            )
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], obfuscate_options)
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
