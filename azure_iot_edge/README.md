@@ -111,17 +111,13 @@ Once the Agent has been deployed to the device, [run the Agent's status subcomma
 
 See [metadata.csv][8] for a list of metrics provided by this check.
 
-### Service Checks
-
-**azure.iot_edge.edge_agent.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise.
-
-**azure.iot_edge.edge_hub.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise.
-
 ### Events
 
 Azure IoT Edge does not include any events.
+
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -141,3 +137,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/
+[11]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/assets/service_checks.json

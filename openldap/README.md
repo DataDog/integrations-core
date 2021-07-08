@@ -172,12 +172,12 @@ The openldap check does not include any events.
 
 ### Service Checks
 
-**openldap.can_connect**:<br>
-Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, otherwise returns `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
@@ -187,3 +187,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/openldap/assets/service_checks.json

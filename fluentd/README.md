@@ -177,8 +177,7 @@ The FluentD check does not include any events.
 
 ### Service Checks
 
-**fluentd.is_ok**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Fluentd to collect metrics, otherwise returns `OK`.
+See [service_checks.json][19] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -206,3 +205,4 @@ Need help? Contact [Datadog support][16].
 [16]: https://docs.datadoghq.com/help/
 [17]: https://www.datadoghq.com/blog/monitor-fluentd-datadog
 [18]: https://docs.datadoghq.com/agent/kubernetes/log/
+[19]: https://github.com/DataDog/integrations-core/blob/master/fluentd/assets/service_checks.json

@@ -82,30 +82,18 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**openstack.neutron.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.keystone.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.hypervisor.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
-
-**openstack.neutron.network.up**:<br>
-Returns `CRITICAL` if the Network is down. Returns `OK` otherwise.
-
 ### Events
 
 OpenStack Controller does not include any events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://www.openstack.org
 [2]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
@@ -114,3 +102,4 @@ Need help? Contact [Datadog support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
+[8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json

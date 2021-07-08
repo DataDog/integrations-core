@@ -85,18 +85,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**clickhouse.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database. Otherwise, returns `OK`.
-
 ### Events
 
 The ClickHouse check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://clickhouse.yandex
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -107,3 +107,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
+[10]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/assets/service_checks.json

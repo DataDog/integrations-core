@@ -108,21 +108,7 @@ The Istio check does not include any events.
 
 ### Service Checks
 
-For Istio versions `1.5` or higher:
-
-**istio.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
-
-For all other versions of Istio:
-
-**istio.pilot.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
-
-**istio.galley.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
-
-**istio.citadel.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+See [service_checks.json][22] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -157,3 +143,4 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [21]: https://www.datadoghq.com/blog/istio-datadog/
+[22]: https://github.com/DataDog/integrations-core/blob/master/istio/assets/service_checks.json

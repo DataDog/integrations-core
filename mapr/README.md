@@ -85,14 +85,13 @@ Refer to [fluent_datadog_plugin][8] documentation for more details about the opt
 
 See [metadata.csv][10] for a list of default metrics provided by this integration.
 
-### Service Checks
-
-**mapr.can_connect**:
-Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
-
 ### Events
 
 The MapR check does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -111,6 +110,7 @@ The MapR check does not include any events.
 
 Need more help? Contact [Datadog support][11].
 
+
 [1]: https://mapr.com
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://mapr.com/docs/61/AdministratorGuide/Monitoring.html
@@ -123,3 +123,4 @@ Need more help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datafabric.hpe.com/52/SecurityGuide/t_config_impersonation_notsecure.html?hl=secure%2Ccluster
+[13]: https://github.com/DataDog/integrations-core/blob/master/mapr/assets/service_checks.json

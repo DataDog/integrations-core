@@ -77,21 +77,7 @@ The Windows Service check does not include any events.
 
 ### Service Checks
 
-**windows_service.state**:<br>
-The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
-
-| Windows status   | windows_service.state |
-| ---------------- | --------------------- |
-| Stopped          | CRITICAL              |
-| Start Pending    | WARNING               |
-| Stop Pending     | WARNING               |
-| Running          | OK                    |
-| Continue Pending | WARNING               |
-| Pause Pending    | WARNING               |
-| Paused           | WARNING               |
-| Unknown          | UNKNOWN               |
-
-If the service cannot be accessed by the Agent due to a permission restriction or an incorrect name, the service check reports `UNKNOWN`.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -114,3 +100,4 @@ Need help? Contact [Datadog support][8].
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring
+[12]: https://github.com/DataDog/integrations-core/blob/master/windows_service/assets/service_checks.json

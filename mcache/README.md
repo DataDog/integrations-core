@@ -112,8 +112,7 @@ The Mcache check does not include any events.
 
 ### Service Checks
 
-**memcache.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to memcache to collect metrics, otherwise `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -140,3 +139,4 @@ Need help? Contact [Datadog support][10].
 [13]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[16]: https://github.com/DataDog/integrations-core/blob/master/mcache/assets/service_checks.json

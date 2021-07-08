@@ -207,8 +207,7 @@ The Envoy check does not include any events.
 
 ### Service Checks
 
-**envoy.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, otherwise returns `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -236,3 +235,4 @@ Need help? Contact [Datadog support][15].
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [15]: https://docs.datadoghq.com/help/
+[16]: https://github.com/DataDog/integrations-core/blob/master/envoy/assets/service_checks.json

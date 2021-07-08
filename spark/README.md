@@ -108,22 +108,7 @@ The Spark check does not include any events.
 
 ### Service Checks
 
-The Agent submits one of the following service checks, depending on how you're running Spark:
-
-**spark.standalone_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Standalone Master. Returns `OK` otherwise.
-
-**spark.mesos_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Mesos Master. Returns `OK` otherwise.
-
-**spark.application_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ApplicationMaster. Returns `OK` otherwise.
-
-**spark.resource_manager.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
-
-**spark.driver.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -133,8 +118,7 @@ To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install t
 
 For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
 
-For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node][11]. 
-
+For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node][11].
 
 ## Further Reading
 
@@ -156,3 +140,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://www.datadoghq.com/blog/monitoring-spark
 [13]: https://spark.apache.org/
 [14]: https://docs.datadoghq.com/agent/docker/log/
+[15]: https://github.com/DataDog/integrations-core/blob/master/spark/assets/service_checks.json
