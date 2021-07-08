@@ -69,24 +69,18 @@ Some metrics are only available from specific version of Systemd:
 - `systemd.service.restart_count` requires Systemd v235
 - `systemd.socket.connection_refused_count` requires Systemd v239
 
-### Service Checks
-
-**systemd.can_connect**:<br>
-Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
-
-**systemd.system.state**:<br>
-Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
-
-**systemd.unit.state**:<br>
-Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other.
-
 ### Events
 
 The Systemd check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://www.freedesktop.org/wiki/Software/systemd/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -96,3 +90,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [9]: https://github.com/coreos/go-systemd
+[10]: https://github.com/DataDog/integrations-core/blob/master/systemd/assets/service_checks.json

@@ -38,6 +38,8 @@ def test_e2e(dd_agent_check):
         'jboss.undertow_listener.processing_time',
         'jboss.undertow_listener.request_count',
     ] + JVM_E2E_METRICS
+    metrics.remove('jvm.gc.cms.count')
+    metrics.remove('jvm.gc.parnew.time')
     for metric in metrics:
         aggregator.assert_metric(metric)
 

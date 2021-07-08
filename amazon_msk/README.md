@@ -34,22 +34,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 See [metadata.csv][11] for a list of metrics provided by this check.
 
-### Service Checks
-
-**aws.msk.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. Otherwise, returns `OK`.
-
-**aws.msk.prometheus.health**:<br>
-Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`.
-
-When using the Agent 7+ implementation by setting `use_openmetrics` to `true`:
-
-**aws.msk.openmetrics.health**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`.
-
 ### Events
 
 The Amazon MSK check does not include any events.
+
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -68,3 +59,4 @@ Need help? Contact [Datadog support][12].
 [11]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [12]: https://docs.datadoghq.com/help/
 [13]: https://docs.aws.amazon.com/msk/latest/developerguide/open-monitoring.html
+[14]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/assets/service_checks.json

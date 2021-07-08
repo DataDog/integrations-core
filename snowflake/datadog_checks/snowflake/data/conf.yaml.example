@@ -51,10 +51,10 @@ instances:
     #
   - account: <ACCOUNT>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## Login name for the user.
     #
-    user: <USER>
+    username: <USER>
 
     ## @param password - string - required
     ## Password for the user

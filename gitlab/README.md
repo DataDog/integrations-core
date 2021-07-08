@@ -111,19 +111,7 @@ The Gitlab check does not include any events.
 
 ### Service Checks
 
-The Gitlab check includes health, readiness, and liveness service checks.
-
-**gitlab.prometheus_endpoint_up**:<br>
-Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance.
-
-**gitlab.health**:<br>
-Returns `CRITICAL` if the check cannot access the Gitlab instance.
-
-**gitlab.liveness**:<br>
-Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers.
-
-**gitlab.readiness**:<br>
-Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -142,3 +130,4 @@ Need help? Contact [Datadog support][10].
 [11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
 [12]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html
 [13]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
+[14]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json

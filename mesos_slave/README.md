@@ -1,4 +1,4 @@
-# Mesos_slave Integration
+# Mesos Slave Integration
 
 ![Mesos Slave Dashboard][101]
 
@@ -153,25 +153,9 @@ See [metadata.csv][104] for a list of metrics provided by this integration.
 
 The Mesos-slave check does not include any events.
 
-### Service Check
+### Service Checks
 
-**mesos_slave.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise `OK`.
-
-**<executor_task_name>.ok**:<br>
-The mesos_slave check creates a service check for each executor task, giving it one of the following statuses:
-
-|               |                                |
-| ------------- | ------------------------------ |
-| Task status   | resultant service check status |
-| TASK_STARTING | AgentCheck.OK                  |
-| TASK_RUNNING  | AgentCheck.OK                  |
-| TASK_FINISHED | AgentCheck.OK                  |
-| TASK_FAILED   | AgentCheck.CRITICAL            |
-| TASK_KILLED   | AgentCheck.WARNING             |
-| TASK_LOST     | AgentCheck.CRITICAL            |
-| TASK_STAGING  | AgentCheck.OK                  |
-| TASK_ERROR    | AgentCheck.CRITICAL            |
+See [service_checks.json][109] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -189,3 +173,4 @@ Need help? Contact [Datadog support][105].
 [106]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/datadog_checks/mesos_slave/data/conf.yaml.example
 [107]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [108]: https://docs.datadoghq.com/agent/kubernetes/log/
+[109]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/assets/service_checks.json

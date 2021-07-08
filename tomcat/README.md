@@ -219,8 +219,7 @@ The Tomcat check does not include any events.
 
 ### Service Checks
 
-**tomcat.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance, otherwise returns `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -263,3 +262,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [14]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
 [15]: https://tomcat.apache.org/tomcat-8.0-doc/logging.html#Using_Log4j
+[16]: https://github.com/DataDog/integrations-core/blob/master/tomcat/assets/service_checks.json

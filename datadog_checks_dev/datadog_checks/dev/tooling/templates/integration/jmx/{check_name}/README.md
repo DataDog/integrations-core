@@ -33,13 +33,15 @@ This check monitors [{integration_name}][1].
 
 {integration_name} does not include any metrics.
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
+
+### Service Checks
+
+The {integration_name} integration does not include any service checks.
+
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -52,3 +54,4 @@ Need help? Contact [Datadog support][4].
 [4]: https://docs.datadoghq.com/help/
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/assets/service_checks.json
