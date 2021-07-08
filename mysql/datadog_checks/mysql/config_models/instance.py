@@ -46,13 +46,21 @@ class Ssl(BaseModel):
     key: Optional[str]
 
 
+class StatementMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
 class StatementSamples(BaseModel):
     class Config:
         allow_mutation = False
 
+    collection_interval: Optional[float]
     collection_strategy_cache_maxsize: Optional[int]
     collection_strategy_cache_ttl: Optional[int]
-    collections_per_second: Optional[float]
     enabled: Optional[bool]
     events_statements_enable_procedure: Optional[str]
     events_statements_row_limit: Optional[int]
@@ -86,6 +94,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
+    statement_metrics: Optional[StatementMetrics]
     statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
