@@ -76,6 +76,14 @@ def instance_port(field, value):
     return 5432
 
 
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_samples(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_query_timeout(field, value):
     return 1000
 
@@ -90,14 +98,6 @@ def instance_service(field, value):
 
 def instance_ssl(field, value):
     return 'false'
-
-
-def instance_statement_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_statement_samples(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_table_count_limit(field, value):

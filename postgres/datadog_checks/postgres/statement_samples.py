@@ -85,7 +85,7 @@ class DBExplainError(Enum):
     failed_function = 'failed_function'
 
     # a truncated statement can't be explained
-    statement_truncated = "statement_truncated"
+    query_truncated = "query_truncated"
 
 
 DEFAULT_COLLECTION_INTERVAL = 1
@@ -111,7 +111,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             config_host=config.host,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
-            job_name="statement-samples",
+            job_name="query-samples",
             shutdown_callback=shutdown_callback,
         )
         self._check = check
@@ -127,8 +127,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=int(config.statement_samples_config.get('explained_statements_cache_maxsize', 5000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('explained_statements_per_hour_per_query', 60)),
+            maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
+            ttl=60 * 60 / int(config.statement_samples_config.get('explained_queries_per_hour_per_query', 60)),
         )
 
         # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
@@ -306,11 +306,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.statement_truncated)),
+                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated)),
             )
             return (
                 None,
-                DBExplainError.statement_truncated,
+                DBExplainError.query_truncated,
                 "track_activity_query_size={}".format(track_activity_query_size),
             )
 
@@ -397,7 +397,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "application": row.get('application_name', None),
                     "user": row['usename'],
                     "statement": obfuscated_statement,
-                    "statement_truncated": self._get_truncation_state(
+                    "query_truncated": self._get_truncation_state(
                         self._check._db_configured_track_activity_query_size, row['query']
                     ).value,
                 },
