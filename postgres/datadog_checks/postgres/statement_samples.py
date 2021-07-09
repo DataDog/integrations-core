@@ -118,13 +118,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._config = config
         self._activity_last_query_start = None
         self._tags_no_db = None
+        # The value is loaded when connecting to the main database
+        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
         self._obfuscate_options = json.dumps(
             {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
         )
-        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', False))
-        self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
-        # The value is loaded when connecting to the main database
-        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
 
         self._collection_strategy_cache = TTLCache(
             maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
