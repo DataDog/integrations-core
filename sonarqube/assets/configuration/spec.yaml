@@ -88,7 +88,6 @@ files:
     - template: instances/jmx
       overrides:
         is_jmx.hidden: false
-        is_jmx.value.example: false
         host.required: false
         port.required: false
         is_jmx.description: |
