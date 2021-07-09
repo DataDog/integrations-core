@@ -223,8 +223,8 @@ class DBExplainError(Enum):
     # agent may not have access to the default schema
     use_schema_error = 'use_schema_error'
 
-    # a truncated statement can't be explained
-    statement_truncated = 'statement_truncated'
+    # a truncated query can't be explained
+    query_truncated = 'query_truncated'
 
 
 class MySQLStatementSamples(DBMAsyncJob):
@@ -298,8 +298,8 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         # explained_statements_cache: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=self._config.statement_samples_config.get('explained_statements_cache_maxsize', 5000),
-            ttl=60 * 60 / self._config.statement_samples_config.get('explained_statements_per_hour_per_query', 60),
+            maxsize=self._config.statement_samples_config.get('explained_queries_cache_maxsize', 5000),
+            ttl=60 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
         # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
@@ -365,7 +365,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 )
             except pymysql.err.DatabaseError as e:
                 self._check.count(
-                    "dd.mysql.statement_samples.error",
+                    "dd.mysql.query_samples.error",
                     1,
                     tags=self._tags + ["error:create-temp-table-{}".format(type(e))],
                 )
@@ -427,7 +427,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
             self._log.debug("Failed to obfuscate statement: %s", row['digest_text'])
-            self._check.count("dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:sql-obfuscate"])
+            self._check.count("dd.mysql.query_samples.error", 1, tags=self._tags + ["error:sql-obfuscate"])
             return None
 
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
@@ -441,14 +441,14 @@ class MySQLStatementSamples(DBMAsyncJob):
         truncated = self._get_truncation_state(row['sql_text'])
         if truncated == StatementTruncationState.truncated:
             self._check.count(
-                "dd.mysql.statement_samples.error",
+                "dd.mysql.query_samples.error",
                 1,
-                tags=self._tags + ["error:explain-{}".format(DBExplainError.statement_truncated)],
+                tags=self._tags + ["error:explain-{}".format(DBExplainError.query_truncated)],
             )
             explain_errors = [
                 (
                     None,
-                    DBExplainError.statement_truncated,
+                    DBExplainError.query_truncated,
                     'truncated length: {}'.format(len(row['sql_text'])),
                 )
             ]
@@ -460,7 +460,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     )
                 except Exception as e:
                     self._check.count(
-                        "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
+                        "dd.mysql.query_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
                     )
                     self._log.exception("Failed to explain statement: %s", obfuscated_statement)
 
@@ -504,7 +504,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
-                    "statement_truncated": truncated.value,
+                    "query_truncated": truncated.value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -567,7 +567,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 "statement samples."
             )
             self._check.count(
-                "dd.mysql.statement_samples.error",
+                "dd.mysql.query_samples.error",
                 1,
                 tags=self._tags + ["error:no-enabled-events-statements-consumers"],
             )
@@ -682,7 +682,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_errors
             self._check.count(
-                "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
+                "dd.mysql.query_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
             self._log.debug(
                 'Failed to collect execution plan because schema could not be accessed. error=%s, schema=%s, '
@@ -734,7 +734,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 # so we won't try to explain it again for the cache duration there.
                 explain_errors.append((strategy, DBExplainError.database_error, '{}'.format(type(e))))
                 self._check.count(
-                    "dd.mysql.statement_samples.error",
+                    "dd.mysql.query_samples.error",
                     1,
                     tags=tags + ["error:explain-attempt-{}-{}".format(strategy, type(e))],
                 )

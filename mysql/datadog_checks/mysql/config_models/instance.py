@@ -37,16 +37,7 @@ class Options(BaseModel):
     schema_size_metrics: Optional[bool]
 
 
-class Ssl(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    ca: Optional[str]
-    cert: Optional[str]
-    key: Optional[str]
-
-
-class StatementMetrics(BaseModel):
+class QueryMetrics(BaseModel):
     class Config:
         allow_mutation = False
 
@@ -54,7 +45,7 @@ class StatementMetrics(BaseModel):
     enabled: Optional[bool]
 
 
-class StatementSamples(BaseModel):
+class QuerySamples(BaseModel):
     class Config:
         allow_mutation = False
 
@@ -67,11 +58,20 @@ class StatementSamples(BaseModel):
     events_statements_table: Optional[str]
     events_statements_temp_table_name: Optional[str]
     explain_procedure: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
     fully_qualified_explain_procedure: Optional[str]
     samples_per_hour_per_query: Optional[int]
     seen_samples_cache_maxsize: Optional[int]
+
+
+class Ssl(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    ca: Optional[str]
+    cert: Optional[str]
+    key: Optional[str]
 
 
 class InstanceConfig(BaseModel):
@@ -91,11 +91,11 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     port: Optional[float]
     queries: Optional[Sequence[Mapping[str, Any]]]
+    query_metrics: Optional[QueryMetrics]
+    query_samples: Optional[QuerySamples]
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
-    statement_metrics: Optional[StatementMetrics]
-    statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     username: Optional[str]
