@@ -14,9 +14,10 @@ from semver import VersionInfo
 from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.statement_samples import DBExplainError, PostgresStatementSamples, StatementTruncationState
+from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -54,8 +55,8 @@ SAMPLE_QUERIES = [
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
-    PostgresStatementSamples.executor.shutdown(wait=True)
-    PostgresStatementSamples.executor = ThreadPoolExecutor()
+    DBMAsyncJob.executor.shutdown(wait=True)
+    DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 def test_common_metrics(aggregator, integration_check, pg_instance):
@@ -270,6 +271,8 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
     dbm_instance['statement_samples'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['statement_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
 
     def _run_queries():
@@ -352,8 +355,11 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         conn.close()
 
 
-def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
-    pg_instance['dbm'] = True
+def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
+    # don't need samples for this test
+    dbm_instance['statement_samples'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['statement_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -366,7 +372,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_ins
             return normalized_query
         return query
 
-    check = integration_check(pg_instance)
+    check = integration_check(dbm_instance)
     check._connect()
     cursor = check.db.cursor()
 
@@ -376,10 +382,10 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_ins
         mock_agent.side_effect = obfuscate_sql
         cursor.execute(query, (['app1', 'app2'],))
         cursor.execute(query, (['app1', 'app2', 'app3'],))
-        check.check(pg_instance)
+        check.check(dbm_instance)
         cursor.execute(query, (['app1', 'app2'],))
         cursor.execute(query, (['app1', 'app2', 'app3'],))
-        check.check(pg_instance)
+        check.check(dbm_instance)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -403,8 +409,13 @@ def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}
+    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['statement_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     return pg_instance
+
+
+def _expected_dbm_instance_tags(dbm_instance):
+    return dbm_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
 
 
 @pytest.mark.parametrize(
@@ -596,17 +607,38 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         conn.close()
 
 
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+@pytest.mark.parametrize("statement_metrics_enabled", [True, False])
+def test_async_job_enabled(integration_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
+    dbm_instance['statement_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
+    dbm_instance['statement_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    check.cancel()
+    if statement_samples_enabled:
+        assert check.statement_samples._job_loop_future is not None
+        check.statement_samples._job_loop_future.result()
+    else:
+        assert check.statement_samples._job_loop_future is None
+    if statement_metrics_enabled:
+        assert check.statement_metrics._job_loop_future is not None
+        check.statement_metrics._job_loop_future.result()
+    else:
+        assert check.statement_metrics._job_loop_future is None
+
+
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
     # test the main collection loop rate limit
-    collections_per_second = 10
-    dbm_instance['statement_samples']['collections_per_second'] = collections_per_second
+    collection_interval = 0.1
+    dbm_instance['statement_samples']['collection_interval'] = collection_interval
     dbm_instance['statement_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
     sleep_time = 1
     time.sleep(sleep_time)
-    max_collections = int(collections_per_second * sleep_time) + 1
+    max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
@@ -620,8 +652,9 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     # (query, plan)
     dbm_instance['statement_samples']['samples_per_hour_per_query'] = 1
     # run it synchronously with a high rate limit specifically for the test
-    dbm_instance['statement_samples']['collections_per_second'] = 100
+    dbm_instance['statement_samples']['collection_interval'] = 1.0 / 100
     dbm_instance['statement_samples']['run_sync'] = True
+    dbm_instance['statement_metrics']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -660,29 +693,41 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-def test_statement_samples_collection_loop_inactive_stop(aggregator, integration_check, dbm_instance):
+def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['statement_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
     # make sure there were no unhandled exceptions
-    check.statement_samples._collection_loop_future.result()
-    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
+    check.statement_samples._job_loop_future.result()
+    check.statement_metrics._job_loop_future.result()
+    for job in ['statement-metrics', 'statement-samples']:
+        aggregator.assert_metric(
+            "dd.postgres.async_job.inactive_stop",
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
+        )
 
 
-def test_statement_samples_collection_loop_cancel(aggregator, integration_check, dbm_instance):
+def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['statement_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
     check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
-    check.statement_samples._collection_loop_future.result()
-    assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
+    check.statement_samples._job_loop_future.result()
+    check.statement_metrics._job_loop_future.result()
+    assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
+    assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check.statement_samples._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
-    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
+    assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    for job in ['statement-metrics', 'statement-samples']:
+        aggregator.assert_metric(
+            "dd.postgres.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+        )
 
 
 def test_statement_samples_invalid_activity_view(aggregator, integration_check, dbm_instance):
@@ -701,8 +746,12 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check._connect()
     check.check(dbm_instance)
     # make sure there were no unhandled exceptions
-    check.statement_samples._collection_loop_future.result()
-    aggregator.assert_metric_has_tag_prefix("dd.postgres.statement_samples.error", "error:database-")
+    check.statement_samples._job_loop_future.result()
+    aggregator.assert_metric(
+        "dd.postgres.async_job.error",
+        tags=_expected_dbm_instance_tags(dbm_instance)
+        + ['job:statement-samples', "error:database-<class 'psycopg2.errors.UndefinedTable'>"],
+    )
 
 
 @pytest.mark.parametrize(
@@ -711,7 +760,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
         "explained_statements_cache_maxsize",
         "explained_statements_per_hour_per_query",
         "seen_samples_cache_maxsize",
-        "collections_per_second",
+        "collection_interval",
     ],
 )
 def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
