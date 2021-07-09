@@ -56,6 +56,20 @@ def test_dbm_enabled_config(dbm_instance, dbm_enabled_key, dbm_enabled):
     assert mysql_check._config.dbm_enabled == dbm_enabled
 
 
+statement_samples_keys = ["query_samples", "statement_samples"]
+
+
+@pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, statement_samples_enabled):
+    # test to make sure we continue to support the old key
+    for k in statement_samples_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._statement_samples._enabled == statement_samples_enabled
+
+
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test

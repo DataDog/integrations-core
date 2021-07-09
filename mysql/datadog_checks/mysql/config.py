@@ -34,7 +34,7 @@ class MySQLConfig(object):
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
-        self.statement_samples_config = instance.get('query_samples', {}) or {}
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.min_collection_interval = instance.get('min_collection_interval', 15)
         self.configuration_checks()
