@@ -28,7 +28,7 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
-    DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
+    DDEV_E2E_AGENT: datadog/agent-dev:julien-lebot-fix-missing-libdatadogagenttwo-py2-win-servercore
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.repo, 'core')) }}:
       DDEV_SKIP_GENERIC_TAGS_CHECK: true
