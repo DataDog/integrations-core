@@ -362,7 +362,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if explain_err_code:
             collection_error = {'code': explain_err_code.value, 'message': err_msg if err_msg else None}
 
-        plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
+        plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
             # if we're using the orjson implementation then json.dumps returns bytes
@@ -370,7 +370,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
-            plan_cost = plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0
 
         statement_plan_sig = (query_signature, plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
@@ -390,7 +389,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "instance": row.get('datname', None),
                     "plan": {
                         "definition": obfuscated_plan,
-                        "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_error": collection_error,
                     },
