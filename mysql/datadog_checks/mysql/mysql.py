@@ -84,7 +84,7 @@ class MySql(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
-        self._statement_metrics = MySQLStatementMetrics(self, self._config)
+        self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
     def execute_query_raw(self, query):
@@ -128,8 +128,8 @@ class MySql(AgentCheck):
                 self._collect_system_metrics(self._config.host, db, tags)
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
-                    self._statement_metrics.collect_per_statement_metrics(db, dbm_tags)
-                    self._statement_samples.run_sampler(dbm_tags)
+                    self._statement_metrics.run_job_loop(dbm_tags)
+                    self._statement_samples.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -145,6 +145,7 @@ class MySql(AgentCheck):
 
     def cancel(self):
         self._statement_samples.cancel()
+        self._statement_metrics.cancel()
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()

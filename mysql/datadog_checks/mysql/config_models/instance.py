@@ -22,6 +22,13 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class Options(BaseModel):
     class Config:
         allow_mutation = False
@@ -37,6 +44,34 @@ class Options(BaseModel):
     schema_size_metrics: Optional[bool]
 
 
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class QuerySamples(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    collection_strategy_cache_maxsize: Optional[int]
+    collection_strategy_cache_ttl: Optional[int]
+    enabled: Optional[bool]
+    events_statements_enable_procedure: Optional[str]
+    events_statements_row_limit: Optional[int]
+    events_statements_table: Optional[str]
+    events_statements_temp_table_name: Optional[str]
+    explain_procedure: Optional[str]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
+    fully_qualified_explain_procedure: Optional[str]
+    samples_per_hour_per_query: Optional[int]
+    seen_samples_cache_maxsize: Optional[int]
+
+
 class Ssl(BaseModel):
     class Config:
         allow_mutation = False
@@ -44,26 +79,6 @@ class Ssl(BaseModel):
     ca: Optional[str]
     cert: Optional[str]
     key: Optional[str]
-
-
-class StatementSamples(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_strategy_cache_maxsize: Optional[int]
-    collection_strategy_cache_ttl: Optional[int]
-    collections_per_second: Optional[float]
-    enabled: Optional[bool]
-    events_statements_enable_procedure: Optional[str]
-    events_statements_row_limit: Optional[int]
-    events_statements_table: Optional[str]
-    events_statements_temp_table_name: Optional[str]
-    explain_procedure: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
-    fully_qualified_explain_procedure: Optional[str]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
 
 
 class InstanceConfig(BaseModel):
@@ -79,14 +94,16 @@ class InstanceConfig(BaseModel):
     host: Optional[str]
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     options: Optional[Options]
     password: Optional[str]
     port: Optional[float]
     queries: Optional[Sequence[Mapping[str, Any]]]
+    query_metrics: Optional[QueryMetrics]
+    query_samples: Optional[QuerySamples]
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
-    statement_samples: Optional[StatementSamples]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     username: Optional[str]

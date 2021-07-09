@@ -1,9 +1,5 @@
-import logging
-import os
 import re
-import threading
 import time
-from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum
 from typing import Dict, Optional, Tuple
 
@@ -17,20 +13,16 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import (
-    ConstantRateLimiter,
-    RateLimitingTTLCache,
-    default_json_event_encoding,
-    resolve_db_host,
-)
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
+
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -60,10 +52,6 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
 ).strip()
 
 EXPLAIN_VALIDATION_QUERY = "SELECT * FROM pg_stat_activity"
-
-MAX_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
-
-UNKNOWN_VALUE = -1
 
 
 class StatementTruncationState(Enum):
@@ -97,27 +85,38 @@ class DBExplainError(Enum):
     failed_function = 'failed_function'
 
     # a truncated statement can't be explained
-    statement_truncated = "statement_truncated"
+    query_truncated = "query_truncated"
 
 
-class PostgresStatementSamples(object):
+DEFAULT_COLLECTION_INTERVAL = 1
+
+
+class PostgresStatementSamples(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
     """
 
-    executor = ThreadPoolExecutor()
-
-    def __init__(self, check, config):
+    def __init__(self, check, config, shutdown_callback):
+        collection_interval = float(
+            config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        )
+        if collection_interval <= 0:
+            collection_interval = DEFAULT_COLLECTION_INTERVAL
+        super(PostgresStatementSamples, self).__init__(
+            check,
+            rate_limit=1 / collection_interval,
+            run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
+            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            dbms="postgres",
+            min_collection_interval=config.min_collection_interval,
+            config_host=config.host,
+            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            job_name="query-samples",
+            shutdown_callback=shutdown_callback,
+        )
         self._check = check
-        # map[dbname -> psycopg connection]
-        self._db_pool = {}
         self._config = config
-        self._log = get_check_logger()
         self._activity_last_query_start = None
-        self._last_check_run = 0
-        self._collection_loop_future = None
-        self._cancel_event = threading.Event()
-        self._tags = None
         self._tags_no_db = None
         self._db_hostname = resolve_db_host(self._config.host)
         self._obfuscate_options = json.dumps(
@@ -130,31 +129,26 @@ class PostgresStatementSamples(object):
         self._rate_limiter = ConstantRateLimiter(
             float(self._config.statement_samples_config.get('collections_per_second', 1))
         )
-        self._explain_function = self._config.statement_samples_config.get(
-            'explain_function', 'datadog.explain_statement'
-        )
+        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
 
         self._collection_strategy_cache = TTLCache(
-            maxsize=self._config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
-            ttl=self._config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
+            maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
+            ttl=config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
         )
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=int(self._config.statement_samples_config.get('explained_statements_cache_maxsize', 5000)),
-            ttl=60 * 60 / int(self._config.statement_samples_config.get('explained_statements_per_hour_per_query', 60)),
+            maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
+            ttl=60 * 60 / int(config.statement_samples_config.get('explained_queries_per_hour_per_query', 60)),
         )
 
         # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
-            maxsize=int(self._config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
-            ttl=60 * 60 / int(self._config.statement_samples_config.get('samples_per_hour_per_query', 15)),
+            maxsize=int(config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
+            ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
-
-    def cancel(self):
-        self._cancel_event.set()
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -166,30 +160,6 @@ class PostgresStatementSamples(object):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
-
-    def run_sampler(self, tags):
-        """
-        start the sampler thread if not already running
-        :param tags:
-        :return:
-        """
-        if not self._enabled:
-            self._log.debug("Statement sampler not enabled")
-            return
-
-        # since statement samples are collected from all databases on this host we need to tag telemetry with the
-        # right "db" tag which may be different from the initial database that the check is configured to connect to
-        self._tags = tags
-        self._tags_str = ','.join(self._tags)
-        self._tags_no_db = [t for t in tags if not t.startswith('db:')]
-        self._last_check_run = time.time()
-        if self._run_sync or is_affirmative(os.environ.get('DBM_STATEMENT_SAMPLER_RUN_SYNC', "false")):
-            self._log.debug("Running statement sampler synchronously")
-            self._collect_statement_samples()
-        elif self._collection_loop_future is None or not self._collection_loop_future.running():
-            self._collection_loop_future = PostgresStatementSamples.executor.submit(self._collection_loop)
-        else:
-            self._log.debug("Statement sampler collection loop already running")
 
     def _get_new_pg_stat_activity(self):
         start_time = time.time()
@@ -204,7 +174,7 @@ class PostgresStatementSamples(object):
         if self._activity_last_query_start:
             query = query + " AND query_start > %s"
             params = params + (self._activity_last_query_start,)
-        with self._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -241,70 +211,11 @@ class PostgresStatementSamples(object):
                 tags=self._tags + ["error:insufficient-privilege"],
             )
 
-    def _get_db(self, dbname):
-        # while psycopg2 is threadsafe (meaning in theory we should be able to use the same connection as the parent
-        # check), the parent doesn't use autocommit and instead calls commit() and rollback() explicitly, meaning
-        # it can cause strange clashing issues if we're trying to use the same connection from another thread here.
-        # since the statement sampler runs continuously it's best we have our own connection here with autocommit
-        # enabled
-        db = self._db_pool.get(dbname)
-        if not db or db.closed:
-            self._log.debug("initializing connection to dbname=%s", dbname)
-            db = self._check._new_connection(dbname)
-            db.set_session(autocommit=True)
-            self._db_pool[dbname] = db
-            # Reload the track_activity_query_size setting on a new connection to the main db
-            if self._config.dbname == dbname:
-                self._load_query_max_text_size(db)
-        if db.status != psycopg2.extensions.STATUS_READY:
-            # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-            db.rollback()
-        return db
-
-    def _collection_loop(self):
-        try:
-            self._log.info("Starting statement sampler collection loop")
-            while True:
-                if self._cancel_event.isSet():
-                    self._log.info("Collection loop cancelled")
-                    self._check.count("dd.postgres.statement_samples.collection_loop_cancel", 1, tags=self._tags)
-                    break
-                if time.time() - self._last_check_run > self._config.min_collection_interval * 2:
-                    self._log.info("Sampler collection loop stopping due to check inactivity")
-                    self._check.count("dd.postgres.statement_samples.collection_loop_inactive_stop", 1, tags=self._tags)
-                    break
-                self._collect_statement_samples()
-        except psycopg2.errors.DatabaseError as e:
-            self._log.warning(
-                "Statement sampler database error: %s", e, exc_info=self._log.getEffectiveLevel() == logging.DEBUG
-            )
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._tags + ["error:database-{}".format(type(e))],
-            )
-        except Exception as e:
-            self._log.exception("Statement sampler collection loop crash")
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._tags + ["error:collection-loop-crash-{}".format(type(e))],
-            )
-        finally:
-            self._log.info("Shutting down statement sampler collection loop")
-            self._close_db_pool()
-
-    def _close_db_pool(self):
-        for dbname, db in self._db_pool.items():
-            if db and not db.closed:
-                try:
-                    db.close()
-                except Exception:
-                    self._log.exception("failed to close DB connection for db=%s", dbname)
-            self._db_pool[dbname] = None
+    def run_job(self):
+        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        self._collect_statement_samples()
 
     def _collect_statement_samples(self):
-        self._rate_limiter.sleep()
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
         rows = self._filter_valid_statement_rows(rows)
@@ -341,7 +252,7 @@ class PostgresStatementSamples(object):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self._get_db(dbname)
+            self._check._get_db(dbname)
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -380,7 +291,7 @@ class PostgresStatementSamples(object):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._get_db(dbname).cursor() as cursor:
+        with self._check._get_db(dbname).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
             cursor.execute(
                 """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
@@ -395,21 +306,23 @@ class PostgresStatementSamples(object):
                 return None
             return result[0][0]
 
-    def _run_explain_safe(self, max_query_size, dbname, statement, obfuscated_statement):
-        # type: (int, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+    def _run_explain_safe(self, dbname, statement, obfuscated_statement):
+        # type: (str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        if self._get_truncation_state(max_query_size, statement) == StatementTruncationState.truncated:
+        track_activity_query_size = self._check._db_configured_track_activity_query_size
+
+        if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.statement_truncated)),
+                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated)),
             )
             return (
                 None,
-                DBExplainError.statement_truncated,
-                "track_activity_query_size={}".format(max_query_size),
+                DBExplainError.query_truncated,
+                "track_activity_query_size={}".format(track_activity_query_size),
             )
 
         db_explain_error, err = self._get_db_explain_setup_state_cached(dbname)
@@ -454,13 +367,13 @@ class PostgresStatementSamples(object):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
-            self._max_query_size, row['datname'], row['query'], obfuscated_statement
+            row['datname'], row['query'], obfuscated_statement
         )
         collection_error = None
         if explain_err_code:
             collection_error = {'code': explain_err_code.value, 'message': err_msg if err_msg else None}
 
-        plan, normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None, None
+        plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
             # if we're using the orjson implementation then json.dumps returns bytes
@@ -468,7 +381,6 @@ class PostgresStatementSamples(object):
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
-            plan_cost = plan_dict.get('Plan', {}).get('Total Cost', 0.0) or 0.0
 
         statement_plan_sig = (query_signature, plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
@@ -488,7 +400,6 @@ class PostgresStatementSamples(object):
                     "instance": row.get('datname', None),
                     "plan": {
                         "definition": obfuscated_plan,
-                        "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_error": collection_error,
                     },
@@ -497,7 +408,9 @@ class PostgresStatementSamples(object):
                     "application": row.get('application_name', None),
                     "user": row['usename'],
                     "statement": obfuscated_statement,
-                    "statement_truncated": self._get_truncation_state(self._max_query_size, row['query']).value,
+                    "query_truncated": self._get_truncation_state(
+                        self._check._db_configured_track_activity_query_size, row['query']
+                    ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
             }
@@ -530,26 +443,11 @@ class PostgresStatementSamples(object):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"],
                 )
 
-    def _load_query_max_text_size(self, db):
-        try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                self._log.debug("Running query [%s]", MAX_ACTIVITY_QUERY_SIZE_QUERY)
-                cursor.execute(MAX_ACTIVITY_QUERY_SIZE_QUERY)
-                row = cursor.fetchone()
-                self._max_query_size = int(row['setting'])
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
-            self._log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._tags + ["error:load-track-activity-query-size"],
-            )
-
     @staticmethod
-    def _get_truncation_state(max_query_size, statement):
+    def _get_truncation_state(track_activity_query_size, statement):
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
-        if max_query_size == UNKNOWN_VALUE:
+        if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
             return StatementTruncationState.unknown
 
         # Compare the query length (in bytes to match Postgres) to the configured max query size to determine
@@ -559,5 +457,5 @@ class PostgresStatementSamples(object):
         # happens to be greater or equal to the threshold below but isn't actually truncated, this
         # would falsely report it as a truncated statement
         statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
-        truncated = len(statement_bytes) >= max_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
+        truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
