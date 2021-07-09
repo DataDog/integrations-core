@@ -1,8 +1,8 @@
 import click
 
-from ......fs import dir_exists, file_exists
-from ....console import CONTEXT_SETTINGS, abort, echo_failure
-from .validate_profile import validate_profile
+from .....fs import dir_exists, file_exists
+from ...console import CONTEXT_SETTINGS, abort, echo_failure
+from . import validators 
 
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
@@ -18,7 +18,7 @@ def click_options(file, directory, verbose):
         if not dir_exists(directory):
             echo_failure("Directory not found, or could not be read: " + directory)
             abort()
-    validate_profile(file, directory, verbose)
+    validators.validate_profile(file, directory, verbose)
 
 
 # only click-related stuff in a separate file
