@@ -48,6 +48,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_options(field, value):
     return get_default_field_value(field, value)
 

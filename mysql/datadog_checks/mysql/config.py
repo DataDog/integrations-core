@@ -37,6 +37,7 @@ class MySQLConfig(object):
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.min_collection_interval = instance.get('min_collection_interval', 15)
+        self.obfuscator_options = instance.get('obfuscator_options', {}) or {}
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

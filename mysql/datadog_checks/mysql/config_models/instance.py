@@ -22,6 +22,13 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
 class Options(BaseModel):
     class Config:
         allow_mutation = False
@@ -87,6 +94,7 @@ class InstanceConfig(BaseModel):
     host: Optional[str]
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     options: Optional[Options]
     password: Optional[str]
     port: Optional[float]
