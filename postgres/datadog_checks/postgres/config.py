@@ -79,7 +79,7 @@ class PostgresConfig:
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
-        self.statement_samples_config = instance.get('query_samples', {}) or {}
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
 
     def _build_tags(self, custom_tags):

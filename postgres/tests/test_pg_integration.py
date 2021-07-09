@@ -264,6 +264,22 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     assert check._config.dbm_enabled == dbm_enabled
 
 
+statement_samples_keys = ["query_samples", "statement_samples"]
+
+
+@pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+def test_statement_samples_enabled_config(
+    integration_check, dbm_instance, statement_samples_key, statement_samples_enabled
+):
+    # test to make sure we continue to support the old key
+    for k in statement_samples_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
+    check = integration_check(dbm_instance)
+    assert check.statement_samples._enabled == statement_samples_enabled
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
