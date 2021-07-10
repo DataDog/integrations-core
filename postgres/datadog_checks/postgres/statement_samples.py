@@ -118,7 +118,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._config = config
         self._activity_last_query_start = None
         self._tags_no_db = None
+        # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._obfuscate_options = json.dumps(
+            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        )
 
         self._collection_strategy_cache = TTLCache(
             maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
@@ -336,7 +340,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_plan_for_statement(self, row):
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(

@@ -383,7 +383,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     query_signature = 'a478c1e7aaac3ff2'
     normalized_query = 'select * from pg_stat_activity where application_name = ANY(array [ ? ])'
 
-    def obfuscate_sql(query):
+    def obfuscate_sql(query, options=None):
         if query.startswith('select * from pg_stat_activity where application_name'):
             return normalized_query
         return query

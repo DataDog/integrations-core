@@ -108,6 +108,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        self._obfuscate_options = json.dumps(
+            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        )
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.full_statement_text_cache_max_size,
@@ -251,7 +254,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)

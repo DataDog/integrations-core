@@ -258,6 +258,17 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+    ## Configure how the SQL obfuscator behaves.
+    #
+    obfuscator_options:
+
+        ## @param quantize_sql_tables - boolean - optional - default: false
+        ## Set to `true` to perform quantization on your SQL tables.
+        ##
+        ## Note that this option only applies when `dbm` is enabled.
+        #
+        # quantize_sql_tables: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
