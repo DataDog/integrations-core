@@ -76,7 +76,7 @@ datadog-kubelet==7.0.0
 datadog-kubernetes-state==5.7.1
 datadog-kyototycoon==1.12.1
 datadog-lighttpd==1.13.2
-datadog-linkerd==2.9.0
+datadog-linkerd==2.9.1
 datadog-linux-proc-extras==2.0.1; sys_platform == 'linux2'
 datadog-mapr==1.4.1; sys_platform == 'linux2'
 datadog-mapreduce==1.14.0
