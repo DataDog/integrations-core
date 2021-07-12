@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 8.0.1 / 2021-07-12
+
+* [Fixed] fix broken error handling in reading of pg_settings. See [#9672](https://github.com/DataDog/integrations-core/pull/9672).
+
 ## 8.0.0 / 2021-07-12
 
 * [Added] Add DBM SQL obfuscator options. See [#9640](https://github.com/DataDog/integrations-core/pull/9640).
