@@ -134,7 +134,7 @@ datadog-tls==2.5.0
 datadog-tokumx==2.3.3
 datadog-tomcat==1.8.0
 datadog-twemproxy==1.10.0
-datadog-twistlock==1.11.0
+datadog-twistlock==1.12.0
 datadog-varnish==1.10.0
 datadog-vault==2.13.0
 datadog-vertica==2.1.1
