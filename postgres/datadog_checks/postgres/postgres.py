@@ -311,10 +311,10 @@ class PostgreSql(AgentCheck):
                 self._db_configured_track_activity_query_size = int(row['setting'])
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
             self.log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
-            self._check.count(
-                "dd.postgres.statement_samples.error",
+            self.count(
+                "dd.postgres.error",
                 1,
-                tags=self._tags + ["error:load-track-activity-query-size"],
+                tags=self._config.tags + ["error:load-track-activity-query-size"],
             )
 
     def _get_db(self, dbname):
