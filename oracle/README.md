@@ -68,18 +68,18 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-##### JDBC Driver
+##### JDBC driver
 
 *NOTE*: This method only works on Linux.
 
-Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver.
+Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC driver.
 
 Once it is installed, complete the following steps: 
 
 1. [Download the JDBC Driver][2] JAR file.
 2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
-#### Datadog User creation
+#### Datadog user creation
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Stand Alone" xxx -->
@@ -230,9 +230,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 [Run the Agent's status subcommand][10] and look for `oracle` under the Checks section.
 
-
-
-## Custom Query
+## Custom query
 
 Providing custom queries is also supported. Each query must have three parameters:
 
@@ -350,8 +348,7 @@ The Oracle Database check does not include any events.
 
 ### Service Checks
 
-**oracle.can_connect**:<br>
-Verifies the database is available and accepting connections.
+See [service_checks.json][18] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -445,3 +442,4 @@ Need help? Contact [Datadog support][12].
 [15]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [16]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
 [17]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[18]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json

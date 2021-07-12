@@ -1,5 +1,10 @@
 # CHANGELOG - mongo
 
+## 2.5.0 / 2021-07-12
+
+* [Added] Bump pymongo to 3.8. See [#9557](https://github.com/DataDog/integrations-core/pull/9557).
+* [Fixed] Update description of the `hosts` config parameter. See [#9542](https://github.com/DataDog/integrations-core/pull/9542).
+
 ## 2.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Fixed] Fix authSource config option.. See [#9139](https://github.com/DataDog/integrations-core/pull/9139).

@@ -181,25 +181,14 @@ def write_option(option, writer, indent='', start_list=False):
 
         if 'options' in option:
             multiple = option['multiple']
-            options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
-            next_indent = indent + '    '
-            writer.write(indent, option_name, ':', '\n')
-            if options:
-                for i, opt in enumerate(options):
-                    if opt['hidden']:
-                        continue
+            multiple_instances_defined = option.get('multiple_instances_defined')
 
-                    writer.write('\n')
-                    if i == 0 and multiple:
-                        if option_enabled(opt):
-                            write_option(opt, writer, next_indent, start_list=True)
-                        else:
-                            writer.write(next_indent[:-2], '-\n')
-                            write_option(opt, writer, next_indent)
-                    else:
-                        write_option(opt, writer, next_indent)
-            elif multiple:
-                writer.write('\n', next_indent[:-2], '- {}\n')
+            writer.write(indent, option_name, ':', '\n')
+            if multiple and multiple_instances_defined:
+                for instance in option['options']:
+                    write_sub_option(instance, writer, indent, multiple, include_top_description=True)
+            else:
+                write_sub_option(option, writer, indent, multiple)
 
         # For sections that prefer to document everything in the description, like `logs`
         else:
@@ -215,6 +204,30 @@ def write_option(option, writer, indent='', start_list=False):
                     writer.write(example_indent)
 
                 writer.write(line, '\n')
+
+
+def write_sub_option(option, writer, indent, multiple, include_top_description=False):
+    options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
+    next_indent = indent + '    '
+
+    if options:
+        for i, opt in enumerate(options):
+            if opt['hidden']:
+                continue
+
+            writer.write('\n')
+            if i == 0 and multiple:
+                if include_top_description and option.get('description'):
+                    write_description(option, writer, next_indent, 'option')
+                if option_enabled(opt):
+                    write_option(opt, writer, next_indent, start_list=True)
+                else:
+                    writer.write(next_indent[:-2], '-\n')
+                    write_option(opt, writer, next_indent)
+            else:
+                write_option(opt, writer, next_indent)
+    elif multiple:
+        writer.write('\n', next_indent[:-2], '- {}\n')
 
 
 class ExampleConsumer(object):

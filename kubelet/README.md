@@ -50,12 +50,20 @@ The check will still be able to collect:
 - pod limits and requests
 - node capacity metrics
 
+## Data Collected
+
+### Service Checks
+
+See [service_checks.json][6] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
 [5]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/kubelet/assets/service_checks.json

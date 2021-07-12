@@ -75,27 +75,7 @@ The Process Check does not include any events.
 
 ### Service Checks
 
-**process.up**:<br>
-The Agent submits this service check for each instance in `process.yaml`, tagging each with `process:<name>`.
-
-For an instance with no `thresholds` specified, the service check has a status of either CRITICAL (zero processes running) or OK (at least one process running).
-
-For an instance with `thresholds` specified, consider this example:
-
-```yaml
-instances:
-  - name: my_worker_process
-    search_string: ["/usr/local/bin/worker"]
-    thresholds:
-      critical: [1, 7]
-      warning: [3, 5]
-```
-
-The Agent submits a `process.up` tagged `process:my_worker_process` whose status is:
-
-- `CRITICAL` when there are less than 1 or more than 7 worker processes
-- `WARNING` when there are 1, 2, 6, or 7 worker processes
-- `OK` when there are 3, 4, or 5 worker processes
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -116,3 +96,4 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [10]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/process-check-monitoring
+[13]: https://github.com/DataDog/integrations-core/blob/master/process/assets/service_checks.json

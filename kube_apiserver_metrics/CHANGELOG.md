@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.10.0 / 2021-07-12
+
+* [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9577](https://github.com/DataDog/integrations-core/pull/9577).
+
 ## 1.9.0 / 2021-05-28
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).

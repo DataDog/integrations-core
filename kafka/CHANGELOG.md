@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.8.0 / 2021-07-12
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
 ## 2.7.0 / 2021-05-28
 
 * [Added] Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).

@@ -35,10 +35,10 @@ instances:
     #
     service_name: <SERVICE_NAME>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## The username for the Datadog user account.
     #
-    user: <USER>
+    username: <USERNAME>
 
     ## @param password - string - required
     ## The password for the Datadog user account.

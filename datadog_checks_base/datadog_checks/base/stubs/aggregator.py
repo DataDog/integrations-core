@@ -43,9 +43,12 @@ def check_tag_names(metric, tags):
         'cluster_name',
         'clustername',
         'cluster',
+        'env',
         'host_name',
         'hostname',
         'host',
+        'service',
+        'version',
     ]
 
     if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):

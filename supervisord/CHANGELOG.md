@@ -1,5 +1,10 @@
 # CHANGELOG - supervisord
 
+## 1.9.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8991](https://github.com/DataDog/integrations-core/pull/8991).
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+
 ## 1.8.0 / 2021-05-28
 
 * [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
