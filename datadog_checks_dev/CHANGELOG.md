@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.2.0 / 2021-07-12
+
+* [Added] Support multiple instances in config specs. See [#9615](https://github.com/DataDog/integrations-core/pull/9615).
+* [Fixed] Fix `meta dash export`. See [#9652](https://github.com/DataDog/integrations-core/pull/9652).
+
 ## 12.1.0 / 2021-06-29
 
 * [Added] log collection category validation. See [#9514](https://github.com/DataDog/integrations-core/pull/9514).

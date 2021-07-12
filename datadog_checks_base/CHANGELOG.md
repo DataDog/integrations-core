@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 20.2.0 / 2021-07-12
+
+* [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).
+
 ## 20.1.0 / 2021-07-08
 
 * [Added] Add `db.utils.DBMAsyncJob`. See [#9656](https://github.com/DataDog/integrations-core/pull/9656).

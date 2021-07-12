@@ -1,5 +1,9 @@
 # CHANGELOG - SonarQube
 
+## 1.3.0 / 2021-07-12
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
 ## 1.2.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#8985](https://github.com/DataDog/integrations-core/pull/8985).

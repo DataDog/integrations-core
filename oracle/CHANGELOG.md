@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 3.3.1 / 2021-07-12
+
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* [Fixed] Dont use connection string for client. See [#9219](https://github.com/DataDog/integrations-core/pull/9219).
+
 ## 3.3.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
