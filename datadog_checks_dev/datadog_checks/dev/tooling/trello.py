@@ -53,7 +53,7 @@ class TrelloClient:
             'team/agent-apm': 'agent-apm',
             'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
-            'team/networks': 'networks',
+            'team/networks': 'agent-network',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
             'team/container-app': 'container-app',
