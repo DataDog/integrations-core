@@ -69,3 +69,10 @@ instances:
     ##
     #
     # join_standard_tags: false
+
+    ## @param additional_metrics - list - optional - default: []
+    ## Additional metrics that should be collected
+    #
+    # additional_metrics:
+    # - metric_name_a
+    # - metric_name_b: name_alias_b

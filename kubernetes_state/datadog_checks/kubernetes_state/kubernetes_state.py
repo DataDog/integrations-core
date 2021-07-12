@@ -431,6 +431,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
             self.log.warning("Option labels_mapper should be a dictionary for %s", endpoint)
 
+        ksm_instance['metrics'].extend(ksm_instance.get('additional_metrics', []))
+
         return ksm_instance
 
     def _condition_to_service_check(self, sample, sc_name, mapping, tags=None):
