@@ -431,7 +431,11 @@ def dbm_instance(pg_instance):
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+    return dbm_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:{}'.format(dbm_instance['dbname']),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -642,6 +646,22 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
         check.statement_metrics._job_loop_future.result()
     else:
         assert check.statement_metrics._job_loop_future is None
+
+
+@pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
+def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, db_user):
+    dbm_instance["username"] = db_user
+    dbm_instance["dbname"] = "postgres"
+    check = integration_check(dbm_instance)
+    check._connect()
+    check._load_query_max_text_size(check.db)
+    if db_user == 'datadog_no_catalog':
+        aggregator.assert_metric(
+            "dd.postgres.error",
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['error:load-track-activity-query-size'],
+        )
+    else:
+        assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
