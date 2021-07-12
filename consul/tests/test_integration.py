@@ -11,7 +11,7 @@ from datadog_checks.consul import ConsulCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
-from .common import CONSUL_VERSION
+from .common import CONSUL_VERSION, PROMETHEUS_HIST_METRICS_1_9, PROMETHEUS_METRICS_1_9
 
 METRICS = [
     'consul.catalog.nodes_up',
@@ -103,8 +103,8 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
         caplog.at_level(logging.WARNING)
         consul_check.check(instance_prometheus)
         assert (
-                "does not support the prometheus endpoint. "
-                "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning." in caplog.text
+            "does not support the prometheus endpoint. "
+            "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning." in caplog.text
         )
         return
 
@@ -118,6 +118,10 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
     for metric in common.PROMETHEUS_METRICS:
         aggregator.assert_metric(metric, tags=common_tags, count=1)
 
+    if greater_than_1_6:
+        for metric in PROMETHEUS_METRICS_1_9:
+            aggregator.assert_metric(metric, tags=common_tags, count=1)
+
     aggregator.assert_metric('consul.memberlist.msg.suspect', tags=common_tags, at_least=0)
     aggregator.assert_metric('consul.peers', value=3, count=1)
     if greater_than_1_6:
@@ -126,16 +130,13 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
     for hist_suffix in ['count', 'sum', 'quantile']:
         aggregator.assert_metric_has_tag('consul.http.request.{}'.format(hist_suffix), 'method:GET', at_least=0)
         for tag in common_tags:
+            aggregator.assert_metric_has_tag('consul.raft.leader.lastContact.' + hist_suffix, tag, at_least=0)
             for metric in common.PROMETHEUS_HIST_METRICS:
                 aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
-            aggregator.assert_metric_has_tag('consul.raft.leader.lastContact.' + hist_suffix, tag, at_least=0)
             if greater_than_1_6:
-                aggregator.assert_metric_has_tag(
-                    'consul.raft.replication.appendEntries.rpc.' + hist_suffix, tag, at_least=1
-                )
-                aggregator.assert_metric_has_tag(
-                    'consul.raft.replication.heartbeat.' + hist_suffix, tag, at_least=1
-                )
+                for metric in PROMETHEUS_HIST_METRICS_1_9:
+                    aggregator.assert_metric_has_tag(metric + hist_suffix, tag, at_least=1)
+                aggregator.assert_metric_has_tag('consul.raft.replication.heartbeat.' + hist_suffix, tag, at_least=1)
 
     # Some of the metrics documented in the metadata.csv were sent through DogStatsD as `timer` as well.
     # We end up with some of the prometheus metrics having a different in-app type.
