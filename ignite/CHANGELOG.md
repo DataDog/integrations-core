@@ -1,5 +1,9 @@
 # CHANGELOG - ignite
 
+## 1.4.0 / 2021-07-12
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
 ## 1.3.2 / 2021-05-28
 
 * [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
