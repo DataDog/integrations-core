@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 8.0.2 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9677](https://github.com/DataDog/integrations-core/pull/9677).
+
 ## 8.0.1 / 2021-07-12
 
 * [Fixed] fix broken error handling in reading of pg_settings. See [#9672](https://github.com/DataDog/integrations-core/pull/9672).
