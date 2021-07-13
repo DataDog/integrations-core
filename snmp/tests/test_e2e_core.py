@@ -36,6 +36,7 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
 
 
 def assert_apc_ups_metrics(dd_agent_check, config):
+    instance = config['instances'][0]
     aggregator = dd_agent_check(config, rate=True)
 
     profile_tags = [
