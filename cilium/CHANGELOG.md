@@ -1,5 +1,9 @@
 # CHANGELOG - Cilium
 
+## 1.7.1 / 2021-07-13
+
+* [Fixed] Revert cilium AD change. See [#9683](https://github.com/DataDog/integrations-core/pull/9683).
+
 ## 1.7.0 / 2021-07-12
 
 * [Added] Update container identifier. See [#9512](https://github.com/DataDog/integrations-core/pull/9512).
