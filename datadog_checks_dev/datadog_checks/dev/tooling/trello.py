@@ -33,6 +33,7 @@ class TrelloClient:
             'Tools and Libraries': '5ef373fb33b7b805120d5011',
             'Runtime-Security': '5f3148683b7428276f0f2133',
             'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
+            'Database Monitoring': '60ec3d30532b9072b44d3900',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
@@ -47,6 +48,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'Tools and Libraries',
             'team/agent-security': 'Runtime-Security',
             'team/infra-integrations': 'Infra-Integrations',
+            'team/database-monitoring': 'Database Monitoring',
         }
 
         self.label_github_team_map = {
@@ -62,6 +64,7 @@ class TrelloClient:
             'team/intg-tools-libs': 'integrations-tools-and-libraries',
             'team/agent-security': 'agent-security',
             'team/infra-integrations': 'infrastructure-integrations',
+            'team/database-monitoring': 'database-monitoring',
         }
 
         self.label_map = {
@@ -77,6 +80,7 @@ class TrelloClient:
             'Tools and Libraries': '5ab12740841642c2a8829053',
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
             'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
+            'Database Monitoring': '60ec4973bd1b8652312af938',
         }
         self.progress_columns = {
             '600ec7ad2b78475e13c04cfc': 'In Progress',  # INPROGRESS
