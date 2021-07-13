@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 5.0.1 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9676](https://github.com/DataDog/integrations-core/pull/9676).
+
 ## 5.0.0 / 2021-07-12
 
 * [Added] Add DBM SQL obfuscator options. See [#9639](https://github.com/DataDog/integrations-core/pull/9639).
