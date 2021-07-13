@@ -363,9 +363,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
             row['datname'], row['query'], obfuscated_statement
         )
-        collection_error = None
+        collection_errors = None
         if explain_err_code:
-            collection_error = {'code': explain_err_code.value, 'message': err_msg if err_msg else None}
+            collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
 
         plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
         if plan_dict:
@@ -395,7 +395,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "plan": {
                         "definition": obfuscated_plan,
                         "signature": plan_signature,
-                        "collection_error": collection_error,
+                        "collection_errors": collection_errors,
                     },
                     "query_signature": query_signature,
                     "resource_hash": query_signature,
