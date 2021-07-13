@@ -12,6 +12,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
@@ -288,8 +289,8 @@ class MySQLStatementSamples(DBMAsyncJob):
             'STATEMENT': self._run_explain,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
-        self._obfuscate_options = json.dumps(
-            {'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)}
+        self._obfuscate_options = to_native_string(
+            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
         )
         self._init_caches()
 
