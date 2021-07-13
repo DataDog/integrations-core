@@ -159,6 +159,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
 
+    def _payload_pg_version(self):
+        version = self._check.version
+        if not version:
+            return ""
+        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
+
     def collect_per_statement_metrics(self):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
@@ -178,9 +184,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'min_collection_interval': self._config.min_collection_interval,
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
-                'postgres_version': 'v{major}.{minor}.{patch}'.format(
-                    major=self._check._version.major, minor=self._check._version.minor, patch=self._check._version.patch
-                ),
+                'postgres_version': self._payload_pg_version(),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
