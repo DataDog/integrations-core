@@ -372,6 +372,7 @@ class AggregatorStub(object):
             msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
+        self.assert_no_duplicate_metrics()
 
     def assert_metrics_using_metadata(
         self, metadata_metrics, check_metric_type=True, check_submission_type=False, exclude=None
