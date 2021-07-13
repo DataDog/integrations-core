@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 8.0.3 / 2021-07-13
+
+* [Fixed] fix None-version crash for DBM statement metrics. See [#9692](https://github.com/DataDog/integrations-core/pull/9692).
+
 ## 8.0.2 / 2021-07-13
 
 * [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9677](https://github.com/DataDog/integrations-core/pull/9677).
