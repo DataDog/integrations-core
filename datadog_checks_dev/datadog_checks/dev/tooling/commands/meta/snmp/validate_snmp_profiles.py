@@ -9,7 +9,7 @@ from . import validators
 @click.option('-f', '--file', help="Path to a profile file to validate")
 @click.option('-d', '--directory', help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
-def click_options(file, directory, verbose):
+def validate_profile(file, directory, verbose):
     if file:
         if not file_exists(file):
             echo_failure("Profile file not found, or could not be read: " + file)
