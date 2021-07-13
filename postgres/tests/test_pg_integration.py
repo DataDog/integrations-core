@@ -6,7 +6,6 @@ import socket
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
-from unittest.mock import PropertyMock
 
 import mock
 import psycopg2
@@ -296,7 +295,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
         assert check.statement_metrics._payload_pg_version() == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
