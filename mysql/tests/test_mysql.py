@@ -346,7 +346,7 @@ def test_statement_metrics(aggregator, dbm_instance, query, default_schema, data
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['min_collection_interval'] == 15
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
