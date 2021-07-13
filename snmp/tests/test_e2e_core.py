@@ -18,7 +18,24 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
         }
     )
     config['init_config']['loader'] = 'core'
+    assert_apc_ups_metrics(dd_agent_check, config)
 
+
+def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups',
+            'oid_batch_size': 1,
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    assert_apc_ups_metrics(dd_agent_check, config)
+
+
+def assert_apc_ups_metrics(dd_agent_check, config):
     aggregator = dd_agent_check(config, rate=True)
 
     profile_tags = [
