@@ -9,7 +9,7 @@ from .translate_profile import translate_profile
 from .validate_mib_filenames import validate_mib_filenames
 from .validate_snmp_profiles import validate_profile
 
-ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, click_options]
+ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, validate_profile]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='SNMP utilities')
