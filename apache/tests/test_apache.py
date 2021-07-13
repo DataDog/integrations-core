@@ -276,3 +276,4 @@ def test_scoreboard_values(aggregator, check, scoreboard, expected_metrics, data
 
     metadata_metrics = get_metadata_metrics()
     aggregator.assert_metrics_using_metadata({k: v for k, v in metadata_metrics if k in expected_metrics})
+    aggregator.assert_no_duplicate_metrics()
