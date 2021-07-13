@@ -19,8 +19,3 @@ def click_options(file, directory, verbose):
             echo_failure("Directory not found, or could not be read: " + directory)
             abort()
     validators.validate_profile(file, directory, verbose)
-
-
-# only click-related stuff in a separate file
-# different click options for each validator - jsonschema, duplicates
-# tests - unit tests independent of click
