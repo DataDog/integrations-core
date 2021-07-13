@@ -7,7 +7,6 @@
 Get metrics from Btrfs in real time to:
 
 - Visualize and monitor Btrfs states.
-- Be notified about Btrfs failovers and events.
 
 ## Setup
 
@@ -17,13 +16,13 @@ The Btrfs check is included in the [Datadog Agent][3] package, so you don't need
 
 ### Configuration
 
-1. Configure the Agent according to your needs, edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample btrfs.d/conf.yaml][5] for all available configuration options.
+1. Edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample btrfs.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][6]
+2. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `btrfs` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `btrfs` under the Checks section.
 
 ## Data Collected
 
