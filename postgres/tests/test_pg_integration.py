@@ -280,6 +280,29 @@ def test_statement_samples_enabled_config(
     assert check.statement_samples._enabled == statement_samples_enabled
 
 
+@pytest.mark.parametrize(
+    "version,expected_payload_version",
+    [
+        (VersionInfo(*[9, 6, 0]), "v9.6.0"),
+        (None, ""),
+    ],
+)
+def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
+    if version:
+        check = integration_check(dbm_instance)
+        check._version = version
+        check._connect()
+        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+    else:
+        with mock.patch(
+            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+        ) as patched_version:
+            patched_version.return_value = None
+            check = integration_check(dbm_instance)
+            check._connect()
+            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
@@ -323,6 +346,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
+    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['min_collection_interval'] == dbm_instance['min_collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
