@@ -22,6 +22,8 @@ class TCPCheck(AgentCheck):
         self.timeout = float(instance.get('timeout', 10))
         self.collect_response_time = instance.get('collect_response_time', False)
         self.host = instance.get('host', None)
+        self.ip_cache_duration = int(instance.get('ip_cache_duration', 0)) or None
+        self.last_ip_cache_ts = 0
         self.socket_type = None
         self._addr = None
 
@@ -73,6 +75,11 @@ class TCPCheck(AgentCheck):
     def resolve_ip(self):
         self._addr = socket.gethostbyname(self.host)
         self.log.debug("%s resolved to %s", self.host, self._addr)
+
+    def should_resolve_ip(self):
+        if self.ip_cache_duration is None:
+            return False
+        return get_precise_time() - self.last_ip_cache_ts > self.ip_cache_duration
 
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
