@@ -57,7 +57,7 @@ instances:
 
     ## @param cluster_name - string - optional
     ## This is used as the value of the `mesos_cluster` tag. If not provided it will be retrieved from the
-    ## `/state` endpoint. Use this if you are experiencing load issues and you know the cluster_name ahead of time.
+    ## `/state-summary` endpoint. Use this if you are experiencing load issues and you know the cluster_name.
     #
     # cluster_name: <CLUSTER_NAME>
 
