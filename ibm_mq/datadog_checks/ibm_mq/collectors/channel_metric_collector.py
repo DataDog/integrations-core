@@ -94,7 +94,9 @@ class ChannelMetricCollector(object):
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
             if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
                 self.log.debug("Channel status not found for channel %s: %s", search_channel_name, e)
-            elif not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+            elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("There are no messages available for channel %s", search_channel_name)
+            else:
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
             for channel_info in response:
