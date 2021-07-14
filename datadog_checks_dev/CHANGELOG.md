@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.3.0 / 2021-07-14
+
+* [Added] Add command for validating SNMP profiles. See [#9587](https://github.com/DataDog/integrations-core/pull/9587).
+
 ## 12.2.0 / 2021-07-12
 
 * [Added] Support multiple instances in config specs. See [#9615](https://github.com/DataDog/integrations-core/pull/9615).
