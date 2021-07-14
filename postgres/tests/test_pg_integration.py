@@ -347,7 +347,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
-    assert event['min_collection_interval'] == dbm_instance['min_collection_interval']
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'

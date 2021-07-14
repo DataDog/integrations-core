@@ -52,7 +52,9 @@ class ChannelMetricCollector(object):
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
             # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("There are no messages available for PCF channel")
+            else:
                 self.log.warning("Error getting CHANNEL stats %s", e)
         else:
             channels = len(response)
