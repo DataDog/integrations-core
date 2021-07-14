@@ -106,6 +106,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=shutdown_callback,
         )
+        self._metrics_collection_interval = collection_interval
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -181,7 +182,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             payload = {
                 'host': self._db_hostname_cached(),
                 'timestamp': time.time() * 1000,
-                'min_collection_interval': self._config.min_collection_interval,
+                'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
