@@ -23,7 +23,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    timeout: Optional[int]
+    timeout: Optional[float]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
