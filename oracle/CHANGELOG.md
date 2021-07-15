@@ -1,9 +1,5 @@
 # CHANGELOG - oracle
 
-## 3.3.2 / 2021-07-15
-
-* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
-
 ## 3.3.1 / 2021-07-12
 
 * [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
