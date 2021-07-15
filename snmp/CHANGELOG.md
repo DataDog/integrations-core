@@ -1,6 +1,15 @@
 # CHANGELOG - snmp
 
-## 5.1.0 / 2021-04-19
+## 5.2.0 / 2021-05-28
+
+* [Added] Add collect device metadata config. See [#9393](https://github.com/DataDog/integrations-core/pull/9393).
+* [Added] Add rate type to error and discard counters. See [#9218](https://github.com/DataDog/integrations-core/pull/9218). Thanks [loganmc10](https://github.com/loganmc10).
+* [Fixed] Improve snmp example config. See [#9417](https://github.com/DataDog/integrations-core/pull/9417).
+* [Fixed] Revert "Add collect device metadata config". See [#9439](https://github.com/DataDog/integrations-core/pull/9439).
+* [Fixed] Fix mypy lint issue. See [#9288](https://github.com/DataDog/integrations-core/pull/9288).
+* [Fixed] Update conf.yaml.example - wrong file name. See [#7704](https://github.com/DataDog/integrations-core/pull/7704).
+
+## 5.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
 * [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).

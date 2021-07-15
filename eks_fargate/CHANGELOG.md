@@ -1,6 +1,6 @@
 # CHANGELOG - eks_fargate
 
-## 2.0.0 / 2021-04-19
+## 2.0.0 / 2021-04-19 / Agent 7.28.0
 
 * [Changed] Refactor kubelet and eks_fargate checks to use `KubeletBase`. See [#8798](https://github.com/DataDog/integrations-core/pull/8798).
 

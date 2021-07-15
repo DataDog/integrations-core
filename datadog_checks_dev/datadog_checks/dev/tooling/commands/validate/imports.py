@@ -4,7 +4,8 @@
 
 import click
 
-from ...utils import complete_valid_checks, get_check_files, get_valid_integrations
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_check_files
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
@@ -45,23 +46,22 @@ def validate_import(filepath, check, autofix):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate proper base imports')
-@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--autofix', is_flag=True, help='Apply suggested fix')
 @click.pass_context
-def imports(ctx, autofix, checks):
-    """Validate proper imports in checks."""
+def imports(ctx, check, autofix):
+    """Validate proper imports in checks.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
 
     validation_fails = {}
-    all_checks = sorted(get_valid_integrations())
 
-    if checks:
-        invalid_checks = [c for c in checks if c not in all_checks]
-        if invalid_checks:
-            abort(f'Invalid checks: {invalid_checks}')
-        all_checks = sorted(checks)
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating imports for {len(checks)} checks to avoid deprecated modules ...")
 
-    echo_info("Validating imports avoiding deprecated modules ...")
-    for check_name in sorted(all_checks):
+    for check_name in checks:
         echo_debug(f'Checking {check_name}')
 
         # focus on check and testing directories

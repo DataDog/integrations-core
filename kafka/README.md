@@ -142,8 +142,7 @@ The Kafka check does not include any events.
 
 ### Service Checks
 
-**kafka.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
+See [service_checks.json][21] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -177,3 +176,4 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [18]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [19]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [20]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[21]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json

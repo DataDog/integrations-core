@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+import re
 import subprocess
 import time
 from collections import Counter
@@ -16,11 +17,13 @@ import pymysql
 import pytest
 from pkg_resources import parse_version
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql, statements
-from datadog_checks.mysql.statement_samples import MySQLStatementSamples
+from datadog_checks.mysql.statement_samples import StatementTruncationState
 from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
@@ -31,22 +34,47 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def dbm_instance(instance_complex):
-    instance_complex['deep_database_monitoring'] = True
-    instance_complex['min_collection_interval'] = 1
-    instance_complex['statement_samples'] = {
-        'enabled': True,
-        # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
-        'run_sync': True,
-        'collections_per_second': 1,
-    }
+    instance_complex['dbm'] = True
+    # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
+    instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    # set a very small collection interval so the tests go fast
+    instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return instance_complex
+
+
+dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
+@pytest.mark.parametrize("dbm_enabled", [True, False])
+def test_dbm_enabled_config(dbm_instance, dbm_enabled_key, dbm_enabled):
+    # test to make sure we continue to support the old key
+    for k in dbm_enabled_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[dbm_enabled_key] = dbm_enabled
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._config.dbm_enabled == dbm_enabled
+
+
+statement_samples_keys = ["query_samples", "statement_samples"]
+
+
+@pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, statement_samples_enabled):
+    # test to make sure we continue to support the old key
+    for k in statement_samples_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._statement_samples._enabled == statement_samples_enabled
 
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
-    MySQLStatementSamples.executor.shutdown(wait=True)
-    MySQLStatementSamples.executor = ThreadPoolExecutor()
+    DBMAsyncJob.executor.shutdown(wait=True)
+    DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 @pytest.mark.integration
@@ -262,51 +290,91 @@ def test_complex_config_replica(aggregator, instance_complex):
     )
 
 
+def _obfuscate_sql(query, options=None):
+    return re.sub(r'\s+', ' ', query or '').strip()
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_metrics(aggregator, dbm_instance):
-    QUERY = 'select * from information_schema.processlist'
-    QUERY_DIGEST_TEXT = 'SELECT * FROM `information_schema` . `processlist`'
-    # The query signature should match the query and consistency of this tag has product impact. Do not change
-    # the query signature for this test unless you know what you're doing. The query digest is determined by
-    # mysql and varies across versions.
-    QUERY_SIGNATURE = '8cd0f2b4343decc'
-    if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        QUERY_DIGEST = '5d343195f2d7adf4388d42755311c3e3'
-    elif environ.get('MYSQL_VERSION') == '5.6':
-        QUERY_DIGEST = 'acfa199773950cd8cf912f3a19219492'
-    elif environ.get('MYSQL_VERSION') == '5.7':
-        QUERY_DIGEST = '0737e429dc883ba8c86c15ae76e59dda'
-    else:
-        # 8.0+
-        QUERY_DIGEST = '6817a67871eb7edddad5b7836c93330aa3c98801ac759eed1bea6db1a34579c4'
-        QUERY_SIGNATURE = '9d73cb71644af0a2'
-
+# these queries are formatted the same way they appear in events_statements_summary_by_digest to make the test simpler
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM `testdb` . `users`",
+        # include one long query that exceeds truncation limit so we can confirm the truncation is happening
+        "SELECT `hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `name` , "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `age` FROM `testdb` . `users` "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` JOIN `testdb` . `users` `B` ON "
+        "`hello_how_is_it_going_this_is_a_very_long_table_alias_name` . `name` = `B` . `name`",
+    ],
+)
+@pytest.mark.parametrize("default_schema", [None, "testdb"])
+@pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
+def test_statement_metrics(aggregator, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
     def run_query(q):
         with mysql_check._connect() as db:
             with closing(db.cursor()) as cursor:
+                if default_schema:
+                    cursor.execute("USE " + default_schema)
                 cursor.execute(q)
 
-    # Run a query
-    run_query(QUERY)
-    mysql_check.check(dbm_instance)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql, mock.patch.object(
+        mysql_check, '_get_is_aurora', passthrough=True
+    ) as m_get_is_aurora, mock.patch.object(
+        mysql_check, '_get_runtime_aurora_tags', passthrough=True
+    ) as m_get_runtime_aurora_tags:
+        m_obfuscate_sql.side_effect = _obfuscate_sql
+        m_get_is_aurora.return_value = False
+        m_get_runtime_aurora_tags.return_value = []
+        if aurora_replication_role:
+            m_get_is_aurora.return_value = True
+            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    run_query(QUERY)
-    mysql_check.check(dbm_instance)
-    for name in statements.STATEMENT_METRICS.values():
-        aggregator.assert_metric(
-            name,
-            tags=tags.SC_TAGS
-            + [
-                'query:{}'.format(QUERY_DIGEST_TEXT),
-                'query_signature:{}'.format(QUERY_SIGNATURE),
-                'digest:{}'.format(QUERY_DIGEST),
-            ],
-            count=1,
-        )
+        # Run a query
+        run_query(query)
+        mysql_check.check(dbm_instance)
+
+        # Run the query and check a second time so statement metrics are computed from the previous run
+        run_query(query)
+        mysql_check.check(dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    assert event['host'] == 'stubbed.hostname'
+    assert event['timestamp'] > 0
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
+    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    if aurora_replication_role:
+        expected_tags.add("replication_role:" + aurora_replication_role)
+    assert set(event['tags']) == expected_tags
+    query_signature = compute_sql_signature(query)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
+
+    assert row['digest']
+    assert row['schema_name'] == default_schema
+    assert row['digest_text'].strip() == query.strip()[0:200]
+
+    for col in statements.METRICS_COLUMNS:
+        assert type(row[col]) in (float, int)
+
+    events = aggregator.get_event_platform_events("dbm-samples")
+    assert len(events) > 0
+    fqt_events = [e for e in events if e.get('dbm_type') == 'fqt']
+    assert len(fqt_events) > 0
+    matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+    assert len(matching) == 1
+    event = matching[0]
+    assert event['db']['query_signature'] == query_signature
+    assert event['db']['statement'] == query
+    assert event['mysql']['schema'] == default_schema
+    assert event['timestamp'] > 0
+    assert event['host'] == 'stubbed.hostname'
 
 
 @pytest.mark.integration
@@ -320,19 +388,9 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
     # mysql and varies across versions.
     query_signature = '94caeb4c54f97849'
 
-    if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        query_digest = '9d1281ca764113522cfddefa25171e04'
-    elif environ.get('MYSQL_VERSION') == '5.6':
-        query_digest = '8ed22fb1a4d540751208966b7e322c3b'
-    elif environ.get('MYSQL_VERSION') == '5.7':
-        query_digest = '6b5a1b14bbeef4253f3d88bd6d2f41cf'
-    else:
-        # 8.0+
-        query_digest = 'bab5dd3d1abebc38338867fb4933301115cb3c40840fea30e1d6301cc14099c5'
-
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
-    def obfuscate_sql(query):
+    def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
             return normalized_query
         return query
@@ -355,128 +413,144 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         run_query(query_two)
         mysql_check.check(dbm_instance)
 
-    expected_tags = tags.SC_TAGS + [
-        'query:{}'.format(normalized_query),
-        'query_signature:{}'.format(query_signature),
-        'digest:{}'.format(query_digest),
-    ]
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
 
-    aggregator.assert_metric('mysql.queries.count', count=1, tags=expected_tags)
-    aggregator.assert_metric('mysql.queries.count', value=2.0, tags=expected_tags)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
 
-
-def test_generate_synthetic_rows():
-    rows = [
-        {
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_examined': 50,
-        },
-        {
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_examined': 0,
-        },
-    ]
-    result = statements.generate_synthetic_rows(rows)
-    assert result == [
-        {
-            'avg_time': 25.2,
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_sent_ratio': 0.4,
-            'rows_examined': 50,
-        },
-        {
-            'avg_time': 0,
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_sent_ratio': 0,
-            'rows_examined': 0,
-        },
-    ]
+    assert row['query_signature'] == query_signature
+    assert row['count_star'] == 2
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "events_statements_table",
-    ["events_statements_current", "events_statements_history", "events_statements_history_long", None],
+    ["events_statements_history_long"],
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
-    "schema,statement",
+    "schema,statement,expected_collection_errors,expected_statement_truncated",
     [
-        (None, 'select name as nam from testdb.users'),
-        ('information_schema', 'select name as nam from testdb.users'),
-        ('testdb', 'select name as nam from users'),
+        (
+            None,
+            'select name as nam from testdb.users',
+            [{'strategy': 'PROCEDURE', 'code': 'procedure_strategy_requires_default_schema', 'message': None}],
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            'information_schema',
+            'select * from testdb.users',
+            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            'testdb',
+            'select name as nam from users',
+            [
+                {
+                    'strategy': 'FQ_PROCEDURE',
+                    'code': 'database_error',
+                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                }
+            ],
+            StatementTruncationState.not_truncated.value,
+        ),
+        (
+            'testdb',
+            'SELECT {} FROM users where '
+            'name=\'Johannes Chrysostomus Wolfgangus Theophilus Mozart\''.format(
+                ", ".join("name as name{}".format(i) for i in range(244))
+            ),
+            [
+                {
+                    'strategy': None,
+                    'code': 'query_truncated',
+                    'message': 'truncated length: {}'.format(
+                        4096
+                        if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+                        else 1024
+                    ),
+                }
+            ],
+            StatementTruncationState.truncated.value,
+        ),
     ],
 )
+@pytest.mark.parametrize("aurora_replication_role", ["reader"])
 def test_statement_samples_collect(
-    aggregator, dbm_instance, bob_conn, events_statements_table, explain_strategy, schema, statement, caplog
+    aggregator,
+    dbm_instance,
+    bob_conn,
+    events_statements_table,
+    explain_strategy,
+    schema,
+    statement,
+    expected_collection_errors,
+    expected_statement_truncated,
+    aurora_replication_role,
+    caplog,
 ):
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
 
     # try to collect a sample from all supported events_statements tables using all possible strategies
-    dbm_instance['statement_samples']['events_statements_table'] = events_statements_table
+    dbm_instance['query_samples']['events_statements_table'] = events_statements_table
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    logger.debug("running first check")
-    mysql_check.check(dbm_instance)
-    aggregator.reset()
-    mysql_check._statement_samples._init_caches()
+    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    if aurora_replication_role:
+        expected_tags.add("replication_role:" + aurora_replication_role)
 
-    # we deliberately want to keep the connection open for the duration of the test to ensure
-    # the query remains in the events_statements_current and events_statements_history tables
-    # it would be cleared out upon connection close otherwise
-    with closing(bob_conn.cursor()) as cursor:
-        # run the check once, then clear out all saved events
-        # on the next check run it should only capture events since the last checkpoint
-        if schema:
-            cursor.execute("use {}".format(schema))
-        cursor.execute(statement)
-    logger.debug("running second check")
-    mysql_check.check(dbm_instance)
-    logger.debug("done second check")
+    with mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora, mock.patch.object(
+        mysql_check, '_get_runtime_aurora_tags', passthrough=True
+    ) as m_get_runtime_aurora_tags:
+        m_get_is_aurora.return_value = False
+        m_get_runtime_aurora_tags.return_value = []
+        if aurora_replication_role:
+            m_get_is_aurora.return_value = True
+            m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
+
+        logger.debug("running first check")
+        mysql_check.check(dbm_instance)
+        aggregator.reset()
+        mysql_check._statement_samples._init_caches()
+
+        # we deliberately want to keep the connection open for the duration of the test to ensure
+        # the query remains in the events_statements_current and events_statements_history tables
+        # it would be cleared out upon connection close otherwise
+        with closing(bob_conn.cursor()) as cursor:
+            # run the check once, then clear out all saved events
+            # on the next check run it should only capture events since the last checkpoint
+            if schema:
+                cursor.execute("use {}".format(schema))
+            cursor.execute(statement)
+        logger.debug("running second check")
+        mysql_check.check(dbm_instance)
+        logger.debug("done second check")
+
     events = aggregator.get_event_platform_events("dbm-samples")
-    matching = [e for e in events if e['db']['statement'] == statement]
+
+    # Match against the statement itself if it's below the statement length limit or its truncated form which is
+    # the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...'
+    expected_statement_prefix = (
+        statement[:1021] + '...'
+        if len(statement) > 1024
+        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        else statement[:4093] + '...'
+        if len(statement) > 4096
+        else statement
+    )
+
+    matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
     assert len(matching) > 0, "should have collected an event"
+
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
         # explain via the FQ_PROCEDURE will fail if a query contains non-fully-qualified tables because it will
@@ -489,9 +563,18 @@ def test_statement_samples_collect(
     elif not schema and explain_strategy == 'PROCEDURE':
         # if there is no default schema then we cannot use the non-fully-qualified procedure strategy
         assert not with_plans, "should not have collected any plans"
-    else:
+    elif not expected_statement_truncated:
         event = with_plans[0]
         assert 'query_block' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
+        assert set(event['ddtags'].split(',')) == expected_tags
+
+    # Validate the events to ensure we've provided an explanation for not providing an exec plan
+    for event in matching:
+        assert event['db']['query_truncated'] == expected_statement_truncated
+        if event['db']['plan']['definition'] is None:
+            assert event['db']['plan']['collection_errors'] == expected_collection_errors
+        else:
+            assert event['db']['plan']['collection_errors'] is None
 
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
@@ -500,56 +583,132 @@ def test_statement_samples_collect(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_rate_limit(aggregator, bob_conn, dbm_instance):
-    dbm_instance['statement_samples']['run_sync'] = False
-    dbm_instance['statement_samples']['collections_per_second'] = 0.5
-    query = "select name as nam from testdb.users where name = 'hello'"
+def test_statement_samples_main_collection_rate_limit(aggregator, dbm_instance):
+    # test rate limiting of the main collection loop
+    collection_interval = 0.2
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_samples']['run_sync'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    with closing(bob_conn.cursor()) as cursor:
-        for _ in range(5):
-            cursor.execute(query)
-            mysql_check.check(dbm_instance)
-            time.sleep(1)
-    events = aggregator.get_event_platform_events("dbm-samples")
-    matching = [e for e in events if e['db']['statement'] == query]
-    assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
-    metrics = aggregator.metrics("dd.mysql.collect_statement_samples.time")
-    assert 2 < len(metrics) < 6
+    mysql_check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_collections = int(1 / collection_interval * sleep_time) + 1
     mysql_check.cancel()
+    metrics = aggregator.metrics("dd.mysql.collect_statement_samples.time")
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_loop_inactive_stop(aggregator, dbm_instance):
-    # confirm that the collection loop stops on its own after the check has not been run for a while
-    dbm_instance['statement_samples']['run_sync'] = False
+def test_statement_samples_unique_plans_rate_limits(aggregator, bob_conn, dbm_instance):
+    # test unique sample ingestion rate limiting
+    cache_max_size = 20
+    dbm_instance['query_samples']['run_sync'] = True
+    # fix the table to 'events_statements_current' to ensure we don't pull in historical queries from other tests
+    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_current'
+    dbm_instance['query_samples']['seen_samples_cache_maxsize'] = cache_max_size
+    # samples_per_hour_per_query set very low so that within this test we will have at most one sample per
+    # (query, plan)
+    dbm_instance['query_samples']['samples_per_hour_per_query'] = 1
+    dbm_instance['query_samples']['collection_interval'] = 1.0 / 100
+    query_template = "select {} from testdb.users where name = 'hello'"
+    # queries that have different numbers of columns are considered different queries
+    # i.e. "SELECT city, city FROM persons where city= 'hello'"
+    queries = [query_template.format(','.join(["name"] * i)) for i in range(1, 20)]
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    with closing(bob_conn.cursor()) as cursor:
+        for _ in range(3):
+            # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
+            for q in queries:
+                cursor.execute(q)
+                mysql_check.check(dbm_instance)
+
+    def _sample_key(e):
+        return e['db']['query_signature'], e['db'].get('plan', {}).get('signature')
+
+    dbm_samples = [e for e in aggregator.get_event_platform_events("dbm-samples") if e.get('dbm_type') != 'fqt']
+    statement_counts = Counter(_sample_key(e) for e in dbm_samples)
+    assert len(statement_counts) == cache_max_size, "expected to collect at {} unique statements".format(cache_max_size)
+
+    for _, count in statement_counts.items():
+        assert count == 1, "expected to collect exactly one sample per (query, plan)"
+
+    # in addition to the test query, dbm_samples will also contain samples from other queries that the postgres
+    # integration is running
+    pattern = query_template.format("(name,?)+")
+    matching = [e for e in dbm_samples if re.match(pattern, e['db']['statement'])]
+    assert len(matching) > 0, "should have collected at least one matching event"
+
+
+def _expected_dbm_instance_tags(dbm_instance):
+    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_async_job_inactive_stop(aggregator, dbm_instance):
+    # confirm that async jobs stop on their own after the check has not been run for a while
+    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['query_metrics']['run_sync'] = False
+    # low collection interval for a faster test
+    dbm_instance['min_collection_interval'] = 1
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
     # make sure there were no unhandled exceptions
-    mysql_check._statement_samples._collection_loop_future.result()
-    aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_inactive_stop")
+    mysql_check._statement_samples._job_loop_future.result()
+    mysql_check._statement_metrics._job_loop_future.result()
+    for job in ['statement-metrics', 'statement-samples']:
+        aggregator.assert_metric(
+            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+        )
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_check_cancel(aggregator, dbm_instance):
-    # confirm that the collection loop stops on its own after the check has not been run for a while
-    dbm_instance['statement_samples']['run_sync'] = False
+def test_async_job_cancel(aggregator, dbm_instance):
+    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['query_metrics']['run_sync'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
     mysql_check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
-    mysql_check._statement_samples._collection_loop_future.result()
-    assert not mysql_check._statement_samples._collection_loop_future.running(), "thread should be stopped"
-    assert mysql_check._statement_samples._db is None, "db connection should be gone"
-    aggregator.assert_metric("dd.mysql.statement_samples.collection_loop_cancel")
+    mysql_check._statement_samples._job_loop_future.result()
+    mysql_check._statement_metrics._job_loop_future.result()
+    assert not mysql_check._statement_samples._job_loop_future.running(), "samples thread should be stopped"
+    assert not mysql_check._statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
+    assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
+    assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
+    for job in ['statement-metrics', 'statement-samples']:
+        aggregator.assert_metric(
+            "dd.mysql.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+        )
+
+
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+@pytest.mark.parametrize("statement_metrics_enabled", [True, False])
+def test_async_job_enabled(dbm_instance, statement_samples_enabled, statement_metrics_enabled):
+    dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
+    dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check.check(dbm_instance)
+    mysql_check.cancel()
+    if statement_samples_enabled:
+        assert mysql_check._statement_samples._job_loop_future is not None
+        mysql_check._statement_samples._job_loop_future.result()
+    else:
+        assert mysql_check._statement_samples._job_loop_future is None
+    if statement_metrics_enabled:
+        assert mysql_check._statement_metrics._job_loop_future is not None
+        mysql_check._statement_metrics._job_loop_future.result()
+    else:
+        assert mysql_check._statement_metrics._job_loop_future is None
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_samples_max_per_digest(dbm_instance):
     # clear out any events from previous test runs
-    dbm_instance['statement_samples']['events_statements_table'] = 'events_statements_history_long'
+    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_history_long'
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     for _ in range(3):
         mysql_check.check(dbm_instance)
@@ -562,10 +721,10 @@ def test_statement_samples_max_per_digest(dbm_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_samples_invalid_explain_procedure(aggregator, dbm_instance):
-    dbm_instance['statement_samples']['explain_procedure'] = 'hello'
+    dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     mysql_check.check(dbm_instance)
-    aggregator.assert_metric_has_tag_prefix("dd.mysql.statement_samples.error", "error:explain-")
+    aggregator.assert_metric_has_tag_prefix("dd.mysql.query_samples.error", "error:explain-")
 
 
 @pytest.mark.integration
@@ -574,7 +733,7 @@ def test_statement_samples_invalid_explain_procedure(aggregator, dbm_instance):
     "events_statements_enable_procedure", ["datadog.enable_events_statements_consumers", "invalid_proc"]
 )
 def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_statements_enable_procedure):
-    dbm_instance['statement_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
+    dbm_instance['query_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
 
     # deliberately disable one of the consumers

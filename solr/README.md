@@ -189,8 +189,7 @@ The Solr check does not include any events.
 
 ### Service Checks
 
-**solr.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SolR instance. Returns `OK` otherwise.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -248,3 +247,4 @@ attribute:
 [11]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
 [12]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
 [13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[14]: https://github.com/DataDog/integrations-core/blob/master/solr/assets/service_checks.json

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import threading
 from contextlib import closing
 
 import psycopg2
@@ -9,27 +10,18 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .util import (
-    ALL_SCHEMAS,
-    CONNECTION_METRICS,
-    FUNCTION_METRICS,
-    IDX_METRICS,
-    LOCK_METRICS,
-    REL_METRICS,
-    REPLICATION_METRICS,
-    SIZE_METRICS,
-    STATIO_METRICS,
-    build_relations_filter,
-    fmt,
-    get_schema_field,
-)
+from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
+
+TRACK_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 
 class PostgreSql(AgentCheck):
@@ -53,12 +45,21 @@ class PostgreSql(AgentCheck):
             )
         self._config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
+        self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
+        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
+        # The value is loaded when connecting to the main database
+        self._db_configured_track_activity_query_size = TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+
+        # map[dbname -> psycopg connection]
+        self._db_pool = {}
+        self._db_pool_lock = threading.Lock()
 
     def cancel(self):
         self.statement_samples.cancel()
+        self.statement_metrics.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -87,38 +88,7 @@ class PostgreSql(AgentCheck):
             self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
 
-    def _build_relations_config(self, yamlconfig):
-        """Builds a dictionary from relations configuration while maintaining compatibility"""
-        config = {}
-
-        for element in yamlconfig:
-            if isinstance(element, str):
-                config[element] = {'relation_name': element, 'schemas': [ALL_SCHEMAS]}
-            elif isinstance(element, dict):
-                if not ('relation_name' in element or 'relation_regex' in element):
-                    self.log.warning(
-                        "Parameter 'relation_name' or 'relation_regex' is required for relation element %s", element
-                    )
-                    continue
-                if 'relation_name' in element and 'relation_regex' in element:
-                    self.log.warning(
-                        "Expecting only of parameters 'relation_name', 'relation_regex' for relation element %s",
-                        element,
-                    )
-                    continue
-                schemas = element.get('schemas', [])
-                if not isinstance(schemas, list):
-                    self.log.warning("Expected a list of schemas for %s", element)
-                    continue
-                name = element.get('relation_name') or element['relation_regex']
-                config[name] = element.copy()
-                if len(schemas) == 0:
-                    config[name]['schemas'] = [ALL_SCHEMAS]
-            else:
-                self.log.warning('Unhandled relations config type: %s', element)
-        return config
-
-    def _run_query_scope(self, cursor, scope, is_custom_metrics, relations_config, cols, descriptors, is_relations):
+    def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
             return None
         if scope == REPLICATION_METRICS or not self.version >= V9:
@@ -127,14 +97,14 @@ class PostgreSql(AgentCheck):
             log_func = self.log.warning
 
         results = None
+        is_relations = scope.get('relation') and self._relations_manager.has_relations
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if is_relations:
                 schema_field = get_schema_field(descriptors)
-                relations_filter = build_relations_filter(relations_config, schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
-                cursor.execute(query.format(relations=relations_filter))
+                formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                cursor.execute(formatted_query)
             else:
                 self.log.debug("Running query: %s", str(query))
                 cursor.execute(query.replace(r'%', r'%%'))
@@ -180,7 +150,7 @@ class PostgreSql(AgentCheck):
 
         return results
 
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics):
         if scope is None:
             return None
         # build query
@@ -190,11 +160,7 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
-        is_relations = scope['relation'] and len(relations_config) > 0
-
-        results = self._run_query_scope(
-            cursor, scope, is_custom_metrics, relations_config, cols, descriptors, is_relations
-        )
+        results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
         if not results:
             return None
 
@@ -263,10 +229,8 @@ class PostgreSql(AgentCheck):
             metric_scope.append(self.metrics_cache.get_count_metrics())
 
         # Do we need relation-specific metrics?
-        relations_config = {}
         if self._config.relations:
-            metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
-            relations_config = self._build_relations_config(self._config.relations)
+            metric_scope.extend(RELATION_METRICS)
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -279,39 +243,39 @@ class PostgreSql(AgentCheck):
             metric_scope.append(replication_stats_metrics)
 
         cursor = self.db.cursor()
-        results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False, relations_config)
+        results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
             self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
 
-        self._query_scope(cursor, bgw_instance_metrics, instance_tags, False, relations_config)
-        self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
+        self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
+        self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
         if self._config.collect_activity_metrics:
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-            self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
+            self._query_scope(cursor, activity_metrics, instance_tags, False)
 
         for scope in list(metric_scope) + self._config.custom_metrics:
-            self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics, relations_config)
+            self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
         cursor.close()
 
-    def _new_connection(self):
+    def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "user=%s dbname=%s application_name=%s" % (
                 self._config.user,
-                self._config.dbname,
+                dbname,
                 self._config.application_name,
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            return psycopg2.connect(connection_string)
+            conn = psycopg2.connect(connection_string)
         else:
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': self._config.password,
-                'database': self._config.dbname,
+                'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -319,7 +283,10 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
-            return psycopg2.connect(**args)
+            conn = psycopg2.connect(**args)
+        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
+        conn.set_session(autocommit=True)
+        return conn
 
     def _connect(self):
         """Get and memoize connections to instances"""
@@ -332,7 +299,56 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
-            self.db = self._new_connection()
+            self.db = self._new_connection(self._config.dbname)
+
+    # Reload the track_activity_query_size setting on a new connection to the main db
+    def _load_query_max_text_size(self, db):
+        try:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                self.log.debug("Running query [%s]", TRACK_ACTIVITY_QUERY_SIZE_QUERY)
+                cursor.execute(TRACK_ACTIVITY_QUERY_SIZE_QUERY)
+                row = cursor.fetchone()
+                self._db_configured_track_activity_query_size = int(row['setting'])
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+            self.log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
+            self.count(
+                "dd.postgres.error",
+                1,
+                tags=self._config.tags + ["error:load-track-activity-query-size"],
+            )
+
+    def _get_db(self, dbname):
+        """
+        Returns a memoized psycopg2 connection to `dbname` with autocommit
+        Threadsafe as long as no transactions are used
+        :param dbname:
+        :return: a psycopg2 connection
+        """
+        # TODO: migrate the rest of this check to use a connection from this pool
+        with self._db_pool_lock:
+            db = self._db_pool.get(dbname)
+            if not db or db.closed:
+                self.log.debug("initializing connection to dbname=%s", dbname)
+                db = self._new_connection(dbname)
+                db.set_session(autocommit=True)
+                self._db_pool[dbname] = db
+            if db.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                db.rollback()
+            if self._config.dbname == dbname:
+                self._load_query_max_text_size(db)
+            return db
+
+    def _close_db_pool(self):
+        # TODO: add automatic aging out of connections after some time
+        with self._db_pool_lock:
+            for dbname, db in self._db_pool.items():
+                if db and not db.closed:
+                    try:
+                        db.close()
+                    except Exception:
+                        self._log.exception("failed to close DB connection for db=%s", dbname)
+                self._db_pool[dbname] = None
 
     def _collect_custom_queries(self, tags):
         """
@@ -430,11 +446,6 @@ class PostgreSql(AgentCheck):
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
 
-    def _collect_per_statement_metrics(self, tags):
-        metrics = self.statement_metrics.collect_per_statement_metrics(self.db)
-        for metric_name, metric_value, metrics_tags in metrics:
-            self.count(metric_name, metric_value, tags=list(set(metrics_tags + tags)))
-
     def check(self, _):
         tags = copy.copy(self._config.tags)
         # Collect metrics
@@ -446,12 +457,12 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            if self._config.deep_database_monitoring:
-                self._collect_per_statement_metrics(tags)
-                self.statement_samples.run_sampler(tags)
+            if self._config.dbm_enabled:
+                self.statement_metrics.run_job_loop(tags)
+                self.statement_samples.run_job_loop(tags)
 
         except Exception as e:
-            self.log.error("Unable to collect postgres metrics.")
+            self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(

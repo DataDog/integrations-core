@@ -10,12 +10,12 @@ from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
 from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ...testing import process_checks_option
 from ...utils import (
     complete_valid_checks,
     get_config_files,
     get_config_spec,
     get_data_directory,
-    get_valid_checks,
     get_version_string,
     load_manifest,
 )
@@ -34,20 +34,23 @@ TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def config(ctx, check, sync, verbose):
-    """Validate default configuration files."""
+    """Validate default configuration files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
     repo_choice = ctx.obj['repo_choice']
-    if check:
-        checks = [check]
-    elif repo_choice == 'agent':
+    if repo_choice == 'agent':
         checks = ['agent']
     else:
-        checks = sorted(get_valid_checks())
+        checks = process_checks_option(check, source='valid_checks')
 
     files_failed = {}
     files_warned = {}
     file_counter = []
 
-    echo_waiting('Validating default configuration files...')
+    echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
         check_display_queue = []
 

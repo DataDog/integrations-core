@@ -10,7 +10,7 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
-#### via Istio
+#### Istio
 
 If you are using Envoy as part of [Istio][3], to access Envoy's [admin endpoint][4] you need to set Istio's [proxyAdminPort][5].
 
@@ -207,10 +207,16 @@ The Envoy check does not include any events.
 
 ### Service Checks
 
-**envoy.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, otherwise returns `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+### Common problems
+
+#### Endpoint `/server_info` unreachable
+- Disable the `collect_server_info` option in your Envoy configuration, if the endpoint is not available in your Envoy environment, to minimize error logs.
+
+**Note**: Envoy version data will not be collected.
 
 Need help? Contact [Datadog support][15].
 
@@ -229,3 +235,4 @@ Need help? Contact [Datadog support][15].
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [15]: https://docs.datadoghq.com/help/
+[16]: https://github.com/DataDog/integrations-core/blob/master/envoy/assets/service_checks.json

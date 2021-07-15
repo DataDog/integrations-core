@@ -70,6 +70,22 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_server_info
+      description: |
+        Collect Envoy version by accessing the `/server_info` endpoint.
+        Disable this if this endpoint is not reachable by the agent.
+      value:
+        type: boolean
+        example: true
+    - name: disable_legacy_cluster_tag
+      description: |
+        Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
+        which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
+      enabled: true
+      value:
+        type: boolean
+        display_default: false
+        example: true
     - template: instances/default
     - template: instances/http
       overrides:

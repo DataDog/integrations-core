@@ -1,10 +1,63 @@
 # CHANGELOG - postgres
 
+## 8.0.4 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9696](https://github.com/DataDog/integrations-core/pull/9696).
+
+## 8.0.3 / 2021-07-13
+
+* [Fixed] fix None-version crash for DBM statement metrics. See [#9692](https://github.com/DataDog/integrations-core/pull/9692).
+
+## 8.0.2 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9677](https://github.com/DataDog/integrations-core/pull/9677).
+
+## 8.0.1 / 2021-07-12
+
+* [Fixed] fix broken error handling in reading of pg_settings. See [#9672](https://github.com/DataDog/integrations-core/pull/9672).
+
+## 8.0.0 / 2021-07-12
+
+* [Added] Add DBM SQL obfuscator options. See [#9640](https://github.com/DataDog/integrations-core/pull/9640).
+* [Added] Add truncated statement indicator to postgres query sample events. See [#9597](https://github.com/DataDog/integrations-core/pull/9597).
+* [Added] Add better error handling/reporting for database errors when querying pg_stat_statements. See [#9628](https://github.com/DataDog/integrations-core/pull/9628).
+* [Added] Provide a reason for not having an execution plan (Postgres). See [#9563](https://github.com/DataDog/integrations-core/pull/9563).
+* [Fixed] Fix insufficient rate limiting of statement samples . See [#9581](https://github.com/DataDog/integrations-core/pull/9581).
+* [Fixed] log execution plan collection failure at debug level. See [#9562](https://github.com/DataDog/integrations-core/pull/9562).
+* [Fixed] Enable autocommit on all connections. See [#9494](https://github.com/DataDog/integrations-core/pull/9494).
+* [Changed] Change DBM `statement` config keys and metric terminology to `query`. See [#9664](https://github.com/DataDog/integrations-core/pull/9664).
+* [Changed] remove execution plan cost extraction. See [#9632](https://github.com/DataDog/integrations-core/pull/9632).
+* [Changed] decouple DBM query metrics interval from check run interval. See [#9657](https://github.com/DataDog/integrations-core/pull/9657).
+* [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9618](https://github.com/DataDog/integrations-core/pull/9618).
+* [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
+
+## 7.0.2 / 2021-06-03
+
+* [Fixed] Remove instance-level database tag from DBM metrics & events. See [#9469](https://github.com/DataDog/integrations-core/pull/9469).
+
+## 7.0.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
+## 7.0.0 / 2021-05-28
+
+* [Added] Filter lock relation metrics by relkind. See [#9323](https://github.com/DataDog/integrations-core/pull/9323).
+* [Fixed] Allow strings in relations. See [#9432](https://github.com/DataDog/integrations-core/pull/9432).
+* [Fixed] Postgres 13 support for statement metrics. See [#9365](https://github.com/DataDog/integrations-core/pull/9365).
+* [Fixed] Fix erroneous postgres statement metrics on duplicate queries. See [#9231](https://github.com/DataDog/integrations-core/pull/9231).
+* [Changed] Send database monitoring "full query text" events. See [#9405](https://github.com/DataDog/integrations-core/pull/9405).
+* [Changed] Exclude `EXPLAIN` queries from `pg_stat_statements`. See [#9358](https://github.com/DataDog/integrations-core/pull/9358).
+* [Changed] Extract relations logic to RelationsManager. See [#9322](https://github.com/DataDog/integrations-core/pull/9322).
+* [Changed] Collect statement metrics & samples from all databases on host. See [#9252](https://github.com/DataDog/integrations-core/pull/9252).
+* [Changed] Remove `service` event facet. See [#9275](https://github.com/DataDog/integrations-core/pull/9275).
+* [Changed] Send database monitoring query metrics to new intake. See [#9222](https://github.com/DataDog/integrations-core/pull/9222).
+* [Removed] Remove unused query metric limit configuration. See [#9377](https://github.com/DataDog/integrations-core/pull/9377).
+
 ## 6.0.2 / 2021-04-27
 
 * [Fixed] Revert way of checking if it's aurora. See [#9224](https://github.com/DataDog/integrations-core/pull/9224).
 
-## 6.0.1 / 2021-04-26
+## 6.0.1 / 2021-04-26 / Agent 7.28.0
 
 * [Fixed] Fix config validation for `relations`. See [#9242](https://github.com/DataDog/integrations-core/pull/9242).
 

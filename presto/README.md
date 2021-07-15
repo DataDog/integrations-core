@@ -68,12 +68,12 @@ Presto does not include any events.
 
 ### Service Checks
 
-**presto.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Presto instance, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://docs.datadoghq.com/integrations/presto/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -84,3 +84,4 @@ Need help? Contact [Datadog support][6].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/presto/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/presto/assets/service_checks.json

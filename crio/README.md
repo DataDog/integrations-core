@@ -38,9 +38,14 @@ Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 CRI-O does not include any events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: http://cri-o.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -49,3 +54,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/crio/assets/service_checks.json

@@ -59,18 +59,18 @@ See [Datadog's documentation][10] for additional information on how to configure
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-**scylla.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
-
 ### Events
 
 The Scylla check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://scylladb.com
 [2]: https://docs.datadoghq.com/agent/
@@ -82,3 +82,4 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.scylladb.com/getting-started/logging/
 [9]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://github.com/DataDog/integrations-core/blob/master/scylla/assets/service_checks.json

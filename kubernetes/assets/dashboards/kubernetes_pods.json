@@ -160,7 +160,7 @@
                     "response_format": "timeseries",
                     "queries": [
                       {
-                        "query": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {cluster_name,kube_namespace}",
+                        "query": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {kube_cluster_name,kube_namespace}",
                         "data_source": "metrics",
                         "name": "query1"
                       }
@@ -881,7 +881,7 @@
     ],
     "template_variables": [
       { "name": "scope", "default": "*" },
-      { "name": "cluster", "default": "*", "prefix": "cluster_name" },
+      { "name": "cluster", "default": "*", "prefix": "kube_cluster_name" },
       { "name": "namespace", "default": "*", "prefix": "kube_namespace" },
       { "name": "deployment", "default": "*", "prefix": "kube_deployment" },
       { "name": "statefulset", "default": "*", "prefix": "kube_stateful_set" },

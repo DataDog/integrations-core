@@ -1,6 +1,17 @@
 # CHANGELOG - Amazon MSK
 
-## 1.6.0 / 2021-04-19
+## 1.8.0 / 2021-07-12
+
+* [Added] Add metrics from label IDs. See [#9643](https://github.com/DataDog/integrations-core/pull/9643).
+* [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
+* [Fixed] Raise exception if attempting to use new style openmetrics with py2. See [#9613](https://github.com/DataDog/integrations-core/pull/9613).
+
+## 1.7.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+
+## 1.6.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Allow the use of the new OpenMetrics implementation. See [#9082](https://github.com/DataDog/integrations-core/pull/9082).
 * [Added] Add runtime configuration validation. See [#8883](https://github.com/DataDog/integrations-core/pull/8883).

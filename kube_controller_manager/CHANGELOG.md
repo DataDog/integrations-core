@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.9.0 / 2021-07-12
+
+* [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9575](https://github.com/DataDog/integrations-core/pull/9575).
+
 ## 1.8.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).

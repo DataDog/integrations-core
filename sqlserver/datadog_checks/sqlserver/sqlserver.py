@@ -467,11 +467,14 @@ class SQLServer(AgentCheck):
                 for metric in self.instance_metrics:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
-                        rows, cols = instance_results['SqlFractionMetric']
-                        if rows is not None:
-                            metric.fetch_metric(rows, cols)
+                        key = 'SqlFractionMetric'
                     else:
-                        rows, cols = instance_results[metric.__class__.__name__]
+                        key = metric.__class__.__name__
+
+                    if key not in instance_results:
+                        self.log.warning("No %s metrics found, skipping", str(key))
+                    else:
+                        rows, cols = instance_results[key]
                         if rows is not None:
                             metric.fetch_metric(rows, cols)
 
