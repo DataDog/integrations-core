@@ -10,6 +10,7 @@ files:
     - name: use_openmetrics
       description: |
         Use the latest OpenMetrics implementation for more features and better performance.
+        If running on Agent 6, this option requires python3.
 
         In a future release, this option will be set to `true` by default.
       value:
