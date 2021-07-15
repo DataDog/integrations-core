@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 8.0.4 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9696](https://github.com/DataDog/integrations-core/pull/9696).
+
 ## 8.0.3 / 2021-07-13
 
 * [Fixed] fix None-version crash for DBM statement metrics. See [#9692](https://github.com/DataDog/integrations-core/pull/9692).
