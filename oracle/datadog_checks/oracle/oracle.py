@@ -168,15 +168,15 @@ class Oracle(AgentCheck):
         except Exception as e:
             if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                 msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
-                                is available.
-                                For the Oracle instant client, see:
-                                http://www.oracle.com/technetwork/database/features/instant-client/index.html
-                                You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
+                is available.
+                For the Oracle instant client, see:
+                http://www.oracle.com/technetwork/database/features/instant-client/index.html
+                You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
 
-                                For the JDBC Driver, see:
-                                http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-                                You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
-                                configuration file of the check.
-                                """
+                For the JDBC Driver, see:
+                http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+                You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
+                configuration file of the check.
+                """
                 self.log.error(msg)
             raise
