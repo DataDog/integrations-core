@@ -10,7 +10,7 @@ files:
     - name: use_openmetrics
       description: |
         Use the latest OpenMetrics implementation for more features and better performance.
-        If running on Agent 6, this option requires python3.
+        If running on Agent 6, this option requires setting the `python_version` option in `datadog.yaml` to `"3"`.
 
         In a future release, this option will be set to `true` by default.
       value:
