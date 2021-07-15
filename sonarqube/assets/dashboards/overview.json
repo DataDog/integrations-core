@@ -1,14 +1,14 @@
 {
     "author_name": "Datadog",
-    "description": "",
+    "description": null,
     "layout_type": "ordered",
     "template_variables": [],
-    "title": "Sonarqube Overview",
+    "title": "SonarQube Overview",
     "widgets": [
         {
             "definition": {
                 "background_color": "white",
-                "content": "[SonarQube](https://www.datadoghq.com/blog/datadog-sonarqube-integration) is an open-source tool for static code analysis that integrates with your existing CI pipeline to run regular code checks on your codebase.\n\nThis integration collects metrics and logs from SonarQube\u2019s reports in order to provide insight into your codebase quality. You can monitor for code issues and security violations as they're reported by the scanner, visualize changes in code complexity, and collect logs from the SonarQube instance itself for unusual activity. For more information, check out [our documentation](https://docs.datadoghq.com/integrations/sonarqube/).",
+                "content": "[SonarQube](https://www.datadoghq.com/blog/datadog-sonarqube-integration) is an open-source tool for static code analysis that integrates with your existing CI pipeline to run regular code checks on your codebase.\n\nThis integration collects metrics and logs from SonarQube\u2019s reports in order to provide insight into your codebase quality. You can monitor for code issues and security violations as they're reported by the scanner, visualize changes in code complexity, and collect logs from the SonarQube instance itself for unusual activity. For more information, check out the Datadog [documentation](https://docs.datadoghq.com/integrations/sonarqube/).",
                 "font_size": "12",
                 "has_padding": true,
                 "show_tick": false,
@@ -24,6 +24,65 @@
                 "width": 12,
                 "x": 0,
                 "y": 0
+            }
+        },
+        {
+            "definition": {
+                "banner_img": "https://imgix.datadoghq.com/img/blog/datadog-sonarqube-integration/sonarqube-hero.png",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "About Sonarqube",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This dashboard displays metrics and logs from SonarQube\u2019s reports in order to provide insight into your codebase quality. You can monitor for code issues and security violations as they're reported by the scanner, visualize changes in code complexity, and collect logs from the SonarQube instance itself for unusual activity.\n\n##### [**Datadog Sonarqube integration docs&nbsp;\u2197**](https://docs.datadoghq.com/integrations/sonarqube/)",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 5862980161951240,
+                        "layout": {
+                            "height": 3,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Elasticsearch monitoring guides**\n\n[Datadog guide to key Elasticsearch metrics&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/)\n\n[How to monitor Elasticsearch with Datadog&nbsp;\u2197](https://www.datadoghq.com/blog/monitor-elasticsearch-datadog/)\n\n[Collect metrics with native and open source tools&nbsp;\u2197](https://www.datadoghq.com/blog/collect-elasticsearch-metrics/)\n\n[Solve 5 performance and scaling problems&nbsp;\u2197](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)\n\n[Resolve unassigned shards&nbsp;\u2197](https://www.datadoghq.com/blog/elasticsearch-unassigned-shards/)",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 3508707908453426,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 7,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 1376544769619172,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 2
             }
         },
         {
@@ -341,7 +400,13 @@
                     }
                 ]
             },
-            "id": 3862125221719092
+            "id": 3862125221719092,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 8
+            }
         },
         {
             "definition": {
@@ -463,7 +528,13 @@
                     }
                 ]
             },
-            "id": 5423172190266024
+            "id": 5423172190266024,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 19
+            }
         },
         {
             "definition": {
@@ -694,7 +765,11 @@
             },
             "id": 1326175071153698,
             "layout": {
-                "is_column_break": true
+                "height": 7,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
             }
         },
         {
@@ -756,7 +831,13 @@
                     }
                 ]
             },
-            "id": 7649000180006982
+            "id": 7649000180006982,
+            "layout": {
+                "height": 12,
+                "width": 12,
+                "x": 0,
+                "y": 7
+            }
         }
     ]
 }

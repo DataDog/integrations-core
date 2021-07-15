@@ -28,7 +28,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "Sonarqube Overview": "assets/dashboards/overview.json"
+      "SonarQube Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
       "SonarQube vulnerabilities": "assets/recommended_monitors/vulnerabilities.json"
