@@ -35,6 +35,59 @@ SAMPLE_QUERIES = [
 ]
 
 
+dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
+@pytest.mark.parametrize("dbm_enabled", [True, False])
+def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
+    # test to make sure we continue to support the old key
+    for k in dbm_enabled_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[dbm_enabled_key] = dbm_enabled
+    check = integration_check(dbm_instance)
+    assert check._config.dbm_enabled == dbm_enabled
+
+
+statement_samples_keys = ["query_samples", "statement_samples"]
+
+
+@pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
+@pytest.mark.parametrize("statement_samples_enabled", [True, False])
+def test_statement_samples_enabled_config(
+    integration_check, dbm_instance, statement_samples_key, statement_samples_enabled
+):
+    # test to make sure we continue to support the old key
+    for k in statement_samples_keys:
+        dbm_instance.pop(k, None)
+    dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
+    check = integration_check(dbm_instance)
+    assert check.statement_samples._enabled == statement_samples_enabled
+
+
+@pytest.mark.parametrize(
+    "version,expected_payload_version",
+    [
+        (VersionInfo(*[9, 6, 0]), "v9.6.0"),
+        (None, ""),
+    ],
+)
+def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
+    if version:
+        check = integration_check(dbm_instance)
+        check._version = version
+        check._connect()
+        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+    else:
+        with mock.patch(
+            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+        ) as patched_version:
+            patched_version.return_value = None
+            check = integration_check(dbm_instance)
+            check._connect()
+            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
@@ -79,7 +132,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
-    assert event['min_collection_interval'] == dbm_instance['min_collection_interval']
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
@@ -167,6 +220,31 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     assert len(matching) == 1
     row = matching[0]
     assert row['calls'] == 2
+
+
+@pytest.fixture
+def bob_conn():
+    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def dbm_instance(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['min_collection_interval'] = 1
+    pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+    return pg_instance
+
+
+def _expected_dbm_instance_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:{}'.format(dbm_instance['dbname']),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -536,84 +614,6 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
     }
     with pytest.raises(ValueError):
         integration_check(pg_instance)
-
-
-dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
-
-@pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
-@pytest.mark.parametrize("dbm_enabled", [True, False])
-def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
-    # test to make sure we continue to support the old key
-    for k in dbm_enabled_keys:
-        dbm_instance.pop(k, None)
-    dbm_instance[dbm_enabled_key] = dbm_enabled
-    check = integration_check(dbm_instance)
-    assert check._config.dbm_enabled == dbm_enabled
-
-
-statement_samples_keys = ["query_samples", "statement_samples"]
-
-
-@pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
-@pytest.mark.parametrize("statement_samples_enabled", [True, False])
-def test_statement_samples_enabled_config(
-    integration_check, dbm_instance, statement_samples_key, statement_samples_enabled
-):
-    # test to make sure we continue to support the old key
-    for k in statement_samples_keys:
-        dbm_instance.pop(k, None)
-    dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
-    check = integration_check(dbm_instance)
-    assert check.statement_samples._enabled == statement_samples_enabled
-
-
-@pytest.mark.parametrize(
-    "version,expected_payload_version",
-    [
-        (VersionInfo(*[9, 6, 0]), "v9.6.0"),
-        (None, ""),
-    ],
-)
-def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
-    if version:
-        check = integration_check(dbm_instance)
-        check._version = version
-        check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
-    else:
-        with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
-        ) as patched_version:
-            patched_version.return_value = None
-            check = integration_check(dbm_instance)
-            check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
-
-
-@pytest.fixture
-def bob_conn():
-    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
-    yield conn
-    conn.close()
-
-
-@pytest.fixture
-def dbm_instance(pg_instance):
-    pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 1
-    pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
-    return pg_instance
-
-
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbm_instance['dbname']),
-    ]
 
 
 class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState):

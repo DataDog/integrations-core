@@ -89,7 +89,9 @@ class QueueMetricCollector(object):
             except pymqi.MQMIError as e:
                 # Don't warn if no messages, see:
                 # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-                if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+                if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                    self.log.debug("No queue info available")
+                else:
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
@@ -130,7 +132,9 @@ class QueueMetricCollector(object):
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
             # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("No stat messages available for queue %s", queue_name)
+            else:
                 self.warning("Error getting queue stats for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
@@ -169,8 +173,10 @@ class QueueMetricCollector(object):
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
             # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
-                self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("No PCF queue status messages available for queue %s", queue_name)
+            else:
+                self.warning("Error getting pcf queue status for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
@@ -199,8 +205,10 @@ class QueueMetricCollector(object):
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
             # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
-                self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("No PCF queue reset metrics messages available for queue %s", queue_name)
+            else:
+                self.warning("Error getting pcf queue reset metrics for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
