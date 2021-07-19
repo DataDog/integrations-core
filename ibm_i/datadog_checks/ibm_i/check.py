@@ -125,7 +125,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.ActiveJobStatus,
                 queries.JobMemoryUsage,
                 queries.MemoryInfo,
-                queries.JobsInJobQueueInfo,
                 queries.JobQueueInfo,
                 queries.get_message_queue_info(self.config.severity_threshold),
             ]
