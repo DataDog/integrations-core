@@ -73,6 +73,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             job_name="statement-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self._metric_collection_interval = collection_interval
         self._connection_args = connection_args
         self._db = None
         self._config = config
@@ -125,7 +126,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             payload = {
                 'host': self._db_hostname,
                 'timestamp': time.time() * 1000,
-                'min_collection_interval': self._config.min_collection_interval,
+                'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
                 'mysql_rows': rows,
             }

@@ -45,6 +45,12 @@ REPOS = {
         'display_name_overrides': {},
         'ignored_missing_jobs': set(),
     },
+    'marketplace': {
+        'jobs_definition_relative_path': '.azure-pipelines/all.yml',
+        'display_name_overrides': {},
+        'codecov_config_relative_path': '',
+        'ignored_missing_jobs': set(),
+    },
 }
 
 

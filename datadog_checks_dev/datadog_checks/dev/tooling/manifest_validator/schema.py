@@ -141,8 +141,9 @@ def get_manifest_schema():
                                     },
                                     "homepage": {
                                         "type": "string",
+                                        "format": "uri",
                                         "description": "The homepage of the company/product for this integration",
-                                        "pattern": "^[\u0000-\u007F]*$",
+                                        "pattern": "^(https|http)://",
                                     },
                                 },
                             },

@@ -543,14 +543,15 @@ class MySql(AgentCheck):
             except IOError:
                 self.log.debug("Cannot read mysql pid file %s", pid_file)
 
+        process_name = [PROC_NAME]
+        if self.is_mariadb and self.version.version_compatible((10, 5, 0)):
+            process_name.append("mariadbd")
+
         # If pid has not been found, read it from ps
         if pid is None and PSUTIL_AVAILABLE:
             for proc in psutil.process_iter():
                 try:
-                    process_name = PROC_NAME
-                    if self.is_mariadb and self.version.version_compatible((10, 5, 0)):
-                        process_name = "mariadbd"
-                    if proc.name() == process_name:
+                    if proc.name() in process_name:
                         pid = proc.pid
                 except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
                     continue

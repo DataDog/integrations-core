@@ -122,7 +122,7 @@ def test_statement_metrics(aggregator, dbm_instance, query, default_schema, data
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['min_collection_interval'] == 15
+    assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
@@ -151,6 +151,10 @@ def test_statement_metrics(aggregator, dbm_instance, query, default_schema, data
     assert event['mysql']['schema'] == default_schema
     assert event['timestamp'] > 0
     assert event['host'] == 'stubbed.hostname'
+
+
+def _obfuscate_sql(query, options=None):
+    return re.sub(r'\s+', ' ', query or '').strip()
 
 
 @pytest.mark.integration
@@ -456,6 +460,10 @@ def test_async_job_cancel(aggregator, dbm_instance):
         )
 
 
+def _expected_dbm_instance_tags(dbm_instance):
+    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+
+
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
 def test_async_job_enabled(dbm_instance, statement_samples_enabled, statement_metrics_enabled):
@@ -525,11 +533,3 @@ def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_stat
         assert enabled_consumers == original_enabled_consumers.union({'events_statements_history_long'})
     else:
         assert enabled_consumers == original_enabled_consumers
-
-
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
-
-
-def _obfuscate_sql(query, options=None):
-    return re.sub(r'\s+', ' ', query or '').strip()
