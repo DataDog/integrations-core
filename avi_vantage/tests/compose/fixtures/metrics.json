@@ -5,8 +5,8 @@
         "value": 70689.623880597,
         "tags": [
             "uuid:florian-avi-controller",
-            "type:controller",
-            "tenant:admin",
+            "avi_type:controller",
+            "avi_tenant:admin",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/controller"
         ]
     },
@@ -16,8 +16,8 @@
         "value": 78.0,
         "tags": [
             "uuid:florian-avi-controller",
-            "type:controller",
-            "tenant:admin",
+            "avi_type:controller",
+            "avi_tenant:admin",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/controller"
         ]
     },
@@ -27,8 +27,8 @@
         "value": 5.0,
         "tags": [
             "uuid:florian-avi-controller",
-            "type:controller",
-            "tenant:admin",
+            "avi_type:controller",
+            "avi_tenant:admin",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/controller"
         ]
     },
@@ -38,8 +38,8 @@
         "value": 25.0,
         "tags": [
             "uuid:florian-avi-controller",
-            "type:controller",
-            "tenant:admin",
+            "avi_type:controller",
+            "avi_tenant:admin",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/controller"
         ]
     },
@@ -49,10 +49,10 @@
         "value": 100.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -62,10 +62,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -75,10 +75,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -88,10 +88,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -101,10 +101,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -114,10 +114,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -127,10 +127,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -140,10 +140,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -153,10 +153,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -166,10 +166,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -179,10 +179,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -192,10 +192,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -205,10 +205,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -218,10 +218,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -231,10 +231,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -244,10 +244,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -257,10 +257,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -270,10 +270,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -283,10 +283,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -296,10 +296,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -309,10 +309,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -322,10 +322,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -335,10 +335,10 @@
         "value": 0.0,
         "tags": [
             "uuid:pool-4d744485-818e-46a8-b3bc-6aa60b690df4",
-            "type:pool",
-            "tenant:admin",
+            "avi_type:pool",
+            "avi_tenant:admin",
             "server:10.142.0.32:8080",
-            "name:server-pool-1",
+            "pool_name:server-pool-1",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/pool"
         ]
     },
@@ -348,9 +348,9 @@
         "value": 100.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -360,9 +360,9 @@
         "value": 100.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -372,9 +372,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -384,9 +384,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -396,9 +396,9 @@
         "value": 16.3879344786,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -408,9 +408,9 @@
         "value": 16.3879344786,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -420,9 +420,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -432,9 +432,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -444,9 +444,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -456,9 +456,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -468,9 +468,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -480,9 +480,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -492,9 +492,9 @@
         "value": 19.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -504,9 +504,9 @@
         "value": 19.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -516,9 +516,9 @@
         "value": 2.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -528,9 +528,9 @@
         "value": 2.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -540,9 +540,9 @@
         "value": 11.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -552,9 +552,9 @@
         "value": 11.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -564,9 +564,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -576,9 +576,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -588,9 +588,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -600,9 +600,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -612,9 +612,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -624,9 +624,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -636,9 +636,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -648,9 +648,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -660,9 +660,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -672,9 +672,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -684,9 +684,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-wruct",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-wruct",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-wruct",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -696,9 +696,9 @@
         "value": 0.0,
         "tags": [
             "uuid:se-avi-se-hyfzo",
-            "type:serviceengine",
-            "tenant:admin",
-            "name:avi-se-hyfzo",
+            "avi_type:serviceengine",
+            "avi_tenant:admin",
+            "serviceengine_name:avi-se-hyfzo",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/serviceengine"
         ]
     },
@@ -708,9 +708,9 @@
         "value": 80.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -720,9 +720,9 @@
         "value": 80.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -732,9 +732,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -744,9 +744,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -756,9 +756,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -768,9 +768,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -780,9 +780,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -792,9 +792,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -804,9 +804,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -816,9 +816,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -828,9 +828,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -840,9 +840,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -852,9 +852,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -864,9 +864,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -876,9 +876,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -888,9 +888,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -900,9 +900,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -912,9 +912,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -924,9 +924,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -936,9 +936,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -948,9 +948,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -960,9 +960,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -972,9 +972,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -984,9 +984,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -996,9 +996,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1008,9 +1008,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1020,9 +1020,9 @@
         "value": 100.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1032,9 +1032,9 @@
         "value": 100.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1044,9 +1044,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1056,9 +1056,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1068,9 +1068,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1080,9 +1080,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1092,9 +1092,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1104,9 +1104,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1116,9 +1116,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1128,9 +1128,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1140,9 +1140,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1152,9 +1152,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1164,9 +1164,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1176,9 +1176,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1188,9 +1188,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1200,9 +1200,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1212,9 +1212,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1224,9 +1224,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1236,9 +1236,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1248,9 +1248,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1260,9 +1260,9 @@
         "value": 100.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1272,9 +1272,9 @@
         "value": 100.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1284,9 +1284,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1296,9 +1296,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1308,9 +1308,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1320,9 +1320,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1332,9 +1332,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1344,9 +1344,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1356,9 +1356,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1368,9 +1368,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1380,9 +1380,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1392,9 +1392,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1404,9 +1404,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1416,9 +1416,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1428,9 +1428,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1440,9 +1440,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1452,9 +1452,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1464,9 +1464,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1476,9 +1476,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1488,9 +1488,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1500,9 +1500,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1512,9 +1512,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1524,9 +1524,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1536,9 +1536,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1548,9 +1548,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1560,9 +1560,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1572,9 +1572,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1584,9 +1584,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1596,9 +1596,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1608,9 +1608,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1620,9 +1620,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1632,9 +1632,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1644,9 +1644,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1656,9 +1656,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1668,9 +1668,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1680,9 +1680,9 @@
         "value": 0.001,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1692,9 +1692,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1704,9 +1704,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1716,9 +1716,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1728,9 +1728,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1740,9 +1740,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1752,9 +1752,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1764,9 +1764,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1776,9 +1776,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1788,9 +1788,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1800,9 +1800,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1812,9 +1812,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1824,9 +1824,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1836,9 +1836,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     },
@@ -1848,9 +1848,9 @@
         "value": 0.0,
         "tags": [
             "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
-            "type:virtualservice",
-            "tenant:admin",
-            "name:gcp-vs-2",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
             "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
         ]
     }

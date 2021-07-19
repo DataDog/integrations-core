@@ -16,6 +16,7 @@ RESOURCE_METRICS = {
     'controller': metrics.CONTROLLER_METRICS,
     'serviceengine': metrics.SERVICE_ENGINE_METRICS,
 }
+LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
 
 
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -46,6 +47,9 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             endpoint = base_url + entity
             instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [resource_metrics]
+            instance_copy['rename_labels'] = LABELS_REMAPPER.copy()
+            instance_copy['rename_labels']['name'] = entity + "_name"
+            instance_copy['rename_labels'].update(self.config.rename_labels)
 
             scrapers[endpoint] = self.create_scraper(instance_copy)
 

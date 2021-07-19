@@ -70,7 +70,6 @@ def unit_instance():
         "avi_controller_url": "https://34.123.32.255/",
         "tls_verify": False,
         "username": "admin",
-        "password": os.environ['DOCKER_AVI_PASS']
     }
 
 
