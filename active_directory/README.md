@@ -24,7 +24,7 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 This integration uses the [Win 32 event logs integration][10] as the transport mechanism for Active Directory logs.
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
