@@ -64,7 +64,7 @@ logs:
 ```
 
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from.
-Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][5].
+Set the corresponding `source` parameter to `windows.events` to benefit from the [integration automatic processing pipeline][5].
 
 Finally, [restart the Agent][4].
 
