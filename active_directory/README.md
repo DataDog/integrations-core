@@ -40,7 +40,7 @@ This integration uses the [Win 32 event logs integration][10] as the transport m
        service: "active.directory"
    ```
 
-   Change the `channel_path` parameter value and configure them for the type of AD logs (e.g. `security`, `application`, `system` etc)
+   Specify the the type of AD logs (for example, `security`, `application`, or `system`), and provide a value for the `channel_path` parameter.
    Add multiple blocks of the above configuration with different channels if you wish to forward all of them.
    
    The logs can be filtered using [win32 transport filters][11].  
