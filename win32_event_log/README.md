@@ -54,12 +54,12 @@ Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
 logs:
   - type: windows_event
     channel_path: "<CHANNEL_1>"
-    source: "<CHANNEL_1>"
+    source: "windows.events"
     service: myservice
 
   - type: windows_event
     channel_path: "<CHANNEL_2>"
-    source: "<CHANNEL_2>"
+    source: "windows.events"
     service: myservice
 ```
 
