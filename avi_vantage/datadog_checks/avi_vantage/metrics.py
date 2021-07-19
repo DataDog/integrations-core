@@ -1,5 +1,5 @@
 VIRTUAL_SERVICE_METRICS = {
-    # Not found
+    # The following commented metrics are documented but don't seem to be available.
     # "dns_client.avg_avi_errors": {
     #     "name": "dns_client.avg_avi_errors",
     #     "type": "gauge",

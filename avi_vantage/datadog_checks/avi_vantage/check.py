@@ -30,13 +30,10 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.collect_events = False
         self.last_event_time = None
 
-    def get_resource_filters_for_entity(self, entity):
-        return
-
     def configure_scrapers(self):
+        self.base_url = self.config.avi_controller_url.rstrip('/') + "/api/analytics/prometheus-metrics/"
         scrapers = {}
 
-        base_url = self.config.avi_controller_url.rstrip('/') + "/api/analytics/prometheus-metrics/"
         for entity in self.config.entities:
             if entity not in RESOURCE_METRICS:
                 raise CheckException(
@@ -44,7 +41,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             resource_metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
-            endpoint = base_url + entity
+            endpoint = self.base_url + entity
             instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [resource_metrics]
             instance_copy['rename_labels'] = LABELS_REMAPPER.copy()
@@ -59,9 +56,8 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     @contextmanager
     def login(self):
         self.http._session = None
-        base_url = self.config.avi_controller_url.rstrip('/')
-        login_url = base_url + "/login"
-        logout_url = base_url + "/logout"
+        login_url = self.base_url + "/login"
+        logout_url = self.base_url + "/logout"
         login_resp = self.http.post(
             login_url, data={'username': self.config.username, 'password': self.config.password}
         )
@@ -69,13 +65,12 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         yield
         csrf_token = self.http.session.cookies.get('csrftoken')
         if csrf_token:
-            logout_resp = self.http.post(logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': base_url})
+            logout_resp = self.http.post(logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url})
             logout_resp.raise_for_status()
 
     @AgentCheck.metadata_entrypoint
     def collect_avi_version(self):
-        base_url = self.config.avi_controller_url.rstrip('/')
-        response = self.http.get(base_url + "/api/cluster/version")
+        response = self.http.get(self.base_url + "/api/cluster/version")
         response.raise_for_status()
         version = response.json()['Version']
         self.set_metadata('version', version)
@@ -92,5 +87,3 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             except Exception:
                 self.log.debug("Unable to fetch Avi version", exc_info=True)
             super(AviVantageCheck, self).check(None)
-            if self.collect_events:
-                self._collect_events()
