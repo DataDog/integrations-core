@@ -45,9 +45,9 @@ To configure this check for an Agent running on a host:
 
    instances:
      ## @param url - string - required
-     ## Where your Consul HTTP Server Lives
-     ## Point the URL at the leader to get metrics about your Consul Cluster.
-     ## Remind to use https instead of http if your Consul setup is configured to do so.
+     ## Where your Consul HTTP Server lives
+     ## Point the URL at the leader to get metrics about your Consul cluster.
+     ## Use HTTPS instead of HTTP if your Consul setup is configured to do so.
      #
      - url: http://localhost:8500
    ```
