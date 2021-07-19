@@ -41,7 +41,7 @@ Avi Vantage does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://avinetworks.com/why-avi/multi-cloud-load-balancing/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/datadog_checks/avi_vantage/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

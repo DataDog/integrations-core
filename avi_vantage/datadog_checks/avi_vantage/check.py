@@ -81,17 +81,6 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         scraper.http = self.http
         return scraper
 
-    def _collect_events(self):
-        pass
-        # events_url = self.base_url + "/api/analytics/logs"
-        # if not self.last_event_time:
-        #     params = {'type': 2, 'page_size': 1, 'duration': 3600}
-        # else:
-        #     start_time = self.last_event_time + timedelta(microseconds=1)
-        #     params = {'type': 2, 'page_size': 1000, 'start': start_time.replace(tzinfo=None).isoformat()}
-        #
-        # events_resp = self.http.get(events_url, params=params)
-
     def check(self, _):
         with self.login():
             try:
