@@ -13,6 +13,34 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    quantize_sql_tables: Optional[bool]
+
+
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class QuerySamples(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+    explain_function: Optional[str]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
+    samples_per_hour_per_query: Optional[int]
+    seen_samples_cache_maxsize: Optional[int]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -22,19 +50,6 @@ class Relation(BaseModel):
     relation_schema: Optional[str]
     relkind: Optional[Sequence[str]]
     schemas: Optional[Sequence[str]]
-
-
-class StatementSamples(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collections_per_second: Optional[float]
-    enabled: Optional[bool]
-    explain_function: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
 
 
 class InstanceConfig(BaseModel):
@@ -48,22 +63,24 @@ class InstanceConfig(BaseModel):
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
+    dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
-    deep_database_monitoring: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
+    query_metrics: Optional[QueryMetrics]
+    query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
-    statement_samples: Optional[StatementSamples]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]

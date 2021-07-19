@@ -1,5 +1,13 @@
 # CHANGELOG - mesos_slave
 
+## 2.10.1 / 2021-07-15
+
+* [Fixed] Improve cluster_name config option description. See [#9704](https://github.com/DataDog/integrations-core/pull/9704).
+
+## 2.10.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8956](https://github.com/DataDog/integrations-core/pull/8956).
+
 ## 2.9.0 / 2021-06-09
 
 * [Added] Add `cluster_name` config option. See [#9477](https://github.com/DataDog/integrations-core/pull/9477). Thanks [dfreilich](https://github.com/dfreilich).

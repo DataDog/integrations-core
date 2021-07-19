@@ -225,12 +225,9 @@ files:
       value:
         type: string
         example: "datadog-agent"
-    - name: deep_database_monitoring
+    - name: dbm
       description: |
-        Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-        If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-        success manager or Datadog support.
+        Set to `true` to enable Database Monitoring.
       value:
         type: boolean
         example: false
@@ -243,44 +240,61 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
-    - name: statement_samples
-      description: Configure collection of statement samples
+    - name: query_metrics
+      description: Configure collection of query metrics
       options:
         - name: enabled
           description: |
-            Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+            Enable collection of query metrics. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
-        - name: collections_per_second
+            example: true
+        - name: collection_interval
           description: |
-            Set the maximum statement sample collection rate. Each collection involves a single query to
-            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+            Set the query metric collection interval (in seconds). Each collection involves a single query to
+            `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+            check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+    - name: query_samples
+      description: Configure collection of query samples
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
           value:
             type: number
             example: 1
         - name: explain_function
           description: |
-            Override the default function used to collect execution plans for statements.
+            Override the default function used to collect execution plans for queries.
           value:
             type: string
             example: datadog.explain_statement
-        - name: explained_statements_per_hour_per_query
+        - name: explained_queries_per_hour_per_query
           description: |
-            Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+            Set the rate limit for how many execution plans will be collected per hour per normalized query.
           value:
             type: integer
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
             plan.
           value:
             type: integer
             example: 15
-        - name: explained_statements_cache_maxsize
+        - name: explained_queries_cache_maxsize
           description: |
-            Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+            Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
             be increased for databases with a very large number unique normalized queries which exceed the cache's
             limit.
           value:
@@ -293,6 +307,17 @@ files:
           value:
             type: integer
             example: 10000
+    - name: obfuscator_options
+      description: Configure how the SQL obfuscator behaves.
+      options:
+        - name: quantize_sql_tables
+          description: |
+            Set to `true` to perform quantization on your SQL tables.
+
+            Note that this option only applies when `dbm` is enabled.
+          value:
+            type: boolean
+            example: false
     - template: instances/default
   - template: logs
     example:

@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 2.7.1 / 2021-07-12
+
+* [Fixed] etcd signature. See [#9551](https://github.com/DataDog/integrations-core/pull/9551).
+
 ## 2.7.0 / 2021-05-28
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).

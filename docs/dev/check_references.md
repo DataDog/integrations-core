@@ -1,5 +1,5 @@
 ---
-title: Integration assets reference
+title: Integration Assets Reference
 kind: documentation
 ---
 
@@ -25,7 +25,7 @@ Configuration blocks follow a few guidelines:
 - All optional parameters are commented by default.
 - If a placeholder has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
 
-### @param specification
+### `@param` specification
 
 Practically speaking, the only command is `@param`, which is used to describe configuration blocks—primarily for documentation purposes. `@param` is implemented using one of the following forms:
 

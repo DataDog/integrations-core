@@ -15,7 +15,9 @@ from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.consul.common import (
+from datadog_checks.base.utils.serialization import json
+
+from .common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
     CONSUL_CHECK,
@@ -29,7 +31,6 @@ from datadog_checks.consul.common import (
     ceili,
     distance,
 )
-
 from .metrics import METRIC_MAP
 
 try:
@@ -158,7 +159,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         else:
             self.service_check(CONSUL_CAN_CONNECT, self.OK, tags=service_check_tags)
 
-        return resp.json()
+        return json.loads(resp.content)
 
     # Consul Config Accessors
     def _get_local_config(self):
@@ -589,17 +590,23 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         # Intra-datacenter
         nodes = self._get_coord_nodes()
-        if len(nodes) == 1:
+        num_nodes = len(nodes)
+        if num_nodes == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
-            for node in nodes:
+            known_distances = {}
+            for i, node in enumerate(nodes):
                 node_name = node['Node']
-                latencies = []
-                for other in nodes:
-                    other_name = other['Node']
-                    if node_name == other_name:
-                        continue
-                    latencies.append(distance(node, other))
+
+                # Initialize with pre-computed distances
+                latencies = [known_distances[(x, x + 1)] for x in range(i)]
+
+                # Calculate the distance between the current node and nodes that have not yet been seen
+                for n in range(i + 1, num_nodes):
+                    latency = distance(node, nodes[n])
+                    latencies.append(latency)
+                    known_distances[(i, n)] = latency
+
                 latencies.sort()
                 n = len(latencies)
                 half_n = n // 2

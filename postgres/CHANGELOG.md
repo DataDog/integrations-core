@@ -1,5 +1,36 @@
 # CHANGELOG - postgres
 
+## 8.0.4 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9696](https://github.com/DataDog/integrations-core/pull/9696).
+
+## 8.0.3 / 2021-07-13
+
+* [Fixed] fix None-version crash for DBM statement metrics. See [#9692](https://github.com/DataDog/integrations-core/pull/9692).
+
+## 8.0.2 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9677](https://github.com/DataDog/integrations-core/pull/9677).
+
+## 8.0.1 / 2021-07-12
+
+* [Fixed] fix broken error handling in reading of pg_settings. See [#9672](https://github.com/DataDog/integrations-core/pull/9672).
+
+## 8.0.0 / 2021-07-12
+
+* [Added] Add DBM SQL obfuscator options. See [#9640](https://github.com/DataDog/integrations-core/pull/9640).
+* [Added] Add truncated statement indicator to postgres query sample events. See [#9597](https://github.com/DataDog/integrations-core/pull/9597).
+* [Added] Add better error handling/reporting for database errors when querying pg_stat_statements. See [#9628](https://github.com/DataDog/integrations-core/pull/9628).
+* [Added] Provide a reason for not having an execution plan (Postgres). See [#9563](https://github.com/DataDog/integrations-core/pull/9563).
+* [Fixed] Fix insufficient rate limiting of statement samples . See [#9581](https://github.com/DataDog/integrations-core/pull/9581).
+* [Fixed] log execution plan collection failure at debug level. See [#9562](https://github.com/DataDog/integrations-core/pull/9562).
+* [Fixed] Enable autocommit on all connections. See [#9494](https://github.com/DataDog/integrations-core/pull/9494).
+* [Changed] Change DBM `statement` config keys and metric terminology to `query`. See [#9664](https://github.com/DataDog/integrations-core/pull/9664).
+* [Changed] remove execution plan cost extraction. See [#9632](https://github.com/DataDog/integrations-core/pull/9632).
+* [Changed] decouple DBM query metrics interval from check run interval. See [#9657](https://github.com/DataDog/integrations-core/pull/9657).
+* [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9618](https://github.com/DataDog/integrations-core/pull/9618).
+* [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
+
 ## 7.0.2 / 2021-06-03
 
 * [Fixed] Remove instance-level database tag from DBM metrics & events. See [#9469](https://github.com/DataDog/integrations-core/pull/9469).

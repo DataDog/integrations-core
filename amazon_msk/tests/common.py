@@ -22,6 +22,38 @@ E2E_METADATA = {
     'docker_volumes': ['{}:/home/mock_boto3'.format(os.path.join(HERE, 'mock_boto3'))],
 }
 
+METRICS_FROM_LABELS = [
+    'kafka.network.request.ErrorsPerSec',
+    'kafka.network.request.LocalTimeMs',
+    'kafka.network.request.MessageConversionsTimeMs',
+    'kafka.network.request.RemoteTimeMs',
+    'kafka.network.request.RequestBytes',
+    'kafka.network.request.RequestQueueTimeMs',
+    'kafka.network.request.RequestsPerSec',
+    'kafka.network.request.ResponseQueueTimeMs',
+    'kafka.network.request.ResponseSendTimeMs',
+    'kafka.network.request.TemporaryMemoryBytes',
+    'kafka.network.request.ThrottleTimeMs',
+    'kafka.network.request.TotalTimeMs',
+    'kafka.server.broker_topics.BytesInPerSec',
+    'kafka.server.broker_topics.BytesOutPerSec',
+    'kafka.server.broker_topics.BytesRejectedPerSec',
+    'kafka.server.broker_topics.FailedFetchRequestsPerSec',
+    'kafka.server.broker_topics.FailedProduceRequestsPerSec',
+    'kafka.server.broker_topics.FetchMessageConversionsPerSec',
+    'kafka.server.broker_topics.MessagesInPerSec',
+    'kafka.server.broker_topics.ProduceMessageConversionsPerSec',
+    'kafka.server.broker_topics.ReplicationBytesInPerSec',
+    'kafka.server.broker_topics.ReplicationBytesOutPerSec',
+    'kafka.server.broker_topics.TotalFetchRequestsPerSec',
+    'kafka.server.broker_topics.TotalProduceRequestsPerSec',
+    'kafka.server.replica_manager.LeaderCount',
+    'kafka.server.replica_manager.OfflineReplicaCount',
+    'kafka.server.replica_manager.PartitionCount',
+    'kafka.server.replica_manager.UnderMinIsrPartitionCount',
+    'kafka.server.replica_manager.UnderReplicatedPartitions',
+]
+
 
 def get_metrics_fixture_path(exporter_type):
     return os.path.join(HERE, 'docker', 'exporter_{}'.format(exporter_type), 'metrics')

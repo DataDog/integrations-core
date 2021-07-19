@@ -22,8 +22,8 @@ Journal files are, by default, owned and readable by the systemd-journal system 
      usermod -a -G systemd-journal dd-agent
     ```
 
-{{< tabs >}}
-{{% tab "Host" %}}
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
 To configure this check for an Agent running on a host:
 
@@ -52,8 +52,8 @@ To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER
 [Restart the Agent][2].
 
 
-{{% /tab %}}
-{{% tab "Containerized" %}}
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
 
@@ -66,8 +66,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "journald", "service": "<YOUR_APP_NAME>"}` |
 
-{{% /tab %}}
-{{< /tabs >}}
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 #### Advanced features

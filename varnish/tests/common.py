@@ -381,7 +381,7 @@ VARNISH_VERSION = os.getenv('VARNISH_VERSION')
 
 
 def get_config_by_version(name=None):
-    config = {"varnishstat": get_varnish_stat_path(), "tags": ["cluster:webs"]}
+    config = {"varnishstat": get_varnish_stat_path(), "tags": ["varnish_cluster:webs"]}
 
     if name:
         config["name"] = name

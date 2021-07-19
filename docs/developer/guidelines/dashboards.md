@@ -61,7 +61,7 @@ Follow the guidelines below as you build your dashboard to achieve something sim
     !!! warning
         Avoid using ++hyphen++ (hyphen) in the dashboard title as the dashboard URL is generated from the title.
         
-1. Add a logo. The integration logo will automatically appear in the header, next to the dashboard title, if the icon exists [here](http://app.datadoghq.com/internal/styleguide/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration dashboard.
+1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](http://app.datadoghq.com/internal/styleguide/logos/logo-gallery?variant=avatar) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
    ![Logo in header](../assets/images/logo_header.png)
 
 1. Always include an "about" group for the integration containing a brief description and helpful links. Also include an "overview" group containing a few of the most important metrics, and place it at the top of the dashboard. Edit the "about" group and select the "banner" display option, then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. For instructions on how to create and upload a banner image, go to the [DRUIDS logo gallery](http://app.datadoghq.com/internal/styleguide/logos/logo-gallery), click the relevant logo, and click the "MSL Dashboard" tab. The "about" section should contain content, not data; the "overview" section should contain data. Avoid making the "about" section full-width.

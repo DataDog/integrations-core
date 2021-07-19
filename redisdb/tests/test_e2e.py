@@ -14,10 +14,10 @@ pytestmark = pytest.mark.e2e
 
 
 def assert_common_metrics(aggregator):
-    tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
+    base_tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382']
 
-    aggregator.assert_service_check('redis.can_connect', status=Redis.OK, tags=tags)
-
+    aggregator.assert_service_check('redis.can_connect', status=Redis.OK, tags=base_tags)
+    tags = base_tags + ['redis_role:master']
     aggregator.assert_metric('redis.mem.fragmentation_ratio', count=2, tags=tags)
     aggregator.assert_metric('redis.rdb.bgsave', count=2, tags=tags)
     aggregator.assert_metric('redis.aof.last_rewrite_time', count=2, tags=tags)

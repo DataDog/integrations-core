@@ -39,6 +39,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    cluster_name: Optional[str]
     connect_timeout: Optional[float]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]

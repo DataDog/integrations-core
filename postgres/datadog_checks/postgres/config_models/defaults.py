@@ -36,15 +36,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_dbm(field, value):
+    return False
+
+
 def instance_dbname(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_dbstrict(field, value):
-    return False
-
-
-def instance_deep_database_monitoring(field, value):
     return False
 
 
@@ -64,6 +64,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 
@@ -74,6 +78,14 @@ def instance_pg_stat_statements_view(field, value):
 
 def instance_port(field, value):
     return 5432
+
+
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_samples(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_query_timeout(field, value):
@@ -90,10 +102,6 @@ def instance_service(field, value):
 
 def instance_ssl(field, value):
     return 'false'
-
-
-def instance_statement_samples(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_table_count_limit(field, value):

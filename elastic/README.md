@@ -335,13 +335,9 @@ See [metadata.csv][12] for a list of metrics provided by this integration.
 
 The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes - red, yellow, or green.
 
-### Service checks
+### Service Checks
 
-**elasticsearch.cluster_health**:<br>
-Returns `OK` if the cluster status is green, `WARNING` if yellow, and `CRITICAL` otherwise.
-
-**elasticsearch.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Elasticsearch to collect metrics.
+See [service_checks.json][34] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -385,3 +381,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
 [33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[34]: https://github.com/DataDog/integrations-core/blob/master/elastic/assets/service_checks.json

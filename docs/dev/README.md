@@ -1,5 +1,5 @@
 ---
-title: Introduction to Agent-based integrations
+title: Introduction to Agent-based Integrations
 kind: documentation
 aliases:
   - /guides/agent_checks/

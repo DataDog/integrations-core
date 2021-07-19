@@ -63,7 +63,7 @@ trigger-agent-build:
           # Get slack user
           if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
-          if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
 
           MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
           postmessage "$SLACK_AUTHOR" "$MESSAGE"
@@ -81,6 +81,7 @@ trigger-agent-build:
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
+  timeout: 2 hours
   script:
     - |
       if [[ -s ./pipeline_id.txt ]]; then
@@ -92,7 +93,7 @@ validate-agent-build:
           # Get slack user
           if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
-          if [ -z "$SLACK_AUTHOR" ]; then echo "Author not found or unsubscribed"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
 
           # Wait for the agent build to complete
           export BUILD_SUCCESS="true"

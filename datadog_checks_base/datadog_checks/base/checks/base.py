@@ -240,6 +240,13 @@ class AgentCheck(object):
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
             ),
+            '_config_renamed': (
+                False,
+                (
+                    'DEPRECATION NOTICE: The `%s` config option has been renamed '
+                    'to `%s` and will be removed in a future release.'
+                ),
+            ),
         }  # type: Dict[str, Tuple[bool, str]]
 
         # Setup metric limits

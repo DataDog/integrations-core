@@ -14,7 +14,7 @@ The Memcache check is included in the [Datadog Agent][2] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
 
-#### Metric Collection
+#### Metric collection
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -73,7 +73,7 @@ See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] 
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
-#### Log Collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -112,8 +112,7 @@ The Mcache check does not include any events.
 
 ### Service Checks
 
-**memcache.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to memcache to collect metrics, otherwise `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -140,3 +139,4 @@ Need help? Contact [Datadog support][10].
 [13]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[16]: https://github.com/DataDog/integrations-core/blob/master/mcache/assets/service_checks.json

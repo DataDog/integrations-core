@@ -1,5 +1,10 @@
 # CHANGELOG - istio
 
+## 3.13.0 / 2021-07-12
+
+* [Added] Add more pilot metrics. See [#9337](https://github.com/DataDog/integrations-core/pull/9337). Thanks [hari2192](https://github.com/hari2192).
+* [Fixed] Bump base package requirement. See [#9606](https://github.com/DataDog/integrations-core/pull/9606).
+
 ## 3.12.0 / 2021-05-28
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).

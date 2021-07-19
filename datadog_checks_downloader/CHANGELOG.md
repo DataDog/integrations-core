@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.4.0 / 2021-07-09
+
+* [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).
+
 ## 3.3.0 / 2021-05-28
 
 * [Added] Better error message if the integration doesn't have the expected type. See [#9403](https://github.com/DataDog/integrations-core/pull/9403).

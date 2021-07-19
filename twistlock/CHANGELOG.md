@@ -1,5 +1,9 @@
 # CHANGELOG - Twistlock
 
+## 1.12.0 / 2021-07-12
+
+* [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
+
 ## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#9000](https://github.com/DataDog/integrations-core/pull/9000).

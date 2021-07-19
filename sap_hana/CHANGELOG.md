@@ -1,5 +1,9 @@
 # CHANGELOG - SAP HANA
 
+## 1.5.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8981](https://github.com/DataDog/integrations-core/pull/8981).
+
 ## 1.4.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Catch exception when closing lost connection. See [#8630](https://github.com/DataDog/integrations-core/pull/8630).
