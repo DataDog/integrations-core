@@ -22,7 +22,7 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 #### Log collection
 
-_Available for Agent versions >6.0_
+This integration uses [win32 event logs integration][10] as the transport mechanism for active directory logs.
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
@@ -34,16 +34,18 @@ _Available for Agent versions >6.0_
 
    ```yaml
    logs:
-     - type: file
-       path: /path/to/my/directory/file.log
-       source: ruby
-       service: "<MY_SERVICE>"
+     - type: windows_event
+       channel_path: <CHANNEL>
+       source: "windows.events"
+       service: "active.directory"
    ```
 
-   Change the `path` and `service` parameter values and configure them for your environment.
-   See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
-
-3. This integration is intended for the [Active Directory Module for Ruby][5]. If you are not using the Ruby module, change the `source` value to `active_directory` and configure the `path` for your environment.
+   Change the `channel_path` parameter value and configure them for the type of AD logs (e.g. `security`, `application`, `system` etc)
+   Add multiple blocks of the above configuration with different channels if you wish to forward all of them.
+   
+   The logs can be filtered using [win32 transport filters][11].  
+   
+See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
 
 4. [Restart the Agent][4].
 
@@ -73,8 +75,9 @@ Need help? Contact [Datadog support][8].
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/active_directory/datadog_checks/active_directory/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://www.rubydoc.info/gems/activedirectory/0.9.3
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/#installation-in-a-domain-environment
+[10]: https://docs.datadoghq.com/integrations/win32_event_log/#log-collection
+[11]: https://docs.datadoghq.com/integrations/win32_event_log/#filtering-events

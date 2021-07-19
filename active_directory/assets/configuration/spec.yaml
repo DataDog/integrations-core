@@ -19,7 +19,11 @@ files:
     - template: instances/default
   - template: logs
     example:
-    - type: file
-      path: /path/to/active_directory/file.log
-      source: ruby
-      service: <SERVICE_NAME>
+    - type: windows_event
+      channel_path: security
+      source: windows.events
+      service: active.directory
+    - type: windows_event
+      channel_path: application
+      source: windows.events
+      service: active.directory
