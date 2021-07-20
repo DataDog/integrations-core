@@ -33,6 +33,12 @@ class ProfileValidator(object):
 
     def success(self, success_message):
         self.result.messages['success'].append(success_message)
+    
+    def info(self, info_message):
+        self.result.messages['info'].append(info_message)
+    
+    def warning(self, warning_message):
+        self.result.messages['warning'].append(warning_message)
 
     def __repr__(self):
         return str(self.result)
