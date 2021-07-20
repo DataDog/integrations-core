@@ -128,8 +128,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
             self._stat_column_cache = []
-            self._log.warning('Statement-level metrics are unavailable: %s', e)
-            return []
+            raise e
 
     def _get_pg_stat_statements_columns(self):
         """
@@ -230,10 +229,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if (
                 isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
             ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
-                error_tag = "error:database-{}-pg_stat_statements_not_enabled".format(type(e).__name__)
+                error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
                 self._log.warning(
-                    "Unable to collect statement metrics because pg_stat_statements is not installed "
-                    "in this database"
+                    "Unable to collect statement metrics because pg_stat_statements shared library is not loaded"
+                )
+            elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
+                error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+                self._log.warning(
+                    "Unable to collect statement metrics because pg_stat_statements is not created in this database"
                 )
             else:
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
