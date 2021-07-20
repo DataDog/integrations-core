@@ -1,3 +1,4 @@
+from datadog_checks.dev.tooling.constants import get_root
 import click
 
 import yaml
@@ -7,8 +8,6 @@ from os.path import join
 
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-
-# relative_path = '/Users/matheus.kledeglau/Desktop/profiles'
 
 
 @click.command("check-duplicates", short_help="Check SNMP profiles for duplicate metrics",  context_settings=CONTEXT_SETTINGS)
@@ -22,7 +21,14 @@ def check_duplicates(file,directory):
     if directory:
         relative_path = directory
     else:
-        relative_path = "/Users/matheus.kledeglau/Desktop/profiles"
+        relative_path = join(get_root(),
+                        'snmp',
+                        'datadog_checks',
+                        'snmp',
+                        'data',
+                        'profiles'
+                        )
+        print(relative_path)
     used_metrics = {}
     duplicated = {}
     verify_duplicate_metrics_profile_recursive(file, used_metrics, duplicated, relative_path)
