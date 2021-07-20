@@ -271,5 +271,8 @@ def test_scoreboard_values(aggregator, check, scoreboard, expected_metrics, data
 
     check._submit_scoreboard(scoreboard, tags)
 
-    for metric, expectedValue in expected_metrics.items():
-        aggregator.assert_metric(metric, tags=tags, value=expectedValue)
+    for metric, expected_value in expected_metrics.items():
+        aggregator.assert_metric(metric, tags=tags, value=expected_value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_no_duplicate_metrics()
