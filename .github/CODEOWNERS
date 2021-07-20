@@ -102,6 +102,7 @@ assets/               @DataDog/agent-integrations
 **/postgres/tests/test_statements.py         @DataDog/agent-integrations @DataDog/database-monitoring
 **/mysql/statements.py                       @DataDog/agent-integrations @DataDog/database-monitoring
 **/mysql/statement_samples.py                @DataDog/agent-integrations @DataDog/database-monitoring
+**/mysql/tests/test_statements.py            @DataDog/agent-integrations @DataDog/database-monitoring
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
