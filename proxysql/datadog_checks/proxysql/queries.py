@@ -157,6 +157,7 @@ STATS_MYSQL_CONNECTION_POOL = {
                 'SHUNNED': 'CRITICAL',
                 'OFFLINE_SOFT': 'WARNING',
                 'OFFLINE_HARD': 'CRITICAL',
+                'SHUNNED_REPLICATION_LAG': 'CRITICAL',
             },
         },
         # how many connections are currently used by ProxySQL for sending queries to the backend server
