@@ -99,6 +99,7 @@ assets/               @DataDog/agent-integrations
 # Database monitoring
 **/postgres/statements.py                    @DataDog/agent-integrations @DataDog/database-monitoring
 **/postgres/statement_samples.py             @DataDog/agent-integrations @DataDog/database-monitoring
+**/postgres/tests/test_statements.py         @DataDog/agent-integrations @DataDog/database-monitoring
 **/mysql/statements.py                       @DataDog/agent-integrations @DataDog/database-monitoring
 **/mysql/statement_samples.py                @DataDog/agent-integrations @DataDog/database-monitoring
 **/mysql/tests/test_statements.py            @DataDog/agent-integrations @DataDog/database-monitoring
