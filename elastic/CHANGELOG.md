@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 3.0.1 / 2021-07-20
+
+* [Fixed] Fix log line . See [#9621](https://github.com/DataDog/integrations-core/pull/9621).
+
 ## 3.0.0 / 2021-05-28
 
 * [Added] Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
