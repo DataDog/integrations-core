@@ -8,30 +8,6 @@ from os.path import join
 
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-
-@click.command("check-duplicates", short_help="Check SNMP profiles for duplicate metrics",  context_settings=CONTEXT_SETTINGS)
-@click.option('-f', '--file', help="Path to a profile file to validate")
-@click.option('-d', '--directory', help="Path to a directory of profiles to validate")
-@click.option('-p', '--path', help="File containg the path of the directories of all profiles")
-def check_duplicates(file, directory, path):
-    """
-    Calls the recursive function(verify_duplicate_metrics_profile_recursive) to check if there are any duplicated metric.
-    It also logs the duplicated OID and reports all the files:lines where it is.
-    """
-    path = initialize_path(path, directory)
-    used_metrics = {}
-    duplicated = {}
-    verify_duplicate_metrics_profile_recursive(
-        file, used_metrics, duplicated, path)
-    # print(duplicated)
-    for OID in duplicated:
-        echo_failure(OID + " is duplicated in profiles: ")
-        for file, line in duplicated.get(OID):
-            echo_failure("|------> "+file+":"+str(line))
-    if len(duplicated) == 0:
-        echo_success("No duplicated OID ")
-    return duplicated
-
 class SafeLineLoader(SafeLoader):
 
     def construct_mapping(self, node, deep=False):

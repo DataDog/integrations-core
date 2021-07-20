@@ -9,9 +9,8 @@ from .translate_profile import translate_profile
 from .validate_mib_filenames import validate_mib_filenames
 from .validate_snmp_profiles import validate_profile
 
-from .duplicate_metric_profile import check_duplicates
 
-ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, validate_profile, check_duplicates]
+ALL_COMMANDS = [generate_profile_from_mibs, translate_profile, validate_mib_filenames, validate_profile]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='SNMP utilities')

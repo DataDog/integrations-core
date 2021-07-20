@@ -1,3 +1,5 @@
+from yaml.error import YAMLError
+from datadog_checks.dev.tooling.commands.console import echo_failure
 from genericpath import isfile
 import yaml
 from yaml.loader import SafeLoader
@@ -26,19 +28,26 @@ def initialize_path(path_name, directory):
     if directory:
         path.append(directory)
     
-    print(path)
     return path
 
-def find_profile_in_path(profile_name, path):
+def find_profile_in_path(profile_name, path, line = True):
     file_contents = None
+    errors = []
     for directory_path in path:
-        try:
-            with open(join(directory_path, profile_name)) as f:
-                file_contents = yaml.load(f.read(), Loader=SafeLineLoader)
-        except:
-            continue
+        if isfile(join(directory_path, profile_name)):
+            try:
+                with open(join(directory_path, profile_name)) as f:
+                    if line:
+                        file_contents = yaml.load(f.read(), Loader=SafeLineLoader)
+                    else:
+                        file_contents = yaml.safe_load(f.read())
+            except YAMLError as e:
+                errors.append((e, join(directory_path, profile_name)))
         if file_contents:
             return file_contents
+    for e,path in errors:
+        echo_failure("Error in the YAML file " + path)
+        echo_failure(e)
     return file_contents
 
 def exist_profile_in_path(profile_name, path):

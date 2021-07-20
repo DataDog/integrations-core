@@ -28,12 +28,10 @@ def validate_profile(file, directory, verbose, path):
 
     display_queue = []
     file_failures = 0
-    file_fixed = False
 
     for validator in all_validators:
         validator.validate(file,directory,path)
         file_failures += 1 if validator.result.failed else 0
-        file_fixed += 1 if validator.result.fixed else 0
         for msg_type, messages in validator.result.messages.items():
             for message in messages:
                 display_queue.append((message_methods[msg_type], message))
@@ -42,4 +40,4 @@ def validate_profile(file, directory, verbose, path):
         echo_failure("FAILED")
     for display_func, message in display_queue:
         display_func(message)
-    # validators.validate_profile(file, directory, verbose)
+    
