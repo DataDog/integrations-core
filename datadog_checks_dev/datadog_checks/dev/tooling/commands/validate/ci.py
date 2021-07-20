@@ -86,6 +86,10 @@ def get_attribute_from_job(job, attribute):
 
 def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     jobs_definition_relative_path = repo_data['jobs_definition_relative_path']
+    if not jobs_definition_relative_path:
+        echo_info("Skipping since jobs path isn't defined")
+        return
+
     jobs_definition_path = path_join(get_root(), *jobs_definition_relative_path.split('/'))
     if not file_exists(jobs_definition_path):
         abort('Unable to find the file defining all `master` jobs')
@@ -206,6 +210,10 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
 
 def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names):
     codecov_config_relative_path = repo_data['codecov_config_relative_path']
+    if not codecov_config_relative_path:
+        echo_info("Skipping since codecov path isn't defined")
+        return
+
     codecov_config_path = path_join(get_root(), *codecov_config_relative_path.split('/'))
     if not file_exists(codecov_config_path):
         abort('Unable to find the Codecov config file')
@@ -374,5 +382,10 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
+    echo_info("Validating CI Configuration...", nl=False)
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
+
+    echo_info("Validating Code Coverage Configuration...", nl=False)
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
