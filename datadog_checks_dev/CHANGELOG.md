@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.4.1 / 2021-07-20
+
+* [Fixed] Support empty config options for job or codecov. See [#9736](https://github.com/DataDog/integrations-core/pull/9736).
+
 ## 12.4.0 / 2021-07-20
 
 * [Added] Upgrade `virtualenv`. See [#9691](https://github.com/DataDog/integrations-core/pull/9691).
