@@ -1,0 +1,61 @@
+from genericpath import isfile
+import yaml
+from yaml.loader import SafeLoader
+
+from os.path import join
+
+from datadog_checks.dev.tooling.constants import get_root
+
+
+
+def initialize_path(path_name, directory):
+    path = []
+    if path_name:
+        with open(path_name) as f:
+            for directory_path in f:
+                path.append(directory_path.strip())
+
+    path.append(join(get_root(),
+                     'snmp',
+                     'datadog_checks',
+                     'snmp',
+                     'data',
+                     'profiles'
+                     ))
+
+    if directory:
+        path.append(directory)
+    
+    print(path)
+    return path
+
+def find_profile_in_path(profile_name, path):
+    file_contents = None
+    for directory_path in path:
+        try:
+            with open(join(directory_path, profile_name)) as f:
+                file_contents = yaml.load(f.read(), Loader=SafeLineLoader)
+        except:
+            continue
+        if file_contents:
+            return file_contents
+    return file_contents
+
+def exist_profile_in_path(profile_name, path):
+    for directory_path in path:
+        if isfile(join(directory_path, profile_name)):
+            return True
+    return False
+
+class SafeLineLoader(SafeLoader):
+
+    def construct_mapping(self, node, deep=False):
+        """
+        Function to allow retrieving the line of the duplicated metric.\n
+        It adds the key "__line__" with the value of the line it is to every key in the mapping created by yaml.load
+        """
+        mapping = super(SafeLineLoader, self).construct_mapping(
+            node, deep=deep)
+        # Add 1 so line numbering starts at 1
+        mapping['__line__'] = node.start_mark.line + 1
+        return mapping

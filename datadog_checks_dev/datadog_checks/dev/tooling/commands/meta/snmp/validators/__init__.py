@@ -1,1 +1,2 @@
 from .schema_validation import validate_profile
+from .validator import get_all_validators
