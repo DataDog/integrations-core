@@ -641,13 +641,34 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
 
+class UndefinedTable(psycopg2.errors.UndefinedTable):
+    """
+    A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
+    has it as read-only and not settable at construction-time
+    """
+
+    def __init__(self, pg_error):
+        self.pg_error = pg_error
+
+    def __getattribute__(self, attr):
+        if attr == 'pgerror':
+            return self.pg_error
+        else:
+            return super(UndefinedTable, self).__getattribute__(attr)
+
+
 @pytest.mark.parametrize(
     "error,metric_columns,expected_error_tag",
     [
         (
             ObjectNotInPrerequisiteState('pg_stat_statements must be loaded via shared_preload_libraries'),
             [],
-            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_enabled',
+            'error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded',
+        ),
+        (
+            UndefinedTable('ERROR:  relation "pg_stat_statements" does not exist'),
+            [],
+            'error:database-UndefinedTable-pg_stat_statements_not_created',
         ),
         (
             ObjectNotInPrerequisiteState('cannot insert into view'),
