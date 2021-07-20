@@ -7,6 +7,7 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.vault import Vault
 from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
@@ -340,7 +341,7 @@ class TestVault:
             )
         aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
-        aggregator.assert_all_metrics_covered()
+        assert_all_metrics(aggregator)
 
     def test_replication_dr_mode_changed(self, aggregator):
         instance = INSTANCES['main']
@@ -379,7 +380,7 @@ class TestVault:
             assert not c._replication_dr_secondary_mode
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
             aggregator.assert_metric('vault.is_leader', 1)
-            aggregator.assert_all_metrics_covered()
+            assert_all_metrics(aggregator)
             aggregator.reset()
 
             run_check(c)
@@ -389,7 +390,7 @@ class TestVault:
             assert c._replication_dr_secondary_mode
             aggregator.assert_metric('vault.is_leader', 1)
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
-            aggregator.assert_all_metrics_covered()
+            assert_all_metrics(aggregator)
 
     @pytest.mark.parametrize("cluster", [True, False])
     def test_event_leader_change(self, aggregator, cluster):
@@ -526,7 +527,7 @@ class TestVault:
             run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
-        aggregator.assert_all_metrics_covered()
+        assert_all_metrics(aggregator)
 
     def test_sys_leader_non_standard_status_codes(self, aggregator):
         instance = INSTANCES['main']
@@ -613,13 +614,20 @@ class TestVault:
         c.parse_config()
 
         content = (
+            '# HELP vault_route_create_foobar_ vault_route_create_foobar_\n'
+            '# TYPE vault_route_create_foobar_ summary\n'
+            'vault_route_create_foobar_{quantile="0.5"} 1\n'
+            'vault_route_create_foobar_{quantile="0.9"} 2\n'
+            'vault_route_create_foobar_{quantile="0.99"} 3\n'
+            'vault_route_create_foobar__sum 571.073808670044\n'
+            'vault_route_create_foobar__count 18\n'
             '# HELP vault_route_rollback_sys_ vault_route_rollback_sys_\n'
             '# TYPE vault_route_rollback_sys_ summary\n'
             'vault_route_rollback_sys_{quantile="0.5"} 3\n'
             'vault_route_rollback_sys_{quantile="0.9"} 3\n'
             'vault_route_rollback_sys_{quantile="0.99"} 4\n'
-            'vault_route_rollback_sys_ 3.2827999591827393\n'
-            'vault_route_rollback_sys_ 1'
+            'vault_route_rollback_sys__sum 3.2827999591827393\n'
+            'vault_route_rollback_sys__count 1'
         )
 
         def iter_lines(**_):
@@ -636,5 +644,24 @@ class TestVault:
                 aggregator.assert_metric(
                     'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
                 )
+                aggregator.assert_metric(
+                    'vault.route.rollback.quantile', tags=global_tags + [quantile_tag, 'mountpoint:sys']
+                )
+                aggregator.assert_metric(
+                    'vault.route.create.quantile', tags=global_tags + [quantile_tag, 'mountpoint:foobar']
+                )
 
-        aggregator.assert_all_metrics_covered()
+            aggregator.assert_metric('vault.vault.route.rollback.sys.sum', tags=global_tags)
+            aggregator.assert_metric('vault.vault.route.rollback.sys.count', tags=global_tags)
+            aggregator.assert_metric('vault.route.rollback.sum', tags=global_tags + ['mountpoint:sys'])
+            aggregator.assert_metric('vault.route.rollback.count', tags=global_tags + ['mountpoint:sys'])
+            aggregator.assert_metric('vault.route.create.sum', tags=global_tags + ['mountpoint:foobar'])
+            aggregator.assert_metric('vault.route.create.count', tags=global_tags + ['mountpoint:foobar'])
+
+        assert_all_metrics(aggregator)
+
+
+def assert_all_metrics(aggregator):
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_no_duplicate_metrics()
