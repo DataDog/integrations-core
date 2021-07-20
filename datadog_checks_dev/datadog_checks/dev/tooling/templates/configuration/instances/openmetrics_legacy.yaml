@@ -140,17 +140,17 @@
     example: <TOKEN_PATH>
     type: string
 - name: ignore_metrics
-  description: A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+  description: |
+    A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
+    The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
   value:
     type: array
     items:
       type: string
     example:
       - <IGNORED_METRIC_NAME>
-      - <PREFIX_*>
-      - <*_SUFFIX>
-      - <PREFIX_*_SUFFIX>
-      - <*_SUBSTRING_*>
+      - <SUBSTRING_*>
+      - <*_SUBSTRING>
 - name: ignore_metrics_by_labels
   description: |
     A mapping of labels where metrics with matching label key and values are ignored.
