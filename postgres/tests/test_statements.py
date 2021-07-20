@@ -4,6 +4,7 @@
 import re
 import time
 from collections import Counter
+from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg2
@@ -12,6 +13,7 @@ from semver import VersionInfo
 from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
@@ -36,6 +38,13 @@ SAMPLE_QUERIES = [
 
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+
+@pytest.fixture(autouse=True)
+def stop_orphaned_threads():
+    # make sure we shut down any orphaned threads and create a new Executor for each test
+    DBMAsyncJob.executor.shutdown(wait=True)
+    DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 @pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)

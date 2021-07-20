@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
 
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
@@ -26,13 +24,6 @@ ACTIVITY_METRICS = [
 ]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    DBMAsyncJob.executor.shutdown(wait=True)
-    DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 def test_common_metrics(aggregator, integration_check, pg_instance):
