@@ -30,6 +30,10 @@ vault.go.memstats.stack.sys.bytes,gauge,,,,Number of bytes obtained from system 
 vault.go.memstats.sys.bytes,gauge,,,,Number of bytes obtained from system.,0,vault,
 vault.go.threads,gauge,,,,Number of OS threads created.,0,vault,
 vault.is_leader,gauge,,,,1 if leader 0 otherwise.,0,vault,Cluster leader
+vault.vault.cache.hit,count,,,,"Number of times a value was retrieved from the LRU cache.",0,vault,cache hit
+vault.vault.cache.miss,count,,,,"Number of times a value was not in the LRU cache. The results in a read from the configured storage.",0,vault,cache miss
+vault.vault.cache.write,count,,,,"Number of times a value was written to the LRU cache.",0,vault,cache miss
+vault.vault.cache.delete,count,,,,"Number of times a value was deleted from the LRU cache. This does not count cache expirations.",0,vault,cache delete
 vault.process.cpu.seconds.total,count,,,,Total user and system CPU time spent in seconds.,0,vault,
 vault.process.max.fds,gauge,,,,Maximum number of open file descriptors.,0,vault,
 vault.process.open.fds,gauge,,,,Number of open file descriptors.,0,vault,
