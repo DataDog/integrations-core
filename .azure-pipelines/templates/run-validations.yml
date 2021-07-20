@@ -4,9 +4,10 @@ parameters:
   ispr: false
   validate_changed: ''
   validate_codeowners: false
+  validate_ci: true
 
 steps:
-- ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
+- ${{ if eq(parameters.validate_ci, 'true') }}:
   - script: |
       echo "ddev validate ci"
       ddev validate ci
