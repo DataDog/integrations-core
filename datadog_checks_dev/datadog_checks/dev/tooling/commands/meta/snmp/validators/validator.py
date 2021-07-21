@@ -3,7 +3,6 @@ import jsonschema
 
 from datadog_checks.dev.tooling.constants import get_root
 from posixpath import join
-from ..duplicate_metric_profile import verify_duplicate_metrics_profile_recursive
 from ....console import abort
 
 from .utils import (
@@ -115,7 +114,7 @@ class DuplicateMetricsValidator(ProfileValidator):
         """
         used_metrics = {}
         duplicated = {}
-        verify_duplicate_metrics_profile_recursive(
+        self.verify_duplicate_metrics_profile_recursive(
             profile, used_metrics, duplicated, path)
         for OID in duplicated:
             output_message = ""
@@ -125,6 +124,69 @@ class DuplicateMetricsValidator(ProfileValidator):
             self.fail(output_message)
         if len(duplicated) == 0:
             self.success("No duplicated OID ")
+
+    def verify_duplicate_metrics_profile_recursive(self,file, used_metrics, duplicated, path):
+        """
+        Recursively for each profile extended, it checks the metrics and add them into the mapping "used_metrics".\n
+        If the metric is duplicated, it also adds it to the mapping "duplicated".
+        """
+        extensions = self.verify_duplicate_metrics_profile_file(
+            file, used_metrics, duplicated, path)
+        if extensions:
+            for file_name in extensions:
+                self.verify_duplicate_metrics_profile_recursive(
+                    file_name, used_metrics, duplicated, path)
+
+
+    def verify_duplicate_metrics_profile_file(self,file, used_metrics, duplicated, path):
+        # type: (any, dict, dict, list) -> list
+        """
+        Extract the OIDs of a profile and adds them to "used_metrics".\n
+        The duplicated metrics are also added to "duplicated" mapping. "duplicated" is a dictionary where the OIDs are the keys and the values are lists of tuples (name_of_profile,line)
+        """
+        file_contents = find_profile_in_path(file,path)
+        if not file_contents:
+            print("File contents returned None: " + file)
+            abort()
+        # print(path)
+        if file_contents.get('metrics'):
+            for metric in file_contents.get('metrics'):
+                # Check if there are symbols metrics
+                if metric.get('symbols'):
+                    self.extract_oids_from_symbols(
+                        metric, used_metrics, duplicated, file)
+                # Check if there are symbol metrics
+                if metric.get('symbol'):
+                   self.extract_oid_from_symbol(metric, used_metrics, duplicated, file)
+
+        return file_contents.get('extends')
+
+
+    def extract_oids_from_symbols(self, metric, used_metrics, duplicated, file):
+        """
+        Function to extract OID from symbols
+        """
+        for metric_symbols in metric.get('symbols'):
+            OID = metric_symbols.get('OID')
+            line = metric_symbols.get('__line__')
+            if OID not in used_metrics:
+                used_metrics[OID] = [(file, line)]
+            else:
+                used_metrics[OID].append((file, line))
+                duplicated[OID] = used_metrics[OID]
+
+
+    def extract_oid_from_symbol(self, metric, used_metrics, duplicated, file):
+        """
+        Function to extract OID from symbol
+        """
+        OID = metric.get('symbol').get('OID')
+        line = metric.get('symbol').get('__line__')
+        if OID not in used_metrics:
+            used_metrics[OID] = [(file, line)]
+        else:
+            used_metrics[OID].append((file, line))
+            duplicated[OID] = used_metrics[OID]
         
 
 
