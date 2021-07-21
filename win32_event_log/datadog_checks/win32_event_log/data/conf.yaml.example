@@ -100,7 +100,7 @@ instances:
     ##   - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
     ##
     ##   /\ WARNING /\
-    ##   Due to a limitation in the windows events API, filtering on event ids can only be up to 20 ids at a time.
+    ##   Due to a limitation in the windows events API, filtering on event ids can only be up to 20 ids per instance.
     ##   Please consider splitting up the id filtering into multiple instances if necessary
     ##
     ## For advanced and more granular filtering, define a `query`.
