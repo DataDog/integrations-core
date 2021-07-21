@@ -24,7 +24,7 @@ yum install -y kernel-devel-$(uname -r)
 ```
 
 **Note**: Kernel version 4.11 or later is required for the OOM Kill check to work.
-In addition, CentOS/RHEL versions earlier than 8 are not supported.
+In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
