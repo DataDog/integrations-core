@@ -22,9 +22,9 @@ from .common import MYSQL_VERSION_PARSED
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_minimal_config(aggregator, instance_basic):
+def test_minimal_config(aggregator, dd_run_check, instance_basic):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
-    mysql_check.check(instance_basic)
+    dd_run_check(mysql_check)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
@@ -50,9 +50,9 @@ def test_minimal_config(aggregator, instance_basic):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_complex_config(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
-    mysql_check.check(instance_complex)
+def test_complex_config(aggregator, dd_run_check, instance_complex):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    dd_run_check(mysql_check)
 
     _assert_complex_config(aggregator)
     aggregator.assert_metrics_using_metadata(
@@ -140,14 +140,14 @@ def _assert_complex_config(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_connection_failure(aggregator, instance_error):
+def test_connection_failure(aggregator, dd_run_check, instance_error):
     """
     Service check reports connection failure
     """
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_error])
 
     with pytest.raises(Exception):
-        mysql_check.check(instance_error)
+        dd_run_check(mysql_check)
 
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
@@ -157,12 +157,12 @@ def test_connection_failure(aggregator, instance_error):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_complex_config_replica(aggregator, instance_complex):
+def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
 
-    mysql_check.check(config)
+    dd_run_check(mysql_check)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
@@ -530,11 +530,11 @@ def test__get_runtime_aurora_tags():
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(instance_basic, datadog_agent, version_metadata):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+def test_version_metadata(dd_run_check, instance_basic, datadog_agent, version_metadata):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
     mysql_check.check_id = 'test:123'
 
-    mysql_check.check(instance_basic)
+    dd_run_check(mysql_check)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
 
@@ -542,7 +542,7 @@ def test_version_metadata(instance_basic, datadog_agent, version_metadata):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_custom_queries])
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_custom_queries])
     dd_run_check(mysql_check)
 
     aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
