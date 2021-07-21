@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 8.0.5 / 2021-07-21
+
+* [Fixed] Fix wrong errors related to pg_stat_statements setup. See [#9733](https://github.com/DataDog/integrations-core/pull/9733).
+* [Fixed] Bump `datadog-checks-base` version requirement. See [#9719](https://github.com/DataDog/integrations-core/pull/9719).
+
 ## 8.0.4 / 2021-07-15
 
 * [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9696](https://github.com/DataDog/integrations-core/pull/9696).
