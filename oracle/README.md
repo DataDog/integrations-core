@@ -218,7 +218,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "username":"datadog", "password":"<PASSWORD>"}` |
 
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 
