@@ -99,6 +99,10 @@ instances:
     ##   - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
     ##   - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
     ##
+    ##   /\ WARNING /\
+    ##   Due to a limitation in the windows events API, filtering on event id should not consist of more than 20 event ids.
+    ##   Please consider splitting up the id filtering into multiple instances if necessary
+    ##
     ## For advanced and more granular filtering, define a `query`.
     ##
     ## If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
