@@ -24,6 +24,9 @@ class ValidationResult(object):
 
 
 class ProfileValidator(object):
+    """
+    Class that will be subclassed to create the validators for the profile.
+    """
     def __init__(self):
         self.result = ValidationResult()
 
@@ -54,6 +57,9 @@ class ProfileValidator(object):
         return str(self.result)
 
 class SchemaValidator(ProfileValidator):
+    """"
+    Validator responsible to check if the profile matches with the schemas.
+    """
     def __init__(self):
         super(SchemaValidator, self).__init__()
         self.errors = []
@@ -96,8 +102,13 @@ class SchemaValidator(ProfileValidator):
         if len(self.errors) == 0:
             self.success("Schema successfully validated")
 
-class DoubleMetricsValidator(ProfileValidator):
-    def validate(self, profile: str, directory: str, path: list) -> None:
+class DuplicateMetricsValidator(ProfileValidator):
+    """"
+    Validator responsible to check if there are no duplicated metrics in the profile.
+    It checks all the profiles extended by the profile passed.
+    """
+    def validate(self, profile, directory, path):
+        #type: (ProfileValidator,str, str, str) -> None
         """
         Calls the recursive function(verify_duplicate_metrics_profile_recursive) to check if there are any duplicated metric.
         It also logs the duplicated OID and reports all the files:lines where it is.
@@ -121,5 +132,5 @@ def get_all_validators():
     #type () -> list(ProfileValidator)
     return [
         SchemaValidator(),
-        DoubleMetricsValidator()
+        DuplicateMetricsValidator()
     ]

@@ -25,19 +25,36 @@ def validate_profile(file, directory, verbose, path):
     message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
     
     all_validators = validators.get_all_validators()
+    
+    report = validate_profile_from_validators(all_validators, file, directory, path, message_methods)
 
+    show_report(report)
+
+
+def validate_profile_from_validators(all_validators, file, directory, path, message_methods):
     display_queue = []
-    file_failures = 0
+    failure = False
 
     for validator in all_validators:
         validator.validate(file,directory,path)
-        file_failures += 1 if validator.result.failed else 0
+        failure = validator.result.failed
         for msg_type, messages in validator.result.messages.items():
             for message in messages:
                 display_queue.append((message_methods[msg_type], message))
+        if failure:
+            break
     
-    if file_failures > 0:
+    report_profile = {}
+    report_profile['messages'] = display_queue
+    report_profile['failed'] = failure
+
+    return report_profile
+    
+def show_report(report):
+    if report['failed']:
         echo_failure("FAILED")
-    for display_func, message in display_queue:
-        display_func(message)
+    else:
+        echo_success("Profile successfuly validated")
     
+    for display_func, message in report['messages']:
+        display_func(message)
