@@ -110,7 +110,7 @@ files:
           /\ WARNING /\
           Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
           Because of this, you may need to split the ID filtering into multiple instances.
-
+          
         For advanced and more granular filtering, define a `query`.
 
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
