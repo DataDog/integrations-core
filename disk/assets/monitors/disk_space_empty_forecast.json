@@ -1,6 +1,6 @@
 {
 	"name": "[disk] Device {{device.name}} is going to be full on host {{host.name}}",
-	"type": "metric alert",
+	"type": "query alert",
 	"query": "max(next_3d):forecast(( 1 - avg:system.disk.free{*} by {host,device} / avg:system.disk.total{*} by {host,device} ) * 100, 'seasonal', 1, interval='60m', seasonality='weekly') >= 99",
 	"message": "Device {{device.name}} on {{host.name}} is projected to exceed  {{value}}% usage within the next 3 days.",
 	"tags": [
