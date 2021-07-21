@@ -86,8 +86,10 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
-def test_statement_metrics(aggregator, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+def test_statement_metrics(
+    aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
+):
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
         with mysql_check._connect() as db:
@@ -110,11 +112,11 @@ def test_statement_metrics(aggregator, dbm_instance, query, default_schema, data
 
         # Run a query
         run_query(query)
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
 
         # Run the query and check a second time so statement metrics are computed from the previous run
         run_query(query)
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -159,7 +161,7 @@ def _obfuscate_sql(query, options=None):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_agent):
+def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instance, datadog_agent):
     query_one = 'select * from information_schema.processlist where state in (\'starting\')'
     query_two = 'select * from information_schema.processlist where state in (\'starting\', \'Waiting on empty queue\')'
     normalized_query = 'SELECT * FROM `information_schema` . `processlist` where state in ( ? )'
@@ -168,7 +170,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
     # mysql and varies across versions.
     query_signature = '94caeb4c54f97849'
 
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def obfuscate_sql(query, options=None):
         if 'WHERE `state`' in query:
@@ -185,13 +187,13 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
         # Run two queries that map to the same normalized one
         run_query(query_one)
         run_query(query_two)
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
 
         # Run the queries again and check a second time so statement metrics are computed from the previous run using
         # the merged stats of the two queries
         run_query(query_one)
         run_query(query_two)
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -263,6 +265,7 @@ def test_statement_metrics_with_duplicates(aggregator, dbm_instance, datadog_age
 @pytest.mark.parametrize("aurora_replication_role", ["reader"])
 def test_statement_samples_collect(
     aggregator,
+    dd_run_check,
     dbm_instance,
     bob_conn,
     events_statements_table,
@@ -280,7 +283,7 @@ def test_statement_samples_collect(
 
     # try to collect a sample from all supported events_statements tables using all possible strategies
     dbm_instance['query_samples']['events_statements_table'] = events_statements_table
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
@@ -298,7 +301,7 @@ def test_statement_samples_collect(
             m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
 
         logger.debug("running first check")
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
         aggregator.reset()
         mysql_check._statement_samples._init_caches()
 
@@ -363,13 +366,13 @@ def test_statement_samples_collect(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_main_collection_rate_limit(aggregator, dbm_instance):
+def test_statement_samples_main_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test rate limiting of the main collection loop
     collection_interval = 0.2
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_samples']['run_sync'] = False
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(mysql_check)
     sleep_time = 1
     time.sleep(sleep_time)
     max_collections = int(1 / collection_interval * sleep_time) + 1
@@ -380,7 +383,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_unique_plans_rate_limits(aggregator, bob_conn, dbm_instance):
+def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bob_conn, dbm_instance):
     # test unique sample ingestion rate limiting
     cache_max_size = 20
     dbm_instance['query_samples']['run_sync'] = True
@@ -395,13 +398,13 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, bob_conn, dbm_in
     # queries that have different numbers of columns are considered different queries
     # i.e. "SELECT city, city FROM persons where city= 'hello'"
     queries = [query_template.format(','.join(["name"] * i)) for i in range(1, 20)]
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     with closing(bob_conn.cursor()) as cursor:
         for _ in range(3):
             # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
             for q in queries:
                 cursor.execute(q)
-                mysql_check.check(dbm_instance)
+                dd_run_check(mysql_check)
 
     def _sample_key(e):
         return e['db']['query_signature'], e['db'].get('plan', {}).get('signature')
@@ -422,14 +425,14 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, bob_conn, dbm_in
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_async_job_inactive_stop(aggregator, dbm_instance):
+def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     # confirm that async jobs stop on their own after the check has not been run for a while
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     # low collection interval for a faster test
     dbm_instance['min_collection_interval'] = 1
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(mysql_check)
     # make sure there were no unhandled exceptions
     mysql_check._statement_samples._job_loop_future.result()
     mysql_check._statement_metrics._job_loop_future.result()
@@ -441,11 +444,11 @@ def test_async_job_inactive_stop(aggregator, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_async_job_cancel(aggregator, dbm_instance):
+def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(mysql_check)
     mysql_check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     mysql_check._statement_samples._job_loop_future.result()
@@ -466,11 +469,11 @@ def _expected_dbm_instance_tags(dbm_instance):
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-def test_async_job_enabled(dbm_instance, statement_samples_enabled, statement_metrics_enabled):
+def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(mysql_check)
     mysql_check.cancel()
     if statement_samples_enabled:
         assert mysql_check._statement_samples._job_loop_future is not None
@@ -486,12 +489,12 @@ def test_async_job_enabled(dbm_instance, statement_samples_enabled, statement_me
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_max_per_digest(dbm_instance):
+def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
     # clear out any events from previous test runs
     dbm_instance['query_samples']['events_statements_table'] = 'events_statements_history_long'
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     for _ in range(3):
-        mysql_check.check(dbm_instance)
+        dd_run_check(mysql_check)
     rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)
     count_by_digest = Counter(r['digest'] for r in rows)
     for _, count in count_by_digest.items():
@@ -500,10 +503,10 @@ def test_statement_samples_max_per_digest(dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_samples_invalid_explain_procedure(aggregator, dbm_instance):
+def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(mysql_check)
     aggregator.assert_metric_has_tag_prefix("dd.mysql.query_samples.error", "error:explain-")
 
 
@@ -512,9 +515,9 @@ def test_statement_samples_invalid_explain_procedure(aggregator, dbm_instance):
 @pytest.mark.parametrize(
     "events_statements_enable_procedure", ["datadog.enable_events_statements_consumers", "invalid_proc"]
 )
-def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_statements_enable_procedure):
+def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_conn, events_statements_enable_procedure):
     dbm_instance['query_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # deliberately disable one of the consumers
     with closing(root_conn.cursor()) as cursor:
@@ -526,7 +529,7 @@ def test_statement_samples_enable_consumers(dbm_instance, root_conn, events_stat
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     assert original_enabled_consumers == {'events_statements_current', 'events_statements_history'}
 
-    mysql_check.check(dbm_instance)
+    dd_run_check(mysql_check)
 
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
