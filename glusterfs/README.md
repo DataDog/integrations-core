@@ -110,5 +110,5 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://github.com/gluster/gstatus#install
-[9]:  https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/assets/service_checks.json
