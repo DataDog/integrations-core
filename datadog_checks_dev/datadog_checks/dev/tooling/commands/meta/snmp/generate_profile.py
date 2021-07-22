@@ -8,10 +8,13 @@ from collections import namedtuple
 from tempfile import gettempdir
 
 import click
+from pysmi.reader.httpclient import HttpReader
 import yaml
 
 from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
 
+URL_REPO_REFERENCE_MIBS = 'raw.githubusercontent.com/trevoro/snmp-mibs/master/mibs/@mib@'
+PORT_REPO_MIBS = 80
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
 @click.argument('mib_files', nargs=-1)
@@ -271,7 +274,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
     for source_directory in source_mib_directories:
         mib_compiler.addSources(FileReader(source_directory))
     # use snmp mibs repo as mibs source
-    reader = HttpReader('raw.githubusercontent.com', 80, '/projx/snmp-mibs/master/@mib@')
+    reader = _get_reader_from_url(URL_REPO_REFERENCE_MIBS, PORT_REPO_MIBS)
     mib_compiler.addSources(reader)
 
     mib_compiler.addSearchers(*searchers)
@@ -292,6 +295,12 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
 
     return processed
 
+def _get_reader_from_url(url, port):
+    import re
+    url_split = re.split('/',url,2)
+    url_host = url_split[0]
+    url_locationTemplate = os.path.join('/',url_split[1])
+    return HttpReader(url_host, port,url_locationTemplate)
 
 def _load_json_module(source_directory, mib):
     try:
