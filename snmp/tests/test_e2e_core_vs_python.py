@@ -160,6 +160,13 @@ def test_e2e_symbol_metric_tags(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
+def test_e2e_inline_profile_def(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config'] = {'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES}}}}
+    config['instances'][0]['profile'] = 'profile1'
+    assert_python_vs_core(dd_agent_check, config)
+
+
 def test_e2e_extract_value_using_regex(dd_agent_check):
     metrics = [
         {
