@@ -11,6 +11,7 @@ from .validators.utils import (
     exist_profile_in_path
 )
 
+MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
@@ -35,15 +36,14 @@ def _validate_single_profile(file, path, verbose):
         echo_failure("Profile file not found, or could not be read: " + str(file))
         return
 
-    message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
     
     all_validators = validators.get_all_validators()
     
-    report = validate_profile_from_validators(all_validators, file, path, message_methods)
+    report = validate_profile_from_validators(all_validators, file, path)
 
     show_report(report)
 
-def validate_profile_from_validators(all_validators, file, path, message_methods):
+def validate_profile_from_validators(all_validators, file, path):
     display_queue = []
     failure = False
 
@@ -52,7 +52,7 @@ def validate_profile_from_validators(all_validators, file, path, message_methods
         failure = validator.result.failed
         for msg_type, messages in validator.result.messages.items():
             for message in messages:
-                display_queue.append((message_methods[msg_type], message))
+                display_queue.append((MESSAGE_METHODS[msg_type], message))
         if failure:
             break
     
