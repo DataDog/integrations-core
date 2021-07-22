@@ -1,0 +1,32 @@
+{
+    "OpaqueRef:2f7b4e5a-62e2-44ef-80b4-c3b44bcb6f18": {
+        "uuid": "ed54a5d8-cda3-898d-b874-8cd37e92adda",
+        "host": "OpaqueRef:89bdf243-39c4-4fb6-b0c4-e93e2d108054",
+        "number": "0",
+        "vendor": "GenuineIntel",
+        "speed": "2999",
+        "modelname": "Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz",
+        "family": "6",
+        "model": "85",
+        "stepping": "4",
+        "flags": "fpu de tsc msr pae mce cx8 apic sep mca cmov pat clflush mmx fxsr sse sse2 ss syscall nx rdtscp lm constant_tsc nopl nonstop_tsc cpuid pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp fsgsbase bmi1 avx2 bmi2 rdseed adx clflushopt clwb xsaveopt xsavec",
+        "features": "",
+        "utilisation": 0.0,
+        "other_config": {}
+    },
+    "OpaqueRef:1996e63f-69f0-4804-8926-6b4311439f29": {
+        "uuid": "3c7c0f2d-82d3-1e53-e359-00ab48d77626",
+        "host": "OpaqueRef:8d61e53e-45d1-4847-9dac-c6f88e712bad",
+        "number": "0",
+        "vendor": "GenuineIntel",
+        "speed": "2999",
+        "modelname": "Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz",
+        "family": "6",
+        "model": "85",
+        "stepping": "4",
+        "flags": "fpu de tsc msr pae mce cx8 apic sep mca cmov pat clflush mmx fxsr sse sse2 ss syscall nx rdtscp lm constant_tsc nopl nonstop_tsc cpuid pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp fsgsbase bmi1 avx2 bmi2 rdseed adx clflushopt clwb xsaveopt xsavec",
+        "features": "",
+        "utilisation": 0.0,
+        "other_config": {}
+    }
+}

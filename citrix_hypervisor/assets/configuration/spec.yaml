@@ -1,0 +1,16 @@
+name: citrix_hypervisor
+files:
+- name: citrix_hypervisor.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      description: Url of the hypervisor
+      required: true
+      value:
+        type: string
+    - template: instances/http
+    - template: instances/default
