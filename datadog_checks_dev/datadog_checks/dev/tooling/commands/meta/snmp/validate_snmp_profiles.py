@@ -1,4 +1,6 @@
 import click
+import glob
+import os
 
 from .....fs import dir_exists, file_exists
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning, echo_info
@@ -17,9 +19,21 @@ from .validators.utils import (
 def validate_profile(file, directory, verbose):
     path = initialize_path(directory)
 
+    if file:
+        _validate_single_profile(file,path,verbose)
+
+    elif directory:
+        all_profiles_directory = get_all_profiles_directory(directory)
+        for profile in all_profiles_directory:
+            echo_info("Start validation of profile {profile}:".format(profile=profile))
+            _validate_single_profile(profile,path,verbose)
+    else:
+        echo_failure("Provide a file or directory to validate profile")
+
+def _validate_single_profile(file, path, verbose):
     if not exist_profile_in_path(file,path): 
         echo_failure("Profile file not found, or could not be read: " + str(file))
-        abort()
+        return
 
     message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
     
@@ -28,7 +42,6 @@ def validate_profile(file, directory, verbose):
     report = validate_profile_from_validators(all_validators, file, path, message_methods)
 
     show_report(report)
-
 
 def validate_profile_from_validators(all_validators, file, path, message_methods):
     display_queue = []
@@ -57,3 +70,6 @@ def show_report(report):
     
     for display_func, message in report['messages']:
         display_func(message)
+
+def get_all_profiles_directory(directory):
+    return glob.glob(os.path.join(directory,"*.yaml"))
