@@ -19,7 +19,7 @@ def validate_profile(file, directory, verbose, path):
     path = initialize_path(path, directory)
 
     if not exist_profile_in_path(file,path): 
-        echo_failure("Profile file not found, or could not be read: " + file)
+        echo_failure("Profile file not found, or could not be read: " + str(file))
         abort()
 
     message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}

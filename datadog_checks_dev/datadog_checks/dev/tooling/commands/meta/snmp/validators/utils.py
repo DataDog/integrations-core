@@ -12,6 +12,8 @@ from datadog_checks.dev.tooling.constants import get_root
 
 def initialize_path(path_name, directory):
     path = []
+    path.append('./')
+
     if path_name:
         with open(path_name) as f:
             for directory_path in f:
@@ -51,9 +53,10 @@ def find_profile_in_path(profile_name, path, line = True):
     return file_contents
 
 def exist_profile_in_path(profile_name, path):
-    for directory_path in path:
-        if isfile(join(directory_path, profile_name)):
-            return True
+    if profile_name:
+        for directory_path in path:
+            if isfile(join(directory_path, profile_name)):
+                return True
     return False
 
 class SafeLineLoader(SafeLoader):
