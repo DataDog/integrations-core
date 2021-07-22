@@ -84,9 +84,7 @@ def test_e2e_v3_no_auth_no_priv(dd_agent_check):
     config['instances'][0].update(
         {
             'user': 'datadogNoAuthNoPriv',
-            # 'authKey': 'doggiepass',
             'authProtocol': '',
-            # 'privKey': 'doggiePRIVkey',
             'privProtocol': '',
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
