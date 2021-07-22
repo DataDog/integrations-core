@@ -416,7 +416,7 @@ Need help? Contact [Datadog support][22].
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
 [20]: https://docs.datadoghq.com/help
 [21]: https://app.datadoghq.com/containers
-[22]: https://app.datadoghq.com/process
+[22]: https://docs.datadoghq.com/integrations/ecs_fargate/#?tab=fluentbitandfirelens
 [23]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
 [24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [25]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
