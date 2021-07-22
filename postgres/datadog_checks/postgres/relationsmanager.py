@@ -56,6 +56,8 @@ REL_METRICS = {
         'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
         'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
         'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+        'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.rate),
+        'analyze_count': ('postgresql.analyzed', AgentCheck.rate),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}

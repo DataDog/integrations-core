@@ -24,6 +24,8 @@ RELATION_METRICS = [
     'postgresql.toast_blocks_hit',
     'postgresql.toast_index_blocks_read',
     'postgresql.toast_index_blocks_hit',
+    'postgresql.autovacuumed',
+    'postgresql.analyzed',
 ]
 
 RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
