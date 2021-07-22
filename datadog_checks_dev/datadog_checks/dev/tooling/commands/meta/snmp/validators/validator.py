@@ -9,11 +9,13 @@ from .utils import (
     find_profile_in_path,
 )
 
+
 class ValidationResult(object):
     def __init__(self):
         self.failed = False
         self.fixed = False
-        self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
+        self.messages = {'success': [],
+                         'warning': [], 'failure': [], 'info': []}
 
     def __str__(self):
         return '\n'.join(['\n'.join(messages) for messages in self.messages.values()])
@@ -26,6 +28,7 @@ class ProfileValidator(object):
     """
     Class that will be subclassed to create the validators for the profile.
     """
+
     def __init__(self):
         self.result = ValidationResult()
 
@@ -45,20 +48,22 @@ class ProfileValidator(object):
 
     def success(self, success_message):
         self.result.messages['success'].append(success_message)
-    
+
     def info(self, info_message):
         self.result.messages['info'].append(info_message)
-    
+
     def warning(self, warning_message):
         self.result.messages['warning'].append(warning_message)
 
     def __repr__(self):
         return str(self.result)
 
+
 class SchemaValidator(ProfileValidator):
     """"
     Validator responsible to check if the profile matches with the schemas.
     """
+
     def __init__(self):
         super(SchemaValidator, self).__init__()
         self.errors = []
@@ -67,11 +72,10 @@ class SchemaValidator(ProfileValidator):
     def __repr__(self):
         return self.file_path
 
-    def load_from_file(self, file_path,path):
-        self.contents = find_profile_in_path(file_path,path, line = False)
+    def load_from_file(self, file_path, path):
+        self.contents = find_profile_in_path(file_path, path, line=False)
         if not self.contents:
             self.fail("File contents returned None: " + file_path)
-            
 
     def validate(self, profile, path):
         schema_file = join(
@@ -86,7 +90,7 @@ class SchemaValidator(ProfileValidator):
             "validators",
             "profile_schema.json",
         )
-        self.load_from_file(profile,path)
+        self.load_from_file(profile, path)
 
         with open(schema_file, "r") as f:
             contents = f.read()
@@ -97,54 +101,58 @@ class SchemaValidator(ProfileValidator):
         for error in errors:
             self.errors.append(error)
             self.fail(error.message)
-        
+
         if len(self.errors) == 0:
             self.success("Schema successfully validated")
+
 
 class DuplicateMetricsValidator(ProfileValidator):
     """"
     Validator responsible to check if there are no duplicated metrics in the profile.
     It checks all the profiles extended by the profile passed.
     """
+
+    def __init__(self):
+        super().__init__()
+        self.used_metrics = {}
+        self.duplicated = {}
+
     def validate(self, profile, path):
-        #type: (ProfileValidator,str, str) -> None
+        # type: (ProfileValidator,str, str) -> None
         """
         Calls the recursive function(verify_duplicate_metrics_profile_recursive) to check if there are any duplicated metric.
         It also logs the duplicated OID and reports all the files:lines where it is.
         """
-        used_metrics = {}
-        duplicated = {}
-        self.verify_duplicate_metrics_profile_recursive(
-            profile, used_metrics, duplicated, path)
-        for OID in duplicated:
+        self.verify_duplicate_metrics_profile_recursive(profile, path)
+        for OID in self.duplicated:
             output_message = ""
             output_message = "metric with OID " + OID + " is duplicated in profiles: \n"
-            for file, line in duplicated.get(OID):
-                output_message = output_message + "|------> " + file + ":" + str(line) + '\n'
+            for file, line in self.duplicated.get(OID):
+                output_message = output_message + \
+                    "|------> " + file + ":" + str(line) + '\n'
             self.fail(output_message)
-        if len(duplicated) == 0 and not self.result.failed:
+        if len(self.duplicated) == 0 and not self.result.failed:
             self.success("No duplicated OID ")
 
-    def verify_duplicate_metrics_profile_recursive(self,file, used_metrics, duplicated, path):
+    def verify_duplicate_metrics_profile_recursive(self, file, path):
         """
         Recursively for each profile extended, it checks the metrics and add them into the mapping "used_metrics".\n
         If the metric is duplicated, it also adds it to the mapping "duplicated".
         """
         extensions = self.verify_duplicate_metrics_profile_file(
-            file, used_metrics, duplicated, path)
+            file, path)
         if extensions:
             for file_name in extensions:
                 self.verify_duplicate_metrics_profile_recursive(
-                    file_name, used_metrics, duplicated, path)
+                    file_name, path)
 
-
-    def verify_duplicate_metrics_profile_file(self,file, used_metrics, duplicated, path):
-        # type: (any, dict, dict, list) -> list
+    def verify_duplicate_metrics_profile_file(self, file, path):
+        # type: (str, list) -> list
         """
         Extract the OIDs of a profile and adds them to "used_metrics".\n
         The duplicated metrics are also added to "duplicated" mapping. "duplicated" is a dictionary where the OIDs are the keys and the values are lists of tuples (name_of_profile,line)
         """
-        file_contents = find_profile_in_path(file,path)
+        file_contents = find_profile_in_path(file, path)
         if not file_contents:
             self.fail("File contents returned None: " + file)
             return
@@ -154,44 +162,41 @@ class DuplicateMetricsValidator(ProfileValidator):
                 # Check if there are symbols metrics
                 if metric.get('symbols'):
                     self.extract_oids_from_symbols(
-                        metric, used_metrics, duplicated, file)
+                        metric, file)
                 # Check if there are symbol metrics
                 if metric.get('symbol'):
-                   self.extract_oid_from_symbol(metric, used_metrics, duplicated, file)
+                    self.extract_oid_from_symbol(metric, file)
 
         return file_contents.get('extends')
 
-
-    def extract_oids_from_symbols(self, metric, used_metrics, duplicated, file):
+    def extract_oids_from_symbols(self, metric, file):
         """
         Function to extract OID from symbols
         """
         for metric_symbols in metric.get('symbols'):
             OID = metric_symbols.get('OID')
             line = metric_symbols.get('__line__')
-            if OID not in used_metrics:
-                used_metrics[OID] = [(file, line)]
+            if OID not in self.used_metrics:
+                self.used_metrics[OID] = [(file, line)]
             else:
-                used_metrics[OID].append((file, line))
-                duplicated[OID] = used_metrics[OID]
+                self.used_metrics[OID].append((file, line))
+                self.duplicated[OID] = self.used_metrics[OID]
 
-
-    def extract_oid_from_symbol(self, metric, used_metrics, duplicated, file):
+    def extract_oid_from_symbol(self, metric, file):
         """
         Function to extract OID from symbol
         """
         OID = metric.get('symbol').get('OID')
         line = metric.get('symbol').get('__line__')
-        if OID not in used_metrics:
-            used_metrics[OID] = [(file, line)]
+        if OID not in self.used_metrics:
+            self.used_metrics[OID] = [(file, line)]
         else:
-            used_metrics[OID].append((file, line))
-            duplicated[OID] = used_metrics[OID]
-        
+            self.used_metrics[OID].append((file, line))
+            self.duplicated[OID] = self.used_metrics[OID]
 
 
 def get_all_validators():
-    #type () -> list(ProfileValidator)
+    # type () -> list(ProfileValidator)
     return [
         SchemaValidator(),
         DuplicateMetricsValidator()
