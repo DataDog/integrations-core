@@ -29,7 +29,7 @@ class ProfileValidator(object):
     def __init__(self):
         self.result = ValidationResult()
 
-    def validate(self, profile, directory, path):
+    def validate(self, profile, path):
         # type: (str, str, list(str)) -> None
         raise NotImplementedError
 
@@ -73,7 +73,7 @@ class SchemaValidator(ProfileValidator):
             self.fail("File contents returned None: " + file_path)
             
 
-    def validate(self, profile: str, directory: str, path: list):
+    def validate(self, profile, path):
         schema_file = join(
             get_root(),
             "datadog_checks_dev",
@@ -106,8 +106,8 @@ class DuplicateMetricsValidator(ProfileValidator):
     Validator responsible to check if there are no duplicated metrics in the profile.
     It checks all the profiles extended by the profile passed.
     """
-    def validate(self, profile, directory, path):
-        #type: (ProfileValidator,str, str, str) -> None
+    def validate(self, profile, path):
+        #type: (ProfileValidator,str, str) -> None
         """
         Calls the recursive function(verify_duplicate_metrics_profile_recursive) to check if there are any duplicated metric.
         It also logs the duplicated OID and reports all the files:lines where it is.

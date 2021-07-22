@@ -25,17 +25,17 @@ def validate_profile(file, directory, verbose):
     
     all_validators = validators.get_all_validators()
     
-    report = validate_profile_from_validators(all_validators, file, directory, path, message_methods)
+    report = validate_profile_from_validators(all_validators, file, path, message_methods)
 
     show_report(report)
 
 
-def validate_profile_from_validators(all_validators, file, directory, path, message_methods):
+def validate_profile_from_validators(all_validators, file, path, message_methods):
     display_queue = []
     failure = False
 
     for validator in all_validators:
-        validator.validate(file,directory,path)
+        validator.validate(file,path)
         failure = validator.result.failed
         for msg_type, messages in validator.result.messages.items():
             for message in messages:
