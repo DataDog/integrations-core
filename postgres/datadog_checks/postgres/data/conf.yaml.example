@@ -153,6 +153,12 @@ instances:
     #
     # collect_default_database: false
 
+    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## Collect metrics about WAL file age.
+    ## NOTE: You must be running the check local to your database if you want to enable this option.
+    #
+    # collect_wal_metrics: false
+
     ## @param tag_replication_role - boolean - optional - default: false
     ## Tag metrics and checks with `replication_role:<master|standby>`.
     #
