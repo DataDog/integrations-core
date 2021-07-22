@@ -10,14 +10,9 @@ from datadog_checks.dev.tooling.constants import get_root
 
 
 
-def initialize_path(path_name, directory):
+def initialize_path(directory):
     path = []
     path.append('./')
-
-    if path_name:
-        with open(path_name) as f:
-            for directory_path in f:
-                path.append(directory_path.strip())
 
     path.append(join(get_root(),
                      'snmp',

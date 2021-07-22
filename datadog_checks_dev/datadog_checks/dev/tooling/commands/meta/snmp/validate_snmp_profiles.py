@@ -14,9 +14,8 @@ from .validators.utils import (
 @click.option('-f', '--file', help="Path to a profile file to validate")
 @click.option('-d', '--directory', help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
-@click.option('-p', '--path', help="File containg the path of the directories of all profiles")
-def validate_profile(file, directory, verbose, path):
-    path = initialize_path(path, directory)
+def validate_profile(file, directory, verbose):
+    path = initialize_path(directory)
 
     if not exist_profile_in_path(file,path): 
         echo_failure("Profile file not found, or could not be read: " + str(file))

@@ -122,7 +122,7 @@ class DuplicateMetricsValidator(ProfileValidator):
             for file, line in duplicated.get(OID):
                 output_message = output_message + "|------> " + file + ":" + str(line) + '\n'
             self.fail(output_message)
-        if len(duplicated) == 0:
+        if len(duplicated) == 0 and not self.result.failed:
             self.success("No duplicated OID ")
 
     def verify_duplicate_metrics_profile_recursive(self,file, used_metrics, duplicated, path):
@@ -146,8 +146,8 @@ class DuplicateMetricsValidator(ProfileValidator):
         """
         file_contents = find_profile_in_path(file,path)
         if not file_contents:
-            print("File contents returned None: " + file)
-            abort()
+            self.fail("File contents returned None: " + file)
+            return
         # print(path)
         if file_contents.get('metrics'):
             for metric in file_contents.get('metrics'):
