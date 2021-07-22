@@ -1,5 +1,9 @@
 # CHANGELOG - supervisord
 
+## 1.9.1 / 2021-07-22
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+
 ## 1.9.0 / 2021-07-12
 
 * [Added] Add runtime configuration validation. See [#8991](https://github.com/DataDog/integrations-core/pull/8991).
