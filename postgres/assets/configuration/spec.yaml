@@ -186,6 +186,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_wal_metrics
+      description: |
+        Collect metrics about WAL file age.
+        NOTE: You must be running the check local to your database if you want to enable this option.
+      value:
+        type: boolean
+        example: false
     - name: tag_replication_role
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
