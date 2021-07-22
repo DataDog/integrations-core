@@ -79,6 +79,39 @@ def test_e2e_v3_default_auth_priv_protocols(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=509 + 5)
 
 
+def test_e2e_v3_no_auth_no_priv(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogNoAuthNoPriv',
+            # 'authKey': 'doggiepass',
+            'authProtocol': '',
+            # 'privKey': 'doggiePRIVkey',
+            'privProtocol': '',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=509 + 5)
+
+
+def test_e2e_v3_with_auth_no_priv(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5NoPriv',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privProtocol': '',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=509 + 5)
+
+
 def test_e2e_regex_match(dd_agent_check, aggregator):
     metrics = [
         {
