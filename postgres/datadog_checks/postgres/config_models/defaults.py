@@ -32,6 +32,10 @@ def instance_collect_function_metrics(field, value):
     return False
 
 
+def instance_collect_wal_metrics(field, value):
+    return False
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
