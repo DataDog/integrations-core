@@ -297,7 +297,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
 
 def _get_reader_from_url(url, port):
     import re
-    url_split = re.split('/',url,2)
+    url_split = re.split('/',url,1)
     url_host = url_split[0]
     url_locationTemplate = os.path.join('/',url_split[1])
     return HttpReader(url_host, port,url_locationTemplate)
