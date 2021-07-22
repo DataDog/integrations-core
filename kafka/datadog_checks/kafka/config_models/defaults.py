@@ -32,6 +32,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_is_jmx(field, value):
+    return True
+
+
 def instance_java_bin_path(field, value):
     return get_default_field_value(field, value)
 
