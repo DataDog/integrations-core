@@ -86,11 +86,11 @@ class PostgreSql(AgentCheck):
         else:
             wal_dir = "pg_xlog"
 
-        wal_log_dir = os.path.join("/var/lib/pgsql/", str(self.version), "/data/", wal_dir)
+        wal_log_dir = os.path.join("/var/lib/pgsql", str(self.version), "data", wal_dir)
 
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
-                "Cannot access WAL log directory %s; ensure you are running the agent on your local postgres database",
+                "Cannot access WAL log directory: %s. Ensure that you are running the agent on your local postgres database.",
                 wal_log_dir,
             )
             return None
@@ -104,7 +104,7 @@ class PostgreSql(AgentCheck):
             if all([ext for ext in exluded_file_exts if not file_name.endswith(ext)])
         ]
         if len(all_wal_files) < 1:
-            self.log.warning("No WAL files found in directory %s", wal_log_dir)
+            self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
             return None
         oldest_file = min(all_wal_files, key=os.path.getctime)
         oldest_file_age = os.path.getctime(oldest_file)
