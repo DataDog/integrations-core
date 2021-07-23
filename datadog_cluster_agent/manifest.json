@@ -1,0 +1,35 @@
+{
+  "display_name": "Datadog-Cluster-Agent",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "datadog_cluster_agent",
+  "metric_prefix": "datadog_cluster_agent.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "275fd66d-2440-44e5-ac30-461062cd2825",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Cluster-Agent",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "datadog-cluster-agent",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
