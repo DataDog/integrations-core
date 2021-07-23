@@ -1,20 +1,17 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..utils import normalize_source_name
 from .constants import OPENAPI_DATA_TYPES
-from .utils import default_option_example
+from .utils import default_option_example, normalize_source_name
 
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
-        loader.errors.append(f'{loader.source}: {loader.spec_type} specifications must be a mapping object')
+        loader.errors.append(f'{loader.source}: Configuration specifications must be a mapping object')
         return
 
     if 'name' not in spec:
-        loader.errors.append(
-            f'{loader.source}: {loader.spec_type} specifications must contain a top-level `name` attribute'
-        )
+        loader.errors.append(f'{loader.source}: Configuration specifications must contain a top-level `name` attribute')
         return
 
     name = spec['name']
@@ -25,7 +22,7 @@ def spec_validator(spec, loader):
     release_version = spec.setdefault('version', loader.version)
     if not release_version:
         loader.errors.append(
-            f'{loader.source}: {loader.spec_type} specifications must contain a top-level `version` attribute'
+            f'{loader.source}: Configuration specifications must contain a top-level `version` attribute'
         )
         return
     elif not isinstance(release_version, str):
@@ -34,7 +31,7 @@ def spec_validator(spec, loader):
 
     if 'files' not in spec:
         loader.errors.append(
-            f'{loader.source}: {loader.spec_type} specifications must contain a top-level `files` attribute'
+            f'{loader.source}: Configuration specifications must contain a top-level `files` attribute'
         )
         return
 
