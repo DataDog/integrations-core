@@ -8,12 +8,11 @@ from collections import namedtuple
 from tempfile import gettempdir
 
 import click
+import yaml
 from pysmi.reader.httpclient import HttpReader
 from pysmi.reader.localfile import FileReader
-import yaml
 
-from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_success, echo_warning, set_debug
-
+from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
@@ -22,7 +21,12 @@ from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_success, ec
 @click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.option('--interactive', '-i', help='Prompt to confirm before saving to a file', is_flag=True)
-@click.option('--source', '-s', help='Source of the MIBs files. Can be a url or a path for a directory', default= 'http://raw.githubusercontent.com/trevoro/snmp-mibs/master/mibs/@mib@')
+@click.option(
+    '--source',
+    '-s',
+    help='Source of the MIBs files. Can be a url or a path for a directory',
+    default='http://raw.githubusercontent.com/trevoro/snmp-mibs/master/mibs/@mib@',
+)
 @click.pass_context
 def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive, source):
     """
@@ -125,7 +129,9 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
 
     profile_oid_collection = {}
     # build profile
-    for oid_node in _extract_oids_from_mibs(list(mibs), list(source_directories), json_destination_directory, source, filters):
+    for oid_node in _extract_oids_from_mibs(
+        list(mibs), list(source_directories), json_destination_directory, source, filters
+    ):
         if oid_node.node_type == 'table':
             _add_profile_table_node(profile_oid_collection, oid_node)
         elif oid_node.node_type == 'row':
@@ -136,7 +142,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
                 os.path.dirname(mib_files[0]),
                 metric_tag_aliases_path=aliases,
                 json_mib_directory=json_destination_directory,
-                source=source, 
+                source=source,
             )
         elif oid_node.node_type == 'column':
             _add_profile_column_node(profile_oid_collection, oid_node)
@@ -251,11 +257,11 @@ class OidNode:
         return self.mib_class == 'objecttype'
 
 
-def _compile_mib_to_json(mib, source_mib_directories, destination_directory, source ):
+def _compile_mib_to_json(mib, source_mib_directories, destination_directory, source):
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
     from pysmi.parser import SmiV1CompatParser
-    from pysmi.reader import FileReader, HttpReader
+    from pysmi.reader import FileReader
     from pysmi.searcher import AnyFileSearcher, StubSearcher
     from pysmi.writer import FileWriter
 
@@ -278,7 +284,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
     # use snmp mibs repo as mibs source
     reader = _get_reader_from_source(source)
     mib_compiler.addSources(reader)
-    
+
     mib_compiler.addSearchers(*searchers)
 
     processed = mib_compiler.compile(
@@ -297,24 +303,26 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
 
     return processed
 
+
 def _get_reader_from_source(source):
     if os.path.exists(source):
         return FileReader(source)
     return _get_reader_from_url(source)
-    
+
+
 def _get_reader_from_url(url):
-    import re
     from urllib.parse import urlparse
 
     if not (url.startswith('//') or url.startswith('http://') or url.startswith('https://')):
-        url = "//" + url 
+        url = "//" + url
     url_parsed = urlparse(url)
     url_host = url_parsed.hostname
     url_locationTemplate = url_parsed.path
     port = 80
     if url_parsed.port:
         port = url_parsed.port
-    return HttpReader(url_host, port,url_locationTemplate)
+    return HttpReader(url_host, port, url_locationTemplate)
+
 
 def _load_json_module(source_directory, mib):
     try:
