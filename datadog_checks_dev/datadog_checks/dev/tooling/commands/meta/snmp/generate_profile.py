@@ -278,8 +278,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
     # use snmp mibs repo as mibs source
     reader = _get_reader_from_source(source)
     mib_compiler.addSources(reader)
-    echo_warning("Reading MIB {m}".format(m=mib))
-    echo_warning(reader.getData(mib))
+    
     mib_compiler.addSearchers(*searchers)
 
     processed = mib_compiler.compile(
@@ -315,9 +314,6 @@ def _get_reader_from_url(url):
     port = 80
     if url_parsed.port:
         port = url_parsed.port
-    echo_warning(url_host)
-    echo_warning(port)
-    echo_warning(url_locationTemplate)
     return HttpReader(url_host, port,url_locationTemplate)
 
 def _load_json_module(source_directory, mib):
