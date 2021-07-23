@@ -4,12 +4,13 @@
 import mock
 import psycopg2
 import pytest
-from mock import MagicMock
+from mock import MagicMock, PropertyMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.version_utils import VersionUtils
 
 pytestmark = pytest.mark.unit
 
@@ -212,6 +213,22 @@ def test_version_metadata(check, test_case, params):
             m.assert_any_call('test:123', name, value)
         m.assert_any_call('test:123', 'version.scheme', 'semver')
         m.assert_any_call('test:123', 'version.raw', test_case)
+
+
+@pytest.mark.parametrize(
+    'pg_version, wal_path',
+    [
+        ('9.6.2', '/var/lib/pgsql/9.6.2/data/pg_xlog'),
+        ('10.0.0', '/var/lib/pgsql/10.0.0/data/pg_wal'),
+    ],
+)
+def test_get_wal_dir(check, pg_version, wal_path):
+    check.check_id = 'test:123'
+    version_utils = VersionUtils.parse_version(pg_version)
+    with mock.patch('datadog_checks.postgres.PostgreSql.version', new_callable=PropertyMock) as mock_version:
+        mock_version.return_value = version_utils
+        path_name = check._get_wal_dir()
+        assert path_name == wal_path
 
 
 @pytest.mark.usefixtures('mock_cursor_for_replica_stats')

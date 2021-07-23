@@ -80,7 +80,7 @@ class PostgreSql(AgentCheck):
         if wal_file_age is not None:
             self.gauge("postgresql.wal_age", wal_file_age, tags=[t for t in instance_tags if not t.startswith("db:")])
 
-    def _get_wal_file_age(self):
+    def _get_wal_dir(self):
         if self.version >= V10:
             wal_dir = "pg_wal"
         else:
@@ -88,12 +88,18 @@ class PostgreSql(AgentCheck):
 
         wal_log_dir = os.path.join("/var/lib/pgsql", str(self.version), "data", wal_dir)
 
+        return wal_log_dir
+
+    def _get_wal_file_age(self):
+        wal_log_dir = self._get_wal_dir(self)
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
-                "Cannot access WAL log directory: %s. Ensure that you are running the agent on your local postgres database.",
+                "Cannot access WAL log directory: %s. Ensure that you are "
+                "running the agent on your local postgres database.",
                 wal_log_dir,
             )
             return None
+
         all_files = os.listdir(wal_log_dir)
 
         # files extentions that are not valid WAL files
