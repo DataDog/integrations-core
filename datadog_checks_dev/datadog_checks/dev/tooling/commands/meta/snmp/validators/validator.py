@@ -183,6 +183,12 @@ class DuplicateMetricsValidator(ProfileValidator):
         Function to extract OID from symbol
         """
         OID = metric.get('symbol').get('OID')
+        if (
+            metric.get('forced_type') == 'flag_stream'
+            and metric.get('options')
+            and metric.get('options').get('metric_suffix')
+        ):
+            OID = OID + metric.get('options').get('metric_suffix')
         line = metric.get('symbol').get('__line__')
         if OID not in self.used_metrics:
             self.used_metrics[OID] = [(file, line)]
