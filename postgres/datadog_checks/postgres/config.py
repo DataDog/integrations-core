@@ -60,6 +60,7 @@ class PostgresConfig:
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
+        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', False)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
