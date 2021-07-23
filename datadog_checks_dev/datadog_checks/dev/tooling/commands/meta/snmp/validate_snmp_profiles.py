@@ -2,6 +2,8 @@ import click
 import glob
 import os
 
+from datadog_checks.dev.tooling.constants import get_root
+
 from .....fs import dir_exists, file_exists
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning, echo_info
 from . import validators
@@ -23,13 +25,15 @@ def validate_profile(file, directory, verbose):
     if file:
         _validate_single_profile(file,path,verbose)
 
-    elif directory:
+    else:
+        if not directory:
+            dd_profiles_path = os.path.join("snmp", "datadog_checks", "snmp", "data", "profiles") 
+            directory = os.path.join(get_root(), dd_profiles_path)
+        
         all_profiles_directory = get_all_profiles_directory(directory)
         for profile in all_profiles_directory:
             echo_info("Start validation of profile {profile}:".format(profile=profile))
             _validate_single_profile(profile,path,verbose)
-    else:
-        echo_failure("Provide a file or directory to validate profile")
 
 def _validate_single_profile(file, path, verbose):
     if not exist_profile_in_path(file,path): 
