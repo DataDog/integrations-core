@@ -1,21 +1,18 @@
 import json
+from posixpath import join
+
 import jsonschema
 
 from datadog_checks.dev.tooling.constants import get_root
-from posixpath import join
-from ....console import abort
 
-from .utils import (
-    find_profile_in_path,
-)
+from .utils import find_profile_in_path
 
 
 class ValidationResult(object):
     def __init__(self):
         self.failed = False
         self.fixed = False
-        self.messages = {'success': [],
-                         'warning': [], 'failure': [], 'info': []}
+        self.messages = {'success': [], 'warning': [], 'failure': [], 'info': []}
 
     def __str__(self):
         return '\n'.join(['\n'.join(messages) for messages in self.messages.values()])
@@ -60,7 +57,7 @@ class ProfileValidator(object):
 
 
 class SchemaValidator(ProfileValidator):
-    """"
+    """ "
     Validator responsible to check if the profile matches with the schemas.
     """
 
@@ -107,7 +104,7 @@ class SchemaValidator(ProfileValidator):
 
 
 class DuplicateMetricsValidator(ProfileValidator):
-    """"
+    """ "
     Validator responsible to check if there are no duplicated metrics in the profile.
     It checks all the profiles extended by the profile passed.
     """
@@ -120,7 +117,8 @@ class DuplicateMetricsValidator(ProfileValidator):
     def validate(self, profile, path):
         # type: (ProfileValidator,str, str) -> None
         """
-        Calls the recursive function(verify_duplicate_metrics_profile_recursive) to check if there are any duplicated metric.
+        Calls the recursive function(verify_duplicate_metrics_profile_recursive)
+        to check if there are any duplicated metric.
         It also logs the duplicated OID and reports all the files:lines where it is.
         """
         self.verify_duplicate_metrics_profile_recursive(profile, path)
@@ -128,8 +126,7 @@ class DuplicateMetricsValidator(ProfileValidator):
             output_message = ""
             output_message = "metric with OID " + OID + " is duplicated in profiles: \n"
             for file, line in self.duplicated.get(OID):
-                output_message = output_message + \
-                    "|------> " + file + ":" + str(line) + '\n'
+                output_message = output_message + "|------> " + file + ":" + str(line) + '\n'
             self.fail(output_message)
         if len(self.duplicated) == 0 and not self.result.failed:
             self.success("No duplicated OID ")
@@ -139,18 +136,18 @@ class DuplicateMetricsValidator(ProfileValidator):
         Recursively for each profile extended, it checks the metrics and add them into the mapping "used_metrics".\n
         If the metric is duplicated, it also adds it to the mapping "duplicated".
         """
-        extensions = self.verify_duplicate_metrics_profile_file(
-            file, path)
+        extensions = self.verify_duplicate_metrics_profile_file(file, path)
         if extensions:
             for file_name in extensions:
-                self.verify_duplicate_metrics_profile_recursive(
-                    file_name, path)
+                self.verify_duplicate_metrics_profile_recursive(file_name, path)
 
     def verify_duplicate_metrics_profile_file(self, file, path):
         # type: (str, list) -> list
         """
         Extract the OIDs of a profile and adds them to "used_metrics".\n
-        The duplicated metrics are also added to "duplicated" mapping. "duplicated" is a dictionary where the OIDs are the keys and the values are lists of tuples (name_of_profile,line)
+        The duplicated metrics are also added to "duplicated" mapping. \n
+        "duplicated" is a dictionary where the OIDs are the keys and
+        the values are lists of tuples (name_of_profile,line)
         """
         file_contents = find_profile_in_path(file, path)
         if not file_contents:
@@ -161,8 +158,7 @@ class DuplicateMetricsValidator(ProfileValidator):
             for metric in file_contents.get('metrics'):
                 # Check if there are symbols metrics
                 if metric.get('symbols'):
-                    self.extract_oids_from_symbols(
-                        metric, file)
+                    self.extract_oids_from_symbols(metric, file)
                 # Check if there are symbol metrics
                 if metric.get('symbol'):
                     self.extract_oid_from_symbol(metric, file)
@@ -197,7 +193,4 @@ class DuplicateMetricsValidator(ProfileValidator):
 
 def get_all_validators():
     # type () -> list(ProfileValidator)
-    return [
-        SchemaValidator(),
-        DuplicateMetricsValidator()
-    ]
+    return [SchemaValidator(), DuplicateMetricsValidator()]
