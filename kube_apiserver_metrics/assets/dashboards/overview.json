@@ -7,8 +7,8 @@
       "definition": {
         "type": "image",
         "url": "/static/images/screenboard/integrations/kubernetes.jpg",
-        "sizing": "cover",
-        "has_background": true,
+        "sizing": "scale-down",
+        "has_background": false,
         "has_border": true,
         "vertical_align": "center",
         "horizontal_align": "center"
