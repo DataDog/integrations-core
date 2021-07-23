@@ -1,6 +1,6 @@
 {
   "title": "Kubernetes API Server - Overview",
-  "description": "",
+  "description": "## Kubernetes API Server - Overview\n\nThis dashboard provides a high-level overview of your [Kubernetes API servers](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/).\n\nClone this template to make changes and add your own graphs and widgets.",
   "widgets": [
     {
       "id": 5523550815136180,
