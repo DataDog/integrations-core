@@ -37,7 +37,7 @@
             "response_format": "scalar",
             "queries": [
               {
-                "query": "avg:kube_apiserver.go_goroutines{$cluster_name}",
+                "query": "avg:kube_apiserver.go_goroutines{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "avg"
@@ -72,7 +72,7 @@
             "response_format": "scalar",
             "queries": [
               {
-                "query": "avg:kube_apiserver.go_threads{$cluster_name}",
+                "query": "avg:kube_apiserver.go_threads{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "last"
@@ -107,7 +107,7 @@
             "response_format": "scalar",
             "queries": [
               {
-                "query": "avg:kube_apiserver.audit_event.count{$cluster_name}.as_count()",
+                "query": "avg:kube_apiserver.audit_event.count{$kube_cluster_name}.as_count()",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "avg"
@@ -142,7 +142,7 @@
             "response_format": "scalar",
             "queries": [
               {
-                "query": "avg:kube_apiserver.process_resident_memory_bytes{$cluster_name}",
+                "query": "avg:kube_apiserver.process_resident_memory_bytes{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "last"
@@ -177,7 +177,7 @@
             "response_format": "scalar",
             "queries": [
               {
-                "query": "avg:kube_apiserver.process_virtual_memory_bytes{$cluster_name}",
+                "query": "avg:kube_apiserver.process_virtual_memory_bytes{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1",
                 "aggregator": "last"
@@ -213,7 +213,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:kube_apiserver.current_inflight_requests{$cluster_name}",
+                "query": "sum:kube_apiserver.current_inflight_requests{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -268,7 +268,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:kube_apiserver.authenticated_user_requests.count{$cluster_name}.as_rate()",
+                "query": "sum:kube_apiserver.authenticated_user_requests.count{$kube_cluster_name}.as_rate()",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -315,7 +315,7 @@
             "response_format": "timeseries",
             "queries": [
               {
-                "query": "sum:kube_apiserver.longrunning_gauge{$cluster_name}",
+                "query": "sum:kube_apiserver.longrunning_gauge{$kube_cluster_name}",
                 "data_source": "metrics",
                 "name": "query1"
               }
@@ -367,7 +367,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -376,14 +375,14 @@
                       "formula": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.etcd_object_counts{$cluster_name}",
+                      "query": "sum:kube_apiserver.etcd_object_counts{$kube_cluster_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -414,7 +413,6 @@
               "title": "Object count by resource",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -427,15 +425,15 @@
                       }
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.etcd_object_counts{$cluster_name} by {resource}",
+                      "query": "sum:kube_apiserver.etcd_object_counts{$kube_cluster_name} by {resource}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ]
             },
@@ -478,7 +476,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -487,14 +484,14 @@
                       "formula": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.rest_client_requests_total.count{$cluster_name} by {code}.as_rate()",
+                      "query": "sum:kube_apiserver.rest_client_requests_total.count{$kube_cluster_name} by {code}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -525,7 +522,6 @@
               "title": "By method per second",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -538,15 +534,15 @@
                       }
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:kube_apiserver.rest_client_requests_total.count{$cluster_name} by {method}.as_rate()",
+                      "query": "avg:kube_apiserver.rest_client_requests_total.count{$kube_cluster_name} by {method}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ]
             },
@@ -589,7 +585,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -598,14 +593,14 @@
                       "formula": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster_name} by {code}.as_rate()",
+                      "query": "sum:kube_apiserver.apiserver_request_total.count{$kube_cluster_name} by {code}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -636,7 +631,6 @@
               "title": "By resource per second",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -649,15 +643,15 @@
                       }
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster_name} by {resource}.as_rate()",
+                      "query": "sum:kube_apiserver.apiserver_request_total.count{$kube_cluster_name} by {resource}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ]
             },
@@ -700,7 +694,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -709,14 +702,14 @@
                       "formula": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.grpc_client_handled_total{$cluster_name} by {grpc_code}.as_rate()",
+                      "query": "sum:kube_apiserver.grpc_client_handled_total{$kube_cluster_name} by {grpc_code}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -747,7 +740,6 @@
               "title": "By (service, method) per second",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "toplist",
               "requests": [
                 {
@@ -760,15 +752,15 @@
                       }
                     }
                   ],
+                  "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:kube_apiserver.grpc_client_handled_total{$cluster_name} by {grpc_service,grpc_method}.as_rate()",
+                      "query": "sum:kube_apiserver.grpc_client_handled_total{$kube_cluster_name} by {grpc_service,grpc_method}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last"
                     }
-                  ],
-                  "response_format": "scalar"
+                  ]
                 }
               ]
             },
@@ -791,9 +783,9 @@
   ],
   "template_variables": [
     {
-      "name": "cluster_name",
+      "name": "kube_cluster_name",
       "default": "*",
-      "prefix": "cluster_name"
+      "prefix": "kube_cluster_name"
     },
     {
       "name": "host",
