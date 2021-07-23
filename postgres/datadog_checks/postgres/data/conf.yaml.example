@@ -159,6 +159,12 @@ instances:
     #
     # collect_wal_metrics: false
 
+    ## @param data_directory - string - optional - default: /var/lib/postgresql/data
+    ## The data directory of your postgres installation
+    ## Required when collecting WAL metrics.
+    #
+    # data_directory: /var/lib/postgresql/data
+
     ## @param tag_replication_role - boolean - optional - default: false
     ## Tag metrics and checks with `replication_role:<master|standby>`.
     #

@@ -86,12 +86,12 @@ class PostgreSql(AgentCheck):
         else:
             wal_dir = "pg_xlog"
 
-        wal_log_dir = os.path.join("/var/lib/pgsql", str(self.version), "data", wal_dir)
+        wal_log_dir = os.path.join(self._config.data_directory, wal_dir)
 
         return wal_log_dir
 
     def _get_wal_file_age(self):
-        wal_log_dir = self._get_wal_dir(self)
+        wal_log_dir = self._get_wal_dir()
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
                 "Cannot access WAL log directory: %s. Ensure that you are "

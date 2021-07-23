@@ -218,12 +218,14 @@ def test_version_metadata(check, test_case, params):
 @pytest.mark.parametrize(
     'pg_version, wal_path',
     [
-        ('9.6.2', '/var/lib/pgsql/9.6.2/data/pg_xlog'),
-        ('10.0.0', '/var/lib/pgsql/10.0.0/data/pg_wal'),
+        ('9.6.2', '/var/lib/postgresql/data/pg_xlog'),
+        ('10.0.0', '/var/lib/postgresql/data/pg_wal'),
     ],
 )
-def test_get_wal_dir(check, pg_version, wal_path):
-    check.check_id = 'test:123'
+def test_get_wal_dir(integration_check, pg_instance, pg_version, wal_path):
+    pg_instance['data_directory'] = "/var/lib/postgresql/data/"
+    check = integration_check(pg_instance)
+
     version_utils = VersionUtils.parse_version(pg_version)
     with mock.patch('datadog_checks.postgres.PostgreSql.version', new_callable=PropertyMock) as mock_version:
         mock_version.return_value = version_utils
