@@ -193,6 +193,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: data_directory
+      description: |
+        The data directory of your postgres installation
+        Required when collecting WAL metrics.
+      value:
+        type: string
+        example: /var/lib/postgresql/data
     - name: tag_replication_role
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
