@@ -72,3 +72,4 @@ postgresql.queries.local_blks_dirtied,count,,block,,Total number of local blocks
 postgresql.queries.local_blks_written,count,,block,,Total number of local blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks written
 postgresql.queries.temp_blks_read,count,,block,,Total number of temp blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks read
 postgresql.queries.temp_blks_written,count,,block,,Total number of temp blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks written
+postgresql.wal_age,count,gauge,,seconds,,The age in seconds of the oldest WAL file.,0,postgres,wal age
