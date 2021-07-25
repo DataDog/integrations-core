@@ -5,7 +5,7 @@ from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
 def shared_collect_default_metrics(field, value):
-    return True
+    return False
 
 
 def shared_conf(field, value):
@@ -17,7 +17,7 @@ def shared_is_jmx(field, value):
 
 
 def shared_new_gc_metrics(field, value):
-    return True
+    return False
 
 
 def shared_proxy(field, value):

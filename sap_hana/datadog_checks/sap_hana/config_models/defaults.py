@@ -13,7 +13,7 @@ def shared_service(field, value):
 
 
 def instance_batch_size(field, value):
-    return get_default_field_value(field, value)
+    return 1000
 
 
 def instance_custom_queries(field, value):
@@ -29,7 +29,7 @@ def instance_min_collection_interval(field, value):
 
 
 def instance_port(field, value):
-    return get_default_field_value(field, value)
+    return 30015
 
 
 def instance_service(field, value):
@@ -41,7 +41,7 @@ def instance_tags(field, value):
 
 
 def instance_timeout(field, value):
-    return get_default_field_value(field, value)
+    return 10
 
 
 def instance_tls_ca_cert(field, value):

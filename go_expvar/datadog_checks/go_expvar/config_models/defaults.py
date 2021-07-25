@@ -97,7 +97,7 @@ def instance_min_collection_interval(field, value):
 
 
 def instance_namespace(field, value):
-    return get_default_field_value(field, value)
+    return 'go_expvar'
 
 
 def instance_ntlm_domain(field, value):

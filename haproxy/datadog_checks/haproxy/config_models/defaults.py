@@ -293,7 +293,7 @@ def instance_type_overrides(field, value):
 
 
 def instance_url(field, value):
-    return 'http://localhost/admin?stats'
+    return get_default_field_value(field, value)
 
 
 def instance_use_legacy_auth_encoding(field, value):
