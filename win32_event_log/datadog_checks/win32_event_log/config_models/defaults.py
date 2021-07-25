@@ -45,7 +45,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_event_format(field, value):
-    return 'Message'
+    return ['Message']
 
 
 def instance_event_id(field, value):
@@ -141,7 +141,7 @@ def instance_timeout(field, value):
 
 
 def instance_type(field, value):
-    return 'information'
+    return ['information']
 
 
 def instance_user(field, value):

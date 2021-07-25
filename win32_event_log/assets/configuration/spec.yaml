@@ -302,7 +302,7 @@ files:
         Note: This is only used when `legacy_mode` is set to `true`.
       value:
         type: string
-        example: <REMOTE_HOSNAME>
+        example: <REMOTE_HOSTNAME>
         display_default: localhost
     - name: log_file
       description: |
@@ -336,9 +336,10 @@ files:
         type: array
         items:
           type: string
+        display_default:
+          - information
         example:
           - information
-        display_default: information
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -379,7 +380,8 @@ files:
         type: array
         items:
           type: string
-        display_default: Message
+        display_default:
+          - Message
         example:
           - Message
     - template: instances/default
