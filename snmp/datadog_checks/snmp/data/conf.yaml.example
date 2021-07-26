@@ -102,7 +102,7 @@ instances:
     #
     # ip_address: <IP_ADDRESS>
 
-    ## @param port - integer - optional
+    ## @param port - integer - optional - default: 161
     ## Default SNMP port.
     #
     # port: 161

@@ -131,14 +131,14 @@ files:
         value:
           type: integer
           example: 161
-          display_default:
+          display_default: 161
       - name: community_string
         required: false
         description: |
           Only useful for SNMP v1 & v2.
         value:
           type: string
-          example: public
+          example: 'public'
           display_default:
       - name: snmp_version
         required: false
