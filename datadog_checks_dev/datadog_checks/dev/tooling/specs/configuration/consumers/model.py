@@ -36,6 +36,12 @@ def example_looks_informative(example):
 def get_default_value(type_data):
     if 'default' in type_data:
         return type_data['default']
+    elif 'display_default' in type_data:
+        display_default = type_data['display_default']
+        if display_default is None:
+            return NO_DEFAULT
+        else:
+            return display_default
     elif 'type' not in type_data or type_data['type'] in ('array', 'object'):
         return NO_DEFAULT
 

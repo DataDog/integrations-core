@@ -29,7 +29,7 @@ def instance_collect_attributes(field, value):
 
 
 def instance_collect_events(field, value):
-    return True
+    return 'depends on collection_type value'
 
 
 def instance_collect_events_only(field, value):
@@ -37,7 +37,7 @@ def instance_collect_events_only(field, value):
 
 
 def instance_collect_per_instance_filters(field, value):
-    return get_default_field_value(field, value)
+    return 'none'
 
 
 def instance_collect_tags(field, value):
@@ -53,7 +53,7 @@ def instance_collection_type(field, value):
 
 
 def instance_excluded_host_tags(field, value):
-    return get_default_field_value(field, value)
+    return []
 
 
 def instance_include_datastore_cluster_folder_tag(field, value):
@@ -65,11 +65,11 @@ def instance_max_historical_metrics(field, value):
 
 
 def instance_metric_filters(field, value):
-    return get_default_field_value(field, value)
+    return 'all metrics'
 
 
 def instance_metrics_per_query(field, value):
-    return 50
+    return 500
 
 
 def instance_min_collection_interval(field, value):
@@ -85,7 +85,7 @@ def instance_refresh_metrics_metadata_cache_interval(field, value):
 
 
 def instance_resource_filters(field, value):
-    return get_default_field_value(field, value)
+    return 'no filter'
 
 
 def instance_rest_api_options(field, value):

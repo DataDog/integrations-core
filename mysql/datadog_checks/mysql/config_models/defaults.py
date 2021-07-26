@@ -13,7 +13,7 @@ def shared_service(field, value):
 
 
 def instance_charset(field, value):
-    return 'utf8'
+    return get_default_field_value(field, value)
 
 
 def instance_connect_timeout(field, value):
@@ -37,7 +37,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_host(field, value):
-    return 'localhost'
+    return get_default_field_value(field, value)
 
 
 def instance_max_custom_queries(field, value):
@@ -97,4 +97,4 @@ def instance_use_global_custom_queries(field, value):
 
 
 def instance_username(field, value):
-    return 'datadog'
+    return get_default_field_value(field, value)

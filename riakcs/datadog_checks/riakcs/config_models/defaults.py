@@ -21,7 +21,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_host(field, value):
-    return get_default_field_value(field, value)
+    return 'localhost'
 
 
 def instance_is_secure(field, value):
@@ -37,11 +37,11 @@ def instance_min_collection_interval(field, value):
 
 
 def instance_port(field, value):
-    return get_default_field_value(field, value)
+    return 8080
 
 
 def instance_s3_root(field, value):
-    return get_default_field_value(field, value)
+    return 's3.amazonaws.com'
 
 
 def instance_service(field, value):
