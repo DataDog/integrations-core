@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 8.1.0 / 2021-07-26
+
+* [Added] Add new relation metrics. See [#9758](https://github.com/DataDog/integrations-core/pull/9758).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix debug log formatting. See [#9752](https://github.com/DataDog/integrations-core/pull/9752).
+
 ## 8.0.5 / 2021-07-21
 
 * [Fixed] Fix wrong errors related to pg_stat_statements setup. See [#9733](https://github.com/DataDog/integrations-core/pull/9733).
