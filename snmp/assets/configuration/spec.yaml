@@ -1,11 +1,15 @@
 name: SNMP
+description: |
+  WARNING: This configuration files is for SNMP v1, v2 and v3
+  Check carefully all variables depending of your SNMP version.
+
+  NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
 files:
 - name: snmp.yaml
   options:
     - template: init_config
       options:
       - name: loader
-        required: false
         description: |
             Check loader to use for all instances. Available loaders:
             - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
@@ -15,7 +19,6 @@ files:
           example: core
           type: string
       - name: oid_batch_size
-        required: false
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
             uses more resources.
@@ -25,14 +28,13 @@ files:
           type: integer
         
       - name: global_metrics
-        required: false
         description: |
-            Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-            global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-
-            Single scalar metrics and table metrics can be defined in this section.
-            Details on how to define metrics can be found here:
-            https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+          Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
+          global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
+          
+          Single scalar metrics and table metrics can be defined in this section.
+          Details on how to define metrics can be found here:
+          https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
         value:
           type: array
           items:
@@ -45,7 +47,6 @@ files:
               metric_tags:
                 - TCP
       - name: profiles
-        required: false
         description: |
           Specify profiles to be able to reference a set of metrics by name.
           One of definition_file or definition needs to be defined.
@@ -64,7 +65,6 @@ files:
               definition_file: generic-router.yaml
           display_default:
       - name: refresh_oids_cache_interval
-        required: false
         description: |
           (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
           the cache is refreshed.
@@ -84,7 +84,6 @@ files:
           example: 3600
         display_default: 0
       - name: optimize_mib_memory_usage
-        required: false
         description: |
           **Experimental** - Setting this flag to true attempts to optimize memory usage related to
           MIB information. This shares internal MIB data across instances.
@@ -95,7 +94,6 @@ files:
           example: false
           display_default: false
       - name: mibs_folder
-        required: false
         description: |
           Specify an additional folder for your custom mib files (python format).
           Only available using python SNMP integration
@@ -104,7 +102,6 @@ files:
           example: /path/to/your/mibs/folder
           display_default: 
       - name: ignore_nonincreasing_oid 
-        required: false
         description: |
           Set to true to ignore non increasing oid.
           See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
@@ -117,7 +114,6 @@ files:
     - template: instances
       options:
       - name: ip_address
-        required: false
         description: |
           The IP address of the device to monitor.
           One of ip_address and network_address must be provided.
@@ -125,7 +121,6 @@ files:
           type: string
           display_default:
       - name: port
-        required: false
         description: |
           Default SNMP port.
         value:
@@ -133,15 +128,13 @@ files:
           example: 161
           display_default: 161
       - name: community_string
-        required: false
         description: |
           Only useful for SNMP v1 & v2.
         value:
-          type: string
           example: 'public'
+          type: string
           display_default:
       - name: snmp_version
-        required: false
         description: |
           If you are using SNMP v1 set snmp_version to 1
           If you are using SNMP v3 set snmp_version to 3
@@ -150,7 +143,6 @@ files:
           type: integer
           example: 2
       - name: timeout
-        required: false
         description: |
           Amount of second before timing out.
         value:
@@ -158,7 +150,6 @@ files:
           type: integer
           example: 5
       - name: retries
-        required: false
         description: |
           Amount of retries before failure.
         value:
@@ -166,7 +157,6 @@ files:
           example: 5
           display_default: 5
       - name: loader
-        required: false
         description: |
           Check loader to use. Available loaders:
           - core: (recommended) will use new corecheck SNMP integration
@@ -176,7 +166,6 @@ files:
           example: core
           display_default: python
       - name: oid_batch_size
-        required: false
         description: |
           The number of OIDs handled by each batch. Increasing this number improves performance but
           uses more resources.
@@ -186,7 +175,6 @@ files:
           example: 10
           display_default: 60
       - name: user
-        required: false
         description: |
           USERNAME to connect to your SNMP devices.
           SNMP v3 specific configuration
@@ -195,7 +183,6 @@ files:
           example: <USERNAME>
           display_default:
       - name: authProtocol
-        required: false
         description: |
           Authentication type to use when connecting to your SNMP devices.
           It can be one of: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
@@ -206,7 +193,6 @@ files:
           example: <AUTHENTICATION_PROTOCOL>
           display_default:
       - name: authKey
-        required: false
         description: |
           Authentication key to use with your Authentication type.
           SNMP v3 specific configuration
@@ -215,7 +201,6 @@ files:
           example: <AUTHENTICATION_TYPE_KEY>
           display_default:
       - name: privProtocol
-        required: false
         description: |
           Privacy type to use when connecting to your SNMP devices.
           It can be one of: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
@@ -226,7 +211,6 @@ files:
           example: <PRIVACY_TYPE>
           display_default:
       - name: privKey
-        required: false
         description: |
           Privacy type key to use with your Privacy type.
           SNMP v3 specific configuration
@@ -235,7 +219,6 @@ files:
           example: <PRIVACY_TYPE_KEY>
           display_default:
       - name: context_engine_id
-        required: false
         description: |
           ID of your context engine; typically unneeded.
           (optional SNMP v3-only parameter)
@@ -245,7 +228,6 @@ files:
           example: <CONTEXT_ENGINE_ID>
           display_default:
       - name: context_name
-        required: false
         description: |
           Name of your context (optional SNMP v3-only parameter).
           SNMP v3 specific configuration
@@ -254,7 +236,6 @@ files:
           example: <CONTEXT_NAME>
           display_default:
       - name: use_global_metrics
-        required: false
         description: |
           Whether or not global_metrics should be included for this instance.
         value:
@@ -262,7 +243,6 @@ files:
           example: true
           display_default: true
       - name: profile
-        required: false
         description: |
           Name of the profile to use, if any.
         value:
@@ -270,7 +250,6 @@ files:
           example: <PROFILE_NAME>
           display_default:
       - name: metrics
-        required: false
         description: |
           Specify metrics you want to monitor.
           metrics set here will override global_metrics set in the init_config section 
@@ -293,7 +272,6 @@ files:
               metric_tags:
                 - TCP
       - name: metric_tags
-        required: false
         description: |
           Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
           Regular expressions can be used to separate the resulting value into several tags, or get a
@@ -314,7 +292,6 @@ files:
                   host: \2
                   device_type: \1
       - name: network_address
-        required: false
         description: |
           The network address of the devices to scan for monitor.
           Only available using python SNMP integration
@@ -322,7 +299,6 @@ files:
           type: string
           example: <NETWORK_ADRESS>
       - name: ignored_ip_addresses
-        required: false
         description: |
           A list of IP addresses to ignore when scanning the network.
           Only available using python SNMP integration
@@ -335,7 +311,6 @@ files:
             - <IP_ADDRESS_2>  
           display_default: 
       - name: discovery_interval
-        required: false
         description: |
           Interval between 2 discovery starts, in seconds.
           Only available using python SNMP integration
@@ -344,7 +319,6 @@ files:
           example: 3600
           display_default: 3600
       - name: discovery_allowed_failures
-        required: false
         description: |
           Number of times a discovered host can fail before we remove it from the discovered list.
           Only available using python SNMP integration
@@ -353,7 +327,6 @@ files:
           example: 3
           display_default: 3
       - name: workers
-        required: false
         description: |
           Number of workers used for check when using discovery.
           Only available using python SNMP integration
@@ -362,7 +335,6 @@ files:
           example: 5
           display_default: 5
       - name: enforce_mib_constraints
-        required: false
         description: |
           If set to false we will not check the values returned meet the MIB constraints.
           Only available using python SNMP integration
@@ -371,7 +343,6 @@ files:
           example: true
           display_default: true
       - name: bulk_threshold
-        required: false
         description: |
           The number of symbols in each table that triggers a BULK request.
           Only relevant for SNMP > 1.
@@ -381,7 +352,6 @@ files:
           example: 0
           display_default: 0
       - name: refresh_oids_cache_interval
-        required: false
         description: |
           (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
           the cache is refreshed.
