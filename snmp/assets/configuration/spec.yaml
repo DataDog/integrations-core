@@ -1,9 +1,4 @@
 name: SNMP
-description: |
-  WARNING: This configuration files is for SNMP v1, v2 and v3
-  Check carefully all variables depending of your SNMP version.
-
-  NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
 files:
 - name: snmp.yaml
   options:
@@ -130,6 +125,7 @@ files:
       - name: community_string
         description: |
           Only useful for SNMP v1 & v2.
+          Enclose the community string with single quote to avoid special character being interpreted.
         value:
           example: 'public'
           type: string
