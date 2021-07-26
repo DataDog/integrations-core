@@ -147,22 +147,21 @@ To configure this check for an Agent running on a host:
      #
      - server: localhost:1521
 
-       ## @param service_name - string - required
-       ## The Oracle Database service name. To view the services available on your server,
-       ## run the following query:
-       ## `SELECT value FROM v$parameter WHERE name='service_names'`
-       #
-       service_name: "<SERVICE_NAME>"
+      ## @param service_name - string - required
+      ## The Oracle Database service name. To view the services available on your server,
+      ## run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+      #
+      service_name: <SERVICE_NAME>
 
-       ## @param user - string - required
-       ## The username for the user account.
-       #
-       user: datadog
+      ## @param username - string - required
+      ## The username for the Datadog user account.
+      #
+      username: <USERNAME>
 
-       ## @param password - string - required
-       ## The password for the user account.
-       #
-       password: "<PASSWORD>"
+      ## @param password - string - required
+      ## The password for the Datadog user account.
+      #
+      password: <PASSWORD>
    ```
 
 2. [Restart the Agent][8].
@@ -219,7 +218,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "username":"datadog", "password":"<PASSWORD>"}` |
 
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 
