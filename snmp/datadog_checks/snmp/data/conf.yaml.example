@@ -1,95 +1,100 @@
-## WARNING: This configuration files is for SNMP v1, v2 and v3
-## Check carefully all variables depending of your SNMP version.
-##
-## NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
-
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param loader - string - optional - default: python
-  ## Check loader to use for all instances. Available loaders:
-  ## - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
-  ## - python: will use legacy python SNMP integration
-  #
-  loader: core
+    ## @param loader - string - optional - default: python
+    ## Check loader to use for all instances. Available loaders:
+    ## - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
+    ## - python: will use legacy python SNMP integration
+    #
+    # loader: core
 
-  ## @param oid_batch_size - integer - optional - default: 10 (python), 60 (core)
-  ## The number of OIDs handled by each batch. Increasing this number improves performance but
-  ## uses more resources.
-  #
-  # oid_batch_size: 10
+    ## @param oid_batch_size - integer - optional - default: 10
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    #
+    # oid_batch_size: 10
 
-  ## @param global_metrics - list of elements - optional
-  ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-  ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-  ##
-  ## Single scalar metrics and table metrics can be defined in this section.
-  ## Details on how to define metrics can be found here:
-  ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
-  #
-  #
-  # global_metrics:
-  #   - OID: 1.3.6.1.2.1.6.5.0
-  #     name: tcpPassiveOpens
-  #   - OID: 1.3.6.1.2.1.6.5.0
-  #     name: tcpPassiveOpens
-  #     metric_tags:
-  #       - TCP
+    ## @param global_metrics - list of mappings - optional
+    ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
+    ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
+    ##
+    ## Single scalar metrics and table metrics can be defined in this section.
+    ## Details on how to define metrics can be found here:
+    ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+    #
+    # global_metrics:
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #     metric_tags:
+    #     - TCP
 
-  ## @param profiles - object - optional
-  ## Specify profiles to be able to reference a set of metrics by name.
-  ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with a profile, whereas definition inlines
-  ## it directly here.
-  ## When using a profile present on the profiles directory of the
-  ## configuration, you can directly pass the filename.
-  ## By default, it loads all the profiles installed in the python package and
-  ## in the configuration directory, if the file doesn't start with an underscore.
-  #
-  # profiles:
-  #   f5-big-ip:
-  #     definition_file: f5-big-ip.yaml
-  #   router:
-  #     definition_file: generic-router.yaml
-  #   [...]
+    ## @param profiles - mapping - optional
+    ## Specify profiles to be able to reference a set of metrics by name.
+    ## One of definition_file or definition needs to be defined.
+    ## definition_file points to a file with a profile, whereas definition inlines
+    ## it directly here.
+    ## When using a profile present on the profiles directory of the
+    ## configuration, you can directly pass the filename.
+    ## By default, it loads all the profiles installed in the python package and
+    ## in the configuration directory, if the file doesn't start with an underscore.
+    #
+    # profiles:
+    #   f5-big-ip:
+    #     definition_file: f5-big-ip.yaml
+    #   router:
+    #     definition_file: generic-router.yaml
 
-  ## @param refresh_oids_cache_interval - integer - optional - default: 0
-  ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
-  ## the cache is refreshed.
-  ## This option works best when `oid_batch_size` is set to 128 or 256.
-  ## This is useful to improve performance when fetching metrics from large tables.
-  ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
-  ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
-  ## The caching is disabled if the interval is set to `0` (default).
-  ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
-  ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
-  ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
-  ##         the OIDs will be refreshed only according to the refresh interval.
-  ## Only available using python SNMP integration
-  #
-  # refresh_oids_cache_interval: 3600
+    ## @param refresh_oids_cache_interval - integer - optional - default: 3600
+    ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
+    ## the cache is refreshed.
+    ## This option works best when `oid_batch_size` is set to 128 or 256.
+    ## This is useful to improve performance when fetching metrics from large tables.
+    ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+    ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
+    ## The caching is disabled if the interval is set to `0` (default).
+    ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+    ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
+    ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+    ##         the OIDs will be refreshed only according to the refresh interval.
+    ## Only available using python SNMP integration
+    #
+    # refresh_oids_cache_interval: 3600
 
-  ## @param optimize_mib_memory_usage - boolean - optional - default: false
-  ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
-  ## MIB information. This shares internal MIB data across instances.
-  ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
-  ## Only available using python SNMP integration
-  #
-  # optimize_mib_memory_usage: false
+    ## @param optimize_mib_memory_usage - boolean - optional - default: false
+    ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
+    ## MIB information. This shares internal MIB data across instances.
+    ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
+    ## Only available using python SNMP integration
+    #
+    # optimize_mib_memory_usage: false
 
-  ## @param mibs_folder - string - optional
-  ## Specify an additional folder for your custom mib files (python format).
-  ## Only available using python SNMP integration
-  #
-  # mibs_folder: /path/to/your/mibs/folder
+    ## @param mibs_folder - string - optional - default: /path/to/your/mibs/folder
+    ## Specify an additional folder for your custom mib files (python format).
+    ## Only available using python SNMP integration
+    #
+    # mibs_folder: /path/to/your/mibs/folder
 
-  ## @param ignore_nonincreasing_oid - boolean - optional - default: false
-  ## Set to true to ignore non increasing oid.
-  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
-  ## Only available using python SNMP integration
-  #
-  # ignore_nonincreasing_oid: false
+    ## @param ignore_nonincreasing_oid - boolean - optional - default: false
+    ## Set to true to ignore non increasing oid.
+    ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
+    ## Only available using python SNMP integration
+    #
+    # ignore_nonincreasing_oid: false
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
+
   -
     ## @param ip_address - string - optional
     ## The IP address of the device to monitor.
@@ -102,11 +107,10 @@ instances:
     #
     # port: 161
 
-    ## @param community_string - string - optional
+    ## @param community_string - string - optional - default: public
     ## Only useful for SNMP v1 & v2.
-    ## Enclose the community string with single quote like below (to avoid special character being interpreted).
     #
-    # community_string: 'public'
+    # community_string: public
 
     ## @param snmp_version - integer - optional - default: 2
     ## If you are using SNMP v1 set snmp_version to 1
@@ -124,15 +128,6 @@ instances:
     #
     # retries: 5
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
     ## @param loader - string - optional - default: python
     ## Check loader to use. Available loaders:
     ## - core: (recommended) will use new corecheck SNMP integration
@@ -140,7 +135,7 @@ instances:
     #
     # loader: core
 
-    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## @param oid_batch_size - integer - optional - default: 60
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
@@ -204,9 +199,10 @@ instances:
     #
     # profile: <PROFILE_NAME>
 
-    ## @param metrics - list of elements - optional
+    ## @param metrics - list of mappings - optional
     ## Specify metrics you want to monitor.
-    ## metrics set here will override global_metrics set in the init_config section if use_global_metrics is set to false.
+    ## metrics set here will override global_metrics set in the init_config section 
+    ## if use_global_metrics is set to false.
     ## Otherwise, they will be used in addition of global_metrics.
     ##
     ## Single scalar metrics and table metrics can be defined in this section.
@@ -219,24 +215,23 @@ instances:
     #   - OID: 1.3.6.1.2.1.6.5.0
     #     name: tcpPassiveOpens
     #     metric_tags:
-    #       - TCP
+    #     - TCP
 
-    ## @param metric_tags - list of elements - optional
+    ## @param metric_tags - list of strings - optional
     ## Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
     ## Regular expressions can be used to separate the resulting value into several tags, or get a
     ## substring using the regular Python engine: https://docs.python.org/3/library/re.html
     #
     # metric_tags:
-    #  - OID: 1.3.6.1.2.1.1.5.0
-    #    symbol: sysName
-    #    tag: snmp_host
-    #  - # With regular expression matching
-    #    OID: 1.3.6.1.2.1.1.5.0
-    #    symbol: sysName
-    #    match: (.*)-(.*)
-    #    tags:
-    #        host: \2
-    #        device_type: \1
+    #   - OID: 1.3.6.1.2.1.1.5.0
+    #     symbol: sysName
+    #     tag: snmp_host
+    #   - OID: 1.3.6.1.2.1.1.5.0
+    #     symbol: sysName
+    #     match: (.*)-(.*)
+    #     tags:
+    #       host: \2
+    #       device_type: \1
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
@@ -244,7 +239,7 @@ instances:
     #
     # network_address: <NETWORK_ADRESS>
 
-    ## @param ignored_ip_addresses - list of string - optional
+    ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
     ## Only available using python SNMP integration
     #
@@ -299,3 +294,7 @@ instances:
     ## Only available using python SNMP integration
     #
     # refresh_oids_cache_interval: 3600
+
+    ## Every instance is scheduled independent of the others.
+    #
+    # instances: []
