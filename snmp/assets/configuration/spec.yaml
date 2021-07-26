@@ -301,7 +301,7 @@ files:
         value:
           type: array
           items:
-            type: string
+            type: object
           example: 
             - OID: 1.3.6.1.2.1.1.5.0
               symbol: sysName
