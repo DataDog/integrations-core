@@ -104,8 +104,9 @@ instances:
 
     ## @param community_string - string - optional
     ## Only useful for SNMP v1 & v2.
+    ## Enclose the community string with single quote like below (to avoid special character being interpreted).
     #
-    # community_string: public
+    # community_string: 'public'
 
     ## @param snmp_version - integer - optional - default: 2
     ## If you are using SNMP v1 set snmp_version to 1
