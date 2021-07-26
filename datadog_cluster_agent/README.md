@@ -1,8 +1,8 @@
-# Agent Check: Datadog-Cluster-Agent
+# Agent Check: Datadog Cluster Agent
 
 ## Overview
 
-This check monitors [Datadog-Cluster-Agent][1] through the Datadog Agent.
+This check monitors the [Datadog Cluster Agent][1] through the Datadog Agent.
 
 ## Setup
 
@@ -35,8 +35,6 @@ The Datadog-Cluster-Agent integration does not include any events.
 
 ### Service Checks
 
-The Datadog-Cluster-Agent integration does not include any service checks.
-
 See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -44,7 +42,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][8].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.datadoghq.com/agent/cluster_agent/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/datadog_checks/datadog_cluster_agent/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
