@@ -21,7 +21,7 @@ class TCPCheck(AgentCheck):
         self.instance_name = self.normalize_tag(instance['name'])
         self.timeout = float(instance.get('timeout', 10))
         self.collect_response_time = instance.get('collect_response_time', False)
-        self.url = instance.get('host', None)
+        self.host = instance.get('host', None)
         self.socket_type = None
         self._addr = None
 
@@ -31,18 +31,18 @@ class TCPCheck(AgentCheck):
         except Exception:
             raise ConfigurationError("{} is not a correct port.".format(str(port)))
         try:
-            split_url = self.url.split(":")
+            split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
             raise ConfigurationError("A valid url must be specified")
 
         custom_tags = instance.get('tags', [])
         self.tags = [
-            'url:{}:{}'.format(self.url, self.port),
+            'url:{}:{}'.format(self.host, self.port),
             'instance:{}'.format(instance.get('name')),
         ] + custom_tags
 
         self.service_check_tags = custom_tags + [
-            'target_host:{}'.format(self.url),
+            'target_host:{}'.format(self.host),
             'port:{}'.format(self.port),
             'instance:{}'.format(self.instance_name),
         ]
@@ -51,9 +51,9 @@ class TCPCheck(AgentCheck):
         if len(split_url) == 8:  # It may then be a IP V6 address, we check that
             for block in split_url:
                 if len(block) != 4:
-                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.url))
+                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.host))
             # It's a correct IP V6 address
-            self._addr = self.url
+            self._addr = self.host
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
@@ -66,13 +66,13 @@ class TCPCheck(AgentCheck):
                 self.resolve_ip()
             except Exception as e:
                 self.log.debug(str(e))
-                msg = "URL: {} could not be resolved".format(self.url)
+                msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
         return self._addr
 
     def resolve_ip(self):
-        self._addr = socket.gethostbyname(self.url)
-        self.log.debug("%s resolved to %s", self.url, self._addr)
+        self._addr = socket.gethostbyname(self.host)
+        self.log.debug("%s resolved to %s", self.host, self._addr)
 
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
@@ -82,12 +82,12 @@ class TCPCheck(AgentCheck):
             response_time = get_precise_time() - start
             return response_time
 
-    def check(self, instance):
+    def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
-        self.log.debug("Connecting to %s %d", self.url, self.port)
+        self.log.debug("Connecting to %s %d", self.host, self.port)
         try:
             response_time = self.connect()
-            self.log.debug("%s:%d is UP", self.url, self.port)
+            self.log.debug("%s:%d is UP", self.host, self.port)
             self.report_as_service_check(AgentCheck.OK, 'UP')
             if self.collect_response_time:
                 self.gauge(
@@ -114,13 +114,13 @@ class TCPCheck(AgentCheck):
                     ),
                 )
             else:
-                self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.url, self.port, str(e), length)
+                self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.host, self.port, str(e), length)
                 self.report_as_service_check(
                     AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
                 )
 
             if self.socket_type == socket.AF_INET:
-                self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.url, self.port)
+                self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
                 self._addr = None
 
     def report_as_service_check(self, status, msg=None):
