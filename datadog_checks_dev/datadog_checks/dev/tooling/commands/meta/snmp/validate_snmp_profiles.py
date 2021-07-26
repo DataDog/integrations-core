@@ -7,7 +7,7 @@ from datadog_checks.dev.tooling.constants import get_root
 
 from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success, echo_warning
 from . import validators
-from .validators.utils import exist_profile_in_path, initialize_path
+from .validators.utils import exist_profile_in_path, get_default_snmp_profiles_path, initialize_path
 
 MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
 
@@ -24,8 +24,7 @@ def validate_profile(file, directory, verbose):
 
     else:
         if not directory:
-            dd_profiles_path = os.path.join("snmp", "datadog_checks", "snmp", "data", "profiles")
-            directory = os.path.join(get_root(), dd_profiles_path)
+            directory = get_default_snmp_profiles_path()
 
         all_profiles_directory = get_all_profiles_directory(directory)
         for profile in all_profiles_directory:
