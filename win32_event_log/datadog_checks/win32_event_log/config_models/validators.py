@@ -4,7 +4,8 @@
 
 
 def initialize_instance(values, **kwargs):
-    if filters := values.get('filters', {}):
+    filters = values.setdefault('filters', {})
+    if filters:
         if isinstance(filters, dict) and 'type' in filters:
             types = filters['type']
             if isinstance(types, list):
