@@ -1,30 +1,25 @@
-# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
 import yaml
 
-from ...utils import file_exists, path_join, read_file
+from ...utils import file_exists, get_parent_dir, path_join, read_file
 
+TEMPLATES_DIR = path_join(get_parent_dir(get_parent_dir(__file__)), 'templates', 'configuration')
 VALID_EXTENSIONS = ('yaml', 'yml')
 
 
-class BaseTemplate(object):
-    # Override in subclass with path to templates
-    TEMPLATES_DIR = None
-
+class ConfigTemplates:
     def __init__(self, paths=None):
-        if self.TEMPLATES_DIR is None:
-            raise NotImplementedError('Cannot be instantiated directly, subclass and override TEMPLATES_DIR')
-
         self.templates = {}
         self.paths = []
 
         if paths:
             self.paths.extend(paths)
 
-        self.paths.append(self.TEMPLATES_DIR)
+        self.paths.append(TEMPLATES_DIR)
 
     def load(self, template):
         path_parts = template.split('/')
