@@ -32,7 +32,7 @@ def test():
               description: words
               value:
                 example: bar
-                display_default: baz
+                default: baz
                 type: string
             - name: example_ignored_array
               description: words
@@ -52,7 +52,7 @@ def test():
             - name: long_default_formatted
               description: words
               value:
-                display_default:
+                default:
                 - ["01", "02", "03", "04", "05"]
                 - ["06", "07", "08", "09", "10"]
                 - ["11", "12", "13", "14", "15"]
