@@ -7,7 +7,7 @@ init_config:
     ## - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
     ## - python: will use legacy python SNMP integration
     #
-    # loader: core
+    # loader: python
 
     ## @param oid_batch_size - integer - optional - default: 10
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -47,7 +47,7 @@ init_config:
     #   router:
     #     definition_file: generic-router.yaml
 
-    ## @param refresh_oids_cache_interval - integer - optional - default: 3600
+    ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
     ## the cache is refreshed.
     ## This option works best when `oid_batch_size` is set to 128 or 256.
@@ -61,7 +61,7 @@ init_config:
     ##         the OIDs will be refreshed only according to the refresh interval.
     ## Only available using python SNMP integration
     #
-    # refresh_oids_cache_interval: 3600
+    # refresh_oids_cache_interval: 0
 
     ## @param optimize_mib_memory_usage - boolean - optional - default: false
     ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
@@ -75,7 +75,7 @@ init_config:
     ## Specify an additional folder for your custom mib files (python format).
     ## Only available using python SNMP integration
     #
-    # mibs_folder: /path/to/your/mibs/folder
+    # mibs_folder: <MIBS_FOLDER>
 
     ## @param ignore_nonincreasing_oid - boolean - optional - default: false
     ## Set to true to ignore non increasing oid.
@@ -109,9 +109,10 @@ instances:
 
     ## @param community_string - string - optional
     ## Only useful for SNMP v1 & v2.
-    ## Enclose the community string with single quote to avoid special character being interpreted.
+    ## Enclose the community string with single quotes to avoid special characters being interpreted. For instance:
+    ## community_string: 'public'
     #
-    # community_string: public
+    # community_string: <COMMUNITY_STRING>
 
     ## @param snmp_version - integer - optional - default: 2
     ## If you are using SNMP v1 set snmp_version to 1
@@ -134,7 +135,7 @@ instances:
     ## - core: (recommended) will use new corecheck SNMP integration
     ## - python: will use legacy python SNMP integration
     #
-    # loader: core
+    # loader: python
 
     ## @param oid_batch_size - integer - optional - default: 60
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
@@ -238,7 +239,7 @@ instances:
     ## The network address of the devices to scan for monitor.
     ## Only available using python SNMP integration
     #
-    # network_address: <NETWORK_ADRESS>
+    # network_address: <NETWORK_ADDRESS>
 
     ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
@@ -294,7 +295,7 @@ instances:
     ##         the OIDs will be refreshed only according to the refresh interval.
     ## Only available using python SNMP integration
     #
-    # refresh_oids_cache_interval: 3600
+    # refresh_oids_cache_interval: 0
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

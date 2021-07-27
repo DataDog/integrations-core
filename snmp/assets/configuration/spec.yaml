@@ -115,10 +115,9 @@ files:
       - name: community_string
         description: |
           Only useful for SNMP v1 & v2.
-          Enclose the community string with single quotes to avoid special characters being interpreted.
+          Enclose the community string with single quotes to avoid special characters being interpreted. For instance:
+          community_string: 'public'
         value:
-          default: public
-          example: "'public'"
           type: string
       - name: snmp_version
         description: |
