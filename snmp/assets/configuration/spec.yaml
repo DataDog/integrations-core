@@ -153,8 +153,7 @@ files:
           Only available for corecheck implementation (`loader: core`).
         value:
           type: integer
-          example: 10
-          display_default: 60
+          example: 60
       - name: user
         description: |
           USERNAME to connect to your SNMP devices.
