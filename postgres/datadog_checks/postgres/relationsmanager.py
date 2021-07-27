@@ -138,7 +138,7 @@ SELECT relname,
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 BLOAT_QUERY = """
 SELECT
-    schemaname, relname, iname, /*reltuples::bigint, relpages::bigint, otta,*/
+    schemaname, relname, iname,
     ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric,1) AS tbloat
 FROM (
     SELECT
