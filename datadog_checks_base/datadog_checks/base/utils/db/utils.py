@@ -125,7 +125,7 @@ def resolve_db_host(db_host):
 
     try:
         host_ip = socket.gethostbyname(db_host)
-    except socket.gaierror as e:
+    except (socket.gaierror, UnicodeError) as e:
         # could be connecting via a unix domain socket
         logger.debug(
             "failed to resolve DB host '%s' due to %r. falling back to agent hostname: %s",
@@ -139,7 +139,7 @@ def resolve_db_host(db_host):
         agent_host_ip = socket.gethostbyname(agent_hostname)
         if agent_host_ip == host_ip:
             return agent_hostname
-    except socket.gaierror as e:
+    except (socket.gaierror, UnicodeError) as e:
         logger.debug(
             "failed to resolve agent host '%s' due to socket.gaierror(%s). using DB host: %s",
             agent_hostname,
