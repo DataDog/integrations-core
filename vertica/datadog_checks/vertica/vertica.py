@@ -114,7 +114,8 @@ class VerticaCheck(AgentCheck):
 
             self.query_version()
             self.query_custom()
-
+        except vertica.errors.Error as e:
+            self.log.error("There was an error retrieving metrics: %s" % str(e))
         finally:
             self._view.clear()
 
