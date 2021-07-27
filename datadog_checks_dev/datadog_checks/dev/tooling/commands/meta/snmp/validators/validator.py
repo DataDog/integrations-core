@@ -183,12 +183,15 @@ class DuplicateOIDValidator(ProfileValidator):
         Function to extract OID from symbol
         """
         OID = metric.get('symbol').get('OID')
+        # Check if the metric is a flag_stream
         if (
             metric.get('forced_type') == 'flag_stream'
             and metric.get('options')
             and metric.get('options').get('metric_suffix')
         ):
-            OID = OID + metric.get('options').get('metric_suffix')
+            # if it is a flag stream, do the hash as: OID.placement
+            # e.g OID = 1.2.3 and placement = 9 -> hash with 1.2.3.9
+            OID = OID + '.' + str(metric.get('options').get('placement'))
         line = metric.get('symbol').get('__line__')
         if OID not in self.used_oid:
             self.used_oid[OID] = [(file, line)]
