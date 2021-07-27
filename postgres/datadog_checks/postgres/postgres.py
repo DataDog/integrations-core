@@ -5,6 +5,7 @@ import copy
 import os
 import threading
 from contextlib import closing
+from time import time
 
 import psycopg2
 from six import iteritems
@@ -100,20 +101,23 @@ class PostgreSql(AgentCheck):
             )
             return None
 
-        all_files = os.listdir(wal_log_dir)
+        all_dir_contents = os.listdir(wal_log_dir)
+        all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
 
         # files extentions that are not valid WAL files
         exluded_file_exts = [".backup", ".history"]
         all_wal_files = [
-            file_name
+            os.path.join(wal_log_dir, file_name)
             for file_name in all_files
-            if all([ext for ext in exluded_file_exts if not file_name.endswith(ext)])
+            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
         ]
         if len(all_wal_files) < 1:
             self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
             return None
+
         oldest_file = min(all_wal_files, key=os.path.getctime)
-        oldest_file_age = os.path.getctime(oldest_file)
+        now = time()
+        oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
 
     @property
