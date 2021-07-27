@@ -142,7 +142,7 @@ instances:
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
     #
-    # oid_batch_size: 10
+    # oid_batch_size: 60
 
     ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
