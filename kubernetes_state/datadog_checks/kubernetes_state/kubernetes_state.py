@@ -32,6 +32,7 @@ ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
     'job': 'kube_job',
+    'job_name': 'kube_job',
     'cronjob': 'kube_cronjob',
     'pod': 'pod_name',
     'phase': 'pod_phase',

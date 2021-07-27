@@ -164,8 +164,8 @@ TAGS = {
     ],
     NAMESPACE + '.container.status_report.count.terminated': ['pod:pod2'],
     NAMESPACE + '.persistentvolumeclaim.request_storage': ['storageclass:manual'],
-    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2'],
-    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2'],
+    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
+    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
     NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
 }
 
@@ -605,6 +605,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-job',
+            'kube_job:curl-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -620,6 +621,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-cron-job',
+            'kube_job:curl-cron-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -720,12 +722,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -747,12 +749,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -799,7 +801,7 @@ def test_job_counts(aggregator, instance):
     # Test if we now have two as the value for the same job
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=2,
     )
 
