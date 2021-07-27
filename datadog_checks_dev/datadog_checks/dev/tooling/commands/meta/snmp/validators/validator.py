@@ -5,7 +5,7 @@ import jsonschema
 
 from datadog_checks.dev.tooling.constants import get_root
 
-from .utils import find_profile_in_path
+from .utils import find_profile_in_path, get_all_profiles_directory
 
 
 class ValidationResult(object):
@@ -199,7 +199,21 @@ class DuplicateOIDValidator(ProfileValidator):
             self.used_oid[OID].append((file, line))
             self.duplicated[OID] = self.used_oid[OID]
 
+class SysobjectidValidator(ProfileValidator):
+    """ 
+    Validator responsible to check if there are no duplicated sysobjectid in the profile.
+    """
+    def __init__(self):
+        super().__init__()
+        self.used_sysobjid = {}
+        self.duplicated = {}
+
+    def validate(self, profile, path):
+        pass
+            
+
+            
 
 def get_all_validators():
     # type () -> list(ProfileValidator)
-    return [SchemaValidator(), DuplicateOIDValidator()]
+    return [SchemaValidator(), DuplicateOIDValidator(), SysobjectidValidator()]
