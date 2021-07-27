@@ -75,7 +75,8 @@ def get_jobq_job_status(timeout):
                 "SELECT SUBSTR(JOB_NAME,1,POSSTR(JOB_NAME,'/')-1) AS JOB_ID, "
                 "SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1,POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "  # noqa:E501
                 "SUBSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),POSSTR(SUBSTR(JOB_NAME,POSSTR(JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
-                "JOB_SUBSYSTEM, 'JOBQ', JOB_QUEUE_LIBRARY, JOB_QUEUE_NAME, JOB_QUEUE_STATUS, 1 "
+                "JOB_SUBSYSTEM, 'JOBQ', JOB_QUEUE_LIBRARY, JOB_QUEUE_NAME, JOB_QUEUE_STATUS, 1, "
+                "(DAYS(CURRENT TIMESTAMP) - DAYS(JOB_QUEUE_TIME)) * 86400 + MIDNIGHT_SECONDS(CURRENT TIMESTAMP) - MIDNIGHT_SECONDS(JOB_QUEUE_TIME) AS JOBQ_DURATION "
                 "FROM TABLE(QSYS2.JOB_INFO('*JOBQ', '*ALL', '*ALL', '*ALL', '*ALL'))"
             ),
             'timeout': timeout,
@@ -90,6 +91,7 @@ def get_jobq_job_status(timeout):
             {'name': 'job_queue_name', 'type': 'tag'},
             {'name': 'job_queue_status', 'type': 'tag'},
             {'name': 'ibm_i.job.status', 'type': 'gauge'},
+            {'name': 'ibm_i.job.jobq_duration', 'type': 'gauge'},
         ],
     }
 
@@ -111,9 +113,10 @@ def get_active_job_status(timeout):
                 "SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1,POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')-1) AS JOB_USER, "  # noqa:E501
                 "SUBSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),POSSTR(SUBSTR(A.JOB_NAME,POSSTR(A.JOB_NAME,'/')+1),'/')+1) AS JOB_NAME, "  # noqa:E501
                 "A.SUBSYSTEM, 'ACTIVE', A.JOB_STATUS, 1, "
-                "CASE WHEN A.ELAPSED_TIME = 0 THEN 0 ELSE A.ELAPSED_CPU_TIME / (10 * A.ELAPSED_TIME) END AS CPU_RATE "
+                "CASE WHEN A.ELAPSED_TIME = 0 THEN 0 ELSE A.ELAPSED_CPU_TIME / (10 * A.ELAPSED_TIME) END AS CPU_RATE, "
+                "(DAYS(CURRENT TIMESTAMP) - DAYS(A.JOB_ACTIVE_TIME)) * 86400 + MIDNIGHT_SECONDS(CURRENT TIMESTAMP) - MIDNIGHT_SECONDS(A.JOB_ACTIVE_TIME) AS ACTIVE_DURATION "  #noqa:E501
                 # Two queries: one to fetch the stats, another to reset them
-                "FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', '')) A INNER JOIN TABLE(QSYS2.ACTIVE_JOB_INFO('YES', '', '', '')) B "  # noqa:E501
+                "FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO', '', '', '', 'ALL')) A INNER JOIN TABLE(QSYS2.ACTIVE_JOB_INFO('YES', '', '', '')) B "  # noqa:E501
                 # Assumes that INTERNAL_JOB_ID is unique, which should be the case
                 "ON A.INTERNAL_JOB_ID = B.INTERNAL_JOB_ID"
             ),
@@ -128,6 +131,7 @@ def get_active_job_status(timeout):
             {'name': 'job_active_status', 'type': 'tag'},
             {'name': 'ibm_i.job.status', 'type': 'gauge'},
             {'name': 'ibm_i.job.cpu_usage', 'type': 'gauge'},
+            {'name': 'ibm_i.job.active_duration', 'type': 'gauge'},
         ],
     }
 
