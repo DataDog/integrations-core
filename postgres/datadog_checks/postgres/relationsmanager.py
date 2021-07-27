@@ -136,6 +136,7 @@ SELECT relname,
 }
 'pg_index'
 
+# adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 BLOAT_QUERY = """
 SELECT
     schemaname, relname, iname, /*reltuples::bigint, relpages::bigint, otta,*/
@@ -181,6 +182,7 @@ FROM (
 ) AS sml WHERE {relations};
 """
 
+# The estimated table bloat
 BLOAT_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('relname', 'table'), ('iname', 'index')],
     'metrics': {
@@ -189,6 +191,7 @@ BLOAT_METRICS = {
     'query': BLOAT_QUERY,
     'relation': True,
 }
+
 RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS, BLOAT_METRICS]
 
 

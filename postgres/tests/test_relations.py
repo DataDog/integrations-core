@@ -75,6 +75,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     for name in RELATION_SIZE_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_size_tags)
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_bloat_metric(aggregator, integration_check, pg_instance):
@@ -89,7 +90,7 @@ def test_bloat_metric(aggregator, integration_check, pg_instance):
         'db:%s' % pg_instance['dbname'],
         'table:pg_index',
         'schema:pg_catalog',
-        'index:pg_index_indrelid_index'
+        'index:pg_index_indrelid_index',
     ]
 
     aggregator.assert_metric('postgresql.table_bloat', count=1, tags=expected_tags)
