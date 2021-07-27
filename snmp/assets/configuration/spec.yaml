@@ -3,6 +3,12 @@ files:
 - name: snmp.yaml
   options:
     - template: init_config
+      overrides: 
+       description: | 
+          WARNING: This configuration files is for SNMP v1, v2 and v3
+          Check carefully all variables depending of your SNMP version.
+
+          NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
       options:
       - name: loader
         description: |
