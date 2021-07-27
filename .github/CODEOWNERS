@@ -76,11 +76,11 @@ assets/               @DataDog/agent-integrations
 /tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
 # Infrastructure integrations
-/snmp/                                                            @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp/*.md                                                        @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/                                                          @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp_*/*.md                                                      @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp/                                                             @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp/*.md                                                         @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/                                                           @DataDog/infrastructure-integrations @DataDog/agent-integrations
+/snmp_*/*.md                                                       @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/infrastructure-integrations @DataDog/agent-integrations
 
 # Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
