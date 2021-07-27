@@ -1,3 +1,5 @@
+import glob
+
 from os.path import join
 
 import yaml
@@ -53,6 +55,8 @@ def exist_profile_in_path(profile_name, path):
 def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
 
+def get_all_profiles_directory(directory):
+    return glob.glob(join(directory, "*.yaml"))
 
 class SafeLineLoader(SafeLoader):
     def construct_mapping(self, node, deep=False):
