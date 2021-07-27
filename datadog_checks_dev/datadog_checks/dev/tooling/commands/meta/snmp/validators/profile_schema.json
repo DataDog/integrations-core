@@ -652,7 +652,8 @@
                                                 }
                                             ],
                                             "required": [
-                                                "tags"
+                                                "tags",
+                                                "match"
                                             ],
                                             "properties": {
                                                 "tag": {
