@@ -2,8 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
+import requests
 from six import iteritems
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
@@ -123,6 +127,16 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             default_namespace="kube_controller_manager",
         )
 
+        if instances is not None:
+            for instance in instances:
+                url = instance.get('health_url')
+                prometheus_url = instance.get('prometheus_url')
+
+                if url is None and re.search(r'/metrics$', prometheus_url):
+                    url = re.sub(r'/metrics$', '/healthz', prometheus_url)
+
+                instance['health_url'] = url
+
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
@@ -153,6 +167,8 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             leader_config["tags"] = instance.get("tags", [])
             leader_config["record_kind"] = instance.get('leader_election_kind', 'auto')
             self.check_election_status(leader_config)
+
+        self._perform_service_check(instance)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
@@ -200,3 +216,19 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         #  rename the tag "name" to "queue" and submit this metric with the new metrics_name
         self._tag_renaming(metric, "queue", "name")
         self.submit_openmetric(new_metric_name, metric, scraper_config)
+
+    def _perform_service_check(self, instance):
+        url = instance.get('health_url')
+        if url is None:
+            return
+
+        tags = instance.get("tags", [])
+        service_check_name = 'kube_controller_manager.up'
+
+        try:
+            response = self.http.get(url)
+            response.raise_for_status()
+            self.service_check(service_check_name, AgentCheck.OK, tags=tags)
+        except requests.exceptions.RequestException as e:
+            message = str(e)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
