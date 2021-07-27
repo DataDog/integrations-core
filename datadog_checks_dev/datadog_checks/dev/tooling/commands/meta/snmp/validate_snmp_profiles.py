@@ -3,8 +3,6 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.constants import get_root
-
 from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success, echo_warning
 from . import validators
 from .validators.utils import exist_profile_in_path, get_default_snmp_profiles_path, initialize_path

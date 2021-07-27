@@ -103,25 +103,25 @@ class SchemaValidator(ProfileValidator):
             self.success("Schema successfully validated")
 
 
-class DuplicateMetricsValidator(ProfileValidator):
+class DuplicateOIDValidator(ProfileValidator):
     """ "
-    Validator responsible to check if there are no duplicated metrics in the profile.
+    Validator responsible to check if there are no duplicated oid in the profile.
     It checks all the profiles extended by the profile passed.
     """
 
     def __init__(self):
         super().__init__()
-        self.used_metrics = {}
+        self.used_oid = {}
         self.duplicated = {}
 
     def validate(self, profile, path):
         # type: (ProfileValidator,str, str) -> None
         """
-        Calls the recursive function(verify_duplicate_metrics_profile_recursive)
-        to check if there are any duplicated metric.
+        Calls the recursive function(verify_duplicate_oid_profile_recursive)
+        to check if there are any duplicated oid.
         It also logs the duplicated OID and reports all the files:lines where it is.
         """
-        self.verify_duplicate_metrics_profile_recursive(profile, path)
+        self.verify_duplicate_oid_profile_recursive(profile, path)
         for OID in self.duplicated:
             output_message = ""
             output_message = "metric with OID " + OID + " is duplicated in profiles: \n"
@@ -131,21 +131,21 @@ class DuplicateMetricsValidator(ProfileValidator):
         if len(self.duplicated) == 0 and not self.result.failed:
             self.success("No duplicated OID ")
 
-    def verify_duplicate_metrics_profile_recursive(self, file, path):
+    def verify_duplicate_oid_profile_recursive(self, file, path):
         """
-        Recursively for each profile extended, it checks the metrics and add them into the mapping "used_metrics".\n
-        If the metric is duplicated, it also adds it to the mapping "duplicated".
+        Recursively for each profile extended, it checks the oid and add them into the mapping "used_oid".\n
+        If the oid is duplicated, it also adds it to the mapping "duplicated".
         """
-        extensions = self.verify_duplicate_metrics_profile_file(file, path)
+        extensions = self.verify_duplicate_oid_profile_file(file, path)
         if extensions:
             for file_name in extensions:
-                self.verify_duplicate_metrics_profile_recursive(file_name, path)
+                self.verify_duplicate_oid_profile_recursive(file_name, path)
 
-    def verify_duplicate_metrics_profile_file(self, file, path):
+    def verify_duplicate_oid_profile_file(self, file, path):
         # type: (str, list) -> list
         """
-        Extract the OIDs of a profile and adds them to "used_metrics".\n
-        The duplicated metrics are also added to "duplicated" mapping. \n
+        Extract the OIDs of a profile and adds them to "used_oid".\n
+        The duplicated oid are also added to "duplicated" mapping. \n
         "duplicated" is a dictionary where the OIDs are the keys and
         the values are lists of tuples (name_of_profile,line)
         """
@@ -172,11 +172,11 @@ class DuplicateMetricsValidator(ProfileValidator):
         for metric_symbols in metric.get('symbols'):
             OID = metric_symbols.get('OID')
             line = metric_symbols.get('__line__')
-            if OID not in self.used_metrics:
-                self.used_metrics[OID] = [(file, line)]
+            if OID not in self.used_oid:
+                self.used_oid[OID] = [(file, line)]
             else:
-                self.used_metrics[OID].append((file, line))
-                self.duplicated[OID] = self.used_metrics[OID]
+                self.used_oid[OID].append((file, line))
+                self.duplicated[OID] = self.used_oid[OID]
 
     def extract_oid_from_symbol(self, metric, file):
         """
@@ -190,13 +190,13 @@ class DuplicateMetricsValidator(ProfileValidator):
         ):
             OID = OID + metric.get('options').get('metric_suffix')
         line = metric.get('symbol').get('__line__')
-        if OID not in self.used_metrics:
-            self.used_metrics[OID] = [(file, line)]
+        if OID not in self.used_oid:
+            self.used_oid[OID] = [(file, line)]
         else:
-            self.used_metrics[OID].append((file, line))
-            self.duplicated[OID] = self.used_metrics[OID]
+            self.used_oid[OID].append((file, line))
+            self.duplicated[OID] = self.used_oid[OID]
 
 
 def get_all_validators():
     # type () -> list(ProfileValidator)
-    return [SchemaValidator(), DuplicateMetricsValidator()]
+    return [SchemaValidator(), DuplicateOIDValidator()]

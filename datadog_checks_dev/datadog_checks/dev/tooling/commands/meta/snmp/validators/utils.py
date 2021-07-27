@@ -49,8 +49,10 @@ def exist_profile_in_path(profile_name, path):
                 return True
     return False
 
+
 def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
+
 
 class SafeLineLoader(SafeLoader):
     def construct_mapping(self, node, deep=False):
