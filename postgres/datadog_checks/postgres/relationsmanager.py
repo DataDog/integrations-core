@@ -134,7 +134,6 @@ SELECT relname,
  WHERE {relations}""",
     'relation': True,
 }
-'pg_index'
 
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 BLOAT_QUERY = """
