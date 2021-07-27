@@ -184,7 +184,7 @@ FROM (
 BLOAT_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('relname', 'table'), ('iname', 'index')],
     'metrics': {
-        'tbloat': ('postgresql.bloat', AgentCheck.gauge),
+        'tbloat': ('postgresql.table_bloat', AgentCheck.gauge),
     },
     'query': BLOAT_QUERY,
     'relation': True,
