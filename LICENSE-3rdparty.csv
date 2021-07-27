@@ -16,6 +16,7 @@ boto,PyPI,MIT,Mitch Garnaat
 boto3,PyPI,Apache-2.0,Amazon Web Services
 botocore,PyPI,Apache-2.0,Amazon Web Services
 cachetools,PyPI,MIT,Thomas Kemmer
+check-postgres,https://github.com/bucardo/,BSD-2-Clause,Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
 clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
