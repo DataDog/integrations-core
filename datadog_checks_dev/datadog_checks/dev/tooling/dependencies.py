@@ -68,7 +68,10 @@ def read_check_dependencies(check=None):
     dependencies = create_dependency_data()
     errors = []
 
-    checks = sorted(get_valid_checks()) if check is None else [check]
+    if isinstance(check, list):
+        checks = sorted(check)
+    else:
+        checks = sorted(get_valid_checks()) if check is None else [check]
 
     for check_name in checks:
         req_file = os.path.join(root, check_name, 'requirements.in')
@@ -82,7 +85,10 @@ def read_check_base_dependencies(check=None):
     dependencies = create_dependency_data()
     errors = []
 
-    checks = sorted(get_valid_checks()) if check is None else [check]
+    if isinstance(check, list):
+        checks = sorted(check)
+    else:
+        checks = sorted(get_valid_checks()) if check is None else [check]
 
     for check_name in checks:
         if check_name.startswith('datadog_checks_'):
