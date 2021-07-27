@@ -5,7 +5,6 @@ import click
 
 from ....utils import get_next
 from ...dependencies import read_agent_dependencies, read_check_base_dependencies, read_check_dependencies
-from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
@@ -139,8 +138,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     * Optionally verify that the `datadog-checks-base` requirement satisfies specific version
     """
     failed = False
-    checks = process_checks_option(check, source='valid_checks')
-    check_dependencies, check_errors = read_check_dependencies(checks)
+    check_dependencies, check_errors = read_check_dependencies(check)
 
     if check_errors:
         for check_error in check_errors:
@@ -148,7 +146,7 @@ def dep(check, require_base_check_version, min_base_check_version):
 
         abort()
 
-    check_base_dependencies, check_base_errors = read_check_base_dependencies(checks)
+    check_base_dependencies, check_base_errors = read_check_base_dependencies(check)
 
     if check_base_errors:
         for check_error in check_base_errors:

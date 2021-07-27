@@ -2,7 +2,6 @@ parameters:
   check: null
   repo: 'core'
   ispr: false
-  validate_changed: ''
   validate_codeowners: false
   validate_ci: true
 
@@ -15,8 +14,8 @@ steps:
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: |
-      echo "ddev validate agent-reqs ${{ parameters.validate_changed }}"
-      ddev validate agent-reqs ${{ parameters.validate_changed }}
+      echo "ddev validate agent-reqs"
+      ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
 
 - ${{ if eq(parameters.validate_codeowners, 'true') }}:
@@ -27,23 +26,23 @@ steps:
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: |
-      echo "ddev validate http ${{ parameters.validate_changed }}"
-      ddev validate http ${{ parameters.validate_changed }}
+      echo "ddev validate http"
+      ddev validate http
     displayName: 'Validate use of http wrapper'
 
 - script: |
-    echo "ddev validate config ${{ parameters.validate_changed }}"
-    ddev validate config ${{ parameters.validate_changed }}
+    echo "ddev validate config"
+    ddev validate config
   displayName: 'Validate default configuration files'
 
 - script: |
-    echo "ddev validate models ${{ parameters.validate_changed }}"
-    ddev validate models ${{ parameters.validate_changed }}
+    echo "ddev validate models ${{ parameters.check }}"
+    ddev validate models ${{ parameters.check }}
   displayName: 'Validate configuration data models'
 
 - script: |
-    echo "ddev validate dashboards ${{ parameters.validate_changed }}"
-    ddev validate dashboards ${{ parameters.validate_changed }}
+    echo "ddev validate dashboards"
+    ddev validate dashboards
   displayName: 'Validate dashboard definition files'
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'true')) }}:
@@ -59,53 +58,53 @@ steps:
 
 - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.ispr, 'false')) }}:
     - script: |
-        echo "ddev validate dep ${{ parameters.validate_changed }}"
-        ddev validate dep ${{ parameters.validate_changed }}
+        echo "ddev validate dep"
+        ddev validate dep
       displayName: 'Validate dependencies'
 
 - script: |
-    echo "ddev validate manifest ${{ parameters.validate_changed }}"
-    ddev validate manifest ${{ parameters.validate_changed }}
+    echo "ddev validate manifest"
+    ddev validate manifest
   displayName: 'Validate manifest files'
 
 - script: |
-    echo "ddev validate metadata ${{ parameters.validate_changed }}"
-    ddev validate metadata ${{ parameters.validate_changed }}
+    echo "ddev validate metadata"
+    ddev validate metadata
   displayName: 'Validate metric data'
 
 - script: |
-    echo "ddev validate readmes ${{ parameters.validate_changed }}"
-    ddev validate readmes ${{ parameters.validate_changed }}
+    echo "ddev validate readmes"
+    ddev validate readmes
   displayName: 'Validate README files'
 
 - script: |
-    echo "ddev validate recommended-monitors ${{ parameters.validate_changed }}"
-    ddev validate recommended-monitors ${{ parameters.validate_changed }}
+    echo "ddev validate recommended-monitors"
+    ddev validate recommended-monitors
   displayName: 'Validate monitors files'
 
 - script: |
-    echo "ddev validate saved-views ${{ parameters.validate_changed }}"
-    ddev validate saved-views ${{ parameters.validate_changed }}
+    echo "ddev validate saved-views"
+    ddev validate saved-views
   displayName: 'Validate saved views data'
 
 - script: |
-    echo "ddev validate service-checks ${{ parameters.validate_changed }}"
-    ddev validate service-checks ${{ parameters.validate_changed }}
+    echo "ddev validate service-checks"
+    ddev validate service-checks
   displayName: 'Validate service check data'
 
 - script: |
-    echo "ddev validate imports ${{ parameters.validate_changed }}"
-    ddev validate imports ${{ parameters.validate_changed }}
+    echo "ddev validate imports"
+    ddev validate imports
   displayName: 'Validate imports'
 
 - script: |
-    echo "ddev validate package ${{ parameters.validate_changed }}"
-    ddev validate package ${{ parameters.validate_changed }}
+    echo "ddev validate package"
+    ddev validate package
   displayName: 'Validate package'
 
 - script: |
-    echo "ddev validate jmx-metrics ${{ parameters.validate_changed }}"
-    ddev validate jmx-metrics ${{ parameters.validate_changed }}
+    echo "ddev validate jmx-metrics"
+    ddev validate jmx-metrics
   displayName: 'Validate JMX integrations metrics.yaml'
 
 - ${{ if eq(parameters.repo, 'core') }}:
