@@ -41,7 +41,7 @@ def instance_custom_queries(field, value):
 
 
 def instance_data_directory(field, value):
-    return '/usr/local/pgsql/data'
+    return '/var/lib/postgresql/data'
 
 
 def instance_dbm(field, value):
