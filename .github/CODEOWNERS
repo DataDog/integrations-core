@@ -86,7 +86,7 @@ assets/               @DataDog/agent-integrations
 /openstack/*.md                           @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/                    @DataDog/infrastructure-integrations @DataDog/agent-integrations
 /openstack_controller/*.md                @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp @DataDog/infrastructure-integrations @DataDog/agent-integrations
 
 # Agent Platform
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
