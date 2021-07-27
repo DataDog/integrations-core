@@ -636,8 +636,8 @@
                                         {
                                             "$id": "#/properties/metrics/items/anyOf/1/properties/metric_tags/items/anyOf/0",
                                             "type": "object",
-                                            "title": "The first anyOf schema",
-                                            "description": "An explanation about the purpose of this instance.",
+                                            "title": "The second anyOf schema",
+                                            "description": "To allow profiles to have a tags field in metric_tags instead of only tag",
                                             "default": {},
                                             "examples": [
                                                 {
