@@ -152,6 +152,14 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
+      - name: disable_legacy_service_tag
+        description: |
+          Whether or not to stop submitting the tag `service` that has been renamedto `snowflake_service`.
+        value:
+          type: boolean
+          display_default: false
+          example: true
+        enabled: true
       - template: instances/default
         overrides:
           min_collection_interval.description: |
