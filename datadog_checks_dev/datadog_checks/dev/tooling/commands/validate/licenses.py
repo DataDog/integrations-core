@@ -171,7 +171,10 @@ async def scrape_license_data(urls):
 
 
 def validate_extra_licenses():
-    """ An integration may use code from an outside source or from a non-PYPI so it """
+    """
+    An integration may use code from an outside source or origin that is not pypi-
+    it will have a file in its check directory titled `LICENSE-3rdparty-extra.csv`
+    """
     checks = process_checks_option(None, source='valid_checks')
     lines = []
     any_errors = False
