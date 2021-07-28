@@ -60,7 +60,6 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
             'oid_batch_size': 1,
         }
     )
-    config['init_config']['loader'] = 'core'
     assert_apc_ups_metrics(dd_agent_check, config)
 
 
