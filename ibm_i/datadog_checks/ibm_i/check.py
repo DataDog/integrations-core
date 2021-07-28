@@ -1,14 +1,16 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from contextlib import closing, suppress
+import fcntl
+import os
+import subprocess
+import time
 from datetime import datetime
 from typing import List, NamedTuple, Tuple
 
-import pyodbc
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.serialization import json
 
 from . import queries
 from .config_models import ConfigMixin
@@ -22,21 +24,11 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(IbmICheck, self).__init__(name, init_config, instances)
 
-        self._connection = None
+        self._connection_string = None
+        self._subprocess = None
         self._query_manager = None
         self._current_errors = 0
         self.check_initializations.append(self.set_up_query_manager)
-
-    def handle_query_error(self, error):
-        self._current_errors += 1
-        return error
-
-    def _delete_connection(self, e):
-        if self._connection:
-            self.warning('An error occurred, resetting IBM i connection: %s', e)
-            with suppress(Exception):
-                self.connection.close()
-            self._connection = None
 
     def check(self, _):
         check_start = datetime.now()
@@ -49,11 +41,11 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.warning('Could not set up query manager, skipping check run')
             check_status = None
         except Exception as e:
-            self._delete_connection(e)
+            self._delete_connection_subprocess(e)
             check_status = AgentCheck.CRITICAL
 
+        # At least one query failed, set the service check as failing
         if self._current_errors:
-            self._delete_connection("query error")
             check_status = AgentCheck.CRITICAL
 
         if check_status is not None:
@@ -78,17 +70,134 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 hostname=self._query_manager.hostname,
             )
 
-    def execute_query(self, query):
-        # https://github.com/mkleehammer/pyodbc/wiki/Connection#execute
-        with closing(self.connection.execute(query)) as cursor:
+    def cancel(self):
+        # When the check gets cancelled, clean up the connection subprocess.
+        self._delete_connection_subprocess()
 
-            # https://github.com/mkleehammer/pyodbc/wiki/Cursor
-            for row in cursor:
-                yield row
+    def handle_query_error(self, error):
+        self._current_errors += 1
+        return error
 
     @property
-    def connection(self):
-        if self._connection is None:
+    def connection_subprocess(self):
+        if self._subprocess is None:
+            self._create_connection_subprocess()
+        return self._subprocess
+
+    def _create_connection_subprocess(self):
+        self._subprocess = subprocess.Popen(
+            # TODO: Change to sys.executable once we're based on Agent 7.30.0
+            [
+                "/opt/datadog-agent/embedded/bin/python3",
+                "-c",
+                "from datadog_checks.ibm_i.query_script import query; query()",
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        # Set stdout reader as non-blocking, we don't want to
+        # block .read() calls to be able to time out.
+        fl = fcntl.fcntl(self._subprocess.stdout.fileno(), fcntl.F_GETFL)
+        fcntl.fcntl(self._subprocess.stdout, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        # Set stderr reader as non-blocking, we don't want to
+        # wait until EOF is sent, we only want to read whatever is there when
+        # we try to return errors.
+        fl = fcntl.fcntl(self._subprocess.stderr.fileno(), fcntl.F_GETFL)
+        fcntl.fcntl(self._subprocess.stderr, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        try:
+            print(self.connection_string, file=self._subprocess.stdin, flush=True)
+        except BrokenPipeError as e:
+            # The stdin pipe is broken, usually due to the Agent
+            # killing the subprocess when stopping.
+            # Clean up then return.
+            self._delete_connection_subprocess(e)
+
+    def _delete_connection_subprocess(self, message):
+        if self._subprocess:
+            self.log.debug("Deleting connection: %s", message)
+            while not self._subprocess.returncode:
+                self._subprocess.kill()
+                self._subprocess.wait()
+
+        self._subprocess = None
+
+    def execute_query(self, query, disconnect_on_error=True):
+        try:
+            # Write query
+            print(query['text'], file=self.connection_subprocess.stdin, flush=True)
+        except BrokenPipeError as e:
+            # The stdin pipe is broken, usually due to the Agent
+            # killing the subprocess when stopping.
+            # Clean up then return.
+            self._delete_connection_subprocess(e)
+            return
+
+        done = False
+        query_start = datetime.now()
+
+        while not done and (datetime.now() - query_start).total_seconds() <= query['timeout']:
+            # Sleep for a bit to wait for results & avoid being a busy loop
+            time.sleep(0.2)
+            try:
+                # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
+                for line in iter(self.connection_subprocess.stdout.readline, ''):
+                    stripped_line = line.strip()
+                    if stripped_line == "":
+                        # Empty line, skip
+                        continue
+                    if stripped_line == "ENDOFQUERY":
+                        done = True
+                        break
+                    try:
+                        yield json.loads(stripped_line)
+                    except Exception as e:
+                        # We didn't manage to parse the line provided by the subprocess
+                        # Remove subprocess to restart on a clean state and raise.
+                        self._delete_connection_subprocess(e)
+                        raise
+            except TypeError:
+                # We couldn't read anything
+                continue
+            except BrokenPipeError as e:
+                # The stdout pipe is broken, usually due to the Agent
+                # killing the subprocess when stopping.
+                # Clean up then return.
+                self._delete_connection_subprocess(e)
+                return
+
+        e = None
+        try:
+            e = self.connection_subprocess.stderr.read().strip()
+        except TypeError:
+            # We couldn't read anything
+            pass
+        except BrokenPipeError as e:
+            # The stderr pipe is broken, usually due to the Agent
+            # killing the subprocess when stopping.
+            # Clean up then return.
+            self._delete_connection_subprocess(e)
+            return
+
+        # disconnect_on_error can be set to False for queries we
+        # expect to fail and where we don't want to disconnect.
+        if e:
+            if disconnect_on_error:
+                self._delete_connection_subprocess(e)
+            raise Exception(e)
+
+        if not done:
+            if disconnect_on_error:
+                self._delete_connection_subprocess("Timed out after {} seconds".format(query['timeout']))
+            raise Exception("Timed out after {} seconds".format(query['timeout']))
+
+    @property
+    def connection_string(self):
+        if self._connection_string is None:
             # https://www.connectionstrings.com/as-400/
             # https://www.ibm.com/support/pages/odbc-driver-ibm-i-access-client-solutions
             connection_string = self.config.connection_string
@@ -105,9 +214,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
                     connection_string += f'PWD={self.config.password};'
                     self.register_secret(self.config.password)
 
-            self._connection = pyodbc.connect(connection_string)
+            self._connection_string = connection_string
 
-        return self._connection
+        return self._connection_string
 
     @property
     def query_manager(self):
@@ -119,21 +228,21 @@ class IbmICheck(AgentCheck, ConfigMixin):
         system_info = self.fetch_system_info()
         if system_info:
             query_list = [
-                queries.BaseDiskUsage,
-                queries.CPUUsage,
-                queries.InactiveJobStatus,
-                queries.ActiveJobStatus,
-                queries.JobMemoryUsage,
-                queries.MemoryInfo,
-                queries.JobQueueInfo,
-                queries.get_message_queue_info(self.config.severity_threshold),
+                queries.get_base_disk_usage(self.config.query_timeout),
+                queries.get_cpu_usage(self.config.query_timeout),
+                queries.get_jobq_job_status(self.config.job_query_timeout),
+                queries.get_active_job_status(self.config.job_query_timeout),
+                queries.get_job_memory_usage(self.config.job_query_timeout),
+                queries.get_memory_info(self.config.query_timeout),
+                queries.get_job_queue_info(self.config.query_timeout),
+                queries.get_message_queue_info(self.config.system_mq_query_timeout, self.config.severity_threshold),
             ]
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
-                query_list.append(queries.DiskUsage)
-                query_list.append(queries.SubsystemInfo)
+                query_list.append(queries.get_disk_usage(self.config.query_timeout))
+                query_list.append(queries.get_subsystem_info(self.config.query_timeout))
 
             if self.config.fetch_ibm_mq_metrics and self.ibm_mq_check():
-                query_list.append(queries.IBMMQInfo)
+                query_list.append(queries.get_ibm_mq_info(self.config.query_timeout))
 
             self._query_manager = QueryManager(
                 self,
@@ -148,7 +257,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def ibm_mq_check(self):
         # Try to get data from the IBM MQ tables. If they're not present,
         # an exception is raised, and we return that IBM MQ is not available.
-        query = "SELECT QNAME, COUNT(*) FROM TABLE(MQREADALL()) GROUP BY QNAME"
+        query = {
+            'text': "SELECT QNAME, COUNT(*) FROM TABLE(MQREADALL()) GROUP BY QNAME",
+            'timeout': self.config.query_timeout,
+        }
         try:
             # self.execute_query(query) yields a generator, therefore the SQL query is actually run
             # only when needed (eg. when looping through it, transforming it
@@ -156,8 +268,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
             # We do need the query to be executed, which is why we do an operation on it.
             # We use the list operation because we know it will work as long as the query doesn't
             # raise an error (if we were to use next, we'd have to take care of the case where
-            # the generator rasies a StopIteration exception because the query is valid but returns 0 rows).
-            list(self.execute_query(query))  # type: List[Tuple[str]]
+            # the generator raises a StopIteration exception because the query is valid but returns 0 rows).
+            list(self.execute_query(query, disconnect_on_error=False))  # type: List[Tuple[str]]
         except Exception as e:
             self.log.debug("Couldn't find IBM MQ data, turning off IBM MQ queries: %s", e)
             return False
@@ -167,11 +279,15 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def fetch_system_info(self):
         try:
             return self.system_info_query()
-        except Exception as e:
-            self._delete_connection(e)
+        except Exception:
+            # In case of errors, the connection will have already been cleaned by execute_query.
+            pass
 
     def system_info_query(self):
-        query = "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO"
+        query = {
+            'text': "SELECT HOST_NAME, OS_VERSION, OS_RELEASE FROM SYSIBMADM.ENV_SYS_INFO",
+            'timeout': self.config.query_timeout,
+        }
         results = list(self.execute_query(query))  # type: List[Tuple[str]]
         if len(results) == 0:
             self.log.error("Couldn't find system info on the remote system.")

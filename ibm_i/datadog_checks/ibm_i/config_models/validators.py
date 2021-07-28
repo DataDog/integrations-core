@@ -8,3 +8,8 @@ def instance_severity_threshold(value, *, field):
     if v < 0 or v > 99:
         raise ValueError("severity threshold must be in the range [0,99]")
     return v
+
+
+def instance_query_timeout(value, *, field):
+    v = int(value)
+    return v
