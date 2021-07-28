@@ -218,9 +218,13 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
-def get_extra_license_file(check_name):
-    path = os.path.join(get_root(), check_name, 'LICENSE-3rdparty-extra.csv')
-    return path, file_exists(path)
+def get_extra_license_files():
+    for path in os.listdir(get_root()):
+        if not file_exists(get_manifest_file(path)):
+            continue
+        extra_license_file = os.path.join(get_root(), path, 'LICENSE-3rdparty-extra.csv')
+        if file_exists(extra_license_file):
+            yield extra_license_file
 
 
 def get_metadata_file(check_name):

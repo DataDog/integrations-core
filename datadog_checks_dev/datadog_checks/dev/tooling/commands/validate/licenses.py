@@ -13,8 +13,7 @@ from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import get_agent_requirements, get_license_attribution_file
-from ...testing import process_checks_option
-from ...utils import get_extra_license_file, read_license_file_rows
+from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 EXPLICIT_LICENSES = {
@@ -177,45 +176,45 @@ def validate_extra_licenses():
     An integration may use code from an outside source or origin that is not pypi-
     it will have a file in its check directory titled `LICENSE-3rdparty-extra.csv`
     """
-    checks = process_checks_option(None, source='valid_checks')
     lines = []
     any_errors = False
-    for check in checks:
+
+    all_extra_licenses = get_extra_license_files()
+
+    for license_file in all_extra_licenses:
         errors = False
-        license_file, has_extra_license = get_extra_license_file(check)
-        if has_extra_license:
-            rows = read_license_file_rows(license_file)
-            for line_no, row, line in rows:
-                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
-                if None in row.values():
-                    errors = True
-                    any_errors = True
-                    echo_failure(f"{check}:{line_no} Has the wrong amount of columns")
-                    continue
+        rows = read_license_file_rows(license_file)
+        for line_no, row, line in rows:
+            # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+            if None in row.values():
+                errors = True
+                any_errors = True
+                echo_failure(f"{license_file}:{line_no} Has the wrong amount of columns")
+                continue
 
-                # all headers exist, no invalid headers
-                all_keys = set(row)
-                ALL_HEADERS = set(HEADERS)
-                if all_keys != ALL_HEADERS:
-                    invalid_headers = all_keys.difference(ALL_HEADERS)
-                    if invalid_headers:
-                        echo_failure(f'{check}:{line_no} Invalid column {invalid_headers}')
+            # all headers exist, no invalid headers
+            all_keys = set(row)
+            ALL_HEADERS = set(HEADERS)
+            if all_keys != ALL_HEADERS:
+                invalid_headers = all_keys.difference(ALL_HEADERS)
+                if invalid_headers:
+                    echo_failure(f'{license_file}:{line_no} Invalid column {invalid_headers}')
 
-                    missing_headers = ALL_HEADERS.difference(all_keys)
-                    if missing_headers:
-                        echo_failure(f'{check}:{line_no} Missing columns {missing_headers}')
+                missing_headers = ALL_HEADERS.difference(all_keys)
+                if missing_headers:
+                    echo_failure(f'{license_file}:{line_no} Missing columns {missing_headers}')
 
-                    errors = True
-                    any_errors = True
-                    continue
-                license_type = row['License']
-                if license_type not in VALID_LICENSES:
-                    errors = True
-                    any_errors = True
-                    echo_failure(f'{check}:{line_no} Invalid license type {license_type}')
-                    continue
-                if not errors:
-                    lines.append(line)
+                errors = True
+                any_errors = True
+                continue
+            license_type = row['License']
+            if license_type not in VALID_LICENSES:
+                errors = True
+                any_errors = True
+                echo_failure(f'{license_file}:{line_no} Invalid license type {license_type}')
+                continue
+            if not errors:
+                lines.append(line)
 
     return lines, any_errors
 
