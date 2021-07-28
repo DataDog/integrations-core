@@ -49,6 +49,21 @@ instances:
     #
     # severity_threshold: 50
 
+    ## @param job_query_timeout - integer - optional - default: 600
+    ## The timeout (in seconds) applied to queries on job views (ACTIVE_JOB_INFO, JOB_INFO) made on the IBM i system.
+    #
+    # job_query_timeout: 600
+
+    ## @param system_mq_query_timeout - integer - optional - default: 60
+    ## The timeout (in seconds) applied to queries on message queue views (MESSAGE_QUEUE_INFO) made on the IBM i system.
+    #
+    # system_mq_query_timeout: 60
+
+    ## @param query_timeout - integer - optional - default: 30
+    ## The default timeout (in seconds) applied to queries made on the IBM i system.
+    #
+    # query_timeout: 30
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
