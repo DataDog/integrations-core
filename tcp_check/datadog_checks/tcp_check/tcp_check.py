@@ -8,6 +8,8 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
+DEFAULT_IP_CACHE_DURATION = None
+
 
 class TCPCheck(AgentCheck):
 
@@ -22,20 +24,29 @@ class TCPCheck(AgentCheck):
         self.timeout = float(instance.get('timeout', 10))
         self.collect_response_time = instance.get('collect_response_time', False)
         self.host = instance.get('host', None)
-        self.ip_cache_duration = int(instance.get('ip_cache_duration', 0)) or None
-        self.last_ip_cache_ts = 0
         self.socket_type = None
         self._addr = None
+
+        ConfigurationErrorMsg = "Invalid `{}`; a {} must be specified."
+
+        self.ip_cache_last_ts = 0
+        self.ip_cache_duration = DEFAULT_IP_CACHE_DURATION
+        ip_cache_duration = instance.get('ip_cache_duration', None)
+        if ip_cache_duration is not None:
+            try:
+                self.ip_cache_duration = int(ip_cache_duration)
+            except Exception:
+                raise ConfigurationError(ConfigurationErrorMsg.format('ip_cache_duration', 'number'))
 
         port = instance.get('port', None)
         try:
             self.port = int(port)
         except Exception:
-            raise ConfigurationError("{} is not a correct port.".format(str(port)))
+            raise ConfigurationError(ConfigurationErrorMsg.format('port', 'number'))
         try:
             split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
-            raise ConfigurationError("A valid url must be specified")
+            raise ConfigurationError(ConfigurationErrorMsg.format('url', 'string'))
 
         custom_tags = instance.get('tags', [])
         self.tags = [
@@ -79,7 +90,7 @@ class TCPCheck(AgentCheck):
     def should_resolve_ip(self):
         if self.ip_cache_duration is None:
             return False
-        return get_precise_time() - self.last_ip_cache_ts > self.ip_cache_duration
+        return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
@@ -91,7 +102,12 @@ class TCPCheck(AgentCheck):
 
     def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
-        self.log.debug("Connecting to %s %d", self.host, self.port)
+
+        if self.should_resolve_ip():
+            self.resolve_ip()
+            self.ip_cache_last_ts = start
+
+        self.log.debug("Connecting to %s on port %d", self.host, self.port)
         try:
             response_time = self.connect()
             self.log.debug("%s:%d is UP", self.host, self.port)
