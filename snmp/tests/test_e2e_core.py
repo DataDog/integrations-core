@@ -17,6 +17,40 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
             'community_string': 'apc_ups',
         }
     )
+    assert_apc_ups_metrics(config, dd_agent_check, instance)
+
+
+def test_e2e_core_v3_no_auth_no_priv(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'user': 'datadogNoAuthNoPriv',
+            'snmp_version': 3,
+            'context_name': 'apc_ups',
+            'community_string': '',
+        }
+    )
+    assert_apc_ups_metrics(config, dd_agent_check, instance)
+
+
+def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'user': 'datadogMD5NoPriv',
+            'snmp_version': 3,
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'context_name': 'apc_ups',
+            'community_string': '',
+        }
+    )
+    assert_apc_ups_metrics(config, dd_agent_check, instance)
+
+
+def assert_apc_ups_metrics(config, dd_agent_check, instance):
     config['init_config']['loader'] = 'core'
 
     aggregator = dd_agent_check(config, rate=True)
