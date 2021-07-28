@@ -8,6 +8,7 @@ from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
 from ...fs import read_file_lines, write_file_lines
+from ...utils import parse_agent_req_file
 from ..constants import get_agent_requirements
 from ..dependencies import read_check_dependencies
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
@@ -108,3 +109,13 @@ def freeze():
     lines = sorted(set(f'{d[1]}\n' for d in data))
 
     write_file_lines(static_file, lines)
+
+
+@dep.command(
+    context_settings=CONTEXT_SETTINGS, short_help="Update integrations' dependencies so that they match the Agent's static environment"
+)
+def sync():
+    agent_rec_file = get_agent_requirements()
+    all_reqs = parse_agent_req_file()
+
+    for check in checks:
