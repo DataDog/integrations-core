@@ -17,7 +17,7 @@ def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
             'community_string': 'apc_ups',
         }
     )
-    assert_apc_ups_metrics(config, dd_agent_check, instance)
+    assert_apc_ups_metrics(config, dd_agent_check)
 
 
 def test_e2e_core_v3_no_auth_no_priv(dd_agent_check):
@@ -31,7 +31,7 @@ def test_e2e_core_v3_no_auth_no_priv(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_apc_ups_metrics(config, dd_agent_check, instance)
+    assert_apc_ups_metrics(config, dd_agent_check)
 
 
 def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
@@ -47,12 +47,7 @@ def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_apc_ups_metrics(config, dd_agent_check, instance)
-
-
-def assert_apc_ups_metrics(config, dd_agent_check, instance):
-    config['init_config']['loader'] = 'core'
-    assert_apc_ups_metrics(dd_agent_check, config)
+    assert_apc_ups_metrics(config, dd_agent_check)
 
 
 def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
@@ -70,6 +65,7 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
 
 
 def assert_apc_ups_metrics(dd_agent_check, config):
+    config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     aggregator = dd_agent_check(config, rate=True)
 
