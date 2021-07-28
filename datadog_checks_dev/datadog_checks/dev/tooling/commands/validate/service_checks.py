@@ -48,7 +48,7 @@ def service_checks(check, sync):
     """
 
     root = get_root()
-    checks = process_checks_option(check, source='integrations')
+    checks = process_checks_option(check, source='integrations', extend_changed=True)
     echo_info(f"Validating service_checks.json files for {len(checks)} checks ...")
 
     failed_checks = 0

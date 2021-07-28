@@ -44,7 +44,7 @@ def config(ctx, check, sync, verbose):
     if repo_choice == 'agent':
         checks = ['agent']
     else:
-        checks = process_checks_option(check, source='valid_checks')
+        checks = process_checks_option(check, source='valid_checks', extend_changed=True)
 
     files_failed = {}
     files_warned = {}
