@@ -72,6 +72,8 @@ class IbmDb2Check(AgentCheck):
         ):
             try:
                 query_method()
+            except ConnectionError as e:
+                raise
             except Exception as e:
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
