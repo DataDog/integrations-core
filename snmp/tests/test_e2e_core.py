@@ -52,7 +52,25 @@ def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
 
 def assert_apc_ups_metrics(config, dd_agent_check, instance):
     config['init_config']['loader'] = 'core'
+    assert_apc_ups_metrics(dd_agent_check, config)
 
+
+def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups',
+            'oid_batch_size': 1,
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    assert_apc_ups_metrics(dd_agent_check, config)
+
+
+def assert_apc_ups_metrics(dd_agent_check, config):
+    instance = config['instances'][0]
     aggregator = dd_agent_check(config, rate=True)
 
     profile_tags = [
