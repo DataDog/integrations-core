@@ -60,13 +60,21 @@ class IbmDb2Check(AgentCheck):
 
             self._conn = connection
 
-        self.query_instance()
-        self.query_database()
-        self.query_buffer_pool()
-        self.query_table_space()
-        self.query_transaction_log()
-        self.query_custom()
         self.collect_metadata()
+
+        for query_method in (
+            self.query_instance,
+            self.query_database,
+            self.query_buffer_pool,
+            self.query_table_space,
+            self.query_transaction_log,
+            self.query_custom,
+        ):
+            try:
+                query_method()
+            except Exception as e:
+                self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
+                continue
 
     def collect_metadata(self):
         try:
