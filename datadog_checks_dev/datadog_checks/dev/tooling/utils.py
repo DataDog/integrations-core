@@ -218,6 +218,11 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
+def get_extra_license_file(check_name):
+    path = os.path.join(get_root(), check_name, 'LICENSE-3rdparty-extra.csv')
+    return path, file_exists(path)
+
+
 def get_metadata_file(check_name):
     path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
     return os.path.join(get_root(), check_name, path)
@@ -401,6 +406,24 @@ def read_metadata_rows(metadata_file):
 
         for line_no, row in enumerate(reader, 2):
             yield line_no, row
+
+
+def read_license_file_rows(license_file):
+    """
+    Iterate over the rows of a `LICENSE-3rdparty-extra.csv` or `LICENSE-3rdparty.csv` file.
+    """
+    with io.open(license_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        f.seek(0)
+        reader = csv.DictReader(f, delimiter=',')
+
+        # Read header
+        reader._fieldnames = reader.fieldnames
+
+        for line_no, row in enumerate(reader, 2):
+            # return the original line because it will be needed to append to the original file
+            line = lines[line_no - 1]
+            yield line_no, row, line
 
 
 def read_readme_file(check_name):
