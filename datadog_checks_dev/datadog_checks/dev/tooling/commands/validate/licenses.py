@@ -197,14 +197,13 @@ def validate_extra_licenses():
                 if all_keys != ALL_HEADERS:
                     invalid_headers = all_keys.difference(ALL_HEADERS)
                     if invalid_headers:
-                        errors = True
                         echo_failure(f'{check}:{line_no} Invalid column {invalid_headers}')
 
                     missing_headers = ALL_HEADERS.difference(all_keys)
                     if missing_headers:
-                        errors = True
                         echo_failure(f'{check}:{line_no} Missing columns {missing_headers}')
 
+                    errors = True
                     any_errors = True
                     continue
                 license_type = row['License']
