@@ -131,7 +131,7 @@ instances:
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `consul_service` and disable the associated deprecation warning.
     #
-    # disable_legacy_service_tag: false
+    disable_legacy_service_tag: true
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
