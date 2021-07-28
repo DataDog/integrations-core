@@ -60,7 +60,6 @@ KNOWN_LICENSES = {
     'bsd license': 'BSD-3-Clause',
     '3-clause bsd license': 'BSD-3-Clause',
     'new bsd license': 'BSD-3-Clause',
-    'simplified bsd license': 'BSD-2-Clause',
     'mit license': 'MIT',
     'psf': 'PSF',
     'psf license': 'PSF',
@@ -104,6 +103,15 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
     'W3C License': 'W3C',
     'Zope Public License': 'ZPL-2.1',
 }
+
+EXTRA_LICENSES = {'BSD-2-Clause'}
+
+VALID_LICENSES = (
+    EXTRA_LICENSES
+    | set(KNOWN_LICENSES.values())
+    | set(CLASSIFIER_TO_HIGHEST_SPDX.values())
+    | set(KNOWN_CLASSIFIERS.values())
+)
 
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
@@ -197,7 +205,7 @@ def validate_extra_licenses():
                     any_errors = True
                     continue
                 license_type = row['License']
-                if license_type not in KNOWN_LICENSES.values():
+                if license_type not in VALID_LICENSES:
                     errors = True
                     any_errors = True
                     echo_failure(f'{check}:{line_no} Invalid license type {license_type}')
