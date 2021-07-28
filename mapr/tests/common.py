@@ -5,7 +5,7 @@ from datadog_checks.dev import get_here
 
 HERE = get_here()
 
-INSTANCE = {'ticket_location': 'foo'}
+INSTANCE = {'ticket_location': 'foo', 'disable_legacy_cluster_tag': True}
 
 KAFKA_METRIC = {
     u'metric': u'mapr.process.context_switch_involuntary',

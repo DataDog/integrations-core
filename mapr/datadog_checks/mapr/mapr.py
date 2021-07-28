@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import json
 import os
 import re
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .common import ALLOWED_METRICS, COUNT_METRICS, GAUGE_METRICS, HISTOGRAM_METRICS, MONOTONIC_COUNTER_METRICS
@@ -53,9 +54,9 @@ class MaprCheck(AgentCheck):
             topic_name=self.hostname,
         )
         self.allowed_metrics = [re.compile(w) for w in self.instance.get('metric_whitelist', [])]
-        self.base_tags = self.instance.get('tags', [])
+        self.custom_tags = self.instance.get('tags', [])
         self.has_ever_submitted_metrics = False
-
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
 
         if not self.auth_ticket:
@@ -85,11 +86,11 @@ class MaprCheck(AgentCheck):
             conn = self.get_connection()
         except Exception:
             self.service_check(
-                SERVICE_CHECK, AgentCheck.CRITICAL, self.base_tags + ['topic:{}'.format(self.topic_path)]
+                SERVICE_CHECK, AgentCheck.CRITICAL, self.custom_tags + ['topic:{}'.format(self.topic_path)]
             )
             raise
         else:
-            self.service_check(SERVICE_CHECK, AgentCheck.OK, self.base_tags + ['topic:{}'.format(self.topic_path)])
+            self.service_check(SERVICE_CHECK, AgentCheck.OK, self.custom_tags + ['topic:{}'.format(self.topic_path)])
 
         submitted_metrics_count = 0
 
@@ -146,7 +147,7 @@ class MaprCheck(AgentCheck):
                 )
 
         if submitted_metrics_count:
-            self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.base_tags)
+            self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.custom_tags)
 
     def get_connection(self):
         if self._conn:
@@ -181,7 +182,14 @@ class MaprCheck(AgentCheck):
 
     def submit_metric(self, metric):
         metric_name = metric['metric']
-        tags = self.base_tags + ["{}:{}".format(k, v) for k, v in iteritems(metric['tags'])]
+        tags = copy.deepcopy(self.custom_tags)
+        for k, v in iteritems(metric['tags']):
+            if self._disable_legacy_cluster_tag:
+                if k == 'clustername':
+                    k = 'mapr_cluster'
+                elif k == 'clusterid':
+                    k = 'mapr_cluster_id'
+            tags.append("{}:{}".format(k, v))
 
         if 'buckets' in metric and metric_name in HISTOGRAM_METRICS:
             for bounds, value in metric['buckets'].items():
