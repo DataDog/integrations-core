@@ -47,8 +47,10 @@ def test_retry_connection(aggregator, instance):
 
 
 def test_query_function_error(aggregator, instance):
-    exception_msg = '[IBM][CLI Driver][DB2/NT64] SQL0440N  No authorized routine named "MON_GET_INSTANCE" of type ' \
-                    '"FUNCTION" having compatible arguments was found.  SQLSTATE=42884'
+    exception_msg = (
+        '[IBM][CLI Driver][DB2/NT64] SQL0440N  No authorized routine named "MON_GET_INSTANCE" of type '
+        '"FUNCTION" having compatible arguments was found.  SQLSTATE=42884'
+    )
 
     def query_instance(*args, **kwargs):
         raise Exception(exception_msg)
