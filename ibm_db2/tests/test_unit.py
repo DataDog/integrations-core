@@ -46,6 +46,24 @@ def test_retry_connection(aggregator, instance):
         assert ibmdb2._conn != conn1
 
 
+def test_query_function_error(aggregator, instance):
+    exception_msg = '[IBM][CLI Driver][DB2/NT64] SQL0440N  No authorized routine named "MON_GET_INSTANCE" of type ' \
+                    '"FUNCTION" having compatible arguments was found.  SQLSTATE=42884'
+
+    def query_instance(*args, **kwargs):
+        raise Exception(exception_msg)
+
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    ibmdb2.log = mock.MagicMock()
+    ibmdb2._conn = mock.MagicMock()
+    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2.query_instance = query_instance
+
+    with pytest.raises(Exception):
+        ibmdb2.query_instance()
+        ibmdb2.log.warning.assert_called_with('Encountered error running `%s`: %s', 'query_instance', exception_msg)
+
+
 def test_parse_version(instance):
     raw_version = '11.01.0202'
     check = IbmDb2Check('ibm_db2', {}, [instance])

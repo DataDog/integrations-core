@@ -73,7 +73,7 @@ class IbmDb2Check(AgentCheck):
             try:
                 query_method()
             except Exception as e:
-                self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
+                self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
 
     def collect_metadata(self):
