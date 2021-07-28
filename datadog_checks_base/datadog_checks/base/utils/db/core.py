@@ -61,6 +61,7 @@ class QueryManager(object):
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
         self.hostname = hostname  # type: str
+
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
@@ -82,7 +83,7 @@ class QueryManager(object):
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
-        column_transformers = COLUMN_TRANSFORMERS.copy()
+        column_transformers = COLUMN_TRANSFORMERS.copy()  # type: # type: Dict[str, Transformer]
 
         for submission_method, transformer_name in SUBMISSION_METHODS.items():
             method = getattr(self.check, submission_method)
@@ -95,11 +96,9 @@ class QueryManager(object):
     def execute(self, extra_tags=None):
         """This method is what you call every check run."""
         logger = self.check.log
+        global_tags = list(self.tags)
         if extra_tags:
-            global_tags = list(extra_tags)
-            global_tags.extend(self.tags)
-        else:
-            global_tags = self.tags
+            global_tags.extend(list(extra_tags))
 
         for query in self.queries:
             query_name = query.name
