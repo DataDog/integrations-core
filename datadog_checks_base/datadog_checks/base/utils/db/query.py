@@ -32,8 +32,8 @@ class Query(object):
         self.column_transformers = None  # type: Tuple[Tuple[str, Tuple[str, Transformer]]]
         # These transformers are used to collect extra metrics calculated from the query result
         self.extra_transformers = None  # type: List[Tuple[str, Transformer]]
-        # Contains the tags defined in query_data not the ones returned by the query
-        self.custom_tags = None  # type: List[str]
+        # Contains the tags defined in query_data, more tags can be added later from the query result
+        self.base_tags = None  # type: List[str]
 
     def compile(
         self,
@@ -199,5 +199,5 @@ class Query(object):
         self.query = query
         self.column_transformers = tuple(column_data)
         self.extra_transformers = tuple(extra_data)
-        self.custom_tags = tags
+        self.base_tags = tags
         del self.query_data
