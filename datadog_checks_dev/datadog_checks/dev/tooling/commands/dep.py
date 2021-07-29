@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from collections import defaultdict
 
 import click
@@ -8,9 +9,9 @@ from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
 from ...fs import read_file_lines, write_file_lines
-from ...utils import parse_agent_req_file
-from ..constants import get_agent_requirements
-from ..dependencies import read_check_dependencies
+from ..constants import get_agent_requirements, get_root
+from ..dependencies import read_agent_dependencies, read_check_dependencies
+from ..utils import get_valid_checks
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 
@@ -112,10 +113,47 @@ def freeze():
 
 
 @dep.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Update integrations' dependencies so that they match the Agent's static environment"
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Update integrations' dependencies so that they match the Agent's static environment",
 )
 def sync():
-    agent_rec_file = get_agent_requirements()
-    all_reqs = parse_agent_req_file()
+    agent_dependencies, errors = read_agent_dependencies()
+    if errors:
+        for error in errors:
+            echo_failure(error)
+        abort()
 
-    for check in checks:
+    checks = sorted(get_valid_checks())
+    for check_name in checks:
+        check_dependencies, check_errors = read_check_dependencies(check=check_name)
+
+        if check_errors:
+            for error in check_errors:
+                echo_failure(error)
+            abort()
+
+        for check_name, check_dependency_defs in check_dependencies.items():
+            agent_deps = agent_dependencies[check_name]
+            for check_dep_name, dependency_definitions in check_dependency_defs.items():
+                for check_dependency_def in dependency_definitions:
+                    for agent_dep_name, agent_dependency_definitions in agent_deps.items():
+                        for agent_dependency_definition in agent_dependency_definitions:
+                            if agent_dependency_definition.requirement == check_dependency_def.requirement:
+                                continue
+                            else:
+                                check_dependency_def.requirement = agent_dependency_definition.requirement
+
+            data = sorted(
+                (
+                    (dependency_definition.name, str(dependency_definition.requirement).lower())
+                    for versions in check_dependencies.values()
+                    for dependency_definitions in versions.values()
+                    for dependency_definition in dependency_definitions
+                ),
+                key=lambda d: d[0],
+            )
+            root = get_root()
+            check_req_file = os.path.join(root, check_name, 'requirements.in')
+            lines = sorted(set(f'{d[1]}\n' for d in data))
+            print(lines)
+
