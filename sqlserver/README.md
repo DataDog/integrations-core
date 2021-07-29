@@ -28,6 +28,13 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
         GRANT VIEW SERVER STATE to datadog;
     ```
+   
+   If you want to collect file size metrics per database, ensure the `datadog` user has access to your database.
+   You can [grant][26] the following which gives the datadog user access (This does not grant any permission in any database beyond connect):
+   
+   ```text
+       GRANT CONNECT ANY DATABASE to datadog; 
+   ```
 
 2. Make sure your SQL Server instance is listening on a specific fixed port. By default, named instances and SQL Server Express are configured for dynamic ports. See [Microsoft's documentation][15] for more details.
 
@@ -189,3 +196,4 @@ Need help? Contact [Datadog support][13].
 [23]: https://docs.datadoghq.com/agent/faq/template_variables/
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/
 [25]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json
+[26]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
