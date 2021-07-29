@@ -107,7 +107,7 @@ class QueryManager(object):
             query_name = query.name
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
-            query_tags = query.custom_tags
+            query_tags = query.base_tags
 
             try:
                 rows = self.execute_query(query.query)
@@ -123,16 +123,18 @@ class QueryManager(object):
                 if not self._is_row_valid(query, row):
                     continue
 
-                query_result = {}
+                # It holds the query results
+                sources = {}  # type: Dict[str, str]
+                # It holds the transformers defined in query_columns along with the column value
                 submission_queue = []  # type: List[Tuple[Transformer, Any]]
-                tags = list(global_tags) + query_tags
+                tags = global_tags + query_tags
 
                 for (column_name, type_transformer), column_value in zip(query_columns, row):
                     # Columns can be ignored via configuration
                     if not column_name:
                         continue
 
-                    query_result[column_name] = column_value
+                    sources[column_name] = column_value
                     column_type, transformer = type_transformer
 
                     # The transformer can be None for `source` types. Those such columns do not submit
@@ -146,17 +148,17 @@ class QueryManager(object):
                         submission_queue.append((transformer, column_value))
 
                 for transformer, value in submission_queue:
-                    transformer(query_result, value, tags=tags, hostname=self.hostname)
+                    transformer(sources, value, tags=tags, hostname=self.hostname)
 
                 for name, transformer in extra_transformers:
                     try:
-                        result = transformer(query_result, tags=tags, hostname=self.hostname)
+                        result = transformer(sources, tags=tags, hostname=self.hostname)
                     except Exception as e:
                         self.logger.error('Error transforming %s: %s', name, e)
                         continue
                     else:
                         if result is not None:
-                            query_result[name] = result
+                            sources[name] = result
 
     def _is_row_valid(self, query, row):
         # type: (Query, List) -> bool
