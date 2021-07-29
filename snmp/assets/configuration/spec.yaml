@@ -48,7 +48,7 @@ files:
       - name: profiles
         description: |
           Specify profiles to be able to reference a set of metrics by name.
-         Either `definition_file` or `definition` must be defined.
+          Either `definition_file` or `definition` must be defined.
           `definition_file` points to a file with a profile, and `definition` inlines
           it directly.
           When using a profile present on the profiles directory of the
