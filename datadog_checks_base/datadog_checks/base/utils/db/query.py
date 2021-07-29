@@ -23,13 +23,17 @@ class Query(object):
 
     def __init__(self, query_data):
         # type: (Dict[str, Any]) -> Query
+        # Contains the data to fill the rest of the attributes
         self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
+        # The actual query
         self.query = None  # type: str
-        self.columns = None  # type: List[str]
-        # Extras will hold a collection of extra metrics that are calculated from the ones provided in columns
-        self.extras = None  # type: List[Tuple[str, Transformer]]
-        self.tags = None  # type: List[str]
+        # Contains a mapping of column_name -> column_type, transformer
+        self.column_transformers = None  # type: Tuple[Tuple[str, Tuple[str, Transformer]]]
+        # These transformers are used to collect extra metrics calculated from the query result
+        self.extra_transformers = None  # type: List[Tuple[str, Transformer]]
+        # Contains the tags defined in query_data not the ones returned by the query
+        self.custom_tags = None  # type: List[str]
 
     def compile(
         self,
@@ -193,7 +197,7 @@ class Query(object):
 
         self.name = query_name
         self.query = query
-        self.columns = tuple(column_data)
-        self.extras = tuple(extra_data)
-        self.tags = tags
+        self.column_transformers = tuple(column_data)
+        self.extra_transformers = tuple(extra_data)
+        self.custom_tags = tags
         del self.query_data

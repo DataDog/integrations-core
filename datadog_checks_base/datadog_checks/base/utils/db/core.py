@@ -64,6 +64,7 @@ class QueryManager(object):
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
         self.hostname = hostname  # type: str
+        self.logger = self.check.log
 
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
@@ -98,41 +99,28 @@ class QueryManager(object):
 
     def execute(self, extra_tags=None):
         """This method is what you call every check run."""
-        logger = self.check.log
         global_tags = list(self.tags)
         if extra_tags:
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
             query_name = query.name
-            query_columns = query.columns
-            query_extras = query.extras
-            query_tags = query.tags
-            num_columns = len(query_columns)
+            query_columns = query.column_transformers
+            query_extras = query.extra_transformers
+            query_tags = query.custom_tags
 
             try:
                 rows = self.execute_query(query.query)
             except Exception as e:
                 if self.error_handler:
-                    logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
+                    self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
                 else:
-                    logger.error('Error querying %s: %s', query_name, e)
+                    self.logger.error('Error querying %s: %s', query_name, e)
 
                 continue
 
             for row in rows:
-                if not row:
-                    logger.debug('Query %s returned an empty result', query_name)
-                    continue
-
-                if num_columns != len(row):
-                    logger.error(
-                        'Query %s expected %d column%s, got %d',
-                        query_name,
-                        num_columns,
-                        's' if num_columns > 1 else '',
-                        len(row),
-                    )
+                if not self._is_row_valid(query, row):
                     continue
 
                 sources = {}
@@ -141,14 +129,14 @@ class QueryManager(object):
                 tags = list(global_tags)
                 tags.extend(query_tags)
 
-                for (column_name, transformer), value in zip(query_columns, row):
+                for (column_name, type_transformer), value in zip(query_columns, row):
                     # Columns can be ignored via configuration
                     if not column_name:
                         continue
 
                     sources[column_name] = value
 
-                    column_type, transformer = transformer
+                    column_type, transformer = type_transformer
 
                     # The transformer can be None for `source` types. Those such columns do not submit
                     # anything but are collected into the row values for other columns to reference.
@@ -173,6 +161,24 @@ class QueryManager(object):
                     else:
                         if result is not None:
                             sources[name] = result
+
+    def _is_row_valid(self, query, row):
+        # type: (Query, List) -> bool
+        if not row:
+            self.logger.debug('Query %s returned an empty result', query.name)
+            return False
+
+        num_columns = len(query.column_transformers)
+        if num_columns != len(row):
+            self.logger.error(
+                'Query %s expected %d column%s, got %d',
+                query.name,
+                num_columns,
+                's' if num_columns > 1 else '',
+                len(row),
+            )
+            return False
+        return True
 
     def execute_query(self, query):
         """
