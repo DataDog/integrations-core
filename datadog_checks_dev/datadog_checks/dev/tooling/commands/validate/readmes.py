@@ -30,7 +30,7 @@ def readmes(ctx, check):
     files_failed = {}
     readme_counter = set()
 
-    integrations = process_checks_option(check, source='integrations')
+    integrations = process_checks_option(check, source='integrations', extend_changed=True)
 
     for integration in integrations:
         display_queue = []

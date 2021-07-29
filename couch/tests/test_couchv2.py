@@ -121,6 +121,9 @@ def _assert_check(aggregator, gauges):
     for gauge in gauges["replication_tasks_gauges"]:
         aggregator.assert_metric(gauge)
 
+    for gauge in gauges["indexing_tasks_gauges"]:
+        aggregator.assert_metric(gauge, at_least=0)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
