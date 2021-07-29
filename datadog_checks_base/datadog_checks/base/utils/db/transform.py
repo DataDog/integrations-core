@@ -6,7 +6,7 @@ from __future__ import division
 import re
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, Tuple, List
+from typing import Any, Callable, Dict, List, Tuple
 
 from datadog_checks.base.types import ServiceCheckStatus
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
@@ -85,8 +85,9 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
     Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
     """
     gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)  # type: Callable
-    monotonic_count = transformers['monotonic_count'](transformers, '{}.count'.format(column_name), **modifiers)   \
-        # type: Callable
+    monotonic_count = transformers['monotonic_count'](
+        transformers, '{}.count'.format(column_name), **modifiers
+    )  # type: Callable
 
     def monotonic_gauge(_, value, **kwargs):
         # type: (List, str, Dict[str, Any]) -> None
@@ -483,7 +484,7 @@ COLUMN_TRANSFORMERS = {
     'match': get_match,
     'service_check': get_service_check,
     'time_elapsed': get_time_elapsed,
-}   # type: Dict[str, Transformer]
+}  # type: Dict[str, Transformer]
 
 EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}  # type: Dict[str, TransformerFactory]
 

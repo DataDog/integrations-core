@@ -4,8 +4,9 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple
 
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 from six import raise_from
+
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 
 from .utils import create_extra_transformer
 
@@ -164,8 +165,9 @@ class Query(object):
             elif extra_type not in extra_transformers and extra_type not in submission_transformers:
                 raise ValueError('unknown type `{}` for extra {} of {}'.format(extra_type, extra_name, query_name))
 
-            transformer_factory = extra_transformers.get(extra_type, submission_transformers.get(extra_type))  \
-                # type: TransformerFactory
+            transformer_factory = extra_transformers.get(
+                extra_type, submission_transformers.get(extra_type)
+            )  # type: TransformerFactory
 
             extra_source = extra.get('source')
             if extra_type in submission_transformers:

@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
-from typing import Callable, Iterable, List, Sequence, Union
+from typing import Any, Callable, Dict, List
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db.types import QueryExecutor, Transformer
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -35,13 +36,15 @@ class QueryManager(object):
     )
     self.check_initializations.append(self._query_manager.compile_queries)
     ```
+
+    Note: This class is not in charge of opening or closing connections, just running queries.
     """
 
     def __init__(
         self,
         check,  # type: AgentCheck
-        executor,  # type:  Callable[[str], Union[Sequence, Iterable]]
-        queries=None,  # type: List[str]
+        executor,  # type:  QueryExecutor
+        queries=None,  # type: List[Dict[str, Any]]
         tags=None,  # type: List[str]
         error_handler=None,  # type: Callable[[str], str]
         hostname=None,  # type: str
@@ -50,13 +53,13 @@ class QueryManager(object):
         - **check** (_AgentCheck_) - an instance of a Check
         - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
           a sequence representing either the full result set or an iterator over the result set
-        - **queries** (_List[Query]_) - a list of `Query` instances
+        - **queries** (_List[Dict]_) - a list of queries in dict format
         - **tags** (_List[str]_) - a list of tags to associate with every submission
         - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
           a sanitized string, useful for scrubbing potentially sensitive information libraries emit
         """
         self.check = check  # type: AgentCheck
-        self.executor = executor  # type:  Callable[[str], Union[Sequence, Iterable]]
+        self.executor = executor  # type:  QueryExecutor
         self.tags = tags or []
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
@@ -83,7 +86,7 @@ class QueryManager(object):
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
-        column_transformers = COLUMN_TRANSFORMERS.copy()  # type: # type: Dict[str, Transformer]
+        column_transformers = COLUMN_TRANSFORMERS.copy()  # type: Dict[str, Transformer]
 
         for submission_method, transformer_name in SUBMISSION_METHODS.items():
             method = getattr(self.check, submission_method)
