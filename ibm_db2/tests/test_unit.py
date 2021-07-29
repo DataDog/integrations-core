@@ -4,6 +4,8 @@
 import mock
 import pytest
 
+from requests import ConnectionError
+
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
