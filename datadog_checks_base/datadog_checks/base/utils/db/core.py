@@ -125,7 +125,7 @@ class QueryManager(object):
 
                 query_result = {}
                 submission_queue = []  # type: List[Tuple[Transformer, Any]]
-                tags = list(global_tags) + query_tags
+                tags = global_tags + query_tags
 
                 for (column_name, type_transformer), column_value in zip(query_columns, row):
                     # Columns can be ignored via configuration
