@@ -43,6 +43,8 @@ def check_tag_names(metric, tags):
         'cluster_name',
         'clustername',
         'cluster',
+        'clusterid',
+        'cluster_id',
         'env',
         'host_name',
         'hostname',
