@@ -213,6 +213,14 @@ instances:
     #
     # share_labels: {}
 
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, this instructs the check to cache labels collected from the first payload
+    ## for increased performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+    #
+    # cache_shared_labels: true
+
     ## @param request_size - number - optional - default: 16
     ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
     #

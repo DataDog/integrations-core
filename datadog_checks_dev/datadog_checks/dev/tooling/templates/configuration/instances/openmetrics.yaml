@@ -270,6 +270,15 @@
           type: array
           items:
             type: string
+- name: cache_shared_labels
+  description: |
+    When `share_labels` is set, this instructs the check to cache labels collected from the first payload
+    for increased performance.
+
+    Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+  value:
+    type: boolean
+    example: true
 - name: request_size
   description: |
     The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
