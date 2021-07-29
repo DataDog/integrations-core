@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Tuple
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.types import QueryExecutor, Transformer
@@ -106,7 +106,7 @@ class QueryManager(object):
         for query in self.queries:
             query_name = query.name
             query_columns = query.column_transformers
-            query_extras = query.extra_transformers
+            extra_transformers = query.extra_transformers
             query_tags = query.custom_tags
 
             try:
@@ -123,19 +123,16 @@ class QueryManager(object):
                 if not self._is_row_valid(query, row):
                     continue
 
-                sources = {}
-                submission_queue = []
+                query_result = {}
+                submission_queue = []  # type: List[Tuple[Transformer, Any]]
+                tags = list(global_tags) + query_tags
 
-                tags = list(global_tags)
-                tags.extend(query_tags)
-
-                for (column_name, type_transformer), value in zip(query_columns, row):
+                for (column_name, type_transformer), column_value in zip(query_columns, row):
                     # Columns can be ignored via configuration
                     if not column_name:
                         continue
 
-                    sources[column_name] = value
-
+                    query_result[column_name] = column_value
                     column_type, transformer = type_transformer
 
                     # The transformer can be None for `source` types. Those such columns do not submit
@@ -143,24 +140,24 @@ class QueryManager(object):
                     if transformer is None:
                         continue
                     elif column_type == 'tag':
-                        tags.append(transformer(None, value))
+                        tags.append(transformer(None, column_value))  # get_tag transformer
                     elif column_type == 'tag_list':
-                        tags.extend(transformer(None, value))
+                        tags.extend(transformer(None, column_value))  # get_tag_list transformer
                     else:
-                        submission_queue.append((transformer, value))
+                        submission_queue.append((transformer, column_value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags, hostname=self.hostname)
+                    transformer(query_result, value, tags=tags, hostname=self.hostname)
 
-                for name, transformer in query_extras:
+                for name, transformer in extra_transformers:
                     try:
-                        result = transformer(sources, tags=tags, hostname=self.hostname)
+                        result = transformer(query_result, tags=tags, hostname=self.hostname)
                     except Exception as e:
-                        logger.error('Error transforming %s: %s', name, e)
+                        self.logger.error('Error transforming %s: %s', name, e)
                         continue
                     else:
                         if result is not None:
-                            sources[name] = result
+                            query_result[name] = result
 
     def _is_row_valid(self, query, row):
         # type: (Query, List) -> bool
