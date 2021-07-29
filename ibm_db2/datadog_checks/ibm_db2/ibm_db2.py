@@ -5,9 +5,9 @@ from __future__ import division
 
 from itertools import chain
 from time import time as timestamp
-from requests import ConnectionError
 
 import ibm_db
+from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
