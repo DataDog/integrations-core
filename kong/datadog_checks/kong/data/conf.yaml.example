@@ -214,7 +214,7 @@ instances:
     # share_labels: {}
 
     ## @param cache_shared_labels - boolean - optional - default: true
-    ## When `share_labels` is set, this instructs the check to cache labels collected from the first payload
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
     ## for increased performance.
     ##
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
