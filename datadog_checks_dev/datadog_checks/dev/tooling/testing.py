@@ -322,7 +322,7 @@ def get_tox_env_python_version(env):
         return int(match.group(1))
 
 
-def process_checks_option(check, source=None, validate=False):
+def process_checks_option(check, source=None, validate=False, extend_changed=False):
     # provide common function for determining which check to run validations against
     # `source` determines which method for gathering valid check, default will use `get_valid_checks`
     # `validate` gets applied for specific check names, ensuring the check is included in the default
@@ -343,6 +343,8 @@ def process_checks_option(check, source=None, validate=False):
         choice = sorted(get_valid())
     elif check.lower() == 'changed':
         choice = sorted(get_changed_directories() & get_valid())
+        if extend_changed and ('datadog_checks_dev' in choice or 'datadog_checks_base' in choice):
+            choice = sorted(get_valid())
     else:
         if validate:
             choice = [check] if check in get_valid() else []
