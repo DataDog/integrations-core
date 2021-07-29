@@ -64,7 +64,6 @@ class QueryManager(object):
         self.error_handler = error_handler
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
         self.hostname = hostname  # type: str
-        self.logger = self.check.log
 
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
@@ -99,6 +98,10 @@ class QueryManager(object):
 
     def execute(self, extra_tags=None):
         """This method is what you call every check run."""
+        # This needs to stay here b/c when we construct a QueryManager in a check's __init__
+        # there is no check ID at that point
+        self.logger = self.check.log
+
         global_tags = list(self.tags)
         if extra_tags:
             global_tags.extend(list(extra_tags))
