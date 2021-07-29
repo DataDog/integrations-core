@@ -9,8 +9,6 @@ from tempfile import gettempdir
 
 import click
 import yaml
-from pysmi.reader.httpclient import HttpReader
-from pysmi.reader.localfile import FileReader
 
 from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
 
@@ -305,6 +303,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
 
 
 def _get_reader_from_source(source):
+    from pysmi.reader.localfile import FileReader
     if os.path.exists(source):
         return FileReader(source)
     return _get_reader_from_url(source)
@@ -312,6 +311,7 @@ def _get_reader_from_source(source):
 
 def _get_reader_from_url(url):
     from urllib.parse import urlparse
+    from pysmi.reader.httpclient import HttpReader
 
     if not (url.startswith('//') or url.startswith('http://') or url.startswith('https://')):
         url = "//" + url
