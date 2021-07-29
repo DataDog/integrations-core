@@ -3,12 +3,13 @@ files:
 - name: snmp.yaml
   options:
     - template: init_config
-      overrides: 
-       description: | 
+      overrides:
+       description: |
           WARNING: This configuration file is for SNMP v1, v2, and v3.
           Check all variables depending on your SNMP version.
 
-          NOTE: See SNMP integration setup guide and examples in the Datadog documentation: https://docs.datadoghq.com/network_monitoring/devices/setup
+          NOTE: See SNMP integration setup guide and examples in the Datadog documentation:
+                https://docs.datadoghq.com/network_monitoring/devices/setup
       options:
       - name: loader
         description: |
@@ -25,12 +26,12 @@ files:
         value:
           example: 10
           type: integer
-        
+
       - name: global_metrics
         description: |
           Specify global_metrics you want to monitor by using MIBS for counter and gauge.
           global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-          
+
           Single scalar metrics and table metrics can be defined in this section.
           Details on how to define metrics can be found in the documentation:
           https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
@@ -77,7 +78,7 @@ files:
                   - With auto discovery, if the same IP is assigned to a different device with different OIDs,
                   the OIDs are refreshed only according to the refresh interval.
           Only available using python SNMP integration
-        
+
         value:
           type: integer
           example: 0
@@ -96,7 +97,7 @@ files:
           Only available using python SNMP integration.
         value:
           type: string
-      - name: ignore_nonincreasing_oid 
+      - name: ignore_nonincreasing_oid
         description: |
           Set to true to ignore non increasing OID.
           See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
@@ -228,10 +229,10 @@ files:
       - name: metrics
         description: |
           Specify metrics you want to monitor.
-          Metrics set here will override `global_metrics` set in the `init_config` section 
+          Metrics set here will override `global_metrics` set in the `init_config` section
           if `use_global_metrics` is set to false.
           Otherwise, they will be used in addition to `global_metrics`.
-          
+
           Single scalar metrics and table metrics can be defined in this section.
           Details on how to define metrics can be found in the documentation:
           https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
@@ -239,7 +240,7 @@ files:
           type: array
           items:
             type: object
-          example: 
+          example:
             - OID: 1.3.6.1.2.1.6.5.0
               name: tcpPassiveOpens
             - OID: 1.3.6.1.2.1.6.5.0
@@ -255,7 +256,7 @@ files:
           type: array
           items:
             type: object
-          example: 
+          example:
             - OID: 1.3.6.1.2.1.1.5.0
               symbol: sysName
               tag: snmp_host
@@ -280,9 +281,9 @@ files:
           type: array
           items:
             type: string
-          example: 
+          example:
             - <IP_ADDRESS_1>
-            - <IP_ADDRESS_2>  
+            - <IP_ADDRESS_2>
       - name: discovery_interval
         description: |
           Interval between 2 discovery starts, in seconds.
@@ -329,12 +330,12 @@ files:
           When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
           using batched GET queries, as opposed to one GETNEXT query per row in the table.
           The caching is disabled if the interval is set to `0` (default).
-          
+
           Note: If some tables rows are dynamic, new rows are only fetched at every refresh interval.
                   - This means new OIDs are only picked up when OIDs are refreshed according to the refresh interval.
                   - With auto discovery, if the same IP is assigned to a different device with different OIDs,
                   the OIDs are refreshed only according to the refresh interval.
-          
+
         value:
           type: integer
           example: 0
