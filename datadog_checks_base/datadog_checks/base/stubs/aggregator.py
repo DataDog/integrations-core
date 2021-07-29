@@ -39,24 +39,12 @@ def backend_normalize_metric_name(metric_name):
 
 
 def check_tag_names(metric, tags):
-    forbidden_tags = [
-        'cluster_name',
-        'clustername',
-        'cluster',
-        'clusterid',
-        'cluster_id',
-        'env',
-        'host_name',
-        'hostname',
-        'host',
-        'service',
-        'version',
-    ]
-
     if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        from datadog_checks.base.utils.tagging import GENERIC_TAGS
+
         for tag in tags:
             tag_name = tag.split(':')[0]
-            if tag_name in forbidden_tags:
+            if tag_name in GENERIC_TAGS:
                 raise Exception(
                     "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
                     "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(

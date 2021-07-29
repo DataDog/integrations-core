@@ -8,8 +8,10 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import ServiceCheckStatus
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.utils.tagging import GENERIC_TAGS
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
@@ -31,7 +33,7 @@ ALLOWED_GLOBALS = {
 SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
-def get_tag(transformers, column_name, **modifiers):
+def get_tag(transformers, name, **modifiers):
     # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a tag that will be used in every subsequent submission.
@@ -43,20 +45,33 @@ def get_tag(transformers, column_name, **modifiers):
     to the string `true` or `false`. So for example if you named the column `alive` and the result was the
     number `0` the tag will be `alive:false`.
     """
-    template = '{}:{{}}'.format(column_name)
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
-    def tag(_, value, **kwargs):
-        # type: (List, str, Dict[str, Any]) -> str
+    def tag(_, value, check, **kwargs):
+        # type: (List, str, AgentCheck, Dict[str, Any]) -> List[str]
         if boolean:
             value = str(is_affirmative(value)).lower()
-
-        return template.format(value)
+        return _transform_tag(name, value, check)
 
     return tag
 
 
-def get_tag_list(transformers, column_name, **modifiers):
+def _transform_tag(name, value, check):
+    # type: (str, str, AgentCheck) -> List[str]
+    template = '{}:{}'
+    tags = []
+    if name in GENERIC_TAGS:
+        new_name = '{}_{}'.format(check.name, name)
+        if not not is_affirmative(check.instance.get('disable_generic_tags', False)):
+            check._log_deprecation(name, new_name)
+            tags.append(template.format(name, value))
+        tags.append(template.format(new_name, value))
+    else:
+        tags.append(template.format(name, value))
+    return tags
+
+
+def get_tag_list(transformers, name, **modifiers):
     # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a list of tags that will be used in every submission.
@@ -67,14 +82,15 @@ def get_tag_list(transformers, column_name, **modifiers):
     For example, if the column is named `server_tag` and the column returned the value `'us,primary'`, then all
     submissions for that row will be tagged by `server_tag:us` and `server_tag:primary`.
     """
-    template = '%s:{}' % column_name
 
-    def tag_list(_, value, **kwargs):
-        # type: (List, str, Dict[str, Any]) -> List[str]
+    def tag_list(_, value, check, **kwargs):
+        # type: (List, str, AgentCheck, Dict[str, Any]) -> List[str]
         if isinstance(value, str):
             value = [v.strip() for v in value.split(',')]
-
-        return [template.format(v) for v in value]
+        tags = []
+        for v in value:
+            tags.extend(_transform_tag(name, v, check))
+        return tags
 
     return tag_list
 

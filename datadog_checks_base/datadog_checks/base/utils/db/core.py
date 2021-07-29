@@ -139,10 +139,9 @@ class QueryManager(object):
                     # anything but are collected into the row values for other columns to reference.
                     if transformer is None:
                         continue
-                    elif column_type == 'tag':
-                        tags.append(transformer(None, column_value))  # get_tag transformer
-                    elif column_type == 'tag_list':
-                        tags.extend(transformer(None, column_value))  # get_tag_list transformer
+                    elif column_type == 'tag' or column_type == 'tag_list':
+                        # get_tag transformer or  get_tag_list transformer
+                        tags.extend(transformer(None, column_value, self.check))
                     else:
                         submission_queue.append((transformer, column_value))
 
