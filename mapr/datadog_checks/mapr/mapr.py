@@ -184,14 +184,17 @@ class MaprCheck(AgentCheck):
         metric_name = metric['metric']
         tags = copy.deepcopy(self.custom_tags)
         for k, v in iteritems(metric['tags']):
-            generic_tag = False
             if k == 'clustername':
-                generic_tag = True
                 tags.append("{}:{}".format('mapr_cluster', v))
+                if not self._disable_legacy_cluster_tag:
+                    self._log_deprecation(k, 'mapr_cluster')
+                    tags.append("{}:{}".format(k, v))
             elif k == 'clusterid':
-                generic_tag = True
                 tags.append("{}:{}".format('mapr_cluster_id', v))
-            if not (self._disable_legacy_cluster_tag and generic_tag):
+                if not self._disable_legacy_cluster_tag:
+                    self._log_deprecation(k, 'mapr_cluster_id')
+                    tags.append("{}:{}".format(k, v))
+            else:
                 tags.append("{}:{}".format(k, v))
 
         if 'buckets' in metric and metric_name in HISTOGRAM_METRICS:
