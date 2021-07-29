@@ -85,7 +85,7 @@ files:
         description: |
           **Experimental** - Setting this flag to true attempts to optimize memory usage related to
           MIB information. This shares internal MIB data across instances.
-          Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
+          Note: This strategy may impact MIB resolution.
           Only available using python SNMP integration.
         value:
           type: boolean
