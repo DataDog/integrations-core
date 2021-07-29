@@ -29,8 +29,8 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
         GRANT VIEW SERVER STATE to datadog;
     ```
    
-   If you want to collect file size metrics per database, ensure the `datadog` user has access to your database.
-   You can [grant][26] the following which gives the datadog user access (This does not grant any permission in any database beyond connect):
+   If you want to collect file size metrics per database, ensure the `datadog` user has access to your databases.
+   You can [grant][26] the following which gives the datadog user access (Note: this does not grant any permission in any database beyond connect):
    
    ```text
        GRANT CONNECT ANY DATABASE to datadog; 
