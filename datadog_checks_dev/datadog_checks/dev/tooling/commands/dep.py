@@ -10,7 +10,7 @@ from packaging.specifiers import SpecifierSet
 
 from ...fs import read_file_lines, write_file_lines
 from ..constants import get_agent_requirements, get_root
-from ..dependencies import normalize_dependency_marker, read_agent_dependencies, read_check_dependencies
+from ..dependencies import read_agent_dependencies, read_check_dependencies
 from ..utils import get_valid_checks
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
@@ -117,7 +117,9 @@ def freeze():
     short_help="Update integrations' dependencies so that they match the Agent's static environment",
 )
 def sync():
-    agent_dependencies, errors = read_agent_dependencies()
+    root = get_root()
+    all_agent_dependencies, errors = read_agent_dependencies()
+
     if errors:
         for error in errors:
             echo_failure(error)
@@ -132,24 +134,21 @@ def sync():
             for error in check_errors:
                 echo_failure(error)
             abort()
-        deps_to_update = {}
-        for check_dep_nam, check_dependency_defs in check_dependencies.items():
-            agent_deps = agent_dependencies[check_dep_nam]
-            for version, dependency_definitions in check_dependency_defs.items():
-                for check_dependency_def in dependency_definitions:
-                    for agent_dep_version, agent_dependency_definitions in agent_deps.items():
-                        for agent_dependency_definition in agent_dependency_definitions:
-                            # look for the dependency with the same marker and name since the version can be different
-                            if (
-                                agent_dependency_definition.name == check_dependency_def.name
-                                and normalize_dependency_marker(check_dependency_def.requirement.marker)
-                                == normalize_dependency_marker(agent_dependency_definition.requirement.marker)
-                            ):
-                                if version != agent_dep_version:
-                                    # the agent requirement was bumped
-                                    deps_to_update[agent_dep_version] = check_dependency_def
 
-            root = get_root()
+        deps_to_update = {
+            agent_dep_version: check_dependency_definition
+            for check_dependency_name, check_dependency_definitions in check_dependencies.items()
+            for version, dependency_definitions in check_dependency_definitions.items()
+            for check_dependency_definition in dependency_definitions
+            for agent_dep_version, agent_dependency_definitions in all_agent_dependencies[check_dependency_name].items()
+            for agent_dependency_definition in agent_dependency_definitions
+            # look for the dependency with the same marker and name since the version can be different
+            if check_dependency_definition.same_name_marker(agent_dependency_definition)
+            and version != agent_dep_version
+        }
+
+        if deps_to_update:
+            files_updated += 1
             check_req_file = os.path.join(root, check_name, 'requirements.in')
             old_lines = read_file_lines(check_req_file)
             new_lines = old_lines.copy()
@@ -158,11 +157,9 @@ def sync():
                 dependency_definition.requirement.specifier = new_version
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
-                if new_lines != old_lines:
-                    files_updated += 1
-                    write_file_lines(check_req_file, new_lines)
+            write_file_lines(check_req_file, new_lines)
 
     if not files_updated:
-        abort('No dependency definitions to update')
+        echo_info('All dependencies synced.')
 
     echo_info(f'Files updated: {files_updated}')

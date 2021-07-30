@@ -21,6 +21,19 @@ class DependencyDefinition:
     def __repr__(self):
         return f'<DependencyDefinition name={self.name} check_name={self.check_name} requirement={self.requirement}'
 
+    @property
+    def _normalized_marker(self):
+        if self.requirement.marker is None:
+            return self.requirement.marker
+
+        new_marker = str(self.requirement.marker).strip()
+        new_marker = new_marker.replace('\'', "\"")
+        return new_marker
+
+    def same_name_marker(self, other):
+        test = self.name == other.name and self._normalized_marker == other._normalized_marker
+        return test
+
 
 def create_dependency_data():
     return defaultdict(lambda: defaultdict(lambda: []))
