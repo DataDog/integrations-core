@@ -13,6 +13,8 @@ The Datadog Agent can collect many metrics from MySQL databases, including (but 
 
 You can also create your own metrics using custom SQL queries.
 
+<div class="alert alert-info">This page describes the MySQL agent integration; if you are looking for the Database Monitoring product for MySQL, see <a href="/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+
 **Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
 
 ## Setup
