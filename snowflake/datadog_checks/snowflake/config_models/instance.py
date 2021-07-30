@@ -32,7 +32,6 @@ class InstanceConfig(BaseModel):
     client_session_keep_alive: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
-    disable_legacy_service_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     login_timeout: Optional[int]
     metric_groups: Optional[Sequence[str]]

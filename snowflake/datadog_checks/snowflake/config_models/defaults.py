@@ -48,10 +48,6 @@ def instance_database(field, value):
     return 'SNOWFLAKE'
 
 
-def instance_disable_legacy_service_tag(field, value):
-    return False
-
-
 def instance_empty_default_hostname(field, value):
     return False
 
