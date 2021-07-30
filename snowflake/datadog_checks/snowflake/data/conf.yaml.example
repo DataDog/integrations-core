@@ -185,6 +185,12 @@ instances:
     #     tags:
     #     - test:snowflake
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as cluster that come from query executions will be replaced by <integration_name>_cluster
+    ## to avoid getting mixed with other integraton tags
+    #
+    disable_generic_tags: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
