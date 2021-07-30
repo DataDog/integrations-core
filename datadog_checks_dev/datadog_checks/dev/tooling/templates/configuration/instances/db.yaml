@@ -62,3 +62,4 @@
     display_default: false
     example: true
   enabled: true
+  hidden: true
