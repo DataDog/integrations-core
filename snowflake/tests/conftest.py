@@ -10,6 +10,7 @@ INSTANCE = {
     "database": "SNOWFLAKE",
     "schema": "ACCOUNT_USAGE",
     'role': "ACCOUNTADMIN",
+    'disable_generic_tags': True,
 }
 
 OAUTH_INSTANCE = {
@@ -20,6 +21,7 @@ OAUTH_INSTANCE = {
     'role': "ACCOUNTADMIN",
     "authenticator": "oauth",
     "token": "testtoken",
+    'disable_generic_tags': True,
 }
 
 CHECK_NAME = 'snowflake'

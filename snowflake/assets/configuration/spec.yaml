@@ -152,6 +152,7 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
+          disable_generic_tags.hidden: False
       - template: instances/default
         overrides:
           min_collection_interval.description: |
