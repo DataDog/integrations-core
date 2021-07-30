@@ -2,7 +2,12 @@ import click
 
 from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success, echo_warning
 from . import validators
-from .validators.utils import exist_profile_in_path, get_all_profiles_directory, get_default_snmp_profiles_path, initialize_path
+from .validators.utils import (
+    exist_profile_in_path,
+    get_all_profiles_directory,
+    get_default_snmp_profiles_path,
+    initialize_path,
+)
 
 MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
 
@@ -67,4 +72,3 @@ def show_report(report):
 
     for display_func, message in report['messages']:
         display_func(message)
-

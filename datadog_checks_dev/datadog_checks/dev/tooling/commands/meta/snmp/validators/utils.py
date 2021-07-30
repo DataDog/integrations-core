@@ -1,5 +1,4 @@
 import glob
-
 from os.path import join
 
 import yaml
@@ -51,6 +50,7 @@ def exist_profile_in_path(profile_name, path):
                 return True
     return False
 
+
 def get_profile(profile_name, line=True):
     if isfile(profile_name):
         try:
@@ -59,7 +59,7 @@ def get_profile(profile_name, line=True):
                     file_contents = yaml.load(f.read(), Loader=SafeLineLoader)
                 else:
                     file_contents = yaml.safe_load(f.read())
-        except YAMLError as e:
+        except YAMLError:
             file_contents = None
     return file_contents
 
@@ -67,8 +67,10 @@ def get_profile(profile_name, line=True):
 def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
 
+
 def get_all_profiles_directory(directory):
     return glob.glob(join(directory, "*.yaml"))
+
 
 class SafeLineLoader(SafeLoader):
     def construct_mapping(self, node, deep=False):

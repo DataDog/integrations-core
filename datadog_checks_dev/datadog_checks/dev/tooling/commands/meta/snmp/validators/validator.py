@@ -199,10 +199,12 @@ class DuplicateOIDValidator(ProfileValidator):
             self.used_oid[OID].append((file, line))
             self.duplicated[OID] = self.used_oid[OID]
 
+
 class SysobjectidValidator(ProfileValidator):
-    """ 
+    """
     Validator responsible to check if there are no duplicated sysobjectid in the profile.
     """
+
     def __init__(self):
         super().__init__()
         self.used_sysobjid = {}
@@ -211,13 +213,13 @@ class SysobjectidValidator(ProfileValidator):
 
     def validate(self, profile, path):
         sysobjectids = self.extract_sysobjectids_profile(profile)
-        self.check_sysobjectids_are_duplicated( sysobjectids, profile)
+        self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         for directory in path:
             for profile in get_all_profiles_directory(directory):
                 sysobjectids = self.extract_sysobjectids_profile(profile)
                 self.check_sysobjectids_are_duplicated(sysobjectids, profile)
         self.report_errors()
-    
+
     def report_errors(self):
         if len(self.duplicated) == 0:
             self.success("No duplicated sysobjectid")
@@ -231,10 +233,10 @@ class SysobjectidValidator(ProfileValidator):
     def extract_sysobjectids_profile(self, profile):
         file_contents = get_profile(profile)
         sysobjectid = file_contents.get('sysobjectid')
-        if (not isinstance(sysobjectid, list)) and sysobjectid != None:
+        if (not isinstance(sysobjectid, list)) and sysobjectid:
             sysobjectid = [sysobjectid]
         return sysobjectid
-            
+
     def check_sysobjectids_are_duplicated(self, sysobjectids, profile):
         if (not sysobjectids) or (profile in self.seen_profiles):
             return
@@ -245,6 +247,7 @@ class SysobjectidValidator(ProfileValidator):
             else:
                 self.used_sysobjid[sysobjectid].append(profile)
                 self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
+
 
 def get_all_validators():
     # type () -> list(ProfileValidator)
