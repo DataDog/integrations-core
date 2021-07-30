@@ -31,8 +31,7 @@ class DependencyDefinition:
         return new_marker
 
     def same_name_marker(self, other):
-        test = self.name == other.name and self._normalized_marker == other._normalized_marker
-        return test
+        return self.name == other.name and self._normalized_marker == other._normalized_marker
 
 
 def create_dependency_data():
@@ -54,15 +53,6 @@ def load_dependency_data(req_file, dependencies, errors, check_name=None):
         name = req.name.lower()
         dependency = dependencies[name][req.specifier]
         dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
-
-
-def normalize_dependency_marker(marker):
-    if marker is None:
-        return marker
-
-    new_marker = str(marker).strip()
-    new_marker = new_marker.replace('\'', "\"")
-    return new_marker
 
 
 def load_base_check(req_file, dependencies, errors, check_name=None):

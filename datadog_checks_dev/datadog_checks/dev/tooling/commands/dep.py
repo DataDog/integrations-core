@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from collections import defaultdict
 
 import click
@@ -9,9 +8,9 @@ from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
 from ...fs import read_file_lines, write_file_lines
-from ..constants import get_agent_requirements, get_root
+from ..constants import get_agent_requirements
 from ..dependencies import read_agent_dependencies, read_check_dependencies
-from ..utils import get_valid_checks
+from ..utils import get_check_req_file, get_valid_checks
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 
@@ -117,7 +116,6 @@ def freeze():
     short_help="Update integrations' dependencies so that they match the Agent's static environment",
 )
 def sync():
-    root = get_root()
     all_agent_dependencies, errors = read_agent_dependencies()
 
     if errors:
@@ -149,7 +147,7 @@ def sync():
 
         if deps_to_update:
             files_updated += 1
-            check_req_file = os.path.join(root, check_name, 'requirements.in')
+            check_req_file = get_check_req_file(check_name)
             old_lines = read_file_lines(check_req_file)
             new_lines = old_lines.copy()
 
