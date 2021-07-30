@@ -133,6 +133,8 @@ DATABASE_METRICS = [
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
+    ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
+    ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
 ]
 
 DATABASE_FRAGMENTATION_METRICS = [
