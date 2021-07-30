@@ -72,7 +72,7 @@ class IIS(PDHBaseCheck):
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
                 else:
                     self.log.debug(
-                        "Unknwon IIS counter: %s. Falling back to default submission.", counter.english_class_name
+                        "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
                     )
                     for instance_name, val in iteritems(counter_values):
                         tags = list(self._tags.get(self.instance_hash, []))
