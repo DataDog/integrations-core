@@ -133,22 +133,27 @@ def sync():
                 echo_failure(error)
             abort()
         deps_to_update = {}
-        agent_deps = agent_dependencies[check_name]
         for check_dep_nam, check_dependency_defs in check_dependencies.items():
             agent_deps = agent_dependencies[check_dep_nam]
             for version, dependency_definitions in check_dependency_defs.items():
                 for check_dependency_def in dependency_definitions:
                     for agent_dep_version, agent_dependency_definitions in agent_deps.items():
                         for agent_dependency_definition in agent_dependency_definitions:
-                            if agent_dependency_definition.name == check_dependency_def.name and normalize_dependency_marker(check_dependency_def.requirement.marker) == normalize_dependency_marker(agent_dependency_definition.requirement.marker):
+                            # look for the dependency with the same marker and name since the version can be different
+                            if (
+                                agent_dependency_definition.name == check_dependency_def.name
+                                and normalize_dependency_marker(check_dependency_def.requirement.marker)
+                                == normalize_dependency_marker(agent_dependency_definition.requirement.marker)
+                            ):
                                 if version != agent_dep_version:
                                     # the agent requirement was bumped
                                     deps_to_update[agent_dep_version] = check_dependency_def
-                                    
+
             root = get_root()
             check_req_file = os.path.join(root, check_name, 'requirements.in')
             old_lines = read_file_lines(check_req_file)
             new_lines = old_lines.copy()
+
             for new_version, dependency_definition in deps_to_update.items():
                 dependency_definition.requirement.specifier = new_version
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
@@ -161,5 +166,3 @@ def sync():
         abort('No dependency definitions to update')
 
     echo_info(f'Files updated: {files_updated}')
-
-

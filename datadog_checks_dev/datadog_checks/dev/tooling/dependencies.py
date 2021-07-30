@@ -42,13 +42,15 @@ def load_dependency_data(req_file, dependencies, errors, check_name=None):
         dependency = dependencies[name][req.specifier]
         dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
 
+
 def normalize_dependency_marker(marker):
     if marker is None:
         return marker
-        
+
     new_marker = str(marker).strip()
     new_marker = new_marker.replace('\'', "\"")
     return new_marker
+
 
 def load_base_check(req_file, dependencies, errors, check_name=None):
     for i, line in enumerate(stream_file_lines(req_file)):
