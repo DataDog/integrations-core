@@ -55,9 +55,9 @@ def test_submit_gauge(instance, aggregator):
         'mapr.process.context_switch_involuntary',
         value=6308,
         tags=[
-            'clustername:demo',
+            'mapr_cluster:demo',
             'process_name:apiserver',
-            'clusterid:7616098736519857348',
+            'mapr_cluster_id:7616098736519857348',
             'fqdn:mapr-lab-2-ghs6.c.datadog-integrations-lab.internal',
         ],
     )
@@ -73,9 +73,9 @@ def test_submit_gauge_additional_tags(instance, aggregator):
     aggregator.assert_metric(
         'mapr.process.context_switch_involuntary',
         tags=[
-            'clustername:demo',
+            'mapr_cluster:demo',
             'process_name:apiserver',
-            'clusterid:7616098736519857348',
+            'mapr_cluster_id:7616098736519857348',
             'fqdn:mapr-lab-2-ghs6.c.datadog-integrations-lab.internal',
             'foo:bar',
             'baz:biz',
@@ -89,8 +89,8 @@ def test_submit_bucket(instance, aggregator):
     check = MaprCheck('mapr', {}, [instance])
     check.submit_metric(DISTRIBUTION_METRIC)
     expected_tags = [
-        "clusterid:7616098736519857348",
-        "clustername:demo",
+        "mapr_cluster_id:7616098736519857348",
+        "mapr_cluster:demo",
         "fqdn:mapr-lab-2-dhk4.c.datadog-integrations-lab.internal",
         "noindex://primary",
         "rpc_type:put",

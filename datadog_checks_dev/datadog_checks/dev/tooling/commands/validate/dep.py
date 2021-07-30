@@ -139,7 +139,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     * Optionally verify that the `datadog-checks-base` requirement satisfies specific version
     """
     failed = False
-    checks = process_checks_option(check, source='valid_checks')
+    checks = process_checks_option(check, source='valid_checks', extend_changed=True)
     check_dependencies, check_errors = read_check_dependencies(checks)
 
     if check_errors:

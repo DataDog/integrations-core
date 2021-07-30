@@ -30,7 +30,7 @@ def recommended_monitors(check):
     checks, an 'all' or empty `check` value will validate all README files.
     """
 
-    checks = process_checks_option(check, source='integrations')
+    checks = process_checks_option(check, source='integrations', extend_changed=True)
     echo_info(f"Validating recommended monitors for {len(checks)} checks ...")
 
     failed_checks = 0
