@@ -2,14 +2,14 @@
 
 ![PostgreSQL Graph][1]
 
+<div class="alert alert-info">This page describes the Postgres agent integration; if you are looking for the Database Monitoring product for Postgres, see <a href="/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+
 ## Overview
 
 Get metrics from PostgreSQL in real time to:
 
 - Visualize and monitor PostgreSQL states.
 - Received notifications about PostgreSQL failovers and events.
-
-<div class="alert alert-info">This page describes the Postgres agent integration; if you are looking for the Database Monitoring product for Postgres, see <a href="/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ## Setup
 
