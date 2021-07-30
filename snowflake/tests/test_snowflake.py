@@ -61,7 +61,7 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
             Decimal('1.066997500000'),
         )
     ]
-    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
+    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
