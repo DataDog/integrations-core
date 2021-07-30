@@ -7,6 +7,7 @@ from itertools import chain
 from time import time as timestamp
 
 import ibm_db
+from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
@@ -60,13 +61,23 @@ class IbmDb2Check(AgentCheck):
 
             self._conn = connection
 
-        self.query_instance()
-        self.query_database()
-        self.query_buffer_pool()
-        self.query_table_space()
-        self.query_transaction_log()
-        self.query_custom()
         self.collect_metadata()
+
+        for query_method in (
+            self.query_instance,
+            self.query_database,
+            self.query_buffer_pool,
+            self.query_table_space,
+            self.query_transaction_log,
+            self.query_custom,
+        ):
+            try:
+                query_method()
+            except ConnectionError:
+                raise
+            except Exception as e:
+                self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
+                continue
 
     def collect_metadata(self):
         try:
