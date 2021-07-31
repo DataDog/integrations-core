@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Dict, Optional, Tuple
 
 import psycopg2
+import six
 from cachetools import TTLCache
 from six import PY2
 
@@ -15,7 +16,12 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import (
+    ConstantRateLimiter,
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -148,6 +154,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
 
+        self._activity_coll_enabled = is_affirmative(self._config.activity_samples_config.get('enabled', False))
+        # activity events must be reported at least as often as regular samples
+        self._activity_coll_interval = max(
+            self._config.activity_samples_config.get('collection_interval', collection_interval), collection_interval
+        )
+        # Use an instance of ConstantRateLimiter to keep track of elapsed time between reported events
+        self._query_activity_rate_limit = ConstantRateLimiter(1 / self._activity_coll_interval)
+
     def _dbtags(self, db, *extra_tags):
         """
         Returns the default instance tags with the initial "db" tag replaced with the provided tag
@@ -226,11 +240,18 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
         rows = self._filter_valid_statement_rows(rows)
-        events = self._explain_pg_stat_activity(rows)
+        event_samples, activity_event = self._collect_events(rows)
         submitted_count = 0
-        for e in events:
+        for e in event_samples:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
+        if activity_event is not None:
+            self._check.database_monitoring_query_activity(
+                json.dumps(activity_event, default=default_json_event_encoding)
+            )
+            self._check.histogram(
+                "dd.postgres.collect_activity_samples.time", (time.time() - start_time) * 1000, tags=self._tags
+            )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -256,6 +277,28 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+
+    def _obfuscate_query(self, row):
+        try:
+            return datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
+        except Exception as e:
+            self._log.debug("Failed to obfuscate statement: %s", e)
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            return None
+
+    @staticmethod
+    def _collect_active_query(row, query_signature):
+        if row['state'] is not None and row['state'] == 'active':
+            # make a copy of the current row, remove all null values
+            # and then replace the query with its query_signature
+            active_row = {key: val for key, val in row.items() if val is not None}
+            active_row['query'] = query_signature
+            return six.ensure_str(json.dumps(active_row, default=default_json_event_encoding))
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
@@ -384,21 +427,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
             return error_response
 
-    def _collect_plan_for_statement(self, row):
-        try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-        except Exception as e:
-            self._log.debug("Failed to obfuscate statement: %s", e)
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            return None
-
+    def _collect_plan_for_statement(self, row, obfuscated_statement, query_signature):
         # limit the rate of explains done to the database
-        query_signature = compute_sql_signature(obfuscated_statement)
         cache_key = (row['datname'], query_signature)
         if not self._explained_statements_ratelimiter.acquire(cache_key):
             return None
@@ -470,12 +500,21 @@ class PostgresStatementSamples(DBMAsyncJob):
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
 
-    def _explain_pg_stat_activity(self, rows):
+    def _collect_events(self, rows):
+        active_query_rows = []
+        events = []
         for row in rows:
             try:
-                event = self._collect_plan_for_statement(row)
+                obfuscated_statement = self._obfuscate_query(row)
+                if not obfuscated_statement:
+                    continue
+                query_signature = compute_sql_signature(obfuscated_statement)
+                active_row = self._collect_active_query(row, query_signature)
+                if active_row:
+                    active_query_rows.append(active_row)
+                event = self._collect_plan_for_statement(row, obfuscated_statement, query_signature)
                 if event:
-                    yield event
+                    events.append(event)
             except Exception:
                 self._log.exception(
                     "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
@@ -486,6 +525,24 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+        return events, self._create_activity_event(active_query_rows)
+
+    def _create_activity_event(self, active_query_rows):
+        # Only send an event if we are configured to do so, and
+        # don't report more often than the configured collection interval
+        if (
+            self._query_activity_rate_limit.elapsed_time() < self._activity_coll_interval
+            or not self._activity_coll_enabled
+        ):
+            return None
+
+        event = {
+            "host": self._db_hostname,
+            "ddsource": "postgres",
+            "timestamp": time.time() * 1000,
+            "active_queries": active_query_rows,
+        }
+        return event
 
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
+import select
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -35,7 +36,6 @@ SAMPLE_QUERIES = [
     ),
     ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
-
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
 
@@ -250,6 +250,7 @@ def dbm_instance(pg_instance):
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     return pg_instance
 
@@ -649,7 +650,7 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
 
 
-def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
+def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
     dbm_instance['query_samples']['collection_interval'] = collection_interval
