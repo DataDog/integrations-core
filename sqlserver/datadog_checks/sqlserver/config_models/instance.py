@@ -47,6 +47,7 @@ class InstanceConfig(BaseModel):
     include_ao_metrics: Optional[bool]
     include_db_fragmentation_metrics: Optional[bool]
     include_fci_metrics: Optional[bool]
+    include_master_files_metrics: Optional[bool]
     include_instance_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
     min_collection_interval: Optional[float]

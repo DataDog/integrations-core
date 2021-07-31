@@ -261,7 +261,7 @@ class SQLServer(AgentCheck):
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load sys.master_files metrics
-        if is_affirmative(self.instance.get('include_master_file_metrics', False)):
+        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
             for name, table, column in DATABASE_MASTER_FILES:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
