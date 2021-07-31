@@ -13,6 +13,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -49,6 +50,7 @@ EXPECTED_DEFAULT_METRICS = [
         INSTANCE_METRICS,
         INSTANCE_METRICS_TOTAL,
         DATABASE_METRICS,
+        DATABASE_MASTER_FILES,
     )
 ]
 EXPECTED_METRICS = (
@@ -79,6 +81,7 @@ INSTANCE_DOCKER = {
     'include_db_fragmentation_metrics': True,
     'include_fci_metrics': True,
     'include_ao_metrics': False,
+    'include_master_file_metrics': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {

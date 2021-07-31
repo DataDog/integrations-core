@@ -414,7 +414,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
     DEFAULT_METRIC_TYPE = 'gauge'
     QUERY_BASE = """
         select sys.databases.name as name, file_id, type, physical_name, size, max_size,
-        sys.master_files.state as state, sys.master_files.state_desc as state_desc from {table} 
+        sys.master_files.state as state, sys.master_files.state_desc as state_desc from {table}
         right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id;
     """.format(
         table=TABLE
