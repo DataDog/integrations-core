@@ -65,7 +65,9 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         yield
         csrf_token = self.http.session.cookies.get('csrftoken')
         if csrf_token:
-            logout_resp = self.http.post(logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url})
+            logout_resp = self.http.post(
+                logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url}
+            )
             logout_resp.raise_for_status()
 
     @AgentCheck.metadata_entrypoint
