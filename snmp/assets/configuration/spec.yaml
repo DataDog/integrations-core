@@ -25,6 +25,9 @@ files:
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
             uses more resources.
+
+            In corecheck, the default value depends on the version of the agent.
+            Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           example: 10
           type: integer
@@ -163,6 +166,9 @@ files:
           The number of OIDs handled by each batch. Increasing this number improves performance but
           uses more resources.
           Only available for corecheck implementation (`loader: core`).
+
+          In corecheck, the default value depends on the version of the agent.
+          Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           type: integer
           example: 60
@@ -207,7 +213,7 @@ files:
           example: <PRIVACY_TYPE_KEY>
       - name: context_engine_id
         description: |
-         (Optional SNMP v3-only parameter)
+          (Optional SNMP v3-only parameter)
           ID of your context engine; typically unneeded.
           SNMP v3 specific configuration.
         value:

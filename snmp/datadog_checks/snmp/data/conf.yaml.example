@@ -16,6 +16,9 @@ init_config:
     ## @param oid_batch_size - integer - optional - default: 10
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
+    ##
+    ## In corecheck, the default value depends on the version of the agent.
+    ## Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
     #
     # oid_batch_size: 10
 
@@ -146,6 +149,9 @@ instances:
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
+    ##
+    ## In corecheck, the default value depends on the version of the agent.
+    ## Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
     #
     # oid_batch_size: 60
 
@@ -185,8 +191,8 @@ instances:
 
     ## @param context_engine_id - string - optional
     ## (Optional SNMP v3-only parameter)
-    ##  ID of your context engine; typically unneeded.
-    ##  SNMP v3 specific configuration.
+    ## ID of your context engine; typically unneeded.
+    ## SNMP v3 specific configuration.
     #
     # context_engine_id: <CONTEXT_ENGINE_ID>
 
