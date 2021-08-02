@@ -124,6 +124,10 @@ VIRTUAL_SERVICE_METRICS = {
         "name": "l7_client.avg_complete_responses",
         "type": "gauge",
     },
+    "avi_l7_client_avg_error_responses": {
+        "name": "l7_client.avg_error_responses",
+        "type": "gauge",
+    },
     "avi_l7_client_avg_frustrated_responses": {
         "name": "l7_client.avg_frustrated_responses",
         "type": "gauge",
