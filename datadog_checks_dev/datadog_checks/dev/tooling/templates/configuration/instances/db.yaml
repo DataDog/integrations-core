@@ -53,13 +53,3 @@
             type: gauge
         tags:
           - test:<INTEGRATION>
-- name: disable_generic_tags
-  description: |
-    Generic tags such as cluster that come from query executions will be replaced by <integration_name>_cluster
-    to avoid getting mixed with other integraton tags
-  value:
-    type: boolean
-    display_default: false
-    example: true
-  enabled: true
-  hidden: true

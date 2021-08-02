@@ -70,6 +70,17 @@ class IIS(PDHBaseCheck):
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
                 elif counter.english_class_name == 'APP_POOL_WAS':
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
+                else:
+                    self.log.debug(
+                        "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
+                    )
+                    for instance_name, val in iteritems(counter_values):
+                        tags = list(self._tags.get(self.instance_hash, []))
+
+                        if not counter.is_single_instance():
+                            tag = "instance:{}".format(instance_name)
+                            tags.append(tag)
+                        metric_func(dd_name, val, tags)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
