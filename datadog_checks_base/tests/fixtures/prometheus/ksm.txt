@@ -867,7 +867,3 @@ kube_service_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_kube
 kube_service_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_k8s_app="glbc",label_kubernetes_io_cluster_service="true",label_kubernetes_io_name="GLBCDefaultBackend",namespace="kube-system",service="default-http-backend"} 1
 kube_service_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_k8s_app="kube-dns",label_kubernetes_io_cluster_service="true",label_kubernetes_io_name="KubeDNS",namespace="kube-system",service="kube-dns"} 1
 kube_service_labels{label_app="kube-state-metrics",label_chart="kube-state-metrics-0.5.0",label_heritage="Tiller",label_release="ungaged-panther",namespace="default",service="ungaged-panther-kube-state-metrics"} 1
-# HELP kube_statefulset_status_observed_generation The generation observed by the StatefulSet controller.
-# TYPE kube_statefulset_status_observed_generation gauge
-kube_statefulset_status_observed_generation{namespace="datadog-agent",statefulset="web"} 1
-kube_statefulset_status_observed_generation{namespace="kube-system",statefulset="mysql"} 1

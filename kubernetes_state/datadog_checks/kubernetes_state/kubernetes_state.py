@@ -328,7 +328,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicationcontroller_metadata_generation',
                     'kube_replicationcontroller_status_observed_generation',
                     'kube_statefulset_metadata_generation',
-                    'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
                     # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
