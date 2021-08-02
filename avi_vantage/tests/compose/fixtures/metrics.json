@@ -1639,6 +1639,30 @@
         ]
     },
     {
+        "name": "avi_vantage.l7_client.avg_error_responses",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
+            "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
+        ]
+    },
+    {
+        "name": "avi_vantage.l7_client.avg_error_responses",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
+            "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
+        ]
+    },
+    {
         "name": "avi_vantage.l7_client.avg_waf_disabled",
         "type": 0,
         "value": 0.0,
@@ -1772,6 +1796,30 @@
     },
     {
         "name": "avi_vantage.l7_client.avg_ssl_handshakes_new",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "uuid:virtualservice-b5210ca9-62a9-4022-a639-14d70c9bec4e",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs-2",
+            "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
+        ]
+    },
+    {
+        "name": "avi_vantage.l7_client.avg_ssl_errors",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "uuid:virtualservice-21fe337d-76f7-425f-b7b4-30ad4c3d931e",
+            "avi_type:virtualservice",
+            "avi_tenant:admin",
+            "virtualservice_name:gcp-vs",
+            "endpoint:https://34.123.32.255/api/analytics/prometheus-metrics/virtualservice"
+        ]
+    },
+    {
+        "name": "avi_vantage.l7_client.avg_ssl_errors",
         "type": 0,
         "value": 0.0,
         "tags": [
