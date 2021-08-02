@@ -441,6 +441,18 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         value=2,
     )
 
+    # statefulset count
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:kube-system', 'optional:tag1'],
+        value=2,
+    )
+
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in TAGS.get(metric, []):

@@ -105,6 +105,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'metric_name': 'deployment.count',
                 'allowed_labels': ['namespace'],
             },
+            'kube_statefulset_status_observed_generation': {
+                'metric_name': 'statefulset.count',
+                'allowed_labels': ['namespace'],
+            },
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -131,6 +135,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
+            'kube_statefulset_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
