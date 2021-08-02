@@ -2,7 +2,7 @@
 
 ## 5.7.2 / 2021-08-02
 
-* [Added] KSM `kubernetes_state.statefulset.count` metric. See [#tbd](tbd).
+* [Added] KSM `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).
 
 ## 5.7.1 / 2021-06-03
 
