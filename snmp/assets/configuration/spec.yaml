@@ -171,7 +171,7 @@ files:
           Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           type: integer
-          example: 60
+          example: 10
       - name: user
         description: |
           Username to connect to your SNMP devices.
