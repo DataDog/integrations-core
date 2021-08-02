@@ -29,9 +29,15 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         self.collect_events = False
         self.last_event_time = None
+        self._base_url = None
+
+    @property
+    def base_url(self):
+        if not self._base_url:
+            self._base_url = self.config.avi_controller_url.rstrip('/')
+        return self._base_url
 
     def configure_scrapers(self):
-        self.base_url = self.config.avi_controller_url.rstrip('/') + "/api/analytics/prometheus-metrics/"
         scrapers = {}
 
         for entity in self.config.entities:
@@ -41,7 +47,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             resource_metrics = RESOURCE_METRICS[entity]
             instance_copy = deepcopy(self.instance)
-            endpoint = self.base_url + entity
+            endpoint = self.base_url + "/api/analytics/prometheus-metrics/" + entity
             instance_copy['openmetrics_endpoint'] = endpoint
             instance_copy['metrics'] = [resource_metrics]
             instance_copy['rename_labels'] = LABELS_REMAPPER.copy()
