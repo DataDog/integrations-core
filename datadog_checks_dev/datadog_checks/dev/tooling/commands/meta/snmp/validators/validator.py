@@ -251,10 +251,11 @@ class SysobjectidValidator(ProfileValidator):
                 self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
 
 class TableColumnHasTagValidator(ProfileValidator):
-    """ 
-    Validator responsible to check if all metrics related to a column in a profile 
+    """
+    Validator responsible to check if all metrics related to a column in a profile
     have tags to identify which row/entity they belong to
     """
+
     def validate(self, profile, path):
         file_contents = find_profile_in_path(profile, path)
         metrics = {}
@@ -263,23 +264,25 @@ class TableColumnHasTagValidator(ProfileValidator):
         for metric in metrics:
             if metric.get('table'):
                 if not metric.get('metric_tags'):
-                    self.fail("Table metric defined in line {} does not have tag associated".format(metric.get('__line__')))
+                    self.fail(
+                        "Table metric defined in line {} does not have tag associated".format(metric.get('__line__'))
+                    )
                 else:
                     all_metric_tags_are_valid, lines = self.check_metric_tags_are_valid(metric.get('metric_tags'))
                     if not all_metric_tags_are_valid:
                         self.fail("metric_tables defined in lines {} are not valid".format(lines))
-        
+
         if not self.result.failed:
             self.success("All metric tables have tags associated")
-    
-    def check_metric_tags_are_valid(self,metric_tags):
+
+    def check_metric_tags_are_valid(self, metric_tags):
         all_tags_are_valid = True
         lines = []
         for metric_tag in metric_tags:
             if not (metric_tag.get('column') or metric_tag.get('index')):
                 all_tags_are_valid = False
                 lines.append(metric_tag.get('__line__'))
-            
+
         return all_tags_are_valid, lines
 
 def get_all_single_validators():
