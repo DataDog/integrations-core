@@ -33,5 +33,7 @@ files:
           enum: *avi_entities
     - template: instances/openmetrics
       overrides:
+        persist_connections.hidden: true
+        persist_connections.default: true
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false

@@ -534,11 +534,6 @@ instances:
     #
     # log_requests: false
 
-    ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
-    #
-    # persist_connections: false
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

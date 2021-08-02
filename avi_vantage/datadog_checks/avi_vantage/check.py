@@ -26,9 +26,6 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super(AviVantageCheck, self).__init__(name, init_config, instances)
         # Required for storing the auth cookie
         self.instance['persist_connections'] = True
-
-        self.collect_events = False
-        self.last_event_time = None
         self._base_url = None
 
     @property
@@ -64,10 +61,17 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.http._session = None
         login_url = self.base_url + "/login"
         logout_url = self.base_url + "/logout"
-        login_resp = self.http.post(
-            login_url, data={'username': self.config.username, 'password': self.config.password}
-        )
-        login_resp.raise_for_status()
+        try:
+            login_resp = self.http.post(
+                login_url, data={'username': self.config.username, 'password': self.config.password}
+            )
+            login_resp.raise_for_status()
+        except Exception:
+            self.service_check("can_connect", AgentCheck.CRITICAL, tags=self.config.tags)
+            raise
+        else:
+            self.service_check("can_connect", AgentCheck.OK, tags=self.config.tags)
+
         yield
         csrf_token = self.http.session.cookies.get('csrftoken')
         if csrf_token:

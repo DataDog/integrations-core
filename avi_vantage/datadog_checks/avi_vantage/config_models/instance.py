@@ -67,6 +67,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     cache_metric_wildcards: Optional[bool]
+    cache_shared_labels: Optional[bool]
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
