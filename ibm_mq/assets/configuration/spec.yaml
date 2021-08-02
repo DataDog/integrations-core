@@ -72,7 +72,8 @@ files:
       - name: queue_regex
         description: |
           Collect from queues that match a regex
-          Note: Do not use in conjuction with `auto_discover_queues` or `queue_patterns` as it may lead to unexpected results.
+          Note: Do not use in conjuction with `auto_discover_queues` or `queue_patterns` as it may lead to
+          unexpected results.
         value:
           example:
             - '^DEV\..*$'          # match queues starting with "DEV."
