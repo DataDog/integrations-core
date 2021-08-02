@@ -66,6 +66,11 @@ instances:
     #
     # leader_election_kind: auto
 
+    ## @param health_url - string - optional - default: http://localhost:10251/healthz
+    ## URL for the kube-scheduler health endpoint.
+    #
+    # health_url: http://localhost:10251/healthz
+
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.
     #
