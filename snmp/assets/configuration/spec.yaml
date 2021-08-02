@@ -12,13 +12,15 @@ files:
                 https://docs.datadoghq.com/network_monitoring/devices/setup
       options:
       - name: loader
+        enabled: true
         description: |
             Check loader to use for all instances. Available loaders:
             - core: (recommended) Uses new corecheck SNMP integration (faster and lower memory usage)
             - python: Uses the legacy python SNMP integration
         value:
-          example: python
+          example: core
           type: string
+          display_default: python
       - name: oid_batch_size
         description: |
             The number of OIDs handled by each batch. Increasing this number improves performance but
