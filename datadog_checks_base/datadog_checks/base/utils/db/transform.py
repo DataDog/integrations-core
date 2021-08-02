@@ -33,7 +33,7 @@ ALLOWED_GLOBALS = {
 SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
-def get_tag(transformers, name, **modifiers):
+def get_tag(transformers, column_name, **modifiers):
     # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a tag that will be used in every subsequent submission.
@@ -71,7 +71,7 @@ def _transform_tag(name, value, check):
     return tags
 
 
-def get_tag_list(transformers, name, **modifiers):
+def get_tag_list(transformers, column_name, **modifiers):
     # type: (Dict[str, Transformer], str, Any) -> Transformer
     """
     Convert a column to a list of tags that will be used in every submission.
