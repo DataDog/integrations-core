@@ -29,10 +29,10 @@ class QueueMetricCollector(object):
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 
     def __init__(self, config, service_check, warning, send_metric, send_metrics_from_properties, log):
-        # type: (IBMMQConfig, Callable, Callable, Callable, Callable, logging.LoggerAdapter) -> QueueMetricCollector
+        # type: (IBMMQConfig, Callable, Callable, Callable, Callable, logging.LoggerAdapter) -> None
         self.config = config  # type: IBMMQConfig
         self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
-        self.warning = warning  # type: Callable[[str], None]
+        self.warning = warning  # type: Callable
         self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
         self.send_metrics_from_properties = (
             send_metrics_from_properties
