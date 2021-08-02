@@ -180,6 +180,10 @@ VIRTUAL_SERVICE_METRICS = {
         "name": "l7_client.avg_ssl_handshakes_new",
         "type": "gauge",
     },
+    "avi_l7_client_avg_ssl_errors": {
+        "name": "l7_client.avg_ssl_errors",
+        "type": "gauge",
+    },
     "avi_l7_client_sum_uri_length": {
         "name": "l7_client.sum_uri_length",
         "type": "gauge",
