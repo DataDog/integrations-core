@@ -149,13 +149,15 @@ files:
           type: integer
           example: 5
       - name: loader
+        enabled: true
         description: |
           Check loader to use. Available loaders:
           - core: (recommended) Uses new corecheck SNMP integration
           - python: Uses legacy python SNMP integration
         value:
           type: string
-          example: python
+          example: core
+          display_default: python
       - name: oid_batch_size
         description: |
           The number of OIDs handled by each batch. Increasing this number improves performance but

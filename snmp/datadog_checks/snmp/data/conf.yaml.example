@@ -140,7 +140,7 @@ instances:
     ## - core: (recommended) Uses new corecheck SNMP integration
     ## - python: Uses legacy python SNMP integration
     #
-    # loader: python
+    loader: core
 
     ## @param oid_batch_size - integer - optional - default: 60
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
