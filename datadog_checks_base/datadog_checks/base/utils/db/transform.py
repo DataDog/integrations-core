@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import ServiceCheckStatus
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 
@@ -47,11 +48,11 @@ def get_tag(transformers, column_name, **modifiers):
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
     def tag(_, value, **kwargs):
-        # type: (List, str, Dict[str, Any]) -> str
+        # type: (List, str, Dict[str, Any]) -> List[str]
         if boolean:
             value = str(is_affirmative(value)).lower()
 
-        return template.format(value)
+        return [template.format(value)]
 
     return tag
 
