@@ -1,14 +1,17 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Set, List
+import logging
+from typing import Any, Callable, Dict, List, Set
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
+from datadog_checks.base.types import ServiceCheck
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
+from ..config import IBMMQConfig
 
 try:
     import pymqi
@@ -26,13 +29,16 @@ class QueueMetricCollector(object):
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 
     def __init__(self, config, service_check, warning, send_metric, send_metrics_from_properties, log):
-        self.config = config
-        self.service_check = service_check
-        self.warning = warning
-        self.send_metric = send_metric
-        self.send_metrics_from_properties = send_metrics_from_properties
-        self.log = log
-        self.user_provided_queues = set(self.config.queues)
+        # type: (IBMMQConfig, Callable, Callable, Callable, Callable, logging.LoggerAdapter) -> QueueMetricCollector
+        self.config = config  # type: IBMMQConfig
+        self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
+        self.warning = warning  # type: Callable[[str], None]
+        self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
+        self.send_metrics_from_properties = (
+            send_metrics_from_properties
+        )  # type: Callable[[Dict, Dict, str, List[str]], None]
+        self.log = log  # type: logging.LoggerAdapter
+        self.user_provided_queues = set(self.config.queues)  # type: Set[str]
 
     def collect_queue_metrics(self, queue_manager):
         queues = self.discover_queues(queue_manager)
