@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 8.2.0 / 2021-08-03
+
+* [Added] Add metric for estimated table bloat percentage . See [#9786](https://github.com/DataDog/integrations-core/pull/9786).
+* [Added] Collect WAL file age metric. See [#9784](https://github.com/DataDog/integrations-core/pull/9784).
+
 ## 8.1.0 / 2021-07-26
 
 * [Added] Add new relation metrics. See [#9758](https://github.com/DataDog/integrations-core/pull/9758).
