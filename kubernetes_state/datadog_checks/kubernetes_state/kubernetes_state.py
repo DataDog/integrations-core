@@ -39,7 +39,7 @@ kube_labels_mapper = {
     'daemonset': 'kube_daemon_set',
     'replicationcontroller': 'kube_replication_controller',
     'replicaset': 'kube_replica_set',
-    'statefulset ': 'kube_stateful_set',
+    'statefulset': 'kube_stateful_set',
     'deployment': 'kube_deployment',
     'container': 'kube_container_name',
     'container_id': 'container_id',
