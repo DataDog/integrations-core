@@ -242,6 +242,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         stop_environment(check, env, metadata=metadata)
         environment.remove_config()
         abort()
+
+    if python < 3:
+        time.sleep(10)
+
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
