@@ -48,6 +48,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
+    
     expected_tags = pg_instance['tags'] + [
         'server:{}'.format(pg_instance['host']),
         'port:{}'.format(pg_instance['port']),
