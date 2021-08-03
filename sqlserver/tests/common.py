@@ -81,7 +81,7 @@ INSTANCE_DOCKER = {
     'include_db_fragmentation_metrics': True,
     'include_fci_metrics': True,
     'include_ao_metrics': False,
-    'include_master_file_metrics': True,
+    'include_master_files_metrics': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
