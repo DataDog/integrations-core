@@ -265,6 +265,9 @@ class AggregatorStub(object):
             if hostname and hostname != bucket.hostname:
                 continue
 
+            if monotonic != bucket.monotonic:
+                continue
+
             candidates.append(bucket)
 
         expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
