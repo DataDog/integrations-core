@@ -88,11 +88,11 @@ instances:
     ## Web API instance example
   -
     ## @param web_endpoint - string - optional
-    ## The SonarQube web endpoint which should expose its API at `/api`. For example:
+    ## The SonarQube web endpoint with an exposed API at `/api`. For example:
     ##
     ##   web_endpoint: http://<WEB_ENDPOINT>:<PORT>
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false` and is required for all
+    ## Note: This only takes effect when `is_jmx` is set to `false` and is required for all
     ## API metrics.
     #
     # web_endpoint: <WEB_ENDPOINT>
@@ -100,33 +100,33 @@ instances:
     ## @param default_tag - string - optional - default: component
     ## The tag name to use for `components` by default.
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ## Note: This only takes effect when `is_jmx` is set to `false`.
     #
     # default_tag: component
 
     ## @param default_include - list of strings - optional
-    ## A list of regular expressions that decides what metrics to collect by default. For brevity,
-    ## you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+    ## A list of regular expressions used to collect metrics by default. For brevity,
+    ## you may alter the `sonarqube.` prefix and `.` (dot) characters are treated literally.
     ##
     ## By default, all available metrics are collected.
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ## Note: This only takes effect when `is_jmx` is set to `false`.
     #
     # default_include: []
 
     ## @param default_exclude - list of strings - optional
-    ## A list of regular expressions that decides what metrics to exclude by default. For brevity,
-    ## you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+    ## A list of regular expressions used to collect metrics by default. For brevity,
+    ## you may alter the `sonarqube.` prefix and `.` (dot) characters are treated literally.
     ##
     ## By default, no metrics are excluded.
     ##
-    ## NOTE: This only takes effect when `is_jmx` is set to `false`.
+    ## Note: This only takes effect when `is_jmx` is set to `false`.
     #
     # default_exclude: []
 
     ## @param components - mapping - optional
     ## The components for which metrics should be collected. Each object may override the default
-    ## options. For example, the following will gather all default metrics for "some-project",
+    ## options. The following example gathers all default metrics for "some-project",
     ## and only what is included/excluded for "another-project":
     ##
     ##   components:
@@ -140,7 +140,7 @@ instances:
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
     ##
-    ## NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true`
+    ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
     ## or `false.
     #
     # components: {}
@@ -424,7 +424,7 @@ instances:
     ## Whether or not this instance is a configuration for a JMX integration.
     ## If `is_jmx` is set to true at the init_config level, this flag is ignored.
     ##
-    ## NOTE: Setting `is_jmx` to true disables some configuration options.
+    ## Note: Setting `is_jmx` to true disables some configuration options.
     #
     # is_jmx: true
 
@@ -439,12 +439,12 @@ instances:
     # port: <PORT>
 
     ## @param user - string - optional
-    ## User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
+    ## The user name for connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # user: <USER>
 
     ## @param password - string - optional
-    ## Password to use when connecting to JMX (or HTTP if `is_jmx = false`).
+    ## The password for connecting to JMX (or HTTP if `is_jmx = false`).
     #
     # password: <PASSWORD>
 
