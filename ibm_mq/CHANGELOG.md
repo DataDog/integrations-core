@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.13.4-beta / 2021-08-03
+
+* [Fixed] Do not submit critical service check when there are no messages. See [#9703](https://github.com/DataDog/integrations-core/pull/9703).
+
 ## 3.13.3 / 2021-07-15
 
 * [Fixed] Add debug line when there are no messages available. See [#9702](https://github.com/DataDog/integrations-core/pull/9702).
