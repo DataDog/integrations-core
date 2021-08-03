@@ -97,8 +97,8 @@ def test_submit_bucket(instance, aggregator):
         "table_fid:2070.42.262546",
         "table_path:/var/mapr/mapr.monitoring/tsdb-meta",
     ]
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, True, 'stubbed.hostname', expected_tags)
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, True, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, False, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, False, 'stubbed.hostname', expected_tags)
     aggregator.assert_all_metrics_covered()  # No metrics submitted
 
 
