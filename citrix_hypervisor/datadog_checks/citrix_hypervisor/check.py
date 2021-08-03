@@ -5,6 +5,8 @@ from typing import Any
 
 import demjson
 
+from .metrics import build_metric
+
 from datadog_checks.base import AgentCheck
 
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -19,6 +21,7 @@ class CitrixHypervisorCheck(AgentCheck):
 
         self._last_timestamp = 0
         self._base_url = self.instance['url'].rstrip('/')
+        self.tags = self.instance.get('tags', [])
 
         self.check_initializations.append(self._check_connection)
 
@@ -54,8 +57,10 @@ class CitrixHypervisorCheck(AgentCheck):
         values = data['data'][0]['values']
         for i in range(len(legends)):
             # TODO
-            metric_name = legends[i].split(':')[-1]
-            self.gauge('host.{}'.format(metric_name), values[i])
+            metric_name, tags = build_metric(legends[i], self.log)
+
+            if metric_name != None:
+                self.gauge(metric_name, values[i], tags=self.tags + tags)
 
     def check(self, _):
         # type: (Any) -> None
