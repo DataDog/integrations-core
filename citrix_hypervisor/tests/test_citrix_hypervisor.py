@@ -10,7 +10,7 @@ from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 
-def _assert_metrics(aggregator, count=1, custom_tags=[]):
+def _assert_metrics(aggregator, custom_tags, count=1):
     host_tag = 'citrix_hypervisor_host:4cff6b2b-a236-42e0-b388-c78a413f5f46'
     vm_tag = 'citrix_hypervisor_vm:cc11e6e9-5071-4707-830a-b87e5618e874'
     METRICS = [
@@ -46,7 +46,7 @@ def test_check(aggregator, instance):
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
     check.check(instance)
 
-    _assert_metrics(aggregator)
+    _assert_metrics(aggregator, ['foo:bar'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

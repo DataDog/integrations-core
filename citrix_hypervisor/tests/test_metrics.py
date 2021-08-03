@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+
+import mock
 import pytest
 
-from datadog_checks.citrix_hypervisor.metrics import build_metric
-
+from datadog_checks.citrix_hypervisor import metrics
 
 logger = logging.getLogger(__name__)
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
@@ -25,16 +27,54 @@ logger = logging.getLogger(__name__)
             ['citrix_hypervisor_host:123-abc', 'cache_sr:123-abc-456-def'],
         ),
         pytest.param('AVERAGE:vm:456-def:memory', 'vm.memory.avg', ['citrix_hypervisor_vm:456-def']),
+        pytest.param(
+            'MAX:host:123-abc:90-12_id1_78-ef_id2',
+            'host.test_id.max',
+            ['citrix_hypervisor_host:123-abc', 'id1:90-12', 'id2:78-ef'],
+        ),
     ],
 )
 def test_build_metric_good(raw_metric, expected_name, expected_tags, caplog):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
-    name, tags = build_metric(raw_metric, logger)
 
-    expected_log = 'Found metric {} ({})'.format(name, raw_metric)
+    new_regex_metrics = metrics.REGEX_METRICS + [
+        {
+            'regex': '([a-z0-9-]+)_id1_([a-z0-9-]+)_id2',
+            'name': '.test_id',
+            'tags': (
+                'id1',
+                'id2',
+            ),
+        }
+    ]
 
-    assert name == expected_name
-    assert tags == expected_tags
+    with mock.patch('datadog_checks.citrix_hypervisor.metrics.REGEX_METRICS', new_regex_metrics):
+        name, tags = metrics.build_metric(raw_metric, logger)
 
-    assert expected_log == caplog.text
+        expected_log = 'Found metric {} ({})'.format(name, raw_metric)
+
+        assert name == expected_name
+        assert tags == expected_tags
+
+        assert expected_log in caplog.text
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'raw_metric, expected_log',
+    [
+        pytest.param('AVG:stuff:id:metric_name', 'Unknown format for metric {}'),
+        pytest.param('bad_format', 'Unknown format for metric {}'),
+        pytest.param('MAX:stuff:id:metric_name', 'Ignoring metric {}'),
+    ],
+)
+def test_build_metric_error(raw_metric, expected_log, caplog):
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+
+    name, tags = metrics.build_metric(raw_metric, logger)
+
+    assert name is None
+    assert tags is None
+    assert expected_log.format(raw_metric) in caplog.text

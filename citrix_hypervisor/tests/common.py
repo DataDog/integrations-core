@@ -9,4 +9,5 @@ MOCKED_INSTANCE = {
     'url': 'mocked',
     'username': 'datadog',
     'password': 'password',
+    'tags': ['foo:bar'],
 }

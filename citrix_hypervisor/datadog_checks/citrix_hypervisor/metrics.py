@@ -38,7 +38,7 @@ def build_metric(metric_name, logger):
     """
     metric_parts = metric_name.split(':')
 
-    if len(metric_parts) != 4:
+    if len(metric_parts) != 4 or METRICS_SUFFIX.get(metric_parts[0]) is None:
         logger.debug('Unknown format for metric %s', metric_name)
         return None, None
 
