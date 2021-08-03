@@ -69,7 +69,7 @@ init_config:
     ##         the OIDs are refreshed only according to the refresh interval.
     ## Only available using python SNMP integration
     #
-    # refresh_oids_cache_interval: 0
+    # refresh_oids_cache_interval: 3600
 
     ## @param optimize_mib_memory_usage - boolean - optional - default: false
     ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
@@ -145,7 +145,7 @@ instances:
     #
     loader: core
 
-    ## @param oid_batch_size - integer - optional - default: 60
+    ## @param oid_batch_size - integer - optional - default: 10
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
@@ -153,7 +153,7 @@ instances:
     ## In corecheck, the default value depends on the version of the agent.
     ## Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
     #
-    # oid_batch_size: 60
+    # oid_batch_size: 10
 
     ## @param user - string - optional
     ## Username to connect to your SNMP devices.
@@ -306,7 +306,7 @@ instances:
     ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
     ##         the OIDs are refreshed only according to the refresh interval.
     #
-    # refresh_oids_cache_interval: 0
+    # refresh_oids_cache_interval: 3600
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

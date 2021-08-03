@@ -86,7 +86,8 @@ files:
 
         value:
           type: integer
-          example: 0
+          example: 3600
+          display_default: 0
       - name: optimize_mib_memory_usage
         description: |
           **Experimental** - Setting this flag to true attempts to optimize memory usage related to
@@ -171,7 +172,7 @@ files:
           Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
         value:
           type: integer
-          example: 60
+          example: 10
       - name: user
         description: |
           Username to connect to your SNMP devices.
@@ -348,5 +349,6 @@ files:
 
         value:
           type: integer
-          example: 0
+          example: 3600
+          display_default: 0
       - template: instances/default
