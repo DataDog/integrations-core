@@ -26,8 +26,6 @@ class CitrixHypervisorCheck(AgentCheck):
         self.check_initializations.append(self._check_connection)
 
     def _check_connection(self):
-        self.log.warning("Check initialization. Verifying connection and getting latest timestamp")
-
         # Get the latest timestamp to reduce the length of the update endpoint response
         r = self.http.get(self._base_url + '/host_rrd', params={'json': 'true'})
         r.raise_for_status()
