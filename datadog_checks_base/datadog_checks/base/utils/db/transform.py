@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import ServiceCheckStatus
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 
