@@ -5,9 +5,9 @@ from typing import Any
 
 import demjson
 
-from .metrics import build_metric
-
 from datadog_checks.base import AgentCheck
+
+from .metrics import build_metric
 
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
@@ -59,7 +59,7 @@ class CitrixHypervisorCheck(AgentCheck):
             # TODO
             metric_name, tags = build_metric(legends[i], self.log)
 
-            if metric_name != None:
+            if metric_name is not None:
                 self.gauge(metric_name, values[i], tags=self.tags + tags)
 
     def check(self, _):

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from datadog_checks.base.log import get_check_logger
 
 SIMPLE_METRICS = {
     'cpu0': '.cpu',
@@ -21,8 +20,8 @@ SIMPLE_METRICS = {
 
 REGEX_METRICS = [
     {'regex': 'sr_([a-z0-9-]+)_cache_misses', 'name': '.cache_misses', 'tags': ('cache_sr',)},
-    {'regex': 'sr_([a-z0-9-]+)_cache_hits', 'name': '.cache_hits', 'tags': ('cache_sr', )},
-    {'regex': 'sr_([a-z0-9-]+)_cache_size', 'name': '.cache_size', 'tags': ('cache_sr', )},
+    {'regex': 'sr_([a-z0-9-]+)_cache_hits', 'name': '.cache_hits', 'tags': ('cache_sr',)},
+    {'regex': 'sr_([a-z0-9-]+)_cache_size', 'name': '.cache_size', 'tags': ('cache_sr',)},
 ]
 
 METRICS_SUFFIX = {
@@ -63,11 +62,11 @@ def build_metric(metric_name, logger):
                 for i in range(len(regex['tags'])):
                     additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
                 break
-            
+
         if not found:
             logger.debug('Ignoring metric %s', metric_name)
             return None, None
-        
+
     name += METRICS_SUFFIX[metric_parts[0]]
 
     logger.debug('Found metric %s (%s)', name, metric_name)

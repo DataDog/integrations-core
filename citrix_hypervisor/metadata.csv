@@ -1,1 +1,17 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+citrix_hypervisor.host.cache_hits.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.cache_misses.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.cache_size.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.cpu.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.memory.free_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.memory.reclaimed.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.memory.reclaimed_max.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.memory.total_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.pool.session_count.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.pool.task_count.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.xapi.allocation_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.xapi.free_memory_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.xapi.live_memory_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.host.xapi.memory_usage_kib.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.vm.cpu.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
+citrix_hypervisor.vm.memory.avg,gauge,15,,,TODO,0,citrix_hypervisor,TODO
