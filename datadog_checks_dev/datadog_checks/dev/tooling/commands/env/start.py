@@ -10,6 +10,7 @@ import pyperclip
 
 from ....ci import running_on_ci
 from ....fs import dir_exists, file_exists, path_join
+from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
@@ -242,6 +243,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         stop_environment(check, env, metadata=metadata)
         environment.remove_config()
         abort()
+
+    if ON_WINDOWS and python < 3:
+        time.sleep(10)
+
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
