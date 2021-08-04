@@ -530,6 +530,10 @@ coverage:
         target: 75
         flags:
         - zk
+      citrix_hypervisor:
+        target: 75
+        flags:
+        - citrix_hypervisor
       etcd:
         target: 75
         flags:
@@ -619,6 +623,11 @@ flags:
     paths:
     - cisco_aci/datadog_checks/cisco_aci
     - cisco_aci/tests
+  citrix_hypervisor:
+    carryforward: true
+    paths:
+    - citrix_hypervisor/datadog_checks/citrix_hypervisor
+    - citrix_hypervisor/tests
   clickhouse:
     carryforward: true
     paths:
