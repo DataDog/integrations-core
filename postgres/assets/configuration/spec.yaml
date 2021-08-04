@@ -94,8 +94,9 @@ files:
         Cancelled queries won't log any metrics.
       value:
         type: integer
-        example: 1000
-        display_default: null
+        example: 2000
+        default: 2000
+        display_default: 2000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
