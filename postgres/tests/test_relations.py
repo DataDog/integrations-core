@@ -78,6 +78,26 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_bloat_metric(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['pg_index']
+
+    posgres_check = integration_check(pg_instance)
+    posgres_check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:pg_index',
+        'schema:pg_catalog',
+        'index:pg_index_indrelid_index',
+    ]
+
+    aggregator.assert_metric('postgresql.table_bloat', count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
         {'relation_regex': '.*', 'schemas': ['hello', 'hello2']},

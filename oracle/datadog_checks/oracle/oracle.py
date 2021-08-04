@@ -94,6 +94,10 @@ class Oracle(AgentCheck):
 
     def handle_query_error(self, error):
         self._current_errors += 1
+        try:
+            self._cached_connection.close()
+        except Exception as e:
+            self.log.warning("Couldn't close the connection after a query failure: %s", str(e))
         self._cached_connection = None
 
         return error
@@ -115,9 +119,8 @@ class Oracle(AgentCheck):
     def _connection(self):
         if self._cached_connection is None:
             if self.can_use_oracle_client():
-                connection = cx_Oracle.connect(
-                    user=self._user, password=self._password, dsn="{}/{}".format(self._server, self._service)
-                )
+                dsn = self._get_dsn()
+                self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
                 self.log.error(
@@ -127,35 +130,7 @@ class Oracle(AgentCheck):
                 )
                 raise JDBC_IMPORT_ERROR
             else:
-                connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
-                try:
-                    if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                        jpype.attachThreadToJVM()
-                        jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                            jpype.java.lang.ClassLoader.getSystemClassLoader()
-                        )
-                    connection = jdb.connect(
-                        self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
-                    )
-                    self.log.debug("Connected to Oracle DB using JDBC connector")
-                except Exception as e:
-                    if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
-                        msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
-                        is available.
-                        For the Oracle instant client, see:
-                        http://www.oracle.com/technetwork/database/features/instant-client/index.html
-                        You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
-
-                        For the JDBC Driver, see:
-                        http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-                        You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
-                        configuration file of the check.
-                        """
-                        self.log.error(msg)
-                    raise
-
-            self._cached_connection = connection
-
+                self._cached_connection = self._jdbc_connect()
         return self._cached_connection
 
     def can_use_oracle_client(self):
@@ -169,3 +144,43 @@ class Oracle(AgentCheck):
         else:
             self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
             return True
+
+    def _get_dsn(self):
+        host = self._server
+        port = 1521
+        try:
+            if ':' in self._server:
+                host, port = self._server.split(':')
+                port = int(port)
+        except Exception:
+            raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
+        return cx_Oracle.makedsn(host, port, service_name=self._service)
+
+    def _jdbc_connect(self):
+        connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
+        try:
+            if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                jpype.attachThreadToJVM()
+                jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                    jpype.java.lang.ClassLoader.getSystemClassLoader()
+                )
+            connection = jdb.connect(
+                self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
+            )
+            self.log.debug("Connected to Oracle DB using JDBC connector")
+            return connection
+        except Exception as e:
+            if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
+                msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
+                is available.
+                For the Oracle instant client, see:
+                http://www.oracle.com/technetwork/database/features/instant-client/index.html
+                You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
+
+                For the JDBC Driver, see:
+                http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+                You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
+                configuration file of the check.
+                """
+                self.log.error(msg)
+            raise

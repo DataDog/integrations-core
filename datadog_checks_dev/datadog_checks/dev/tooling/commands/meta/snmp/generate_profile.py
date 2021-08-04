@@ -19,8 +19,14 @@ from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, se
 @click.option('-a', '--aliases', help='Path to metric tag aliases', default=None)
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.option('--interactive', '-i', help='Prompt to confirm before saving to a file', is_flag=True)
+@click.option(
+    '--source',
+    '-s',
+    help='Source of the MIBs files. Can be a url or a path for a directory',
+    default='http://raw.githubusercontent.com/trevoro/snmp-mibs/master/mibs/@mib@',
+)
 @click.pass_context
-def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive):
+def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive, source):
     """
     Generate an SNMP profile from MIBs. Accepts a directory path containing mib files
     to be used as source to generate the profile, along with a filter if a device or
@@ -121,7 +127,9 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
 
     profile_oid_collection = {}
     # build profile
-    for oid_node in _extract_oids_from_mibs(list(mibs), list(source_directories), json_destination_directory, filters):
+    for oid_node in _extract_oids_from_mibs(
+        list(mibs), list(source_directories), json_destination_directory, source, filters
+    ):
         if oid_node.node_type == 'table':
             _add_profile_table_node(profile_oid_collection, oid_node)
         elif oid_node.node_type == 'row':
@@ -132,6 +140,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
                 os.path.dirname(mib_files[0]),
                 metric_tag_aliases_path=aliases,
                 json_mib_directory=json_destination_directory,
+                source=source,
             )
         elif oid_node.node_type == 'column':
             _add_profile_column_node(profile_oid_collection, oid_node)
@@ -246,11 +255,11 @@ class OidNode:
         return self.mib_class == 'objecttype'
 
 
-def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
+def _compile_mib_to_json(mib, source_mib_directories, destination_directory, source):
     from pysmi.codegen import JsonCodeGen
     from pysmi.compiler import MibCompiler
     from pysmi.parser import SmiV1CompatParser
-    from pysmi.reader import FileReader, HttpReader
+    from pysmi.reader import FileReader
     from pysmi.searcher import AnyFileSearcher, StubSearcher
     from pysmi.writer import FileWriter
 
@@ -271,7 +280,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
     for source_directory in source_mib_directories:
         mib_compiler.addSources(FileReader(source_directory))
     # use snmp mibs repo as mibs source
-    reader = HttpReader('raw.githubusercontent.com', 80, '/projx/snmp-mibs/master/@mib@')
+    reader = _get_reader_from_source(source)
     mib_compiler.addSources(reader)
 
     mib_compiler.addSearchers(*searchers)
@@ -293,6 +302,30 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory):
     return processed
 
 
+def _get_reader_from_source(source):
+    from pysmi.reader.localfile import FileReader
+
+    if os.path.exists(source):
+        return FileReader(source)
+    return _get_reader_from_url(source)
+
+
+def _get_reader_from_url(url):
+    from urllib.parse import urlparse
+
+    from pysmi.reader.httpclient import HttpReader
+
+    if not (url.startswith('//') or url.startswith('http://') or url.startswith('https://')):
+        url = "//" + url
+    url_parsed = urlparse(url)
+    url_host = url_parsed.hostname
+    url_locationTemplate = url_parsed.path
+    port = 80
+    if url_parsed.port:
+        port = url_parsed.port
+    return HttpReader(url_host, port, url_locationTemplate)
+
+
 def _load_json_module(source_directory, mib):
     try:
         with open(os.path.join(source_directory, mib + '.json')) as mib_json:
@@ -301,7 +334,7 @@ def _load_json_module(source_directory, mib):
         return None
 
 
-def _load_module_or_compile(mib, source_directories, json_mib_directory):
+def _load_module_or_compile(mib, source_directories, json_mib_directory, source):
     # try loading the json mib, if already compiled
     echo_debug('⏳ Loading mib {}'.format(mib))
     mib_json = _load_json_module(json_mib_directory, mib)
@@ -311,7 +344,7 @@ def _load_module_or_compile(mib, source_directories, json_mib_directory):
 
     # compile and reload
     echo_debug('⏳ Compile mib {}'.format(mib))
-    processed = _compile_mib_to_json(mib, source_directories, json_mib_directory)
+    processed = _compile_mib_to_json(mib, source_directories, json_mib_directory, source)
     echo_debug('✅ Mib {} compiled: {}'.format(mib, processed[mib]))
     if processed[mib] != 'missing':
         mib_json = _load_json_module(json_mib_directory, mib)
@@ -320,8 +353,8 @@ def _load_module_or_compile(mib, source_directories, json_mib_directory):
     return None
 
 
-def _find_oid_by_name(mib, oid_name, source_directories, json_mib_directory):
-    mib_json = _load_module_or_compile(mib, source_directories, json_mib_directory)
+def _find_oid_by_name(mib, oid_name, source_directories, json_mib_directory, source):
+    mib_json = _load_module_or_compile(mib, source_directories, json_mib_directory, source)
     if mib_json is None:
         return None
 
@@ -331,8 +364,8 @@ def _find_oid_by_name(mib, oid_name, source_directories, json_mib_directory):
     return mib_json[oid_name]['oid']
 
 
-def _find_name_by_oid(mib, oid, source_directories, json_mib_directory):
-    mib_json = _load_module_or_compile(mib, source_directories, json_mib_directory)
+def _find_name_by_oid(mib, oid, source_directories, json_mib_directory, source):
+    mib_json = _load_module_or_compile(mib, source_directories, json_mib_directory, source)
     if mib_json is None:
         return None
 
@@ -373,7 +406,7 @@ def _filter_mib_oids(mib, json_mib, filter_data):
     return filtered_json_oids
 
 
-def _extract_oids_from_mibs(mibs, source_directories, json_destination_directory, filter_path=None):
+def _extract_oids_from_mibs(mibs, source_directories, json_destination_directory, source, filter_path=None):
     filter_data = None
     if filter_path is not None and os.path.isfile(filter_path):
         with open(filter_path) as f:
@@ -381,7 +414,7 @@ def _extract_oids_from_mibs(mibs, source_directories, json_destination_directory
 
     json_mibs = {}
     for mib in mibs:
-        json_mib = _load_module_or_compile(mib, source_directories, json_destination_directory)
+        json_mib = _load_module_or_compile(mib, source_directories, json_destination_directory, source)
         if json_mib is None:
             continue
 
@@ -539,7 +572,7 @@ def _load_aliases_from_yaml(aliases_path):
 
 
 def _add_profile_row_node(
-    profile_oid_collection, oid_node, mibs_directories, json_mib_directory, metric_tag_aliases_path
+    profile_oid_collection, oid_node, mibs_directories, json_mib_directory, metric_tag_aliases_path, source
 ):
     """
     Updates a collection of profile nodes, indexed by oid, adding indexes if found in oid_node
@@ -581,11 +614,11 @@ def _add_profile_row_node(
 
         index = {'MIB': mib, 'tag': oid_name}
         column = {'name': oid_name}
-        index_oid = _find_oid_by_name(mib, oid_name, mibs_directories, json_mib_directory)
+        index_oid = _find_oid_by_name(mib, oid_name, mibs_directories, json_mib_directory, source)
         if index_oid is not None:
             column['OID'] = index_oid
             index_table_oid = '.'.join(index_oid.split('.')[:-2])
-            index_table_name = _find_name_by_oid(mib, index_table_oid, mibs_directories, json_mib_directory)
+            index_table_name = _find_name_by_oid(mib, index_table_oid, mibs_directories, json_mib_directory, source)
             if index_table_name is not None:
                 index['table'] = index_table_name
         index['column'] = column
