@@ -119,7 +119,7 @@ files:
         type: string
     - name: include_master_files_metrics
       description: |
-        Include database file size and state from sys.master_files.
+        Include database file size and state from `sys.master_files`.
       value:
         type: boolean
         example: false
