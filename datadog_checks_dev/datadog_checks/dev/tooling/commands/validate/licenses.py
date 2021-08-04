@@ -174,7 +174,7 @@ def validate_extra_licenses():
     Validates extra third party licenses.
 
     An integration may use code from an outside source or origin that is not pypi-
-    it will have a file in its check directory titled `LICENSE-3rdparty-extra.csv`
+    it will have a file in its check directory titled `3rdparty-extra-LICENSE.csv`
     """
     lines = []
     any_errors = False
