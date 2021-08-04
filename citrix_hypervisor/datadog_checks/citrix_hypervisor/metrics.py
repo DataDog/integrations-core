@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from typing import Any, List, Optional, Tuple
 
 SIMPLE_METRICS = {
     'cpu0': '.cpu',
@@ -32,6 +33,7 @@ METRICS_SUFFIX = {
 
 
 def build_metric(metric_name, logger):
+    # type: (str, Any) -> Tuple[Optional[str], Optional[List[str]]]
     """
     "AVERAGE:host:1e108be9-8ad0-4988-beff-03d8bb1369ae:sr_35c781cf-951d-0456-8190-373e3c08193e_cache_misses"
     "AVERAGE:vm:057d0e50-da57-4fde-b0a7-9ebd1bf42a59:memory"
@@ -51,14 +53,17 @@ def build_metric(metric_name, logger):
     else:
         found = False
         for regex in REGEX_METRICS:
-            tags_values = re.findall(regex['regex'], metric_name)
+            tags_values = []  # type: List[str]
+            results = re.findall(str(regex['regex']), metric_name)
 
-            if len(tags_values) > 0 and isinstance(tags_values[0], tuple):
-                tags_values = tags_values[0]
+            if len(results) > 0 and isinstance(results[0], tuple):
+                tags_values = list(results[0])
+            else:
+                tags_values = results
 
             if len(tags_values) == len(regex['tags']):
                 found = True
-                name += regex['name']
+                name += str(regex['name'])
                 for i in range(len(regex['tags'])):
                     additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
                 break

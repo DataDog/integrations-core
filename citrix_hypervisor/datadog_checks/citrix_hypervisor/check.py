@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any, Dict, List
 
 import demjson
 
@@ -18,6 +18,7 @@ class CitrixHypervisorCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, name, init_config, instances):
+        # type: (str, Dict, List[Dict]) -> None
         super(CitrixHypervisorCheck, self).__init__(name, init_config, instances)
 
         self._last_timestamp = 0
@@ -31,12 +32,14 @@ class CitrixHypervisorCheck(AgentCheck):
         self.check_initializations.append(self._check_connection)
 
     def _check_connection(self):
+        # type: () -> None
         # Get the latest timestamp to reduce the length of the update endpoint response
         r = self.http.get(self._base_url + '/host_rrd', params={'json': 'true'})
         r.raise_for_status()
         self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
 
     def _get_updated_metrics(self):
+        # type: () -> Dict
         params = {
             'start': self._last_timestamp,
             'host': 'true',
@@ -53,6 +56,7 @@ class CitrixHypervisorCheck(AgentCheck):
         return data
 
     def submit_metrics(self, data):
+        # type: (Dict) -> None
         legends = data['meta']['legend']
         values = data['data'][0]['values']
         for i in range(len(legends)):
@@ -76,5 +80,6 @@ class CitrixHypervisorCheck(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def collect_hypervisor_version(self):
+        # type: () -> None
         # TODO: send version
         pass
