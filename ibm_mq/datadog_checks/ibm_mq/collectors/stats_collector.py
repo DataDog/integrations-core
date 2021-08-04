@@ -68,7 +68,9 @@ class StatsCollector(object):
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
             # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
-            if not (e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE):
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                self.log.debug("No messages available")
+            else:
                 raise
         finally:
             queue.close()

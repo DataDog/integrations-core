@@ -4,7 +4,7 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
 
@@ -1512,5 +1512,64 @@ def test_option_multiple_types_nested():
             ## words
             #
             # foo: <FOO>
+        """
+    )
+
+
+def test_option_multiple_instances_defined():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            multiple_instances_defined: true
+            options:
+            - name: instance_1
+              description: Description of the first instance
+              options:
+              - name: foo
+                description: words
+                value:
+                  type: string
+            - name: instance_2
+              description: |
+                Description of the second instance
+                Multiple lines
+              options:
+              - name: bar
+                description: description
+                value:
+                  type: string
+
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+            ## Description of the first instance
+          -
+            ## @param foo - string - optional
+            ## words
+            #
+            # foo: <FOO>
+
+            ## Description of the second instance
+            ## Multiple lines
+          -
+            ## @param bar - string - optional
+            ## description
+            #
+            # bar: <BAR>
         """
     )

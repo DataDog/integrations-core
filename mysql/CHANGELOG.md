@@ -1,5 +1,32 @@
 # CHANGELOG - mysql
 
+## 5.0.4 / 2021-07-22
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* [Fixed] Bump `datadog-checks-base` version requirement. See [#9718](https://github.com/DataDog/integrations-core/pull/9718).
+
+## 5.0.3 / 2021-07-16
+
+* [Fixed] Support old executable names. See [#9716](https://github.com/DataDog/integrations-core/pull/9716).
+
+## 5.0.2 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9695](https://github.com/DataDog/integrations-core/pull/9695).
+
+## 5.0.1 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9676](https://github.com/DataDog/integrations-core/pull/9676).
+
+## 5.0.0 / 2021-07-12
+
+* [Added] Add DBM SQL obfuscator options. See [#9639](https://github.com/DataDog/integrations-core/pull/9639).
+* [Added] Add truncated statement indicator to mysql query sample events. See [#9620](https://github.com/DataDog/integrations-core/pull/9620).
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* [Changed] Change DBM `statement` config keys and metric terminology to `query`. See [#9661](https://github.com/DataDog/integrations-core/pull/9661).
+* [Changed] remove execution plan cost extraction. See [#9631](https://github.com/DataDog/integrations-core/pull/9631).
+* [Changed] decouple DBM query metrics interval from check run interval. See [#9658](https://github.com/DataDog/integrations-core/pull/9658).
+* [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9619](https://github.com/DataDog/integrations-core/pull/9619).
+
 ## 4.1.0 / 2021-06-30
 
 * [Added] Provide a reason for not having an execution plan (MySQL). See [#9569](https://github.com/DataDog/integrations-core/pull/9569).

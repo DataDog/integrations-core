@@ -1,9 +1,5 @@
-import logging
-import os
 import re
-import threading
 import time
-from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
 from enum import Enum
 
@@ -16,14 +12,9 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import (
-    ConstantRateLimiter,
-    RateLimitingTTLCache,
-    default_json_event_encoding,
-    resolve_db_host,
-)
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
@@ -41,11 +32,11 @@ EVENTS_STATEMENTS_PREFERRED_TABLES = [
 ]
 
 # default sampling settings for events_statements_* tables
-# rate limit is in samples/second
-# {table -> rate-limit}
-DEFAULT_EVENTS_STATEMENTS_COLLECTIONS_PER_SECOND = {
-    'events_statements_history_long': 0.1,
-    'events_statements_history': 0.1,
+# collection interval is in seconds
+# {table -> interval}
+DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL = {
+    'events_statements_history_long': 10,
+    'events_statements_history': 10,
     'events_statements_current': 1,
 }
 
@@ -204,6 +195,15 @@ PYMYSQL_NON_RETRYABLE_ERRORS = frozenset(
 )
 
 
+class StatementTruncationState(Enum):
+    """
+    Denotes the various possible states of a statement's truncation
+    """
+
+    truncated = 'truncated'
+    not_truncated = 'not_truncated'
+
+
 class DBExplainError(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
@@ -224,33 +224,39 @@ class DBExplainError(Enum):
     # agent may not have access to the default schema
     use_schema_error = 'use_schema_error'
 
+    # a truncated query can't be explained
+    query_truncated = 'query_truncated'
 
-class MySQLStatementSamples(object):
+
+class MySQLStatementSamples(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
     """
 
-    executor = ThreadPoolExecutor()
-
     def __init__(self, check, config, connection_args):
-        self._check = check
+        collection_interval = float(config.statement_metrics_config.get('collection_interval', 1))
+        if collection_interval <= 0:
+            collection_interval = 1
+        super(MySQLStatementSamples, self).__init__(
+            check,
+            rate_limit=1 / collection_interval,
+            run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
+            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            min_collection_interval=config.min_collection_interval,
+            config_host=config.host,
+            dbms="mysql",
+            expected_db_exceptions=(pymysql.err.DatabaseError,),
+            job_name="statement-samples",
+            shutdown_callback=self._close_db_conn,
+        )
+        self._config = config
         self._version_processed = False
         self._connection_args = connection_args
         # checkpoint at zero so we pull the whole history table on the first run
         self._checkpoint = 0
-        self._log = get_check_logger()
         self._last_check_run = 0
         self._db = None
-        self._tags = None
-        self._tags_str = None
-        self._collection_loop_future = None
-        self._cancel_event = threading.Event()
-        self._rate_limiter = ConstantRateLimiter(1)
-        self._config = config
-        self._db_hostname = resolve_db_host(self._config.host)
-        self._enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
-        self._run_sync = is_affirmative(self._config.statement_samples_config.get('run_sync', False))
-        self._collections_per_second = self._config.statement_samples_config.get('collections_per_second', -1)
+        self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
         self._events_statements_row_limit = self._config.statement_samples_config.get(
             'events_statements_row_limit', 5000
         )
@@ -268,14 +274,14 @@ class MySQLStatementSamples(object):
         self._has_window_functions = False
         events_statements_table = self._config.statement_samples_config.get('events_statements_table', None)
         if events_statements_table:
-            if events_statements_table in DEFAULT_EVENTS_STATEMENTS_COLLECTIONS_PER_SECOND:
+            if events_statements_table in DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL:
                 self._log.debug("Configured preferred events_statements_table: %s", events_statements_table)
                 self._preferred_events_statements_tables = [events_statements_table]
             else:
                 self._log.warning(
                     "Invalid events_statements_table: %s. Must be one of %s. Falling back to trying all tables.",
                     events_statements_table,
-                    ', '.join(DEFAULT_EVENTS_STATEMENTS_COLLECTIONS_PER_SECOND.keys()),
+                    ', '.join(DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL.keys()),
                 )
         self._explain_strategies = {
             'PROCEDURE': self._run_explain_procedure,
@@ -283,6 +289,9 @@ class MySQLStatementSamples(object):
             'STATEMENT': self._run_explain,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
+        self._obfuscate_options = to_native_string(
+            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
+        )
         self._init_caches()
 
     def _init_caches(self):
@@ -293,8 +302,8 @@ class MySQLStatementSamples(object):
 
         # explained_statements_cache: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=self._config.statement_samples_config.get('explained_statements_cache_maxsize', 5000),
-            ttl=60 * 60 / self._config.statement_samples_config.get('explained_statements_per_hour_per_query', 60),
+            maxsize=self._config.statement_samples_config.get('explained_queries_cache_maxsize', 5000),
+            ttl=60 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
         # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
@@ -305,17 +314,7 @@ class MySQLStatementSamples(object):
             ttl=60 * 60 / self._config.statement_samples_config.get('samples_per_hour_per_query', 15),
         )
 
-    def run_sampler(self, tags):
-        """
-        start the sampler thread if not already running & update tag metadata
-        :param tags:
-        :return:
-        """
-        if not self._enabled:
-            self._log.debug("Statement sampler not enabled")
-            return
-        self._tags = tags
-        self._tags_str = ','.join(tags)
+    def _read_version_info(self):
         if not self._version_processed and self._check.version:
             self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
@@ -323,21 +322,6 @@ class MySQLStatementSamples(object):
             else:
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
-        self._last_check_run = time.time()
-        if self._run_sync or is_affirmative(os.environ.get('DBM_STATEMENT_SAMPLER_RUN_SYNC', "false")):
-            self._log.debug("Running statement sampler synchronously")
-            self._collect_statement_samples()
-        elif self._collection_loop_future is None or not self._collection_loop_future.running():
-            self._collection_loop_future = MySQLStatementSamples.executor.submit(self.collection_loop)
-        else:
-            self._log.debug("Statement sampler collection loop already running")
-
-    def cancel(self):
-        """
-        Cancels the collection loop thread if it's running.
-        Returns immediately, leaving the thread to stop & clean up on its own time.
-        """
-        self._cancel_event.set()
 
     def _get_db_connection(self):
         """
@@ -357,39 +341,6 @@ class MySQLStatementSamples(object):
                 self._log.debug("Failed to close db connection", exc_info=1)
             finally:
                 self._db = None
-
-    def collection_loop(self):
-        try:
-            self._log.info("Starting statement sampler collection loop")
-            while True:
-                if self._cancel_event.isSet():
-                    self._log.info("Collection loop cancelled")
-                    self._check.count("dd.mysql.statement_samples.collection_loop_cancel", 1, tags=self._tags)
-                    break
-                if time.time() - self._last_check_run > self._config.min_collection_interval * 2:
-                    self._log.info("Stopping statement sampler collection loop due to check inactivity")
-                    self._check.count("dd.mysql.statement_samples.collection_loop_inactive_stop", 1, tags=self._tags)
-                    break
-                self._collect_statement_samples()
-        except pymysql.err.DatabaseError as e:
-            self._log.warning(
-                "Statement sampler database error: %s", e, exc_info=self._log.getEffectiveLevel() == logging.DEBUG
-            )
-            self._check.count(
-                "dd.mysql.statement_samples.error",
-                1,
-                tags=self._tags + ["error:collection-loop-database-error-{}".format(type(e))],
-            )
-        except Exception as e:
-            self._log.exception("Statement sampler collection loop crash")
-            self._check.count(
-                "dd.mysql.statement_samples.error",
-                1,
-                tags=self._tags + ["error:collection-loop-crash-{}".format(type(e))],
-            )
-        finally:
-            self._log.info("Shutting down statement sampler collection loop")
-            self._close_db_conn()
 
     def _cursor_run(self, cursor, query, params=None, obfuscated_params=None):
         """
@@ -418,7 +369,7 @@ class MySQLStatementSamples(object):
                 )
             except pymysql.err.DatabaseError as e:
                 self._check.count(
-                    "dd.mysql.statement_samples.error",
+                    "dd.mysql.query_samples.error",
                     1,
                     tags=self._tags + ["error:create-temp-table-{}".format(type(e))],
                 )
@@ -452,7 +403,6 @@ class MySQLStatementSamples(object):
 
     def _filter_valid_statement_rows(self, rows):
         num_sent = 0
-        num_truncated = 0
 
         for row in rows:
             if not row or not all(row):
@@ -461,26 +411,12 @@ class MySQLStatementSamples(object):
             sql_text = row['sql_text']
             if not sql_text:
                 continue
-            # The SQL_TEXT column will store 1024 chars by default. Plans cannot be captured on truncated
-            # queries, so the `performance_schema_max_sql_text_length` variable must be raised.
-            if sql_text[-3:] == '...':
-                num_truncated += 1
-                continue
             yield row
             # only save the checkpoint for rows that we have successfully processed
             # else rows that we ignore can push the checkpoint forward causing us to miss some on the next run
             if row['timer_start'] > self._checkpoint:
                 self._checkpoint = row['timer_start']
             num_sent += 1
-
-        if num_truncated > 0:
-            self._log.warning(
-                'Unable to collect %d/%d statement samples due to truncated SQL text. Consider raising '
-                '`performance_schema_max_sql_text_length` to capture these queries.',
-                num_truncated,
-                num_truncated + num_sent,
-            )
-            self._check.count("dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:truncated-sql-text"])
 
     def _collect_plan_for_statement(self, row):
         # Plans have several important signatures to tag events with:
@@ -489,13 +425,13 @@ class MySQLStatementSamples(object):
         # - `query_signature` - hash computed from the digest text to match query metrics
 
         try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'])
-            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'])
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['sql_text'], self._obfuscate_options)
+            obfuscated_digest_text = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
         except Exception:
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
             self._log.debug("Failed to obfuscate statement: %s", row['digest_text'])
-            self._check.count("dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:sql-obfuscate"])
+            self._check.count("dd.mysql.query_samples.error", 1, tags=self._tags + ["error:sql-obfuscate"])
             return None
 
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
@@ -506,16 +442,31 @@ class MySQLStatementSamples(object):
             return None
 
         plan, explain_errors = None, None
-        with closing(self._get_db_connection().cursor()) as cursor:
-            try:
-                plan, explain_errors = self._explain_statement(
-                    cursor, row['sql_text'], row['current_schema'], obfuscated_statement
+        truncated = self._get_truncation_state(row['sql_text'])
+        if truncated == StatementTruncationState.truncated:
+            self._check.count(
+                "dd.mysql.query_samples.error",
+                1,
+                tags=self._tags + ["error:explain-{}".format(DBExplainError.query_truncated)],
+            )
+            explain_errors = [
+                (
+                    None,
+                    DBExplainError.query_truncated,
+                    'truncated length: {}'.format(len(row['sql_text'])),
                 )
-            except Exception as e:
-                self._check.count(
-                    "dd.mysql.statement_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
-                )
-                self._log.exception("Failed to explain statement: %s", obfuscated_statement)
+            ]
+        else:
+            with closing(self._get_db_connection().cursor()) as cursor:
+                try:
+                    plan, explain_errors = self._explain_statement(
+                        cursor, row['sql_text'], row['current_schema'], obfuscated_statement
+                    )
+                except Exception as e:
+                    self._check.count(
+                        "dd.mysql.query_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
+                    )
+                    self._log.exception("Failed to explain statement: %s", obfuscated_statement)
 
         collection_errors = []
         if explain_errors:
@@ -524,16 +475,15 @@ class MySQLStatementSamples(object):
                     {
                         'strategy': strategy if strategy else None,
                         'code': explain_err_code.value if explain_err_code else None,
-                        'message': '{}'.format(type(explain_err)) if explain_err else None,
+                        'message': explain_err if explain_err else None,
                     }
                 )
 
-        normalized_plan, obfuscated_plan, plan_signature, plan_cost = None, None, None, None
+        normalized_plan, obfuscated_plan, plan_signature = None, None, None
         if plan:
             normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
-            plan_cost = self._parse_execution_plan_cost(plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
@@ -552,13 +502,13 @@ class MySQLStatementSamples(object):
                     "instance": row['current_schema'],
                     "plan": {
                         "definition": obfuscated_plan,
-                        "cost": plan_cost,
                         "signature": plan_signature,
                         "collection_errors": collection_errors if collection_errors else None,
                     },
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
+                    "query_truncated": truncated.value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -621,7 +571,7 @@ class MySQLStatementSamples(object):
                 "statement samples."
             )
             self._check.count(
-                "dd.mysql.statement_samples.error",
+                "dd.mysql.query_samples.error",
                 1,
                 tags=self._tags + ["error:no-enabled-events-statements-consumers"],
             )
@@ -645,30 +595,33 @@ class MySQLStatementSamples(object):
             )
             return None, None
 
-        rate_limit = self._collections_per_second
-        if rate_limit < 0:
-            rate_limit = DEFAULT_EVENTS_STATEMENTS_COLLECTIONS_PER_SECOND[events_statements_table]
+        collection_interval = self._configured_collection_interval
+        if collection_interval < 0:
+            collection_interval = DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL[events_statements_table]
 
         # cache only successful strategies
         # should be short enough that we'll reflect updates relatively quickly
         # i.e., an aurora replica becomes a master (or vice versa).
-        strategy = (events_statements_table, rate_limit)
+        strategy = (events_statements_table, collection_interval)
         self._log.debug(
-            "Chose plan collection strategy: events_statements_table=%s, collections_per_second=%s",
+            "Chose plan collection strategy: events_statements_table=%s, collection_interval=%s",
             events_statements_table,
-            rate_limit,
+            collection_interval,
         )
         self._collection_strategy_cache["plan_collection_strategy"] = strategy
         return strategy
 
+    def run_job(self):
+        self._collect_statement_samples()
+
     def _collect_statement_samples(self):
+        self._read_version_info()
         self._log.debug("collecting statement samples")
-        self._rate_limiter.sleep()
-        events_statements_table, rate_limit = self._get_sample_collection_strategy()
+        events_statements_table, collection_interval = self._get_sample_collection_strategy()
         if not events_statements_table:
             return
-        if self._rate_limiter.rate_limit_s != rate_limit:
-            self._rate_limiter = ConstantRateLimiter(rate_limit)
+        self._set_rate_limit(1.0 / collection_interval)
+
         start_time = time.time()
 
         tags = self._tags + ["events_statements_table:{}".format(events_statements_table)]
@@ -729,11 +682,11 @@ class MySQLStatementSamples(object):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
-            explain_errors = [(None, DBExplainError.use_schema_error, e)]
+            explain_errors = [(None, DBExplainError.use_schema_error, '{}'.format(type(e)))]
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_errors
             self._check.count(
-                "dd.mysql.statement_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
+                "dd.mysql.query_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
             )
             self._log.debug(
                 'Failed to collect execution plan because schema could not be accessed. error=%s, schema=%s, '
@@ -783,9 +736,9 @@ class MySQLStatementSamples(object):
                 # we don't cache failed plan collection failures for specific queries because some queries in a schema
                 # can fail while others succeed. The failed collection will be cached for the specific query
                 # so we won't try to explain it again for the cache duration there.
-                explain_errors.append((strategy, DBExplainError.database_error, e))
+                explain_errors.append((strategy, DBExplainError.database_error, '{}'.format(type(e))))
                 self._check.count(
-                    "dd.mysql.statement_samples.error",
+                    "dd.mysql.query_samples.error",
                     1,
                     tags=tags + ["error:explain-attempt-{}-{}".format(strategy, type(e))],
                 )
@@ -828,9 +781,8 @@ class MySQLStatementSamples(object):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
 
     @staticmethod
-    def _parse_execution_plan_cost(execution_plan):
-        """
-        Parses the total cost from the execution plan, if set. If not set, returns cost of 0.
-        """
-        cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.0)
-        return float(cost or 0.0)
+    def _get_truncation_state(statement):
+        # Mysql adds 3 dots at the end of truncated statements so we use this to check if
+        # a statement is truncated
+        truncated = statement[-3:] == '...'
+        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

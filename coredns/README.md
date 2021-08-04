@@ -163,20 +163,14 @@ The CoreDNS check does not include any events.
 
 ### Service Checks
 
-**coredns.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
+See [service_checks.json][20] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
 
-## Development
-
-See the [main documentation][2]
-for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/developers/
 [3]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
@@ -193,3 +187,4 @@ for more details about how to test and develop Agent based integrations.
 [17]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
 [18]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [19]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations
+[20]: https://github.com/DataDog/integrations-core/blob/master/coredns/assets/service_checks.json

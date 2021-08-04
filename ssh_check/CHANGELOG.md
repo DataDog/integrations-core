@@ -1,5 +1,9 @@
 # CHANGELOG - ssh_check
 
+## 1.12.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8989](https://github.com/DataDog/integrations-core/pull/8989).
+
 ## 1.11.4 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

@@ -13,7 +13,7 @@ def shared_service(field, value):
 
 
 def instance_charset(field, value):
-    return 'utf8'
+    return get_default_field_value(field, value)
 
 
 def instance_connect_timeout(field, value):
@@ -37,7 +37,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_host(field, value):
-    return 'localhost'
+    return get_default_field_value(field, value)
 
 
 def instance_max_custom_queries(field, value):
@@ -46,6 +46,10 @@ def instance_max_custom_queries(field, value):
 
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_options(field, value):
@@ -64,6 +68,14 @@ def instance_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_samples(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
@@ -76,10 +88,6 @@ def instance_ssl(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_statement_samples(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 
@@ -89,4 +97,4 @@ def instance_use_global_custom_queries(field, value):
 
 
 def instance_username(field, value):
-    return 'datadog'
+    return get_default_field_value(field, value)

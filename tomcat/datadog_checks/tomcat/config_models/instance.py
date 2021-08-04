@@ -20,6 +20,7 @@ class InstanceConfig(BaseModel):
     collect_default_jvm_metrics: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
+    is_jmx: Optional[bool]
     java_bin_path: Optional[str]
     java_options: Optional[str]
     jmx_url: Optional[str]

@@ -213,8 +213,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the configured `apache_status_url`, otherwise returns `OK`.
+See [service_checks.json][26] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -258,3 +257,4 @@ Additional helpful documentation, links, and articles:
 [23]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[26]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json

@@ -153,16 +153,11 @@ The SQL server check does not include any events.
 
 ### Service Checks
 
-**sqlserver.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to SQL Server to collect metrics, otherwise `OK`.
+See [service_checks.json][25] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][13].
-
-## Development
-
-See the [main documentation][14] for more details about how to test and develop Agent based integrations.
 
 ## Further Reading
 
@@ -185,7 +180,6 @@ See the [main documentation][14] for more details about how to test and develop 
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
 [13]: https://docs.datadoghq.com/help/
-[14]: https://docs.datadoghq.com/developers/integrations/
 [15]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [17]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
 [18]: https://www.datadoghq.com/blog/sql-server-monitoring
@@ -194,3 +188,4 @@ See the [main documentation][14] for more details about how to test and develop 
 [21]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://docs.datadoghq.com/agent/faq/template_variables/
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/
+[25]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from os import environ
 
 import requests
@@ -476,8 +477,10 @@ class Authenticator(object):
             return resp
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+            safe_identity = copy.deepcopy(identity)
+            safe_identity['password']['user']['password'] = '********'
             msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
-                identity=identity, scope=scope, url=auth_url
+                identity=safe_identity, scope=scope, url=auth_url
             )
             logger.debug(msg)
             raise KeystoneUnreachable(msg)

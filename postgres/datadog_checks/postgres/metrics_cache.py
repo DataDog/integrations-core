@@ -159,7 +159,7 @@ class PostgresMetricsCache:
             return self.replication_metrics
 
         if is_aurora:
-            logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
+            logger.debug("Detected Aurora %s. Won't collect replication metrics", version)
             self.replication_metrics = {}
         elif version >= V10:
             self.replication_metrics = dict(REPLICATION_METRICS_10)

@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import os
+import threading
 from contextlib import closing
+from time import time
 
 import psycopg2
 from six import iteritems
@@ -15,9 +18,12 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
-from .version_utils import V9, VersionUtils
+from .version_utils import V9, V10, VersionUtils
 
 MAX_CUSTOM_RESULTS = 100
+
+TRACK_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 
 class PostgreSql(AgentCheck):
@@ -41,14 +47,21 @@ class PostgreSql(AgentCheck):
             )
         self._config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config)
-        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
+        # The value is loaded when connecting to the main database
+        self._db_configured_track_activity_query_size = TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+
+        # map[dbname -> psycopg connection]
+        self._db_pool = {}
+        self._db_pool_lock = threading.Lock()
 
     def cancel(self):
         self.statement_samples.cancel()
+        self.statement_metrics.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -62,6 +75,50 @@ class PostgreSql(AgentCheck):
         role = cursor.fetchone()[0]
         # value fetched for role is of <type 'bool'>
         return "standby" if role else "master"
+
+    def _collect_wal_metrics(self, instance_tags):
+        wal_file_age = self._get_wal_file_age()
+        if wal_file_age is not None:
+            self.gauge("postgresql.wal_age", wal_file_age, tags=[t for t in instance_tags if not t.startswith("db:")])
+
+    def _get_wal_dir(self):
+        if self.version >= V10:
+            wal_dir = "pg_wal"
+        else:
+            wal_dir = "pg_xlog"
+
+        wal_log_dir = os.path.join(self._config.data_directory, wal_dir)
+
+        return wal_log_dir
+
+    def _get_wal_file_age(self):
+        wal_log_dir = self._get_wal_dir()
+        if not os.path.isdir(wal_log_dir):
+            self.log.warning(
+                "Cannot access WAL log directory: %s. Ensure that you are "
+                "running the agent on your local postgres database.",
+                wal_log_dir,
+            )
+            return None
+
+        all_dir_contents = os.listdir(wal_log_dir)
+        all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
+
+        # files extentions that are not valid WAL files
+        exluded_file_exts = [".backup", ".history"]
+        all_wal_files = [
+            os.path.join(wal_log_dir, file_name)
+            for file_name in all_files
+            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
+        ]
+        if len(all_wal_files) < 1:
+            self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
+            return None
+
+        oldest_file = min(all_wal_files, key=os.path.getctime)
+        now = time()
+        oldest_file_age = now - os.path.getctime(oldest_file)
+        return oldest_file_age
 
     @property
     def version(self):
@@ -290,6 +347,55 @@ class PostgreSql(AgentCheck):
         else:
             self.db = self._new_connection(self._config.dbname)
 
+    # Reload the track_activity_query_size setting on a new connection to the main db
+    def _load_query_max_text_size(self, db):
+        try:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                self.log.debug("Running query [%s]", TRACK_ACTIVITY_QUERY_SIZE_QUERY)
+                cursor.execute(TRACK_ACTIVITY_QUERY_SIZE_QUERY)
+                row = cursor.fetchone()
+                self._db_configured_track_activity_query_size = int(row['setting'])
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+            self.log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
+            self.count(
+                "dd.postgres.error",
+                1,
+                tags=self._config.tags + ["error:load-track-activity-query-size"],
+            )
+
+    def _get_db(self, dbname):
+        """
+        Returns a memoized psycopg2 connection to `dbname` with autocommit
+        Threadsafe as long as no transactions are used
+        :param dbname:
+        :return: a psycopg2 connection
+        """
+        # TODO: migrate the rest of this check to use a connection from this pool
+        with self._db_pool_lock:
+            db = self._db_pool.get(dbname)
+            if not db or db.closed:
+                self.log.debug("initializing connection to dbname=%s", dbname)
+                db = self._new_connection(dbname)
+                db.set_session(autocommit=True)
+                self._db_pool[dbname] = db
+            if db.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                db.rollback()
+            if self._config.dbname == dbname:
+                self._load_query_max_text_size(db)
+            return db
+
+    def _close_db_pool(self):
+        # TODO: add automatic aging out of connections after some time
+        with self._db_pool_lock:
+            for dbname, db in self._db_pool.items():
+                if db and not db.closed:
+                    try:
+                        db.close()
+                    except Exception:
+                        self._log.exception("failed to close DB connection for db=%s", dbname)
+                self._db_pool[dbname] = None
+
     def _collect_custom_queries(self, tags):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
@@ -397,12 +503,14 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
-            if self._config.deep_database_monitoring:
-                self.statement_metrics.collect_per_statement_metrics(self.db, self.version, tags)
-                self.statement_samples.run_sampler(tags)
+            if self._config.dbm_enabled:
+                self.statement_metrics.run_job_loop(tags)
+                self.statement_samples.run_job_loop(tags)
+            if self._config.collect_wal_metrics:
+                self._collect_wal_metrics(tags)
 
         except Exception as e:
-            self.log.error("Unable to collect postgres metrics.")
+            self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(

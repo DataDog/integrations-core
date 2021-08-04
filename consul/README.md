@@ -45,9 +45,9 @@ To configure this check for an Agent running on a host:
 
    instances:
      ## @param url - string - required
-     ## Where your Consul HTTP Server Lives
-     ## Point the URL at the leader to get metrics about your Consul Cluster.
-     ## Remind to use https instead of http if your Consul setup is configured to do so.
+     ## Where your Consul HTTP server lives,
+     ## point the URL at the leader to get metrics about your Consul cluster.
+     ## Use HTTPS instead of HTTP if your Consul setup is configured to do so.
      #
      - url: http://localhost:8500
    ```
@@ -226,11 +226,7 @@ The Datadog Agent emits an event when the Consul cluster elects a new leader, ta
 
 ### Service Checks
 
-**consul.check**:<br>
-The Datadog Agent submits a service check for each of Consul's health checks, tagging each with:
-
-- `service:<name>`, if Consul reports a `ServiceName`
-- `consul_service_id:<id>`, if Consul reports a `ServiceID`
+See [service_checks.json][18] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -258,3 +254,4 @@ Need help? Contact [Datadog support][13].
 [15]: https://engineering.datadoghq.com/consul-at-datadog
 [16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time
+[18]: https://github.com/DataDog/integrations-core/blob/master/consul/assets/service_checks.json

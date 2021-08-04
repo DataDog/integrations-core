@@ -1,5 +1,15 @@
 # CHANGELOG - datadog_checks_base
 
+## 20.2.0 / 2021-07-12
+
+* [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).
+
+## 20.1.0 / 2021-07-08
+
+* [Added] Add `db.utils.DBMAsyncJob`. See [#9656](https://github.com/DataDog/integrations-core/pull/9656).
+* [Added] Add a `possible_prometheus_urls` parameter to the OpenMetrics base check. See [#9573](https://github.com/DataDog/integrations-core/pull/9573).
+* [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
+
 ## 20.0.1 / 2021-06-24
 
 * [Fixed] Fix Python 2 integer division bug in db.util `ConstantRateLimiter`. See [#9592](https://github.com/DataDog/integrations-core/pull/9592).

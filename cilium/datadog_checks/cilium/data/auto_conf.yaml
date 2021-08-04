@@ -5,7 +5,6 @@
 #
 ad_identifiers:
   - cilium-agent
-  - cilium
 
 ## All options defined here are available to all instances.
 #

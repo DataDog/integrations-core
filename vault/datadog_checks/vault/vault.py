@@ -10,7 +10,7 @@ from six import PY2
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .errors import ApiUnreachable
-from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP
+from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
 
 try:
     from json import JSONDecodeError
@@ -57,7 +57,9 @@ class Vault(OpenMetricsBaseCheck):
             name,
             init_config,
             instances,
-            default_instances={self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP]}},
+            default_instances={
+                self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP] + ROUTE_METRICS_TO_TRANSFORM},
+            },
             default_namespace=self.CHECK_NAME,
         )
 
@@ -339,13 +341,15 @@ class Vault(OpenMetricsBaseCheck):
         if metric.name in METRIC_ROLLBACK_COMPAT_MAP:
             self.submit_openmetric(METRIC_ROLLBACK_COMPAT_MAP[metric.name], metric, scraper_config)
 
-        metricname = transformerkey.replace('_', '.')[:-2]
-        metrictag = metric.name[len(transformerkey) - 1 : -1]
+        metric_name = metric.name.replace('_', '.').rstrip('.')
 
         # Remove extra vault prefix
-        if metricname.startswith('vault.'):
-            metricname = metricname[len('vault.') :]
+        if metric_name.startswith('vault.'):
+            metric_name = metric_name[len('vault.') :]
 
+        metric_tag = metric.name[len(transformerkey) - 1 : -1]
         for i in metric.samples:
-            i.labels['mountpoint'] = metrictag
-        self.submit_openmetric(metricname, metric, scraper_config)
+            i.labels['mountpoint'] = metric_tag
+
+        normalized_metric_name = metric_name.replace('.' + metric_tag, '')
+        self.submit_openmetric(normalized_metric_name, metric, scraper_config)

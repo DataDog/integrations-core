@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 3.1.1 / 2021-07-07
+
+* [Fixed] Do not throw key errors. See [#9460](https://github.com/DataDog/integrations-core/pull/9460).
+
 ## 3.1.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#8987](https://github.com/DataDog/integrations-core/pull/8987).

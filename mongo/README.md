@@ -427,8 +427,7 @@ This check emits an event each time a Mongo node has a change in its replication
 
 ### Service Checks
 
-**mongodb.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to MongoDB to collect metrics, otherwise returns `OK`.
+See [service_checks.json][35] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -475,3 +474,4 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [32]: https://docs.datadoghq.com/tracing/setup/
 [33]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [34]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[35]: https://github.com/DataDog/integrations-core/blob/master/mongo/assets/service_checks.json

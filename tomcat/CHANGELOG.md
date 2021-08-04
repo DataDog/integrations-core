@@ -1,5 +1,9 @@
 # CHANGELOG - tomcat
 
+## 1.8.0 / 2021-07-12
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
 ## 1.7.0 / 2021-05-28
 
 * [Added] Add runtime configuration validation. See [#8998](https://github.com/DataDog/integrations-core/pull/8998).

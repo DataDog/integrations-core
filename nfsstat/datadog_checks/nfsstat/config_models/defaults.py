@@ -9,7 +9,7 @@ def shared_autofs_enabled(field, value):
 
 
 def shared_nfsiostat_path(field, value):
-    return '/usr/local/sbin/nfsiostat'
+    return get_default_field_value(field, value)
 
 
 def shared_service(field, value):

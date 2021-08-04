@@ -41,7 +41,7 @@ def instance_service(field, value):
 
 
 def instance_tag_by(field, value):
-    return 'Name,Label'
+    return get_default_field_value(field, value)
 
 
 def instance_tag_queries(field, value):

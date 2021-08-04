@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.9.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8970](https://github.com/DataDog/integrations-core/pull/8970).
+
 ## 1.8.4 / 2021-04-19 / Agent 7.28.0
 
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
