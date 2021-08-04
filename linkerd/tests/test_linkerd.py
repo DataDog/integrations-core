@@ -96,7 +96,10 @@ def test_openmetrics_error(monkeypatch):
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
-        aggregator.assert_metric(metric_name, metric_type=metric_type)
+        if metric_name == 'linkerd.route.actual_request_total':
+            aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
+        else:
+            aggregator.assert_metric(metric_name, metric_type=metric_type)
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
