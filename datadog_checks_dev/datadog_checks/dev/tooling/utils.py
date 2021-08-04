@@ -222,7 +222,7 @@ def get_extra_license_files():
     for path in os.listdir(get_root()):
         if not file_exists(get_manifest_file(path)):
             continue
-        extra_license_file = os.path.join(get_root(), path, 'LICENSE-3rdparty-extra.csv')
+        extra_license_file = os.path.join(get_root(), path, '3rdparty-extra-LICENSE.csv')
         if file_exists(extra_license_file):
             yield extra_license_file
 
@@ -414,7 +414,7 @@ def read_metadata_rows(metadata_file):
 
 def read_license_file_rows(license_file):
     """
-    Iterate over the rows of a `LICENSE-3rdparty-extra.csv` or `LICENSE-3rdparty.csv` file.
+    Iterate over the rows of a `3rdparty-extra-LICENSE.csv` or `LICENSE-3rdparty.csv` file.
     """
     with io.open(license_file, 'r', encoding='utf-8') as f:
         lines = f.readlines()
