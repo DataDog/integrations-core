@@ -123,6 +123,7 @@ INSTANCE_SQL2017.update(
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
         'include_ao_metrics': False,
+        'include_master_files_metrics': True,
     }
 )
 
