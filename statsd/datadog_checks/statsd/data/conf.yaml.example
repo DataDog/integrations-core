@@ -24,7 +24,7 @@ instances:
     #
     # port: 8126
 
-    ## @param timeout - integer - optional - default: 10
+    ## @param timeout - number - optional - default: 10
     ## Custom timeout for your check request.
     #
     # timeout: 10

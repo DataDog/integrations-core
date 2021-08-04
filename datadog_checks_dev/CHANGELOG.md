@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 12.4.1 / 2021-07-20
+
+* [Fixed] Support empty config options for job or codecov. See [#9736](https://github.com/DataDog/integrations-core/pull/9736).
+
+## 12.4.0 / 2021-07-20
+
+* [Added] Upgrade `virtualenv`. See [#9691](https://github.com/DataDog/integrations-core/pull/9691).
+* [Added] Add database integrations team to tooling trello. See [#9671](https://github.com/DataDog/integrations-core/pull/9671).
+* [Added] Add marketplace section to CI validation. See [#9679](https://github.com/DataDog/integrations-core/pull/9679).
+* [Fixed] Validate changed check in ci. See [#9638](https://github.com/DataDog/integrations-core/pull/9638).
+* [Fixed] Use pattern for enforcing a URL structure for author->homepage in manifest. See [#9697](https://github.com/DataDog/integrations-core/pull/9697).
+
 ## 12.3.0 / 2021-07-14
 
 * [Added] Add command for validating SNMP profiles. See [#9587](https://github.com/DataDog/integrations-core/pull/9587).

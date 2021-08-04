@@ -29,7 +29,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_kafka_client_api_version(field, value):
-    return '2.3.0'
+    return get_default_field_value(field, value)
 
 
 def instance_kafka_consumer_offsets(field, value):
@@ -49,7 +49,7 @@ def instance_monitor_unlisted_consumer_groups(field, value):
 
 
 def instance_sasl_kerberos_domain_name(field, value):
-    return 'localhost'
+    return get_default_field_value(field, value)
 
 
 def instance_sasl_kerberos_service_name(field, value):
@@ -57,7 +57,7 @@ def instance_sasl_kerberos_service_name(field, value):
 
 
 def instance_sasl_mechanism(field, value):
-    return 'PLAIN'
+    return get_default_field_value(field, value)
 
 
 def instance_sasl_plain_password(field, value):

@@ -58,6 +58,7 @@ class InstanceConfig(BaseModel):
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
     host: Optional[str]
+    is_jmx: Optional[bool]
     java_bin_path: Optional[str]
     java_options: Optional[str]
     jmx_url: Optional[str]

@@ -29,9 +29,6 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "docs": {
-      "spec": "assets/docs/spec.yaml"
-    },
     "dashboards": {
       "RethinkDB Overview": "assets/dashboards/overview.json"
     },

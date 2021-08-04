@@ -105,7 +105,7 @@ def instance_persist_connections(field, value):
 
 
 def instance_plus_api_version(field, value):
-    return get_default_field_value(field, value)
+    return 2
 
 
 def instance_proxy(field, value):
@@ -165,7 +165,7 @@ def instance_use_plus_api(field, value):
 
 
 def instance_use_plus_api_stream(field, value):
-    return False
+    return True
 
 
 def instance_use_vts(field, value):

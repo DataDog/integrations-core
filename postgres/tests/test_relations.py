@@ -24,6 +24,8 @@ RELATION_METRICS = [
     'postgresql.toast_blocks_hit',
     'postgresql.toast_index_blocks_read',
     'postgresql.toast_index_blocks_hit',
+    'postgresql.autovacuumed',
+    'postgresql.analyzed',
 ]
 
 RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
@@ -72,6 +74,26 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
     for name in RELATION_SIZE_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_size_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_bloat_metric(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['pg_index']
+
+    posgres_check = integration_check(pg_instance)
+    posgres_check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:pg_index',
+        'schema:pg_catalog',
+        'index:pg_index_indrelid_index',
+    ]
+
+    aggregator.assert_metric('postgresql.table_bloat', count=1, tags=expected_tags)
 
 
 @pytest.mark.integration

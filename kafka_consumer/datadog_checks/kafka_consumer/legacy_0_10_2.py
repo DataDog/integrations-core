@@ -4,9 +4,7 @@
 from __future__ import division
 
 from collections import defaultdict
-from time import time
 
-from kafka import KafkaClient
 from kafka import errors as kafka_errors
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
@@ -14,35 +12,24 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import string_types
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
+from .constants import KAFKA_INTERNAL_TOPICS
 
 
-class LegacyKafkaCheck_0_10_2(AgentCheck):
+class LegacyKafkaCheck_0_10_2(object):
     """
     Check the offsets and lag of Kafka consumers. This check also returns broker highwater offsets.
 
     This is the legacy codepath which is used when either broker version < 0.10.2 or zk_connect_str has a value.
     """
 
-    __NAMESPACE__ = 'kafka'
+    def __init__(self, parent_check):
+        self._parent_check = parent_check
 
-    def __init__(self, name, init_config, instances):
-        super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
-        self._context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self._custom_tags = self.instance.get('tags', [])
-
-        self._monitor_unlisted_consumer_groups = is_affirmative(
-            self.instance.get('monitor_unlisted_consumer_groups', False)
-        )
-        self._monitor_all_broker_highwatermarks = is_affirmative(
-            self.instance.get('monitor_all_broker_highwatermarks', False)
-        )
-        self._consumer_groups = self.instance.get('consumer_groups', {})
         # Note: We cannot skip validation if monitor_unlisted_consumer_groups is True because this legacy check only
         # supports that functionality for Zookeeper, not Kafka.
-        self._validate_explicit_consumer_groups()
+        self.validate_consumer_groups()
 
         self._kafka_client = self._create_kafka_client()
         self._zk_hosts_ports = self.instance.get('zk_connect_str')
@@ -60,10 +47,18 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 else:
                     raise ConfigurationError("zk_connect_str must be a string or list of strings")
 
-            self._zk_client = KazooClient(hosts=self._zk_hosts_ports, timeout=int(init_config.get('zk_timeout', 5)))
+            self._zk_client = KazooClient(
+                hosts=self._zk_hosts_ports, timeout=int(self.init_config.get('zk_timeout', 5))
+            )
             self._zk_client.start()
 
-    def check(self, instance):
+    def __getattr__(self, item):
+        try:
+            return getattr(self._parent_check, item)
+        except AttributeError:
+            raise AttributeError("LegacyKafkaCheck_0_10_2 has no attribute called {}".format(item))
+
+    def check(self):
         """The main entrypoint of the check."""
         self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
@@ -90,7 +85,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # Support for storing offsets in Kafka not available until Kafka 0.8.2. Also, for legacy reasons, this check
         # only fetches consumer offsets from Kafka if Zookeeper is omitted or kafka_consumer_offsets is True.
         if self._kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
-            instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
+            self.instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
                 self.log.debug('Collecting consumer offsets')
@@ -104,7 +99,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
                 str(self._kafka_client.config.get('api_version')),
-                str(instance.get('kafka_consumer_offsets')),
+                str(self.instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
 
@@ -135,35 +130,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, source='zk')
 
     def _create_kafka_client(self):
-        kafka_conn_str = self.instance.get('kafka_connect_str')
-        if not isinstance(kafka_conn_str, (string_types, list)):
-            raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        kafka_version = self.instance.get('kafka_client_api_version')
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
-        kafka_client = KafkaClient(
-            bootstrap_servers=kafka_conn_str,
-            client_id='dd-agent',
-            request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
-            # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for broker
-            # version during the bootstrapping process. Note that probing randomly picks a broker to probe, so in a
-            # mixed-version cluster probing returns a non-deterministic result.
-            api_version=kafka_version,
-            # While we check for SSL params, if not present they will default to the kafka-python values for plaintext
-            # connections
-            security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
-            sasl_mechanism=self.instance.get('sasl_mechanism'),
-            sasl_plain_username=self.instance.get('sasl_plain_username'),
-            sasl_plain_password=self.instance.get('sasl_plain_password'),
-            sasl_kerberos_service_name=self.instance.get('sasl_kerberos_service_name', 'kafka'),
-            sasl_kerberos_domain_name=self.instance.get('sasl_kerberos_domain_name'),
-            ssl_cafile=self.instance.get('ssl_cafile'),
-            ssl_check_hostname=self.instance.get('ssl_check_hostname', True),
-            ssl_certfile=self.instance.get('ssl_certfile'),
-            ssl_keyfile=self.instance.get('ssl_keyfile'),
-            ssl_crlfile=self.instance.get('ssl_crlfile'),
-            ssl_password=self.instance.get('ssl_password'),
-        )
+        kafka_client = self.create_kafka_client()
         # Force initial population of the local cluster metadata cache
         kafka_client.poll(future=kafka_client.cluster.request_update())
         if kafka_client.cluster.topics(exclude_internal_topics=False) is None:
@@ -453,36 +420,3 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         error_type = kafka_errors.for_code(response.error_code)
         if error_type is kafka_errors.NoError:
             return response.coordinator_id
-
-    def _validate_explicit_consumer_groups(self):
-        """Validate any explicitly specified consumer groups.
-
-        While the check does not require specifying consumer groups,
-        if they are specified this method should be used to validate them.
-
-        consumer_groups = {'consumer_group': {'topic': [0, 1]}}
-        """
-        assert isinstance(self._consumer_groups, dict)
-        for consumer_group, topics in self._consumer_groups.items():
-            assert isinstance(consumer_group, string_types)
-            assert isinstance(topics, dict) or topics is None  # topics are optional
-            if topics is not None:
-                for topic, partitions in topics.items():
-                    assert isinstance(topic, string_types)
-                    assert isinstance(partitions, (list, tuple)) or partitions is None  # partitions are optional
-                    if partitions is not None:
-                        for partition in partitions:
-                            assert isinstance(partition, int)
-
-    def _send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
-        """Emit an event to the Datadog Event Stream."""
-        event_dict = {
-            'timestamp': int(time()),
-            'msg_title': title,
-            'event_type': event_type,
-            'alert_type': severity,
-            'msg_text': text,
-            'tags': tags,
-            'aggregation_key': aggregation_key,
-        }
-        self.event(event_dict)

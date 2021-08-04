@@ -1,5 +1,9 @@
 # CHANGELOG - statsd
 
+## 1.7.1 / 2021-07-15
+
+* [Fixed] Allow float value for timeout. See [#9711](https://github.com/DataDog/integrations-core/pull/9711).
+
 ## 1.7.0 / 2021-07-12
 
 * [Added] Add runtime configuration validation. See [#8990](https://github.com/DataDog/integrations-core/pull/8990).

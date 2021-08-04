@@ -1,5 +1,14 @@
 # CHANGELOG - mysql
 
+## 5.0.4 / 2021-07-22
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* [Fixed] Bump `datadog-checks-base` version requirement. See [#9718](https://github.com/DataDog/integrations-core/pull/9718).
+
+## 5.0.3 / 2021-07-16
+
+* [Fixed] Support old executable names. See [#9716](https://github.com/DataDog/integrations-core/pull/9716).
+
 ## 5.0.2 / 2021-07-15
 
 * [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9695](https://github.com/DataDog/integrations-core/pull/9695).

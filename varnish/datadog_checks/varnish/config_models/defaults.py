@@ -45,4 +45,4 @@ def instance_tags(field, value):
 
 
 def instance_varnishadm(field, value):
-    return '/usr/bin/varnishadm'
+    return get_default_field_value(field, value)

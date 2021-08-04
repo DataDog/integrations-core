@@ -147,8 +147,9 @@ STATS_MYSQL_CONNECTION_POOL = {
         # the TCP endpoint on which the mysqld backend server is listening for connections
         {'name': 'srv_host', 'type': 'tag'},
         {'name': 'srv_port', 'type': 'tag'},
-        # the status of the backend server. Can be ONLINE, SHUNNED, OFFLINE_SOFT, OFFLINE_HARD
-        # see https://github.com/sysown/proxysql/wiki/Main-(runtime)#mysql_servers
+        # the status of the backend server. Can be ONLINE, SHUNNED, OFFLINE_SOFT, OFFLINE_HARD, SHUNNED_REPLICATION_LAG
+        # see https://github.com/sysown/proxysql/wiki/Main-(runtime)#mysql_servers and
+        # https://github.com/sysown/proxysql/blob/v2.x/include/proxysql_structs.h#L13-L19
         {
             'name': 'backend.status',
             'type': 'service_check',
@@ -157,6 +158,7 @@ STATS_MYSQL_CONNECTION_POOL = {
                 'SHUNNED': 'CRITICAL',
                 'OFFLINE_SOFT': 'WARNING',
                 'OFFLINE_HARD': 'CRITICAL',
+                'SHUNNED_REPLICATION_LAG': 'CRITICAL',
             },
         },
         # how many connections are currently used by ProxySQL for sending queries to the backend server
