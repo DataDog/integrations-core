@@ -151,7 +151,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
 
         sql_statement_summary = """\
-            SELECT `schema_name`,
+            SELECT /*+ MAX_EXECUTION_TIME(2000) */
+                   `schema_name`,
                    `digest`,
                    `digest_text`,
                    `count_star`,

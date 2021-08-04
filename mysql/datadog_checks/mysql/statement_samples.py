@@ -136,7 +136,7 @@ EVENTS_STATEMENTS_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT
+    SELECT /*+ MAX_EXECUTION_TIME(2000) */
         current_schema,
         sql_text,
         digest,

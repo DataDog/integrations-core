@@ -13,7 +13,7 @@ from .const import BUILDS
 
 def get_version(db):
     with closing(db.cursor()) as cursor:
-        cursor.execute('SELECT VERSION()')
+        cursor.execute('SELECT /*+ MAX_EXECUTION_TIME(1000) */ VERSION()')
         result = cursor.fetchone()
 
         # Version might include a build, a flavor, or both
