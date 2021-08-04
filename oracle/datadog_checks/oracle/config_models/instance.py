@@ -26,6 +26,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    as_sysdba: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     empty_default_hostname: Optional[bool]
     jdbc_driver_path: Optional[str]

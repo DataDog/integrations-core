@@ -12,6 +12,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_as_sysdba(field, value):
+    return False
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
