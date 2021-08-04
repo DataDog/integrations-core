@@ -119,7 +119,7 @@ instances:
     # ao_database: <AO_DATABASE>
 
     ## @param include_master_files_metrics - boolean - optional - default: false
-    ## Include database file size and state from sys.master_files.
+    ## Include database file size and state from `sys.master_files`.
     #
     # include_master_files_metrics: false
 
