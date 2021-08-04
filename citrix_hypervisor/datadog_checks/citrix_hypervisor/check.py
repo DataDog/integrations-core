@@ -5,7 +5,7 @@ from typing import Any
 
 import demjson
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .metrics import build_metric
 
@@ -14,13 +14,18 @@ from .metrics import build_metric
 
 
 class CitrixHypervisorCheck(AgentCheck):
-    __NAMESPACE__ = "citrix_hypervisor"
+    __NAMESPACE__ = 'citrix_hypervisor'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, name, init_config, instances):
         super(CitrixHypervisorCheck, self).__init__(name, init_config, instances)
 
         self._last_timestamp = 0
+
+        if self.instance.get('url') is None:
+            raise ConfigurationError('Missing configuration option: url')
         self._base_url = self.instance['url'].rstrip('/')
+
         self.tags = self.instance.get('tags', [])
 
         self.check_initializations.append(self._check_connection)
@@ -32,23 +37,20 @@ class CitrixHypervisorCheck(AgentCheck):
         self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
 
     def _get_updated_metrics(self):
-        try:
-            params = {
-                'start': self._last_timestamp,
-                'host': 'true',
-                'json': 'true',
-                'cf': 'AVERAGE|MIN|MAX',
-            }
-            r = self.http.get(self._base_url + '/rrd_updates', params=params)
-            r.raise_for_status()
-            # Response is not formatted for simplejson, it's missing double quotes " around the field names
-            data = demjson.decode(r.content)
+        params = {
+            'start': self._last_timestamp,
+            'host': 'true',
+            'json': 'true',
+            'cf': 'AVERAGE|MIN|MAX',
+        }
+        r = self.http.get(self._base_url + '/rrd_updates', params=params)
+        r.raise_for_status()
+        # Response is not formatted for simplejson, it's missing double quotes " around the field names
+        data = demjson.decode(r.content)
 
-            self._last_timestamp = int(data['meta']['end'])
+        self._last_timestamp = int(data['meta']['end'])
 
-            return data
-        except Exception as e:
-            self.log.exception(e)
+        return data
 
     def submit_metrics(self, data):
         legends = data['meta']['legend']
@@ -62,10 +64,15 @@ class CitrixHypervisorCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        data = self._get_updated_metrics()
+        try:
+            data = self._get_updated_metrics()
 
-        # TODO: submit metric from data
-        self.submit_metrics(data)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.tags)
+        except Exception as e:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.tags)
+            self.log.error(e)
+        else:
+            self.submit_metrics(data)
 
     @AgentCheck.metadata_entrypoint
     def collect_hypervisor_version(self):

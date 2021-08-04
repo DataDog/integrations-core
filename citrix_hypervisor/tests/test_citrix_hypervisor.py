@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -50,3 +51,20 @@ def test_check(aggregator, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.usefixtures('mock_responses')
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'url, expected_status',
+    [
+        pytest.param('mocked', AgentCheck.OK),
+        pytest.param('wrong', AgentCheck.CRITICAL),
+    ],
+)
+def test_service_check(aggregator, url, expected_status):
+    instance = {'url': url}
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check('citrix_hypervisor.can_connect', expected_status, tags=[])
