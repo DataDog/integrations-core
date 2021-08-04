@@ -590,6 +590,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.statefulset.replicas_ready',
         tags=[
             'statefulset:web',
+            'kube_stateful_set:web',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
