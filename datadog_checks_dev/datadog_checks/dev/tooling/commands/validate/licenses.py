@@ -21,6 +21,8 @@ EXPLICIT_LICENSES = {
     'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
     'adodbapi': ['LGPL-2.1-only'],
+    # https://github.com/dmeranda/demjson/blob/master/LICENSE.txt
+    'demjson': ['LGPL-3.0-or-later'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
     'dnspython': ['ISC'],
     # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt

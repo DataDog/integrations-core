@@ -67,7 +67,7 @@ class InstanceConfig(BaseModel):
     tls_private_key: Optional[str]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
-    url: Optional[str]
+    url: str
     use_legacy_auth_encoding: Optional[bool]
     username: Optional[str]
 

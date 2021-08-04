@@ -4,8 +4,20 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_proxy(field, value):
+    return get_default_field_value(field, value)
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
+
+
+def shared_skip_proxy(field, value):
+    return False
+
+
+def shared_timeout(field, value):
+    return 10
 
 
 def instance_auth_token(field, value):
@@ -138,10 +150,6 @@ def instance_tls_use_host_header(field, value):
 
 def instance_tls_verify(field, value):
     return True
-
-
-def instance_url(field, value):
-    return 'localhost'
 
 
 def instance_use_legacy_auth_encoding(field, value):
