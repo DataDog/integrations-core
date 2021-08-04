@@ -8,13 +8,13 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
-DEFAULT_IP_CACHE_DURATION = None
-
 
 class TCPCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
+    CONFIGURATION_ERROR_MSG = "`{}` is an invalid `{}`; a {} must be specified."
+    DEFAULT_IP_CACHE_DURATION = None
 
     def __init__(self, name, init_config, instances):
         super(TCPCheck, self).__init__(name, init_config, instances)
@@ -26,27 +26,27 @@ class TCPCheck(AgentCheck):
         self.host = instance.get('host', None)
         self.socket_type = None
         self._addr = None
-
-        ConfigurationErrorMsg = "Invalid `{}`; a {} must be specified."
-
         self.ip_cache_last_ts = 0
-        self.ip_cache_duration = DEFAULT_IP_CACHE_DURATION
+        self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
+
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
             try:
                 self.ip_cache_duration = int(ip_cache_duration)
             except Exception:
-                raise ConfigurationError(ConfigurationErrorMsg.format('ip_cache_duration', 'number'))
+                raise ConfigurationError(
+                    self.CONFIGURATION_ERROR_MSG.format(ip_cache_duration, 'ip_cache_duration', 'number')
+                )
 
         port = instance.get('port', None)
         try:
             self.port = int(port)
         except Exception:
-            raise ConfigurationError(ConfigurationErrorMsg.format('port', 'number'))
+            raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(port, 'port', 'number'))
         try:
             split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
-            raise ConfigurationError(ConfigurationErrorMsg.format('url', 'string'))
+            raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
 
         custom_tags = instance.get('tags', [])
         self.tags = [
@@ -64,7 +64,9 @@ class TCPCheck(AgentCheck):
         if len(split_url) == 8:  # It may then be a IP V6 address, we check that
             for block in split_url:
                 if len(block) != 4:
-                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.host))
+                    raise ConfigurationError(
+                        self.CONFIGURATION_ERROR_MSG.format(self.host, 'IPv6 address', 'valid address')
+                    )
             # It's a correct IP V6 address
             self._addr = self.host
             self.socket_type = socket.AF_INET6
