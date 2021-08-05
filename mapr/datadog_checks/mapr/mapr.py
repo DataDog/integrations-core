@@ -81,7 +81,15 @@ class MaprCheck(AgentCheck):
                 % ck_import_error
             )
 
-        conn = self.get_connection()
+        service_check_tags = self.base_tags + ['topic:{}'.format(self.topic_path)]
+        try:
+            conn = self.get_connection()
+        except Exception:
+            self.service_check(SERVICE_CHECK, AgentCheck.CRITICAL, service_check_tags)
+            raise
+        else:
+            self.service_check(SERVICE_CHECK, AgentCheck.OK, service_check_tags)
+
         submitted_metrics_count = 0
 
         while True:
@@ -96,7 +104,7 @@ class MaprCheck(AgentCheck):
                 # Metric received
                 submitted_metrics_count += self._process_metric(msg)
             else:
-                self._process_error(msg)
+                self._process_error(msg.error())
 
         if not self.has_ever_submitted_metrics:
             # The integration has never found any metric so far
@@ -128,8 +136,8 @@ class MaprCheck(AgentCheck):
             self.log.warning("Received unexpected message %s, wont be processed", msg.value())
             self.log.exception(e)
 
-    def _process_error(self, msg):
-        if msg.error().code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
+    def _process_error(self, error_msg):
+        if error_msg.code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
             if self.auth_ticket:
                 raise CheckException(
                     "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
@@ -142,33 +150,26 @@ class MaprCheck(AgentCheck):
                     "\t* The dd-agent user has the 'consume' permission on topic %s or "
                     "impersonation is correctly configured." % (self.topic_path, self.topic_path)
                 )
-        elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
+        elif error_msg.code() != ck.KafkaError._PARTITION_EOF:
             # Partition EOF is expected anytime we reach the end of one partition in the topic.
             # This is expected at least once per partition per check run.
-            raise CheckException(msg.error())
+            raise CheckException(error_msg)
 
     def get_connection(self):
         if not self._conn:
             self._connect()
-        self.service_check(SERVICE_CHECK, AgentCheck.OK, self.base_tags + ['topic:{}'.format(self.topic_path)])
         # confluent_kafka takes care of recreating the connection if anything goes wrong.
         return self._conn
 
     def _connect(self):
-        try:
-            self._conn = ck.Consumer(
-                {
-                    "group.id": "dd-agent",  # uniquely identify this consumer
-                    "enable.auto.commit": False  # important, do not store the offset for this consumer,
-                    # if we do it just once the mapr library has a bug/feature which prevents resetting it to the head
-                }
-            )
-            self._conn.subscribe([self.topic_path])
-        except Exception:
-            self.service_check(
-                SERVICE_CHECK, AgentCheck.CRITICAL, self.base_tags + ['topic:{}'.format(self.topic_path)]
-            )
-            raise
+        self._conn = ck.Consumer(
+            {
+                "group.id": "dd-agent",  # uniquely identify this consumer
+                "enable.auto.commit": False  # important, do not store the offset for this consumer,
+                # if we do it just once the mapr library has a bug/feature which prevents resetting it to the head
+            }
+        )
+        self._conn.subscribe([self.topic_path])
 
     def should_collect_metric(self, metric_name):
         if metric_name not in ALLOWED_METRICS:
