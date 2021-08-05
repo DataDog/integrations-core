@@ -171,21 +171,6 @@ def sync():
     echo_info(f'Files updated: {files_updated}')
 
 
-async def get_data(url):
-    async with request('GET', url) as response:
-        try:
-            info = orjson.loads(await response.read())['info']
-        except Exception as e:
-            raise type(e)(f'Error processing URL {url}: {e}')
-        else:
-            return (
-                info['name'],
-                info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
-                info['license'],
-                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
-            )
-
-
 async def get_version_data(url):
     async with request('GET', url) as response:
         try:
