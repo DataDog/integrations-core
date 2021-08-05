@@ -1,2 +1,0 @@
-orjson==2.6.1; python_version > '3.0'
-demjson==2.2.4

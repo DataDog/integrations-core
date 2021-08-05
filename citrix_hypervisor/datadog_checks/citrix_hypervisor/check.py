@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List
 
-import demjson
+import yaml
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -49,9 +49,14 @@ class CitrixHypervisorCheck(AgentCheck):
         r = self.http.get(self._base_url + '/rrd_updates', params=params)
         r.raise_for_status()
         # Response is not formatted for simplejson, it's missing double quotes " around the field names
-        data = demjson.decode(r.content)
+        data = yaml.safe_load(r.content)
 
-        self._last_timestamp = int(data['meta']['end'])
+        if data['meta'].get('end') is not None:
+            self._last_timestamp = int(data['meta']['end'])
+        else:
+            for key in data['meta'].keys():
+                if data['meta'][key] is None and key.startswith('end'):
+                    self._last_timestamp = int(key.split(':')[-1])
 
         return data
 
@@ -74,7 +79,7 @@ class CitrixHypervisorCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.tags)
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.tags)
-            self.log.error(e)
+            self.log.exception(e)
         else:
             self.submit_metrics(data)
 
