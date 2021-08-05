@@ -76,9 +76,9 @@ class CitrixHypervisorCheck(AgentCheck):
         try:
             data = self._get_updated_metrics()
 
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags)
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags)
             self.log.exception(e)
         else:
             self.submit_metrics(data)
