@@ -2,8 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
-
 import click
+import asyncio
+import orjson
+import requests
+from aiohttp import request
+from aiomultiprocess import Pool
+from packaging.requirements import Requirement
 from packaging.markers import InvalidMarker, Marker
 from packaging.specifiers import SpecifierSet
 
@@ -161,3 +166,54 @@ def sync():
         echo_info('All dependencies synced.')
 
     echo_info(f'Files updated: {files_updated}')
+
+IGNORED_DEPS = {'psycopg2-binary'}
+
+async def get_version_data(url):
+    async with request('GET', url) as response:
+        try:
+            info = orjson.loads(await response.read())['info']
+        except Exception as e:
+            raise type(e)(f'Error processing URL {url}: {e}')
+        else:
+            return (
+                info['name'],
+                info['version'],
+                info['requires_python'],
+            )
+
+async def scrape_version_data(urls):
+    package_data = defaultdict(lambda: {'version': '', 'requires_python': None})
+
+    async with Pool() as pool:
+        async for package_name, package_version, package_python in pool.map(get_version_data, urls):
+            data = package_data[package_name]
+            if package_version:
+                data['version'] = package_version
+
+            if package_python:
+                data['requires_python'] = package_python
+
+    return package_data
+
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Automatically check for dependency updates')
+@click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
+def update(sync):
+
+    all_agent_dependencies, errors = read_agent_dependencies()
+
+    api_urls = []
+    for package in all_agent_dependencies.keys():
+        api_urls.append(f'https://pypi.org/pypi/{package}/json')
+
+    package_data = asyncio.run(scrape_version_data(api_urls))
+
+    for package, package_dependency_definitions in all_agent_dependencies.items():
+        if package in IGNORED_DEPS:
+            continue
+        package_latest_version = package_data['version']
+        for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items():
+            for agent_dependency_definition in agent_dependency_definitions:
+                if agent_dep_version != package_latest_version:
+                    continue
+                    

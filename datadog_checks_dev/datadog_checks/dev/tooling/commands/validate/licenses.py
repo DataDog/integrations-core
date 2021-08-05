@@ -126,7 +126,6 @@ def format_attribution_line(package_name, license_id, package_copyright):
 def extract_license_classifier(classifier):
     return classifier.split(' :: ')[-1]
 
-
 def get_known_spdx_licenses():
     url = 'https://raw.githubusercontent.com/spdx/license-list-data/v3.13/json/licenses.json'
     with requests.get(url) as response:
@@ -148,7 +147,6 @@ async def get_data(url):
                 info['license'],
                 {extract_license_classifier(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
-
 
 async def scrape_license_data(urls):
     package_data = defaultdict(lambda: {'copyright': set(), 'licenses': [], 'classifiers': set()})
@@ -217,7 +215,6 @@ def validate_extra_licenses():
                 lines.append(line)
 
     return lines, any_errors
-
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
