@@ -470,12 +470,17 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         return rows, columns
 
     def fetch_metric(self, rows, columns):
-        db_name = columns.index('database')
-        file_id = columns.index("file_id")
-        file_type = columns.index("type")
-        file_location = columns.index("physical_name")
-        db_files_state_desc_index = columns.index("state_desc")
-        value_column_index = columns.index(self.column)
+        try:
+            db_name = columns.index('database')
+            file_id = columns.index("file_id")
+            file_type = columns.index("type")
+            file_location = columns.index("physical_name")
+            db_files_state_desc_index = columns.index("state_desc")
+            value_column_index = columns.index(self.column)
+        except ValueError as e:
+            raise CheckException(
+                "Could not fetch all required information from columns {}:\n\t{}".format(str(columns), str(e))
+            )
 
         for row in rows:
             if row[db_name] != self.instance:
