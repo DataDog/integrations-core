@@ -203,7 +203,7 @@ async def scrape_version_data(urls):
     return package_data
 
 
-def is_version_compatible(dep, marker, supported_versions):
+def is_version_compatible(marker, supported_versions):
     """
     Determines if any of the given versions are compatible with the given marker
     """
@@ -215,6 +215,10 @@ def is_version_compatible(dep, marker, supported_versions):
         marker = Marker(
             'sys_platform == "win32" or sys_platform == "darwin" and python_version < "3.0" or python_version > "3.0"'
         )
+
+    if len(supported_versions) == 0:
+        # if there are no classifiers then assume it works on all Python versions
+        is_compatible = True
 
     for python_version in supported_versions:
         has_match = False
@@ -230,7 +234,14 @@ def is_version_compatible(dep, marker, supported_versions):
 
 @dep.command(context_settings=CONTEXT_SETTINGS, short_help='Automatically check for dependency updates')
 @click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
-def updates(sync):
+@click.option(
+    '--check-python-classifiers',
+    '-s',
+    is_flag=True,
+    help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
+    NOTE: Some packages may not have proper classifiers.""",
+)
+def updates(sync, check_python_classifiers):
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -250,10 +261,12 @@ def updates(sync):
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
         if str(agent_dep_version)[2:] != package_data[package]['version']
-        and is_version_compatible(
-            agent_dependency_definition,
-            agent_dependency_definition.requirement.marker,
-            package_data[package]['classifiers'],
+        and (
+            not check_python_classifiers
+            or is_version_compatible(
+                agent_dependency_definition.requirement.marker,
+                package_data[package]['classifiers'],
+            )
         )
     }
 
@@ -268,10 +281,10 @@ def updates(sync):
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
             write_file_lines(static_file, new_lines)
-            echo_info('Updated dependencies in `agent_requirements.in`')
+            echo_info(f'Updated {len(deps_to_update.keys())} dependencies in `agent_requirements.in`')
     else:
         if deps_to_update:
-            echo_failure("Dependencies are out of sync:")
+            echo_failure(f"{len(deps_to_update.keys())} Dependencies are out of sync:")
             for dependency_definition, version in deps_to_update.items():
                 echo_failure(f"Dependency {dependency_definition.requirement} can be updated to version {version}")
         else:
