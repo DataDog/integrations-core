@@ -122,6 +122,10 @@ SystemEvents = {
             'type': 'match',
             'source': 'value',
             'items': {
+                'AIORead': {'name': 'aio.read.count', 'type': 'monotonic_gauge'}, # what is a monotonic gauge
+                'AIOReadBytes': {'name': 'aio.read.size', 'type': 'monotonic_gauge'},
+                'AIOWrite': {'name': 'aio.write.count', 'type': 'monotonic_gauge'},
+                'AIOWriteBytes': {'name': 'aio.write.size', 'type': 'monotonic_gauge'},
                 'CannotRemoveEphemeralNode': {'name': 'node.remove', 'type': 'monotonic_gauge'},
                 'CannotWriteToWriteBufferDiscard': {'name': 'buffer.write.discard', 'type': 'monotonic_gauge'},
                 'CompileAttempt': {'name': 'compilation.attempt', 'type': 'monotonic_gauge'},
@@ -177,6 +181,10 @@ SystemEvents = {
                 'FailedQuery': {'name': 'query.failed', 'type': 'monotonic_gauge'},
                 'FailedSelectQuery': {'name': 'select.query.select.failed', 'type': 'monotonic_gauge'},
                 'FileOpen': {'name': 'file.open', 'type': 'monotonic_gauge'},
+                'HedgedRequestsChangeReplica': {
+                    'name': 'table.replica.change.hedged_requests.count',
+                    'type': 'monotonic_gauge',
+                },
                 'InsertQuery': {'name': 'query.insert', 'type': 'monotonic_gauge'},
                 'InsertQueryTimeMicroseconds': {
                     'name': 'insert.query.time',
@@ -189,17 +197,41 @@ SystemEvents = {
                     'name': 'table.mergetree.replicated.leader.elected',
                     'type': 'monotonic_gauge',
                 },
+                'NetworkReceiveBytes': {},
+                'NetworkReceiveElapsedMicroseconds': {},
+                'NetworkSendBytes': {},
+                'NetworkSendElapsedMicroseconds': {},
                 'Merge': {'name': 'merge', 'type': 'monotonic_gauge'},
+                'MergeTreeDataProjectionWriterBlocks': {
+                    'name': 'table.mergetree.insert.block.projection',
+                    'type': 'monotonic_gauge',
+                },
                 'MergeTreeDataWriterBlocks': {'name': 'table.mergetree.insert.block', 'type': 'monotonic_gauge'},
+                'MergeTreeDataProjectionWriterBlocksAlreadySorted': {
+                    'name': 'table.mergetree.insert.block.already_sorted.projection',
+                    'type': 'monotonic_gauge',
+                },
                 'MergeTreeDataWriterBlocksAlreadySorted': {
                     'name': 'table.mergetree.insert.block.already_sorted',
+                    'type': 'monotonic_gauge',
+                },
+                'MergeTreeDataProjectionWriterCompressedBytes': {
+                    'name': 'table.mergetree.insert.block.size.compressed.projection',
                     'type': 'monotonic_gauge',
                 },
                 'MergeTreeDataWriterCompressedBytes': {
                     'name': 'table.mergetree.insert.write.size.compressed',
                     'type': 'monotonic_gauge',
                 },
+                'MergeTreeDataProjectionWriterRows': {
+                    'name': 'table.mergetree.insert.write.row.projection',
+                    'type': 'monotonic_gauge',
+                },
                 'MergeTreeDataWriterRows': {'name': 'table.mergetree.insert.row', 'type': 'monotonic_gauge'},
+                'MergeTreeDataProjectionWriterUncompressedBytes': {
+                    'name': 'table.mergetree.insert.write.size.uncompressed.projection',
+                    'type': 'monotonic_gauge',
+                },
                 'MergeTreeDataWriterUncompressedBytes': {
                     'name': 'table.mergetree.insert.write.size.uncompressed',
                     'type': 'monotonic_gauge',
@@ -319,7 +351,11 @@ SystemEvents = {
                 'SelectedParts': {'name': 'table.mergetree.part.selected', 'type': 'monotonic_gauge'},
                 'SelectedRanges': {'name': 'table.mergetree.range.selected', 'type': 'monotonic_gauge'},
                 'SelectedRows': {'name': 'selected.rows', 'type': 'monotonic_gauge'},
+                'SleepFunctionCalls': {},
+                'SleepFunctionMicroseconds': {},
                 'SlowRead': {'name': 'file.read.slow', 'type': 'monotonic_gauge'},
+                'StorageBufferLayerLockReadersWaitMilliseconds': {},
+                'StorageBufferLayerLockWritersWaitMilliseconds': {},
                 'SystemTimeMicroseconds': {
                     'name': 'thread.system.process_time',
                     'type': 'temporal_percent',

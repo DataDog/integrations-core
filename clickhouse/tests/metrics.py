@@ -102,9 +102,15 @@ V_21_METRICS = [
     'clickhouse.parts.outdated',
     'clickhouse.parts.precommitted',
     'clickhouse.parts.temporary',
+    'clickhouse.drained_connections.async.active',
+    'clickhouse.drained_connections.sync',
+    'clickhouse.drained_connections.async.active',
+    'clickhouse.table.distributed.file.insert.broken',
+    'clickhouse.mmapped.file.count',
+    'clickhouse.mmapped.file.size',
 ]
 
-version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, 21: V_21_METRICS}
+version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, '21': V_21_METRICS}
 
 
 def get_metrics(version):
