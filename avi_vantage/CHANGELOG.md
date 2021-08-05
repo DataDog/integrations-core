@@ -1,2 +1,0 @@
-# CHANGELOG - Avi Vantage
-

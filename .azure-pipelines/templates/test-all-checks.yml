@@ -57,9 +57,6 @@ jobs:
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
-    - checkName: avi_vantage
-      displayName: Avi Vantage
-      os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
       os: linux
