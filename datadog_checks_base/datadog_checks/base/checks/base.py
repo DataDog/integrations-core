@@ -35,6 +35,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 
 try:
@@ -1084,15 +1085,21 @@ class AgentCheck(object):
                     'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
                 )
 
+        disable_generic_tags = is_affirmative(self.instance.get('disable_generic_tags', False))
         for tag in tags:
             if tag is None:
                 continue
-
             try:
                 tag = to_native_string(tag)
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
+            tag_name, value = tag.split(':')
+            if tag_name not in GENERIC_TAGS or not disable_generic_tags:
+                normalized_tags.append(tag)
+            if tag_name in GENERIC_TAGS:
+                new_name = '{}_{}'.format(self.name, tag_name)
+                normalized_tags.append('{}:{}'.format(new_name, value))
 
             normalized_tags.append(tag)
 
