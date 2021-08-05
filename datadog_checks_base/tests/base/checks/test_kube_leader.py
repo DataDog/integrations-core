@@ -66,21 +66,21 @@ CM_TAGS = ["record_kind:configmap", "record_name:thisrecord", "record_namespace:
 @pytest.fixture()
 def mock_incluster():
     # Disable the kube config loader to avoid errors on check run
-    with mock.patch('datadog_checks.base.checks.win.mixins.config.load_incluster_config'):
+    with mock.patch('datadog_checks.base.checks.kube_leader.mixins.config.load_incluster_config'):
         yield
 
 
 @pytest.fixture()
 def mock_read_endpoints():
     # Allows to inject an arbitrary endpoints object
-    with mock.patch('datadog_checks.base.checks.win.mixins.client.CoreV1Api.read_namespaced_endpoints') as m:
+    with mock.patch('datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_endpoints') as m:
         yield m
 
 
 @pytest.fixture()
 def mock_read_configmap():
     # Allows to inject an arbitrary configmap object
-    with mock.patch('datadog_checks.base.checks.win.mixins.client.CoreV1Api.read_namespaced_config_map') as m:
+    with mock.patch('datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_config_map') as m:
         yield m
 
 
@@ -196,14 +196,14 @@ class TestElectionRecord:
         assert record.seconds_until_renew < -4
 
 
-@mock.patch('datadog_checks.base.checks.win.mixins.config')
+@mock.patch('datadog_checks.base.checks.kube_leader.mixins.config')
 class TestClientConfig:
     def test_config_incluster(self, config):
         c = KubeLeaderElectionBaseCheck()
         c.check({})
         config.load_incluster_config.assert_called_once()
 
-    @mock.patch('datadog_checks.base.checks.win.mixins.datadog_agent')
+    @mock.patch('datadog_checks.base.checks.kube_leader.mixins.datadog_agent')
     def test_config_kubeconfig(self, datadog_agent, config):
         datadog_agent.get_config.return_value = "/file/path"
         c = KubeLeaderElectionBaseCheck()
