@@ -11,7 +11,12 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The citrix_hypervisor check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+No additional installation is needed on your server.  
+The recommended way to monitor Citrix Hypervisors is to install one Datadog Agent on each hypervisor.
+
+#### Datadog User
+
+The Citrix Hypervisor integration needs a user with at least [`read-only`](https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html) access to monitor the service.
 
 ### Configuration
 

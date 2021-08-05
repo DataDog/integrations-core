@@ -82,9 +82,3 @@ class CitrixHypervisorCheck(AgentCheck):
             self.log.exception(e)
         else:
             self.submit_metrics(data)
-
-    @AgentCheck.metadata_entrypoint
-    def collect_hypervisor_version(self):
-        # type: () -> None
-        # TODO: send version
-        pass
