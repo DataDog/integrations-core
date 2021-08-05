@@ -19,7 +19,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from .validate.licenses import extract_classifier_value
 
 # Dependencies to ignore when update dependencies
-IGNORED_DEPS = {'psycopg2-binary==2.8.6'}
+IGNORED_DEPS = {'psycopg2-binary'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
