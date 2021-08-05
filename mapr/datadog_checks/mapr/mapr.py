@@ -156,12 +156,10 @@ class MaprCheck(AgentCheck):
             raise CheckException(error_msg)
 
     def get_connection(self):
-        if not self._conn:
-            self._connect()
-        # confluent_kafka takes care of recreating the connection if anything goes wrong.
-        return self._conn
+        if self._conn:
+            # confluent_kafka takes care of recreating the connection if anything goes wrong.
+            return self._conn
 
-    def _connect(self):
         self._conn = ck.Consumer(
             {
                 "group.id": "dd-agent",  # uniquely identify this consumer
@@ -170,6 +168,7 @@ class MaprCheck(AgentCheck):
             }
         )
         self._conn.subscribe([self.topic_path])
+        return self._conn
 
     def should_collect_metric(self, metric_name):
         if metric_name not in ALLOWED_METRICS:
