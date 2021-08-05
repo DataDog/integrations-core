@@ -37,7 +37,7 @@ def test_get_connection_instant_client(check, dd_run_check, as_sysdba):
 
         dd_run_check(check)
         assert check._cached_connection == con
-        cx.connect.assert_called_with(user='system', password='oracle', dsn='localhost:1521/xe', mode=mode)
+        cx.connect.assert_called_with(user='system', password='oracle', dsn=check._get_dsn(), mode=mode)
         service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
 
 
