@@ -17,6 +17,8 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .const import OPTIMIZER_HINT_TEMPLATE
+
 try:
     import datadog_agent
 except ImportError:
@@ -151,7 +153,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         """
 
         sql_statement_summary = """\
-            SELECT /*+ MAX_EXECUTION_TIME(2000) */
+            SELECT {hint}
                    `schema_name`,
                    `digest`,
                    `digest_text`,
@@ -169,13 +171,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
             FROM performance_schema.events_statements_summary_by_digest
             WHERE `digest_text` NOT LIKE 'EXPLAIN %'
             ORDER BY `count_star` DESC
-            LIMIT 10000"""
+            LIMIT 10000""".format(OPTIMIZER_HINT_TEMPLATE)
 
         rows = []  # type: List[PyMysqlRow]
 
         try:
             with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-                cursor.execute(sql_statement_summary)
+                cursor.execute(self._check._format_query(sql_statement_summary))
 
                 rows = cursor.fetchall() or []  # type: ignore
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:

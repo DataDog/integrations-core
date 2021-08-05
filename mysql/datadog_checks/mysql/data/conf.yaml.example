@@ -69,6 +69,11 @@ instances:
     #
     # connect_timeout: 10
 
+    ## @param query_timeout - number - optional - default: 5000
+    ## Maximum execution time to allow SELECT queries to complete before being terminated.
+    #
+    # query_timeout: 5000
+
     ## @param ssl - mapping - optional
     ## Use this section to configure a TLS connection between the Agent and MySQL.
     ##

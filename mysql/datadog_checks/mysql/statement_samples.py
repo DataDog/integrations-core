@@ -17,6 +17,9 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, comput
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .const import OPTIMIZER_HINT_TEMPLATE
+
+
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 # unless a specific table is configured, we try all of the events_statements tables in descending order of
@@ -136,7 +139,7 @@ EVENTS_STATEMENTS_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT /*+ MAX_EXECUTION_TIME(2000) */
+    SELECT {hint}
         current_schema,
         sql_text,
         digest,
@@ -162,7 +165,7 @@ EVENTS_STATEMENTS_QUERY = re.sub(
         processlist_user,
         processlist_host,
         processlist_db
-    FROM {statements_numbered} as E
+    FROM {{statements_numbered}} as E
     LEFT JOIN performance_schema.threads as T
         ON E.thread_id = T.thread_id
     WHERE sql_text IS NOT NULL
@@ -170,7 +173,7 @@ EVENTS_STATEMENTS_QUERY = re.sub(
         AND row_num = 1
     ORDER BY timer_wait DESC
     LIMIT %s
-""",
+""".format(hint=OPTIMIZER_HINT_TEMPLATE),
 ).strip()
 
 ENABLED_STATEMENTS_CONSUMERS_QUERY = re.sub(
@@ -347,7 +350,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
         self._log.debug("Running query [%s] %s", query, obfuscated_params if obfuscated_params else params)
-        cursor.execute(query, params)
+        cursor.execute(self._check._format_query(query), params)
 
     def _get_new_events_statements(self, events_statements_table, row_limit):
         # Select the most recent events with a bias towards events which have higher wait times

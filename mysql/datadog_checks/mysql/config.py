@@ -26,6 +26,7 @@ class MySQLConfig(object):
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
+        self.query_timeout = int(instance.get('query_timeout', 5000))
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))

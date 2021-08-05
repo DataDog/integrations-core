@@ -76,6 +76,14 @@ files:
               type: number
               example: 10
 
+          - name: query_timeout
+            description: |
+              Maximum execution time to allow SELECT queries to complete before being terminated.
+            value:
+              type: number
+              example: 5000
+              display_default: 5000
+
           - name: ssl
             description: |
               Use this section to configure a TLS connection between the Agent and MySQL.

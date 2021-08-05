@@ -8,6 +8,8 @@ COUNT = "count"
 MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
 
+OPTIMIZER_HINT_TEMPLATE = '/*DDHINT*/'
+
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
     # Command Metrics

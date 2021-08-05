@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-SQL_95TH_PERCENTILE = """SELECT /*+ MAX_EXECUTION_TIME(2000) */ `avg_us`, `ro` as `percentile` FROM
+from .const import OPTIMIZER_HINT_TEMPLATE
+
+SQL_95TH_PERCENTILE = """SELECT {hint} `avg_us`, `ro` as `percentile` FROM
 (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
     (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us`
         FROM performance_schema.events_statements_summary_by_digest
@@ -10,35 +12,35 @@ SQL_95TH_PERCENTILE = """SELECT /*+ MAX_EXECUTION_TIME(2000) */ `avg_us`, `ro` a
     (SELECT @rownum := 0) r) q
 WHERE q.`ro` > ROUND(.95*@rownum)
 ORDER BY `percentile` ASC
-LIMIT 1"""
+LIMIT 1""".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
 SQL_QUERY_SCHEMA_SIZE = """\
-SELECT /*+ MAX_EXECUTION_TIME(2000) */ table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
+SELECT {hint} table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
 FROM     information_schema.tables
-GROUP BY table_schema"""
+GROUP BY table_schema""".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
 SQL_AVG_QUERY_RUN_TIME = """\
-SELECT /*+ MAX_EXECUTION_TIME(2000) */ schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
+SELECT {hint} schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
 FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
-GROUP BY schema_name"""
+GROUP BY schema_name""".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
-SQL_WORKER_THREADS = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'"
+SQL_WORKER_THREADS = "SELECT {hint} THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
-SQL_PROCESS_LIST = "SELECT /*+ MAX_EXECUTION_TIME(2000) */ * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
+SQL_PROCESS_LIST = "SELECT {hint} * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
 SQL_INNODB_ENGINES = """\
-SELECT /*+ MAX_EXECUTION_TIME(2000) */ engine
+SELECT {hint} engine
 FROM information_schema.ENGINES
-WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
+WHERE engine='InnoDB' and support != 'no' and support != 'disabled'""".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
 SQL_SERVER_ID_AWS_AURORA = """\
 SHOW VARIABLES LIKE 'aurora_server_id'"""
 
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
-SELECT /*+ MAX_EXECUTION_TIME(2000) */ IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
+SELECT {hint} IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
 FROM information_schema.replica_host_status
-WHERE server_id = @@aurora_server_id"""
+WHERE server_id = @@aurora_server_id""".format(hint=OPTIMIZER_HINT_TEMPLATE)
 
 
 def show_replica_status_query(version, is_mariadb, channel=''):

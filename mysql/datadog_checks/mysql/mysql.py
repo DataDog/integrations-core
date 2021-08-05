@@ -24,6 +24,7 @@ from .const import (
     GAUGE,
     INNODB_VARS,
     MONOTONIC,
+    OPTIMIZER_HINT_TEMPLATE,
     OPTIONAL_STATUS_VARS,
     OPTIONAL_STATUS_VARS_5_6_6,
     PERFORMANCE_VARS,
@@ -87,9 +88,13 @@ class MySql(AgentCheck):
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
 
+    def _format_query(self, query):
+        optimizer_hint = ' /*+ MAX_EXECUTION_TIME({}) */ '.format(self._config.query_timeout)
+        return query.replace(OPTIMIZER_HINT_TEMPLATE, optimizer_hint, 1)
+
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
-            cursor.execute(query)
+            cursor.execute(self._format_query(query))
             for row in cursor.fetchall_unbuffered():
                 yield row
 
@@ -448,7 +453,7 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(query)
+                cursor.execute(self._format_query(query))
                 result = cursor.fetchone()
                 if result is not None:
                     for field, metric in list(iteritems(field_metric_map)):
@@ -479,7 +484,7 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
+                cursor.execute(self._format_query(SQL_REPLICATION_ROLE_AWS_AURORA))
                 replication_role = cursor.fetchone()[0]
 
                 if replication_role in {'writer', 'reader'}:
@@ -569,7 +574,7 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_SERVER_ID_AWS_AURORA)
+                cursor.execute(self._format_query(SQL_SERVER_ID_AWS_AURORA))
                 if len(cursor.fetchall()) > 0:
                     self._is_aurora = True
                 else:
@@ -623,7 +628,7 @@ class MySql(AgentCheck):
         # table. Later is choosen because that involves no string parsing.
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_INNODB_ENGINES)
+                cursor.execute(self._format_query(SQL_INNODB_ENGINES))
                 return cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
@@ -680,9 +685,9 @@ class MySql(AgentCheck):
                 if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
-                    cursor.execute(SQL_WORKER_THREADS)
+                    cursor.execute(self._format_query(SQL_WORKER_THREADS))
                 else:
-                    cursor.execute(SQL_PROCESS_LIST)
+                    cursor.execute(self._format_query(SQL_PROCESS_LIST))
                 replica_results = cursor.fetchall()
                 replicas = 0
                 for _ in replica_results:
@@ -707,7 +712,7 @@ class MySql(AgentCheck):
         # in microseconds
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_95TH_PERCENTILE)
+                cursor.execute(self._format_query(SQL_95TH_PERCENTILE))
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -729,7 +734,7 @@ class MySql(AgentCheck):
         # value in microseconds
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_AVG_QUERY_RUN_TIME)
+                cursor.execute(self._format_query(SQL_AVG_QUERY_RUN_TIME))
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -756,7 +761,7 @@ class MySql(AgentCheck):
         # value in microseconds
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(SQL_QUERY_SCHEMA_SIZE)
+                cursor.execute(self._format_query(SQL_QUERY_SCHEMA_SIZE))
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the information schema 'tables' table.")
