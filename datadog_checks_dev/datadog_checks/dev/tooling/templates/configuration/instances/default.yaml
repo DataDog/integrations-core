@@ -6,8 +6,9 @@
     Generic tags such as cluster that come from query executions will be replaced by <integration_name>_cluster
     to avoid getting mixed with other integraton tags
     value:
-  type: boolean
-  display_default: false
-  example: true
+  value:
+    type: boolean
+    display_default: false
+    example: true
   enabled: true
   hidden: true
