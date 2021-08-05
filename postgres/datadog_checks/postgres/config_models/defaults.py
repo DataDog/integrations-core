@@ -97,7 +97,7 @@ def instance_query_samples(field, value):
 
 
 def instance_query_timeout(field, value):
-    return 2000
+    return 5000
 
 
 def instance_relations(field, value):

@@ -41,7 +41,7 @@ class PostgresConfig:
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
-        self.query_timeout = int(instance.get('query_timeout', 2000))
+        self.query_timeout = int(instance.get('query_timeout', 5000))
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
