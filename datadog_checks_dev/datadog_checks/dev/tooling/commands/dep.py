@@ -264,8 +264,8 @@ def updates(sync):
         if package not in IGNORED_DEPS
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
-        if str(agent_dep_version)[2:] != package_data[package]['version'] and
-        is_version_compatible(
+        if str(agent_dep_version)[2:] != package_data[package]['version']
+        and is_version_compatible(
             agent_dependency_definition,
             agent_dependency_definition.requirement.marker,
             package_data[package]['classifiers'],
