@@ -50,7 +50,7 @@ def load_dependency_data(req_file, dependencies, errors, check_name=None):
             errors.append(f'File `{req_file}` has an invalid dependency: `{line}`\n{e}')
             continue
 
-        name = req.name.lower()
+        name = req.name.lower().replace('_', '-')
         dependency = dependencies[name][req.specifier]
         dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
 
@@ -66,7 +66,7 @@ def load_base_check(req_file, dependencies, errors, check_name=None):
                 errors.append(f'File `{req_file}` has an invalid base check dependency: `{line}`\n{e}')
                 return
 
-            name = req.name.lower()
+            name = req.name.lower().replace('_', '-')
             dependency = dependencies[name][req.specifier]
             dependency.append(DependencyDefinition(name, req, req_file, i, check_name))
             return
