@@ -52,7 +52,7 @@ SystemMetrics = {
                 'LocalThread': {'name': 'thread.local.total', 'type': 'gauge'},
                 'LocalThreadActive': {'name': 'thread.local.active', 'type': 'gauge'},
                 'MMappedFileBytes': {'name': 'mmapped.file.size', 'type': 'gauge'},
-                'MMappedFiles': {'name': 'mmapped.file.count', 'type': 'gauge'},
+                'MMappedFiles': {'name': 'mmapped.file.current', 'type': 'gauge'},
                 'MaxDDLEntryID': {'name': 'ddl.max_processed', 'type': 'gauge'},
                 'MemoryTracking': {'name': 'query.memory', 'type': 'gauge'},
                 'MemoryTrackingForMerges': {'name': 'merge.memory', 'type': 'gauge'},
@@ -122,9 +122,9 @@ SystemEvents = {
             'type': 'match',
             'source': 'value',
             'items': {
-                'AIORead': {'name': 'aio.read.count', 'type': 'monotonic_gauge'}, # what is a monotonic gauge
+                'AIORead': {'name': 'aio.read', 'type': 'monotonic_gauge'},
                 'AIOReadBytes': {'name': 'aio.read.size', 'type': 'monotonic_gauge'},
-                'AIOWrite': {'name': 'aio.write.count', 'type': 'monotonic_gauge'},
+                'AIOWrite': {'name': 'aio.write', 'type': 'monotonic_gauge'},
                 'AIOWriteBytes': {'name': 'aio.write.size', 'type': 'monotonic_gauge'},
                 'CannotRemoveEphemeralNode': {'name': 'node.remove', 'type': 'monotonic_gauge'},
                 'CannotWriteToWriteBufferDiscard': {'name': 'buffer.write.discard', 'type': 'monotonic_gauge'},
@@ -182,7 +182,7 @@ SystemEvents = {
                 'FailedSelectQuery': {'name': 'select.query.select.failed', 'type': 'monotonic_gauge'},
                 'FileOpen': {'name': 'file.open', 'type': 'monotonic_gauge'},
                 'HedgedRequestsChangeReplica': {
-                    'name': 'table.replica.change.hedged_requests.count',
+                    'name': 'table.replica.change.hedged_requests',
                     'type': 'monotonic_gauge',
                 },
                 'InsertQuery': {'name': 'query.insert', 'type': 'monotonic_gauge'},
@@ -197,41 +197,37 @@ SystemEvents = {
                     'name': 'table.mergetree.replicated.leader.elected',
                     'type': 'monotonic_gauge',
                 },
-                'NetworkReceiveBytes': {},
-                'NetworkReceiveElapsedMicroseconds': {},
-                'NetworkSendBytes': {},
-                'NetworkSendElapsedMicroseconds': {},
                 'Merge': {'name': 'merge', 'type': 'monotonic_gauge'},
                 'MergeTreeDataProjectionWriterBlocks': {
                     'name': 'table.mergetree.insert.block.projection',
                     'type': 'monotonic_gauge',
                 },
-                'MergeTreeDataWriterBlocks': {'name': 'table.mergetree.insert.block', 'type': 'monotonic_gauge'},
                 'MergeTreeDataProjectionWriterBlocksAlreadySorted': {
                     'name': 'table.mergetree.insert.block.already_sorted.projection',
-                    'type': 'monotonic_gauge',
-                },
-                'MergeTreeDataWriterBlocksAlreadySorted': {
-                    'name': 'table.mergetree.insert.block.already_sorted',
                     'type': 'monotonic_gauge',
                 },
                 'MergeTreeDataProjectionWriterCompressedBytes': {
                     'name': 'table.mergetree.insert.block.size.compressed.projection',
                     'type': 'monotonic_gauge',
                 },
-                'MergeTreeDataWriterCompressedBytes': {
-                    'name': 'table.mergetree.insert.write.size.compressed',
-                    'type': 'monotonic_gauge',
-                },
                 'MergeTreeDataProjectionWriterRows': {
                     'name': 'table.mergetree.insert.write.row.projection',
                     'type': 'monotonic_gauge',
                 },
-                'MergeTreeDataWriterRows': {'name': 'table.mergetree.insert.row', 'type': 'monotonic_gauge'},
                 'MergeTreeDataProjectionWriterUncompressedBytes': {
                     'name': 'table.mergetree.insert.write.size.uncompressed.projection',
                     'type': 'monotonic_gauge',
                 },
+                'MergeTreeDataWriterBlocks': {'name': 'table.mergetree.insert.block', 'type': 'monotonic_gauge'},
+                'MergeTreeDataWriterBlocksAlreadySorted': {
+                    'name': 'table.mergetree.insert.block.already_sorted',
+                    'type': 'monotonic_gauge',
+                },
+                'MergeTreeDataWriterCompressedBytes': {
+                    'name': 'table.mergetree.insert.write.size.compressed',
+                    'type': 'monotonic_gauge',
+                },
+                'MergeTreeDataWriterRows': {'name': 'table.mergetree.insert.row', 'type': 'monotonic_gauge'},
                 'MergeTreeDataWriterUncompressedBytes': {
                     'name': 'table.mergetree.insert.write.size.uncompressed',
                     'type': 'monotonic_gauge',
@@ -239,6 +235,18 @@ SystemEvents = {
                 'MergedRows': {'name': 'merge.row.read', 'type': 'monotonic_gauge'},
                 'MergedUncompressedBytes': {'name': 'merge.read.size.uncompressed', 'type': 'monotonic_gauge'},
                 'MergesTimeMilliseconds': {'name': 'merge.time', 'type': 'temporal_percent', 'scale': 'millisecond'},
+                'NetworkReceiveBytes': {'name': 'network.receive.size', 'type': 'monotonic_gauge'},
+                'NetworkReceiveElapsedMicroseconds': {
+                    'name': 'network.receive.elapsed.time',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
+                'NetworkSendBytes': {'name': 'network.send.size', 'type': 'monotonic_gauge'},
+                'NetworkSendElapsedMicroseconds': {
+                    'name': 'network.send.elapsed.time',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
                 'NotCreatedLogEntryForMerge': {'name': 'log.entry.merge.not_created', 'type': 'monotonic_gauge'},
                 'NotCreatedLogEntryForMutation': {
                     'name': 'log.entry.mutation.not_created',
@@ -351,11 +359,23 @@ SystemEvents = {
                 'SelectedParts': {'name': 'table.mergetree.part.selected', 'type': 'monotonic_gauge'},
                 'SelectedRanges': {'name': 'table.mergetree.range.selected', 'type': 'monotonic_gauge'},
                 'SelectedRows': {'name': 'selected.rows', 'type': 'monotonic_gauge'},
-                'SleepFunctionCalls': {},
-                'SleepFunctionMicroseconds': {},
+                'SleepFunctionCalls': {'name': 'sleep_function.calls', 'type': 'monotonic_gauge'},
+                'SleepFunctionMicroseconds': {
+                    'name': 'sleep_function.time',
+                    'type': 'temporal_percent',
+                    'scale': 'microsecond',
+                },
                 'SlowRead': {'name': 'file.read.slow', 'type': 'monotonic_gauge'},
-                'StorageBufferLayerLockReadersWaitMilliseconds': {},
-                'StorageBufferLayerLockWritersWaitMilliseconds': {},
+                'StorageBufferLayerLockReadersWaitMilliseconds': {
+                    'name': 'storage.buffer_layer.read.wait',
+                    'type': 'temporal_percent',
+                    'scale': 'millisecond',
+                },
+                'StorageBufferLayerLockWritersWaitMilliseconds': {
+                    'name': 'storage.buffer_layer.write.wait',
+                    'type': 'temporal_percent',
+                    'scale': 'millisecond',
+                },
                 'SystemTimeMicroseconds': {
                     'name': 'thread.system.process_time',
                     'type': 'temporal_percent',
