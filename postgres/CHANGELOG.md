@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 8.2.1 / 2021-08-05
+
+* [Fixed] Revert "Upgrade `psycopg2` on Python 3". See [#9835](https://github.com/DataDog/integrations-core/pull/9835).
+
 ## 8.2.0 / 2021-08-03
 
 * [Added] Add metric for estimated table bloat percentage. See [#9786](https://github.com/DataDog/integrations-core/pull/9786).
