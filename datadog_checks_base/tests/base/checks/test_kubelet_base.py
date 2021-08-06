@@ -15,7 +15,7 @@ HERE = get_here()
 
 
 def get_fixture_path(filename):
-    return os.path.join(HERE, 'fixtures', filename)
+    return os.path.join(HERE, '..', '..', 'fixtures', filename)
 
 
 def mock_from_file(filename):

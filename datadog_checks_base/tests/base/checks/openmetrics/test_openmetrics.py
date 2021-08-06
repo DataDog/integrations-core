@@ -22,6 +22,7 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
 text_content_type = 'text/plain; version=0.0.4'
+FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', 'fixtures', 'prometheus'))
 
 
 class MockResponse:
@@ -103,7 +104,7 @@ def ref_gauge():
 @pytest.fixture
 def text_data():
     # Loading test text data
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
+    f_name = os.path.join(FIXTURE_PATH, 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
         assert len(text_data) == 14494
@@ -114,7 +115,7 @@ def text_data():
 @pytest.fixture()
 def mock_get():
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURE_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
@@ -2570,7 +2571,7 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
 @pytest.fixture()
 def mock_filter_get():
     text_data = None
-    f_name = os.path.join(get_here(), 'fixtures', 'prometheus', 'deprecated.txt')
+    f_name = os.path.join(FIXTURE_PATH, 'deprecated.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(

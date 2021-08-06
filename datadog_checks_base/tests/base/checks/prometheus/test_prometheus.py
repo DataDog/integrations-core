@@ -102,9 +102,7 @@ def bin_data():
 @pytest.fixture
 def text_data():
     # Loading test text data
-    f_name = os.path.abspath(
-        os.path.join(FIXTURES_PATH, 'metrics.txt')
-    )
+    f_name = os.path.abspath(os.path.join(FIXTURES_PATH, 'metrics.txt'))
     with open(f_name, 'r') as f:
         text_data = f.read()
         assert len(text_data) == 14494
