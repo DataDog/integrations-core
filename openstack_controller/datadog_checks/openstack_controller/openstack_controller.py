@@ -196,8 +196,8 @@ class OpenStackControllerCheck(AgentCheck):
 
         return hypervisor_aggregate_map
 
-    def get_loads_for_single_hypervisor(self, hyp_id):
-        uptime = self.get_os_hypervisor_uptime(hyp_id)
+    def get_loads_for_single_hypervisor(self, hypervisor):
+        uptime = self.get_os_hypervisor_uptime(hypervisor)
         return self._parse_uptime_string(uptime)
 
     def collect_hypervisors_metrics(
@@ -287,7 +287,7 @@ class OpenStackControllerCheck(AgentCheck):
         # If the Agent is installed on the hypervisors, system.load.1/5/15 is available as a system metric
         if collect_hypervisor_load:
             try:
-                load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
+                load_averages = self.get_loads_for_single_hypervisor(hyp)
             except Exception as e:
                 self.warning('Unable to get loads averages for hypervisor %s: %s', hyp['id'], e)
                 load_averages = []
@@ -453,6 +453,10 @@ class OpenStackControllerCheck(AgentCheck):
                         tags=tags + host_tags,
                         hostname=server_id,
                     )
+
+            # microversion post 2.48
+            # TODO: Server stats returned by newer hypervisors have a different format.
+            # https://docs.openstack.org/api-ref/compute/?expanded=show-server-diagnostics-detail
 
     def collect_project_limit(self, project, tags=None):
         # NOTE: starting from Version 3.10 (Queens)
@@ -793,8 +797,8 @@ class OpenStackControllerCheck(AgentCheck):
     def get_nova_endpoint(self):
         return self._api.get_nova_endpoint()
 
-    def get_os_hypervisor_uptime(self, hyp_id):
-        return self._api.get_os_hypervisor_uptime(hyp_id)
+    def get_os_hypervisor_uptime(self, hypervisor):
+        return self._api.get_os_hypervisor_uptime(hypervisor)
 
     def get_os_aggregates(self):
         return self._api.get_os_aggregates()
