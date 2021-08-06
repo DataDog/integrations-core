@@ -11,6 +11,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -494,6 +495,7 @@ class PostgreSql(AgentCheck):
 
     def check(self, _):
         tags = copy.copy(self._config.tags)
+        tags.append('host:{}'.format(resolve_db_host(self._config.host)))
         # Collect metrics
         try:
             # Check version
