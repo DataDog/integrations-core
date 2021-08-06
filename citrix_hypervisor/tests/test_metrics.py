@@ -16,22 +16,14 @@ logger = logging.getLogger(__name__)
     'raw_metric, expected_name, expected_tags',
     [
         pytest.param(
-            'AVERAGE:host:123-abc:pool_task_count', 'host.pool.task_count.avg', ['citrix_hypervisor_host:123-abc']
-        ),
-        pytest.param(
-            'MIN:host:123-abc:xapi_free_memory_kib', 'host.xapi.free_memory_kib.min', ['citrix_hypervisor_host:123-abc']
+            'AVERAGE:host:123-abc:pool_task_count', 'host.pool.task_count', ['citrix_hypervisor_host:123-abc']
         ),
         pytest.param(
             'AVERAGE:host:123-abc:sr_123-abc-456-def_cache_size',
-            'host.cache_size.avg',
+            'host.cache_size',
             ['citrix_hypervisor_host:123-abc', 'cache_sr:123-abc-456-def'],
         ),
-        pytest.param('AVERAGE:vm:456-def:memory', 'vm.memory.avg', ['citrix_hypervisor_vm:456-def']),
-        pytest.param(
-            'MAX:host:123-abc:90-12_id1_78-ef_id2',
-            'host.test_id.max',
-            ['citrix_hypervisor_host:123-abc', 'id1:90-12', 'id2:78-ef'],
-        ),
+        pytest.param('AVERAGE:vm:456-def:memory', 'vm.memory', ['citrix_hypervisor_vm:456-def']),
     ],
 )
 def test_build_metric_good(raw_metric, expected_name, expected_tags, caplog):
@@ -65,8 +57,9 @@ def test_build_metric_good(raw_metric, expected_name, expected_tags, caplog):
     'raw_metric, expected_log',
     [
         pytest.param('AVG:stuff:id:metric_name', 'Unknown format for metric {}'),
+        pytest.param('MIN:host:123-abc:xapi_free_memory_kib', 'Unknown format for metric {}'),
         pytest.param('bad_format', 'Unknown format for metric {}'),
-        pytest.param('MAX:stuff:id:metric_name', 'Ignoring metric {}'),
+        pytest.param('AVERAGE:stuff:id:metric_name', 'Ignoring metric {}'),
     ],
 )
 def test_build_metric_error(raw_metric, expected_log, caplog):

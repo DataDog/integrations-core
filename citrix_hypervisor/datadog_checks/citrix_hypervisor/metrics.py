@@ -28,11 +28,9 @@ REGEX_METRICS = [
     {'regex': 'cpu([a-zA-Z0-9-]+)', 'name': '.cpu', 'tags': ('cpu_id',)},
 ]
 
-METRICS_SUFFIX = {
-    'AVERAGE': '.avg',
-    'MAX': '.max',
-    'MIN': '.min',
-}
+# 'MAX' and 'MIN' are not available when the integration is requesting the most granular interval,
+# so they are ignored if they appear.
+ALLOWED_METRIC_TYPE = ['AVERAGE']
 
 
 def build_metric(metric_name, logger):
@@ -43,7 +41,7 @@ def build_metric(metric_name, logger):
     """
     metric_parts = metric_name.split(':')
 
-    if len(metric_parts) != 4 or METRICS_SUFFIX.get(metric_parts[0]) is None:
+    if len(metric_parts) != 4 or metric_parts[0] not in ALLOWED_METRIC_TYPE:
         logger.debug('Unknown format for metric %s', metric_name)
         return None, None
 
@@ -74,8 +72,6 @@ def build_metric(metric_name, logger):
         if not found:
             logger.debug('Ignoring metric %s', metric_name)
             return None, None
-
-    name += METRICS_SUFFIX[metric_parts[0]]
 
     logger.debug('Found metric %s (%s)', name, metric_name)
 

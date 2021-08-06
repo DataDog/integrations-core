@@ -7,8 +7,7 @@ import pytest
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
-
-# from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 
 METRICS = [
     'host.cache_hits',
@@ -22,12 +21,15 @@ METRICS = [
     'host.memory.reclaimed',
     'host.memory.reclaimed_max',
     'host.memory.total_kib',
+    'host.pif.rx',
+    'host.pif.tx',
     'host.pool.session_count',
     'host.pool.task_count',
     'host.xapi.allocation_kib',
     'host.xapi.free_memory_kib',
     'host.xapi.live_memory_kib',
     'host.xapi.memory_usage_kib',
+    'host.xapi.open_fds',
     'vm.cpu',
     'vm.memory',
 ]
@@ -75,14 +77,13 @@ def test_lab(aggregator):
 
     for instance in instances:
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
+        check._check_connection()
         check.check(None)
 
         aggregator.assert_service_check('citrix_hypervisor.can_connect', CitrixHypervisorCheck.OK)
         for m in METRICS:
-            aggregator.assert_metric('citrix_hypervisor.{}.avg'.format(m))
-            aggregator.assert_metric('citrix_hypervisor.{}.min'.format(m), at_least=0)
-            aggregator.assert_metric('citrix_hypervisor.{}.max'.format(m), at_least=0)
+            aggregator.assert_metric('citrix_hypervisor.{}'.format(m))
 
         aggregator.assert_all_metrics_covered()
-        # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
         aggregator.reset()
