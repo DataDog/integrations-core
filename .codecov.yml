@@ -82,6 +82,10 @@ coverage:
         target: 75
         flags:
         - cisco_aci
+      Citrix_Hypervisor:
+        target: 75
+        flags:
+        - citrix_hypervisor
       ClickHouse:
         target: 75
         flags:
@@ -530,10 +534,6 @@ coverage:
         target: 75
         flags:
         - zk
-      citrix_hypervisor:
-        target: 75
-        flags:
-        - citrix_hypervisor
       etcd:
         target: 75
         flags:

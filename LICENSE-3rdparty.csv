@@ -24,7 +24,6 @@ cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual c
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
-demjson,PyPI,LGPL-3.0-or-later,Deron Meranda
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
 flup,PyPI,BSD-3-Clause,Allan Saddi

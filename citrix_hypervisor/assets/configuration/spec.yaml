@@ -1,4 +1,4 @@
-name: citrix_hypervisor
+name: Citrix Hypervisor
 files:
 - name: citrix_hypervisor.yaml
   options:
