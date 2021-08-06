@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 citrix_hypervisor.host.cache_hits,gauge,15,hit,,IntelliCache hits on storage repository,0,citrix_hypervisor,host cache hit
 citrix_hypervisor.host.cache_misses,gauge,15,miss,,IntelliCache misses on storage repository,0,citrix_hypervisor,host cache miss
-citrix_hypervisor.host.cache_size,gauge,15,size,,IntelliCache size storage repository,0,citrix_hypervisor,host cache size
+citrix_hypervisor.host.cache_size,gauge,15,,,IntelliCache size storage repository,0,citrix_hypervisor,host cache size
 citrix_hypervisor.host.cpu,gauge,15,,,Average CPU usage,0,citrix_hypervisor,host cpu avg
 citrix_hypervisor.host.memory.free_kib,gauge,15,,,Memory available on hypervisor,0,citrix_hypervisor,host mem free
 citrix_hypervisor.host.memory.reclaimed,gauge,15,,,Reclaimed memory on hypervisor,0,citrix_hypervisor,host mem reclaimed

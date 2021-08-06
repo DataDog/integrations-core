@@ -1,10 +1,10 @@
 {
-  "display_name": "citrix_hypervisor",
+  "display_name": "Citrix Hypervisor",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "citrix_hypervisor",
   "metric_prefix": "citrix_hypervisor.",
-  "metric_to_check": "citrix_hypervisor.host.cpu.avg",
+  "metric_to_check": "citrix_hypervisor.host.cpu",
   "creates_events": false,
   "short_description": "TODO",
   "guid": "d6c1911b-f7fd-4537-af4f-1aa40dae40c2",
@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "citrix_hypervisor",
+  "public_title": "Citrix Hypervisor",
   "categories": [
     ""
   ],

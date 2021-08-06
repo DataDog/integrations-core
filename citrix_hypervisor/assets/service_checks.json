@@ -5,7 +5,7 @@
         "check": "citrix_hypervisor.can_connect",
         "statuses": [
             "ok",
-            "ctricial"
+            "critical"
         ],
         "groups": [
             "citrix_hypervisor_url"
