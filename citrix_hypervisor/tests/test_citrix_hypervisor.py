@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+import logging
 
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -43,7 +42,6 @@ def _assert_metrics(aggregator, custom_tags, count=1):
 @pytest.mark.usefixtures('mock_responses')
 @pytest.mark.unit
 def test_check(aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
     check.check(instance)
 
@@ -68,3 +66,21 @@ def test_service_check(aggregator, url, expected_status):
     check.check(instance)
 
     aggregator.assert_service_check('citrix_hypervisor.can_connect', expected_status, tags=[])
+
+
+@pytest.mark.usefixtures('mock_responses')
+@pytest.mark.unit
+def test_initialization(caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
+    # Connection succeded
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': 'mocked'}])
+    check._check_connection()
+    assert check._last_timestamp == 1627907477
+
+    # Connection failure
+    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [{'url': 'wrong'}])
+    check._check_connection()
+    assert check._last_timestamp == 0
+    assert "Couldn't initialize the timestamp due to HTTP error" in caplog.text

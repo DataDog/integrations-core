@@ -35,8 +35,10 @@ class CitrixHypervisorCheck(AgentCheck):
         # type: () -> None
         # Get the latest timestamp to reduce the length of the update endpoint response
         r = self.http.get(self._base_url + '/host_rrd', params={'json': 'true'})
-        r.raise_for_status()
-        self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
+        if r.status_code == 200:
+            self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
+        else:
+            self.log.warning("Couldn't initialize the timestamp due to HTTP error %s, set it to 0", r.reason)
 
     def _get_updated_metrics(self):
         # type: () -> Dict
@@ -76,9 +78,15 @@ class CitrixHypervisorCheck(AgentCheck):
         try:
             data = self._get_updated_metrics()
 
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags)
+            self.service_check(
+                self.SERVICE_CHECK_CONNECT, self.OK, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags
+            )
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags)
+            self.service_check(
+                self.SERVICE_CHECK_CONNECT,
+                self.CRITICAL,
+                ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags,
+            )
             self.log.exception(e)
         else:
             self.submit_metrics(data)
