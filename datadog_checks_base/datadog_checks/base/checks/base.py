@@ -189,6 +189,8 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
+        self.disable_generic_tags = is_affirmative(self.instance.get('disable_generic_tags', False))
+        self.check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False))
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -1085,8 +1087,6 @@ class AgentCheck(object):
                     'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
                 )
 
-        disable_generic_tags = is_affirmative(self.instance.get('disable_generic_tags', False))
-        check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False))
         for tag in tags:
             if tag is None:
                 continue
@@ -1095,9 +1095,9 @@ class AgentCheck(object):
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-            if check_generic_tags or disable_generic_tags:
+            if self.check_generic_tags or self.disable_generic_tags:
                 tag_name, value = tag.split(':')
-                if tag_name not in GENERIC_TAGS or not disable_generic_tags:
+                if tag_name not in GENERIC_TAGS or not self.disable_generic_tags:
                     normalized_tags.append(tag)
                 if tag_name in GENERIC_TAGS:
                     new_name = '{}_{}'.format(self.name, tag_name)
