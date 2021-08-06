@@ -223,6 +223,35 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    # verify that the old status check returns OK
+    aggregator.assert_service_check('sqlserver.can_connect', tags=['db:master', 'optional:tag1'], status=SQLServer.OK)
+
+    # verify all databses in autodiscovery are
+    for database in instance_autodiscovery['autodiscovery_include']:
+        aggregator.assert_service_check(
+            'sqlserver.database.can_connect', tags=[f'database:{database}', 'optional:tag1'], status=SQLServer.OK
+        )
+
+    instance_autodiscovery['autodiscovery_include'] = ['master']
+    instance_autodiscovery['autodiscovery_exclude'] = ['msdb']
+
+    # assert no connection is created for an excluded database
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect', tags=['database:msdb', 'optional:tag1'], status=SQLServer.OK, count=0
+    )
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect', tags=['database:master', 'optional:tag1'], status=SQLServer.OK
+    )
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodiscovery):
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
