@@ -259,13 +259,9 @@ class OpenstackSDKApi(AbstractApi):
         # With SimpleApi this method returns either the new or the old format depending on the hypervisor.
         # Because openstacksdk only supports the new format, this method either returns the new format with new
         # hypervisor, or an empty payload with older hypervisor.
-        if PY3:
-            self._check_authentication()
+        self._check_authentication()
 
-            return self.connection.compute.get_server_diagnostics(server_id)
-        else:
-            self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
-            raise NotImplementedError()
+        return self.connection.compute.get_server_diagnostics(server_id)
 
 
 class SimpleApi(AbstractApi):
