@@ -77,13 +77,13 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional
+    ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
     ## Cancelled queries won't log any metrics.
     #
-    # query_timeout: 1000
+    # query_timeout: 5000
 
     ## @param relations - (list of string or mapping) - optional
     ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.

@@ -7,11 +7,12 @@ datadog-amazon-msk==1.8.1
 datadog-ambari==1.6.2; sys_platform != 'win32'
 datadog-apache==1.17.0
 datadog-aspdotnet==1.7.0; sys_platform == 'win32'
+datadog-avi-vantage==1.0.0
 datadog-azure-iot-edge==2.1.0
 datadog-btrfs==1.11.1; sys_platform != 'win32'
 datadog-cacti==1.8.3; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.8.0
-datadog-cassandra==1.12.0
+datadog-cassandra==1.13.0
 datadog-ceph==2.4.1; sys_platform != 'win32'
 datadog-checks-base==20.2.0
 datadog-checks-downloader==3.4.0
@@ -27,7 +28,7 @@ datadog-couch==3.13.3
 datadog-couchbase==1.17.0
 datadog-crio==1.6.0
 datadog-directory==1.10.0
-datadog-disk==4.3.0
+datadog-disk==4.4.0
 datadog-dns-check==2.0.1
 datadog-dotnetclr==1.8.0; sys_platform == 'win32'
 datadog-druid==1.6.1
@@ -96,7 +97,7 @@ datadog-openldap==1.7.0
 datadog-openmetrics==1.14.0
 datadog-openstack-controller==1.11.0
 datadog-openstack==1.11.0
-datadog-oracle==3.3.3
+datadog-oracle==3.3.4
 datadog-pdh-check==1.13.0; sys_platform == 'win32'
 datadog-pgbouncer==2.0.0; sys_platform != 'win32'
 datadog-php-fpm==1.11.1
