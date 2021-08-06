@@ -13,8 +13,10 @@ files:
             In a future release, this option will be set to `true` by default.
             This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
           value:
-            example: false
+            example: true
+            display_default: false
             type: boolean
+          enabled: true
         - name: istiod_endpoint
           description: |
             Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
