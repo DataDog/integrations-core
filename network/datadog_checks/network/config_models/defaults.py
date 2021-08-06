@@ -12,6 +12,10 @@ def instance_blacklist_conntrack_metrics(field, value):
     return []
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_aws_ena_metrics(field, value):
     return False
 
@@ -38,6 +42,10 @@ def instance_combine_connection_states(field, value):
 
 def instance_conntrack_path(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):

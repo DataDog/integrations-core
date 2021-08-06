@@ -40,12 +40,20 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_node_metrics(field, value):
     return True
 
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):

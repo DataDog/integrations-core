@@ -40,6 +40,10 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_client_token(field, value):
     return get_default_field_value(field, value)
 
@@ -53,6 +57,10 @@ def instance_connect_timeout(field, value):
 
 
 def instance_detect_leader(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
     return False
 
 

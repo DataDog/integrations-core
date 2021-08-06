@@ -27,10 +27,12 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     backup_servers: Optional[Sequence[Mapping[str, Any]]]
+    check_generic_tags: Optional[bool]
     client_lib_log_level: Optional[str]
     connection_load_balance: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     db: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     metric_groups: Optional[Sequence[str]]
     min_collection_interval: Optional[float]

@@ -3,12 +3,19 @@
 - template: instances/global
 - name: disable_generic_tags
   description: |
-    Generic tags such as cluster that come from query executions will be replaced by <integration_name>_cluster
-    to avoid getting mixed with other integraton tags
-    value:
+    Generic tags such as cluster will be replaced by <integration_name>_cluster to avoid
+    getting mixed with other integraton tags.
   value:
     type: boolean
     display_default: false
     example: true
-  enabled: true
+  hidden: true
+- name: check_generic_tags
+  description: |
+    When a generic tag is detected a matching <integration_name>_cluster will be emitted as well to avoid
+    getting mixed with other integraton tags
+  value:
+    type: boolean
+    display_default: false
+    example: true
   hidden: true

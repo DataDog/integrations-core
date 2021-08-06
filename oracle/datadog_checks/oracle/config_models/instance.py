@@ -26,7 +26,9 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    check_generic_tags: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     jdbc_driver_path: Optional[str]
     min_collection_interval: Optional[float]

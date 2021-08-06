@@ -36,6 +36,10 @@ def instance_availability_group(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_command_timeout(field, value):
     return 5
 
@@ -66,6 +70,10 @@ def instance_database_autodiscovery_interval(field, value):
 
 def instance_db_fragmentation_object_names(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_driver(field, value):

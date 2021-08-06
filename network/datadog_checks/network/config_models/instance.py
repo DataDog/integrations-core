@@ -18,6 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     blacklist_conntrack_metrics: Optional[Sequence[str]]
+    check_generic_tags: Optional[bool]
     collect_aws_ena_metrics: Optional[bool]
     collect_connection_queues: Optional[bool]
     collect_connection_state: Optional[bool]
@@ -25,6 +26,7 @@ class InstanceConfig(BaseModel):
     collect_rate_metrics: Optional[bool]
     combine_connection_states: Optional[bool]
     conntrack_path: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     excluded_interface_re: Optional[str]
     excluded_interfaces: Optional[Sequence[str]]

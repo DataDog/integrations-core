@@ -24,6 +24,10 @@ def instance_batch_tags_collector_size(field, value):
     return 200
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_attributes(field, value):
     return False
 
@@ -50,6 +54,10 @@ def instance_collection_level(field, value):
 
 def instance_collection_type(field, value):
     return 'realtime'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_excluded_host_tags(field, value):

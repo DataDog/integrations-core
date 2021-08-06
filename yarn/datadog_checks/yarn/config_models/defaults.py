@@ -48,6 +48,10 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_cluster_name(field, value):
     return 'default_cluster'
 
@@ -62,6 +66,10 @@ def instance_collect_node_metrics(field, value):
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_disable_legacy_cluster_tag(field, value):

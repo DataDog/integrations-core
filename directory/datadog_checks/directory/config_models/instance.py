@@ -17,10 +17,12 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    check_generic_tags: Optional[bool]
     countonly: Optional[bool]
     directory: str
     dirs_patterns_full: Optional[bool]
     dirtagname: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exclude_dirs: Optional[Sequence[str]]
     filegauges: Optional[bool]
