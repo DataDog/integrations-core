@@ -270,6 +270,21 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+    ## Configure collection of query samples
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active query samples. Requires `dbm: true` and query_samples to be enabled.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 1
+        ## Set the active query sample collection interval (in seconds). This controls how often active query
+        #  information is reported, and cannot be lower than the collection_interval set for query_samples.
+        #
+        # collection_interval: 1
+
     ## Configure how the SQL obfuscator behaves.
     #
     obfuscator_options:
