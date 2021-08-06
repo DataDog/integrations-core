@@ -37,7 +37,7 @@ class SnowflakeCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
         # Change default value
-        self.instance['check_generic_tags'] = is_affirmative(self.instance.get('check_generic_tags', True))
+        self.check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', True))
 
         self._config = Config(self.instance)
         self._conn = None
