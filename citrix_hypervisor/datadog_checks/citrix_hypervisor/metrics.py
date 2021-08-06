@@ -5,7 +5,6 @@ import re
 from typing import Any, List, Optional, Tuple
 
 SIMPLE_METRICS = {
-    'cpu0': '.cpu',
     'memory': '.memory',
     'memory_reclaimed_max': '.memory.reclaimed_max',
     'memory_reclaimed': '.memory.reclaimed',
@@ -17,12 +16,16 @@ SIMPLE_METRICS = {
     'xapi_free_memory_kib': '.xapi.free_memory_kib',
     'xapi_live_memory_kib': '.xapi.live_memory_kib',
     'xapi_allocation_kib': '.xapi.allocation_kib',
+    'xapi_open_fds': '.xapi.open_fds',
 }
 
 REGEX_METRICS = [
     {'regex': 'sr_([a-z0-9-]+)_cache_misses', 'name': '.cache_misses', 'tags': ('cache_sr',)},
     {'regex': 'sr_([a-z0-9-]+)_cache_hits', 'name': '.cache_hits', 'tags': ('cache_sr',)},
     {'regex': 'sr_([a-z0-9-]+)_cache_size', 'name': '.cache_size', 'tags': ('cache_sr',)},
+    {'regex': 'pif_([a-zA-Z0-9-]+)_rx', 'name': '.pif.rx', 'tags': ('interface',)},
+    {'regex': 'pif_([a-zA-Z0-9-]+)_tx', 'name': '.pif.tx', 'tags': ('interface',)},
+    {'regex': 'cpu([a-zA-Z0-9-]+)', 'name': '.cpu', 'tags': ('cpu_id',)},
 ]
 
 METRICS_SUFFIX = {
