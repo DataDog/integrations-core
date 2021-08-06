@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     application_name: Optional[str]
+    check_generic_tags: Optional[bool]
     collect_activity_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_database_size_metrics: Optional[bool]
@@ -68,6 +69,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]

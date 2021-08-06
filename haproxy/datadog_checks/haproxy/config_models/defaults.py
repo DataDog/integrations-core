@@ -52,6 +52,10 @@ def instance_bearer_token_path(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collate_status_tags_per_host(field, value):
     return True
 
@@ -74,6 +78,10 @@ def instance_connect_timeout(field, value):
 
 def instance_count_status_by_service(field, value):
     return True
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_disable_legacy_service_tag(field, value):

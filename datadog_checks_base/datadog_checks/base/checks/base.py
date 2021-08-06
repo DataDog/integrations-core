@@ -1086,6 +1086,7 @@ class AgentCheck(object):
                 )
 
         disable_generic_tags = is_affirmative(self.instance.get('disable_generic_tags', False))
+        check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False))
         for tag in tags:
             if tag is None:
                 continue
@@ -1094,13 +1095,14 @@ class AgentCheck(object):
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-            tag_name, value = tag.split(':')
-            if tag_name not in GENERIC_TAGS or not disable_generic_tags:
+            if check_generic_tags or disable_generic_tags:
+                tag_name, value = tag.split(':')
+                if tag_name not in GENERIC_TAGS or not disable_generic_tags:
+                    normalized_tags.append(tag)
+                if tag_name in GENERIC_TAGS:
+                    new_name = '{}_{}'.format(self.name, tag_name)
+                    normalized_tags.append('{}:{}'.format(new_name, value))
+            else:
                 normalized_tags.append(tag)
-            if tag_name in GENERIC_TAGS:
-                new_name = '{}_{}'.format(self.name, tag_name)
-                normalized_tags.append('{}:{}'.format(new_name, value))
-
-            normalized_tags.append(tag)
 
         return normalized_tags

@@ -12,6 +12,10 @@ def instance_application_name(field, value):
     return 'datadog-agent'
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_activity_metrics(field, value):
     return False
 
@@ -53,6 +57,10 @@ def instance_dbname(field, value):
 
 
 def instance_dbstrict(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
     return False
 
 

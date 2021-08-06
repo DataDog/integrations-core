@@ -20,6 +20,10 @@ def instance_channels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_statistics_metrics(field, value):
     return False
 
@@ -29,6 +33,10 @@ def instance_connection_name(field, value):
 
 
 def instance_convert_endianness(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
     return False
 
 

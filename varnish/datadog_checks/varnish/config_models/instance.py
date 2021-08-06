@@ -17,8 +17,10 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    check_generic_tags: Optional[bool]
     daemon_host: Optional[str]
     daemon_port: Optional[int]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     metrics_filter: Optional[Sequence[str]]
     min_collection_interval: Optional[float]

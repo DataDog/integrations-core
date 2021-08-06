@@ -105,6 +105,7 @@ class InstanceConfig(BaseModel):
     attributes_prefix: Optional[str]
     batch_property_collector_size: Optional[int]
     batch_tags_collector_size: Optional[int]
+    check_generic_tags: Optional[bool]
     collect_attributes: Optional[bool]
     collect_events: Optional[bool]
     collect_events_only: Optional[bool]
@@ -112,6 +113,7 @@ class InstanceConfig(BaseModel):
     collect_tags: Optional[bool]
     collection_level: Optional[int]
     collection_type: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: bool
     excluded_host_tags: Optional[Sequence[str]]
     host: str
