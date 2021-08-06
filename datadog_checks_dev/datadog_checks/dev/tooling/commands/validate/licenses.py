@@ -13,6 +13,7 @@ from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import get_agent_requirements, get_license_attribution_file
+from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 EXPLICIT_LICENSES = {
@@ -102,6 +103,17 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
     'Zope Public License': 'ZPL-2.1',
 }
 
+EXTRA_LICENSES = {'BSD-2-Clause'}
+
+VALID_LICENSES = (
+    EXTRA_LICENSES
+    | set(KNOWN_LICENSES.values())
+    | set(CLASSIFIER_TO_HIGHEST_SPDX.values())
+    | set(KNOWN_CLASSIFIERS.values())
+)
+
+HEADERS = ['Component', 'Origin', 'License', 'Copyright']
+
 
 def format_attribution_line(package_name, license_id, package_copyright):
     package_copyright = ' | '.join(sorted(package_copyright))
@@ -157,6 +169,56 @@ async def scrape_license_data(urls):
     return package_data
 
 
+def validate_extra_licenses():
+    """
+    Validates extra third party licenses.
+
+    An integration may use code from an outside source or origin that is not pypi-
+    it will have a file in its check directory titled `3rdparty-extra-LICENSE.csv`
+    """
+    lines = []
+    any_errors = False
+
+    all_extra_licenses = get_extra_license_files()
+
+    for license_file in all_extra_licenses:
+        errors = False
+        rows = read_license_file_rows(license_file)
+        for line_no, row, line in rows:
+            # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+            if None in row.values():
+                errors = True
+                any_errors = True
+                echo_failure(f"{license_file}:{line_no} Has the wrong amount of columns")
+                continue
+
+            # all headers exist, no invalid headers
+            all_keys = set(row)
+            ALL_HEADERS = set(HEADERS)
+            if all_keys != ALL_HEADERS:
+                invalid_headers = all_keys.difference(ALL_HEADERS)
+                if invalid_headers:
+                    echo_failure(f'{license_file}:{line_no} Invalid column {invalid_headers}')
+
+                missing_headers = ALL_HEADERS.difference(all_keys)
+                if missing_headers:
+                    echo_failure(f'{license_file}:{line_no} Missing columns {missing_headers}')
+
+                errors = True
+                any_errors = True
+                continue
+            license_type = row['License']
+            if license_type not in VALID_LICENSES:
+                errors = True
+                any_errors = True
+                echo_failure(f'{license_file}:{line_no} Invalid license type {license_type}')
+                continue
+            if not errors:
+                lines.append(line)
+
+    return lines, any_errors
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
 @click.pass_context
@@ -184,7 +246,9 @@ def licenses(ctx, sync):
 
     package_license_errors = defaultdict(list)
 
-    lines = ['Component,Origin,License,Copyright\n']
+    header_line = "{}\n".format(','.join(HEADERS))
+
+    lines = [header_line]
     for package_name, data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
@@ -238,9 +302,17 @@ def licenses(ctx, sync):
 
         abort()
 
+    extra_licenses_lines, any_errors = validate_extra_licenses()
+    lines.extend(extra_licenses_lines)
+    lines.sort()
     license_attribution_file = get_license_attribution_file()
     if sync:
         write_file_lines(license_attribution_file, lines)
-        echo_success('Success!')
+        if any_errors:
+            abort('Failed to write all extra licenses. Please fix any reported errors')
+        else:
+            echo_success('Success!')
     elif read_file_lines(license_attribution_file) != lines:
         abort('Out of sync, run again with the --sync flag')
+    elif any_errors:
+        abort()

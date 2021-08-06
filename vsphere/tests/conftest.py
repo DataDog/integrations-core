@@ -30,6 +30,7 @@ def realtime_instance():
         'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
         'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
         'ssl_verify': False,
+        'rest_api_options': None,
     }
 
 
