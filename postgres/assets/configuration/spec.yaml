@@ -320,6 +320,24 @@ files:
           value:
             type: integer
             example: 10000
+      # TODO: this should probably be configured under query_samples
+      # eventually these won't be configured differently.
+    - name: query_activity
+      description: Configure collection of activity query samples
+      options:
+        - name: enabled
+          description: |
+            Enable collection of activity query samples. Requires `dbm: true`, and enabling query_samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the activity query sample collection interval (in seconds). This number cannot be smaller than
+            query_samples configured collection_interval.
+          value:
+            type: number
+            example: 1
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:
