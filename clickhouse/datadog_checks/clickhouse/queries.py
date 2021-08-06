@@ -15,8 +15,8 @@ SystemMetrics = {
             'source': 'value',
             'items': {
                 'ActiveAsyncDrainedConnections': {'name': 'drained_connections.async.active', 'type': 'gauge'},
-                'ActiveSyncDrainedConnections': {'name': 'drained_connections.sync', 'type': 'gauge'},
-                'AsyncDrainedConnections': {'name': 'drained_connections.async.active', 'type': 'gauge'},
+                'ActiveSyncDrainedConnections': {'name': 'drained_connections.sync.active', 'type': 'gauge'},
+                'AsyncDrainedConnections': {'name': 'drained_connections.async', 'type': 'gauge'},
                 'BackgroundBufferFlushSchedulePoolTask': {
                     'name': 'background_pool.buffer_flush_schedule.task.active',
                     'type': 'gauge',
