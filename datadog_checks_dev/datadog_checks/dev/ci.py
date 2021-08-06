@@ -25,3 +25,7 @@ def running_on_linux_ci():
 
 def running_on_macos_ci():
     return running_on_ci() and os.environ.get('AGENT_OS') == 'Darwin'
+
+
+def running_on_gh_actions():
+    return 'GITHUB_ACTIONS' in os.environ
