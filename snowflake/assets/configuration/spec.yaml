@@ -167,3 +167,4 @@ files:
           min_collection_interval.enabled: 3600
           disable_generic_tags.hidden: False
           disable_generic_tags.enabled: True
+          check_generic_tags.display_default: True
