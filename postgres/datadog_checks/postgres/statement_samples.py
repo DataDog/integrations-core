@@ -155,7 +155,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.activity_samples_config.get('enabled', False))
-        # activity events must be reported at least as often as regular samples
+        # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.activity_samples_config.get('collection_interval', collection_interval), collection_interval
         )
