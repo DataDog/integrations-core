@@ -5,7 +5,6 @@ files:
   - template: init_config
     options:
     - template: init_config/default
-    - template: init_config/http
   - template: instances
     options:
     - name: server
