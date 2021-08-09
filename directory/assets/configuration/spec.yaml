@@ -3,8 +3,6 @@ files:
 - name: directory.yaml
   options:
   - template: init_config
-    options:
-    - template: init_config/default
   - template: instances
     options:
     - name: directory

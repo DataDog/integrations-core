@@ -26,6 +26,7 @@ ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 GH_ANNOTATION_LEVELS = ['warning', 'error']
 
+
 def get_tox_env():
     return os.environ['TOX_ENV_NAME']
 

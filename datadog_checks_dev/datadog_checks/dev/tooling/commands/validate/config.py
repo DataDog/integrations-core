@@ -84,9 +84,11 @@ def config(ctx, check, sync, verbose):
         spec.load()
 
         if not default_temp:
+            message = "Missing default template in init_config or instances section"
             check_display_queue.append(
-                lambda **kwargs: echo_failure("Missing default template in init_config or instances section")
+                lambda **kwargs: echo_failure()
             )
+            print_github_annotation(spec_path, '1', message, level="error")
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -95,13 +97,9 @@ def config(ctx, check, sync, verbose):
         else:
             if spec.data['name'] != display_name:
                 files_failed[spec_path] = True
-                check_display_queue.append(
-                    lambda **kwargs: echo_failure(
-                        f"Spec  name `{spec.data['name']}` should be `{display_name}`", **kwargs
-                    )
-                )
-                print_github_annotation(spec_path, '1', "Incorrect `name` field, should be `{}`".format(display_name), level="warning")
-
+                message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
+                check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
+                print_github_annotation(spec_path, '1', message, level="error")
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
