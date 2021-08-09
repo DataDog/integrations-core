@@ -947,7 +947,11 @@
           },
           "id": 7360116371450254,
           "layout": {
-              "is_column_break": true
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 5,
+            "is_column_break": true
           }
       },
       {
