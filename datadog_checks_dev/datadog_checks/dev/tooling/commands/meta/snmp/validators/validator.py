@@ -250,6 +250,7 @@ class SysobjectidValidator(ProfileValidator):
                 self.used_sysobjid[sysobjectid].append(profile)
                 self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
 
+
 class TableColumnHasTagValidator(ProfileValidator):
     """
     Validator responsible to check if all metrics related to a column in a profile
@@ -289,6 +290,7 @@ class TableColumnHasTagValidator(ProfileValidator):
                 lines.append(metric_tag.get('__line__'))
 
         return all_tags_are_valid, lines
+
 
 def get_all_single_validators():
     # type () -> list(ProfileValidator)
