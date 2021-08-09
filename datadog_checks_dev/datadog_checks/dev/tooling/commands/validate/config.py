@@ -118,7 +118,6 @@ def config(ctx, check, sync, verbose):
                                 lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
                             print_github_annotation(example_file_path, message, level="error")
-
         if check_display_queue or verbose:
             echo_info(f'{check}:')
             if verbose:
