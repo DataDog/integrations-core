@@ -108,6 +108,12 @@ ALERT_TYPE_ERROR = 'error'
 # Constants for heartbeat failed collections
 NTNX_sqlserver_heartbeat_collection = "NTNX_sqlserver_heartbeat_collection"
 
+# Constants for Alert to be raise for db db execution time
+NTNX__db_execution_time_exceeded = "NTNX__db_execution_time_exceeded"
+
+# Constant for Query Execution time threshold
+QUERY_EXECUTION_TIME_LIMIT = 10
+
 class SQLConnectionError(Exception):
     """
     Exception raised for SQL instance connection issues
@@ -586,10 +592,23 @@ class SQLServer(AgentCheck):
     def check(self, instance):
         if self.do_check[self._conn_key(instance, self.DEFAULT_DB_KEY)]:
             proc = instance.get('stored_procedure')
+            initialTime = time.time()
             if proc is None:
                 self.do_perf_counter_check(instance)
             else:
                 self.do_stored_procedure_check(instance, proc)
+
+            endTime = time.time()
+            self.log.debug("Check for raising alert if it exceeds execution time")
+            if int(endTime - initialTime) >= QUERY_EXECUTION_TIME_LIMIT:
+                self.log.info("Raising alert due to DB execution time exceeded %s secs" % QUERY_EXECUTION_TIME_LIMIT)
+                alert_title = NTNX__db_execution_time_exceeded
+                alert_message = "DB call is taking more than {} secs to execute. Raising Alert".format(QUERY_EXECUTION_TIME_LIMIT)
+                try:
+                    self.raise_alert(instance, alert_title, alert_message)
+                except Exception as e:
+                    self.log.warning("Sending Alert for DB execution time exceed FAILED with exception: %s ", e)
+
         else:
             self.log.debug("Skipping check")
 
