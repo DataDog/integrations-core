@@ -3,7 +3,7 @@ files:
 - name: directory.yaml
   options:
   - template: init_config
-  - template: instances
+  - template: instance
     options:
     - name: directory
       description: |

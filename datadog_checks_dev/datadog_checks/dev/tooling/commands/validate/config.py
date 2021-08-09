@@ -117,11 +117,11 @@ def config(ctx, check, sync, verbose):
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
+                            message = f'File `{example_file}` is not in sync, run "ddev validate config -s"'
                             check_display_queue.append(
-                                lambda example_file=example_file, **kwargs: echo_failure(
-                                    f'File `{example_file}` is not in sync, run "ddev validate config -s"', **kwargs
-                                )
+                                lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
+                            print_github_annotation(example_file, '1', message, level="error")
 
         if check_display_queue or verbose:
             echo_info(f'{check}:')
@@ -207,14 +207,17 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
         # Verify there is an `instances` section
         if 'instances' not in config_data:
             files_failed[config_file] = True
-            file_display_queue.append(lambda: echo_failure('Missing `instances` section', indent=FILE_INDENT))
-
+            message = 'Missing `instances` section'
+            file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+            print_github_annotation(file_name, '1', message, level="error")
         # Verify there is a default instance
         else:
             instances = config_data['instances']
             if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
                 files_failed[config_file] = True
-                file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
+                message = 'No default instance'
+                file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+                print_github_annotation(file_name, '1', message, level="error")
 
         if file_display_queue:
             check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))
