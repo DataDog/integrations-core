@@ -539,6 +539,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         event = {
             "host": self._db_hostname,
             "ddsource": "postgres",
+            "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "active_queries": active_query_rows,
         }
