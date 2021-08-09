@@ -232,6 +232,8 @@ class SysobjectidValidator(ProfileValidator):
 
     def extract_sysobjectids_profile(self, profile):
         file_contents = get_profile(profile)
+        if not file_contents:
+            return []
         sysobjectid = file_contents.get('sysobjectid')
         if (not isinstance(sysobjectid, list)) and sysobjectid:
             sysobjectid = [sysobjectid]
@@ -249,6 +251,11 @@ class SysobjectidValidator(ProfileValidator):
                 self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
 
 
-def get_all_validators():
+def get_all_single_validators():
     # type () -> list(ProfileValidator)
-    return [SchemaValidator(), DuplicateOIDValidator(), SysobjectidValidator()]
+    return [SchemaValidator(), DuplicateOIDValidator()]
+
+
+def get_all_group_validators():
+    # type () -> list(ProfileValidator)
+    return [SysobjectidValidator()]

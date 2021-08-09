@@ -52,6 +52,7 @@ def exist_profile_in_path(profile_name, path):
 
 
 def get_profile(profile_name, line=True):
+    file_contents = None
     if isfile(profile_name):
         try:
             with open(profile_name) as f:
