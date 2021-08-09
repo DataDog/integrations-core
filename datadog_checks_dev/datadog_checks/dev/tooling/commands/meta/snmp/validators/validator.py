@@ -265,12 +265,17 @@ class TableColumnHasTagValidator(ProfileValidator):
             if metric.get('table'):
                 if not metric.get('metric_tags'):
                     self.fail(
-                        "Table metric defined in line {} does not have tag associated".format(metric.get('__line__'))
+                        "'metric_tags' is missing for table metric defined in line {}.".format(metric.get('__line__'))
                     )
                 else:
                     all_metric_tags_are_valid, lines = self.check_metric_tags_are_valid(metric.get('metric_tags'))
                     if not all_metric_tags_are_valid:
-                        self.fail("metric_tables defined in lines {} are not valid".format(lines))
+                        self.fail(
+                            "metric_tables defined in lines {} are not valid. \
+                        \nmetric_tags defined does not contains neither option 'column' nor 'index'".format(
+                                lines
+                            )
+                        )
 
         if not self.result.failed:
             self.success("All metric tables have tags associated")
