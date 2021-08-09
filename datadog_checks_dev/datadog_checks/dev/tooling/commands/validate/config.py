@@ -85,9 +85,7 @@ def config(ctx, check, sync, verbose):
 
         if not default_temp:
             message = "Missing default template in init_config or instances section"
-            check_display_queue.append(
-                lambda **kwargs: echo_failure(message)
-            )
+            check_display_queue.append(lambda **kwargs: echo_failure(message))
             print_github_annotation(spec_path, '1', message, level="error")
 
         if spec.errors:
