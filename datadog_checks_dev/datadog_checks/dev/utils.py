@@ -143,4 +143,4 @@ def print_github_annotation(file, line, message, level=None):
     if level not in GH_ANNOTATION_LEVELS:
         level = "warning"
     if running_on_gh_actions():
-        os.system("echo '::{} file={},line={} {}'".format(level, file, line, message))
+        os.system("echo '::{} file={},line={}::{}'".format(level, file, line, message))
