@@ -147,11 +147,11 @@ files:
               service.hidden: true
               min_collection_interval.hidden: true
               empty_default_hostname.hidden: true
-          - template: logs
-            example:
-              - type: file
-                path: /var/log/apache2/*.log
-                source: openstack
-              - type: file
-                path: /var/log/libvirt/*.log
-                source: openstack
+      - template: logs
+        example:
+          - type: file
+            path: /var/log/apache2/*.log
+            source: openstack
+          - type: file
+            path: /var/log/libvirt/*.log
+            source: openstack
