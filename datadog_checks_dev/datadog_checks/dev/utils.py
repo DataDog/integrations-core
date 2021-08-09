@@ -30,6 +30,7 @@ GH_ANNOTATION_LEVELS = ['warning', 'error']
 =======
 >>>>>>> Test annotation
 
+
 def get_tox_env():
     return os.environ['TOX_ENV_NAME']
 
