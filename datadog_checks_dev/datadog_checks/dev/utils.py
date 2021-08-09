@@ -18,13 +18,13 @@ from six.moves.urllib.request import urlopen
 
 from datadog_checks.dev.fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
-from .ci import running_on_ci, running_on_windows_ci  # noqa: F401
+from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
-
+GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 def get_tox_env():
     return os.environ['TOX_ENV_NAME']
@@ -137,3 +137,10 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def print_github_annotation(file, line, message, level=None):
+    if level not in GH_ANNOTATION_LEVELS:
+        level = "warning"
+    if running_on_gh_actions():
+        print("::{} file={},line={}".format(level, file, line, message))

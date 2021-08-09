@@ -8,6 +8,7 @@ from datadog_checks.dev.tooling.config_validator.validator import validate_confi
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
+from datadog_checks.dev.utils import print_github_annotation
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...testing import process_checks_option
@@ -99,6 +100,8 @@ def config(ctx, check, sync, verbose):
                         f"Spec  name `{spec.data['name']}` should be `{display_name}`", **kwargs
                     )
                 )
+                print_github_annotation(spec_path, '1', "Incorrect `name` field, should be `{}`".format(display_name), level="warning")
+
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
