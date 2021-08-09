@@ -17,8 +17,8 @@
   value:
     type: array
     example:
-      - processor:cpu
-      - memory:mem
+      - processor: cpu
+      - memory: mem
       - io
     items:
       anyOf:
