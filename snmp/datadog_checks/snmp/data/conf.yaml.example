@@ -67,7 +67,6 @@ init_config:
     ##         - This means new OIDs are also only picked up every refresh interval.
     ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
     ##         the OIDs are refreshed only according to the refresh interval.
-    ## Only available using python SNMP integration
     #
     # refresh_oids_cache_interval: 3600
 
