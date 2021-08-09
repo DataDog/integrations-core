@@ -228,7 +228,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
         system_info = self.fetch_system_info()
         if system_info:
             query_list = [
-                queries.get_base_disk_usage(self.config.query_timeout),
                 queries.get_cpu_usage(self.config.query_timeout),
                 queries.get_jobq_job_status(self.config.job_query_timeout),
                 queries.get_active_job_status(self.config.job_query_timeout),
@@ -237,9 +236,13 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 queries.get_job_queue_info(self.config.query_timeout),
                 queries.get_message_queue_info(self.config.system_mq_query_timeout, self.config.severity_threshold),
             ]
+
             if system_info.os_version > 7 or (system_info.os_version == 7 and system_info.os_release >= 3):
+                query_list.append(queries.get_base_disk_usage_73(self.config.query_timeout))
                 query_list.append(queries.get_disk_usage(self.config.query_timeout))
                 query_list.append(queries.get_subsystem_info(self.config.query_timeout))
+            else:
+                query_list.append(queries.get_base_disk_usage_72(self.config.query_timeout))
 
             if self.config.fetch_ibm_mq_metrics and self.ibm_mq_check():
                 query_list.append(queries.get_ibm_mq_info(self.config.query_timeout))

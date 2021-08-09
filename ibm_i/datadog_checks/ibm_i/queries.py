@@ -2,10 +2,32 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-def get_base_disk_usage(timeout):
+def get_base_disk_usage_72(timeout):
     return {
-        'name': 'base_disk_usage',
+        'name': 'base_disk_usage_72',
+        'query': {
+            'text': (
+                # Use DISTINCT because one serial number can have multiple lines with different RESOURCE NAMEs,
+                # but we only want one metric per disk for disk space usage.
+                'SELECT DISTINCT ASP_NUMBER, UNIT_NUMBER, UNIT_TYPE, UNIT_STORAGE_CAPACITY, '
+                'UNIT_SPACE_AVAILABLE, PERCENT_USED FROM QSYS2.SYSDISKSTAT'
+            ),
+            'timeout': timeout,
+        },
+        'columns': [
+            {'name': 'asp_number', 'type': 'tag'},
+            {'name': 'unit_number', 'type': 'tag'},
+            {'name': 'unit_type', 'type': 'tag'},
+            {'name': 'ibm_i.asp.unit_storage_capacity', 'type': 'gauge'},
+            {'name': 'ibm_i.asp.unit_space_available', 'type': 'gauge'},
+            {'name': 'ibm_i.asp.percent_used', 'type': 'gauge'},
+        ],
+    }
+
+
+def get_base_disk_usage_73(timeout):
+    return {
+        'name': 'base_disk_usage_73',
         'query': {
             'text': (
                 # Use DISTINCT because one serial number can have multiple lines with different RESOURCE NAMEs,
