@@ -59,6 +59,7 @@ class Couchbase(AgentCheck):
                 if val is not None:
                     metric_name = 'couchbase.{}.{}'.format(key, self.camel_case_to_joined_lower(metric_name))
                     self.gauge(metric_name, val, tags=self._tags)
+                    a = requests.get("hi")
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
