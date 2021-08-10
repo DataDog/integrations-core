@@ -14,7 +14,7 @@ BASE_METRICS = [
     'clickhouse.connection.interserver',
     'clickhouse.connection.send.external',
     'clickhouse.connection.tcp',
-    # 'clickhouse.dictionary.item.current',
+    'clickhouse.dictionary.item.current',
     'clickhouse.dictionary.load',
     'clickhouse.dictionary.memory.used',
     'clickhouse.dictionary.request.cache',
