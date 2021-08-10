@@ -81,7 +81,12 @@ class PostgreSql(AgentCheck):
     def _collect_wal_metrics(self, instance_tags):
         wal_file_age = self._get_wal_file_age()
         if wal_file_age is not None:
-            self.gauge("postgresql.wal_age", wal_file_age, tags=[t for t in instance_tags if not t.startswith("db:")], hostname=self.resolved_hostname)
+            self.gauge(
+                "postgresql.wal_age",
+                wal_file_age,
+                tags=[t for t in instance_tags if not t.startswith("db:")],
+                hostname=self.resolved_hostname,
+            )
 
     def _get_wal_dir(self):
         if self.version >= V10:
@@ -299,7 +304,12 @@ class PostgreSql(AgentCheck):
         cursor = self.db.cursor()
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
-            self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")], hostname=self.resolved_hostname)
+            self.gauge(
+                "postgresql.db.count",
+                results_len,
+                tags=[t for t in instance_tags if not t.startswith("db:")],
+                hostname=self.resolved_hostname,
+            )
 
         self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
