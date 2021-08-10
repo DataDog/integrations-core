@@ -89,7 +89,6 @@ def validate_use_http_wrapper_file(file, check):
                         f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
                         f'please use the HTTP wrapper instead'
                     )
-
                     print_github_annotation(
                         file, num, "Detected use of `{http_func}`, please use the HTTP wrapper instead", level="warning"
                     )
