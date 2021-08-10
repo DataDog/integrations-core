@@ -357,7 +357,7 @@ class SupportedOSValidator(ManifestValidator):
         if check_name in LOGS_EXCLUDE_LIST:
             return
 
-        if (check_has_logs or check_has_python) and not supported_os:
+        if not supported_os and (check_has_logs or check_has_python):
             output = f'Attribute `supported_os` in {check_name}/manifest.json should not be empty.'
             self.fail(output)
 
