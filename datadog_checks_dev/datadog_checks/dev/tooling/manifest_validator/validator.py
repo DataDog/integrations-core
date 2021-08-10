@@ -27,17 +27,17 @@ METRIC_TO_CHECK_EXCLUDE_LIST = {
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 LOGS_EXCLUDE_LIST = {
-        'docker_daemon',
-        'ecs_fargate',  # Logs are provided by FireLens or awslogs
-        'cassandra_nodetool',  # Logs are provided by cassandra
-        'jmeter',
-        'kafka_consumer',  # Logs are provided by kafka
-        'kubernetes',
-        'pan_firewall',
-        'altostra',
-        'hasura_cloud',
-        'sqreen',
-    }
+    'docker_daemon',
+    'ecs_fargate',  # Logs are provided by FireLens or awslogs
+    'cassandra_nodetool',  # Logs are provided by cassandra
+    'jmeter',
+    'kafka_consumer',  # Logs are provided by kafka
+    'kubernetes',
+    'pan_firewall',
+    'altostra',
+    'hasura_cloud',
+    'sqreen',
+}
 
 
 class ValidationResult(object):
