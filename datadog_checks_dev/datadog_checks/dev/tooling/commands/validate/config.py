@@ -86,7 +86,7 @@ def config(ctx, check, sync, verbose):
         if not default_temp:
             message = "Missing default template in init_config or instances section"
             check_display_queue.append(lambda **kwargs: echo_failure(message))
-            print_github_annotation(spec_path, '1', message, level="error")
+            print_github_annotation(spec_path, message, level="error")
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -97,7 +97,7 @@ def config(ctx, check, sync, verbose):
                 files_failed[spec_path] = True
                 message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
                 check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
-                print_github_annotation(spec_path, '1', message, level="error")
+                print_github_annotation(spec_path, message, level="error")
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
@@ -119,7 +119,7 @@ def config(ctx, check, sync, verbose):
                             check_display_queue.append(
                                 lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
-                            print_github_annotation(example_file_path, '1', message, level="error")
+                            print_github_annotation(example_file_path, message, level="error")
 
         if check_display_queue or verbose:
             echo_info(f'{check}:')
@@ -207,7 +207,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             files_failed[config_file] = True
             message = 'Missing `instances` section'
             file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
-            print_github_annotation(file_name, '1', message, level="error")
+            print_github_annotation(file_name, message, level="error")
         # Verify there is a default instance
         else:
             instances = config_data['instances']
@@ -215,7 +215,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
                 files_failed[config_file] = True
                 message = 'No default instance'
                 file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
-                print_github_annotation(file_name, '1', message, level="error")
+                print_github_annotation(file_name, message, level="error")
 
         if file_display_queue:
             check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))
