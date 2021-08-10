@@ -662,8 +662,9 @@ def find_legacy_signature(check):
     for path, _, files in os.walk(get_check_directory(check)):
         for f in files:
             if f.endswith('.py'):
-                with open(os.path.join(path, f)) as test_file:
+                file_path = os.path.join(path, f)
+                with open(file_path) as test_file:
                     for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return str(f), num
+                            return file_path, num
     return None

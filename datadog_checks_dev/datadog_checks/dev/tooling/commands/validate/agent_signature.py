@@ -2,7 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 import click
+
+from datadog_checks.dev.utils import print_github_annotation
 
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, find_legacy_signature
@@ -29,8 +33,15 @@ def legacy_signature(check):
         check_failed = find_legacy_signature(check)
         if check_failed is not None:
             has_failed = True
-            failed_file, failed_num = check_failed
+            failed_file_path, failed_num = check_failed
+            failed_file = os.path.basename(failed_file_path)
             echo_failure(f"Check `{check}` uses legacy agent signature in `{failed_file}` on line {failed_num}")
+            print_github_annotation(
+                failed_file_path,
+                "Detected use of legacy agent signature, please use the new signature",
+                level="warning",
+                line=failed_num,
+            )
 
     if not has_failed:
         if check:
