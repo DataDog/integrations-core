@@ -37,6 +37,7 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
+        self._resolved_hostname = None
         self._version = None
         self._is_aurora = None
         self._version_utils = VersionUtils()
@@ -80,7 +81,7 @@ class PostgreSql(AgentCheck):
     def _collect_wal_metrics(self, instance_tags):
         wal_file_age = self._get_wal_file_age()
         if wal_file_age is not None:
-            self.gauge("postgresql.wal_age", wal_file_age, tags=[t for t in instance_tags if not t.startswith("db:")])
+            self.gauge("postgresql.wal_age", wal_file_age, tags=[t for t in instance_tags if not t.startswith("db:")], hostname=self.resolved_hostname)
 
     def _get_wal_dir(self):
         if self.version >= V10:
@@ -134,6 +135,12 @@ class PostgreSql(AgentCheck):
         if self._is_aurora is None:
             self._is_aurora = self._version_utils.is_aurora(self.db)
         return self._is_aurora
+
+    @property
+    def resolved_hostname(self):
+        if self._resolved_hostname is None:
+            self._resolved_hostname = resolve_db_host(self._config.host)
+        return self._resolved_hostname
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
@@ -252,7 +259,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=set(tags))
+                submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
             num_results += 1
 
@@ -292,7 +299,7 @@ class PostgreSql(AgentCheck):
         cursor = self.db.cursor()
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
-            self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
+            self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")], hostname=self.resolved_hostname)
 
         self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
@@ -362,6 +369,7 @@ class PostgreSql(AgentCheck):
                 "dd.postgres.error",
                 1,
                 tags=self._config.tags + ["error:load-track-activity-query-size"],
+                hostname=self.resolved_hostname,
             )
 
     def _get_db(self, dbname):
@@ -491,11 +499,10 @@ class PostgreSql(AgentCheck):
                     else:
                         for info in metric_info:
                             metric, value, method = info
-                            getattr(self, method)(metric, value, tags=set(query_tags))
+                            getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
 
     def check(self, _):
         tags = copy.copy(self._config.tags)
-        tags.append('host:{}'.format(resolve_db_host(self._config.host)))
         # Collect metrics
         try:
             # Check version
