@@ -39,7 +39,7 @@ class Couchbase(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, name, init_config, agentConfig, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
         self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
