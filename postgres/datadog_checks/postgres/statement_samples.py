@@ -159,8 +159,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_interval = max(
             self._config.activity_samples_config.get('collection_interval', collection_interval), collection_interval
         )
-        # Use an instance of ConstantRateLimiter to keep track of elapsed time between reported events
-        self._query_activity_rate_limit = ConstantRateLimiter(1 / self._activity_coll_interval)
+        # Keep track of last time we sent an activity event
+        self._time_since_last_activity_event = 0
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -530,12 +530,12 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _create_activity_event(self, active_query_rows):
         # Only send an event if we are configured to do so, and
         # don't report more often than the configured collection interval
+        elapsed_s = time.time() - self._time_since_last_activity_event
         if (
-            self._query_activity_rate_limit.elapsed_time() < self._activity_coll_interval
-            or not self._activity_coll_enabled
+            elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled
         ):
             return None
-
+        self._time_since_last_activity_event = time.time()
         event = {
             "host": self._db_hostname,
             "ddsource": "postgres",

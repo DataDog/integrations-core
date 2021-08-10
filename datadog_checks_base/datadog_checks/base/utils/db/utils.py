@@ -100,11 +100,6 @@ class ConstantRateLimiter:
         time.sleep(sleep_amount)
         self.last_event = time.time()
 
-    def elapsed_time(self):
-        elapsed_s = time.time() - self.last_event
-        self.last_event = time.time()
-        return elapsed_s
-
 
 class RateLimitingTTLCache(TTLCache):
     """
