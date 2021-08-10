@@ -16,12 +16,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature, compute_sql_signature
-from datadog_checks.base.utils.db.utils import (
-    ConstantRateLimiter,
-    DBMAsyncJob,
-    RateLimitingTTLCache,
-    default_json_event_encoding,
-)
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -531,9 +526,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # Only send an event if we are configured to do so, and
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_activity_event
-        if (
-            elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled
-        ):
+        if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
             return None
         self._time_since_last_activity_event = time.time()
         event = {
