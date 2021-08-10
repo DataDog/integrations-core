@@ -42,6 +42,8 @@ METRICS_COLUMNS = {
     'sum_no_good_index_used',
 }
 
+VALUE_UNAVAILABLE = 'unavailable'
+
 
 def _row_key(row):
     """
@@ -184,17 +186,40 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+        event_statements_summary_full = False
+
         for row in rows:
             normalized_row = dict(copy.copy(row))
-            try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
-            except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
-                continue
 
-            normalized_row['digest_text'] = obfuscated_statement
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            # A NULL digest indicates that some queries are not captured in metrics because
+            # the performance_schema query limit was hit. It is important to treat this row
+            # as a real query so that % time metrics calculations are still valid for all
+            # queries, not just tracked queries.
+            # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
+            if normalized_row['digest'] is None:
+                normalized_row['schema'] = VALUE_UNAVAILABLE
+                normalized_row['digest'] = VALUE_UNAVAILABLE
+                normalized_row['query'] = VALUE_UNAVAILABLE
+                normalized_row['query_signature'] = VALUE_UNAVAILABLE
+
+                event_statements_summary_full = True
+            else:
+                try:
+                    obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                except Exception as e:
+                    self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
+                    continue
+
+                normalized_row['digest_text'] = obfuscated_statement
+                normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+
             normalized_rows.append(normalized_row)
+
+        self._check.gauge(
+            "dd.mysql.query_metrics.events_statements_summary_by_digest_full",
+            1 if event_statements_summary_full else 0,
+            tags=self._tags,
+        )
 
         return normalized_rows
 
