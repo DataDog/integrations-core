@@ -25,10 +25,6 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 GH_ANNOTATION_LEVELS = ['warning', 'error']
-<<<<<<< HEAD
-
-=======
->>>>>>> Test annotation
 
 
 def get_tox_env():

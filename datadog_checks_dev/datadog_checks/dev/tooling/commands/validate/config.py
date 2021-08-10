@@ -98,6 +98,7 @@ def config(ctx, check, sync, verbose):
                 message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
                 check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
                 print_github_annotation(spec_path, message, level="error")
+
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
             for example_file, (contents, errors) in example_consumer.render().items():
@@ -119,6 +120,7 @@ def config(ctx, check, sync, verbose):
                                 lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
                             print_github_annotation(example_file_path, message, level="error")
+
         if check_display_queue or verbose:
             echo_info(f'{check}:')
             if verbose:
