@@ -186,7 +186,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
     def _normalize_queries(self, rows):
         normalized_rows = []
-        event_statements_summary_full = False
 
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -196,13 +195,15 @@ class MySQLStatementMetrics(DBMAsyncJob):
             # as a real query so that % time metrics calculations are still valid for all
             # queries, not just tracked queries.
             # See: https://dev.mysql.com/doc/refman/5.7/en/statement-summary-tables.html
-            if normalized_row['digest'] is None:
+            if (
+                normalized_row.get('digest') is None
+                and normalized_row.get('schema') is None
+                and normalized_row.get('digest_text') is None
+            ):
                 normalized_row['schema'] = VALUE_UNAVAILABLE
                 normalized_row['digest'] = VALUE_UNAVAILABLE
-                normalized_row['query'] = VALUE_UNAVAILABLE
+                normalized_row['digest_text'] = VALUE_UNAVAILABLE
                 normalized_row['query_signature'] = VALUE_UNAVAILABLE
-
-                event_statements_summary_full = True
             else:
                 try:
                     obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
@@ -214,12 +215,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
 
             normalized_rows.append(normalized_row)
-
-        self._check.gauge(
-            "dd.mysql.query_metrics.events_statements_summary_by_digest_full",
-            1 if event_statements_summary_full else 0,
-            tags=self._tags,
-        )
 
         return normalized_rows
 
