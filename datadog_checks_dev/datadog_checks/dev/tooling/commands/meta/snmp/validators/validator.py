@@ -273,7 +273,7 @@ class TableColumnHasTagValidator(ProfileValidator):
                     if not all_metric_tags_are_valid:
                         self.fail(
                             "metric_tables defined in lines {} are not valid. \
-                        \nmetric_tags defined does not contains neither option 'column' nor 'index'".format(
+                        \nmetric_tags must have 'column' or 'index' value".format(
                                 lines
                             )
                         )
