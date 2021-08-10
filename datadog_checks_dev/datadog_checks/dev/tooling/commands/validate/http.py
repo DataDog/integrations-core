@@ -55,7 +55,7 @@ def validate_config_http(file, check):
             f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
         )
         echo_failure(message)
-        print_github_annotation(file, '1', message, level="error")
+        print_github_annotation(file, message, level="error")
         has_failed = True
 
     if not has_init_config_http:
@@ -63,7 +63,7 @@ def validate_config_http(file, check):
             f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
         )
         echo_failure(message)
-        print_github_annotation(file, '1', message, level="error")
+        print_github_annotation(file, message, level="error")
         has_failed = True
 
     return has_failed
@@ -90,7 +90,7 @@ def validate_use_http_wrapper_file(file, check):
                         f'please use the HTTP wrapper instead'
                     )
                     print_github_annotation(
-                        file, num, "Detected use of `{http_func}`, please use the HTTP wrapper instead", level="warning"
+                        file, "Detected use of `{http_func}`, please use the HTTP wrapper instead", level="warning", line=num
                     )
                     has_failed = True
 
