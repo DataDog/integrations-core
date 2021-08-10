@@ -38,3 +38,7 @@ jobs:
     - name: Run HTTP wrapper validation
       run: |
         ddev validate http
+
+    - name: Run legacy signature validation
+      run: |
+        ddev validate legacy-signature
