@@ -292,7 +292,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # make a copy of the current row, remove all null values
             # and then replace the query with its query_signature
             active_row = {key: val for key, val in row.items() if val is not None}
-            active_row['query'] = query_signature
+            active_row['query_signature'] = query_signature
+            del active_row['query']
             return six.ensure_str(json.dumps(active_row, default=default_json_event_encoding))
 
     def _can_explain_statement(self, obfuscated_statement):
