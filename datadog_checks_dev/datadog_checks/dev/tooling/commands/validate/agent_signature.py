@@ -39,7 +39,7 @@ def legacy_signature(check):
             print_github_annotation(
                 failed_file_path,
                 "Detected use of legacy agent signature, please use the new signature",
-                level="warning",
+                level="error",
                 line=failed_num,
             )
 
