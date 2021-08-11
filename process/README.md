@@ -30,7 +30,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
   - name: ssh
 
     ## @param search_string - list of strings - optional
-    ## If one of the elements in the list matches, it return the count of
+    ## If one of the elements in the list matches, it returns the count of
     ## all the processes that match the string exactly by default. Change this behavior with the
     ## parameter `exact_match: false`.
     ##
