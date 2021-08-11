@@ -39,7 +39,7 @@ class Couchbase(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
 
-    def __init__(self, name, init_config, agentConfig, instances):
+    def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
 
         self._sync_gateway_url = self.instance.get('sync_gateway_url', None)
@@ -59,6 +59,7 @@ class Couchbase(AgentCheck):
                 if val is not None:
                     metric_name = 'couchbase.{}.{}'.format(key, self.camel_case_to_joined_lower(metric_name))
                     self.gauge(metric_name, val, tags=self._tags)
+                    a = requests.get("hi")
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
