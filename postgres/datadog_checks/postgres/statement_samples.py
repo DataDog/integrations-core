@@ -122,7 +122,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
         self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
+            json.dumps(
+                {
+                    'quantize_sql': self._config.obfuscator_options.get(
+                        'quantize_sql', self._config.get('quantize_sql_tables', False)
+                    )
+                }
+            )
         )
 
         self._collection_strategy_cache = TTLCache(
