@@ -26,18 +26,6 @@ METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
-LOGS_EXCLUDE_LIST = {
-    'docker_daemon',
-    'ecs_fargate',  # Logs are provided by FireLens or awslogs
-    'cassandra_nodetool',  # Logs are provided by cassandra
-    'jmeter',
-    'kafka_consumer',  # Logs are provided by kafka
-    'kubernetes',
-    'pan_firewall',
-    'altostra',
-    'hasura_cloud',
-    'sqreen',
-}
 
 
 class ValidationResult(object):
@@ -320,13 +308,25 @@ class LogsCategoryValidator(ManifestValidator):
     """If an integration defines logs it should have the log collection category"""
 
     LOG_COLLECTION_CATEGORY = "log collection"
+    IGNORE_LIST = {
+        'docker_daemon',
+        'ecs_fargate',  # Logs are provided by FireLens or awslogs
+        'cassandra_nodetool',  # Logs are provided by cassandra
+        'jmeter',
+        'kafka_consumer',  # Logs are provided by kafka
+        'kubernetes',
+        'pan_firewall',
+        'altostra',
+        'hasura_cloud',
+        'sqreen',
+    }
 
     def validate(self, check_name, decoded, fix):
         categories = decoded.get('categories')
         check_has_logs = has_logs(check_name)
         check_has_logs_category = self.LOG_COLLECTION_CATEGORY in categories
 
-        if check_has_logs == check_has_logs_category or check_name in LOGS_EXCLUDE_LIST:
+        if check_has_logs == check_has_logs_category or check_name in self.IGNORE_LIST:
             return
 
         if check_has_logs:
@@ -353,9 +353,6 @@ class SupportedOSValidator(ManifestValidator):
         supported_os = decoded.get('supported_os')
         check_has_logs = has_logs(check_name)
         check_has_python = is_package(check_name)
-
-        if check_name in LOGS_EXCLUDE_LIST:
-            return
 
         if not supported_os and (check_has_logs or check_has_python):
             output = f'Attribute `supported_os` in {check_name}/manifest.json should not be empty.'
