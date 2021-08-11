@@ -207,14 +207,12 @@ def is_version_compatible(marker, supported_versions):
     """
     Determines if any of the given versions are compatible with the given marker
     """
-    os_markers = ['darwin', 'win32']
+    os_markers = ['darwin', 'win32', 'linux', 'aix']
     is_compatible = False
 
     if marker is None:
         # manually set marker since if there's none the dependency should work on all environments
-        marker = Marker(
-            'sys_platform == "win32" or sys_platform == "darwin" and python_version < "3.0" or python_version > "3.0"'
-        )
+        marker = Marker('python_version > "2.0"')
 
     if len(supported_versions) == 0:
         # if there are no classifiers then assume it works on all Python versions
