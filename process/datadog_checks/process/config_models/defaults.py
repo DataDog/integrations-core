@@ -13,7 +13,7 @@ def shared_pid_cache_duration(field, value):
 
 
 def shared_procfs_path(field, value):
-    return '/proc'
+    return get_default_field_value(field, value)
 
 
 def shared_service(field, value):
