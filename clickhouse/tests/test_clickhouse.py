@@ -23,24 +23,23 @@ def test_check(aggregator, instance):
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
     metrics = get_metrics(CLICKHOUSE_VERSION)
+
+    # assert at least 0 for clickhouse.dictionary.* because these metrics do not emit consistently in v21
+    ignore_dictionary_metrics_v21 = re.compile('clickhouse.dictionary.*')
+    at_least = 1
+
     for metric in metrics:
-        # assert at least 0 for clickhouse.dictionary.* because these metrics do not emit consistently in v21
-        ignore_dictionary_metrics_v21 = re.compile('clickhouse.dictionary.*')
-
-        if ignore_dictionary_metrics_v21.search(metric):
-            aggregator.assert_metric_has_tag(metric, server_tag, at_least=0)
-            aggregator.assert_metric_has_tag(metric, port_tag, at_least=0)
-            aggregator.assert_metric_has_tag(metric, 'db:default', at_least=0)
-            aggregator.assert_metric_has_tag(metric, 'foo:bar', at_least=0)
-        else:
-            aggregator.assert_metric_has_tag(metric, server_tag)
-            aggregator.assert_metric_has_tag(metric, port_tag)
-            aggregator.assert_metric_has_tag(metric, 'db:default')
-            aggregator.assert_metric_has_tag(metric, 'foo:bar')
-
+        if ignore_dictionary_metrics_v21.search(metric) and CLICKHOUSE_VERSION == '21':
+            at_least = 0
+        aggregator.assert_metric_has_tag(metric, server_tag, at_least=at_least)
+        aggregator.assert_metric_has_tag(metric, port_tag, at_least=at_least)
+        aggregator.assert_metric_has_tag(metric, 'db:default', at_least=at_least)
+        aggregator.assert_metric_has_tag(metric, 'foo:bar', at_least=at_least)
     aggregator.assert_metric('clickhouse.table.replicated.total', 2)
     aggregator.assert_metric(
-        'clickhouse.dictionary.item.current', tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test']
+        'clickhouse.dictionary.item.current',
+        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
+        at_least=at_least,
     )
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
 

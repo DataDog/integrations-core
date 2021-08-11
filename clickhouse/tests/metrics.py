@@ -101,10 +101,6 @@ V_21_METRICS = [
     'clickhouse.parts.outdated',
     'clickhouse.parts.precommitted',
     'clickhouse.parts.temporary',
-    'clickhouse.mmapped.file.current',
-    'clickhouse.mmapped.file.size',
-    'clickhouse.network.receive.elapsed.time',
-    'clickhouse.network.send.elapsed.time',
 ]
 
 version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, '21': V_21_METRICS}
