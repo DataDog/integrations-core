@@ -17,7 +17,9 @@ The Process Check is included in the [Datadog Agent][1] package, so you don't ne
 
 Unlike many checks, the Process Check doesn't monitor anything useful by default. You must configure which processes you want to monitor, and how.
 
-1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
+1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. 
+Note: One and only one of search_string, pid or pid_file must be specified per instance. 
+See the [sample process.d/conf.yaml][3] for all available configuration options:
 
    ```yaml
    init_config:
