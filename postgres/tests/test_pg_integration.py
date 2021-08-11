@@ -11,7 +11,7 @@ from semver import VersionInfo
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
+from .common import COMMON_METRICS, DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
@@ -215,6 +215,31 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     for _ in range(3):
         check.check(pg_instance)
         assert check._config.tags == expected_tags
+
+
+def test_correct_hostname(aggregator, integration_check, pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['collect_activity_metrics'] = True
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_hostname = 'stubbed.hostname'
+    expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
+    for name in COMMON_METRICS + ACTIVITY_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
+
+    for name in CONNECTION_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
+
+    aggregator.assert_service_check(
+        'postgres.can_connect',
+        count=1,
+        status=PostgreSql.OK,
+        tags=expected_tags_with_db + ['host:{}'.format(expected_hostname)],
+        hostname=expected_hostname,
+    )
 
 
 def assert_state_clean(check):

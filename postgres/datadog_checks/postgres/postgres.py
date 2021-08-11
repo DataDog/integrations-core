@@ -71,6 +71,13 @@ class PostgreSql(AgentCheck):
         self._is_aurora = None
         self.metrics_cache.clean_state()
 
+    def _get_service_check_tags(self):
+        host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
+        service_check_tags = ["host:%s" % host]
+        service_check_tags.extend(self._config.tags)
+        service_check_tags = list(set(service_check_tags))
+        return service_check_tags
+
     def _get_replication_role(self):
         cursor = self.db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
@@ -538,7 +545,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                tags=self._config.service_check_tags,
+                tags=self._get_service_check_tags(),
                 message=message,
                 hostname=self.resolved_hostname,
             )
@@ -552,7 +559,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
-                tags=self._config.service_check_tags,
+                tags=self._get_service_check_tags(),
                 message=message,
                 hostname=self.resolved_hostname,
             )
