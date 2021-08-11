@@ -45,7 +45,7 @@ IF_RATES = [
     'ifOutErrors.rate',
     'ifOutDiscards.rate',
 ]
-IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
+IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed', 'ifNumber']
 IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
 # Generic IP metrics for routers
