@@ -26,6 +26,8 @@ def test_check(dd_agent_check, instance):
     for metric in metrics:
         if ignore_dictionary_metrics_v21.search(metric) and CLICKHOUSE_VERSION == '21':
             at_least = 0
+        else:
+            at_least = 1
         aggregator.assert_metric_has_tag(metric, server_tag, at_least=at_least)
         aggregator.assert_metric_has_tag(metric, port_tag, at_least=at_least)
         aggregator.assert_metric_has_tag(metric, 'db:default', at_least=at_least)
