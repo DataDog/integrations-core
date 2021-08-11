@@ -36,7 +36,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
     ##
     ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
     #
-    # search_string:
+    search_string:
       - ssh
       - sshd
    ```
