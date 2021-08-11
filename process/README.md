@@ -27,7 +27,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
     ## @param name - string - required
     ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
     #
-    - name: ssh
+  - name: ssh
 
     ## @param search_string - list of strings - optional
     ## If one of the elements in the list matches, it return the count of
