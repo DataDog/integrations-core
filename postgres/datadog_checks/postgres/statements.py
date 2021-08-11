@@ -114,7 +114,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             json.dumps(
                 {
                     'quantize_sql': self._config.obfuscator_options.get(
-                        'quantize_sql', self._config.get('quantize_sql_tables', False)
+                        'quantize_sql', self._config.obfuscator_options.get('quantize_sql_tables', False)
                     )
                 }
             )
