@@ -40,7 +40,7 @@ def legacy_signature(check):
                 failed_file_path,
                 "Detected use of legacy agent signature, please use the new signature",
                 level="error",
-                line=failed_num + 1,
+                line=failed_num,
             )
 
     if not has_failed:

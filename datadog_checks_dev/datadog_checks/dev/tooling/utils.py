@@ -666,5 +666,5 @@ def find_legacy_signature(check):
                 with open(file_path) as test_file:
                     for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return file_path, num
+                            return file_path, num + 1
     return None
