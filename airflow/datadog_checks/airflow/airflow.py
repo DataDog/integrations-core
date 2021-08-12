@@ -59,10 +59,11 @@ class AirflowCheck(AgentCheck):
 
         if metadb_status == AIRFLOW_STABLE_STATUS_OK and scheduler_status == AIRFLOW_STABLE_STATUS_OK:
             health_status = AgentCheck.OK
+            self.service_check('airflow.healthy', health_status, tags=tags)
         else:
             health_status = AgentCheck.CRITICAL
+            self.service_check('airflow.healthy', health_status, tags=tags, message=message)
 
-        self.service_check('airflow.healthy', health_status, tags=tags, message=message)
         self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
 
     def _parse_config(self):
