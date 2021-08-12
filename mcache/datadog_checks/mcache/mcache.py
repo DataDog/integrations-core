@@ -162,7 +162,6 @@ class Memcache(AgentCheck):
             except ZeroDivisionError:
                 pass
 
-            uptime = stats.get("uptime", 0)
             self.service_check(
                 self.SERVICE_CHECK,
                 AgentCheck.OK,
