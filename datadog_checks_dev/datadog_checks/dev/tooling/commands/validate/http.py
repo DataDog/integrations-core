@@ -50,6 +50,9 @@ def validate_config_http(file, check):
             if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
                 has_init_config_http = True
 
+            if has_init_config_http and has_instance_http:
+                break
+
     if not has_instance_http:
         message = (
             f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"

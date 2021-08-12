@@ -174,7 +174,7 @@ class Couchbase(AgentCheck):
         """
         Hit a given URL and return the parsed json.
         """
-        r = requests.get(url)
+        r = self.http.get(url)
         r.raise_for_status()
         return r.json()
 
