@@ -59,7 +59,7 @@ class Couchbase(AgentCheck):
                 if val is not None:
                     metric_name = 'couchbase.{}.{}'.format(key, self.camel_case_to_joined_lower(metric_name))
                     self.gauge(metric_name, val, tags=self._tags)
-                    a = requests.get("hi")
+
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
@@ -174,7 +174,7 @@ class Couchbase(AgentCheck):
         """
         Hit a given URL and return the parsed json.
         """
-        r = self.http.get(url)
+        r = requests.get(url)
         r.raise_for_status()
         return r.json()
 
