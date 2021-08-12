@@ -323,9 +323,9 @@ files:
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:
-        - name: quantize_sql
+        - name: replace_digits
           description: |
-            Set to `true` to perform quantization on your SQL statements.
+            Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
 
             Note that this option only applies when `dbm` is enabled.
           value:
