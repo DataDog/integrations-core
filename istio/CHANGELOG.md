@@ -1,11 +1,11 @@
 # CHANGELOG - istio
 
-## 3.13.0 / 2021-07-12
+## 3.13.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add more pilot metrics. See [#9337](https://github.com/DataDog/integrations-core/pull/9337). Thanks [hari2192](https://github.com/hari2192).
 * [Fixed] Bump base package requirement. See [#9606](https://github.com/DataDog/integrations-core/pull/9606).
 
-## 3.12.0 / 2021-05-28
+## 3.12.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 * [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).

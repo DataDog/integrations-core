@@ -1,6 +1,6 @@
 # CHANGELOG - VoltDB
 
-## 1.3.1 / 2021-06-01
+## 1.3.1 / 2021-06-01 / Agent 7.29.0
 
 * [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
 

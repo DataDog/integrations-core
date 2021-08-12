@@ -1,6 +1,6 @@
 # CHANGELOG - yarn
 
-## 1.19.1 / 2021-06-07
+## 1.19.1 / 2021-06-07 / Agent 7.29.0
 
 * [Fixed] Remove required when there are default values. See [#9475](https://github.com/DataDog/integrations-core/pull/9475).
 

@@ -1,10 +1,10 @@
 # CHANGELOG - Kube_scheduler
 
-## 1.9.0 / 2021-07-12
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9574](https://github.com/DataDog/integrations-core/pull/9574).
 
-## 1.8.0 / 2021-05-28
+## 1.8.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

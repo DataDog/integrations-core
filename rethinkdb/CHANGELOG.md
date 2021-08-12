@@ -1,6 +1,6 @@
 # CHANGELOG - RethinkDB
 
-## 1.3.3 / 2021-07-07
+## 1.3.3 / 2021-07-07 / Agent 7.30.0
 
 * [Fixed] Use agent 8 signature. See [#9649](https://github.com/DataDog/integrations-core/pull/9649).
 
