@@ -167,7 +167,6 @@ class Memcache(AgentCheck):
                 self.SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=service_check_tags,
-                message="Server has been up for %s seconds" % uptime,
             )
         except BadResponseError:
             raise
