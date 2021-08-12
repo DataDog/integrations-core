@@ -217,14 +217,21 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         assert check._config.tags == expected_tags
 
 
-def test_correct_hostname(aggregator, integration_check, pg_instance):
-    pg_instance['dbm'] = True
+@pytest.mark.parametrize('dbm_enabled', (True, False))
+def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instance):
+    pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_hostname = 'stubbed.hostname'
+    if dbm_enabled:
+        expected_hostname = 'stubbed.hostname'
+        expected_hostname_service_check = expected_hostname
+    else:
+        expected_hostname = None
+        expected_hostname_service_check = HOST
+
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
     for name in COMMON_METRICS + ACTIVITY_METRICS:
@@ -237,7 +244,7 @@ def test_correct_hostname(aggregator, integration_check, pg_instance):
         'postgres.can_connect',
         count=1,
         status=PostgreSql.OK,
-        tags=expected_tags_with_db + ['host:{}'.format(expected_hostname)],
+        tags=expected_tags_with_db + ['host:{}'.format(expected_hostname_service_check)],
         hostname=expected_hostname,
     )
 

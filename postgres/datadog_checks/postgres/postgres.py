@@ -21,6 +21,11 @@ from .config import PostgresConfig
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, V10, VersionUtils
 
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
 MAX_CUSTOM_RESULTS = 100
 
 TRACK_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
@@ -38,6 +43,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
         self._resolved_hostname = None
+        self._agent_hostname = None
         self._version = None
         self._is_aurora = None
         self._version_utils = VersionUtils()
@@ -70,6 +76,9 @@ class PostgreSql(AgentCheck):
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
+
+    def _get_debug_tags(self):
+        return ['agent_hostname:{}'.format(self.agent_hostname)]
 
     def _get_service_check_tags(self):
         host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
@@ -153,6 +162,12 @@ class PostgreSql(AgentCheck):
         if self._resolved_hostname is None and self._config.dbm_enabled:
             self._resolved_hostname = resolve_db_host(self._config.host)
         return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
@@ -385,7 +400,7 @@ class PostgreSql(AgentCheck):
             self.count(
                 "dd.postgres.error",
                 1,
-                tags=self._config.tags + ["error:load-track-activity-query-size"],
+                tags=self._config.tags + ["error:load-track-activity-query-size"] + self._get_debug_tags(),
                 hostname=self.resolved_hostname,
             )
 
