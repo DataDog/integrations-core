@@ -203,8 +203,11 @@ def test_ssl_connection_creation(instance):
 
 
 def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
+    import logging
+
     import pymqi
 
+    logger = logging.getLogger(__file__)
     config = IBMMQConfig(instance_ssl_dummy)
 
     error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME)
@@ -213,9 +216,9 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     ) as get_normal_connection, mock.patch('datadog_checks.ibm_mq.connection.get_ssl_connection') as get_ssl_connection:
 
         with pytest.raises(pymqi.MQMIError):
-            get_queue_manager_connection(config)
+            get_queue_manager_connection(config, logger)
 
-        get_normal_connection.assert_called_with(config)
+        get_normal_connection.assert_called_with(config, logger)
         assert not get_ssl_connection.called
 
     # normal connection failed with with error other those listed in get_queue_manager_connection
@@ -227,17 +230,17 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
             'datadog_checks.ibm_mq.connection.get_ssl_connection'
         ) as get_ssl_connection:
 
-            get_queue_manager_connection(config)
+            get_queue_manager_connection(config, logger)
 
-            get_normal_connection.assert_called_with(config)
-            get_ssl_connection.assert_called_with(config)
+            get_normal_connection.assert_called_with(config, logger)
+            get_ssl_connection.assert_called_with(config, logger)
 
     # no issue with normal connection
     with mock.patch('datadog_checks.ibm_mq.connection.get_normal_connection') as get_normal_connection, mock.patch(
         'datadog_checks.ibm_mq.connection.get_ssl_connection'
     ) as get_ssl_connection:
 
-        get_queue_manager_connection(config)
+        get_queue_manager_connection(config, logger)
 
-        get_normal_connection.assert_called_with(config)
-        get_ssl_connection.assert_called_with(config)
+        get_normal_connection.assert_called_with(config, logger)
+        get_ssl_connection.assert_called_with(config, logger)
