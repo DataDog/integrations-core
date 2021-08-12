@@ -96,9 +96,7 @@ class TwistlockCheck(AgentCheck):
             license_status = AgentCheck.CRITICAL
 
         message = license.get("expiration_date") if license_status is not AgentCheck.OK else None
-        self.service_check(
-            service_check_name, license_status, tags=self._config.tags, message=message
-        )
+        self.service_check(service_check_name, license_status, tags=self._config.tags, message=message)
 
     def report_registry_scan(self):
         namespace = "{}.registry".format(self.NAMESPACE)

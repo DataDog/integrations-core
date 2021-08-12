@@ -72,9 +72,7 @@ class CheckSSH(AgentCheck):
                     client.connect(
                         self.host, port=self.port, username=self.username, passphrase=self.password, pkey=private_key
                     )
-                self.service_check(
-                    self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags
-                )
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
                 exception_message = str(e)
