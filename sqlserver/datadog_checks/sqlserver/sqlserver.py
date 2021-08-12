@@ -142,6 +142,8 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
+        if status == AgentCheck.OK:
+            message = None
         self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):

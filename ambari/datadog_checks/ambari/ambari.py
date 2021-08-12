@@ -5,9 +5,8 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException
-
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import CheckException
 
 from . import common
 

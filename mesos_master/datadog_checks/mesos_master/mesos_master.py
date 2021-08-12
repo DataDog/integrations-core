@@ -162,6 +162,9 @@ class MesosMaster(AgentCheck):
         response, msg, status = self._make_request(url)
 
         self.log.debug('Request to url : %s, timeout: %s, message: %s', url, self.http.options['timeout'], msg)
+
+        if status == AgentCheck.OK:
+            msg = None
         self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if response.encoding is None:
