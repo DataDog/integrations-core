@@ -8,13 +8,14 @@ from tests.metrics import (
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
+    IF_SCALAR_GAUGE,
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
     TCP_COUNTS,
     TCP_GAUGES,
     UDP_COUNTS,
-    IF_SCALAR_GAUGE)
+)
 
 from . import common
 
