@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+
 import mock
 import pytest
 from clickhouse_driver.errors import Error, NetworkError
