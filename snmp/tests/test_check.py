@@ -1217,6 +1217,7 @@ def test_timeout(aggregator, caplog):
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
     # All metrics but `ifAdminStatus` should still arrive
+    aggregator.assert_metric('snmp.ifNumber', count=1)
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
