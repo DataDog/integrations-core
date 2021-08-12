@@ -1,6 +1,6 @@
 # CHANGELOG - Squid
 
-## 1.10.0 / 2021-07-07
+## 1.10.0 / 2021-07-07 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8988](https://github.com/DataDog/integrations-core/pull/8988).
 

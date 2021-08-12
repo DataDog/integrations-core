@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 5.3.2 / 2021-06-07
+## 5.3.2 / 2021-06-07 / Agent 7.29.0
 
 * [Fixed] Fix data configuration type. See [#9482](https://github.com/DataDog/integrations-core/pull/9482).
 

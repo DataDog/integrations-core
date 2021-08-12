@@ -268,6 +268,10 @@ def get_config_file(check_name):
     return os.path.join(get_data_directory(check_name), 'conf.yaml.example')
 
 
+def get_check_req_file(check_name):
+    return os.path.join(get_root(), check_name, 'requirements.in')
+
+
 def get_config_spec(check_name):
     if check_name == 'agent':
         return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')

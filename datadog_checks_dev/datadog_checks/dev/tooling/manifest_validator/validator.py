@@ -15,6 +15,7 @@ from datadog_checks.dev.tooling.utils import (
     get_metadata_file,
     has_logs,
     is_metric_in_metadata_file,
+    is_package,
     parse_version_parts,
     read_metadata_rows,
 )
@@ -345,6 +346,19 @@ class LogsCategoryValidator(ManifestValidator):
             self.fail(output)
 
 
+class SupportedOSValidator(ManifestValidator):
+    """If an integration contains python or logs configuration, the supported_os field should not be empty."""
+
+    def validate(self, check_name, decoded, _):
+        supported_os = decoded.get('supported_os')
+        check_has_logs = has_logs(check_name)
+        check_has_python = is_package(check_name)
+
+        if not supported_os and (check_has_logs or check_has_python):
+            output = f'Attribute `supported_os` in {check_name}/manifest.json should not be empty.'
+            self.fail(output)
+
+
 def get_all_validators(is_extras, is_marketplace):
     return [
         AttributesValidator(),
@@ -358,4 +372,5 @@ def get_all_validators(is_extras, is_marketplace):
         IsPublicValidator(),
         ImmutableAttributesValidator(),
         LogsCategoryValidator(),
+        SupportedOSValidator(),
     ]

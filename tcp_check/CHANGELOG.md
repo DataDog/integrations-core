@@ -1,10 +1,10 @@
 # CHANGELOG - tcp_check
 
-## 3.1.1 / 2021-07-07
+## 3.1.1 / 2021-07-07 / Agent 7.30.0
 
 * [Fixed] Do not resolve IP on __init__. See [#9644](https://github.com/DataDog/integrations-core/pull/9644).
 
-## 3.1.0 / 2021-05-28
+## 3.1.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8994](https://github.com/DataDog/integrations-core/pull/8994).
 

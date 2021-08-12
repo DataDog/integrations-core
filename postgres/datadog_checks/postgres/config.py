@@ -67,7 +67,6 @@ class PostgresConfig:
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
-        self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
         self.min_collection_interval = instance.get('min_collection_interval', 15)
@@ -107,12 +106,6 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
-
-    def _get_service_check_tags(self):
-        service_check_tags = ["host:%s" % self.host]
-        service_check_tags.extend(self.tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
 
     @staticmethod
     def _get_custom_metrics(custom_metrics):
