@@ -1,6 +1,6 @@
 # CHANGELOG - windows_service
 
-## 3.2.0 / 2021-05-28
+## 3.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9007](https://github.com/DataDog/integrations-core/pull/9007).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_slave
 
-## 2.10.1 / 2021-07-15
+## 2.10.1 / 2021-07-15 / Agent 7.30.0
 
 * [Fixed] Improve cluster_name config option description. See [#9704](https://github.com/DataDog/integrations-core/pull/9704).
 

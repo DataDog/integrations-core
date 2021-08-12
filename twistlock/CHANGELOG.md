@@ -1,6 +1,6 @@
 # CHANGELOG - Twistlock
 
-## 1.12.0 / 2021-07-12
+## 1.12.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
 

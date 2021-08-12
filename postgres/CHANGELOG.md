@@ -11,7 +11,7 @@
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 * [Fixed] Fix debug log formatting. See [#9752](https://github.com/DataDog/integrations-core/pull/9752).
 
-## 8.0.5 / 2021-07-21
+## 8.0.5 / 2021-07-21 / Agent 7.30.0
 
 * [Fixed] Fix wrong errors related to pg_stat_statements setup. See [#9733](https://github.com/DataDog/integrations-core/pull/9733).
 * [Fixed] Bump `datadog-checks-base` version requirement. See [#9719](https://github.com/DataDog/integrations-core/pull/9719).
@@ -47,7 +47,7 @@
 * [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9618](https://github.com/DataDog/integrations-core/pull/9618).
 * [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
 
-## 7.0.2 / 2021-06-03
+## 7.0.2 / 2021-06-03 / Agent 7.29.0
 
 * [Fixed] Remove instance-level database tag from DBM metrics & events. See [#9469](https://github.com/DataDog/integrations-core/pull/9469).
 

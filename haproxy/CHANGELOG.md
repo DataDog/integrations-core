@@ -1,6 +1,6 @@
 # CHANGELOG - haproxy
 
-## 2.18.1 / 2021-06-07
+## 2.18.1 / 2021-06-07 / Agent 7.29.0
 
 * [Fixed] Fix `collect_aggregates_only` option type in example config. See [#9473](https://github.com/DataDog/integrations-core/pull/9473).
 
