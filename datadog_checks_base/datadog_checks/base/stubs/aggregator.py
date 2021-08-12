@@ -9,6 +9,7 @@ import re
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
+
 from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
