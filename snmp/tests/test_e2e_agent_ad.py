@@ -137,10 +137,11 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'snmp_host:41ba948911b9',
         'snmp_profile:generic-router',
     ]
-    for metric in IF_SCALAR_GAUGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True)
     aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
     # test ignored IPs
     tags = [
