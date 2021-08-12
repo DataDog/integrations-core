@@ -14,7 +14,7 @@ from tests.metrics import (
     TCP_COUNTS,
     TCP_GAUGES,
     UDP_COUNTS,
-)
+    IF_SCALAR_GAUGE)
 
 from . import common
 
@@ -51,6 +51,8 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     interfaces = [
         ('eth0', 'kept'),
         ('eth1', 'their forward oxen'),
