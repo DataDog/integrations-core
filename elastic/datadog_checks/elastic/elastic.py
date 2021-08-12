@@ -172,6 +172,7 @@ class ESCheck(AgentCheck):
         reversed_health_stat = {'red': 0, 'yellow': 1, 'green': 2}
         for idx in index_resp:
             tags = base_tags + ['index_name:' + idx['index']]
+            tags = tags + ['uuid:' + idx['uuid']]
             # we need to remap metric names because the ones from elastic
             # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
