@@ -26,7 +26,7 @@ Ensure that you have configured the following:
     * Run `ddev dep updates --sync`
     * Run `ddev dep sync`
     * Create a PR with the updated dependencies
-    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency to the [ignore list](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py#L22) and revert that change.
+    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that change.
     
     !!! tip
         Revert the changes and rerun `ddev dep updates --sync` with the `--check-python-classifiers` flag if there are many CI failures on your PR. Running it with the flag will not update a dependency to the newest version if the python classifiers do not match the marker. Although sometimes classifiers are inaccurate on PyPI and could miss a version update, using the flag does reduce errors overall.
