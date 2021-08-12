@@ -6,6 +6,7 @@ coredns.build_info,gauge,,,,"A metric with a constant '1' value labeled by versi
 coredns.response_code_count,count,,,,number of responses per zone and rcode,1,coredns,response code
 coredns.proxy_request_count,count,,request,,query count per upstream.,1,coredns,proxy request count
 coredns.cache_drops_count,count,,response,,"Counter of responses excluded from the cache due to request/response question name mismatch.",0,coredns,cache drop
+coredns.cache_evictions_count,count,,eviction,,"Counter of cache evictions",1,coredns,cache eviction
 coredns.cache_hits_count,count,,hit,,Counter of cache hits by cache type,1,coredns,cache hit
 coredns.cache_misses_count,count,,miss,,Counter of cache misses.,1,coredns,cache miss
 coredns.cache_prefetch_count,count,,,,"The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
