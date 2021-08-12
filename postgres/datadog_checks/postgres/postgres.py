@@ -521,13 +521,8 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (
-                self._config.host,
-                self._config.port,
-                self._config.dbname,
-            )
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags, message=message
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags
             )
             try:
                 # commit to close the current query transaction
