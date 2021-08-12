@@ -20,7 +20,6 @@ def test_check(dd_agent_check, instance):
 
     # assert at least 0 for clickhouse.dictionary.* because these metrics do not emit consistently in v21
     ignore_dictionary_metrics_v21 = re.compile('clickhouse.dictionary.*')
-    at_least = 1
 
     for metric in metrics:
         if ignore_dictionary_metrics_v21.search(metric) and CLICKHOUSE_VERSION == '21':
@@ -32,8 +31,18 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric_has_tag(metric, 'db:default', at_least=at_least)
         aggregator.assert_metric_has_tag(metric, 'foo:bar', at_least=at_least)
     aggregator.assert_metric('clickhouse.table.replicated.total')
-    aggregator.assert_metric(
-        'clickhouse.dictionary.item.current',
-        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
-        at_least=at_least,
-    )
+
+    if CLICKHOUSE_VERSION == '21':
+        at_least = 0
+        aggregator.assert_metric(
+            'clickhouse.dictionary.item.current',
+            tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
+            at_least=at_least,
+        )
+    else:
+        at_least = 1
+        aggregator.assert_metric(
+            'clickhouse.dictionary.item.current',
+            tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
+            at_least=at_least,
+        )
