@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 3.2.0 / 2021-08-12
+
+* [Added] Add database file metrics from sys.master_files. See [#9812](https://github.com/DataDog/integrations-core/pull/9812).
+* [Fixed] Capture value error. See [#9852](https://github.com/DataDog/integrations-core/pull/9852).
+
 ## 3.1.1 / 2021-07-07
 
 * [Fixed] Do not throw key errors. See [#9460](https://github.com/DataDog/integrations-core/pull/9460).
