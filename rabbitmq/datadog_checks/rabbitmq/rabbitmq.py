@@ -686,11 +686,12 @@ class RabbitMQ(AgentCheck):
             except Exception as e:
                 self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
 
-            message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.CRITICAL
+                message = u"Response from aliveness API: {}".format(aliveness_response)
 
             self.service_check('rabbitmq.aliveness', status, tags, message=message)
