@@ -228,10 +228,14 @@ class MySql(AgentCheck):
             db = pymysql.connect(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.resolved_hostname
+            )
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.resolved_hostname
+            )
             raise
         finally:
             if db:
