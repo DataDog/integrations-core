@@ -22,7 +22,7 @@ def test_check(dd_agent_check, instance):
     ignore_dictionary_metrics_v21 = re.compile('clickhouse.dictionary.*')
 
     for metric in metrics:
-        if ignore_dictionary_metrics_v21.search(metric) and CLICKHOUSE_VERSION == '21':
+        if CLICKHOUSE_VERSION == '21' and ignore_dictionary_metrics_v21.search(metric):
             at_least = 0
         else:
             at_least = 1
