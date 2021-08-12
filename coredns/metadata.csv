@@ -9,6 +9,7 @@ coredns.cache_drops_count,count,,response,,"Counter of responses excluded from t
 coredns.cache_hits_count,count,,hit,,Counter of cache hits by cache type,1,coredns,cache hit
 coredns.cache_misses_count,count,,miss,,Counter of cache misses.,1,coredns,cache miss
 coredns.cache_prefetch_count,count,,,,"The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
+coredns.cache_size.count,gauge,,entry,,,1,coredns,cache size
 coredns.cache_stale_count,count,,request,,"Counter of requests served from stale cache entries.",0,coredns,cache stale
 coredns.dnssec.cache_size,gauge,,,,"Total elements in the cache, type is signature.",0,coredns,dnssec cache size
 coredns.dnssec.cache_hits,count,,hit,,"Counter of cache hits.",0,coredns,dnssec cache hit
@@ -38,7 +39,6 @@ coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,cored
 coredns.request_size.bytes.count,gauge,,byte,,size of the request in bytes,0,coredns,request size
 coredns.response_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,response size
 coredns.response_size.bytes.count,gauge,,byte,,size of the request in bytes,0,coredns,response size
-coredns.cache_size.count,gauge,,entry,,,1,coredns,cache size
 coredns.panic_count.count,count,,entry,,,1,coredns,total number of panics
 coredns.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,coredns,
 coredns.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,coredns,
