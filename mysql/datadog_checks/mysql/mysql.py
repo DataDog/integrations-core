@@ -59,6 +59,11 @@ try:
 except ImportError:
     PSUTIL_AVAILABLE = False
 
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
 
 if PY3:
     long = int
@@ -76,6 +81,7 @@ class MySql(AgentCheck):
         self.version = None
         self.is_mariadb = None
         self._resolved_hostname = None
+        self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
@@ -105,6 +111,9 @@ class MySql(AgentCheck):
         if self._resolved_hostname is None and self._config.dbm_enabled:
             self._resolved_hostname = resolve_db_host(self._config.host)
         return self._resolved_hostname
+
+    def _get_debug_tags(self):
+        return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
 
     @classmethod
     def get_library_versions(cls):

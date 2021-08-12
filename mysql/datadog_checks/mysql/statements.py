@@ -124,7 +124,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 row['digest_text'] = row['digest_text'][0:200]
 
             payload = {
-                'host': self._db_hostname,
+                'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
@@ -207,7 +207,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
