@@ -144,7 +144,8 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
-        self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        if self.autodiscovery:
+            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
         if is_default:
             self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 

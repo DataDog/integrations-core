@@ -114,8 +114,7 @@ class Connection(object):
 
     def check_database_conns(self, db_name):
         self.open_db_connections(None, db_name=db_name, is_default=False)
-        if db_name != self.DEFAULT_DATABASE:
-            self.close_db_connections(None, db_name)
+        self.close_db_connections(None, db_name)
 
     @contextmanager
     def open_managed_default_database(self):
