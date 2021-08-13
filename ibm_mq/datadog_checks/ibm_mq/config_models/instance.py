@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     ssl_cipher_spec: Optional[str]
     ssl_key_repository_location: Optional[str]
     tags: Optional[Sequence[str]]
+    timeout: Optional[float]
     username: Optional[str]
 
     @root_validator(pre=True)
