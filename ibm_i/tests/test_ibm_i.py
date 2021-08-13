@@ -24,6 +24,7 @@ def test_check(aggregator, instance):
 def test_fetch_system_info(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
+    check.load_configuration_models()
     with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[("hostname", "7", "3")]), mock.patch(
         'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
     ) as delete_conn:
@@ -37,6 +38,7 @@ def test_fetch_system_info(instance):
 def test_failed_fetch_system_info(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
+    check.load_configuration_models()
     with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[]), mock.patch(
         'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
     ) as delete_conn:
@@ -50,6 +52,7 @@ def test_failed_fetch_system_info(instance):
 def test_query_error_system_info(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
+    check.load_configuration_models()
     exc = Exception("boom")
     with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', side_effect=exc):
         system_info = check.fetch_system_info()
