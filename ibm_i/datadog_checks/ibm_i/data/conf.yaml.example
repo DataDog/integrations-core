@@ -60,7 +60,7 @@ instances:
     # system_mq_query_timeout: 60
 
     ## @param query_timeout - integer - optional - default: 30
-    ## The default timeout (in seconds) applied to queries made on the IBM i system.
+    ## The timeout (in seconds) applied to queries made on the IBM i system.
     #
     # query_timeout: 30
 
