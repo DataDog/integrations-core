@@ -19,11 +19,11 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
+from .config import TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
-
-TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -327,7 +327,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        track_activity_query_size = self._check._db_configured_track_activity_query_size
+        track_activity_query_size = self._check.pg_settings.track_activity_query_size
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
@@ -432,7 +432,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": obfuscated_statement,
                     "query_truncated": self._get_truncation_state(
-                        self._check._db_configured_track_activity_query_size, row['query']
+                        self._check.pg_settings.track_activity_query_size, row['query']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},

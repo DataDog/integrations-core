@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-# https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+# cursor. https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+import logging
+
+import psycopg2
 from six import PY2, PY3, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
+
+logger = logging.getLogger(__name__)
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -16,6 +21,39 @@ DEFAULT_IGNORE_DATABASES = [
     'azure_maintenance',
     'postgres',
 ]
+
+PG_STAT_STATMENTS_MAX_UNKNOWN_VALUE = -1
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
+
+
+class PostgresSettings:
+    """PostgresSettings holds settings queried from the pg_settings table."""
+
+    PG_SETTINGS_QUERY = (
+        "SELECT name, setting FROM pg_settings WHERE name IN ('pg_stat_statements.max', 'track_activity_query_size')"
+    )
+
+    def __init__(self):
+        self.pg_stat_statements_max = PG_STAT_STATMENTS_MAX_UNKNOWN_VALUE
+        self.track_activity_query_size = TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+
+    def query(self, db):
+        try:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                logger.debug("Running query [%s]", self.PG_SETTINGS_QUERY)
+                cursor.execute(self.PG_SETTINGS_QUERY)
+                rows = cursor.fetchall()
+                for setting in rows:
+                    self._extract_setting(setting)
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+            raise err
+
+    def _extract_setting(self, setting):
+        name, val = setting
+        if name == 'pg_stat_statements.max':
+            self.pg_stat_statements_max = int(val)
+        elif name == 'track_activity_query_size':
+            self.track_activity_query_size = int(val)
 
 
 class PostgresConfig:

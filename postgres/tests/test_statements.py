@@ -471,17 +471,17 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
-def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, db_user):
+def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["username"] = db_user
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_query_max_text_size(check.db)
+    check._load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
             tags=_expected_dbm_instance_tags(dbm_instance)
-            + ['error:load-track-activity-query-size', 'agent_hostname:stubbed.hostname'],
+            + ['error:query-pg_settings', 'agent_hostname:stubbed.hostname'],
             hostname='stubbed.hostname',
         )
     else:

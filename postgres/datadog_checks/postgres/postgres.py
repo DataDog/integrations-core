@@ -17,7 +17,7 @@ from datadog_checks.postgres.relationsmanager import RELATION_METRICS, Relations
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
-from .config import PostgresConfig
+from .config import PostgresConfig, PostgresSettings
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, V10, VersionUtils
 
@@ -27,9 +27,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
-
-TRACK_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
-TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 
 class PostgreSql(AgentCheck):
@@ -54,14 +51,13 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
+        self.pg_settings = PostgresSettings()
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
-        # The value is loaded when connecting to the main database
-        self._db_configured_track_activity_query_size = TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
 
         # map[dbname -> psycopg connection]
         self._db_pool = {}
@@ -387,20 +383,15 @@ class PostgreSql(AgentCheck):
         else:
             self.db = self._new_connection(self._config.dbname)
 
-    # Reload the track_activity_query_size setting on a new connection to the main db
-    def _load_query_max_text_size(self, db):
+    def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                self.log.debug("Running query [%s]", TRACK_ACTIVITY_QUERY_SIZE_QUERY)
-                cursor.execute(TRACK_ACTIVITY_QUERY_SIZE_QUERY)
-                row = cursor.fetchone()
-                self._db_configured_track_activity_query_size = int(row['setting'])
+            self.pg_settings.query(db)
         except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
-            self.log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
+            self.log.warning("cannot read from pg_settings: %s", repr(e))
             self.count(
                 "dd.postgres.error",
                 1,
-                tags=self._config.tags + ["error:load-track-activity-query-size"] + self._get_debug_tags(),
+                tags=self._config.tags + ["error:query-pg_settings"] + self._get_debug_tags(),
                 hostname=self.resolved_hostname,
             )
 
@@ -423,7 +414,7 @@ class PostgreSql(AgentCheck):
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
             if self._config.dbname == dbname:
-                self._load_query_max_text_size(db)
+                self._load_pg_settings(db)
             return db
 
     def _close_db_pool(self):
