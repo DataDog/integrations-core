@@ -2,7 +2,7 @@
     "author_name": "Datadog",
     "description": "This Dashboard provides a high-level overview of your Databricks clusters, alongside detailed Spark metrics and logs, so you can monitor your jobs in real-time.\n\n- [Monitor Databricks with Datadog](/blog/databricks-monitoring-datadog)\n- [Databricks integration docs](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly)\n- [Spark integration docs](https://docs.datadoghq.com/integrations/spark/?tab=host)\n",
     "layout_type": "ordered",
-    "reflow_type": "fixed",
+    "reflow_type": "fixed",,
     "template_variables": [
         {
             "default": "*",
@@ -20,7 +20,7 @@
             "prefix": "app_name"
         }
     ],
-    "title": "Databricks Overview",
+    "board_title": "Databricks Overview",
     "widgets": [
         {
             "definition": {

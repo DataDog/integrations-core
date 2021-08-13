@@ -4,10 +4,11 @@
 import json
 
 import click
+from datadog_checks.dev.utils import print_github_annotation
 
 from ....utils import read_file
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_assets_from_manifest
+from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
@@ -47,20 +48,25 @@ def dashboards(check):
         file_failed = False
 
         dashboard_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'dashboards')
+        manifest_file = get_manifest_file(check_name)
         for invalid in invalid_files:
+            message = f'{invalid} does not exist'
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  {invalid} does not exist')
+            echo_failure(f'  ' + message)
             failed_checks += 1
+            print_github_annotation(manifest_file, message)
 
         for dashboard_file in dashboard_relative_locations:
             try:
                 decoded = json.loads(read_file(dashboard_file).strip())
             except json.JSONDecodeError as e:
                 failed_checks += 1
+                message = f'invalid json: {e}'
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
-                echo_failure(f'  invalid json: {e}')
+                echo_failure(f'  ' + message)
+                print_github_annotation(dashboard_file, message)
                 continue
 
             all_keys = set(decoded.keys())
@@ -70,6 +76,7 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}"),
                 )
+                print_github_annotation(dashboard_file, "Detected missing required fields: {}".format(missing_fields))
 
             # Confirm the dashboard payload comes from the old API for now
             if not _is_dashboard_format(decoded):
@@ -77,6 +84,7 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
+                print_github_annotation(dashboard_file, "This dashboard payload is not using the new /dashboard format")
 
             if file_failed:
                 failed_checks += 1
