@@ -52,8 +52,8 @@ class Query(object):
         query = self.query_data.get('query')
         if not query:
             raise ValueError('field `query` for {} is required'.format(query_name))
-        elif not isinstance(query, str) and not isinstance(query, dict):
-            raise ValueError('field `query` for {} must be a string or a mapping'.format(query_name))
+        elif query_name.startswith('custom query #') and not isinstance(query, str):
+            raise ValueError('field `query` for {} must be a string'.format(query_name))
 
         columns = self.query_data.get('columns')
         if not columns:
