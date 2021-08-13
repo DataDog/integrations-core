@@ -31,9 +31,9 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Run configuration validation
-      run: |
-        ddev validate config
+#    - name: Run configuration validation
+#      run: |
+#        ddev validate config
 
     - name: Run HTTP wrapper validation
       run: |
