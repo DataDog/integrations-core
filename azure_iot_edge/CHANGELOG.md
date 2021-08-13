@@ -1,6 +1,6 @@
 # CHANGELOG - Azure IoT Edge
 
-## 2.1.0 / 2021-05-28
+## 2.1.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

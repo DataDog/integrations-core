@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 5.0.4 / 2021-07-22
+## 5.0.4 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
 * [Fixed] Bump `datadog-checks-base` version requirement. See [#9718](https://github.com/DataDog/integrations-core/pull/9718).
@@ -33,7 +33,7 @@
 * [Fixed] Look for mariadbd process for MariaDB 10.5+. See [#9543](https://github.com/DataDog/integrations-core/pull/9543).
 * [Fixed] Fix insufficient rate limiting of statement samples . See [#9585](https://github.com/DataDog/integrations-core/pull/9585).
 
-## 4.0.3 / 2021-06-08
+## 4.0.3 / 2021-06-08 / Agent 7.29.0
 
 * [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).
 

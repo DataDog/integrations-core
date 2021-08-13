@@ -371,7 +371,8 @@ class MySQLStatementSamples(DBMAsyncJob):
                 self._check.count(
                     "dd.mysql.query_samples.error",
                     1,
-                    tags=self._tags + ["error:create-temp-table-{}".format(type(e))],
+                    tags=self._tags + ["error:create-temp-table-{}".format(type(e))] + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
                 )
                 raise
             if self._has_window_functions:
@@ -395,9 +396,20 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             rows = cursor.fetchall()
             self._cursor_run(cursor, drop_temp_table_query)
-            tags = self._tags + ["events_statements_table:{}".format(events_statements_table)]
-            self._check.histogram("dd.mysql.get_new_events_statements.time", (time.time() - start) * 1000, tags=tags)
-            self._check.histogram("dd.mysql.get_new_events_statements.rows", len(rows), tags=tags)
+            tags = (
+                self._tags
+                + ["events_statements_table:{}".format(events_statements_table)]
+                + self._check._get_debug_tags()
+            )
+            self._check.histogram(
+                "dd.mysql.get_new_events_statements.time",
+                (time.time() - start) * 1000,
+                tags=tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.histogram(
+                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
+            )
             self._log.debug("Read %s rows from %s", len(rows), events_statements_table)
             return rows
 
@@ -431,7 +443,12 @@ class MySQLStatementSamples(DBMAsyncJob):
             # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
             # are obfuscated by the database
             self._log.debug("Failed to obfuscate statement: %s", row['digest_text'])
-            self._check.count("dd.mysql.query_samples.error", 1, tags=self._tags + ["error:sql-obfuscate"])
+            self._check.count(
+                "dd.mysql.query_samples.error",
+                1,
+                tags=self._tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
             return None
 
         apm_resource_hash = compute_sql_signature(obfuscated_statement)
@@ -447,7 +464,10 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.mysql.query_samples.error",
                 1,
-                tags=self._tags + ["error:explain-{}".format(DBExplainError.query_truncated)],
+                tags=self._tags
+                + ["error:explain-{}".format(DBExplainError.query_truncated)]
+                + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             explain_errors = [
                 (
@@ -464,7 +484,10 @@ class MySQLStatementSamples(DBMAsyncJob):
                     )
                 except Exception as e:
                     self._check.count(
-                        "dd.mysql.query_samples.error", 1, tags=self._tags + ["error:explain-{}".format(type(e))]
+                        "dd.mysql.query_samples.error",
+                        1,
+                        tags=self._tags + ["error:explain-{}".format(type(e))] + self._check._get_debug_tags(),
+                        hostname=self._check.resolved_hostname,
                     )
                     self._log.exception("Failed to explain statement: %s", obfuscated_statement)
 
@@ -489,7 +512,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],
@@ -573,7 +596,8 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.mysql.query_samples.error",
                 1,
-                tags=self._tags + ["error:no-enabled-events-statements-consumers"],
+                tags=self._tags + ["error:no-enabled-events-statements-consumers"] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
@@ -624,28 +648,45 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         start_time = time.time()
 
-        tags = self._tags + ["events_statements_table:{}".format(events_statements_table)]
         rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
         submitted_count = 0
+        tags = (
+            self._tags + ["events_statements_table:{}".format(events_statements_table)] + self._check._get_debug_tags()
+        )
         for e in events:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
-        self._check.histogram("dd.mysql.collect_statement_samples.time", (time.time() - start_time) * 1000, tags=tags)
-        self._check.count("dd.mysql.collect_statement_samples.events_submitted.count", submitted_count, tags=tags)
+        self._check.histogram(
+            "dd.mysql.collect_statement_samples.time",
+            (time.time() - start_time) * 1000,
+            tags=tags,
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.count(
+            "dd.mysql.collect_statement_samples.events_submitted.count",
+            submitted_count,
+            tags=tags,
+            hostname=self._check.resolved_hostname,
+        )
         self._check.gauge(
-            "dd.mysql.collect_statement_samples.seen_samples_cache.len", len(self._seen_samples_ratelimiter), tags=tags
+            "dd.mysql.collect_statement_samples.seen_samples_cache.len",
+            len(self._seen_samples_ratelimiter),
+            tags=tags,
+            hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
             tags=tags,
+            hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.mysql.collect_statement_samples.collection_strategy_cache.len",
             len(self._collection_strategy_cache),
             tags=tags,
+            hostname=self._check.resolved_hostname,
         )
 
     def _explain_statement(self, cursor, statement, schema, obfuscated_statement):
@@ -658,7 +699,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         """
         start_time = time.time()
         strategy_cache_key = 'explain_strategy:%s' % schema
-        tags = self._tags + ["schema:{}".format(schema)]
+        tags = self._tags + ["schema:{}".format(schema)] + self._check._get_debug_tags()
 
         self._log.debug('explaining statement. schema=%s, statement="%s"', schema, statement)
 
@@ -686,7 +727,10 @@ class MySQLStatementSamples(DBMAsyncJob):
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[strategy_cache_key] = explain_errors
             self._check.count(
-                "dd.mysql.query_samples.error", 1, tags=tags + ["error:explain-use-schema-{}".format(type(e))]
+                "dd.mysql.query_samples.error",
+                1,
+                tags=tags + ["error:explain-use-schema-{}".format(type(e))],
+                hostname=self._check.resolved_hostname,
             )
             self._log.debug(
                 'Failed to collect execution plan because schema could not be accessed. error=%s, schema=%s, '
@@ -728,6 +772,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                         "dd.mysql.run_explain.time",
                         (time.time() - start_time) * 1000,
                         tags=self._tags + ["strategy:{}".format(strategy)],
+                        hostname=self._check.resolved_hostname,
                     )
                     return plan, None
             except pymysql.err.DatabaseError as e:
@@ -741,6 +786,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "dd.mysql.query_samples.error",
                     1,
                     tags=tags + ["error:explain-attempt-{}-{}".format(strategy, type(e))],
+                    hostname=self._check.resolved_hostname,
                 )
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',

@@ -123,7 +123,7 @@ def format_attribution_line(package_name, license_id, package_copyright):
     return f'{package_name},PyPI,{license_id},{package_copyright}\n'
 
 
-def extract_license_classifier(classifier):
+def extract_classifier_value(classifier):
     return classifier.split(' :: ')[-1]
 
 
@@ -146,7 +146,7 @@ async def get_data(url):
                 info['name'],
                 info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
                 info['license'],
-                {extract_license_classifier(c) for c in info['classifiers'] if c.startswith('License ::')},
+                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
 
 
@@ -162,7 +162,7 @@ async def scrape_license_data(urls):
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
-                    data['classifiers'].add(extract_license_classifier(package_license))
+                    data['classifiers'].add(extract_classifier_value(package_license))
                 else:
                     data['licenses'].append(package_license)
 

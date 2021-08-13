@@ -1,6 +1,6 @@
 # CHANGELOG - riakcs
 
-## 2.5.0 / 2021-07-12
+## 2.5.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8980](https://github.com/DataDog/integrations-core/pull/8980).
 

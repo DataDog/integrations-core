@@ -104,34 +104,9 @@ class MaprCheck(AgentCheck):
 
             if msg.error() is None:
                 # Metric received
-                try:
-                    metric = json.loads(ensure_unicode(msg.value()))[0]
-                    metric_name = metric['metric']
-                    if self.should_collect_metric(metric_name):
-                        # Will sometimes submit the same metric multiple time, but because it's only
-                        # gauges and monotonic_counter that's fine.
-                        self.submit_metric(metric)
-                        submitted_metrics_count += 1
-                except Exception as e:
-                    self.log.warning("Received unexpected message %s, wont be processed", msg.value())
-                    self.log.exception(e)
-            elif msg.error().code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
-                if self.auth_ticket:
-                    raise CheckException(
-                        "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
-                        "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
-                    )
-                else:
-                    raise CheckException(
-                        "dd-agent user could not consume topic '%s'. Please ensure that:\n"
-                        "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
-                        "\t* The dd-agent user has the 'consume' permission on topic %s or "
-                        "impersonation is correctly configured." % (self.topic_path, self.topic_path)
-                    )
-            elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
-                # Partition EOF is expected anytime we reach the end of one partition in the topic.
-                # This is expected at least once per partition per check run.
-                raise CheckException(msg.error())
+                submitted_metrics_count += self._process_metric(msg)
+            else:
+                self._process_error(msg.error())
 
         if not self.has_ever_submitted_metrics:
             # The integration has never found any metric so far
@@ -149,6 +124,39 @@ class MaprCheck(AgentCheck):
         if submitted_metrics_count:
             self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.custom_tags)
 
+    def _process_metric(self, msg):
+        try:
+            metric = json.loads(ensure_unicode(msg.value()))[0]
+            metric_name = metric['metric']
+            if self.should_collect_metric(metric_name):
+                # Will sometimes submit the same metric multiple time, but because it's only
+                # gauges and monotonic_counter that's fine.
+                self.submit_metric(metric)
+                return 1
+            return 0
+        except Exception as e:
+            self.log.warning("Received unexpected message %s, wont be processed", msg.value())
+            self.log.exception(e)
+
+    def _process_error(self, error_msg):
+        if error_msg.code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
+            if self.auth_ticket:
+                raise CheckException(
+                    "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
+                    "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
+                )
+            else:
+                raise CheckException(
+                    "dd-agent user could not consume topic '%s'. Please ensure that:\n"
+                    "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
+                    "\t* The dd-agent user has the 'consume' permission on topic %s or "
+                    "impersonation is correctly configured." % (self.topic_path, self.topic_path)
+                )
+        elif error_msg.code() != ck.KafkaError._PARTITION_EOF:
+            # Partition EOF is expected anytime we reach the end of one partition in the topic.
+            # This is expected at least once per partition per check run.
+            raise CheckException(error_msg)
+
     def get_connection(self):
         if self._conn:
             # confluent_kafka takes care of recreating the connection if anything goes wrong.
@@ -158,7 +166,7 @@ class MaprCheck(AgentCheck):
             {
                 "group.id": "dd-agent",  # uniquely identify this consumer
                 "enable.auto.commit": False  # important, do not store the offset for this consumer,
-                # if we do it just once the mapr library has a bug (feature?) which prevents resetting it to the head
+                # if we do it just once the mapr library has a bug/feature which prevents resetting it to the head
             }
         )
         self._conn.subscribe([self.topic_path])

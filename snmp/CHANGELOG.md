@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.2.0 / 2021-05-28
+## 5.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add collect device metadata config. See [#9393](https://github.com/DataDog/integrations-core/pull/9393).
 * [Added] Add rate type to error and discard counters. See [#9218](https://github.com/DataDog/integrations-core/pull/9218). Thanks [loganmc10](https://github.com/loganmc10).

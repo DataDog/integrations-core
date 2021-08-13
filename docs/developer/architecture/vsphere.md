@@ -34,21 +34,21 @@ Once the agent is running, the minimal configuration (as of version 5.x) is as f
 ```yaml
 init_config:
 instances:
-  - host: 
-    username: 
-    password: 
+  - host:
+    username:
+    password:
     use_legacy_check_version: false
     empty_default_hostname: true
 ```
 
 -   `host` is the endpoint used to access the vSphere Client from a web browser. The host is either a FQDN or an IP, not an http url.
-    
+
 -   `username` and `password` are the credentials to log in to vCenter.
-    
+
 -   `use_legacy_check_version` is a backward compatibility flag. It should always be set to false and this flag will be removed in a future version of the integration. Setting it to true tells the agent to use an older and deprecated version of the vSphere integration.
-    
+
 -   `empty_default_hostname` is a field used by the agent directly (and not the integration). By default, the agent does not allow submitting metrics without attaching an explicit host tag unless this flag is set to true. The vSphere integration uses that behavior for some metrics and service checks. For example, the `vsphere.vm.count` metric which gives a count of the VMs in the infra is not submitted with a host tag. This is particularly important if the agent runs inside a vSphere VM. If the `vsphere.vm.count` was submitted with a host tag, the Datadog backend would attach all the other host tags to the metric, for example `vsphere_type:vm` or `vsphere_host:<NAME_OF_THE_ESX_HOST>` which makes the metric almost impossible to use.
-    
+
 
 ### Concepts
 
@@ -63,20 +63,20 @@ By default, only the level 1 metrics are collected but this can be increased in 
 #### Realtime vs historical
 
 -   Each ESXi host collects and stores data for each metric on himself and every VM it hosts every 20 seconds. Those data points are stored for up to one hour and are called realtime. Note: Each metric concerns always either a VM or an ESXi hosts. Metrics that concern datastore for example are not collected in the ESXi hosts.
-    
+
 -   Additionally, the vCenter server collects data from all the ESXi hosts and stores the datapoint with some aggregation rollup into its own database. Those data points are called "historical".
-    
+
 -   Finally, the vCenter server also collects metrics for other kinds of resources (like Datastore, ClusterComputeResource, Datacenter...) Those data points are necessarily "historical".
-    
+
 
 The reason for such an important distinction is that historical metrics are **much MUCH** slower to collect than realtime metrics. The vSphere integration will always collect the "realtime" data for metrics that concern ESXi hosts and VMs. But the integration also collects metrics for Datastores, ClusterComputeResources, Datacenters, and maybe others in the future.
 
 That's why, in the context of the Datadog vSphere integration, we usually simplify by considering that:
 
 -   VMs and ESXi hosts are "realtime resources". Metrics for such resources are quick and easy to get by querying vCenter that will in turn query all the ESXi hosts.
-    
+
 -   Datastores, ClusterComputeResources, and Datacenters are "historical resources" and are much slower to collect.
-    
+
 
 To collect all metrics (realtime and historical), it is advised to use two "check instances". One with `collection_type: realtime` and one with `collection_type: historical` . This way all metrics will be collected but because both check instances are on different schedules, the slowness of collecting historical metrics won't affect the rate at which realtime metrics are collected.
 
@@ -150,7 +150,7 @@ A possible filtering configuration would look like this:
      patterns:
        - <GUEST_HOSTNAME_REGEX>
    - resource: host
-    property: inventory_path
+     property: inventory_path
      patterns:
        - <INVENTORY_PATH_REGEX>
 ```
@@ -177,4 +177,3 @@ collect_per_instance_filters:
   vm:
     - cpu\.usage\..*
 ```
-

@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 3.13.3 / 2021-07-15
+## 3.13.3 / 2021-07-15 / Agent 7.30.0
 
 * [Fixed] Add debug line when there are no messages available. See [#9702](https://github.com/DataDog/integrations-core/pull/9702).
 
@@ -8,7 +8,7 @@
 
 * [Fixed] Properly close internal reply queues. See [#9488](https://github.com/DataDog/integrations-core/pull/9488).
 
-## 3.13.1 / 2021-06-01
+## 3.13.1 / 2021-06-01 / Agent 7.29.0
 
 * [Fixed] Don't emit any warnings if NO_MSG_AVAILABLE is received. See [#9452](https://github.com/DataDog/integrations-core/pull/9452).
 

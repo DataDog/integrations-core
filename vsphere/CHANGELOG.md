@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-## 5.10.0 / 2021-05-28
+## 5.10.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9005](https://github.com/DataDog/integrations-core/pull/9005).
 * [Added] Use new REST API when possible. See [#9293](https://github.com/DataDog/integrations-core/pull/9293).
