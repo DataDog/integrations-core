@@ -4,6 +4,7 @@
 import json
 
 import click
+
 from datadog_checks.dev.utils import print_github_annotation
 
 from ....utils import read_file
@@ -53,7 +54,7 @@ def dashboards(check):
             message = f'{invalid} does not exist'
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  ' + message)
+            echo_failure('  ' + message)
             failed_checks += 1
             print_github_annotation(manifest_file, message)
 
@@ -65,7 +66,7 @@ def dashboards(check):
                 message = f'invalid json: {e}'
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
-                echo_failure(f'  ' + message)
+                echo_failure('  ' + message)
                 print_github_annotation(dashboard_file, message)
                 continue
 
