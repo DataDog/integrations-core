@@ -102,7 +102,7 @@ class CheckSSH(AgentCheck):
                     exception_message = str(e)
                     status = AgentCheck.CRITICAL
 
-                if status == AgentCheck.OK:
+                if status is AgentCheck.OK:
                     exception_message = None
 
                 self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=self.base_tags, message=exception_message)
