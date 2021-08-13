@@ -112,9 +112,10 @@ class Connection(object):
 
         return db_exists, context
 
-    def check_database_conns(self, name):
-        self.open_db_connections(None, db_name=name, is_default=False)
-        self.close_db_connections(None, name)
+    def check_database_conns(self, db_name):
+        self.open_db_connections(None, db_name=db_name, is_default=False)
+        if db_name != self.DEFAULT_DATABASE:
+            self.close_db_connections(None, db_name)
 
     @contextmanager
     def open_managed_default_database(self):
@@ -175,7 +176,7 @@ class Connection(object):
             if is_default:
                 message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
             else:
-                message = "Unable to connect to Database :{} for instance {}: {}".format(database, host, repr(e))
+                message = "Unable to connect to Database: {} for instance {}: {}".format(database, host, repr(e))
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)

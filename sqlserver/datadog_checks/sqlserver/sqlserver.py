@@ -447,8 +447,9 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
-            for db_name in self.databases:
-                self.connection.check_database_conns(db_name)
+            if self.autodiscovery:
+                for db_name in self.databases:
+                    self.connection.check_database_conns(db_name)
         else:
             self.log.debug("Skipping check")
 
