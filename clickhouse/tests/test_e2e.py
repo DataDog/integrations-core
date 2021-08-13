@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
-
 import pytest
 
 from .common import CLICKHOUSE_VERSION
@@ -19,10 +17,8 @@ def test_check(dd_agent_check, instance):
     metrics = get_metrics(CLICKHOUSE_VERSION)
 
     # assert at least 0 for clickhouse.dictionary.* because these metrics do not emit consistently in v21
-    ignore_dictionary_metrics_v21 = re.compile('clickhouse.dictionary.*')
-
     for metric in metrics:
-        if CLICKHOUSE_VERSION == '21' and ignore_dictionary_metrics_v21.search(metric):
+        if CLICKHOUSE_VERSION == '21' and metric.startswith('clickhouse.dictionary.'):
             at_least = 0
         else:
             at_least = 1
