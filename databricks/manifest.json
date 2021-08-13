@@ -25,8 +25,7 @@
   "integration_id": "databricks",
   "assets": {
     "dashboards": {
-      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json",
-      "Databricks Spark Overviewz": "assets/dashboards/databricks_overviewz.json"
+      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
     },
     "saved_views": {},
     "monitors": {},
