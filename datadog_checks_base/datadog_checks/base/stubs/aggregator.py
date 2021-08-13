@@ -10,6 +10,7 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
+from datadog_checks.base.constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -123,6 +124,9 @@ class AggregatorStub(object):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        if status == ServiceCheck.OK and message:
+            raise Exception("Expected empty message on OK service check")
+
         check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
