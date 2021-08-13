@@ -23,6 +23,12 @@ jobs:
     - name: Upgrade Python packaging tools
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
 
+    - name: Install codespell
+      run: python3 -m pip install codespell
+
+    - name: Run codespell for typos
+      run: codespell
+
     - name: Install ddev
       run: pip install -e ./datadog_checks_dev[cli]
 
