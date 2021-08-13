@@ -138,6 +138,9 @@ class KubeLeaderElectionMixin(object):
         self.gauge(prefix + ".lease_duration", record.lease_duration, tags)
 
         leader_status = AgentCheck.OK
+        message = record.summary
         if record.seconds_until_renew + record.lease_duration < 0:
             leader_status = AgentCheck.CRITICAL
-        self.service_check(prefix + ".status", leader_status, tags=tags, message=record.summary)
+        if leader_status is AgentCheck.OK:
+            message = None
+        self.service_check(prefix + ".status", leader_status, tags=tags, message=message)
