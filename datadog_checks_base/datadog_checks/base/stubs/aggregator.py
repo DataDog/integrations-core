@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from datadog_checks.base.constants import ServiceCheck
+from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
