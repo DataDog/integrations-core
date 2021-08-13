@@ -65,6 +65,7 @@ class IBMMQConfig:
 
         self.username = instance.get('username')  # type: str
         self.password = instance.get('password')  # type: str
+        self.timeout = int(float(instance.get('timeout', 5)) * 1000)  # type: int
 
         self.queues = instance.get('queues', [])  # type: List[str]
         self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]

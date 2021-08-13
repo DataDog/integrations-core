@@ -46,7 +46,7 @@ class IbmMqCheck(AgentCheck):
             self.log,
         )
         self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
-        self.metadata_collector = MetadataCollector(self.log)
+        self.metadata_collector = MetadataCollector(self._config, self.log)
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
@@ -77,7 +77,7 @@ class IbmMqCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, queue_manager):
         try:
-            version = self.metadata_collector.collect_metadata(queue_manager, self._config.convert_endianness)
+            version = self.metadata_collector.collect_metadata(queue_manager)
             if version:
                 raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
                 self.set_metadata('version', raw_version, scheme='parts', part_map=version)

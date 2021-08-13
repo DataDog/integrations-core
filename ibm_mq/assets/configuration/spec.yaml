@@ -134,6 +134,12 @@ files:
         value:
           example: false
           type: boolean
+      - name: timeout
+        description: |
+          The number of seconds to wait for IBM MQ to respond.
+        value:
+          example: 5
+          type: number
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
