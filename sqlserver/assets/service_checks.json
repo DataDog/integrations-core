@@ -27,6 +27,6 @@
             "db"
         ],
         "name": "Database Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored SQL Server Database. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the autodiscovered SQL Server Database. Returns `OK` otherwise."
     }
 ]
