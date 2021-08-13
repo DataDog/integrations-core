@@ -566,7 +566,7 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_check_tags())
             try:
                 # commit to close the current query transaction
                 self.db.commit()
