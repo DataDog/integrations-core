@@ -95,7 +95,7 @@ def validate_use_http_wrapper_file(file, check):
                     print_github_annotation(
                         file,
                         "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
-                        level="warning",
+                        level="error",
                         line=num + 1,
                     )
                     has_failed = True
