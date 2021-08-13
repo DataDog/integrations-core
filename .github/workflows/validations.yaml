@@ -34,3 +34,7 @@ jobs:
     - name: Run configuration validation
       run: |
         ddev validate config
+
+    - name: Run HTTP wrapper validation
+      run: |
+        ddev validate http
