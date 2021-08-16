@@ -63,10 +63,11 @@ class GUnicornCheck(AgentCheck):
             tags = ['app:' + proc_name] + custom_tags
             if working == 0 and idle == 0:
                 status = AgentCheck.CRITICAL
-                self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
             else:
                 status = AgentCheck.OK
-                self.service_check(self.IS_RUNNING_SVC, status, tags=tags)
+                msg = None
+
+            self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
 
             # Submit the data.
             self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)

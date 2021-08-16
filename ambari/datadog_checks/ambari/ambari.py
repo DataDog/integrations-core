@@ -131,7 +131,7 @@ class AmbariCheck(AgentCheck):
 
             message = state
             if service_check_state is ServiceCheck.OK:
-                message = ''
+                message = None
 
             self._submit_service_checks(
                 "state", service_check_state, service_tags + ['state:%s' % state], message=message
