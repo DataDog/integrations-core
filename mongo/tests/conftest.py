@@ -175,7 +175,7 @@ class InitializeDB(LazyFunction):
             {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
         ]
 
-        for db_name in ['test', 'test2']:
+        for db_name in ['test', 'test2', 'admin']:
             db = cli[db_name]
             db.foo.insert_many(foos)
             db.bar.insert_many(bars)
