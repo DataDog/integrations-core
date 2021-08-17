@@ -59,7 +59,7 @@ class CustomQueriesCollector(MongoCollector):
         # The mongo command to run (find, aggregate, count...)
         mongo_command = self._extract_command_from_mongo_query(mongo_query)
         # The value of the command, it is usually the collection name on which to run the query.
-        mongo_command_value = str(mongo_query[mongo_command])
+        mongo_command_value = mongo_query[mongo_command]
         del mongo_query[mongo_command]
         if mongo_command not in ALLOWED_CUSTOM_QUERIES_COMMANDS:
             raise ValueError("Custom query command must be of type {}".format(ALLOWED_CUSTOM_QUERIES_COMMANDS))
@@ -102,15 +102,13 @@ class CustomQueriesCollector(MongoCollector):
             self.log.error("Failed to run custom query for metric %s", metric_prefix)
             raise
 
+        formatted_command_value = str(mongo_command_value)
         # `1` is Mongo default value for commands that are collection agnostics.
-        if mongo_command_value == '1':
-            if 'ns' in result['cursor']:
-                collection_name = result['cursor']['ns'].split(1)[1]
-            else:
-                # https://github.com/mongodb/mongo-python-driver/blob/01e34cebdb9aac96c72ddb649e9b0040a0dfd3a0/pymongo/aggregation.py#L208
-                collection_name = '{}.$cmd.{}'.format(db_name, mongo_command)
+        if formatted_command_value == '1':
+            # https://github.com/mongodb/mongo-python-driver/blob/01e34cebdb9aac96c72ddb649e9b0040a0dfd3a0/pymongo/aggregation.py#L208
+            collection_name = '{}.{}'.format(db_name, mongo_command)
         else:
-            collection_name = mongo_command_value
+            collection_name = formatted_command_value
 
         tags.append('collection:{}'.format(collection_name))
         tags.extend(raw_query.get('tags', []))
