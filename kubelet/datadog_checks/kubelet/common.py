@@ -99,7 +99,7 @@ class PodListUtils(object):
     cost (filter called once per prometheus metric), hence the PodListUtils object MUST
     be re-created at every check run.
 
-    Containers that are part of a static pod are not filtered, as we cannot curently
+    Containers that are part of a static pod are not filtered, as we cannot currently
     reliably determine their image name to pass to the filtering logic.
     """
 

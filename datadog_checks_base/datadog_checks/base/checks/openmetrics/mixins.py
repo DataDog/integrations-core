@@ -258,7 +258,7 @@ class OpenMetricsScraperMixin(object):
         config['type_overrides'].update(instance.get('type_overrides', {}))
 
         # `_type_override_patterns` is a dictionary where we store Pattern objects
-        # that match metric names as keys, and their corresponding metric type overrrides as values.
+        # that match metric names as keys, and their corresponding metric type overrides as values.
         config['_type_override_patterns'] = {}
 
         with_wildcards = set()
@@ -271,7 +271,7 @@ class OpenMetricsScraperMixin(object):
         for metric in with_wildcards:
             del config['type_overrides'][metric]
 
-        # Some metrics are retrieved from differents hosts and often
+        # Some metrics are retrieved from different hosts and often
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
@@ -743,7 +743,7 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
-            # check for wilcards in transformers
+            # check for wildcards in transformers
             for transformer_name, transformer in iteritems(metric_transformers):
                 if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
                     transformer(metric, scraper_config, transformer_name)

@@ -302,7 +302,7 @@ See [service_checks.json][28] for a list of service checks provided by this inte
     redisdb
     -------
       - instance #0 [ERROR]: 'Error 111 connecting to localhost:6379. Connection refused.'
-      - Collected 0 metrics, 0 events & 1 service chec
+      - Collected 0 metrics, 0 events & 1 service check
 ```
 
 Check that the connection info in `redisdb.yaml` is correct.
