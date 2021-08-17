@@ -27,7 +27,9 @@ jobs:
       run: python3 -m pip install codespell
 
     - name: Run codespell for typos
-      run: codespell
+      run: |
+        codespell --skip="*.txt,*.json,*/.tox/*,*.sql,*/tests/*,./site/*,*/metrics.yaml,*/CHANGELOG.md,*/.git/*,*/*.egg-info/*,*/build/*" \
+        --ignore-words=.github/workflows/words.txt --ignore-regex="PullRequest|PostgresSQL"
 
     - name: Install ddev
       run: pip install -e ./datadog_checks_dev[cli]
