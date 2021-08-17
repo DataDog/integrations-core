@@ -114,7 +114,7 @@ class IBMMQConfig:
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
             self.log.info(
-                "ssl_auth has not been explictly enabled but other SSL options have been provided. "
+                "ssl_auth has not been explicitly enabled but other SSL options have been provided. "
                 "SSL will be used for connecting"
             )
             self.ssl = True
