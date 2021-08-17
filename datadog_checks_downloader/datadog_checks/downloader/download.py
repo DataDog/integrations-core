@@ -37,7 +37,7 @@ from .parameters import substitute
 # Increase requests timeout.
 tuf_settings.SOCKET_TIMEOUT = 60
 
-# After we import everything we neeed, shut off all existing loggers.
+# After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
 
 

@@ -658,7 +658,7 @@ class MySql(AgentCheck):
     def _is_innodb_engine_enabled(self, db):
         # Whether InnoDB engine is available or not can be found out either
         # from the output of SHOW ENGINES or from information_schema.ENGINES
-        # table. Later is choosen because that involves no string parsing.
+        # table. Later is chosen because that involves no string parsing.
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)

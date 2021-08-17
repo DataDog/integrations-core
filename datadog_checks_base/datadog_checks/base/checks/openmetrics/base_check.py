@@ -165,7 +165,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     def _filter_metric(self, metric, scraper_config):
         """
-        Used to filter metrics at the begining of the processing, by default no metric is filtered
+        Used to filter metrics at the beginning of the processing, by default no metric is filtered
         """
         return False
 
