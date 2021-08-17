@@ -6,7 +6,7 @@ Functions to annotate in Github Actions workflows.
 """
 import os
 
-from .ci import running_on_gh_actions  # noqa: F401
+from datadog_checks.dev.ci import running_on_gh_actions  # noqa: F401
 
 ANNOTATE_WARNING = 'warning'
 ANNOTATE_ERROR = 'error'
