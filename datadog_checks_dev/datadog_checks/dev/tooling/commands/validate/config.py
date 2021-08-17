@@ -4,7 +4,7 @@
 import click
 import yaml
 
-from datadog_checks.dev.annotations import annotate_error
+from datadog_checks.dev.tooling.annotations import annotate_error
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from datadog_checks.dev.tooling.configuration import ConfigSpec
