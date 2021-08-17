@@ -5,8 +5,8 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 from datadog_checks.dev.annotations import annotate_error
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 
 from ...testing import process_checks_option
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success

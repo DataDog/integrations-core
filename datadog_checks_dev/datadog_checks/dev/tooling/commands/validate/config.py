@@ -4,11 +4,11 @@
 import click
 import yaml
 
+from datadog_checks.dev.annotations import annotate_error
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
-from datadog_checks.dev.annotations import annotate_error
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...testing import process_checks_option
