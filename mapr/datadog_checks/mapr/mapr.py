@@ -135,7 +135,7 @@ class MaprCheck(AgentCheck):
                 return 1
             return 0
         except Exception as e:
-            self.log.warning("Received unexpected message %s, wont be processed", msg.value())
+            self.log.warning("Received unexpected message %s, won't be processed", msg.value())
             self.log.exception(e)
 
     def _process_error(self, error_msg):
