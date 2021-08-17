@@ -123,6 +123,7 @@ def test_statement_metrics(
     event = events[0]
 
     assert event['host'] == 'stubbed.hostname'
+    assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
@@ -153,6 +154,7 @@ def test_statement_metrics(
     assert event['mysql']['schema'] == default_schema
     assert event['timestamp'] > 0
     assert event['host'] == 'stubbed.hostname'
+    assert event['ddagentversion'] == datadog_agent.get_version()
 
 
 def _obfuscate_sql(query, options=None):
