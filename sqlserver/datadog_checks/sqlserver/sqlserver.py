@@ -109,10 +109,13 @@ ALERT_TYPE_ERROR = 'error'
 NTNX_sqlserver_heartbeat_collection = "NTNX_sqlserver_heartbeat_collection"
 
 # Constants for Alert to be raise for db db execution time
-NTNX__db_execution_time_exceeded = "NTNX__db_execution_time_exceeded"
+NTNX__collection_latency = "NTNX__collection_latency"
 
 # Constant for Query Execution time threshold
-QUERY_EXECUTION_TIME_LIMIT = 10
+DATA_COLLECTION_TIME_LIMIT = 10
+
+#Constant for retry interval for bad connections
+CONNECTION_RETRY_INTERVAL = 30 * 60
 
 class SQLConnectionError(Exception):
     """
@@ -159,6 +162,7 @@ class SQLServer(AgentCheck):
         # Cache connections
         self.connections = {}
         self.failed_connections = {}
+        self.failed_instances = {}
         self.instances_metrics = {}
         self.instances_per_type_metrics = defaultdict(dict)
         self.existing_databases = None
@@ -589,7 +593,17 @@ class SQLServer(AgentCheck):
 
         return sql_type, base_name
 
+    def check_timer(self, instance):
+        instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
+        instance_ts = self.failed_instances.get(instance_key,None)
+        if instance_ts:
+            current_ts = time.time()
+            if (current_ts - instance_ts) >= CONNECTION_RETRY_INTERVAL:
+                self.do_check[instance_key] = True
+                del self.failed_instances[instance_key]
+
     def check(self, instance):
+        self.check_timer(instance)
         if self.do_check[self._conn_key(instance, self.DEFAULT_DB_KEY)]:
             proc = instance.get('stored_procedure')
             initialTime = time.time()
@@ -599,15 +613,15 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check(instance, proc)
 
             endTime = time.time()
-            self.log.debug("Check for raising alert if it exceeds execution time")
-            if int(endTime - initialTime) >= QUERY_EXECUTION_TIME_LIMIT:
-                self.log.info("Raising alert due to DB execution time exceeded %s secs" % QUERY_EXECUTION_TIME_LIMIT)
-                alert_title = NTNX__db_execution_time_exceeded
-                alert_message = "DB call is taking more than {} secs to execute. Raising Alert".format(QUERY_EXECUTION_TIME_LIMIT)
+            self.log.debug("Check for raising alert if it exceeds collection time")
+            if int(endTime - initialTime) >= DATA_COLLECTION_TIME_LIMIT:
+                self.log.info("Raising alert due to data collection time exceeded %s secs" % DATA_COLLECTION_TIME_LIMIT)
+                alert_title = NTNX__collection_latency
+                alert_message = "Latency in data collection. Taking more than {} secs to collect.".format(DATA_COLLECTION_TIME_LIMIT)
                 try:
                     self.raise_alert(instance, alert_title, alert_message)
                 except Exception as e:
-                    self.log.warning("Sending Alert for DB execution time exceed FAILED with exception: %s ", e)
+                    self.log.warning("Sending Alert for collection latency time exceed FAILED with exception: %s ", e)
 
         else:
             self.log.debug("Skipping check")
@@ -664,6 +678,10 @@ class SQLServer(AgentCheck):
             self.log.warning("Could not fetch metric due to %s" % e)
             self.register_heartbeat_collections(instance, e, True)
             self.maybe_raise_alert(e, instance_key, instance)
+            # add bad instance with current timestamp
+            self.failed_instances[instance_key] = time.time()
+            # disable check for the bad instance
+            self.do_check[instance_key] = False
 
     def do_stored_procedure_check(self, instance, proc):
         """
