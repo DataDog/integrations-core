@@ -28,7 +28,8 @@ jobs:
 
     - name: Run codespell for typos
       run: |
-        codespell --skip="*.txt,*.json,*/.tox/*,*.sql,*/tests/*,./site/*,*/metrics.yaml,*/CHANGELOG.md,*/.git/*,*/*.egg-info/*,*/build/*" \
+        codespell \
+        --skip="*.txt,*.json,*/.tox/*,*.sql,./site/*,*/metrics.yaml,*/CHANGELOG.md,*/.git/*,*/*.egg-info/*,*/build/*,*/vendor/*,*/tests/*" \
         --ignore-words=.github/workflows/words.txt --ignore-regex="PullRequest|PostgresSQL"
 
     - name: Install ddev
