@@ -18,3 +18,4 @@ services:
         -Dtomcat.util.buf.StringCache.char.enabled=true
         -Dtomcat.util.buf.StringCache.trainThreshold=100
       ALLOW_EMPTY_PASSWORD: "yes"
+      
