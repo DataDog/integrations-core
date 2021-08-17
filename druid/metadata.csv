@@ -35,7 +35,7 @@ druid.query.cache.total.averageBytes,gauge,,byte,,Total average cache entry byte
 druid.query.cache.total.timeouts,gauge,,,,Total number of cache timeouts.,-1,druid,qry cache tot timeouts
 druid.query.cache.total.errors,gauge,,,,Total number of cache errors.,-1,druid,qry cache tot errors
 druid.ingest.events.thrownAway,count,,event,,Number of events rejected because they are outside the windowPeriod.,-1,druid,ing events thrown away
-druid.ingest.events.unparsable,count,,event,,Number of events rejected because the events are unparsable.,-1,druid,ing events unparsable
+druid.ingest.events.unparseable,count,,event,,Number of events rejected because the events are unparsable.,-1,druid,ing events unparsable
 druid.ingest.events.duplicate,count,,event,,Number of events rejected because the events are duplicated.,-1,druid,ing events duplicate
 druid.ingest.events.processed,count,,event,,Number of events successfully processed per emission period.,1,druid,ing events processed
 druid.ingest.events.messageGap,gauge,,millisecond,,Time gap between the data time in event and current system time.,-1,druid,ing events message gap
