@@ -10,7 +10,7 @@ HERE = get_here()
 
 TOMCAT_E2E_METRICS = [
     # Tomcat
-    "tomcat.max_time",
+    # "tomcat.max_time", TODO: Upon updating to Tomcat 9.0, this metric is no longer emitted
     "tomcat.threads.busy",
     "tomcat.threads.count",
     "tomcat.threads.max",
