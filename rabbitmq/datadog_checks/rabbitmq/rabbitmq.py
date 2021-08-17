@@ -281,7 +281,7 @@ class RabbitMQ(AgentCheck):
                 self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
 
                 # Generate a service check from the aliveness API. In the case of an invalid response
-                # code or unparseable JSON this check will send no data.
+                # code or unparsable JSON this check will send no data.
                 self._check_aliveness(base_url, vhosts, custom_tags)
 
             # Generate a service check for the service status.

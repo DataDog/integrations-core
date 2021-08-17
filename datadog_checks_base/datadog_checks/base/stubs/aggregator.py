@@ -397,7 +397,7 @@ class AggregatorStub(object):
                 actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                 # We only check `*.count` metrics for histogram and historate submissions
-                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted
+                # Note: all Openmetrics histogram and summary metrics are actually separately submitted
                 if check_submission_type and actual_metric_type in ['histogram', 'historate']:
                     metric_stub_name += '.count'
 

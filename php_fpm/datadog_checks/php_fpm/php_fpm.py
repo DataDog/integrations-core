@@ -105,7 +105,7 @@ class PHPFPMCheck(AgentCheck):
                 data = json.loads(self.request_fastcgi(status_url, query='json'))
             else:
                 # TODO: adding the 'full' parameter gets you per-process detailed
-                # informations, which could be nice to parse and output as metrics
+                # information, which could be nice to parse and output as metrics
                 max_attempts = 3
                 for i in range(max_attempts):
                     resp = self.http.get(status_url, params={'json': True})

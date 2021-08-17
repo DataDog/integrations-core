@@ -84,7 +84,9 @@ class QueueMetricCollector(object):
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
             pcf = None
             try:
-                pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
                 response = pcf.MQCMD_INQUIRE_Q(args)
             except pymqi.MQMIError as e:
                 # Don't warn if no messages, see:
@@ -127,7 +129,9 @@ class QueueMetricCollector(object):
         pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
-            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -168,7 +172,9 @@ class QueueMetricCollector(object):
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
-            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -200,7 +206,9 @@ class QueueMetricCollector(object):
         pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
-            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:

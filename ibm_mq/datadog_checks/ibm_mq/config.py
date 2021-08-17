@@ -65,6 +65,7 @@ class IBMMQConfig:
 
         self.username = instance.get('username')  # type: str
         self.password = instance.get('password')  # type: str
+        self.timeout = int(float(instance.get('timeout', 5)) * 1000)  # type: int
 
         self.queues = instance.get('queues', [])  # type: List[str]
         self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]
@@ -113,7 +114,7 @@ class IBMMQConfig:
             instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
         ):
             self.log.info(
-                "ssl_auth has not been explictly enabled but other SSL options have been provided. "
+                "ssl_auth has not been explicitly enabled but other SSL options have been provided. "
                 "SSL will be used for connecting"
             )
             self.ssl = True
