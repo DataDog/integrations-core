@@ -278,6 +278,7 @@ def test_statement_samples_collect(
     expected_statement_truncated,
     aurora_replication_role,
     caplog,
+    datadog_agent,
 ):
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
@@ -321,6 +322,9 @@ def test_statement_samples_collect(
         logger.debug("done second check")
 
     events = aggregator.get_event_platform_events("dbm-samples")
+
+    for event in events:
+        assert event['ddagentversion'] == datadog_agent.get_version()
 
     # Match against the statement itself if it's below the statement length limit or its truncated form which is
     # the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...'
