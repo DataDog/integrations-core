@@ -358,6 +358,7 @@ def test_statement_samples_collect(
     expected_error_tag,
     expected_collection_errors,
     expected_statement_truncated,
+    datadog_agent,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -413,6 +414,7 @@ def test_statement_samples_collect(
 
         # validate the events to ensure we've provided an explanation for not providing an exec plan
         for event in matching:
+            assert event['ddagentversion'] == datadog_agent.get_version()
             if event['db']['plan']['definition'] is None:
                 assert event['db']['plan']['collection_errors'] == expected_collection_errors
             else:
