@@ -102,13 +102,12 @@ class CustomQueriesCollector(MongoCollector):
             self.log.error("Failed to run custom query for metric %s", metric_prefix)
             raise
 
-        formatted_command_value = str(mongo_command_value)
         # `1` is Mongo default value for commands that are collection agnostics.
-        if formatted_command_value == '1':
+        if str(mongo_command_value) == '1':
             # https://github.com/mongodb/mongo-python-driver/blob/01e34cebdb9aac96c72ddb649e9b0040a0dfd3a0/pymongo/aggregation.py#L208
             collection_name = '{}.{}'.format(db_name, mongo_command)
         else:
-            collection_name = formatted_command_value
+            collection_name = mongo_command_value
 
         tags.append('collection:{}'.format(collection_name))
         tags.extend(raw_query.get('tags', []))
