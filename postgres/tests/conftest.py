@@ -16,7 +16,18 @@ from datadog_checks.postgres import PostgreSql
 from .common import DB_NAME, HOST, PASSWORD, PORT, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-INSTANCE = {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+INSTANCE = {
+    'host': HOST,
+    'port': PORT,
+    'username': USER,
+    'password': PASSWORD,
+    'dbname': DB_NAME,
+    'tags': ['foo:bar'],
+    'query_settings': {
+        # the default collection interval for query settings is 5 min, lower it for tests so it times out quickly
+        'collection_interval': 1,
+    },
+}
 
 
 def connect_to_pg():
