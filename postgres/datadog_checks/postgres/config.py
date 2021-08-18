@@ -2,17 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # cursor. https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-import threading
-import time
-from concurrent.futures.thread import ThreadPoolExecutor
-
 import psycopg2
 from six import PY2, PY3, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -36,74 +31,76 @@ class DatabaseSetting:
     where a setting sets a limit and a value must be tracked to check against the set limit.
     """
 
-    def __init__(self, value):
+    def __init__(self, name, value):
+        self._name = name
         self._value = value
         self._tracked_value = None
 
+    def get_name(self):
+        """get_name returns the name of the setting."""
+        return self._name
+
     def set_value(self, value):
+        """set_value sets the value of the setting."""
         self._value = value
 
     def get_value(self):
+        """get_value returns the value of the setting."""
         return self._value
 
     def set_tracked_value(self, value):
+        """set_tracked_value sets the value of the tracked value for this setting."""
         self._tracked_value = value
 
     def get_tracked_value(self):
+        """get_tracked_value returns the tracked value for this setting."""
         return self._tracked_value
 
 
-class PostgresSettings:
+class PostgresSettings(DBMAsyncJob):
     """PostgresSettings holds settings queried from the pg_settings table."""
 
-    PG_SETTINGS_QUERY = (
-        "SELECT name, setting FROM pg_settings WHERE name IN ('pg_stat_statements.max', 'track_activity_query_size')"
+    # Setting names
+    PG_STAT_STATEMENTS_MAX = "pg_stat_statements.max"
+    TRACK_ACTIVITY_QUERY_SIZE = "track_activity_query_size"
+
+    # Queries
+    PG_SETTINGS_QUERY = ("SELECT name, setting FROM pg_settings WHERE name IN ('{}', '{}')").format(
+        PG_STAT_STATEMENTS_MAX, TRACK_ACTIVITY_QUERY_SIZE
     )
     PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements"
 
-    def __init__(self, check, config):
-        self.pg_stat_statements_max = DatabaseSetting(PG_STAT_STATMENTS_MAX_UNKNOWN_VALUE)
-        self.track_activity_query_size = DatabaseSetting(TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE)
-        self._check = check
+    # Defaults
+    DEFAULT_COLLECTION_INTERVAL = 300  # 5 min in seconds
+
+    def __init__(self, check, config, shutdown_callback=None):
+        collection_interval = config.query_settings.get('collection_interval', self.DEFAULT_COLLECTION_INTERVAL)
+        super(PostgresSettings, self).__init__(
+            check=check,
+            rate_limit=1 / collection_interval,
+            run_sync=is_affirmative(config.query_settings.get('run_sync', False)),
+            enabled=is_affirmative(config.query_settings.get('monitor_settings', True)),
+            dbms="postgres",
+            min_collection_interval=collection_interval,
+            config_host=config.host,
+            expected_db_exceptions=(psycopg2.DatabaseError, psycopg2.OperationalError),
+            job_name="query-settings",
+            shutdown_callback=shutdown_callback,
+        )
+        self.pg_stat_statements_max = DatabaseSetting(self.PG_STAT_STATEMENTS_MAX, PG_STAT_STATMENTS_MAX_UNKNOWN_VALUE)
+        self.track_activity_query_size = DatabaseSetting(
+            self.TRACK_ACTIVITY_QUERY_SIZE, TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+        )
         self._config = config
         self._db = None
-        self._db_hostname = None
-        self._tags = None
-        self._tags_str = None
-        self._log = get_check_logger()
-        self._run_sync = self._config.query_settings.get('run_sync', False)
-        self._last_check_run = 0
-        self._collection_interval = self._config.query_settings.get('collection_interval', 300)
-        self._expected_db_exceptions = (psycopg2.DatabaseError, psycopg2.OperationalError)
-        self._job_name = "postgres-settings"
-        self._job_loop_future = None
-        self._cancel_event = threading.Event()
-        self._executor = ThreadPoolExecutor()
 
-    def cancel(self):
-        self._cancel_event.set()
-
-    def run_job_loop(self, tags):
-        if not self._config.query_settings.get('enable_collection_loop', True):
-            self._log.debug("Job not enabled. job=%s", self._job_name)
-            return
+    def init(self):
+        """
+        init must run regardless of the collection loop being enabled if `dbm` is enabled.
+        Note, a database connection must be established before this is invoked.
+        """
         if not self._db:
             self._db = self._check._get_db(self._config.dbname)
-            self._db_hostname = resolve_db_host(self._config.host)
-            self._query_settings()
-        self._tags = tags
-        self._tags_str = ",".join(self._tags)
-        self._last_check_run = time.time()
-        if self._run_sync:
-            self._log.warning('Running sync %s | %s', self._run_sync, self._db_hostname)
-            self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
-            self._update_setting_values()
-        elif self._job_loop_future is None or not self._job_loop_future.running():
-            self._job_loop_future = self._executor.submit(self._job_loop)
-        else:
-            self._log.debug("Settings job loop already running.")
-
-    def _query_settings(self):
         try:
             with self._db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 self._log.debug("Running query [%s]", self.PG_SETTINGS_QUERY)
@@ -111,9 +108,9 @@ class PostgresSettings:
                 rows = cursor.fetchall()
                 for setting in rows:
                     name, val = setting
-                    if name == "pg_stat_statements.max":
+                    if name == self.PG_STAT_STATEMENTS_MAX:
                         self.pg_stat_statements_max.set_value(int(val))
-                    elif name == "track_activity_query_size":
+                    elif name == self.TRACK_ACTIVITY_QUERY_SIZE:
                         self.track_activity_query_size.set_value(int(val))
         except self._expected_db_exceptions as err:
             self._log.warning("Failed to query for pg_settings: %s", repr(err))
@@ -124,45 +121,15 @@ class PostgresSettings:
                 hostname=self._db_hostname,
             )
 
-    def _job_loop(self):
-        self._log.info("[%s] Starting settings job loop.", self._tags)
-        self._log.warning('Interval %s', self._collection_interval)
-        while True:
-            if self._cancel_event.is_set():
-                self._log.warning("Settings job cancelled.")
-                self._check.count("dd.postgres.async_job.cancel", 1, tags=["job:{}".format(self._job_name)])
-                break
-            if time.time() - self._last_check_run > self._collection_interval * 2:
-                self._log.info("Settings job stopping due to check inactivity [%s]", self._tags)
-                break
-            self._update_setting_values()
-            time.sleep(self._collection_interval)
-
-    def _update_setting_values(self):
-        """_update_setting_values executes queries for settings that need to be periodically checked."""
-        if self._db.closed != 0:
-            self._log.warning('Database connection is closed, attempting to cancel job.')
-            self.cancel()
-            return
-
+    def run_job(self):
+        """
+        run_job implements DBMAsyncJob's run_job.
+        The job executes queries for settings that need to be periodically checked.
+        """
         try:
             self._query_pg_stat_statements_count()
-        except self._expected_db_exceptions:
-            self._check.count(
-                "dd.postgres.settings.error",
-                1,
-                tags=self._tags,
-                hostname=self._db_hostname,
-            )
         except Exception as err:
-            self._log.exception("Settings job loop crash: %s", err)
-            self._check.count(
-                "dd.postgres.settings.error",
-                1,
-                tags=self._tags + ["error:crash-{}".format(type(err))],
-                hostname=self._db_hostname,
-            )
-            self.cancel()
+            raise err
 
     def _query_pg_stat_statements_count(self):
         try:
@@ -171,10 +138,20 @@ class PostgresSettings:
                 cursor.execute(self.PG_STAT_STATEMENTS_COUNT_QUERY)
                 row = cursor.fetchone()
                 if len(row) > 0:
-                    self.pg_stat_statements_max.set_tracked_value(row[0])
+                    count = row[0]
+                    self.pg_stat_statements_max.set_tracked_value(count)
+                    self._emit_tracked_value_metric(self.PG_STAT_STATEMENTS_MAX, count)
         except Exception as err:
             self._log.warning("Failed to query for pg_stat_statements count: %s", repr(err))
             raise err
+
+    def _emit_tracked_value_metric(self, setting, value):
+        self._check.count(
+            "dd.postgres.settings.{}".format(setting),
+            value,
+            tags=self._tags,
+            hostname=self._db_hostname,
+        )
 
 
 class PostgresConfig:
