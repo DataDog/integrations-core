@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-from .config import TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+from .settings import TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes

@@ -17,7 +17,8 @@ from datadog_checks.postgres.relationsmanager import RELATION_METRICS, Relations
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
-from .config import PostgresConfig, PostgresSettings
+from .config import PostgresConfig
+from .settings import PostgresSettings
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, V10, VersionUtils
 
