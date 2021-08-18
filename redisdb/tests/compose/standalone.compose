@@ -11,7 +11,7 @@ services:
     networks:
       - network1
     command: bash -c "if [ -f /etc/users.acl ]; then
-                redis-server /etc/redis.conf --aclfile /etc/users.acl;
+               redis-server /etc/redis.conf --aclfile /etc/users.acl;
              else
                redis-server /etc/redis.conf;
              fi"
