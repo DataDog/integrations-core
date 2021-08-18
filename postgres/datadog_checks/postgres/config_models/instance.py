@@ -45,7 +45,7 @@ class QuerySettings(BaseModel):
     class Config:
         allow_mutation = False
 
-    enable_collection_loop: Optional[bool]
+    monitor_settings: Optional[bool]
     collection_interval: Optional[float]
 
 
