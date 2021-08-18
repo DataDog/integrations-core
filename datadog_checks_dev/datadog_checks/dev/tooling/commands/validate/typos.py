@@ -39,17 +39,17 @@ def typos(ctx, check, fix):
         cmd += " -w"
 
     try:
-        output, err, code = run_command(cmd, capture='out')
+        output, err, code = run_command(cmd, capture=True)
         if code == 0:
             echo_success("All files are valid!")
             abort()
+        annotate_typos(output)
     except Exception as e:
         echo_info(f"Encountered error validating spell check: {e}")
 
-    annotate_typos(output)
-
 
 def annotate_typos(output):
+    echo_failure("Typo validation failed, please fix typos")
     parse_errors = output.split('\n')
     for line in parse_errors:
         m = re.match(FILE_PATH_REGEX, line)
@@ -59,4 +59,3 @@ def annotate_typos(output):
         file, num, suggestion = m.groups()
         annotate_warning(file, f"Detected typo: {suggestion}", line=num)
         echo_warning(line)
-    echo_failure("Typo validation failed, please fix typos")
