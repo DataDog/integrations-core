@@ -13,4 +13,3 @@ def test_check_ok(dd_agent_check, instance):
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_no_duplicate_all()
