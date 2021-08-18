@@ -96,12 +96,12 @@ The JBoss/WildFly integration does not include any events.
 
 ### Service Checks
 
-**jboss.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored JBoss/WildFly instance, otherwise returns `OK`.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
 
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
@@ -115,3 +115,4 @@ Need help? Contact [Datadog support][5].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/assets/service_checks.json

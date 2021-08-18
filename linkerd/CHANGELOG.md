@@ -1,5 +1,13 @@
 # CHANGELOG - Linkerd
 
+## 2.9.1 / 2021-07-12 / Agent 7.30.0
+
+* [Fixed] Raise exception if attempting to use new style openmetrics with py2. See [#9613](https://github.com/DataDog/integrations-core/pull/9613).
+
+## 2.9.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
 ## 2.8.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add support for legacy config to OpenMetricsCompatibilityScraper. See [#8507](https://github.com/DataDog/integrations-core/pull/8507).

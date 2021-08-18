@@ -11,7 +11,7 @@ from datadog_checks.mongo.common import (
 
 
 class CustomQueriesCollector(MongoCollector):
-    """A collector dedicated to running cutom queries defined in the configuration."""
+    """A collector dedicated to running custom queries defined in the configuration."""
 
     def __init__(self, check, db_name, tags, custom_queries):
         super(CustomQueriesCollector, self).__init__(check, tags)

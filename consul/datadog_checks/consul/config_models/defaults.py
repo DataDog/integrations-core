@@ -164,6 +164,10 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_threads_count(field, value):
+    return 1
+
+
 def instance_timeout(field, value):
     return 10
 

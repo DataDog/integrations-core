@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -22,7 +24,8 @@ jobs:
     - id: files
       run: |
         git fetch origin master
-        FILES=$(git --no-pager diff --name-only origin/master -- .in-toto | xargs echo)
+        LAST_COMMON_COMMIT=$(git merge-base HEAD origin/master)
+        FILES=$(git --no-pager diff --name-only $LAST_COMMON_COMMIT -- .in-toto | xargs echo)
         echo "::set-output name=all::$FILES"
 
     - id: merge

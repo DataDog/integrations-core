@@ -57,12 +57,12 @@ jobs:
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
-    - checkName: azure_iot_edge
-      displayName: Azure IoT Edge
+    - checkName: avi_vantage
+      displayName: Avi Vantage
       os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
-      os: windows
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
@@ -110,6 +110,9 @@ jobs:
       os: linux
     - checkName: crio
       displayName: CRI-O
+      os: linux
+    - checkName: datadog_cluster_agent
+      displayName: Datadog Cluster Agent
       os: linux
     - checkName: directory
       displayName: Directory

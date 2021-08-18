@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 import random
+import socket
 import time
 
 from flup.client.fcgi_app import FCGIApp
@@ -18,7 +19,6 @@ FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
 # This fixes that for our use case.
 # https://hg.saddi.com/flup-py3.0/file/tip/flup/client/fcgi_app.py
 if PY3:
-    import socket
 
     def get_connection(self):
         if self._connect is not None:
@@ -35,7 +35,7 @@ if PY3:
     FCGIApp._getConnection = get_connection
 
 
-DEFAULT_TIMEOUT = 20
+DEFAULT_TIMEOUT = 10
 
 
 class BadConfigError(Exception):
@@ -79,6 +79,7 @@ class PHPFPMCheck(AgentCheck):
         ping_url = instance.get('ping_url')
         use_fastcgi = is_affirmative(instance.get('use_fastcgi', False))
         ping_reply = instance.get('ping_reply')
+        sock_timeout = instance.get('timeout', DEFAULT_TIMEOUT)
 
         tags = instance.get('tags', [])
         http_host = instance.get('http_host')
@@ -86,6 +87,7 @@ class PHPFPMCheck(AgentCheck):
         if status_url is None and ping_url is None:
             raise BadConfigError("No status_url or ping_url specified for this instance")
 
+        socket.setdefaulttimeout(sock_timeout)
         pool = None
         if status_url is not None:
             try:
@@ -103,7 +105,7 @@ class PHPFPMCheck(AgentCheck):
                 data = json.loads(self.request_fastcgi(status_url, query='json'))
             else:
                 # TODO: adding the 'full' parameter gets you per-process detailed
-                # informations, which could be nice to parse and output as metrics
+                # information, which could be nice to parse and output as metrics
                 max_attempts = 3
                 for i in range(max_attempts):
                     resp = self.http.get(status_url, params={'json': True})

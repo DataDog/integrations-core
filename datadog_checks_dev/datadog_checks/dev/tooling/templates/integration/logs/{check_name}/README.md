@@ -47,13 +47,15 @@ This integration monitors [{integration_name}][3].
 
 3. [Restart the Agent][2].
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
+
+### Service Checks
+
+The {integration_name} integration does not include any service checks.
+
+See [service_checks.json][4] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -62,3 +64,4 @@ Need help? Contact [Datadog support][1].
 [1]: https://docs.datadoghq.com/help/
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [3]: **LINK_TO_INTEGRATION_SITE**
+[4]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/assets/service_checks.json

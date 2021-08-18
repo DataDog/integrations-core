@@ -51,7 +51,7 @@ def check(instance):
 def instance():
     return {
         'server': 'localhost:1521',
-        'user': 'system',
+        'username': 'system',
         'password': 'oracle',
         'service_name': 'xe',
         'tags': ['optional:tag1'],
@@ -62,7 +62,7 @@ def instance():
 def dd_environment():
     instance = {
         'server': '{}:{}'.format(HOST, PORT),
-        'user': USER,
+        'username': USER,
         'password': PASSWORD,
         'service_name': 'InfraDB.us.oracle.com',
     }

@@ -49,7 +49,7 @@ def instance_bearer_token_path(field, value):
 
 
 def instance_citadel_endpoint(field, value):
-    return 'http://istio-citadel.istio-system:15014/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_connect_timeout(field, value):
@@ -69,7 +69,7 @@ def instance_extra_headers(field, value):
 
 
 def instance_galley_endpoint(field, value):
-    return 'http://istio-galley.istio-system:15014/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_headers(field, value):
@@ -88,12 +88,16 @@ def instance_ignore_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ignore_tags(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_istio_mesh_endpoint(field, value):
-    return 'http://istio-proxy.istio-system:15090/stats/prometheus'
+    return get_default_field_value(field, value)
 
 
 def instance_istiod_endpoint(field, value):
-    return 'http://istiod.istio-system:15014/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_kerberos_auth(field, value):
@@ -149,7 +153,7 @@ def instance_min_collection_interval(field, value):
 
 
 def instance_mixer_endpoint(field, value):
-    return 'http://istio-telemetry.istio-system:15014/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_namespace(field, value):
@@ -169,7 +173,7 @@ def instance_persist_connections(field, value):
 
 
 def instance_pilot_endpoint(field, value):
-    return 'http://istio-pilot.istio-system:15014/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_prometheus_metrics_prefix(field, value):
@@ -254,6 +258,10 @@ def instance_type_overrides(field, value):
 
 def instance_use_legacy_auth_encoding(field, value):
     return True
+
+
+def instance_use_openmetrics(field, value):
+    return False
 
 
 def instance_username(field, value):

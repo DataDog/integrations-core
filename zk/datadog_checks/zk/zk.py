@@ -8,7 +8,7 @@ this check will report three other states:
 
     `down`: the check cannot connect to zookeeper
     `inactive`: the zookeeper instance has lost connection to the cluster
-    `unknown`: an unexpected error has occured in this check
+    `unknown`: an unexpected error has occurred in this check
 
 States can be accessed through the gauge `zookeeper.instances.<state>,
 through the set `zookeeper.instances`, or through the `mode:<state>` tag.
@@ -316,7 +316,7 @@ class ZookeeperCheck(AgentCheck):
             _, value = buf.readline().split(':')
             metrics.append(ZKMetric('zookeeper.connections', int(value.strip())))
         else:
-            # If the zk version doesnt explicitly give the Connections val,
+            # If the zk version doesn't explicitly give the Connections val,
             # use the value we computed from the client list.
             metrics.append(ZKMetric('zookeeper.connections', connections))
 

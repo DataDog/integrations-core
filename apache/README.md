@@ -45,30 +45,30 @@ To configure this check for an Agent running on a host:
 
 _Available for Agent versions >6.0_
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
    ```yaml
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache Logs:
+2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache logs, adjusting the `path` and `service` values to configure them for your environment:
 
    ```yaml
    logs:
      - type: file
-       path: /var/log/apache2/access.log
+       path: /path/to/your/apache/access.log
        source: apache
        service: apache
        sourcecategory: http_web_access
 
      - type: file
-       path: /var/log/apache2/error.log
+       path: /path/to/your/apache/error.log
        source: apache
        service: apache
        sourcecategory: http_web_error
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample apache.d/conf.yaml][4] for all available configuration options.
+    See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -213,8 +213,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the configured `apache_status_url`, otherwise returns `OK`.
+See [service_checks.json][26] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -258,3 +257,4 @@ Additional helpful documentation, links, and articles:
 [23]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
 [25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[26]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json

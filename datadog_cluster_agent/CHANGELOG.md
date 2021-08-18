@@ -1,0 +1,2 @@
+# CHANGELOG - Datadog-Cluster-Agent
+

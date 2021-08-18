@@ -74,6 +74,7 @@ class InstanceConfig(BaseModel):
     health_service_check: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
+    ignore_tags: Optional[Sequence[str]]
     istio_mesh_endpoint: Optional[str]
     istiod_endpoint: Optional[str]
     kerberos_auth: Optional[str]
@@ -117,6 +118,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool]
     type_overrides: Optional[Mapping[str, Any]]
     use_legacy_auth_encoding: Optional[bool]
+    use_openmetrics: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

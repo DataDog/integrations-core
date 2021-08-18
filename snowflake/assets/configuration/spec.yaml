@@ -37,7 +37,7 @@ files:
         value:
           type: string
           example: <ACCOUNT>
-      - name: user
+      - name: username
         required: true
         description: Login name for the user.
         value:

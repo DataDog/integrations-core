@@ -98,6 +98,24 @@ To do so, use the following fixtures:
     my_data = dd_get_state('my_data', default={})
     ```
 
+#### Mock HTTP response
+
+The `mock_http_response` fixture mocks HTTP requests for the lifetime of a test.
+
+The fixture can be used to mock the response of an endpoint. In the following example, we can mock the Prometheus output.
+
+```python
+def test(mock_http_response):
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes 6.396288e+06
+        """
+    )
+    ...
+```
+
 ### Environment manager
 
 The fixture `dd_environment_runner` manages communication between environments and the `ddev env` command group. You will

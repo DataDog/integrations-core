@@ -10,7 +10,9 @@ ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
 RELATION_REGEX = 'relation_regex'
 SCHEMAS = 'schemas'
+RELKIND = 'relkind'
 
+# The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
     'descriptors': [
         ('mode', 'lock_mode'),
@@ -38,6 +40,9 @@ SELECT mode,
     'relation': True,
 }
 
+# The pg_stat_all_tables contain one row for each table in the current database,
+# showing statistics about accesses to that specific table.
+# pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -51,6 +56,8 @@ REL_METRICS = {
         'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
         'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
         'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+        'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
+        'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}
@@ -59,6 +66,10 @@ SELECT relname,schemaname,{metrics_columns}
     'relation': True,
 }
 
+
+# The pg_stat_all_indexes view will contain one row for each index in the current database,
+# showing statistics about accesses to that specific index.
+# The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
 IDX_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
     'metrics': {
@@ -76,6 +87,9 @@ SELECT relname,
     'relation': True,
 }
 
+
+# The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
+# For this integration we are restricting the query to ordinary tables.
 SIZE_METRICS = {
     'descriptors': [('nspname', 'schema'), ('relname', 'table')],
     'metrics': {
@@ -97,6 +111,9 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   {relations}""",
 }
 
+# The pg_statio_all_tables view will contain one row for each table in the current database,
+# showing statistics about I/O on that specific table. The pg_statio_user_tables views contain the same information,
+# but filtered to only show user tables.
 STATIO_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
     'metrics': {
@@ -118,20 +135,77 @@ SELECT relname,
     'relation': True,
 }
 
+# adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
+BLOAT_QUERY = """
+SELECT
+    schemaname, relname, iname,
+    ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric,1) AS tbloat
+FROM (
+    SELECT
+    schemaname, tablename, cc.relname as relname, cc.reltuples, cc.relpages, bs,
+    CEIL((cc.reltuples*((datahdr+ma-
+        (CASE WHEN datahdr%ma=0 THEN ma ELSE datahdr%ma END))+nullhdr2+4))/(bs-20::float)) AS otta,
+    COALESCE(c2.relname,'?') AS iname, COALESCE(c2.reltuples,0) AS ituples, COALESCE(c2.relpages,0) AS ipages,
+    COALESCE(CEIL((c2.reltuples*(datahdr-12))/(bs-20::float)),0) AS iotta -- very rough approximation, assumes all cols
+    FROM (
+    SELECT
+        ma,bs,schemaname,tablename,
+        (datawidth+(hdr+ma-(case when hdr%ma=0 THEN ma ELSE hdr%ma END)))::numeric AS datahdr,
+        (maxfracsum*(nullhdr+ma-(case when nullhdr%ma=0 THEN ma ELSE nullhdr%ma END))) AS nullhdr2
+    FROM (
+        SELECT
+    schemaname, tablename, hdr, ma, bs,
+    SUM((1-null_frac)*avg_width) AS datawidth,
+    MAX(null_frac) AS maxfracsum,
+    hdr+(
+        SELECT 1+count(*)/8
+        FROM pg_stats s2
+        WHERE null_frac<>0 AND s2.schemaname = s.schemaname AND s2.tablename = s.tablename
+    ) AS nullhdr
+        FROM pg_stats s, (
+    SELECT
+        (SELECT current_setting('block_size')::numeric) AS bs,
+        CASE WHEN substring(v,12,3) IN ('8.0','8.1','8.2') THEN 27 ELSE 23 END AS hdr,
+        CASE WHEN v ~ 'mingw32' THEN 8 ELSE 4 END AS ma
+    FROM (SELECT version() AS v) AS foo
+        ) AS constants
+        GROUP BY 1,2,3,4,5
+    ) AS foo
+    ) AS rs
+    JOIN pg_class cc ON cc.relname = rs.tablename
+    JOIN pg_namespace nn ON cc.relnamespace = nn.oid
+    AND nn.nspname = rs.schemaname
+    AND nn.nspname <> 'information_schema'
+    LEFT JOIN pg_index i ON indrelid = cc.oid
+    LEFT JOIN pg_class c2 ON c2.oid = i.indexrelid
+) AS sml WHERE {relations};
+"""
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+# The estimated table bloat
+BLOAT_METRICS = {
+    'descriptors': [('schemaname', 'schema'), ('relname', 'table'), ('iname', 'index')],
+    'metrics': {
+        'tbloat': ('postgresql.table_bloat', AgentCheck.gauge),
+    },
+    'query': BLOAT_QUERY,
+    'relation': True,
+}
+
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS, BLOAT_METRICS]
 
 
 class RelationsManager(object):
+    """Builds queries to collect metrics about relations"""
+
     def __init__(self, yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         self.log = get_check_logger()
         self.config = self._build_relations_config(yamlconfig)
         self.has_relations = len(self.config) > 0
 
-    def build_relations_filter(self, schema_field):
-        # type (str) -> str
-        """Build a WHERE clause filtering relations based on relations_config."""
+    def filter_relation_query(self, query, schema_field):
+        # type (str, str) -> str
+        """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config.values():
             relation_filter = []
@@ -144,14 +218,20 @@ class RelationsManager(object):
                 schema_filter = ' ,'.join("'{}'".format(s) for s in r[SCHEMAS])
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
+            if r.get(RELKIND) and 'FROM pg_locks' in query:
+                relkind_filter = ' ,'.join("'{}'".format(s) for s in r[RELKIND])
+                relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
+
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        return ' OR '.join(relations_filter)
+        relations_filter = ' OR '.join(relations_filter)
+        self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
+        return query.format(relations=relations_filter)
 
     @staticmethod
     def validate_relations_config(yamlconfig):
-        # type: (Dict) -> None
+        # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
             if isinstance(element, dict):
                 if not (RELATION_NAME in element or RELATION_REGEX in element):
@@ -170,7 +250,9 @@ class RelationsManager(object):
                     )
                 if not isinstance(element.get(SCHEMAS, []), list):
                     raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
-            else:
+                if not isinstance(element.get(RELKIND, []), list):
+                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
+            elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod

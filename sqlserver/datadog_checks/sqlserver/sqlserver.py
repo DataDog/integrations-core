@@ -24,6 +24,7 @@ from .const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
@@ -259,6 +260,12 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load sys.master_files metrics
+        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
+            for name, table, column in DATABASE_MASTER_FILES:
+                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
@@ -467,11 +474,14 @@ class SQLServer(AgentCheck):
                 for metric in self.instance_metrics:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
-                        rows, cols = instance_results['SqlFractionMetric']
-                        if rows is not None:
-                            metric.fetch_metric(rows, cols)
+                        key = 'SqlFractionMetric'
                     else:
-                        rows, cols = instance_results[metric.__class__.__name__]
+                        key = metric.__class__.__name__
+
+                    if key not in instance_results:
+                        self.log.warning("No %s metrics found, skipping", str(key))
+                    else:
+                        rows, cols = instance_results[key]
                         if rows is not None:
                             metric.fetch_metric(rows, cols)
 

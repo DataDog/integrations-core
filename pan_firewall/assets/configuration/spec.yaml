@@ -1,6 +1,6 @@
-name: pan.firewall
+name: Palo Alto Networks Firewall
 files:
-- name: pan.firewall.yaml
+- name: pan_firewall.yaml
   options:
   - template: logs
     required: true

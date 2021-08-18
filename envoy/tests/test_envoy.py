@@ -10,7 +10,7 @@ import requests
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, HOST, INSTANCES, response
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -182,7 +182,7 @@ def test_metadata(datadog_agent):
         )
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=response('server_info')):
+    with mock.patch('requests.get', return_value=response('server_info_' + FLAVOR)):
         check._collect_metadata()
 
         major, minor, patch = ENVOY_VERSION.split('.')

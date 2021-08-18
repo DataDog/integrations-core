@@ -46,7 +46,7 @@ def saved_views(check):
     """
     errors = False
 
-    integrations = process_checks_option(check, source='integrations')
+    integrations = process_checks_option(check, source='integrations', extend_changed=True)
     echo_info(f"Validating saved views for {len(integrations)} checks ...")
 
     for integration in integrations:

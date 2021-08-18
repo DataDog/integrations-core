@@ -96,11 +96,7 @@ The Etcd check does not include any events.
 
 ### Service Checks
 
-**etcd.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot collect metrics from your Etcd API endpoint.
-
-**etcd.healthy**:<br>
-Returns `CRITICAL` if a member node is not healthy. Returns 'Unknown' if the Agent can't reach the `/health` endpoint, or if the health status is missing.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -121,3 +117,4 @@ To get a better idea of how (or why) to integrate Etcd with Datadog, check out o
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-etcd-performance
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
+[12]: https://github.com/DataDog/integrations-core/blob/master/etcd/assets/service_checks.json

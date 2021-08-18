@@ -53,7 +53,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
@@ -110,14 +110,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][7] for a list of all metrics provided by this integration.
 
-### Service Checks
-
-**cilium.prometheus.health**:<br>
- Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
-
 ### Events
 
 Cilium does not include any events.
+
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -134,3 +133,4 @@ Need help? Contact [Datadog support][8].
 [9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[12]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json

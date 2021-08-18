@@ -1,6 +1,20 @@
 # CHANGELOG - sqlserver
 
-## 3.0.0 / 2021-03-30
+## 3.2.0 / 2021-08-12
+
+* [Added] Add database file metrics from sys.master_files. See [#9812](https://github.com/DataDog/integrations-core/pull/9812).
+* [Fixed] Capture value error. See [#9852](https://github.com/DataDog/integrations-core/pull/9852).
+
+## 3.1.1 / 2021-07-07 / Agent 7.30.0
+
+* [Fixed] Do not throw key errors. See [#9460](https://github.com/DataDog/integrations-core/pull/9460).
+
+## 3.1.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8987](https://github.com/DataDog/integrations-core/pull/8987).
+* [Fixed] Fix misleading WARN message regarding adoprovider being ignored when using adodbapi connector. See [#9412](https://github.com/DataDog/integrations-core/pull/9412).
+
+## 3.0.0 / 2021-03-30 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
 * [Fixed] Fix autodiscovery tagging. See [#9055](https://github.com/DataDog/integrations-core/pull/9055).

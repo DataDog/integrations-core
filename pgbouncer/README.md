@@ -132,12 +132,12 @@ The PgBouncer check does not include any events.
 
 ### Service Checks
 
-**pgbouncer.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to PgBouncer to collect metrics, otherwise returns `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -149,3 +149,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.postgresql.org/docs/9.1/libpq-ssl.html
+[11]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/assets/service_checks.json

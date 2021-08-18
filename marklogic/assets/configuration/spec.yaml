@@ -23,7 +23,7 @@ files:
         example: false
         type: boolean
     - name: resource_filters
-      # TOOD: Add the "'id' is the resource id to match" option
+      # TODO: Add the "'id' is the resource id to match" option
       # TODO: Add the `metric_groups` option (storage, status, query)
       description: |
         Each filter in the list is composed of two to four parameters.

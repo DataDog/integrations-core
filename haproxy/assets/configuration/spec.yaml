@@ -33,15 +33,17 @@ files:
         example: false
         type: boolean
       description: |
-        This paramater instructs the check to send events on status changes in the backend.
+        This parameter instructs the check to send events on status changes in the backend.
         This is DEPRECATED in favor of the creation of a monitor on the service check status
         and will be removed in a future version.
 
         NOTE: This only takes effect when `use_prometheus` is set to `false`.
     - name: collect_aggregates_only
       value:
+        anyOf:
+          - type: boolean
+          - type: string
         example: true
-        type: boolean
       description: |
         This parameter instructs the check to collect metrics only from the aggregate frontend/backend
         status lines from the stats output instead of for each backend. With this parameter set to false the agent

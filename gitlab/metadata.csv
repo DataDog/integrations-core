@@ -43,7 +43,7 @@ gitlab.transaction.event_push_branch_total,count,,,,The counter for all branch p
 gitlab.transaction.event_push_commit_total,count,,,,The counter for commits,0,gitlab,commits pushes
 gitlab.transaction.event_push_tag_total,count,,,,The counter for tag pushes,0,gitlab,tags pushes
 gitlab.transaction.event_rails_exception_total,count,,,,The counter for number of rails exceptions,-1,gitlab,rails exceptions
-gitlab.transaction.event_receive_email_total,count,,email,,The counter for received emails,0,gitlab,recieved emails
+gitlab.transaction.event_receive_email_total,count,,email,,The counter for received emails,0,gitlab,received emails
 gitlab.transaction.event_remote_mirrors_failed_total,count,,,,The counter for failed remote mirrors,0,gitlab,remote mirrors failed
 gitlab.transaction.event_remote_mirrors_finished_total,count,,,,The counter for finished remote mirrors,0,gitlab,remote mirrors finished
 gitlab.transaction.event_remote_mirrors_running_total,count,,,,The counter for running remote mirrors,0,gitlab,remote mirrors running
@@ -130,8 +130,8 @@ gitlab.geo.attachments_synced,gauge,,,,The number of attachments synced on secon
 gitlab.geo.attachments_failed,gauge,,,,The number of attachments failed to sync on secondary,0,gitlab,geo attachments failed
 gitlab.geo.last_event_id,gauge,,,,The database ID of the latest event log entry on the primary,0,gitlab,geo last id
 gitlab.geo.last_event_timestamp,gauge,,,,The UNIX timestamp of the latest event log entry on the primary,0,gitlab,geo last timestamp
-gitlab.geo.cursor_last_event_id,gauge,,,,The last database ID of the event log processed by the secondary,0,gitlab,geo last curser id
-gitlab.geo.cursor_last_event_timestamp,gauge,,,,The last UNIX timestamp of the event log processed by the secondary,0,gitlab,geo last curser timestamp
+gitlab.geo.cursor_last_event_id,gauge,,,,The last database ID of the event log processed by the secondary,0,gitlab,geo last cursor id
+gitlab.geo.cursor_last_event_timestamp,gauge,,,,The last UNIX timestamp of the event log processed by the secondary,0,gitlab,geo last cursor timestamp
 gitlab.geo.status_failed_total,count,,,,The number of times retrieving the status from the Geo Node failed,-1,gitlab,geo fail status
 gitlab.geo.last_successful_status_check_timestamp,gauge,,,,The last timestamp when the status was successfully updated,0,gitlab,geo success last timestamp
 gitlab.geo.lfs_objects_synced_missing_on_primary,gauge,,,,The number of LFS objects marked as synced due to the file missing on the primary,-1,gitlab,geo lfs object missing

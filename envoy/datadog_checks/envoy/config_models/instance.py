@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     cache_metrics: Optional[bool]
     collect_server_info: Optional[bool]
     connect_timeout: Optional[float]
+    disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     excluded_metrics: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]

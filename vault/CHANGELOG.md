@@ -1,6 +1,16 @@
 # CHANGELOG - Vault
 
-## 2.12.0 / 2021-04-19
+## 2.14.0 / 2021-07-20
+
+* [Added] Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).
+* [Added] Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+* [Added] Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+
+## 2.13.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
+
+## 2.12.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add Additional Vault Route Metrics. See [#8761](https://github.com/DataDog/integrations-core/pull/8761).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

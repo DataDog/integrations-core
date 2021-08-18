@@ -6,7 +6,9 @@ import os
 
 import mock
 import pytest
+import requests
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
@@ -100,3 +102,29 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     assert_metric('.leader_election.lease_duration', value=15, tags=expected_le_tags)
     aggregator.assert_service_check(NAMESPACE + ".leader_election.status", tags=expected_le_tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_service_check_ok(monkeypatch):
+    instance = {'prometheus_url': 'http://localhost:10251/metrics'}
+    instance_tags = []
+
+    check = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
+
+    monkeypatch.setattr(check, 'service_check', mock.Mock())
+
+    calls = [
+        mock.call('kube_scheduler.up', AgentCheck.OK, tags=instance_tags),
+        mock.call('kube_scheduler.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
+    ]
+
+    # successful health check
+    with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+        check._perform_service_check(instance)
+
+    # failed health check
+    raise_error = mock.Mock()
+    raise_error.side_effect = requests.HTTPError('health check failed')
+    with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+        check._perform_service_check(instance)
+
+    check.service_check.assert_has_calls(calls)

@@ -41,7 +41,7 @@ class PostgresConfig:
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
-        self.query_timeout = instance.get('query_timeout')
+        self.query_timeout = int(instance.get('query_timeout', 5000))
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
@@ -60,24 +60,29 @@ class PostgresConfig:
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
+        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', False)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
-        self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
         self.min_collection_interval = instance.get('min_collection_interval', 15)
-
-        # Deep Database monitoring adds additional telemetry for statement metrics
-        self.deep_database_monitoring = is_affirmative(instance.get('deep_database_monitoring', False))
-        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
+        # database monitoring adds additional telemetry for query metrics & samples
+        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
         # Support a custom view when datadog user has insufficient privilege to see queries
         self.pg_stat_statements_view = instance.get('pg_stat_statements_view', 'pg_stat_statements')
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
-        self.statement_samples_config = instance.get('statement_samples', {}) or {}
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.obfuscator_options = instance.get('obfuscator_options', {}) or {}
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -101,12 +106,6 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
         return tags
-
-    def _get_service_check_tags(self):
-        service_check_tags = ["host:%s" % self.host]
-        service_check_tags.extend(self.tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
 
     @staticmethod
     def _get_custom_metrics(custom_metrics):

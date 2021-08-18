@@ -32,13 +32,14 @@ ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
     'job': 'kube_job',
+    'job_name': 'kube_job',
     'cronjob': 'kube_cronjob',
     'pod': 'pod_name',
     'phase': 'pod_phase',
     'daemonset': 'kube_daemon_set',
     'replicationcontroller': 'kube_replication_controller',
     'replicaset': 'kube_replica_set',
-    'statefulset ': 'kube_stateful_set',
+    'statefulset': 'kube_stateful_set',
     'deployment': 'kube_deployment',
     'container': 'kube_container_name',
     'container_id': 'container_id',
@@ -477,6 +478,17 @@ class KubernetesState(OpenMetricsBaseCheck):
         if bool(sample[self.SAMPLE_VALUE]) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
 
+        metric_name = scraper_config['namespace'] + '.node.by_condition'
+        metric_tags = []
+        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            metric_tags += self._build_tags(label_name, label_value, scraper_config)
+        self.gauge(
+            metric_name,
+            sample[self.SAMPLE_VALUE],
+            tags=tags + metric_tags,
+            hostname=self.get_hostname_for_sample(sample, scraper_config),
+        )
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, sample[self.SAMPLE_LABELS])
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
@@ -715,8 +727,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
         base_check_name = scraper_config['namespace'] + '.node'
-        aggregated_metric_name = scraper_config['namespace'] + '.nodes.by_condition'
-        individual_metric_name = scraper_config['namespace'] + '.node.by_condition'
+        metric_name = scraper_config['namespace'] + '.nodes.by_condition'
         by_condition_counter = Counter()
 
         for sample in metric.samples:
@@ -738,11 +749,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
             by_condition_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-            tags = list(tags) + self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
-            self.gauge(individual_metric_name, sample[self.SAMPLE_VALUE], tags=tags)
-
         for tags, count in iteritems(by_condition_counter):
-            self.gauge(aggregated_metric_name, count, tags=list(tags))
+            self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
         """ The ready status of a cluster node (legacy)"""

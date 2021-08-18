@@ -19,11 +19,11 @@ REPLICA_METRICS = [
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
-def test_redis_replication_link_metric(aggregator, replica_instance, dd_environment):
+def test_redis_replication_link_metric(aggregator, replica_instance, dd_run_check, check):
     metric_name = 'redis.replication.master_link_down_since_seconds'
 
-    redis_check = Redis('redisdb', {}, [replica_instance])
-    redis_check.check(replica_instance)
+    redis_check = check(replica_instance)
+    dd_run_check(redis_check)
     aggregator.assert_metric(metric_name, value=0)
 
     # Test the same on the unhealthy host
@@ -32,13 +32,13 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_environm
     redis_check.check(replica_instance)
     metrics = aggregator.metrics(metric_name)
     assert len(metrics) == 1
-    assert metrics[0].value > 0
+    assert metrics[0].value != 0
 
 
-def test_redis_replication_service_check(aggregator, replica_instance, dd_environment):
+def test_redis_replication_service_check(aggregator, replica_instance, dd_run_check, check):
     service_check_name = 'redis.replication.master_link_status'
-    redis_check = Redis('redisdb', {}, [replica_instance])
-    redis_check.check(replica_instance)
+    redis_check = check(replica_instance)
+    dd_run_check(redis_check)
     assert len(aggregator.service_checks(service_check_name)) == 1
 
     # Healthy host
@@ -52,7 +52,7 @@ def test_redis_replication_service_check(aggregator, replica_instance, dd_enviro
     assert aggregator.service_checks(service_check_name)[0].status == Redis.CRITICAL
 
 
-def test_redis_repl(aggregator, dd_environment, master_instance):
+def test_redis_repl(aggregator, dd_run_check, check, master_instance):
     master_db = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
     replica_db = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
     master_db.flushdb()
@@ -61,8 +61,8 @@ def test_redis_repl(aggregator, dd_environment, master_instance):
     master_db.set('replicated:test', 'true')
     assert replica_db.get('replicated:test') == b'true'
 
-    redis_check = Redis('redisdb', {}, [master_instance])
-    redis_check.check(master_instance)
+    redis_check = check(master_instance)
+    dd_run_check(redis_check)
 
     for name in REPLICA_METRICS:
         aggregator.assert_metric(name)

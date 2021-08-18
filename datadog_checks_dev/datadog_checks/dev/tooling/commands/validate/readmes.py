@@ -7,8 +7,7 @@ import click
 import markdown
 from bs4 import BeautifulSoup
 
-from datadog_checks.dev.tooling.constants import get_root
-
+from ...constants import get_root
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_readme_file, load_manifest, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -31,7 +30,7 @@ def readmes(ctx, check):
     files_failed = {}
     readme_counter = set()
 
-    integrations = process_checks_option(check, source='integrations')
+    integrations = process_checks_option(check, source='integrations', extend_changed=True)
 
     for integration in integrations:
         display_queue = []
