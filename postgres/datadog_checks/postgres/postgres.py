@@ -51,7 +51,7 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
-        self.pg_settings = PostgresSettings()
+        self.pg_settings = PostgresSettings(self, self._config)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -383,18 +383,6 @@ class PostgreSql(AgentCheck):
         else:
             self.db = self._new_connection(self._config.dbname)
 
-    def _load_pg_settings(self, db):
-        try:
-            self.pg_settings.query(db)
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
-            self.log.warning("cannot read from pg_settings: %s", repr(e))
-            self.count(
-                "dd.postgres.error",
-                1,
-                tags=self._config.tags + ["error:query-pg_settings"] + self._get_debug_tags(),
-                hostname=self.resolved_hostname,
-            )
-
     def _get_db(self, dbname):
         """
         Returns a memoized psycopg2 connection to `dbname` with autocommit
@@ -413,8 +401,6 @@ class PostgreSql(AgentCheck):
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
-            if self._config.dbname == dbname:
-                self._load_pg_settings(db)
             return db
 
     def _close_db_pool(self):
@@ -536,6 +522,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
+                self.pg_settings.run_job_loop(tags + self._get_debug_tags())
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:

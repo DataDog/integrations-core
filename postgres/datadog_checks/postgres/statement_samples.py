@@ -327,7 +327,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        track_activity_query_size = self._check.pg_settings.track_activity_query_size
+        track_activity_query_size = self._check.pg_settings.track_activity_query_size.get_value()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
@@ -432,7 +432,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": obfuscated_statement,
                     "query_truncated": self._get_truncation_state(
-                        self._check.pg_settings.track_activity_query_size, row['query']
+                        self._check.pg_settings.track_activity_query_size.get_value(), row['query']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
