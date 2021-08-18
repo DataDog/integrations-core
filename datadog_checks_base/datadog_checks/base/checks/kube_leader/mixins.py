@@ -34,7 +34,7 @@ class KubeLeaderElectionMixin(object):
         or no record is found. Monitors on the service-check should have
         no-data alerts enabled to account for this.
 
-        The config objet requires the following fields:
+        The config object requires the following fields:
             namespace (prefix for the metrics and check)
             record_kind (leases, endpoints or configmap)
             record_name
@@ -42,7 +42,7 @@ class KubeLeaderElectionMixin(object):
             tags (optional)
 
         It reads the following agent configuration:
-            kubernetes_kubeconfig_path: defaut is to use in-cluster config
+            kubernetes_kubeconfig_path: default is to use in-cluster config
         """
         try:
             record = self._get_record(

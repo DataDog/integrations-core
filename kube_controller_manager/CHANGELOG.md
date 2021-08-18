@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_controller_manager
 
-## 1.9.0 / 2021-07-12
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9575](https://github.com/DataDog/integrations-core/pull/9575).
 

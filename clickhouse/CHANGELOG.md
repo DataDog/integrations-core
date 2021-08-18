@@ -1,10 +1,10 @@
 # CHANGELOG - ClickHouse
 
-## 2.2.1 / 2021-07-12
+## 2.2.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
 
-## 2.2.0 / 2021-05-28
+## 2.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Upgrade ClickHouse dependencies. See [#9344](https://github.com/DataDog/integrations-core/pull/9344).
 

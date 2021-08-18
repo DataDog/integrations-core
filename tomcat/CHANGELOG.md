@@ -1,10 +1,10 @@
 # CHANGELOG - tomcat
 
-## 1.8.0 / 2021-07-12
+## 1.8.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
 
-## 1.7.0 / 2021-05-28
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8998](https://github.com/DataDog/integrations-core/pull/8998).
 * [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).

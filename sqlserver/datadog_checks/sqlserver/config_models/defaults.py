@@ -108,6 +108,10 @@ def instance_include_instance_metrics(field, value):
     return True
 
 
+def instance_include_master_files_metrics(field, value):
+    return False
+
+
 def instance_include_task_scheduler_metrics(field, value):
     return False
 

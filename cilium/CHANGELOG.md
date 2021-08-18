@@ -1,6 +1,6 @@
 # CHANGELOG - Cilium
 
-## 1.7.1 / 2021-07-13
+## 1.7.1 / 2021-07-13 / Agent 7.30.0
 
 * [Fixed] Revert cilium AD change. See [#9683](https://github.com/DataDog/integrations-core/pull/9683).
 
@@ -9,7 +9,7 @@
 * [Added] Update container identifier. See [#9512](https://github.com/DataDog/integrations-core/pull/9512).
 * [Fixed] Use cilium-agent and cilium as autodiscover identifiers. See [#9518](https://github.com/DataDog/integrations-core/pull/9518).
 
-## 1.6.0 / 2021-05-28
+## 1.6.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

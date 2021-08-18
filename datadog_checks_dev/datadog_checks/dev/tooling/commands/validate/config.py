@@ -8,6 +8,7 @@ from datadog_checks.dev.tooling.config_validator.validator import validate_confi
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
+from datadog_checks.dev.utils import print_github_annotation
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...testing import process_checks_option
@@ -83,9 +84,9 @@ def config(ctx, check, sync, verbose):
         spec.load()
 
         if not default_temp:
-            check_display_queue.append(
-                lambda **kwargs: echo_failure("Missing default template in init_config or instances section")
-            )
+            message = "Missing default template in init_config or instances section"
+            check_display_queue.append(lambda **kwargs: echo_failure(message))
+            print_github_annotation(spec_path, message, level="error")
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -94,11 +95,9 @@ def config(ctx, check, sync, verbose):
         else:
             if spec.data['name'] != display_name:
                 files_failed[spec_path] = True
-                check_display_queue.append(
-                    lambda **kwargs: echo_failure(
-                        f"Spec  name `{spec.data['name']}` should be `{display_name}`", **kwargs
-                    )
-                )
+                message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
+                check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
+                print_github_annotation(spec_path, message, level="error")
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
@@ -116,11 +115,11 @@ def config(ctx, check, sync, verbose):
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
+                            message = f'File `{example_file}` is not in sync, run "ddev validate config -s"'
                             check_display_queue.append(
-                                lambda example_file=example_file, **kwargs: echo_failure(
-                                    f'File `{example_file}` is not in sync, run "ddev validate config -s"', **kwargs
-                                )
+                                lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
+                            print_github_annotation(example_file_path, message, level="error")
 
         if check_display_queue or verbose:
             echo_info(f'{check}:')
@@ -206,14 +205,17 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
         # Verify there is an `instances` section
         if 'instances' not in config_data:
             files_failed[config_file] = True
-            file_display_queue.append(lambda: echo_failure('Missing `instances` section', indent=FILE_INDENT))
-
+            message = 'Missing `instances` section'
+            file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+            print_github_annotation(file_name, message, level="error")
         # Verify there is a default instance
         else:
             instances = config_data['instances']
             if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
                 files_failed[config_file] = True
-                file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
+                message = 'No default instance'
+                file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+                print_github_annotation(file_name, message, level="error")
 
         if file_display_queue:
             check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))

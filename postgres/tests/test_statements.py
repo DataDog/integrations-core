@@ -395,7 +395,11 @@ def test_statement_samples_collect(
 
         if expected_error_tag:
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
-            aggregator.assert_metric("dd.postgres.statement_samples.error", tags=tags + [expected_error_tag])
+            aggregator.assert_metric(
+                "dd.postgres.statement_samples.error",
+                tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
+                hostname='stubbed.hostname',
+            )
         else:
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
@@ -476,7 +480,9 @@ def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, d
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['error:load-track-activity-query-size'],
+            tags=_expected_dbm_instance_tags(dbm_instance)
+            + ['error:load-track-activity-query-size', 'agent_hostname:stubbed.hostname'],
+            hostname='stubbed.hostname',
         )
     else:
         assert len(aggregator.metrics("dd.postgres.error")) == 0
@@ -580,7 +586,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
-            "dd.postgres.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.postgres.async_job.cancel",
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -604,7 +611,10 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
         tags=_expected_dbm_instance_tags(dbm_instance)
-        + ['job:query-samples', "error:database-<class 'psycopg2.errors.UndefinedTable'>"],
+        + [
+            'job:query-samples',
+            "error:database-<class 'psycopg2.errors.UndefinedTable'>",
+        ],
     )
 
 
@@ -706,7 +716,10 @@ def test_statement_metrics_database_errors(
         'db:{}'.format(DB_NAME),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
         expected_error_tag,
     ]
 
-    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )

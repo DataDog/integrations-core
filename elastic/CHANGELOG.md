@@ -4,7 +4,7 @@
 
 * [Fixed] Fix log line . See [#9621](https://github.com/DataDog/integrations-core/pull/9621).
 
-## 3.0.0 / 2021-05-28
+## 3.0.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
 

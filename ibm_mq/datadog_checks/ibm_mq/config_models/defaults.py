@@ -104,5 +104,9 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_timeout(field, value):
+    return 5
+
+
 def instance_username(field, value):
     return get_default_field_value(field, value)

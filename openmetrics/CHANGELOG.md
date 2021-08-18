@@ -1,6 +1,6 @@
 # CHANGELOG - OpenMetrics
 
-## 1.14.0 / 2021-05-28
+## 1.14.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 * [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).

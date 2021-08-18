@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.9.0 / 2021-05-28
+## 2.9.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8942](https://github.com/DataDog/integrations-core/pull/8942).
 * [Fixed] Fix zk_connect_str type. See [#9368](https://github.com/DataDog/integrations-core/pull/9368).

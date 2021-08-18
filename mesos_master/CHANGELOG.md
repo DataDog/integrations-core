@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_master
 
-## 1.13.1 / 2021-06-11
+## 1.13.1 / 2021-06-11 / Agent 7.30.0
 
 * [Fixed] Fix master leader detection after 307. See [#9500](https://github.com/DataDog/integrations-core/pull/9500).
 * [Added] Add runtime configuration validation. See [#8955](https://github.com/DataDog/integrations-core/pull/8955).

@@ -121,10 +121,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
             # truncate query text to the maximum length supported by metrics tags
             for row in rows:
-                row['digest_text'] = row['digest_text'][0:200]
+                row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
 
             payload = {
-                'host': self._db_hostname,
+                'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
@@ -166,7 +166,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE `digest_text` NOT LIKE 'EXPLAIN %'
+            WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
@@ -187,7 +187,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                obfuscated_statement = (
+                    datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                    if row['digest_text'] is not None
+                    else None
+                )
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue
@@ -207,7 +211,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

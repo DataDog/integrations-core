@@ -1,6 +1,6 @@
 # CHANGELOG - system_core
 
-## 1.10.0 / 2021-07-12
+## 1.10.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8992](https://github.com/DataDog/integrations-core/pull/8992).
 

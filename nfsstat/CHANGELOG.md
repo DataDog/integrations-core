@@ -1,6 +1,6 @@
 # CHANGELOG - Nfsstat
 
-## 1.7.0 / 2021-05-28
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8961](https://github.com/DataDog/integrations-core/pull/8961).
 

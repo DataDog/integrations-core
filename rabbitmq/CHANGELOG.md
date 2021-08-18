@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 1.18.0 / 2021-06-23
+## 1.18.0 / 2021-06-23 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8976](https://github.com/DataDog/integrations-core/pull/8976).
 
