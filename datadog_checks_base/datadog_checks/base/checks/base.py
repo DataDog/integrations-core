@@ -1097,9 +1097,10 @@ class AgentCheck(object):
                 continue
             if self.check_generic_tags or self.disable_generic_tags:
                 tag_name, value = tag.split(':')
-                if tag_name not in GENERIC_TAGS or not self.disable_generic_tags:
+                tag_is_generic = tag_name in GENERIC_TAGS
+                if not tag_is_generic or not self.disable_generic_tags:
                     normalized_tags.append(tag)
-                if tag_name in GENERIC_TAGS:
+                if tag_is_generic:
                     new_name = '{}_{}'.format(self.name, tag_name)
                     normalized_tags.append('{}:{}'.format(new_name, value))
             else:
