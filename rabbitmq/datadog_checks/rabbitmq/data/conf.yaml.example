@@ -47,7 +47,7 @@ instances:
 
     ## @param rabbitmq_api_url - string - required
     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-    ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
     #
   - rabbitmq_api_url: http://localhost:15672/api/
 

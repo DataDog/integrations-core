@@ -496,7 +496,7 @@ class VSphereCheck(AgentCheck):
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
-        cluster metrics result in an unpredicatable number of internal metric queries which all count towards
+        cluster metrics result in an unpredictable number of internal metric queries which all count towards
         max_query_metrics. Therefore often collecting a single cluster metric can make the whole call to fail. That's
         why we should never batch cluster metrics with anything else.
         """

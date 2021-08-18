@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
-from .conftest import CHECK_NAME
+from .common import CHECK_NAME
 
 PROXY_CONFIG = {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}
 INVALID_PROXY = {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}

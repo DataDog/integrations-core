@@ -60,8 +60,12 @@ class GUnicornCheck(AgentCheck):
 
             # if no workers are running, alert CRITICAL, otherwise OK
             msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
-            status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
             tags = ['app:' + proc_name] + custom_tags
+            if working == 0 and idle == 0:
+                status = AgentCheck.CRITICAL
+            else:
+                status = AgentCheck.OK
+                msg = None
 
             self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
 

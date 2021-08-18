@@ -75,7 +75,7 @@ def get_changes_per_agent(since, to):
         changes_per_agent[current_tag] = {}
 
         for name, ver in catalog_now.items():
-            # at some point in the git history, the requirements file erroneusly
+            # at some point in the git history, the requirements file erroneously
             # contained the folder name instead of the package name for each check,
             # let's be resilient
             old_ver = (

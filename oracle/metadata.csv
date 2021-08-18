@@ -28,5 +28,5 @@ oracle.process.pga_maximum_memory,gauge,,byte,,PGA maximum memory ever allocated
 oracle.temp_space_used,gauge,,byte,,temp space used,0,oracle_database,temp space used
 oracle.tablespace.used,gauge,,byte,,tablespace used,0,oracle_database,tablespace used
 oracle.tablespace.size,gauge,,byte,,tablespace size,0,oracle_database,tablespace size
-oracle.tablespace.in_use,gauge,,fraction,,tablespace in-use,0,oracle_database,tablespace in-use
+oracle.tablespace.in_use,gauge,,percent,,tablespace in-use,0,oracle_database,tablespace in-use
 oracle.tablespace.offline,gauge,,,,tablespace offline,0,oracle_database,tablespace offline
