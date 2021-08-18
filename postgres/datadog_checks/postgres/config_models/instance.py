@@ -41,6 +41,14 @@ class QuerySamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
+class QuerySettings(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    enable_collection_loop: Optional[bool]
+    collection_interval: Optional[float]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -79,6 +87,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int]
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
+    query_settings: Optional[QuerySettings]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]

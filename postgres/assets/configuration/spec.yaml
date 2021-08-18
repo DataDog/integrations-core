@@ -320,6 +320,22 @@ files:
           value:
             type: integer
             example: 10000
+    - name: query_settings
+      description: Configure collection of settings.
+      options:
+        - name: enable_collection_loop
+          description: |
+            Enable a collection loop that periodically queries for settings from pg_settings.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query settings collection interval (in seconds). Each collection involves
+            a single query to `pg_settings`.
+          value:
+            type: number
+            example: 300
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:

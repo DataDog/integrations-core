@@ -270,6 +270,21 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+    ## Configure collection of settings.
+    #
+    query_settings:
+
+        ## @param enable_collection_loop - boolean - optional - default: true
+        ## Enable a collection loop that periodically queries for settings from pg_settings.
+        #
+        # enable_collection_loop: true
+
+        ## @param collection_interval - number - optional - default: 300
+        ## Set the query settings collection interval (in seconds). Each collection involves
+        ## a single query to `pg_settings`.
+        #
+        # collection_interval: 300
+
     ## Configure how the SQL obfuscator behaves.
     #
     obfuscator_options:
@@ -316,7 +331,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which integration sent the logs.
+## source  - required - Attribute that defines which Integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
