@@ -126,6 +126,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
+                'ddagentversion': datadog_agent.get_version(),
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
                 'mysql_rows': rows,
@@ -212,6 +213,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

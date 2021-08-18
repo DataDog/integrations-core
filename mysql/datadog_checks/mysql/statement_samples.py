@@ -513,6 +513,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],
