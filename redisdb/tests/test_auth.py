@@ -8,7 +8,10 @@ import re
 
 import pytest
 
-from .common import HOST, PASSWORD, PORT, PORT_ACL_INSTANCE, USERNAME
+from datadog_checks.redisdb import Redis
+
+
+from .common import HOST, PASSWORD, PORT, USERNAME
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
@@ -56,7 +59,7 @@ def test_redis_auth_acl_good(aggregator, redis_auth_acl):
     """
     instance = {
         'host': HOST,
-        'port': PORT_ACL_INSTANCE,
+        'port': PORT,
         'username': USERNAME,
         'password': PASSWORD,
         'collect_client_metrics': False,
@@ -74,7 +77,7 @@ def test_redis_auth_acl_bad(aggregator, redis_auth_acl):
     """
     instance = {
         'host': HOST,
-        'port': PORT_ACL_INSTANCE,
+        'port': PORT,
         'username': USERNAME,
         'password': PASSWORD,
         'collect_client_metrics': True,

@@ -5,11 +5,16 @@ services:
     image: "redis:${REDIS_VERSION}"
     volumes:
       - ${REDIS_CONFIG}:/etc/redis.conf
+      - ${REDIS_USERS_ACL:-/dev/null}:/etc/users.acl
     ports:
       - "6379:6379"
     networks:
       - network1
-    command: redis-server /etc/redis.conf
+    command: bash -c "if [ -f /etc/users.acl ]; then
+                redis-server /etc/redis.conf --aclfile /etc/users.acl;
+             else
+               redis-server /etc/redis.conf;
+             fi"
 
 networks:
   network1:

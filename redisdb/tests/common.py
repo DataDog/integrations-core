@@ -9,7 +9,6 @@ from datadog_checks.dev import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 PORT = '6379'
-PORT_ACL_INSTANCE = '6384'
 USERNAME = 'datadog-agent'
 PASSWORD = 'devops-best-friend'
 MASTER_PORT = '6382'
