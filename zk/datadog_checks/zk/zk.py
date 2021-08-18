@@ -143,9 +143,10 @@ class ZookeeperCheck(AgentCheck):
             ruok = ruok_out.readline()
             if ruok == 'imok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.WARNING
-            message = u'Response from the server: %s' % ruok
+                message = u'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -179,7 +180,7 @@ class ZookeeperCheck(AgentCheck):
             if self.expected_mode:
                 if mode == self.expected_mode:
                     status = AgentCheck.OK
-                    message = u"Server is in %s mode" % mode
+                    message = None
                 else:
                     status = AgentCheck.CRITICAL
                     message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)

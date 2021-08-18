@@ -493,14 +493,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
 
-        node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
-        condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-        message = "{} is currently reporting {} = {}".format(node, condition, label_value)
-
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle %s - unknown condition %s", service_check_name, label_value)
         else:
-            self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
+            self.service_check(service_check_name, mapping[label_value], tags=tags)
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':

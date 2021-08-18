@@ -566,16 +566,10 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (
-                self._config.host,
-                self._config.port,
-                self._config.dbname,
-            )
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=self._get_service_check_tags(),
-                message=message,
                 hostname=self.resolved_hostname,
             )
             try:

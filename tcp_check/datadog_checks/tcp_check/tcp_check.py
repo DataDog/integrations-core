@@ -149,7 +149,7 @@ class TCPCheck(AgentCheck):
                 self._addr = None
 
     def report_as_service_check(self, status, msg=None):
-        if status == AgentCheck.OK:
+        if status is AgentCheck.OK:
             msg = None
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.service_check_tags, message=msg)
         # Report as a metric as well
