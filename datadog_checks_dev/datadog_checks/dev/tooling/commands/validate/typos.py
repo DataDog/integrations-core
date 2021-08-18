@@ -1,18 +1,20 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import click
-import re
 import os
+import re
+
+import click
+
+from datadog_checks.dev.tooling.annotations import annotate_warning
+from datadog_checks.dev.tooling.constants import get_root
 
 from ....subprocess import run_command
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
-from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.annotations import annotate_warning
-
 FILE_PATH_REGEX = r'(.+\/[^\/]+)\:(\d+)\:\s+(\w+\s+\=\=\>\s+\w+)'
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate spelling')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
@@ -44,13 +46,17 @@ def typos(ctx, check, fix):
     except Exception as e:
         echo_info(f"Encountered error validating spell check: {e}")
 
-    echo_warning("Detected typos...")
     annotate_typos(output)
+
 
 def annotate_typos(output):
     parse_errors = output.split('\n')
     for line in parse_errors:
         m = re.match(FILE_PATH_REGEX, line)
+        if m is None:
+            continue
+
         file, num, suggestion = m.groups()
         annotate_warning(file, f"Detected typo: {suggestion}", line=num)
         echo_warning(line)
+    echo_failure("Typo validation failed, please fix typos")
