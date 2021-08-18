@@ -52,7 +52,7 @@ def setup_cilium():
 @pytest.fixture(scope='session')
 def dd_environment():
     kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
-    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
+    with kind_run(conditions=[setup_cilium], kind_config=kind_config, sleep=10) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
