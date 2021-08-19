@@ -179,6 +179,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
+                'ddagentversion': datadog_agent.get_version(),
                 'monitor_settings': [
                     {
                         'setting': self._check.pg_settings.pg_stat_statements_max.get_name(),
@@ -304,6 +305,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

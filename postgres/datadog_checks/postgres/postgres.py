@@ -125,7 +125,7 @@ class PostgreSql(AgentCheck):
         all_dir_contents = os.listdir(wal_log_dir)
         all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
 
-        # files extentions that are not valid WAL files
+        # files extensions that are not valid WAL files
         exluded_file_exts = [".backup", ".history"]
         all_wal_files = [
             os.path.join(wal_log_dir, file_name)
@@ -547,16 +547,10 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (
-                self._config.host,
-                self._config.port,
-                self._config.dbname,
-            )
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=self._get_service_check_tags(),
-                message=message,
                 hostname=self.resolved_hostname,
             )
             try:

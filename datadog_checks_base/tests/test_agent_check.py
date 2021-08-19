@@ -512,14 +512,12 @@ class TestServiceChecks:
             AgentCheck.OK,
             tags=["foo", "bar"],
             hostname="testhostname",
-            message="a message",
         )
         aggregator.assert_service_check(
             "testservicecheckwithhostname",
             status=AgentCheck.OK,
             tags=["foo", "bar"],
             hostname="testhostname",
-            message="a message",
         )
 
         check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)

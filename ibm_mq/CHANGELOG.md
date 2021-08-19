@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.14.0 / 2021-08-13
+
+* [Added] Add `timeout` option. See [#9896](https://github.com/DataDog/integrations-core/pull/9896).
+* [Fixed] Use dedicated instance logger for connection messages. See [#9887](https://github.com/DataDog/integrations-core/pull/9887).
+* [Fixed] Do not submit critical service check when there are no messages. See [#9703](https://github.com/DataDog/integrations-core/pull/9703).
+
 ## 3.13.3 / 2021-07-15 / Agent 7.30.0
 
 * [Fixed] Add debug line when there are no messages available. See [#9702](https://github.com/DataDog/integrations-core/pull/9702).

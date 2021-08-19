@@ -1,13 +1,17 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+from typing import Any, Callable, Dict, List, Set
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
+from datadog_checks.base.types import ServiceCheck
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
+from ..config import IBMMQConfig
 
 try:
     import pymqi
@@ -25,19 +29,22 @@ class QueueMetricCollector(object):
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 
     def __init__(self, config, service_check, warning, send_metric, send_metrics_from_properties, log):
-        self.config = config
-        self.service_check = service_check
-        self.warning = warning
-        self.send_metric = send_metric
-        self.send_metrics_from_properties = send_metrics_from_properties
-        self.log = log
-        self.queues = set(self.config.queues)
+        # type: (IBMMQConfig, Callable, Callable, Callable, Callable, logging.LoggerAdapter) -> None
+        self.config = config  # type: IBMMQConfig
+        self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
+        self.warning = warning  # type: Callable
+        self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
+        self.send_metrics_from_properties = (
+            send_metrics_from_properties
+        )  # type: Callable[[Dict, Dict, str, List[str]], None]
+        self.log = log  # type: logging.LoggerAdapter
+        self.user_provided_queues = set(self.config.queues)  # type: Set[str]
 
     def collect_queue_metrics(self, queue_manager):
-        self.discover_queues(queue_manager)
+        queues = self.discover_queues(queue_manager)
         self.queue_manager_stats(queue_manager, self.config.tags)
 
-        for queue_name in self.queues:
+        for queue_name in queues:
             queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
 
             for regex, q_tags in self.config.queue_tag_re:
@@ -57,27 +64,28 @@ class QueueMetricCollector(object):
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
 
     def discover_queues(self, queue_manager):
-        queues = []
-        if self.config.auto_discover_queues:
-            queues.extend(self._discover_queues(queue_manager, '*'))
+        # type: (pymqi.QueueManager) -> Set[str]
+        discovered_queues = set()
+        if self.config.auto_discover_queues or self.config.queue_regex:
+            discovered_queues.update(self._discover_queues(queue_manager, '*'))
 
         if self.config.queue_patterns:
             for pattern in self.config.queue_patterns:
-                queues.extend(self._discover_queues(queue_manager, pattern))
+                discovered_queues.update(self._discover_queues(queue_manager, pattern))
 
         if self.config.queue_regex:
-            if not queues:
-                queues = self._discover_queues(queue_manager, '*')
-            keep_queues = []
+            keep_queues = set()
             for queue_pattern in self.config.queue_regex:
-                for queue in queues:
+                for queue in discovered_queues:
                     if queue_pattern.match(queue):
-                        keep_queues.append(queue)
-            queues = keep_queues
+                        keep_queues.add(queue)
+            discovered_queues = keep_queues
 
-        self.queues.update(queues)
+        discovered_queues.update(self.user_provided_queues)
+        return discovered_queues
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
+        # type: (pymqi.QueueManager, str) -> List[str]
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:

@@ -2,6 +2,8 @@
 
 ![MySQL Dashboard][1]
 
+<div class="alert alert-info">This page describes the MySQL agent integration; if you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+
 ## Overview
 
 The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):

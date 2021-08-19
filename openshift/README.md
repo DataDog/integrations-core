@@ -72,7 +72,7 @@ This mode does not require granting special permissions to the [`datadog-agent` 
 
 The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Datadog Agent to a host port. This way, the target IP is constant and easily discoverable by your applications. As the default restricted OpenShift SCC does not allow to bind to host port, you can set the Agent to listen on it's own IP, but you will need to handle the discovery of that IP from your application.
 
-The Agent suports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
+The Agent supports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
 #### Host
 

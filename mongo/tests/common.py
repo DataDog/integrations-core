@@ -50,3 +50,65 @@ INSTANCE_USER = {
 INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
 
 INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)], 'username': 'testUser', 'password': 'testPass'}
+
+INSTANCE_CUSTOM_QUERIES = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'metric_prefix': 'dd.custom.mongo.query_a',
+            'query': {'find': 'orders', 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
+            'fields': [
+                {'field_name': 'cust_id', 'name': 'cluster_id', 'type': 'tag'},
+                {'field_name': 'status', 'name': 'status_tag', 'type': 'tag'},
+                {'field_name': 'amount', 'name': 'amount', 'type': 'count'},
+                {'field_name': 'elements', 'name': 'el', 'type': 'count'},
+            ],
+            'tags': ['tag1:val1', 'tag2:val2'],
+        },
+        {
+            'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
+            'database': 'test',
+            'metric_prefix': 'dd.custom.mongo.count',
+            'tags': ['tag1:val1', 'tag2:val2'],
+            'count_type': 'gauge',
+        },
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {'$match': {'status': 'A'}},
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        },
+        {
+            'query': {
+                'aggregate': 1,
+                'pipeline': [
+                    {'$currentOp': {'allUsers': True}},
+                ],
+                'cursor': {'batchSize': 1},
+            },
+            'database': 'admin',
+            'fields': [
+                {'field_name': 'secs_running', 'name': 'secs_running', 'type': 'gauge'},
+                {'field_name': 'appName', 'name': 'app_name', 'type': 'tag'},
+                {'field_name': 'ns', 'name': 'mongo_op_namespace', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.mongodb.custom.queries_slower_than_60sec',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        },
+    ],
+}

@@ -266,7 +266,7 @@ class TestColumnTransformers:
                 'name': 'test query',
                 'query': 'foo',
                 'columns': [
-                    {'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': 'ok'}, 'message': 'baz'},
+                    {'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': 'ok'}},
                 ],
                 'tags': ['test:bar'],
             },
@@ -276,7 +276,7 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
-        aggregator.assert_service_check('test.foo', 0, message='baz', tags=['test:foo', 'test:bar'])
+        aggregator.assert_service_check('test.foo', 0, tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
 
     def test_service_check_unknown(self, aggregator):
