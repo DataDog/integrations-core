@@ -45,8 +45,8 @@ class QuerySettings(BaseModel):
     class Config:
         allow_mutation = False
 
-    monitor_settings: Optional[bool]
     collection_interval: Optional[float]
+    monitor_settings: Optional[bool]
 
 
 class Relation(BaseModel):
