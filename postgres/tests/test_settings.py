@@ -1,40 +1,27 @@
 import pytest
 
-from datadog_checks.postgres.settings import (
-    PG_STAT_STATEMENTS_MAX,
-    PG_STAT_STATEMENTS_MAX_UNKNOWN_VALUE,
-    TRACK_ACTIVITY_QUERY_SIZE,
-    TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE,
-)
+from datadog_checks.postgres.settings import PG_STAT_STATEMENTS_MAX, TRACK_ACTIVITY_QUERY_SIZE
 
 
 @pytest.fixture
 def dbm_instance(pg_instance):
-    pg_instance['dbm'] = True
+    pg_instance['dbm'] = False
     return pg_instance
 
 
 def test_settings_init(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
 
-    # test defaults before init
-    assert check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]['value'] == PG_STAT_STATEMENTS_MAX_UNKNOWN_VALUE
-    assert check.pg_settings.settings[TRACK_ACTIVITY_QUERY_SIZE]['value'] == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
-
-    # check invokes settings because `dbm` is enabled
+    assert check.pg_settings.get(PG_STAT_STATEMENTS_MAX) is None
+    assert check.pg_settings.get(TRACK_ACTIVITY_QUERY_SIZE) is None
     check.check(dbm_instance)
-    assert check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]['value'] != PG_STAT_STATEMENTS_MAX_UNKNOWN_VALUE
-    assert check.pg_settings.settings[TRACK_ACTIVITY_QUERY_SIZE]['value'] != TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+    assert check.pg_settings.get(PG_STAT_STATEMENTS_MAX) is not None
+    assert check.pg_settings.get(TRACK_ACTIVITY_QUERY_SIZE) is not None
 
 
-def test_settings_queries_tracked_values(integration_check, dbm_instance):
-    dbm_instance['dbm'] = False
+def test_settings_monitor(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
 
-    assert check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]['tracked_value'] is None
-    assert check.pg_settings.settings[TRACK_ACTIVITY_QUERY_SIZE]['tracked_value'] is None
-
-    check.pg_settings.query_settings([])
-
-    assert check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]['tracked_value'] is not None
-    assert check.pg_settings.settings[TRACK_ACTIVITY_QUERY_SIZE]['tracked_value'] is None
+    assert check.monitor_settings.pg_stat_statements_count is None
+    check.monitor_settings.query_settings([])
+    assert check.monitor_settings.pg_stat_statements_count is not None

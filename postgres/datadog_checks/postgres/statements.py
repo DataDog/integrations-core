@@ -182,7 +182,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
-                'monitor_settings': [self._check.pg_settings.settings.get(PG_STAT_STATEMENTS_MAX)],
+                'monitor_settings': [
+                    {
+                        PG_STAT_STATEMENTS_MAX: {
+                            'value': self._check.pg_settings.get(PG_STAT_STATEMENTS_MAX),
+                            'tracked_value': self._check.monitor_settings.pg_stat_statements_count,
+                        },
+                    }
+                ],
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:

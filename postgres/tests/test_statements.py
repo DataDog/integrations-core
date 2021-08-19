@@ -150,7 +150,14 @@ def test_statement_metrics(
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
-    expected_monitor_settings = [check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]]
+    expected_monitor_settings = [
+        {
+            PG_STAT_STATEMENTS_MAX: {
+                'value': check.pg_settings.get(PG_STAT_STATEMENTS_MAX),
+                'tracked_value': check.monitor_settings.pg_stat_statements_count,
+            }
+        }
+    ]
     assert event['monitor_settings'] == expected_monitor_settings
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
