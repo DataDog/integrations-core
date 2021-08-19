@@ -271,4 +271,3 @@ class DBMAsyncJob(object):
 
     def run_job(self):
         raise NotImplementedError()
-
