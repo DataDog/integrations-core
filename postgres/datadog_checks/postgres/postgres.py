@@ -52,7 +52,7 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
-        self.pg_settings = PostgresSettings(self, self._config, shutdown_callback=self._close_db_pool)
+        self.pg_settings = PostgresSettings(self, self._config)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -65,7 +65,6 @@ class PostgreSql(AgentCheck):
         self._db_pool_lock = threading.Lock()
 
     def cancel(self):
-        self.pg_settings.cancel()
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
 
@@ -524,8 +523,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
-                self.pg_settings.init(tags=tags, hostname=self.resolved_hostname)
-                self.pg_settings.run_job_loop(tags)
+                self.pg_settings.query_settings(tags)
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
