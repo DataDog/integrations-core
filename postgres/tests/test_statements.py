@@ -245,7 +245,7 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
-    pg_instance['query_settings'] = {'enable_collection_loop': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_settings'] = {'run_sync': True, 'collection_interval': 1}
     return pg_instance
 
 
