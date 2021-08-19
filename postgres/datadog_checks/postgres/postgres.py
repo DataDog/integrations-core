@@ -18,7 +18,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
-from .settings import PostgresSettings
+from .settings import PG_STAT_STATEMENTS_MAX, TRACK_ACTIVITY_QUERY_SIZE, MonitorSettings
 from .util import CONNECTION_METRICS, FUNCTION_METRICS, REPLICATION_METRICS, fmt, get_schema_field
 from .version_utils import V9, V10, VersionUtils
 
@@ -28,6 +28,10 @@ except ImportError:
     from ..stubs import datadog_agent
 
 MAX_CUSTOM_RESULTS = 100
+
+PG_SETTINGS_QUERY = ("SELECT name, setting FROM pg_settings WHERE name IN ('{}', '{}')").format(
+    PG_STAT_STATEMENTS_MAX, TRACK_ACTIVITY_QUERY_SIZE
+)
 
 
 class PostgreSql(AgentCheck):
@@ -52,8 +56,9 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
-        self.pg_settings = PostgresSettings(self, self._config)
+        self.pg_settings = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
+        self.monitor_settings = MonitorSettings(self, self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
@@ -384,6 +389,24 @@ class PostgreSql(AgentCheck):
         else:
             self.db = self._new_connection(self._config.dbname)
 
+    def _load_pg_settings(self, db):
+        try:
+            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                cursor.execute(PG_SETTINGS_QUERY)
+                rows = cursor.fetchall()
+                for setting in rows:
+                    name, val = setting
+                    self.pg_settings[name] = val
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+            self.log.warning("Failed to query for pg_settings: %s", repr(err))
+            self.count(
+                "dd.postgres.error",
+                1,
+                tags=self._config.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
+                hostname=self.resolved_hostname,
+            )
+
     def _get_db(self, dbname):
         """
         Returns a memoized psycopg2 connection to `dbname` with autocommit
@@ -517,13 +540,14 @@ class PostgreSql(AgentCheck):
         try:
             # Check version
             self._connect()
+            self._load_pg_settings(self.db)
             if self._config.tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
-                self.pg_settings.query_settings(tags)
+                self.monitor_settings.query_settings(tags)
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
