@@ -30,7 +30,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Avi Vantage - Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {
       "Avi Vantage - Error Rate Monitor": "assets/monitors/error_rate_monitor.json"
     },
