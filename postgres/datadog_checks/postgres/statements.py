@@ -17,6 +17,8 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .settings import PG_STAT_STATEMENTS_MAX
+
 try:
     import datadog_agent
 except ImportError:
@@ -180,13 +182,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
-                'monitor_settings': [
-                    {
-                        'setting': self._check.pg_settings.pg_stat_statements_max.get_name(),
-                        'value': self._check.pg_settings.pg_stat_statements_max.get_value(),
-                        'tracked_value': self._check.pg_settings.pg_stat_statements_max.get_tracked_value(),
-                    }
-                ],
+                'monitor_settings': [self._check.pg_settings.settings.get(PG_STAT_STATEMENTS_MAX)],
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:

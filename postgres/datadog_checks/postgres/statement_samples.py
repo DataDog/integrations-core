@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-from .settings import TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+from .settings import TRACK_ACTIVITY_QUERY_SIZE, TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -327,7 +327,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        track_activity_query_size = self._check.pg_settings.track_activity_query_size.get_value()
+        track_activity_query_size = self._get_track_activity_query_size()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
@@ -433,7 +433,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": obfuscated_statement,
                     "query_truncated": self._get_truncation_state(
-                        self._check.pg_settings.track_activity_query_size.get_value(), row['query']
+                        self._get_track_activity_query_size(), row['query']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -467,6 +467,12 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+
+    def _get_track_activity_query_size(self):
+        track_activity_query_size = self._check.pg_settings.settings.get(TRACK_ACTIVITY_QUERY_SIZE)
+        return (
+            track_activity_query_size['value'] if track_activity_query_size else TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
+        )
 
     @staticmethod
     def _get_truncation_state(track_activity_query_size, statement):

@@ -15,6 +15,7 @@ from six import string_types
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.postgres.settings import PG_STAT_STATEMENTS_MAX
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 
@@ -149,13 +150,7 @@ def test_statement_metrics(
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
-    expected_monitor_settings = [
-        {
-            'setting': check.pg_settings.pg_stat_statements_max.get_name(),
-            'value': check.pg_settings.pg_stat_statements_max.get_value(),
-            'tracked_value': check.pg_settings.pg_stat_statements_max.get_tracked_value(),
-        }
-    ]
+    expected_monitor_settings = [check.pg_settings.settings[PG_STAT_STATEMENTS_MAX]]
     assert event['monitor_settings'] == expected_monitor_settings
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
@@ -258,7 +253,6 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
-    pg_instance['query_settings'] = {'run_sync': True, 'collection_interval': 1}
     return pg_instance
 
 
@@ -513,7 +507,6 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     dbm_instance['query_samples']['collection_interval'] = 1.0 / 100
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['query_settings']['collection_interval'] = 1.0 / 100
     check = integration_check(dbm_instance)
     check._connect()
 
