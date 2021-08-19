@@ -550,7 +550,7 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
-                self.monitor_settings.query_settings(tags)
+                self.monitor_settings.query(tags)
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:

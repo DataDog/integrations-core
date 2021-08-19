@@ -25,7 +25,7 @@ class MonitorSettings:
         self._log = get_check_logger()
         self._expected_db_exceptions = (psycopg2.DatabaseError, psycopg2.OperationalError)
 
-    def query_settings(self, tags):
+    def query(self, tags):
         if not self._db:
             self._db = self._check._get_db(self._config.dbname)
             self._db_hostname = resolve_db_host(self._config.host)
