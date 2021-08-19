@@ -56,7 +56,7 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
-        self.pg_settings = {}
+        self.pg_settings = None
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.monitor_settings = MonitorSettings(self, self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
@@ -390,6 +390,9 @@ class PostgreSql(AgentCheck):
             self.db = self._new_connection(self._config.dbname)
 
     def _load_pg_settings(self, db):
+        if self.pg_settings:
+            return
+        self.pg_settings = {}
         try:
             with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
