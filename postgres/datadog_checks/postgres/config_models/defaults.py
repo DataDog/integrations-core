@@ -96,10 +96,6 @@ def instance_query_samples(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_query_settings(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_query_timeout(field, value):
     return 5000
 

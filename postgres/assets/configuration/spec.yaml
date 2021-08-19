@@ -320,22 +320,6 @@ files:
           value:
             type: integer
             example: 10000
-    - name: query_settings
-      description: Configure the collection of settings.
-      options:
-        - name: monitor_settings
-          description: |
-            Enable the Agent to periodically query for settings from pg_settings. Requires `dbm: true`.
-          value:
-            type: boolean
-            example: true
-        - name: collection_interval
-          description: |
-            Set the query settings collection interval (in seconds). Each collection involves
-            a single query to `pg_settings`.
-          value:
-            type: number
-            example: 300
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:

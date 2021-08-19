@@ -272,32 +272,3 @@ class DBMAsyncJob(object):
     def run_job(self):
         raise NotImplementedError()
 
-
-class DatabaseSetting:
-    """
-    DatabaseSetting represents a single database setting and a tracked value (if applicable).
-
-    The tracked value is typically used in conjunction with the setting value for scenarios
-    where a setting sets a limit and a value must be tracked to check against the set limit.
-    """
-
-    def __init__(self, name, value):
-        self._name = name
-        self._value = value
-        self._tracked_value = None
-
-    def get_name(self):
-        return self._name
-
-    def set_value(self, value):
-        self._value = value
-
-    def get_value(self):
-        return self._value
-
-    def set_tracked_value(self, value):
-        self._tracked_value = value
-
-    def get_tracked_value(self):
-        return self._tracked_value
-
