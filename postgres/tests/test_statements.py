@@ -146,6 +146,15 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
+    expected_monitor_settings = [
+        {
+            'setting': check.pg_settings.pg_stat_statements_max.get_name(),
+            'value': check.pg_settings.pg_stat_statements_max.get_value(),
+            'tracked_value': check.pg_settings.pg_stat_statements_max.get_tracked_value(),
+        }
+    ]
+    assert event['monitor_settings'] == expected_monitor_settings
+
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
@@ -469,25 +478,6 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
         check.statement_metrics._job_loop_future.result()
     else:
         assert check.statement_metrics._job_loop_future is None
-
-
-# TODO: Update
-# @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
-# def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
-# dbm_instance["username"] = db_user
-# dbm_instance["dbname"] = "postgres"
-# check = integration_check(dbm_instance)
-# check._connect()
-# check._load_pg_settings(check.db)
-# if db_user == 'datadog_no_catalog':
-# aggregator.assert_metric(
-# "dd.postgres.error",
-# tags=_expected_dbm_instance_tags(dbm_instance)
-# + ['error:query-pg_settings', 'agent_hostname:stubbed.hostname'],
-# hostname='stubbed.hostname',
-# )
-# else:
-# assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):

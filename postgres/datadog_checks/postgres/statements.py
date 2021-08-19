@@ -179,6 +179,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
+                'monitor_settings': [
+                    {
+                        'setting': self._check.pg_settings.pg_stat_statements_max.get_name(),
+                        'value': self._check.pg_settings.pg_stat_statements_max.get_value(),
+                        'tracked_value': self._check.pg_settings.pg_stat_statements_max.get_tracked_value(),
+                    }
+                ],
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
