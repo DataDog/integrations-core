@@ -478,6 +478,24 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
         assert check.statement_metrics._job_loop_future is None
 
 
+@pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
+def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
+    dbm_instance["username"] = db_user
+    dbm_instance["dbname"] = "postgres"
+    check = integration_check(dbm_instance)
+    check._connect()
+    check._load_pg_settings(check.db)
+    if db_user == 'datadog_no_catalog':
+        aggregator.assert_metric(
+            "dd.postgres.error",
+            tags=_expected_dbm_instance_tags(dbm_instance)
+            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
+            hostname='stubbed.hostname',
+        )
+    else:
+        assert len(aggregator.metrics("dd.postgres.error")) == 0
+
+
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
     # test the main collection loop rate limit
     collection_interval = 0.1
