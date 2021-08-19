@@ -17,6 +17,7 @@ DEFAULT_IGNORE_DATABASES = [
     'postgres',
 ]
 
+
 class PostgresConfig:
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
