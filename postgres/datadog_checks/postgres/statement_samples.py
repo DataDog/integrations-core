@@ -19,11 +19,11 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 
-from .settings import TRACK_ACTIVITY_QUERY_SIZE, TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
-
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
+
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -469,7 +469,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 )
 
     def _get_track_activity_query_size(self):
-        return int(self._check.pg_settings.get(TRACK_ACTIVITY_QUERY_SIZE, TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
+        return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
     @staticmethod
     def _get_truncation_state(track_activity_query_size, statement):

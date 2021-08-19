@@ -17,8 +17,6 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
-from .settings import PG_STAT_STATEMENTS_MAX
-
 try:
     import datadog_agent
 except ImportError:
@@ -36,6 +34,7 @@ SELECT {cols}
   {filters}
   LIMIT {limit}
 """
+PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements"
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
@@ -182,14 +181,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
                 'ddagentversion': datadog_agent.get_version(),
-                'monitor_settings': [
-                    {
-                        PG_STAT_STATEMENTS_MAX: {
-                            'value': self._check.pg_settings.get(PG_STAT_STATEMENTS_MAX),
-                            'tracked_value': self._check.monitor_settings.pg_stat_statements_count,
-                        },
-                    }
-                ],
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -260,8 +251,33 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    def _emit_pg_stat_statements_metrics(self):
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                PG_STAT_STATEMENTS_COUNT_QUERY,
+            )
+            if not rows:
+                return
+            self._check.count(
+                "postgresql.pg_stat_statements.max",
+                self._check.pg_settings.get("pg_stat_statements.max"),
+                tags=self._tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.count(
+                "postgresql.pg_stat_statements.count",
+                rows[0][0],
+                tags=self._tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
+
     def _collect_metrics_rows(self):
         rows = self._load_pg_stat_statements()
+        if rows:
+            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:

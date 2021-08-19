@@ -15,7 +15,6 @@ from six import string_types
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.postgres.settings import PG_STAT_STATEMENTS_MAX
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 
@@ -150,16 +149,8 @@ def test_statement_metrics(
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
-    expected_monitor_settings = [
-        {
-            PG_STAT_STATEMENTS_MAX: {
-                'value': check.pg_settings.get(PG_STAT_STATEMENTS_MAX),
-                'tracked_value': check.monitor_settings.pg_stat_statements_count,
-            }
-        }
-    ]
-    assert event['monitor_settings'] == expected_monitor_settings
-
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
