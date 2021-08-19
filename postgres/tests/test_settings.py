@@ -10,24 +10,6 @@ from datadog_checks.postgres.settings import (
 
 from .common import HOST, PORT
 
-SAMPLE_QUERIES = [
-    # (username, password, dbname, query, arg)
-    ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
-    (
-        "bob",
-        "bob",
-        "datadog_test",
-        "SELECT hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid, "
-        "hello_how_is_it_going_this_is_a_very_long_table_alias_name.lastname "
-        "FROM persons hello_how_is_it_going_this_is_a_very_long_table_alias_name JOIN persons B "
-        "ON hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid = B.personid WHERE B.city = %s",
-        "hello",
-    ),
-    ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
-]
-
-dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
