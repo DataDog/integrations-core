@@ -257,8 +257,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
                 PG_STAT_STATEMENTS_COUNT_QUERY,
             )
-            if not rows:
-                return
+            count = 0
+            if rows:
+                count = rows[0][0]
             self._check.count(
                 "postgresql.pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max"),
@@ -267,7 +268,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
             self._check.count(
                 "postgresql.pg_stat_statements.count",
-                rows[0][0],
+                count,
                 tags=self._tags + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
