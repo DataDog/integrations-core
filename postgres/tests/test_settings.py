@@ -120,5 +120,5 @@ def test_settings_tracked_value_with_monitor_enabled(aggregator, integration_che
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     assert check.pg_settings.pg_stat_statements_max.get_tracked_value() is not None
-    # ensure that a metric to keep track of tracked setting value is emitted
+    # ensure that a metric to keep track of tracked setting values is emitted
     assert len(aggregator.metrics("dd.postgres.settings.pg_stat_statements.max")) != 0
