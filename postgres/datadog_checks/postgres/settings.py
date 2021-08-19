@@ -44,11 +44,12 @@ class PostgresSettings(DBMAsyncJob):
         self._config = config
         self._db = None
 
-    def init(self):
+    def init(self, tags, hostname=None):
         """
-        init must run regardless of the collection loop being enabled if `dbm` is enabled.
+        init must run regardless of the `monitor_settings` value.
         Note, a database connection must be established before this is invoked.
         """
+        self._tags = tags
         if not self._db:
             self._db = self._check._get_db(self._config.dbname)
         try:
@@ -65,10 +66,15 @@ class PostgresSettings(DBMAsyncJob):
         except self._expected_db_exceptions as err:
             self._log.warning("Failed to query for pg_settings: %s", repr(err))
             self._check.count(
+                "dd.postgres.settings.error", 1, tags=tags + ["error:init-db-{}".format(repr(err))], hostname=hostname
+            )
+        except Exception as err:
+            self._log.exception("Received an unexpected database exception: %s", repr(err))
+            self._check.count(
                 "dd.postgres.settings.error",
                 1,
-                tags=self._tags,
-                hostname=self._db_hostname,
+                tags=tags + ["error:init-db-unexpected-{}".format(repr(err))],
+                hostname=hostname,
             )
 
     def _emit_tracked_value_metric(self, setting, value):
