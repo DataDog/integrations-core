@@ -11,4 +11,4 @@ CITADEL_NAMESPACE = 'istio.citadel'
 ISTIOD_NAMESPACE = 'istio'
 
 # Known labels that cause context explosion
-BLACKLIST_LABELS = ["connectionID"]
+BLACKLIST_LABELS = ["connectionID", ""]
