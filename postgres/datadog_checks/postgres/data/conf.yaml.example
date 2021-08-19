@@ -270,12 +270,12 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
-    ## Configure collection of settings.
+    ## Configure the collection of settings.
     #
     query_settings:
 
         ## @param monitor_settings - boolean - optional - default: true
-        ## Enable the agent to periodically query for settings from pg_settings. Requires `dbm: true`.
+        ## Enable the Agent to periodically query for settings from pg_settings. Requires `dbm: true`.
         #
         # monitor_settings: true
 

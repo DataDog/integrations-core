@@ -321,11 +321,11 @@ files:
             type: integer
             example: 10000
     - name: query_settings
-      description: Configure collection of settings.
+      description: Configure the collection of settings.
       options:
         - name: monitor_settings
           description: |
-            Enable the agent to periodically query for settings from pg_settings. Requires `dbm: true`.
+            Enable the Agent to periodically query for settings from pg_settings. Requires `dbm: true`.
           value:
             type: boolean
             example: true
