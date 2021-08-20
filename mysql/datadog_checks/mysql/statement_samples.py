@@ -289,9 +289,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             'STATEMENT': self._run_explain,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         self._init_caches()
 
     def _init_caches(self):
