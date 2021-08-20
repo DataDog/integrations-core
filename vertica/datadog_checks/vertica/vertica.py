@@ -181,9 +181,9 @@ class VerticaCheck(AgentCheck):
             tags.extend(self._tags)
 
             node_state = node['node_state']
-            self.service_check(
-                self.SERVICE_CHECK_NODE_STATE, node_state_to_service_check(node_state), message=node_state, tags=tags
-            )
+            status = node_state_to_service_check(node_state)
+            message = node_state if status is not AgentCheck.OK else None
+            self.service_check(self.SERVICE_CHECK_NODE_STATE, status, message=message, tags=tags)
 
     def query_projections(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/PROJECTIONS.htm

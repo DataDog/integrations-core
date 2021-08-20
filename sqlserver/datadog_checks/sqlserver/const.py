@@ -148,3 +148,8 @@ DATABASE_FRAGMENTATION_METRICS = [
         'avg_fragment_size_in_pages',
     ),
 ]
+
+DATABASE_MASTER_FILES = [
+    ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
+    ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
+]

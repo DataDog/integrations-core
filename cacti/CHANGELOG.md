@@ -1,6 +1,6 @@
 # CHANGELOG - cacti
 
-## 1.8.3 / 2021-07-15
+## 1.8.3 / 2021-07-15 / Agent 7.30.0
 
 * [Fixed] Fix example config. See [#9705](https://github.com/DataDog/integrations-core/pull/9705).
 

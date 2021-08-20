@@ -1,12 +1,12 @@
 # CHANGELOG - consul
 
-## 1.21.0 / 2021-06-16
+## 1.21.0 / 2021-06-16 / Agent 7.30.0
 
 * [Added] Improve performance of latency metric computation. See [#9530](https://github.com/DataDog/integrations-core/pull/9530).
 * [Added] Improve performance of loading JSON responses on Python 3. See [#9524](https://github.com/DataDog/integrations-core/pull/9524).
 * [Added] Add missing prometheus metrics. See [#9389](https://github.com/DataDog/integrations-core/pull/9389).
 
-## 1.20.0 / 2021-05-25
+## 1.20.0 / 2021-05-25 / Agent 7.29.0
 
 * [Added] Adding support for multiprocessing consul checks. See [#9402](https://github.com/DataDog/integrations-core/pull/9402). Thanks [lchayoun](https://github.com/lchayoun).
 

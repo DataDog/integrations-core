@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## 5.7.1 / 2021-06-03
+## 5.7.1 / 2021-06-03 / Agent 7.29.0
 
 * [Fixed] Fix `node.by_condition` metric. See [#9467](https://github.com/DataDog/integrations-core/pull/9467).
 

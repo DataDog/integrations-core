@@ -14,7 +14,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
 try:
@@ -149,12 +149,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._stat_column_cache = col_names
         return col_names
 
-    def _db_hostname_cached(self):
-        if self._db_hostname:
-            return self._db_hostname
-        self._db_hostname = resolve_db_host(self._config.host)
-        return self._db_hostname
-
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
@@ -179,12 +173,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             for row in rows:
                 row['query'] = row['query'][0:200]
             payload = {
-                'host': self._db_hostname_cached(),
+                'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
+                'ddagentversion': datadog_agent.get_version(),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -203,7 +198,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
                     1,
-                    tags=self._tags + ["error:database-missing_pg_stat_statements_required_columns"],
+                    tags=self._tags
+                    + [
+                        "error:database-missing_pg_stat_statements_required_columns",
+                    ]
+                    + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
                 )
                 return []
 
@@ -241,7 +241,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
 
-            self._check.count("dd.postgres.statement_metrics.error", 1, tags=self._tags + [error_tag])
+            self._check.count(
+                "dd.postgres.statement_metrics.error",
+                1,
+                tags=self._tags + [error_tag] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
 
             return []
 
@@ -255,7 +260,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
+        self._check.gauge(
+            'dd.postgres.queries.query_rows_raw',
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         return rows
 
     def _normalize_queries(self, rows):
@@ -287,7 +297,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ]
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname_cached(),
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

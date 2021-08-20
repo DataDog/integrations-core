@@ -6,6 +6,7 @@ from os import environ
 
 import requests
 from openstack import connection
+from six import PY3
 from six.moves.urllib.parse import urljoin
 
 from .exceptions import (
@@ -64,7 +65,7 @@ class AbstractApi(object):
     def get_projects(self):
         raise NotImplementedError()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
         raise NotImplementedError()
 
     def get_os_aggregates(self):
@@ -213,10 +214,16 @@ class OpenstackSDKApi(AbstractApi):
 
         return self.connection.list_hypervisors()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
-        # Hypervisor uptime is not available in openstacksdk 0.24.0.
-        self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
-        raise NotImplementedError()
+    def get_os_hypervisor_uptime(self, hypervisor):
+        if PY3:
+            if hypervisor.uptime is None:
+                self._check_authentication()
+                self.connection.compute.get_hypervisor_uptime(hypervisor)
+            return hypervisor.uptime
+        else:
+            # Hypervisor uptime is not available in openstacksdk 0.24.0.
+            self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
+            raise NotImplementedError()
 
     def get_os_aggregates(self):
         # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi
@@ -247,9 +254,14 @@ class OpenstackSDKApi(AbstractApi):
         return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
 
     def get_server_diagnostics(self, server_id):
-        # Server diagnostics is not available in openstacksdk 0.24.0. It should be available in the next release.
-        self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
-        raise NotImplementedError()
+        # With microversion 2.48 the format of server diagnostics changed
+        # https://docs.openstack.org/api-ref/compute/?expanded=show-server-diagnostics-detail
+        # With SimpleApi this method returns either the new or the old format depending on the hypervisor.
+        # Because openstacksdk only supports the new format, this method either returns the new format with new
+        # hypervisor, or an empty payload with older hypervisor.
+        self._check_authentication()
+
+        return self.connection.compute.get_server_diagnostics(server_id)
 
 
 class SimpleApi(AbstractApi):
@@ -308,7 +320,8 @@ class SimpleApi(AbstractApi):
     def get_neutron_endpoint(self):
         self._make_request(self.neutron_endpoint)
 
-    def get_os_hypervisor_uptime(self, hyp_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
+        hyp_id = hypervisor['id']
         url = '{}/os-hypervisors/{}/uptime'.format(self.nova_endpoint, hyp_id)
         resp = self._make_request(url)
         return resp.get('hypervisor', {}).get('uptime')

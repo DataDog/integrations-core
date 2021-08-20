@@ -1,6 +1,6 @@
 # CHANGELOG - zk
 
-## 2.10.0 / 2021-05-28
+## 2.10.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9010](https://github.com/DataDog/integrations-core/pull/9010).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 20.2.0 / 2021-07-12
+## 20.2.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).
 
@@ -23,7 +23,7 @@
 * [Changed] Remove monotonic count from ignored types in no duplicate assertion. See [#9463](https://github.com/DataDog/integrations-core/pull/9463).
 * [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
 
-## 19.0.0 / 2021-05-28
+## 19.0.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).

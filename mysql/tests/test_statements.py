@@ -123,6 +123,7 @@ def test_statement_metrics(
     event = events[0]
 
     assert event['host'] == 'stubbed.hostname'
+    assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
@@ -153,6 +154,7 @@ def test_statement_metrics(
     assert event['mysql']['schema'] == default_schema
     assert event['timestamp'] > 0
     assert event['host'] == 'stubbed.hostname'
+    assert event['ddagentversion'] == datadog_agent.get_version()
 
 
 def _obfuscate_sql(query, options=None):
@@ -276,6 +278,7 @@ def test_statement_samples_collect(
     expected_statement_truncated,
     aurora_replication_role,
     caplog,
+    datadog_agent,
 ):
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
@@ -319,6 +322,9 @@ def test_statement_samples_collect(
         logger.debug("done second check")
 
     events = aggregator.get_event_platform_events("dbm-samples")
+
+    for event in events:
+        assert event['ddagentversion'] == datadog_agent.get_version()
 
     # Match against the statement itself if it's below the statement length limit or its truncated form which is
     # the first 1024/4096 bytes (depending on the mysql version) with the last 3 replaced by '...'
@@ -536,3 +542,57 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
         assert enabled_consumers == original_enabled_consumers.union({'events_statements_history_long'})
     else:
         assert enabled_consumers == original_enabled_consumers
+
+
+@pytest.mark.unit
+def test_normalize_queries(dbm_instance):
+    check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    # Test the general case with a valid schema, digest and digest_text
+    assert check._statement_metrics._normalize_queries(
+        [
+            {
+                'schema': 'network',
+                'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
+                'digest_text': 'SELECT * from table where name = ?',
+                'count': 41,
+                'time': 66721400,
+                'lock_time': 18298000,
+            }
+        ]
+    ) == [
+        {
+            'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
+            'schema': 'network',
+            'digest_text': 'SELECT * from table where name = ?',
+            'query_signature': u'761498b7d5f04d11',
+            'count': 41,
+            'time': 66721400,
+            'lock_time': 18298000,
+        }
+    ]
+
+    # Test the case of null values for digest, schema and digest_text (which is what the row created when the table
+    # is full returns)
+    assert check._statement_metrics._normalize_queries(
+        [
+            {
+                'digest': None,
+                'schema': None,
+                'digest_text': None,
+                'count': 41,
+                'time': 66721400,
+                'lock_time': 18298000,
+            }
+        ]
+    ) == [
+        {
+            'digest': None,
+            'schema': None,
+            'digest_text': None,
+            'query_signature': None,
+            'count': 41,
+            'time': 66721400,
+            'lock_time': 18298000,
+        }
+    ]

@@ -1,6 +1,6 @@
 # CHANGELOG - Vertica
 
-## 2.1.1 / 2021-06-07
+## 2.1.1 / 2021-06-07 / Agent 7.29.0
 
 * [Fixed] Fix required values in vertica. See [#9479](https://github.com/DataDog/integrations-core/pull/9479).
 

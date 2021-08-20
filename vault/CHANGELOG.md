@@ -6,7 +6,7 @@
 * [Added] Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
 * [Added] Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
 
-## 2.13.0 / 2021-05-28
+## 2.13.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
 

@@ -31,7 +31,7 @@ class PostfixCheck(AgentCheck):
     [Using postqueue]
     Optionally we can configure the agent to use a built in `postqueue -p` command
     to get a count of messages in the `active`, `hold`, and `deferred` mail queues.
-    `postqueue` is exectued with set-group ID privileges without the need for sudo.
+    `postqueue` is executed with set-group ID privileges without the need for sudo.
 
     YAML config options:
         "config_directory" - the value of 'postconf -h queue_directory'
@@ -42,7 +42,7 @@ class PostfixCheck(AgentCheck):
     - deferred
 
     Unlike using the "sudo" method, the "incoming" queue will not be monitored. Postqueue does
-    not report on the "incomming" mail queue.
+    not report on the "incoming" mail queue.
 
     http://www.postfix.org/postqueue.1.html
 

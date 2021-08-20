@@ -1,6 +1,6 @@
 # CHANGELOG - couch
 
-## 3.13.3 / 2021-07-12
+## 3.13.3 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Use Agent 8 signature. See [#9522](https://github.com/DataDog/integrations-core/pull/9522).
 

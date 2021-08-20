@@ -5,7 +5,12 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+
+# Ignore missing library to not require it for e2e
+try:
+    from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+except ImportError:
+    COUNT = GAUGE = ''
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')

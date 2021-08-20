@@ -173,9 +173,17 @@ class PostgresStatementSamples(DBMAsyncJob):
             cursor.execute(query, params)
             rows = cursor.fetchall()
         self._check.histogram(
-            "dd.postgres.get_new_pg_stat_activity.time", (time.time() - start_time) * 1000, tags=self._tags
+            "dd.postgres.get_new_pg_stat_activity.time",
+            (time.time() - start_time) * 1000,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
         )
-        self._check.histogram("dd.postgres.get_new_pg_stat_activity.rows", len(rows), tags=self._tags)
+        self._check.histogram(
+            "dd.postgres.get_new_pg_stat_activity.rows",
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
@@ -202,7 +210,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
-                tags=self._tags + ["error:insufficient-privilege"],
+                tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
 
     def run_job(self):
@@ -219,19 +228,29 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
         elapsed_ms = (time.time() - start_time) * 1000
-        self._check.histogram("dd.postgres.collect_statement_samples.time", elapsed_ms, tags=self._tags)
+        self._check.histogram(
+            "dd.postgres.collect_statement_samples.time",
+            elapsed_ms,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         self._check.count(
-            "dd.postgres.collect_statement_samples.events_submitted.count", submitted_count, tags=self._tags
+            "dd.postgres.collect_statement_samples.events_submitted.count",
+            submitted_count,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
-            tags=self._tags,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
-            tags=self._tags,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
         )
 
     def _can_explain_statement(self, obfuscated_statement):
@@ -294,7 +313,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             )
             result = cursor.fetchone()
             self._check.histogram(
-                "dd.postgres.run_explain.time", (time.time() - start_time) * 1000, tags=self._dbtags(dbname)
+                "dd.postgres.run_explain.time",
+                (time.time() - start_time) * 1000,
+                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             if not result or len(result) < 1 or len(result[0]) < 1:
                 return None
@@ -311,7 +333,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated)),
+                tags=self._dbtags(dbname, "error:explain-{}".format(DBExplainError.query_truncated))
+                + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             return (
                 None,
@@ -324,7 +348,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)),
+                tags=self._dbtags(dbname, "error:explain-{}".format(db_explain_error)) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             return None, db_explain_error, '{}'.format(type(err))
 
@@ -335,7 +360,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))),
+                tags=self._dbtags(dbname, "error:explain-{}".format(type(e))) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             return None, DBExplainError.database_error, '{}'.format(type(err))
 
@@ -345,7 +371,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         except Exception as e:
             self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
-                "dd.postgres.statement_samples.error", 1, tags=self._dbtags(row['datname'], "error:sql-obfuscate")
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
             )
             return None
 
@@ -380,6 +409,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._db_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
@@ -434,7 +464,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_samples.error",
                     1,
-                    tags=self._tags + ["error:collect-plan-for-statement-crash"],
+                    tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
                 )
 
     @staticmethod

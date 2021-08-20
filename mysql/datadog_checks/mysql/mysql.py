@@ -14,6 +14,7 @@ from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.utils import resolve_db_host
 
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
@@ -58,6 +59,11 @@ try:
 except ImportError:
     PSUTIL_AVAILABLE = False
 
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
 
 if PY3:
     long = int
@@ -74,6 +80,8 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
+        self._resolved_hostname = None
+        self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
 
@@ -97,6 +105,15 @@ class MySql(AgentCheck):
     def _send_metadata(self):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
+
+    @property
+    def resolved_hostname(self):
+        if self._resolved_hostname is None and self._config.dbm_enabled:
+            self._resolved_hostname = resolve_db_host(self._config.host)
+        return self._resolved_hostname
+
+    def _get_debug_tags(self):
+        return ['agent_hostname:{}'.format(datadog_agent.get_hostname())]
 
     @classmethod
     def get_library_versions(cls):
@@ -211,10 +228,14 @@ class MySql(AgentCheck):
             db = pymysql.connect(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.resolved_hostname
+            )
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.resolved_hostname
+            )
             raise
         finally:
             if db:
@@ -395,10 +416,21 @@ class MySql(AgentCheck):
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if status == AgentCheck.OK else 0,
             tags=self._config.tags + additional_tags,
+            hostname=self.resolved_hostname,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
-        self.service_check(self.SLAVE_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
-        self.service_check(self.REPLICA_SERVICE_CHECK_NAME, status, tags=self.service_check_tags + additional_tags)
+        self.service_check(
+            self.SLAVE_SERVICE_CHECK_NAME,
+            status,
+            tags=self.service_check_tags + additional_tags,
+            hostname=self.resolved_hostname,
+        )
+        self.service_check(
+            self.REPLICA_SERVICE_CHECK_NAME,
+            status,
+            tags=self.service_check_tags + additional_tags,
+            hostname=self.resolved_hostname,
+        )
 
     def _is_source_host(self, replicas, results):
         # type: (float, Dict[str, Any]) -> bool
@@ -429,13 +461,13 @@ class MySql(AgentCheck):
                 metric_tags.append(tag)
             if value is not None:
                 if metric_type == RATE:
-                    self.rate(metric_name, value, tags=metric_tags)
+                    self.rate(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
                 elif metric_type == GAUGE:
-                    self.gauge(metric_name, value, tags=metric_tags)
+                    self.gauge(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
                 elif metric_type == COUNT:
-                    self.count(metric_name, value, tags=metric_tags)
+                    self.count(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
                 elif metric_type == MONOTONIC:
-                    self.monotonic_count(metric_name, value, tags=metric_tags)
+                    self.monotonic_count(metric_name, value, tags=metric_tags, hostname=self.resolved_hostname)
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -461,11 +493,17 @@ class MySql(AgentCheck):
                             if result[col_idx] is not None:
                                 self.log.debug("Collecting done, value %s", result[col_idx])
                                 if metric_type == GAUGE:
-                                    self.gauge(metric, float(result[col_idx]), tags=tags)
+                                    self.gauge(
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                    )
                                 elif metric_type == RATE:
-                                    self.rate(metric, float(result[col_idx]), tags=tags)
+                                    self.rate(
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                    )
                                 else:
-                                    self.gauge(metric, float(result[col_idx]), tags=tags)
+                                    self.gauge(
+                                        metric, float(result[col_idx]), tags=tags, hostname=self.resolved_hostname
+                                    )
                             else:
                                 self.log.debug("Received value is None for index %d", col_idx)
                         except ValueError:
@@ -508,10 +546,10 @@ class MySql(AgentCheck):
                     scpu = proc.cpu_times()[1]
 
                 if ucpu and scpu:
-                    self.rate("mysql.performance.user_time", ucpu, tags=tags)
+                    self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
                     # should really be system_time
-                    self.rate("mysql.performance.kernel_time", scpu, tags=tags)
-                    self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags)
+                    self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
+                    self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
 
             except Exception:
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
@@ -620,7 +658,7 @@ class MySql(AgentCheck):
     def _is_innodb_engine_enabled(self, db):
         # Whether InnoDB engine is available or not can be found out either
         # from the output of SHOW ENGINES or from information_schema.ENGINES
-        # table. Later is choosen because that involves no string parsing.
+        # table. Later is chosen because that involves no string parsing.
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
