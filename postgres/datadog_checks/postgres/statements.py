@@ -262,14 +262,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 count = rows[0][0]
             self._check.count(
                 "postgresql.pg_stat_statements.max",
-                self._check.pg_settings.get("pg_stat_statements.max"),
-                tags=self._tags + self._check._get_debug_tags(),
+                self._check.pg_settings.get("pg_stat_statements.max", 0),
+                tags=self._tags,
                 hostname=self._check.resolved_hostname,
             )
             self._check.count(
                 "postgresql.pg_stat_statements.count",
                 count,
-                tags=self._tags + self._check._get_debug_tags(),
+                tags=self._tags,
                 hostname=self._check.resolved_hostname,
             )
         except psycopg2.Error as e:
