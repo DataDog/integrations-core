@@ -44,6 +44,8 @@ DEFAULT_OPTIONS = {
     'verify': True,
 }
 
+FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'fixtures')
+
 
 class TestAttribute:
     def test_default(self):
@@ -964,8 +966,8 @@ class TestAuthTokenDCOS:
             def raise_for_status(self):
                 return True
 
-        priv_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'private-key.pem')
-        pub_key_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dcos', 'public-key.pem')
+        priv_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'private-key.pem')
+        pub_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'public-key.pem')
 
         exp = 3600
         instance = {

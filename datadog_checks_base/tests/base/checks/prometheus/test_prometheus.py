@@ -19,6 +19,9 @@ from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 
 
+FIXTURES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'prometheus'))
+
+
 class MockResponse:
     """
     MockResponse is used to simulate the object requests.Response commonly returned by requests.get
@@ -88,7 +91,7 @@ def ref_gauge():
 
 @pytest.fixture
 def bin_data():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'protobuf.bin')
+    f_name = os.path.join(FIXTURES_PATH, 'protobuf.bin')
     with open(f_name, 'rb') as f:
         bin_data = f.read()
         assert len(bin_data) == 51855
@@ -99,7 +102,7 @@ def bin_data():
 @pytest.fixture
 def text_data():
     # Loading test text data
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
+    f_name = os.path.abspath(os.path.join(FIXTURES_PATH, 'metrics.txt'))
     with open(f_name, 'r') as f:
         text_data = f.read()
         assert len(text_data) == 14494
@@ -108,7 +111,7 @@ def text_data():
 
 
 def test_parse_metric_family():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'protobuf.bin')
+    f_name = os.path.join(FIXTURES_PATH, 'protobuf.bin')
     with open(f_name, 'rb') as f:
         data = f.read()
         assert len(data) == 51855
@@ -1277,7 +1280,7 @@ def test_parse_one_summary_with_none_values(p_check):
 def test_label_joins(sorted_tags_check):
     """ Tests label join on text format """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1627,7 +1630,7 @@ def test_label_joins(sorted_tags_check):
 def test_label_joins_gc(sorted_tags_check):
     """ Tests label join GC on text format """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1693,7 +1696,7 @@ def test_label_joins_gc(sorted_tags_check):
 def test_label_joins_missconfigured(sorted_tags_check):
     """ Tests label join missconfigured label is ignored """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1746,7 +1749,7 @@ def test_label_joins_missconfigured(sorted_tags_check):
 def test_label_join_not_existing(sorted_tags_check):
     """ Tests label join on non existing matching label is ignored """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1785,7 +1788,7 @@ def test_label_join_not_existing(sorted_tags_check):
 def test_label_join_metric_not_existing(sorted_tags_check):
     """ Tests label join on non existing metric is ignored """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1824,7 +1827,7 @@ def test_label_join_metric_not_existing(sorted_tags_check):
 def test_label_join_with_hostname(sorted_tags_check):
     """ Tests label join and hostname override on a metric """
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_response = mock.MagicMock(
@@ -1878,7 +1881,7 @@ def test_label_join_with_hostname(sorted_tags_check):
 @pytest.fixture()
 def mock_get():
     text_data = None
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_get = mock.patch(
