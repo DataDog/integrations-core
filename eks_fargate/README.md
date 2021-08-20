@@ -413,7 +413,7 @@ Need help? Contact [Datadog support][22].
 [16]: https://docs.datadoghq.com/developers/dogstatsd/
 [17]: http://docs.datadoghq.com/tracing/setup
 [18]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
-[19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
+[19]: http://docs.datadoghq.com/tracing/#send-traces-to-datadog
 [20]: https://docs.datadoghq.com/help
 [21]: https://app.datadoghq.com/containers
 [22]: https://app.datadoghq.com/process
