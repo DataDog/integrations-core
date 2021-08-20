@@ -19,11 +19,10 @@ def annotate_display_queue(file, display_queue):
     warnings = ""
     for func, message in display_queue:
         if func == echo_failure:
-            errors += message + "\n"
+            errors += message + "%0A"
         elif func == echo_warning:
-            warnings += message + "\n"
+            warnings += message + "%0A"
     if errors:
-        errors = "{delimiter}" + errors + "{delimiter}"
         annotate_error(file, errors)
     if warnings:
         annotate_warning(file, warnings)
