@@ -1,6 +1,5 @@
 [
     {
-        "agent_version": "6.0.0",
         "integration": "CRI-O",
         "check": "crio.prometheus.health",
         "statuses": [
