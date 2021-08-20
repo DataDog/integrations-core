@@ -1188,7 +1188,7 @@
                     {
                         "definition": {
                             "background_color": "yellow",
-                            "content": "Pools maintain the list of servers assigned to them and perform health monitoring, load balancing, persistence, and functions that involve Avi-Vantage-to-server interaction. A pool may only be used or referenced by only one virtual service at a time.\n\nRefer to [Avi Documentation](https://avinetworks.com/docs/latest/architectural-overview/applications/pools/) for more details on Pools",
+                            "content": "Pools maintain the list of servers assigned to them and perform health monitoring, load balancing, persistence, and functions that involve Avi-Vantage-to-server interaction. A pool may only be used or referenced by only one virtual service at a time.\n\nSee the [Avi documentation](https://avinetworks.com/docs/latest/architectural-overview/applications/pools/) for more details on Pools.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
