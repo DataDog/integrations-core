@@ -787,7 +787,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "Service Engines are created within a group, which contains the definition of how the SEs should be sized, placed, and made highly available.\n\nRefer to [Avi Documentation](https://avinetworks.com/docs/latest/service-engine-group/ for more details on Service Engines",
+                            "content": "Service Engines are created within a group, which contains the definition of how the SEs should be sized, placed, and made highly available.\n\nSee the [Avi documentation](https://avinetworks.com/docs/latest/service-engine-group/ for more details on Service Engines.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": true,
