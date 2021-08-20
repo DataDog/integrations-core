@@ -33,7 +33,7 @@
                     {
                         "definition": {
                             "background_color": "pink",
-                            "content": "This dashboard allows you to monitor the health of your AVI Vantage load balancers, their performance, and the traffic flowing through them.\n\n##### [Official Datadog AVI Vantage documentation \u2197](https://docs.datadoghq.com/integrations/avi_vantage/)",
+                            "content": "## Avi Vantage\n\nThis dashboard allows you to monitor the health of your AVI Vantage load balancers, their performance, and the traffic flowing through them.\n\nFor further reading on monitoring Avi Vantage, see:\n\n- [Official Avi Vantage integration docs](https://docs.datadoghq.com/integrations/avi_vantage/)\n\nClone this template to make changes and add your own graphs and widgets.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
