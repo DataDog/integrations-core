@@ -78,7 +78,9 @@ class KindUp(LazyFunction):
 
     def __call__(self):
         # Create cluster
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name, '--config', self.kind_config], check=True)
+        run_command(
+            ['kind', 'create', 'cluster', '--name', self.cluster_name, '--config', self.kind_config], check=True
+        )
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True)
 
