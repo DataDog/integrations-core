@@ -15,11 +15,9 @@ variables:
   DDEV_COLOR: 1
 
 jobs:
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-all-checks.yml'
   parameters:
-    job_name: Weekly_Metrics_Validation
-    display: Linux
-    check: 'airflow clickhouse'
+    job_name: Weekly_New_Version_Validation
     test: false
     test_e2e: false
     benchmark: false
