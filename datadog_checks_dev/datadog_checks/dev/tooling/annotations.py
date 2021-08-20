@@ -16,13 +16,14 @@ GH_ANNOTATION_LEVELS = [ANNOTATE_WARNING, ANNOTATE_ERROR]
 
 def annotate_display_queue(file, display_queue):
     errors = ""
-    warnings = []
+    warnings = ""
     for func, message in display_queue:
         if func == echo_failure:
             errors += message + "\n"
         elif func == echo_warning:
             warnings += message + "\n"
     if errors:
+        errors = "{delimiter}" + errors + "{delimiter}"
         annotate_error(file, errors)
     if warnings:
         annotate_warning(file, warnings)
