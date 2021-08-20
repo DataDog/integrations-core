@@ -5,9 +5,8 @@ import json
 
 import click
 
-from datadog_checks.dev.utils import print_github_annotation
-
 from ....utils import read_file
+from ...annotations import annotate_error
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -56,7 +55,7 @@ def dashboards(check):
             echo_info(' FAILED')
             echo_failure('  ' + message)
             failed_checks += 1
-            print_github_annotation(manifest_file, message)
+            annotate_error(manifest_file, message)
 
         for dashboard_file in dashboard_relative_locations:
             try:
@@ -67,7 +66,7 @@ def dashboards(check):
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
                 echo_failure('  ' + message)
-                print_github_annotation(dashboard_file, message)
+                annotate_error(dashboard_file, message)
                 continue
 
             all_keys = set(decoded.keys())
@@ -77,7 +76,7 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}"),
                 )
-                print_github_annotation(dashboard_file, "Detected missing required fields: {}".format(missing_fields))
+                annotate_error(dashboard_file, "Detected missing required fields: {}".format(missing_fields))
 
             # Confirm the dashboard payload comes from the old API for now
             if not _is_dashboard_format(decoded):
@@ -85,7 +84,7 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
-                print_github_annotation(dashboard_file, "This dashboard payload is not using the new /dashboard format")
+                annotate_error(dashboard_file, "This dashboard payload is not using the new /dashboard format")
 
             if file_failed:
                 failed_checks += 1
