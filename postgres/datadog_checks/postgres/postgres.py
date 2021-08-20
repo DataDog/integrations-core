@@ -395,6 +395,7 @@ class PostgreSql(AgentCheck):
                     ("pg_stat_statements.max", "track_activity_query_size"),
                 )
                 rows = cursor.fetchall()
+                self.pg_settings.clear()
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
