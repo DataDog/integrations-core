@@ -536,7 +536,7 @@ class AgentCheck(object):
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def _submit_metric(
-        self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False,
+        self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
     ):
         # type: (int, str, float, Sequence[str], str, str, bool, bool) -> None
         if value is None:
