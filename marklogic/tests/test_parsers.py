@@ -502,7 +502,8 @@ def test_parse_resources():
                         'relation-count': {'units': 'quantity', 'value': 1},
                         'relation': [
                             {
-                                'uriref': "/manage/v2/clusters/test-cluster",
+                                'roleref': 'foreign'
+                                'uriref': '/manage/v2/clusters/test-cluster',
                                 'idref': '123255818103205892753',
                                 'nameref': 'test-cluster',
                             },
