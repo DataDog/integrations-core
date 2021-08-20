@@ -149,6 +149,8 @@ def test_statement_metrics(
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
@@ -477,17 +479,17 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
-def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, db_user):
+def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["username"] = db_user
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_query_max_text_size(check.db)
+    check._load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
             tags=_expected_dbm_instance_tags(dbm_instance)
-            + ['error:load-track-activity-query-size', 'agent_hostname:stubbed.hostname'],
+            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
             hostname='stubbed.hostname',
         )
     else:

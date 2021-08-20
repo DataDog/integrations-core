@@ -34,6 +34,7 @@ SELECT {cols}
   {filters}
   LIMIT {limit}
 """
+PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements"
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
@@ -248,8 +249,34 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    def _emit_pg_stat_statements_metrics(self):
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                PG_STAT_STATEMENTS_COUNT_QUERY,
+            )
+            count = 0
+            if rows:
+                count = rows[0][0]
+            self._check.count(
+                "postgresql.pg_stat_statements.max",
+                self._check.pg_settings.get("pg_stat_statements.max", 0),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.count(
+                "postgresql.pg_stat_statements.count",
+                count,
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
+
     def _collect_metrics_rows(self):
         rows = self._load_pg_stat_statements()
+        if rows:
+            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:

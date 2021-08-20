@@ -325,7 +325,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        track_activity_query_size = self._check._db_configured_track_activity_query_size
+        track_activity_query_size = self._get_track_activity_query_size()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
@@ -431,7 +431,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": obfuscated_statement,
                     "query_truncated": self._get_truncation_state(
-                        self._check._db_configured_track_activity_query_size, row['query']
+                        self._get_track_activity_query_size(), row['query']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -465,6 +465,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+
+    def _get_track_activity_query_size(self):
+        return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
     @staticmethod
     def _get_truncation_state(track_activity_query_size, statement):
