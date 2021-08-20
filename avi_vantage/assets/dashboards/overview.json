@@ -1149,7 +1149,7 @@
                     {
                         "definition": {
                             "background_color": "pink",
-                            "content": "A virtual service can be thought of as an IP address that Vantage is listening to, ready to receive requests. In a normal TCP/HTTP configuration, when a client connects to the virtual service address, Vantage will process the client connection or request against a list of settings, policies and profiles, then send valid client traffic to a back-end server that is listed as a member of the virtual service\u2019s pool.\n\nRefer to [Avi Documentation](https://avinetworks.com/docs/latest/architectural-overview/applications/virtual-services/) for more details on virtual services",
+                            "content": "A virtual service can be thought of as an IP address that Vantage is listening to, ready to receive requests. In a normal TCP/HTTP configuration, when a client connects to the virtual service address, Vantage processes the client connection or request against a list of settings, policies, and profiles, then sends valid client traffic to a back-end server that is listed as a member of the virtual service\u2019s pool.\n\nSee the [Avi documentation](https://avinetworks.com/docs/latest/architectural-overview/applications/virtual-services/) for more details on virtual services.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
