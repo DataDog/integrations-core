@@ -10,6 +10,6 @@
             "endpoint"
         ],
         "name": "CRI-O prometheus health",
-        "description": "Returns `CRITICAL` if the check can't access the metrics endpoint."
+        "description": null
     }
 ]
