@@ -8,7 +8,7 @@ Get metrics from kube-dns service in real time to:
   through Prometheus
 
 See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for
-more informations about kube-dns
+more information about kube-dns
 
 ## Setup
 
@@ -38,7 +38,7 @@ metadata:
 
 **Remarks:**
 
-- Notice the "dns-pod" tag that will keep track of the target dns pod IP. The other tags will be related to the dd-agent that is polling the informations using the service discovery.
+- Notice the "dns-pod" tag that will keep track of the target dns pod IP. The other tags will be related to the dd-agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's spec.
 
 ### Validation

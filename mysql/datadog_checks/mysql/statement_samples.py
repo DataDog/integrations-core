@@ -289,9 +289,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             'STATEMENT': self._run_explain,
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         self._init_caches()
 
     def _init_caches(self):
@@ -513,6 +511,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],

@@ -24,7 +24,7 @@ Generally, you'll want to search the web and find out about the following:
 
 - Available versions of the device, and which ones we target.
 
-    > E.g. HP iLO devices exist in multiple versions (version 3, version 4...). Here, we are specifically targetting HP iLO4.
+    > E.g. HP iLO devices exist in multiple versions (version 3, version 4...). Here, we are specifically targeting HP iLO4.
 
 - Supported MIBs and OIDs (often available in official documentation), and associated MIB files.
 
@@ -105,7 +105,7 @@ SNMP-FRAMEWORK-MIB:
 - snmpEngine
 ```
 
-Will include `system`, `interfaces` and `ip` nodes from `RFC1213-MIB`, no node fro, `CISCO-SYSLOG-MIB` and node `snmpEngine` from `SNMP-FRAMEWORK-MIB`.
+Will include `system`, `interfaces` and `ip` nodes from `RFC1213-MIB`, no node from `CISCO-SYSLOG-MIB`, and node `snmpEngine` from `SNMP-FRAMEWORK-MIB`.
 
 Note that each `MIB:node_name` correspond to exactly one and only one OID. However, some MIBs report legacy nodes that are overwritten.
 

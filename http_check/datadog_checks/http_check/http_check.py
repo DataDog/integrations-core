@@ -247,6 +247,9 @@ class HTTPCheck(AgentCheck):
 
         for status in service_checks:
             sc_name, status, msg = status
+
+            if status is AgentCheck.OK:
+                msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):

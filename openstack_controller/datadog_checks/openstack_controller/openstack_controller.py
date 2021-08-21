@@ -410,7 +410,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             server_stats = self.get_server_diagnostics(server_id)
-        except InstancePowerOffFailure:  # 409 response code came back fro nova
+        except InstancePowerOffFailure:  # 409 response code came back for nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             return
         except requests.exceptions.HTTPError as e:

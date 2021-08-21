@@ -173,7 +173,7 @@ haproxy.process.max.frontend.ssl.key.rate,gauge,,,,Maximum observed frontend SSL
 haproxy.process.max.memory.bytes,gauge,,,,Per-process memory limit (in bytes); 0=unset.,0,haproxy,
 haproxy.process.max.pipes,gauge,,,,Configured maximum number of pipes.,0,haproxy,
 haproxy.process.max.session.rate,gauge,,,,Maximum observed number of sessions per second.,0,haproxy,
-haproxy.process.max.sockets,gauge,,,,Maximum numer of open sockets.,0,haproxy,
+haproxy.process.max.sockets,gauge,,,,Maximum number of open sockets.,0,haproxy,
 haproxy.process.max.ssl.connections,gauge,,,,Configured maximum number of concurrent SSL connections.,0,haproxy,
 haproxy.process.max.ssl.rate,gauge,,,,Maximum observed number of SSL sessions per second.,0,haproxy,
 haproxy.process.max.zlib.memory,gauge,,,,Configured maximum amount of memory for zlib in bytes.,0,haproxy,

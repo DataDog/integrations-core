@@ -33,6 +33,8 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
+    :type kind_config: ``str``
     """
     if not which('kind'):
         pytest.skip('Kind not available')

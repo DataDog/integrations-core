@@ -43,7 +43,6 @@ class CouchDb(AgentCheck):
                     self.SERVICE_CHECK_NAME,
                     AgentCheck.OK,
                     tags=service_check_tags,
-                    message='Connection to %s was successful' % url,
                 )
         except requests.exceptions.Timeout as e:
             self.service_check(

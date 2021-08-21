@@ -64,7 +64,7 @@ instances:
     url: http://localhost/admin?stats
 
     ## @param status_check - boolean - optional - default: false
-    ## This paramater instructs the check to send events on status changes in the backend.
+    ## This parameter instructs the check to send events on status changes in the backend.
     ## This is DEPRECATED in favor of the creation of a monitor on the service check status
     ## and will be removed in a future version.
     ##

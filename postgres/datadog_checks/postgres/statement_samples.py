@@ -121,9 +121,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._tags_no_db = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
             maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
@@ -327,7 +325,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
-        track_activity_query_size = self._check._db_configured_track_activity_query_size
+        track_activity_query_size = self._get_track_activity_query_size()
 
         if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
             self._check.count(
@@ -409,6 +407,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._db_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
@@ -432,7 +431,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "user": row['usename'],
                     "statement": obfuscated_statement,
                     "query_truncated": self._get_truncation_state(
-                        self._check._db_configured_track_activity_query_size, row['query']
+                        self._get_track_activity_query_size(), row['query']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -466,6 +465,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+
+    def _get_track_activity_query_size(self):
+        return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
     @staticmethod
     def _get_truncation_state(track_activity_query_size, statement):

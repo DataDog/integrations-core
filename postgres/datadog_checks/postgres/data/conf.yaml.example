@@ -274,12 +274,12 @@ instances:
     #
     obfuscator_options:
 
-        ## @param quantize_sql_tables - boolean - optional - default: false
-        ## Set to `true` to perform quantization on your SQL tables.
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ##
         ## Note that this option only applies when `dbm` is enabled.
         #
-        # quantize_sql_tables: false
+        # replace_digits: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

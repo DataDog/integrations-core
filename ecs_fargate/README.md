@@ -229,7 +229,7 @@ You can monitor Fargate logs by using the AWS FireLens integration built on Data
 
 Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs.
 
-1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][20]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][21]. AWS recommends that you use [the regional Docker image][22]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
+1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][20]. For more information about Fargate container definitions, see the [AWS docs on Container Definitions][21]. AWS recommends that you use [the regional Docker image][22]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
 
    ```json
    {
