@@ -82,9 +82,7 @@ class KindUp(LazyFunction):
         if self.kind_config:
             create_cmd += ['--config', self.kind_config]
 
-        run_command(
-            create_cmd, check=True
-        )
+        run_command(create_cmd, check=True)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True)
 
