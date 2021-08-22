@@ -11,7 +11,7 @@
 * [Added] Add manifest validator for `supported_os` field. See [#9871](https://github.com/DataDog/integrations-core/pull/9871).
 * [Added] Add annotation utils and config spec annotation. See [#9868](https://github.com/DataDog/integrations-core/pull/9868).
 * [Added] [NDM] Validate SysObjectID Consistency. See [#9806](https://github.com/DataDog/integrations-core/pull/9806).
-* [Added] Matheus/generate profile add repository option. See [#9761](https://github.com/DataDog/integrations-core/pull/9761).
+* [Added] Add option to generate profile using custom MIB source. See [#9761](https://github.com/DataDog/integrations-core/pull/9761).
 * [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
 * [Added] Allow extra 3rd party licenses . See [#9796](https://github.com/DataDog/integrations-core/pull/9796).
 * [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
@@ -21,7 +21,7 @@
 * [Fixed] Update GitHub `agent-network` team name. See [#9678](https://github.com/DataDog/integrations-core/pull/9678).
 * [Fixed] Better 'Invalid url' error message in dash export. See [#9837](https://github.com/DataDog/integrations-core/pull/9837).
 * [Fixed] Wait for E2E Agent to be started when running Python 2. See [#9828](https://github.com/DataDog/integrations-core/pull/9828).
-* [Fixed] Reattempt to download pull docker image. See [#9823](https://github.com/DataDog/integrations-core/pull/9823).
+* [Fixed] Re-attempt to pull docker images. See [#9823](https://github.com/DataDog/integrations-core/pull/9823).
 * [Fixed] Validate all integrations for base and dev updates. See [#9787](https://github.com/DataDog/integrations-core/pull/9787).
 * [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
 
