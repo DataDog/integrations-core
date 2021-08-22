@@ -105,7 +105,7 @@ datadog-postfix==1.9.0; sys_platform != 'win32'
 datadog-postgres==9.0.0
 datadog-powerdns-recursor==1.9.0
 datadog-presto==2.4.0
-datadog-process==1.17.2
+datadog-process==2.0.0
 datadog-prometheus==3.3.1
 datadog-proxysql==3.0.1
 datadog-rabbitmq==1.18.0
