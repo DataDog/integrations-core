@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 3.1.0 / 2021-08-22
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
 ## 3.0.1 / 2021-07-20
 
 * [Fixed] Fix log line . See [#9621](https://github.com/DataDog/integrations-core/pull/9621).

@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 4.0.0 / 2021-08-22
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 3.2.0 / 2021-08-12
 
 * [Added] Add database file metrics from sys.master_files. See [#9812](https://github.com/DataDog/integrations-core/pull/9812).
