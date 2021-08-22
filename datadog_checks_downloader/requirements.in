@@ -3,7 +3,7 @@
 # libraries.
 #
 tuf==0.17.0
-in-toto==1.0.1
+in-toto==1.1.1
 #
 # Make sure TUF and in-toto use the same version of this library, which they
 # both use in common. At the time of writing (Jan 30 2020), this was the latest
