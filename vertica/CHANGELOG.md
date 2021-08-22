@@ -2,7 +2,7 @@
 
 ## 3.0.0 / 2021-08-22
 
-* [Removed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
 
 ## 2.1.1 / 2021-06-07 / Agent 7.29.0
 

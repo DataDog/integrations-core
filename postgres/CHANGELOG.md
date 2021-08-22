@@ -8,7 +8,7 @@
 * [Fixed] Revert "Upgrade `psycopg2` on Python 3". See [#9835](https://github.com/DataDog/integrations-core/pull/9835).
 * [Changed] Update postgres obfuscator options config. See [#9884](https://github.com/DataDog/integrations-core/pull/9884).
 * [Changed] Set a default statement timeout for postgres to 5s. See [#9847](https://github.com/DataDog/integrations-core/pull/9847).
-* [Removed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
 
 ## 8.2.0 / 2021-08-03
 

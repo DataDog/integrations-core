@@ -3,7 +3,7 @@
 ## 4.0.0 / 2021-08-22
 
 * [Added] Re-resolve IP after a set duration. See [#9699](https://github.com/DataDog/integrations-core/pull/9699).
-* [Removed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
 
 ## 3.1.1 / 2021-07-07 / Agent 7.30.0
 
