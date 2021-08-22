@@ -51,7 +51,7 @@ datadog-haproxy==3.0.0
 datadog-harbor==1.9.1
 datadog-hazelcast==1.4.0
 datadog-hdfs-datanode==2.0.0; sys_platform != 'win32'
-datadog-hdfs-namenode==1.15.1; sys_platform != 'win32'
+datadog-hdfs-namenode==2.0.0; sys_platform != 'win32'
 datadog-hive==1.6.0
 datadog-hivemq==1.4.0
 datadog-http-check==5.3.2
