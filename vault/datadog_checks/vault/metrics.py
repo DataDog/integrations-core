@@ -152,8 +152,12 @@ METRIC_MAP = {
     'vault_replication_rpc_dr_server_echo': 'replication.rpc.dr.server.echo',
     'vault_replication_rpc_dr_server_fetch_keys_request': 'replication.rpc.dr.server.fetch_keys_request',
     'vault_replication_rpc_standby_server_echo': 'replication.rpc.standby.server.echo',
-    'vault_replication_rpc_standby_server_register_auth_request': 'replication.rpc.standby.server.register_auth_request',
-    'vault_replication_rpc_standby_server_register_lease_request': 'replication.rpc.standby.server.register_lease_request',
+    'vault_replication_rpc_standby_server_register_auth_request': (
+        'replication.rpc.standby.server.register_auth_request'
+    ),
+    'vault_replication_rpc_standby_server_register_lease_request': (
+        'replication.rpc.standby.server.register_lease_request'
+    ),
     'vault_replication_rpc_standby_server_wrap_token_request': 'replication.rpc.standby.server.wrap_token_request',
     'vault_database_Initialize': 'database.Initialize',
     'vault_database_Initialize_error': 'database.Initialize.error',
