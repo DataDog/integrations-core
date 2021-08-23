@@ -95,4 +95,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://app.datadoghq.com/monitors#/create
 [10]: https://docs.datadoghq.com/help/
 [11]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/assets/service_checks.json
-[12]: /monitors/monitor_types/network/?tab=checkalert
+[12]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert

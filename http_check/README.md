@@ -96,4 +96,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://app.datadoghq.com/monitors#/create
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
-[13]: /monitors/monitor_types/network/?tab=checkalert
+[13]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
