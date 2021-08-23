@@ -33,7 +33,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=15.3.0'
 setup(
     name='datadog-dd_cluster_agent',
     version=ABOUT['__version__'],
-    description='The Datadog-Cluster-Agent check',
+    description='The DD-Cluster-Agent check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent dd_cluster_agent check',
