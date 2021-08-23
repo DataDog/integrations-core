@@ -37,7 +37,7 @@ def fetch_mib(mib, source_url):
 @click.argument('profile_path')
 @click.option(
     '--mib_source_url',
-    default='https://raw.githubusercontent.com/projx/snmp-mibs/master/@mib@',
+    default='https://raw.githubusercontent.com:443/DataDog/mibs.snmplabs.com/master/asn1/@mib@',
     help='Source url to fetch missing MIBS',
 )
 @click.pass_context
