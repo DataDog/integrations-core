@@ -6,7 +6,6 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 
 from ....fs import file_exists, read_file, write_file
 from ....structures import JSONDict
@@ -14,6 +13,7 @@ from ...constants import get_root
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
+from ...manifest_validator import get_all_validators
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')

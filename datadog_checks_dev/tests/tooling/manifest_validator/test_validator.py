@@ -4,12 +4,13 @@
 import os
 from pathlib import Path
 
+from datadog_checks.dev.structures import JSONDict
 from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 
 
 def test_manifest_ok():
-    manifest = {
+    manifest = JSONDict({
         "categories": ["os & system", "log collection"],
         "creates_events": False,
         "description": "Collect and graph Microsoft Active Directory metrics",
@@ -35,7 +36,7 @@ def test_manifest_ok():
             "logs": {"source": "ruby"},
             "metrics_metadata": "metadata.csv",
         },
-    }
+    })
     root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
     current_root = get_root()
     set_root(str(root))

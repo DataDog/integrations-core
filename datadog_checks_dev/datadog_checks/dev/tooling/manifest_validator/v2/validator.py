@@ -5,7 +5,6 @@ import json
 
 import requests
 
-from datadog_checks.dev.tooling.commands.console import abort
 from datadog_checks.dev.tooling.manifest_validator.common.validator import (
     ImmutableAttributesValidator,
     LogsCategoryValidator,
@@ -30,24 +29,29 @@ class SchemaValidator(ManifestValidator):
         # Get API and APP keys which are needed to call Datadog API
         org_name = self.ctx.obj['org']
         if not org_name:
-            abort('No `org` has been set')
+            self.fail('No `org` has been set')
+            return
 
         if org_name not in self.ctx.obj['orgs']:
-            abort(f'Selected org {org_name} is not in `orgs`')
+            self.fail(f'Selected org {org_name} is not in `orgs`')
+            return
 
         org = self.ctx.obj['orgs'][org_name]
 
         api_key = org.get('api_key')
         if not api_key:
-            abort(f'No `api_key` has been set for org `{org_name}`')
+            self.fail(f'No `api_key` has been set for org `{org_name}`')
+            return
 
         app_key = org.get('app_key')
         if not app_key:
-            abort(f'No `app_key` has been set for org `{org_name}`')
+            self.fail(f'No `app_key` has been set for org `{org_name}`')
+            return
 
         dd_url = org.get('dd_url')
         if not dd_url:
-            abort(f'No `dd_url` has been set for org `{org_name}`')
+            self.fail(f'No `dd_url` has been set for org `{org_name}`')
+            return
 
         # TODO FIX URL
         url = f"{dd_url}/api/beta/apps/manifest/validate"
@@ -67,7 +71,7 @@ class SchemaValidator(ManifestValidator):
             else:
                 r.raise_for_status()
         except Exception as e:
-            abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
+            self.fail(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
 
 def get_v2_validators(ctx, is_extras, is_marketplace):

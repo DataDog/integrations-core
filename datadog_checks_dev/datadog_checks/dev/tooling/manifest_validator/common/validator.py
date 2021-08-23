@@ -145,7 +145,7 @@ class MetricToCheckValidator(ManifestValidator):
         'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
     }
     METADATA_PATH = {"v1": "/assets/metrics_metadata", "v2": "/assets/integration/metrics/metadata_path"}
-    METRIC_PATH = {"v1": "/assets/metric_to_check", "v2": "/assets/integration/metrics/check"}
+    METRIC_PATH = {"v1": "/metric_to_check", "v2": "/assets/integration/metrics/check"}
     PRICING_PATH = {"v1": "/pricing", "v2": "/pricing"}
 
     def validate(self, check_name, decoded, _):
@@ -159,7 +159,7 @@ class MetricToCheckValidator(ManifestValidator):
         metric_path = self.METRIC_PATH[self.version]
         metric_to_check = decoded.get_path(metric_path)
 
-        pricing = decoded.get_path("/pricing")
+        pricing = decoded.get_path("/pricing") or []
 
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
@@ -249,7 +249,7 @@ class LogsCategoryValidator(ManifestValidator):
 
     def validate(self, check_name, decoded, fix):
         path = self.CATEGORY_PATH[self.version]
-        categories = decoded.get_path(path)
+        categories = decoded.get_path(path) or []
 
         check_has_logs = has_logs(check_name)
         check_has_logs_category = self.LOG_COLLECTION_CATEGORY[self.version] in categories
