@@ -2,8 +2,8 @@
   "display_name": "Datadog Cluster Agent",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "datadog_cluster_agent",
-  "metric_prefix": "datadog_cluster_agent.",
+  "name": "dd_cluster_agent",
+  "metric_prefix": "datadog.cluster_agent.",
   "metric_to_check": "datadog.cluster_agent.admission_webhooks.certificate_expiry",
   "creates_events": false,
   "short_description": "Tracks metrics of the Datadog Cluster Agent",
@@ -20,7 +20,7 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "datadog-cluster-agent",
+  "integration_id": "dd-cluster-agent",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"

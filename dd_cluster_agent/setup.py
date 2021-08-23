@@ -10,7 +10,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'datadog_cluster_agent', '__about__.py')) as f:
+with open(path.join(HERE, 'datadog_checks', 'dd_cluster_agent', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -31,12 +31,12 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=15.3.0'
 
 
 setup(
-    name='datadog-datadog_cluster_agent',
+    name='datadog-dd_cluster_agent',
     version=ABOUT['__version__'],
     description='The Datadog-Cluster-Agent check',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords='datadog agent datadog_cluster_agent check',
+    keywords='datadog agent dd_cluster_agent check',
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
     # Author details
@@ -55,7 +55,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
-    packages=['datadog_checks.datadog_cluster_agent'],
+    packages=['datadog_checks.dd_cluster_agent'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
