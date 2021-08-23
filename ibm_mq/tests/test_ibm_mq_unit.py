@@ -27,6 +27,7 @@ def test_channel_status_service_check_default_mapping(aggregator, get_check, ins
         pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
         pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
         pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+        pymqi.CMQC.MQRC_NO_MSG_AVAILABLE: AgentCheck.UNKNOWN,
     }
 
     for status in service_check_map:
