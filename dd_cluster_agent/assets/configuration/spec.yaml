@@ -1,6 +1,6 @@
-name: Datadog Cluster Agent
+name: DD Cluster Agent
 files:
-- name: datadog_cluster_agent.yaml
+- name: dd_cluster_agent.yaml
   options:
   - template: init_config
     options:

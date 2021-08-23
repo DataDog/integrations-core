@@ -25,8 +25,8 @@ assets/               @DataDog/agent-integrations
 /crio/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /crio/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /crio/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/datadog_cluster_agent/                   @DataDog/container-integrations @DataDog/agent-integrations
-/datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/dd_cluster_agent/                        @DataDog/container-integrations @DataDog/agent-integrations
+/dd_cluster_agent/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                           @DataDog/container-integrations @DataDog/agent-integrations
 /docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava

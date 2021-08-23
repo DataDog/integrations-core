@@ -1,7 +1,7 @@
 [
   {
     "agent_version": "6.31.0",
-    "integration": "Datadog Cluster Agent",
+    "integration": "DD Cluster Agent",
     "check": "datadog.cluster_agent.prometheus.health",
     "statuses": [
       "ok",

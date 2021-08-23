@@ -4,7 +4,7 @@
 from typing import Any, Dict
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
+from datadog_checks.dd_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 NAMESPACE = 'datadog.cluster_agent'
@@ -37,7 +37,7 @@ METRICS = [
 
 def test_check(aggregator, instance, mock_metrics_endpoint):
     # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = DatadogClusterAgentCheck('datadog_cluster_agent', {}, [instance])
+    check = DatadogClusterAgentCheck('dd_cluster_agent', {}, [instance])
 
     # dry run to build mapping for label joins
     check.check(instance)
