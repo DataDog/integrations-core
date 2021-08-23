@@ -48,6 +48,10 @@ def instance_cache_shared_labels(field, value):
     return True
 
 
+def instance_check_generic_tags(field, value):
+    return False
+
+
 def instance_collect_counters_with_distributions(field, value):
     return False
 
@@ -58,6 +62,10 @@ def instance_collect_histogram_buckets(field, value):
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
