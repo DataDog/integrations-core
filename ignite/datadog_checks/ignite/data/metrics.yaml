@@ -62,7 +62,7 @@ jmx_metrics:
           metric_type: gauge
         TotalAllocatedPages:
           alias: ignite.total_allocated_pages
-          metric_type: monotonic_count
+          metric_type: gauge
         EvictionRate:
           alias: ignite.eviction_rate
           metric_type: gauge
@@ -98,7 +98,7 @@ jmx_metrics:
           metric_type: gauge
         TotalAllocatedSize:
           alias: ignite.total_allocated_size
-          metric_type: monotonic_count
+          metric_type: gauge
         UsedCheckpointBufferPages:
           alias: ignite.used_checkpoint_buffer_pages
           metric_type: gauge

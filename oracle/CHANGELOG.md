@@ -1,6 +1,14 @@
 # CHANGELOG - oracle
 
-## 3.3.2 / 2021-07-22
+## 3.3.4 / 2021-08-04
+
+* [Fixed] Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
+
+## 3.3.3 / 2021-07-30
+
+* [Fixed] Explicitly close connection after query error. See [#9800](https://github.com/DataDog/integrations-core/pull/9800).
+
+## 3.3.2 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
 * [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).

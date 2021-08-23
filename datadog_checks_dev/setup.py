@@ -74,6 +74,7 @@ setup(
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
             'click~=8.0',
+            'codespell',
             'colorama',
             'datamodel-code-generator~=0.11.4',
             'docker-compose>=1.25',

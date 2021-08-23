@@ -5,7 +5,7 @@ import jsonschema
 
 from datadog_checks.dev.tooling.constants import get_root
 
-from .utils import find_profile_in_path
+from .utils import find_profile_in_path, get_all_profiles_directory, get_profile
 
 
 class ValidationResult(object):
@@ -200,6 +200,62 @@ class DuplicateOIDValidator(ProfileValidator):
             self.duplicated[OID] = self.used_oid[OID]
 
 
-def get_all_validators():
+class SysobjectidValidator(ProfileValidator):
+    """
+    Validator responsible to check if there are no duplicated sysobjectid in the profile.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.used_sysobjid = {}
+        self.duplicated = {}
+        self.seen_profiles = {}
+
+    def validate(self, profile, path):
+        sysobjectids = self.extract_sysobjectids_profile(profile)
+        self.check_sysobjectids_are_duplicated(sysobjectids, profile)
+        for directory in path:
+            for profile in get_all_profiles_directory(directory):
+                sysobjectids = self.extract_sysobjectids_profile(profile)
+                self.check_sysobjectids_are_duplicated(sysobjectids, profile)
+        self.report_errors()
+
+    def report_errors(self):
+        if len(self.duplicated) == 0:
+            self.success("No duplicated sysobjectid")
+        else:
+            for sysobjectid in self.duplicated:
+                error_message = "SysObjectId {} is duplicated in:\n".format(sysobjectid)
+                for profile in self.duplicated[sysobjectid]:
+                    error_message = error_message + "|------> {}\n".format(profile)
+                self.fail(error_message)
+
+    def extract_sysobjectids_profile(self, profile):
+        file_contents = get_profile(profile)
+        if not file_contents:
+            return []
+        sysobjectid = file_contents.get('sysobjectid')
+        if (not isinstance(sysobjectid, list)) and sysobjectid:
+            sysobjectid = [sysobjectid]
+        return sysobjectid
+
+    def check_sysobjectids_are_duplicated(self, sysobjectids, profile):
+        if (not sysobjectids) or (profile in self.seen_profiles):
+            return
+        self.seen_profiles[profile] = True
+        for sysobjectid in sysobjectids:
+            if sysobjectid not in self.used_sysobjid:
+                self.used_sysobjid[sysobjectid] = [profile]
+            else:
+                self.used_sysobjid[sysobjectid].append(profile)
+                self.duplicated[sysobjectid] = self.used_sysobjid[sysobjectid]
+
+
+def get_all_single_validators():
     # type () -> list(ProfileValidator)
     return [SchemaValidator(), DuplicateOIDValidator()]
+
+
+def get_all_group_validators():
+    # type () -> list(ProfileValidator)
+    return [SysobjectidValidator()]

@@ -5,6 +5,7 @@ import os
 
 import click
 
+from datadog_checks.dev.tooling.annotations import annotate_error
 from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 
 from ...testing import process_checks_option
@@ -49,16 +50,23 @@ def validate_config_http(file, check):
             if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
                 has_init_config_http = True
 
+            if has_init_config_http and has_instance_http:
+                break
+
     if not has_instance_http:
-        echo_failure(
+        message = (
             f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
         )
+        echo_failure(message)
+        annotate_error(file, message)
         has_failed = True
 
     if not has_init_config_http:
-        echo_failure(
+        message = (
             f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
         )
+        echo_failure(message)
+        annotate_error(file, message)
         has_failed = True
 
     return has_failed
@@ -83,6 +91,11 @@ def validate_use_http_wrapper_file(file, check):
                     echo_failure(
                         f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
                         f'please use the HTTP wrapper instead'
+                    )
+                    annotate_error(
+                        file,
+                        "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
+                        line=num + 1,
                     )
                     has_failed = True
 

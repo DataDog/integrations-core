@@ -10,6 +10,7 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
+from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -39,22 +40,15 @@ def backend_normalize_metric_name(metric_name):
 
 
 def check_tag_names(metric, tags):
-    forbidden_tags = [
-        'cluster_name',
-        'clustername',
-        'cluster',
-        'env',
-        'host_name',
-        'hostname',
-        'host',
-        'service',
-        'version',
-    ]
-
     if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        try:
+            from datadog_checks.base.utils.tagging import GENERIC_TAGS
+        except ImportError:
+            GENERIC_TAGS = []
+
         for tag in tags:
             tag_name = tag.split(':')[0]
-            if tag_name in forbidden_tags:
+            if tag_name in GENERIC_TAGS:
                 raise Exception(
                     "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
                     "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
@@ -130,6 +124,9 @@ class AggregatorStub(object):
             self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        if status == ServiceCheck.OK and message:
+            raise Exception("Expected empty message on OK service check")
+
         check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
@@ -261,6 +258,9 @@ class AggregatorStub(object):
                 continue
 
             if hostname and hostname != bucket.hostname:
+                continue
+
+            if monotonic != bucket.monotonic:
                 continue
 
             candidates.append(bucket)
@@ -401,7 +401,7 @@ class AggregatorStub(object):
                 actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                 # We only check `*.count` metrics for histogram and historate submissions
-                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted
+                # Note: all Openmetrics histogram and summary metrics are actually separately submitted
                 if check_submission_type and actual_metric_type in ['histogram', 'historate']:
                     metric_stub_name += '.count'
 

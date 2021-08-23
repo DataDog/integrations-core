@@ -17,7 +17,7 @@ class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
 
-    quantize_sql_tables: Optional[bool]
+    replace_digits: Optional[bool]
 
 
 class QueryMetrics(BaseModel):
@@ -62,7 +62,9 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
+    collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
+    data_directory: Optional[str]
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]

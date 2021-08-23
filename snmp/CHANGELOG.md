@@ -1,6 +1,13 @@
 # CHANGELOG - snmp
 
-## 5.2.0 / 2021-05-28
+## 5.3.0 / 2021-08-22
+
+* [Added] Add `ifNumber` to `_generic-if.yaml`. See [#9875](https://github.com/DataDog/integrations-core/pull/9875).
+* [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
+* [Fixed] Enclose community string using single quote. See [#9742](https://github.com/DataDog/integrations-core/pull/9742).
+* [Fixed] Test string float value in e2e. See [#9689](https://github.com/DataDog/integrations-core/pull/9689).
+
+## 5.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add collect device metadata config. See [#9393](https://github.com/DataDog/integrations-core/pull/9393).
 * [Added] Add rate type to error and discard counters. See [#9218](https://github.com/DataDog/integrations-core/pull/9218). Thanks [loganmc10](https://github.com/loganmc10).

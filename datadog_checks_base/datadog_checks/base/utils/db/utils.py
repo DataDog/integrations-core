@@ -10,11 +10,13 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
+from typing import Any, Callable, Dict, List, Tuple
 
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.db.types import Transformer
 
 try:
     import datadog_agent
@@ -39,11 +41,14 @@ SUBMISSION_METHODS = {
 
 
 def create_submission_transformer(submit_method):
+    # type: (Any) -> Callable[[Any, Any, Any], Callable[[Any, List, Dict], Callable[[Any, Any, Any], Transformer]]]
     # During the compilation phase every transformer will have access to all the others and may be
     # passed the first arguments (e.g. name) that will be forwarded the actual AgentCheck methods.
     def get_transformer(_transformers, *creation_args, **modifiers):
+        # type: (List[Transformer], Tuple, Dict[str, Any]) -> Transformer
         # The first argument of every transformer is a map of named references to collected values.
         def transformer(_sources, *call_args, **kwargs):
+            # type: (Dict[str, Any], Tuple[str, Any], Dict[str, Any]) -> None
             kwargs.update(modifiers)
 
             # TODO: When Python 2 goes away simply do:
@@ -56,6 +61,7 @@ def create_submission_transformer(submit_method):
 
 
 def create_extra_transformer(column_transformer, source=None):
+    # type: (Transformer, str) -> Transformer
     # Every column transformer expects a value to be given but in the post-processing
     # phase the values are determined by references, so to avoid redefining every
     # transformer we just map the proper source to the value.
@@ -114,12 +120,12 @@ class RateLimitingTTLCache(TTLCache):
 
 def resolve_db_host(db_host):
     agent_hostname = datadog_agent.get_hostname()
-    if not db_host or db_host in {'localhost', '127.0.0.1'}:
+    if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
         return agent_hostname
 
     try:
         host_ip = socket.gethostbyname(db_host)
-    except socket.gaierror as e:
+    except (socket.gaierror, UnicodeError) as e:
         # could be connecting via a unix domain socket
         logger.debug(
             "failed to resolve DB host '%s' due to %r. falling back to agent hostname: %s",
@@ -133,7 +139,7 @@ def resolve_db_host(db_host):
         agent_host_ip = socket.gethostbyname(agent_hostname)
         if agent_host_ip == host_ip:
             return agent_hostname
-    except socket.gaierror as e:
+    except (socket.gaierror, UnicodeError) as e:
         logger.debug(
             "failed to resolve agent host '%s' due to socket.gaierror(%s). using DB host: %s",
             agent_hostname,

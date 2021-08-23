@@ -60,7 +60,7 @@ class TrelloClient:
             'team/agent-apm': 'agent-apm',
             'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
-            'team/networks': 'networks',
+            'team/networks': 'agent-network',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
             'team/container-app': 'container-app',
@@ -94,6 +94,8 @@ class TrelloClient:
             self.FIXED_READY_TO_REBUILD_COLUMN: 'Awaiting Build',  # WAITING
             '600eab615842d6560f6ce898': 'Done',
         }
+
+        self.labels_to_ignore = {"cluster-agent"}
 
         self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
 
@@ -161,6 +163,8 @@ class TrelloClient:
         cards = requests.get(self.BOARD_ENDPOINT, params=self.auth)
         for card in cards.json():
             labels = card.get('labels', [])
+            if self.skip_card(labels):
+                continue
             team_found = False
             for label in labels:
                 if label['name'] in self.label_map:
@@ -179,6 +183,15 @@ class TrelloClient:
                     f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?'
                 )
         return counts
+
+    def skip_card(self, labels):
+        """
+        True if at least one label should be ignored, False otherwise.
+        """
+        for label in labels:
+            if label['name'] in self.labels_to_ignore:
+                return True
+        return False
 
     def get_card(self, card_id):
         response = requests.get(f'{self.CARDS_ENDPOINT}/{card_id}', params=self.auth)

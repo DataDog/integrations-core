@@ -1,6 +1,6 @@
 # CHANGELOG - statsd
 
-## 1.7.1 / 2021-07-15
+## 1.7.1 / 2021-07-15 / Agent 7.30.0
 
 * [Fixed] Allow float value for timeout. See [#9711](https://github.com/DataDog/integrations-core/pull/9711).
 

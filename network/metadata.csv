@@ -14,7 +14,7 @@ system.net.conntrack.drop,count,,unit,,The number of drop in the conntrack table
 system.net.conntrack.early_drop,count,,unit,,The number of early drop in the conntrack table.,0,system,early drop
 system.net.conntrack.error,count,,unit,,The number of error in the conntrack table.,0,system,err
 system.net.conntrack.events,count,,unit,,Boolean to enable the connection tracking code will provide userspace with connection tracking events via ctnetlink.,0,system,evts
-system.net.conntrack.events_retry_timeout,gauge,,unit,,,0,system,evts retry tiemout
+system.net.conntrack.events_retry_timeout,gauge,,unit,,,0,system,evts retry timeout
 system.net.conntrack.expect_max,gauge,,unit,,Maximum size of expectation table.,0,system,expect max
 system.net.conntrack.found,count,,unit,,The number of currently allocated flow entries.,0,system,connt found
 system.net.conntrack.generic_timeout,gauge,,unit,,Default for generic timeout. This refers to layer 4 unknown/unsupported protocols.,0,system,generic timeout

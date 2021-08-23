@@ -18,6 +18,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your Istio servers or in your cluster and point it at Istio.
 
+#### Envoy
+
+If you want to monitor the Envoy proxies in Istio, configure the [Envoy integration][23].
+
 ### Configuration
 
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options.
@@ -144,3 +148,4 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [21]: https://www.datadoghq.com/blog/istio-datadog/
 [22]: https://github.com/DataDog/integrations-core/blob/master/istio/assets/service_checks.json
+[23]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio

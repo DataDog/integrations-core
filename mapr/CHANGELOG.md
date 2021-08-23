@@ -1,10 +1,16 @@
 # CHANGELOG - mapr
 
-## 1.5.0 / 2021-07-12
+## 1.6.0 / 2021-08-22
+
+* [Added] Disable generic tags. See [#9791](https://github.com/DataDog/integrations-core/pull/9791).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Fixed] Bump base package requirement. See [#9838](https://github.com/DataDog/integrations-core/pull/9838).
+
+## 1.5.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] More precise errors. See [#9453](https://github.com/DataDog/integrations-core/pull/9453).
 
-## 1.4.1 / 2021-05-20
+## 1.4.1 / 2021-05-20 / Agent 7.29.0
 
 * [Fixed] Fix init failure when auth_ticket is not provided. See [#9390](https://github.com/DataDog/integrations-core/pull/9390).
 * [Fixed] Fixup for an AttributeError. See [#9343](https://github.com/DataDog/integrations-core/pull/9343).

@@ -60,8 +60,8 @@ instances:
     ## value it'll be renamed. This list should contain at least one metric.
     #
     metrics:
-      - processor:cpu
-      - memory:mem
+      - processor: cpu
+      - memory: mem
       - io
 
     ## @param prometheus_metrics_prefix - string - optional
