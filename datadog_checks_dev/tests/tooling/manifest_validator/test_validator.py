@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from datadog_checks.dev.tooling.constants import get_root, set_root
-from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
+from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 
 
 def test_manifest_ok():
@@ -40,7 +40,7 @@ def test_manifest_ok():
     current_root = get_root()
     set_root(str(root))
     try:
-        validators = get_all_validators(False, False)
+        validators = get_all_validators(False, "1.0.0")
         for validator in validators:
             validator.validate('active_directory', manifest, False)
             assert not validator.result.failed, validator.result

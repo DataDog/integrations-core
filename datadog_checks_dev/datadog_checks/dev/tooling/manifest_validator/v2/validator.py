@@ -1,26 +1,19 @@
-# (C) Datadog, Inc. 2021-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+#  (C) Datadog, Inc. 2020-present
+#  All rights reserved
+#  Licensed under a 3-clause BSD style license (see LICENSE)
 import abc
+import json
 import os
-import uuid
 from typing import Dict
 
+import requests
 import six
 
-from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.commands.console import abort
 from datadog_checks.dev.tooling.git import content_changed
-from datadog_checks.dev.tooling.manifest_validator.schema import get_manifest_schema
-from datadog_checks.dev.tooling.utils import (
-    get_metadata_file,
-    has_logs,
-    is_metric_in_metadata_file,
-    is_package,
-    parse_version_parts,
-    read_metadata_rows,
-)
+from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
-FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
+FIELDS_NOT_ALLOWED_TO_CHANGE = ["id", "source_type_name", "app_id"]
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
@@ -43,12 +36,15 @@ class ValidationResult(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class ManifestValidator(object):
-    def __init__(self, is_extras=False, is_marketplace=False, check_in_extras=True, check_in_marketplace=True):
+    def __init__(
+        self, is_extras=False, is_marketplace=False, check_in_extras=True, check_in_marketplace=True, ctx=None
+    ):
         self.result = ValidationResult()
         self.is_extras = is_extras
         self.is_marketplace = is_marketplace
         self.check_in_extras = check_in_extras
         self.check_in_markeplace = check_in_marketplace
+        self.ctx = ctx
 
     def should_validate(self):
         if not self.is_extras and not self.is_marketplace:
@@ -78,100 +74,52 @@ class ManifestValidator(object):
         return str(self.result)
 
 
-class AttributesValidator(ManifestValidator):
-    """ attributes are valid"""
-
+class SchemaValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
-        errors = sorted(get_manifest_schema().iter_errors(decoded), key=lambda e: e.path)
-        if errors:
-            for error in errors:
-                self.fail(f'  {"->".join(map(str, error.absolute_path))} Error: {error.message}')
+        if not self.should_validate():
+            return
 
+        # Get API and APP keys which are needed to call Datadog API
+        org_name = self.ctx.obj['org']
+        if not org_name:
+            abort('No `org` has been set')
 
-class GUIDValidator(ManifestValidator):
-    all_guids = {}
+        if org_name not in self.ctx.obj['orgs']:
+            abort(f'Selected org {org_name} is not in `orgs`')
 
-    def validate(self, check_name, decoded, fix):
-        guid = decoded.get('guid')
-        if guid in self.all_guids:
-            output = f'  duplicate `guid`: `{guid}` from `{self.all_guids[guid]}`'
-            if fix:
-                new_guid = uuid.uuid4()
-                self.all_guids[new_guid] = check_name
-                decoded['guid'] = new_guid
-                self.fix(output, f'  new `guid`: {new_guid}')
+        org = self.ctx.obj['orgs'][org_name]
+
+        api_key = org.get('api_key')
+        if not api_key:
+            abort(f'No `api_key` has been set for org `{org_name}`')
+
+        app_key = org.get('app_key')
+        if not app_key:
+            abort(f'No `app_key` has been set for org `{org_name}`')
+
+        dd_url = org.get('dd_url')
+        if not dd_url:
+            abort(f'No `dd_url` has been set for org `{org_name}`')
+
+        # TODO FIX URL
+        url = f"{dd_url}/api/beta/apps/manifest/validate"
+
+        # prep for upload
+        payload = {"data": {"type": "app_manifest", "attributes": decoded}}
+
+        try:
+            payload_json = json.dumps(payload)
+            r = requests.post(url, data=payload_json, headers={'DD-API-KEY': api_key, 'DD-APPLICATION-KEY': app_key})
+
+            if r.status_code == 400:
+                # parse the errors
+                errors = "\n".join(r.json()["errors"])
+                message = f"Error validating manifest schema:\n{errors}"
+                self.fail(message)
             else:
-                self.fail(output)
-        elif not guid or not isinstance(guid, str):
-            output = '  required non-null string: guid'
-            if fix:
-                new_guid = uuid.uuid4()
-                self.all_guids[new_guid] = check_name
-                decoded['guid'] = new_guid
-                self.fix(output, f'  new `guid`: {new_guid}')
-            else:
-                self.fail(output)
-        else:
-            self.all_guids[guid] = check_name
-        return self.result
-
-
-class ManifestVersionValidator(ManifestValidator):
-    def __init__(self, *args, **kwargs):
-        super(ManifestVersionValidator, self).__init__(*args, **kwargs)
-        self.root = get_root()
-
-    def validate(self, check_name, decoded, fix):
-        # manifest_version
-        correct_manifest_version = '1.0.0'
-        manifest_version = decoded.get('manifest_version')
-        version_parts = parse_version_parts(manifest_version)
-        if len(version_parts) != 3:
-            if not manifest_version:
-                output = '  required non-null string: manifest_version'
-            else:
-                output = f'  invalid `manifest_version`: {manifest_version}'
-
-            if fix:
-                version_parts = parse_version_parts(correct_manifest_version)
-                decoded['manifest_version'] = correct_manifest_version
-                self.fix(output, f'  new `manifest_version`: {correct_manifest_version}')
-            else:
-                self.fail(output)
-
-        if len(version_parts) == 3:
-            about_exists = os.path.isfile(
-                os.path.join(self.root, check_name, 'datadog_checks', check_name, '__about__.py')
-            )
-            if version_parts >= [1, 0, 0]:
-                if 'version' in decoded and about_exists:
-                    output = '  outdated field: version'
-
-                    if fix:
-                        del decoded['version']
-                        self.fix(output, '  removed field: version')
-                    else:
-                        self.fail(output)
-            elif about_exists:
-                output = f'  outdated `manifest_version`: {manifest_version}'
-
-                if fix:
-                    decoded['manifest_version'] = correct_manifest_version
-                    self.fix(output, f'  new `manifest_version`: {correct_manifest_version}')
-                    if 'version' in decoded:
-                        del decoded['version']
-                        self.result.messages['success'].append('  removed field: version')
-                else:
-                    self.fail(output)
-            else:
-                version = decoded.get('version')
-                version_parts = parse_version_parts(version)
-                if len(version_parts) != 3:
-                    if not version:
-                        output = '  required non-null string: version'
-                    else:
-                        output = f'  invalid `version`: {version}'
-                    self.fail(output)
+                r.raise_for_status()
+        except Exception as e:
+            abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
 
 class MaintainerValidator(ManifestValidator):
@@ -193,25 +141,10 @@ class MaintainerValidator(ManifestValidator):
                 self.fail(output)
 
 
-class NameValidator(ManifestValidator):
-    def validate(self, check_name, decoded, fix):
-        correct_name = check_name
-        name = decoded.get('name')
-        if check_name.startswith('datadog') and check_name != 'datadog_cluster_agent':
-            self.fail(f'  An integration check folder cannot start with `datadog`: {check_name}')
-        if not isinstance(name, str) or name.lower() != correct_name.lower():
-            output = f'  incorrect `name`: {name}'
-            if fix:
-                decoded['name'] = correct_name
-                self.fix(output, f'  new `name`: {correct_name}')
-            else:
-                self.fail(output)
-
-
 class MetricsMetadataValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
         # metrics_metadata
-        metadata_in_manifest = decoded.get('assets', {}).get('metrics_metadata')
+        metadata_in_manifest = decoded.get('assets', {}).get('integration', {}).get('metrics', {}).get('metadata_path')
         metadata_file = get_metadata_file(check_name)
         metadata_file_exists = os.path.isfile(metadata_file)
         if not metadata_in_manifest and metadata_file_exists:
@@ -270,20 +203,6 @@ class SupportValidator(ManifestValidator):
             if fix:
                 decoded['support'] = correct_support
                 self.fix(output, f'  new `support`: {correct_support}')
-            else:
-                self.fail(output)
-
-
-class IsPublicValidator(ManifestValidator):
-    def validate(self, check_name, decoded, fix):
-        correct_is_public = True
-        is_public = decoded.get('is_public')
-        if not isinstance(is_public, bool):
-            output = '  required boolean: is_public'
-
-            if fix:
-                decoded['is_public'] = correct_is_public
-                self.fix(output, f'  new `is_public`: {correct_is_public}')
             else:
                 self.fail(output)
 
@@ -348,31 +267,13 @@ class LogsCategoryValidator(ManifestValidator):
             self.fail(output)
 
 
-class SupportedOSValidator(ManifestValidator):
-    """If an integration contains python or logs configuration, the supported_os field should not be empty."""
-
-    def validate(self, check_name, decoded, _):
-        supported_os = decoded.get('supported_os')
-        check_has_logs = has_logs(check_name)
-        check_has_python = is_package(check_name)
-
-        if not supported_os and (check_has_logs or check_has_python):
-            output = f'Attribute `supported_os` in {check_name}/manifest.json should not be empty.'
-            self.fail(output)
-
-
-def get_all_validators(is_extras, is_marketplace):
+def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
-        AttributesValidator(),
-        GUIDValidator(),
-        ManifestVersionValidator(),
-        MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
-        NameValidator(),
-        MetricsMetadataValidator(),
-        MetricToCheckValidator(),
-        SupportValidator(is_extras, is_marketplace),
-        IsPublicValidator(),
-        ImmutableAttributesValidator(),
-        LogsCategoryValidator(),
-        SupportedOSValidator(),
+        SchemaValidator(ctx=ctx),
+        # MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
+        # MetricsMetadataValidator(),
+        # MetricToCheckValidator(),
+        # SupportValidator(is_extras, is_marketplace),
+        # ImmutableAttributesValidator(),
+        # LogsCategoryValidator(),
     ]
