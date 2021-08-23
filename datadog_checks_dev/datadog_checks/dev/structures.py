@@ -7,6 +7,7 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import six
+from jsonpointer import resolve_pointer, set_pointer
 
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
 from .warn import warning
@@ -89,3 +90,18 @@ class TempDir(object):
                 self._cleanup(self.directory)
         else:
             self._cleanup(self.directory)
+
+
+class JSONDict(dict):
+    """Subclass of dict which adds jsonpointer access method"""
+
+    def get_path(self, path):
+        try:
+            value = resolve_pointer(self, path)
+        except:
+            value = None
+        return value
+
+    def set_path(self, path, value):
+        # note we don't catch exceptions
+        set_pointer(self, path, value)
