@@ -269,6 +269,7 @@ def testable(
             '4': 'Core',
             '5': 'Platform',
             '6': 'Tools and Libraries',
+            '7': 'Database Monitoring',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -433,7 +434,8 @@ def testable(
                 echo_info(pr_milestone)
 
             # Ensure Unix lines feeds just in case
-            echo_info(pr_body.strip('\r'), indent=indent)
+            if pr_body:
+                echo_info(pr_body.strip('\r'), indent=indent)
 
             echo_info(options_text)
 
