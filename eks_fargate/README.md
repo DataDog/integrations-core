@@ -19,7 +19,7 @@ AWS Fargate pods are not physical pods, which means they exclude [host-based sys
 
 ### EC2 Node
 
-If you don't specify through [AWS Fargate Profile][4] that your pods should run on fargate, your pods can use classical EC2 machines. If it's the case refer to the [Datadog-Amazon EKS integration setup][5] in order to collect data from them. This works by running the Agent as an EC2-type workload. The Agent setup is the same as that of the [Kuberenetes Agent setup][6], and all options are available. To deploy the Agent on EC2 nodes, use the [DaemonSet setup for the Datadog Agent][7].
+If you don't specify through [AWS Fargate Profile][4] that your pods should run on fargate, your pods can use classical EC2 machines. If it's the case refer to the [Datadog-Amazon EKS integration setup][5] in order to collect data from them. This works by running the Agent as an EC2-type workload. The Agent setup is the same as that of the [Kubernetes Agent setup][6], and all options are available. To deploy the Agent on EC2 nodes, use the [DaemonSet setup for the Datadog Agent][7].
 
 ### Installation
 
@@ -92,7 +92,7 @@ metadata:
 
 #### Running the Agent as a sidecar
 
-To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the adition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
+To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the addition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
 
 ```yaml
 apiVersion: apps/v1
@@ -348,7 +348,7 @@ spec:
 
 To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
 
-1. [Setup the Datadog Cluster Agent][20].
+1. [Setup the Datadog Cluster Agent][27].
 2. [Enable Event collection for your Cluster Agent][21].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
@@ -421,4 +421,5 @@ Need help? Contact [Datadog support][22].
 [24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [25]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [26]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
+[27]: /agent/cluster_agent/setup/
 

@@ -156,11 +156,7 @@ class PgBouncer(AgentCheck):
             db = self._get_connection(use_cached=False)
             self._collect_stats(db)
 
-        redacted_dsn = self._get_redacted_dsn()
-        message = u'Established connection to {}'.format(redacted_dsn)
-        self.service_check(
-            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message
-        )
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
         self._set_metadata()
 
     def _set_metadata(self):

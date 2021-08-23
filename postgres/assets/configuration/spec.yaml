@@ -94,8 +94,7 @@ files:
         Cancelled queries won't log any metrics.
       value:
         type: integer
-        example: 1000
-        display_default: null
+        example: 5000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -324,9 +323,9 @@ files:
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:
-        - name: quantize_sql_tables
+        - name: replace_digits
           description: |
-            Set to `true` to perform quantization on your SQL tables.
+            Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
 
             Note that this option only applies when `dbm` is enabled.
           value:

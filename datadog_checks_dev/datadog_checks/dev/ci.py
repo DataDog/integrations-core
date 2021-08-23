@@ -25,3 +25,8 @@ def running_on_linux_ci():
 
 def running_on_macos_ci():
     return running_on_ci() and os.environ.get('AGENT_OS') == 'Darwin'
+
+
+def running_on_gh_actions():
+    # GITHUB_ACTIONS always set to true when GitHub Actions is running the workflow.
+    return os.environ.get('GITHUB_ACTIONS') == 'true'

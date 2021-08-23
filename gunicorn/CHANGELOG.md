@@ -1,6 +1,10 @@
 # CHANGELOG - gunicorn
 
-## 1.15.0 / 2021-05-28
+## 2.0.0 / 2021-08-22
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.15.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8923](https://github.com/DataDog/integrations-core/pull/8923).
 

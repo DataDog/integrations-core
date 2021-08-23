@@ -207,7 +207,6 @@ def test_get_service_health(init_config, instance, aggregator):
         name="ambari.state",
         status=AgentCheck.OK,
         tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'],
-        message='INSTALLED',
     )
 
 

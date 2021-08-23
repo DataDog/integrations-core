@@ -333,7 +333,7 @@ class NewKafkaConsumerCheck(object):
         associate these offsets to the proper consumer group.
 
         The OffsetFetchRequest is scoped to the topics and partitions that are specified in the check config. If
-        topics are unspecified, it will fetch all known offsets for that consumer group. Similiarly, if the partitions
+        topics are unspecified, it will fetch all known offsets for that consumer group. Similarly, if the partitions
         are unspecified for a topic listed in the config, offsets are fetched for all the partitions within that topic.
         """
         coordinator_id = self.kafka_client._find_coordinator_id_process_response(response)

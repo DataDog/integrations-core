@@ -1,6 +1,6 @@
 # CHANGELOG - External DNS
 
-## 1.3.0 / 2021-05-28
+## 1.3.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

@@ -26,7 +26,7 @@ class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
 
-    quantize_sql_tables: Optional[bool]
+    replace_digits: Optional[bool]
 
 
 class Options(BaseModel):

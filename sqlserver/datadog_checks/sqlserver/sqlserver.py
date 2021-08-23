@@ -24,6 +24,7 @@ from .const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
@@ -141,6 +142,8 @@ class SQLServer(AgentCheck):
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
+        if status is AgentCheck.OK:
+            message = None
         self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
@@ -256,6 +259,12 @@ class SQLServer(AgentCheck):
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
             for name, table, column in TASK_SCHEDULER_METRICS:
+                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
+        # Load sys.master_files metrics
+        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
+            for name, table, column in DATABASE_MASTER_FILES:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 

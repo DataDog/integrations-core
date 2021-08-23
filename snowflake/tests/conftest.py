@@ -1,7 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
+
+from . import common
 
 INSTANCE = {
     "user": "testuser",
@@ -24,19 +28,17 @@ OAUTH_INSTANCE = {
     'disable_generic_tags': True,
 }
 
-CHECK_NAME = 'snowflake'
-
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
-    yield instance
+def dd_environment():
+    yield common.INSTANCE, common.E2E_METADATA
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
-    return INSTANCE
+    return deepcopy(common.INSTANCE)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def oauth_instance():
-    return OAUTH_INSTANCE
+    return deepcopy(common.OAUTH_INSTANCE)

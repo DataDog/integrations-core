@@ -1,6 +1,10 @@
 # CHANGELOG - pgbouncer
 
-## 2.0.0 / 2021-07-12
+## 3.0.0 / 2021-08-22
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.0.0 / 2021-07-12 / Agent 7.30.0
 
 * [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
 

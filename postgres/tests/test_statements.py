@@ -99,7 +99,9 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
-def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
+def test_statement_metrics(
+    aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view, datadog_agent
+):
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
@@ -141,11 +143,14 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
+    assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
@@ -174,6 +179,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
         assert len(matching) == 1
         fqt_event = matching[0]
+        assert fqt_event['ddagentversion'] == datadog_agent.get_version()
         assert fqt_event['ddsource'] == "postgres"
         assert fqt_event['db']['statement'] == expected_query
         assert fqt_event['postgres']['datname'] == dbname
@@ -354,6 +360,7 @@ def test_statement_samples_collect(
     expected_error_tag,
     expected_collection_errors,
     expected_statement_truncated,
+    datadog_agent,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -395,7 +402,11 @@ def test_statement_samples_collect(
 
         if expected_error_tag:
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
-            aggregator.assert_metric("dd.postgres.statement_samples.error", tags=tags + [expected_error_tag])
+            aggregator.assert_metric(
+                "dd.postgres.statement_samples.error",
+                tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
+                hostname='stubbed.hostname',
+            )
         else:
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
@@ -405,6 +416,7 @@ def test_statement_samples_collect(
 
         # validate the events to ensure we've provided an explanation for not providing an exec plan
         for event in matching:
+            assert event['ddagentversion'] == datadog_agent.get_version()
             if event['db']['plan']['definition'] is None:
                 assert event['db']['plan']['collection_errors'] == expected_collection_errors
             else:
@@ -467,16 +479,18 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
-def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, db_user):
+def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["username"] = db_user
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_query_max_text_size(check.db)
+    check._load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['error:load-track-activity-query-size'],
+            tags=_expected_dbm_instance_tags(dbm_instance)
+            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
+            hostname='stubbed.hostname',
         )
     else:
         assert len(aggregator.metrics("dd.postgres.error")) == 0
@@ -580,7 +594,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
-            "dd.postgres.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.postgres.async_job.cancel",
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -604,7 +619,10 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
         tags=_expected_dbm_instance_tags(dbm_instance)
-        + ['job:query-samples', "error:database-<class 'psycopg2.errors.UndefinedTable'>"],
+        + [
+            'job:query-samples',
+            "error:database-<class 'psycopg2.errors.UndefinedTable'>",
+        ],
     )
 
 
@@ -706,7 +724,10 @@ def test_statement_metrics_database_errors(
         'db:{}'.format(DB_NAME),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
         expected_error_tag,
     ]
 
-    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
