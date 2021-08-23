@@ -189,8 +189,10 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
-        self.disable_generic_tags = is_affirmative(self.instance.get('disable_generic_tags', False))
-        self.check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False))
+        self.check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False)) if instance else False
+        self.disable_generic_tags = (
+            is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
