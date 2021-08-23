@@ -285,6 +285,7 @@ def testable(
             '8': 'Integrations',
             '9': 'Infra-Integrations',
             '10': 'Tools and Libraries',
+            '11': 'Database Monitoring',
             's': 'Skip',
             'q': 'Quit',
         }
