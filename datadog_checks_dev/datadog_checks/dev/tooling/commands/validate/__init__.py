@@ -25,6 +25,7 @@ from .readmes import readmes
 from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
 from .service_checks import service_checks
+from .typos import typos
 
 ALL_COMMANDS = (
     agent_reqs,
@@ -48,6 +49,7 @@ ALL_COMMANDS = (
     recommended_monitors,
     saved_views,
     service_checks,
+    typos,
 )
 
 

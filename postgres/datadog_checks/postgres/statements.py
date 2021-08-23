@@ -34,6 +34,7 @@ SELECT {cols}
   {filters}
   LIMIT {limit}
 """
+PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements"
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
@@ -110,9 +111,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.full_statement_text_cache_max_size,
@@ -179,6 +178,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
+                'ddagentversion': datadog_agent.get_version(),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -249,8 +249,34 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    def _emit_pg_stat_statements_metrics(self):
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                PG_STAT_STATEMENTS_COUNT_QUERY,
+            )
+            count = 0
+            if rows:
+                count = rows[0][0]
+            self._check.count(
+                "postgresql.pg_stat_statements.max",
+                self._check.pg_settings.get("pg_stat_statements.max", 0),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.count(
+                "postgresql.pg_stat_statements.count",
+                count,
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
+
     def _collect_metrics_rows(self):
         rows = self._load_pg_stat_statements()
+        if rows:
+            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:
@@ -297,6 +323,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

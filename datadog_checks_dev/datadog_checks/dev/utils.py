@@ -138,13 +138,3 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
-
-
-def print_github_annotation(file, message, level=None, line=1):
-    if not running_on_gh_actions():
-        return
-
-    if level not in GH_ANNOTATION_LEVELS:
-        level = "warning"
-
-    os.system("echo '::{} file={},line={}::{}'".format(level, file, line, message))

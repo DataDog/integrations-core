@@ -14,16 +14,17 @@ from .bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVER
 pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_config]
 
 HERE = get_here()
+FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(HERE), '..', '..', 'fixtures', 'prometheus'))
 
 
 @pytest.fixture
 def fixture_ksm():
-    return os.path.join(os.path.dirname(HERE), 'fixtures', 'prometheus', 'ksm.txt')
+    return os.path.join(FIXTURE_PATH, 'ksm.txt')
 
 
 @pytest.fixture
 def fixture_amazon_msk_jmx_metrics():
-    return os.path.join(os.path.dirname(HERE), 'fixtures', 'prometheus', 'amazon_msk_jmx_metrics.txt')
+    return os.path.join(FIXTURE_PATH, 'amazon_msk_jmx_metrics.txt')
 
 
 def test_ksm_new(benchmark, dd_run_check, mock_http_response, fixture_ksm):

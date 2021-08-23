@@ -6,7 +6,7 @@ import os
 
 import click
 
-from datadog_checks.dev.utils import print_github_annotation
+from datadog_checks.dev.tooling.annotations import annotate_error
 
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, find_legacy_signature
@@ -36,10 +36,9 @@ def legacy_signature(check):
             failed_file_path, failed_num = check_failed
             failed_file = os.path.basename(failed_file_path)
             echo_failure(f"Check `{check}` uses legacy agent signature in `{failed_file}` on line {failed_num}")
-            print_github_annotation(
+            annotate_error(
                 failed_file_path,
                 "Detected use of legacy agent signature, please use the new signature",
-                level="error",
                 line=failed_num,
             )
 

@@ -82,7 +82,12 @@ class PostgresConfig:
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
-        self.obfuscator_options = instance.get('obfuscator_options', {}) or {}
+        obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = {
+            'replace_digits': obfuscator_options_config.get(
+                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            )
+        }
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
