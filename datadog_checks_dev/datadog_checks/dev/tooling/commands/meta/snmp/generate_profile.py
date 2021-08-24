@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 import os
-import sys
 from collections import namedtuple
 from tempfile import gettempdir
 
