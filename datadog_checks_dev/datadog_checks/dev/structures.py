@@ -98,7 +98,7 @@ class JSONDict(dict):
     def get_path(self, path):
         try:
             value = resolve_pointer(self, path)
-        except:
+        except Exception:
             value = None
         return value
 
