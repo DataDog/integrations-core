@@ -20,7 +20,7 @@ do
 		echo "Gitlab is up!"
 		break
 	fi
-	sleep 10
+	sleep 5
 done
 
 # Register the runner and start the Prometheus metrics server
