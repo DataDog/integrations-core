@@ -4,22 +4,14 @@
 import os
 import uuid
 
+import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.manifest_validator.common.validator import (
-    ImmutableAttributesValidator,
-    IsPublicValidator,
-    LogsCategoryValidator,
-    MaintainerValidator,
-    ManifestValidator,
-    MetricsMetadataValidator,
-    MetricToCheckValidator,
-    NameValidator,
-)
+from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 from datadog_checks.dev.tooling.manifest_validator.v1.schema import get_manifest_schema
 from datadog_checks.dev.tooling.utils import has_logs, is_package, parse_version_parts
 
 
-class AttributesValidator(ManifestValidator):
+class AttributesValidator(BaseManifestValidator):
     """Check that attributes are valid"""
 
     def validate(self, check_name, decoded, fix):
@@ -29,7 +21,7 @@ class AttributesValidator(ManifestValidator):
                 self.fail(f'  {"->".join(map(str, error.absolute_path))} Error: {error.message}')
 
 
-class GUIDValidator(ManifestValidator):
+class GUIDValidator(BaseManifestValidator):
     all_guids = {}
 
     def validate(self, check_name, decoded, fix):
@@ -57,7 +49,7 @@ class GUIDValidator(ManifestValidator):
         return self.result
 
 
-class ManifestVersionValidator(ManifestValidator):
+class ManifestVersionValidator(BaseManifestValidator):
     def __init__(self, *args, **kwargs):
         super(ManifestVersionValidator, self).__init__(*args, **kwargs)
         self.root = get_root()
@@ -115,7 +107,7 @@ class ManifestVersionValidator(ManifestValidator):
                     self.fail(output)
 
 
-class SupportValidator(ManifestValidator):
+class SupportValidator(BaseManifestValidator):
     def validate(self, check_name, decoded, fix):
         if self.is_extras:
             correct_support = 'contrib'
@@ -134,7 +126,7 @@ class SupportValidator(ManifestValidator):
                 self.fail(output)
 
 
-class SupportedOSValidator(ManifestValidator):
+class SupportedOSValidator(BaseManifestValidator):
     """If an integration contains python or logs configuration, the supported_os field should not be empty."""
 
     def validate(self, check_name, decoded, _):
@@ -152,13 +144,13 @@ def get_v1_validators(is_extras, is_marketplace):
         AttributesValidator(),
         GUIDValidator(),
         ManifestVersionValidator(),
-        MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
-        NameValidator(),
-        MetricsMetadataValidator(),
-        MetricToCheckValidator(),
+        common.MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
+        common.NameValidator(),
+        common.MetricsMetadataValidator(),
+        common.MetricToCheckValidator(),
         SupportValidator(is_extras, is_marketplace),
-        IsPublicValidator(),
-        ImmutableAttributesValidator(),
-        LogsCategoryValidator(),
         SupportedOSValidator(),
+        common.IsPublicValidator(),
+        common.ImmutableAttributesValidator(),
+        common.LogsCategoryValidator(),
     ]

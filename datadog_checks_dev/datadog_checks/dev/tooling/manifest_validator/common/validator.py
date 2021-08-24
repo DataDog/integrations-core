@@ -26,7 +26,7 @@ class ValidationResult(object):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class ManifestValidator(object):
+class BaseManifestValidator(object):
     def __init__(
         self,
         is_extras=False,
@@ -74,7 +74,7 @@ class ManifestValidator(object):
         return str(self.result)
 
 
-class MaintainerValidator(ManifestValidator):
+class MaintainerValidator(BaseManifestValidator):
 
     MAINTAINER_PATH = {"v1": '/maintainer', "v2": '/author/support_email'}
 
@@ -98,7 +98,7 @@ class MaintainerValidator(ManifestValidator):
                 self.fail(output)
 
 
-class NameValidator(ManifestValidator):
+class NameValidator(BaseManifestValidator):
 
     NAME_PATH = {"v1": '/name', "v2": '/assets/integration/id'}
 
@@ -119,7 +119,7 @@ class NameValidator(ManifestValidator):
                 self.fail(output)
 
 
-class MetricsMetadataValidator(ManifestValidator):
+class MetricsMetadataValidator(BaseManifestValidator):
 
     METADATA_PATH = {"v1": "/assets/metrics_metadata", "v2": "/assets/integration/metrics/metadata_path"}
 
@@ -139,7 +139,7 @@ class MetricsMetadataValidator(ManifestValidator):
             self.fail('  metrics_metadata in manifest.json references a non-existing file: {}.'.format(metadata_file))
 
 
-class MetricToCheckValidator(ManifestValidator):
+class MetricToCheckValidator(BaseManifestValidator):
     METRIC_TO_CHECK_EXCLUDE_LIST = {
         'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
         'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
@@ -187,7 +187,7 @@ class MetricToCheckValidator(ManifestValidator):
                         self.fail('  metric_to_check not included in manifest.json')
 
 
-class IsPublicValidator(ManifestValidator):
+class IsPublicValidator(BaseManifestValidator):
     PUBLIC_PATH = {"v1": "/is_public", "v2": "/display_on_public_website"}
 
     def validate(self, check_name, decoded, fix):
@@ -204,7 +204,7 @@ class IsPublicValidator(ManifestValidator):
                 self.fail(output)
 
 
-class ImmutableAttributesValidator(ManifestValidator):
+class ImmutableAttributesValidator(BaseManifestValidator):
     """Ensure attributes haven't changed
     Skip if the manifest is a new file (i.e. new integration)
     """
@@ -227,7 +227,7 @@ class ImmutableAttributesValidator(ManifestValidator):
             )
 
 
-class LogsCategoryValidator(ManifestValidator):
+class LogsCategoryValidator(BaseManifestValidator):
     """If an integration defines logs it should have the log collection category"""
 
     LOG_COLLECTION_CATEGORY = {"v1": "log collection", "v2": "Category::Log Collection"}

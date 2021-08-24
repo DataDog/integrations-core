@@ -5,15 +5,8 @@ import json
 
 import requests
 
-from datadog_checks.dev.tooling.manifest_validator.common.validator import (
-    ImmutableAttributesValidator,
-    LogsCategoryValidator,
-    MaintainerValidator,
-    ManifestValidator,
-    MetricsMetadataValidator,
-    MetricToCheckValidator,
-    NameValidator,
-)
+import datadog_checks.dev.tooling.manifest_validator.common.validator as common
+from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
@@ -21,7 +14,7 @@ METRIC_TO_CHECK_EXCLUDE_LIST = {
 }
 
 
-class SchemaValidator(ManifestValidator):
+class SchemaValidator(BaseManifestValidator):
     def validate(self, check_name, decoded, fix):
         if not self.should_validate():
             return
@@ -76,12 +69,14 @@ class SchemaValidator(ManifestValidator):
 
 def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
-        MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version="v2"),
-        NameValidator(version="v2"),
-        MetricsMetadataValidator(),
-        MetricToCheckValidator(),
-        ImmutableAttributesValidator(),
-        LogsCategoryValidator(),
+        common.MaintainerValidator(
+            is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version="v2"
+        ),
+        common.NameValidator(version="v2"),
+        common.MetricsMetadataValidator(),
+        common.MetricToCheckValidator(),
+        common.ImmutableAttributesValidator(),
+        common.LogsCategoryValidator(),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version="v2", skip_if_errors=True),
     ]
