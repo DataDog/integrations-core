@@ -19,7 +19,7 @@ from .common import QUEUE_METRICS, assert_all_metrics
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_no_msg_errors_are_caught(get_check, instance, caplog):
+def test_no_msg_errors_are_caught(aggregator, get_check, instance, caplog):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute
     from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
@@ -34,7 +34,7 @@ def test_no_msg_errors_are_caught(get_check, instance, caplog):
         m.unpack = PCFExecute.unpack
         check = get_check(instance)
         check.check(instance)
-
+        aggregator.assert_service_check('ibm_mq.channel', check.UNKNOWN, count=1)
         assert not caplog.records
 
 
