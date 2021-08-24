@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 21.0.1 / 2021-08-23
+
+* [Fixed] Revert "Raise exception during tests for OK service checks sent with messages". See [#9936](https://github.com/DataDog/integrations-core/pull/9936).
+
 ## 21.0.0 / 2021-08-22
 
 * [Added] Raise exception during tests for OK service checks sent with messages. See [#9898](https://github.com/DataDog/integrations-core/pull/9898).

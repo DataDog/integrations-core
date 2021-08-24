@@ -78,6 +78,8 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
+**Note:** To set an alert on these service checks, create a [Network Monitor][13].
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
@@ -94,3 +96,4 @@ Need help? Contact [Datadog support][11].
 [10]: https://app.datadoghq.com/monitors#/create
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
+[13]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
