@@ -111,7 +111,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
 
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
-        echo_warning('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
+        echo_warning('🙄 no mib file provided, need at least one mib file to generate a profile')
         return
 
     # create a list of all mib files directories and mib names
