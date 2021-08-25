@@ -26,11 +26,11 @@ It is recommended to install an [environment manager](#virtual-environment-manag
 
 ### Linux
 
-All mainstream distributions of Linux come with Python pre-installed — likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. Refer to your distribution's package management documentation for more information.
+All mainstream distributions of Linux come with Python pre-installed—likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. See your distribution's package management documentation for more information.
 
 ### Windows
 
-Windows does not normally have a Python environment present. The [official Python documentation][6] contains detailed installation instructions and links to further documentation and tooling.
+Windows does not normally have a Python environment present. See [Using Python on Windows][6] for detailed installation instructions and links to further documentation and tooling.
 
 ## Virtual environment manager
 
@@ -42,7 +42,7 @@ Datadog recommends using [Virtualenv][7] to manage Python virtual environments, 
 
 ### Miniconda
 
-If you're using Miniconda, a tool to manage virtual environments is included. Refer to the [official guide][10] for more information.
+If you're using Miniconda, a tool to manage virtual environments is included. See [Managing environments][10] for more information.
 
 [1]: https://github.com/DataDog/omnibus-software/blob/master/config/software/python.rb#L21
 [2]: https://brew.sh/#install
