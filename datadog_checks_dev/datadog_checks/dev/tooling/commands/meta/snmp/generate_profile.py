@@ -10,6 +10,7 @@ import click
 import yaml
 
 from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
+from ....constants import MIB_SOURCE_URL
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
@@ -22,7 +23,7 @@ from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
     '--source',
     '-s',
     help='Source of the MIBs files. Can be a url or a path for a directory',
-    default='http://raw.githubusercontent.com/trevoro/snmp-mibs/master/mibs/@mib@',
+    default=MIB_SOURCE_URL,
 )
 @click.pass_context
 def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interactive, source):
