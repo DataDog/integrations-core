@@ -30,7 +30,7 @@ def test_parse_uptime_string(aggregator):
     assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
-def test_api_error_log_no_password(check, instance, dd_run_check, aggregator, caplog):
+def test_api_error_log_no_password(check, instance, caplog):
 
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
