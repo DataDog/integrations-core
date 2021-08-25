@@ -23,7 +23,7 @@ Once the integration has been validated (functionality, framework compliance, an
 
 ### What are your responsibilities?
 
-Going forward, you, as the author of the code, are the active maintainer of the integration. You're responsible for maintaining the code and ensuring the integration's functionality. There is no specific time commitment, but Datadog does ask that you only agree to become a maintainer if you feel that you can take care of the code for the foreseeable future. Datadog extends support on a best-effort basis for Extras, so you aren't on your own!
+Going forward, you, as the author of the code, are the active maintainer of the integration. You're responsible for maintaining the code and ensuring the integration's functionality. There is no specific time commitment, but you must be a maintainer and take care of the code for the foreseeable future. Datadog extends support on a best-effort basis for Extras, so you are not alone.
 
 ## Let's get started!
 
