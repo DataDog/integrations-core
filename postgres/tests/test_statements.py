@@ -426,6 +426,74 @@ def test_statement_samples_collect(
         conn.close()
 
 
+@pytest.mark.parametrize(
+    "query,expected_err_tag,expected_explain_err_code,expected_err",
+    [
+        (
+            "select * from fake_table",
+            "error:explain-<class 'psycopg2.errors.UndefinedTable'>",
+            DBExplainError.database_error,
+            "<class 'psycopg2.errors.UndefinedTable'>",
+        ),
+        (
+            "select * from pg_settings where name = $1",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            DBExplainError.database_error,
+            "<class 'psycopg2.errors.UndefinedParameter'>",
+        ),
+        (
+            "SELECT city as city0, city as city1, city as city2, city as city3, "
+            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+            "city as city58, city as city59, city as city60, city as city61 "
+            "FROM persons WHERE city = 123",
+            "error:explain-{}".format(DBExplainError.query_truncated),
+            DBExplainError.query_truncated,
+            "track_activity_query_size=1024",
+        ),
+    ],
+)
+def test_statement_run_explain_errors(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+    expected_err_tag,
+    expected_explain_err_code,
+    expected_err,
+):
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    check.check(dbm_instance)
+    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query)
+
+    assert explain_err_code == expected_explain_err_code
+    assert err == expected_err
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
+        expected_err_tag,
+    ]
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_samples.error',
+        count=1,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
+
+
 @pytest.mark.parametrize("dbstrict", [True, False])
 def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance, dbstrict):
     dbm_instance["dbstrict"] = dbstrict
