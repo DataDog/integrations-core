@@ -361,7 +361,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._dbtags(dbname, "error:explain-{}".format(type(e))) + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
-            return None, DBExplainError.database_error, '{}'.format(type(err))
+            return None, DBExplainError.database_error, '{}'.format(type(e))
 
     def _collect_plan_for_statement(self, row):
         try:
