@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 
 import pytest
-from datadog_checks.dev.plugin.pytest import dd_run_check
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
@@ -30,14 +30,17 @@ def assert_check(aggregator):
             aggregator.assert_metric(metric_name)
         else:
             aggregator.assert_metric(metric_name, tags=CUSTOM_TAGS, count=2)
-    aggregator.assert_all_metrics_covered()
+
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, dd_run_check):
-    gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
+    instance = CONFIG['instances'][0]
+    init_config = copy.deepcopy(CONFIG['init_config'])
+    gitlab_runner = GitlabRunnerCheck('gitlab_runner', init_config, instances=[instance])
 
     dd_run_check(gitlab_runner)
     dd_run_check(gitlab_runner)
