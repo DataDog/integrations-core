@@ -312,8 +312,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         # explain_error_states_cache. cache {(schema, query_signature) -> [explain_error_state])
         self._explain_error_states_cache = TTLCache(
             maxsize=self._config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
-            # only try to re-explain invalid statements once per day
-            ttl=self._config.statement_samples_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
+            # only try to re-explain failed statements once every two hours, so in the worst case the maximum
+            # re-explain rate of failed queries is ~ 5000/(2*60*60) = 1/second
+            ttl=self._config.statement_samples_config.get('explain_errors_cache_ttl', 2 * 60 * 60),
         )
 
         # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
