@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 4.0.1 / 2021-08-24
+
+* [Fixed] Elevate log level for failed connections. See [#9965](https://github.com/DataDog/integrations-core/pull/9965).
+
 ## 4.0.0 / 2021-08-22
 
 * [Added] Re-resolve IP after a set duration. See [#9699](https://github.com/DataDog/integrations-core/pull/9699).
