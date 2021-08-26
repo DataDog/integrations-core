@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "ibm_i",
   "metric_prefix": "ibm_i.",
-  "metric_to_check": "",
+  "metric_to_check": "ibm_i.system.cpu_usage",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Remotely monitor IBM i systems including jobs, job queues, ASPs and more.",
   "guid": "da389374-7541-47e5-bcd1-87cf3b88a469",
   "support": "core",
   "supported_os": [

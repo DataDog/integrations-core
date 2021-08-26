@@ -16,12 +16,16 @@ def instance_driver(field, value):
     return 'iSeries Access ODBC Driver'
 
 
+def instance_empty_default_hostname(field, value):
+    return False
+
+
 def instance_fetch_ibm_mq_metrics(field, value):
     return True
 
 
-def instance_empty_default_hostname(field, value):
-    return False
+def instance_job_query_timeout(field, value):
+    return 600
 
 
 def instance_min_collection_interval(field, value):
@@ -32,12 +36,24 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_query_timeout(field, value):
+    return 30
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_severity_threshold(field, value):
+    return 50
+
+
 def instance_system(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_system_mq_query_timeout(field, value):
+    return 60
 
 
 def instance_tags(field, value):
@@ -46,19 +62,3 @@ def instance_tags(field, value):
 
 def instance_username(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_severity_threshold(field, value):
-    return 50
-
-
-def instance_job_query_timeout(field, value):
-    return 600
-
-
-def instance_system_mq_query_timeout(field, value):
-    return 60
-
-
-def instance_query_timeout(field, value):
-    return 30
