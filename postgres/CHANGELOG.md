@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 9.0.1 / 2021-08-25
+
+* [Fixed] Fix postgres collection_errors error reference. See [#9982](https://github.com/DataDog/integrations-core/pull/9982).
+
 ## 9.0.0 / 2021-08-22
 
 * [Added] Collect settings from pg_settings and submit pg_stat_statements metrics. See [#9928](https://github.com/DataDog/integrations-core/pull/9928).
