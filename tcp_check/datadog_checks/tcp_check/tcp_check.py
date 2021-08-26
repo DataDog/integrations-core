@@ -80,7 +80,7 @@ class TCPCheck(AgentCheck):
             try:
                 self.resolve_ip()
             except Exception as e:
-                self.log.debug(str(e))
+                self.log.error(str(e))
                 msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
         return self._addr
