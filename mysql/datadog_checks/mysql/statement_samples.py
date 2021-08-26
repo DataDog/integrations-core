@@ -226,7 +226,7 @@ class DBExplainErrorCode(Enum):
     query_truncated = 'query_truncated'
 
 
-# ExplainError describes the current state of an explain strategy
+# ExplainState describes the current state of an explain strategy
 # If there is no error then the strategy is valid
 ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_message'])
 

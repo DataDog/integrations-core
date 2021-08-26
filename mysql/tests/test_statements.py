@@ -417,7 +417,7 @@ def test_statement_samples_failed_explain_handling(
             )
             assert not error_states
         else:
-            # reset all internal cachecs to make sure there is no previously cached strategy
+            # reset all internal caches to make sure there is no previously cached strategy
             mysql_check._statement_samples._init_caches()
 
         aggregator.reset()
