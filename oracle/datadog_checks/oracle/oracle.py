@@ -33,6 +33,7 @@ class Oracle(AgentCheck):
     JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
+    SERVICE_CHECK_CAN_QUERY = "can_query"
 
     def __init__(self, name, init_config, instances):
         super(Oracle, self).__init__(name, init_config, instances)
@@ -111,27 +112,34 @@ class Oracle(AgentCheck):
         self._query_manager.execute()
 
         if self._current_errors:
-            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
+            self.service_check(self.SERVICE_CHECK_CAN_QUERY, self.CRITICAL, tags=self._service_check_tags)
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
+            self.service_check(self.SERVICE_CHECK_CAN_QUERY, self.OK, tags=self._service_check_tags)
 
     @property
     def _connection(self):
-        if self._cached_connection is None:
-            if self.can_use_oracle_client():
-                dsn = self._get_dsn()
-                self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
-                self.log.debug("Connected to Oracle DB using Oracle Instant Client")
-            elif JDBC_IMPORT_ERROR:
-                self.log.error(
-                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
-                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
-                    "installation and refer to the Datadog documentation for more information."
-                )
-                raise JDBC_IMPORT_ERROR
-            else:
-                self._cached_connection = self._jdbc_connect()
-        return self._cached_connection
+        try:
+            if self._cached_connection is None:
+                if self.can_use_oracle_client():
+                    dsn = self._get_dsn()
+                    self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
+                    self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+
+                elif JDBC_IMPORT_ERROR:
+                    self.log.error(
+                        "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may "
+                        "not have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check "
+                        "your installation and refer to the Datadog documentation for more information."
+                    )
+                    raise JDBC_IMPORT_ERROR
+                else:
+                    self._cached_connection = self._jdbc_connect()
+        except Exception as exception:
+            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
+            raise exception
+        else:
+            self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
+            return self._cached_connection
 
     def can_use_oracle_client(self):
         try:
