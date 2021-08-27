@@ -8,14 +8,12 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
-from datadog_checks.oracle import Oracle
-
-from .common import CHECK_NAME, mock_bad_executor
-
 import mock
 
 from datadog_checks.base.utils.db import Query, QueryManager
-from datadog_checks.oracle import queries
+from datadog_checks.oracle import Oracle, queries
+
+from .common import CHECK_NAME, mock_bad_executor
 
 
 def test__get_connection_instant_client(check, dd_run_check, aggregator):
@@ -131,6 +129,7 @@ def test__get_connection_failure(check, dd_run_check, aggregator):
 
 
 # test that has successful connection to db and can_query
+
 
 def test__check_only_custom_queries(instance):
     """

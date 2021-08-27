@@ -41,10 +41,7 @@ METRICS = [
     'oracle.tablespace.in_use',
     'oracle.tablespace.offline',
 ]
-SERVICE_CHECKS = [
-    'oracle.can_connect',
-    'oracle.can_query'
-]
+SERVICE_CHECKS = ['oracle.can_connect', 'oracle.can_query']
 
 
 @pytest.mark.e2e

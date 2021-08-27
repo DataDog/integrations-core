@@ -130,13 +130,12 @@ class Oracle(AgentCheck):
                 dsn = self._get_dsn()
                 self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
-
             elif JDBC_IMPORT_ERROR:
                 self._connection_errors += 1
                 self.log.error(
-                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may "
-                    "not have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check "
-                    "your installation and refer to the Datadog documentation for more information."
+                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
+                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                    "installation and refer to the Datadog documentation for more information."
                 )
                 raise JDBC_IMPORT_ERROR
             else:
