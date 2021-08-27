@@ -21,7 +21,7 @@ exclude = '''
   # New integration templates
   | datadog_checks/dev/tooling/templates
   # Vendored third party libraries
-  | datadog_checks/[^/]+/vendor
+  | vendor
 )/
   |
 # Files
