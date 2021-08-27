@@ -147,10 +147,10 @@ class SQLServer(AgentCheck):
         if status is AgentCheck.OK:
             message = None
 
-        if self.autodiscovery:
-            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
         if is_default:
             self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        if self.autodiscovery:
+            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
@@ -453,7 +453,8 @@ class SQLServer(AgentCheck):
                 self.collect_metrics()
             if self.autodiscovery:
                 for db_name in self.databases:
-                    self.connection.check_database_conns(db_name)
+                    if db_name != self.connection.DEFAULT_DATABASE:
+                        self.connection.check_database_conns(db_name)
         else:
             self.log.debug("Skipping check")
 
