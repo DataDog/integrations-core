@@ -24,7 +24,7 @@
         "groups": [
             "server"
         ],
-        "name": "Can Connect",
+        "name": "Can Query",
         "description": "Returns OK if the integration can run all the queries, CRITICAL otherwise"
     }
 ]
