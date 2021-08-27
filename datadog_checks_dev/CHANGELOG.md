@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 13.0.1 / 2021-08-27
+
+* [Fixed] Pin regex. See [#10005](https://github.com/DataDog/integrations-core/pull/10005).
+
 ## 13.0.0 / 2021-08-22
 
 * [Added] Add support for specifying a config path to `kind_run` utility. See [#9930](https://github.com/DataDog/integrations-core/pull/9930).
