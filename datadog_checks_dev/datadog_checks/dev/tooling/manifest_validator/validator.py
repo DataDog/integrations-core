@@ -79,7 +79,7 @@ class ManifestValidator(object):
 
 
 class AttributesValidator(ManifestValidator):
-    """ attributes are valid"""
+    """attributes are valid"""
 
     def validate(self, check_name, decoded, fix):
         errors = sorted(get_manifest_schema().iter_errors(decoded), key=lambda e: e.path)

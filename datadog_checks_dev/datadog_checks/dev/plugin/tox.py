@@ -19,7 +19,7 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
 ISORT_DEP = 'isort==5.8.0'
-BLACK_DEP = 'black==20.8b1'
+BLACK_DEP = 'black==21.7b0'
 FLAKE8_DEP = 'flake8==3.9.1'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
