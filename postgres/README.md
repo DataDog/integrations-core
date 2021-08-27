@@ -123,8 +123,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][16] on this topic for additional details.
@@ -184,8 +182,6 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -209,8 +205,6 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][21].
 
@@ -280,8 +274,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][25].
 
@@ -349,8 +341,6 @@ Set [Autodiscovery Integrations Templates][28] as Docker labels on your applicat
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][29].

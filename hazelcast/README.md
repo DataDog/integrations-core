@@ -41,8 +41,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 1. Hazelcast supports many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
 
    ```text
@@ -112,8 +110,6 @@ Log collection is not supported for this site.
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -130,8 +126,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
 | Parameter      | Value                                              |
@@ -140,8 +134,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

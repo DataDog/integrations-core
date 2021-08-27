@@ -29,8 +29,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
 
 To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager.

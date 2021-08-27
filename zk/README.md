@@ -71,8 +71,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. ZooKeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
@@ -122,8 +120,6 @@ _Available for Agent versions >6.0_
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -146,8 +142,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
@@ -158,8 +152,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

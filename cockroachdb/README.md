@@ -31,8 +31,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
@@ -82,8 +80,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][11].
 
 Then, set [log integrations][12] as Docker labels:
@@ -94,8 +90,6 @@ LABEL "com.datadoghq.ad.logs"='[{"source": "cockroachdb", "service": "<SERVICE_N
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

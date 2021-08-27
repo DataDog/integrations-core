@@ -64,8 +64,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. To enable Varnish logging uncomment the following in `/etc/default/varnishncsa`:
@@ -105,8 +103,6 @@ _Available for Agent versions >6.0_
 6. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxx tab "Containerized" xxx -->
 

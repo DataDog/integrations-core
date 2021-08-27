@@ -38,8 +38,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -71,8 +69,6 @@ For containerized environments, see the [Autodiscovery with JMX][8] guide.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

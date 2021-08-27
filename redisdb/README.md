@@ -56,8 +56,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -116,8 +114,6 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password"
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 _Available for Agent versions >6.0_
 
@@ -195,8 +191,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
@@ -238,8 +232,6 @@ Then, [instrument your application container that makes requests to Redis][7].
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "ECS" xxx -->
 
 #### ECS
@@ -273,8 +265,6 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 _Available for Agent versions >6.0_
 
@@ -311,8 +301,6 @@ See [Tracing Docker Applications][21] for a complete list of available environme
 Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][25].
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxz tabs xxx -->
 

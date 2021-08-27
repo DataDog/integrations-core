@@ -172,8 +172,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -216,8 +214,6 @@ http {
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -244,8 +240,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
 
 Then, set [Log Integrations][18] as Docker labels:
@@ -255,8 +249,6 @@ LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
 ```
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxx tab "Kubernetes" xxx -->
 
@@ -303,8 +295,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
 
 Then, set [Log Integrations][22] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][23].
@@ -321,8 +311,6 @@ metadata:
 ```
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxx tab "ECS" xxx -->
 
@@ -358,8 +346,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
@@ -379,8 +365,6 @@ Then, set [Log Integrations][22] as Docker labels:
 ```
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxz tabs xxx -->
 

@@ -273,8 +273,6 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 >>>>>>> Stashed changes
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 

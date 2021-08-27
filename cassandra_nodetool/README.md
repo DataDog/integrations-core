@@ -39,8 +39,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Cassandra Nodetool logs are collected by the Cassandra integration. See the [log collection instructions for Cassandra][7].
 
 {{< /site-region >}}

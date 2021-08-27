@@ -56,14 +56,10 @@ Follow the [Envoy containerized instructions][7] to configure your Datadog Agent
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 Follow the [Envoy containerized instructions][10] to configure log collection.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

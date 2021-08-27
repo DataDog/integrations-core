@@ -50,8 +50,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 1. Configure Teamcity [logs settings][11].
 
 2. By default, Datadog's integration pipeline supports the following kind of log format:
@@ -96,8 +94,6 @@ Log collection is not supported for this site.
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -118,8 +114,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][10].
 
 | Parameter      | Value                                                |
@@ -128,8 +122,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-{{< /site-region >}}
 
 ### Validation
 

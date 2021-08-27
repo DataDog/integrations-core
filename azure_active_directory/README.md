@@ -50,8 +50,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
 This includes the following:

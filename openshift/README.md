@@ -70,8 +70,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Refer to the [Kubernetes Log Collection][12] documentation for further information.
 
 {{< /site-region >}}

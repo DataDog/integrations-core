@@ -100,8 +100,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
 
 | Parameter      | Value                                     |
@@ -109,8 +107,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | `<LOG_CONFIG>` | `{"source": "proxysql", "service": "<SERVICE_NAME>"}` |
 
 <!-- xxz tab xxx -->
-
-{{< /site-region >}}
 
 <!-- xxz tabs xxx -->
 

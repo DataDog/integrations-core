@@ -44,8 +44,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 
 1. In your `gitlab_runner` [configuration file][8], change the log format to `json` (_Available for Gitlab Runner versions >=11.4.0_ ):
    ```toml

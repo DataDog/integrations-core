@@ -28,8 +28,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 Scylla has different modes of outputting logs depending on the environment it's running in.  See the [Scylla documentation][8] for more specifics on how the application generates logs.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:

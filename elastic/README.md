@@ -77,8 +77,6 @@ Log collection is not supported for this site.
 
 {{< /site-region >}}
 
-{{< site-region region="us,eu,gov" >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
@@ -149,8 +147,6 @@ _Available for Agent versions >6.0_
 
 <!-- xxz tab xxx -->
 
-{{< /site-region >}}
-
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -174,8 +170,6 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
@@ -242,8 +236,6 @@ spec:
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
@@ -312,8 +304,6 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 Log collection is not supported for this site.
 
 {{< /site-region >}}
-
-{{< site-region region="us,eu,gov" >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].
