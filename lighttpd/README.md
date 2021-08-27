@@ -55,6 +55,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
    ```yaml
@@ -74,6 +82,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
    See the [sample lighttpd.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
+
+{{< /site-region >}}
 
 ### Validation
 

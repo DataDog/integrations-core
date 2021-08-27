@@ -55,6 +55,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][12].
 
 | Parameter      | Value                                                |
@@ -65,6 +73,8 @@ To increase the verbosity of the data plane logs, see [the official Linkerd docu
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

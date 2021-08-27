@@ -65,6 +65,14 @@ See the [sample nginx_ingress_controller.d/conf.yaml][2] for all available confi
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][5].
@@ -72,6 +80,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                              |
 | -------------- | ------------------------------------------------------------------ |
 | `<LOG_CONFIG>` | `[{"service": "controller", "source": "nginx-ingress-controller"}]` |
+
+{{< /site-region >}}
 
 ### Validation
 

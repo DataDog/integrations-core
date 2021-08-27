@@ -33,9 +33,20 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][116].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -44,6 +55,8 @@ For containerized environments, see the [Autodiscovery with JMX][117] guide.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

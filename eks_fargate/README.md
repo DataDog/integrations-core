@@ -254,6 +254,7 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
+<<<<<<< Updated upstream
 ### Live Containers
 
 Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][21] page.
@@ -264,6 +265,17 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 
 ## Log collection
 
+=======
+## Log collection
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+>>>>>>> Stashed changes
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
 You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs. 
@@ -286,6 +298,8 @@ You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs.
             log_stream_prefix awslogs-firelens-example
             auto_create_group On
    ```
+
+{{< /site-region >}}
 
 ## Traces collection
 

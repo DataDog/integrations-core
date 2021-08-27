@@ -197,6 +197,14 @@ Use the default configuration in your `airflow.d/conf.yaml` file to activate you
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -267,6 +275,8 @@ _Available for Agent versions >6.0_
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
+{{< /site-region >}}
+
 #### Containerized
 
 ##### Configure Datadog Agent Airflow Integration
@@ -317,6 +327,14 @@ See the Datadog `integrations-core` repo for an [example setup][15].
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][14].
@@ -327,6 +345,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

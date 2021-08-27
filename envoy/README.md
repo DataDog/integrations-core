@@ -141,6 +141,14 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -162,6 +170,9 @@ _Available for Agent versions >6.0_
 3. [Restart the Agent][9].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -178,6 +189,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
@@ -188,6 +207,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

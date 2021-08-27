@@ -85,6 +85,14 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][12] and [Istio logs][11].
 
 _Available for Agent versions >6.0_
@@ -95,6 +103,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}` |
+
+{{< /site-region >}}
 
 ### Validation
 

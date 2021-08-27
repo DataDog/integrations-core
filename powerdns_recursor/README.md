@@ -86,6 +86,14 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
    ```yaml
@@ -110,6 +118,9 @@ To configure this check for an Agent running on a host:
 4. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -124,6 +135,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
 
 | Parameter      | Value                                     |
@@ -132,6 +151,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

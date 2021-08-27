@@ -39,6 +39,15 @@ Additionally, as the metrics for current license usage use the values from the m
 [Restart the Agent][7] to start sending Vertica metrics to Datadog.
 
 #### Log collection
+<<<<<<< Updated upstream
+=======
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+>>>>>>> Stashed changes
 
 _Available for Agent versions >6.0_
 

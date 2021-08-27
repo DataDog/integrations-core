@@ -23,6 +23,14 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 First ensure that you have set `logs_enabled: true` in your `datadog.yaml` file.
 
 To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or use the Datadog Agent Manager.
@@ -130,6 +138,8 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
    ```
 
 2. [Restart the Agent][4] using the Agent Manager (or restart the service).
+
+{{< /site-region >}}
 
 ### Validation
 

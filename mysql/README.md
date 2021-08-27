@@ -136,6 +136,14 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. To make the logs more accessible, follow these steps:
@@ -225,6 +233,9 @@ _Available for Agent versions >6.0_
 4. [Restart the Agent][10].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Docker" xxx -->
 #### Docker
 
@@ -254,6 +265,9 @@ LABEL "com.datadoghq.ad.logs"='[{"source":"mysql","service":"mysql"}]'
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Kubernetes" xxx -->
 
 #### Kubernetes
@@ -308,6 +322,9 @@ metadata:
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "ECS" xxx -->
 
 #### ECS
@@ -336,6 +353,14 @@ See the [Autodiscovery template variables documentation][28] to learn how to pas
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][37].
@@ -354,6 +379,9 @@ Then, set [Log Integrations][34] as Docker labels:
 }
 ```
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxz tabs xxx -->
 
 ### Validation

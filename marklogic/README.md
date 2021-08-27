@@ -67,6 +67,14 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -90,6 +98,8 @@ _Available for Agent versions >6.0_
     Change the `path` value and configure it for your environment. See the [sample `marklogic.d/conf.yaml` file][7] for all available configuration options.
 
 3. [Restart the Agent][8].
+
+{{< /site-region >}}
 
 ### Validation
 

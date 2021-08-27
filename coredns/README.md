@@ -129,9 +129,19 @@ Set [Autodiscovery Integrations Templates][17] as Docker labels on your applicat
 
 ##### Log collection
 
+<<<<<<< Updated upstream
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][18].
 
 Then, set [Log Integrations][19] as Docker labels:
+=======
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+>>>>>>> Stashed changes
 
 ```yaml
 {

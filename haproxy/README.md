@@ -82,6 +82,14 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -124,6 +132,9 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
 4. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -142,6 +153,14 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%/admin?stats"}]'
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
 
 Then, set [Log Integrations][21] as Docker labels:
@@ -151,6 +170,9 @@ LABEL "com.datadoghq.ad.logs"='[{"source":"haproxy","service":"<SERVICE_NAME>"}]
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Kubernetes" xxx -->
 
 #### Kubernetes
@@ -182,6 +204,14 @@ spec:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
@@ -201,6 +231,9 @@ spec:
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "ECS" xxx -->
 
 #### ECS
@@ -227,6 +260,14 @@ Set [Autodiscovery Integrations Templates][27] as Docker labels on your applicat
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][28].
@@ -247,6 +288,8 @@ Then, set [Log Integrations][29] as Docker labels:
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

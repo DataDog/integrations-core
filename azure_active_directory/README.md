@@ -42,7 +42,15 @@ For more details on the setup, see the [Azure tutorial][3].
 
 ## Data Collected
 
-#### Log Collection
+#### Log collection
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
 
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
@@ -50,7 +58,9 @@ This includes the following:
 
    - Sign-ins - Provides information about the usage of managed applications and user sign-in activities.
 
-   - Audit logs - Provides traceability through logs for all changes done by various features within Azure AD.  
+   - Audit logs - Provides traceability through logs for all changes done by various features within Azure AD.
+
+{{< /site-region >}}
 
 ### Metrics
 

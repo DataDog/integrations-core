@@ -14,6 +14,14 @@ Monitoring PKS requires that you set up the Datadog integration for [Kubernetes]
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 The setup is exactly the same as for Kubernetes.
@@ -22,6 +30,8 @@ To start collecting logs from all your containers, use your Datadog Agent [envir
 You can also take advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes][4].
 
 Follow the [container log collection steps][5] to learn more about those environment variables and discover more advanced setup options.
+
+{{< /site-region >}}
 
 ## Troubleshooting
 

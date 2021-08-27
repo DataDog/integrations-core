@@ -117,6 +117,14 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
@@ -133,7 +141,8 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
    ```
 
     Change the `path` parameter value and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
-   
+
+{{< /site-region >}}
 
 ### Validation
 

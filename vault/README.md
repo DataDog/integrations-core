@@ -135,6 +135,15 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 `INSTANCE_CONFIG` needs to be customized depending on your vault authentication config. See example in Host section above. 
 
 #### Log collection
+<<<<<<< Updated upstream
+=======
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+>>>>>>> Stashed changes
 
 _Available for Agent versions >6.0_
 

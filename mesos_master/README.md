@@ -42,6 +42,14 @@ Unless your masters' API uses a self-signed certificate. In that case, set `disa
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -70,6 +78,8 @@ Unless your masters' API uses a self-signed certificate. In that case, set `disa
 3. [Restart the Agent][8].
 
 See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+{{< /site-region >}}
 
 ### Validation
 

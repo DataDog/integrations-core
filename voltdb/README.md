@@ -79,6 +79,15 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 3. [Restart the Agent][4].
 
 #### Log collection
+<<<<<<< Updated upstream
+=======
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+>>>>>>> Stashed changes
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

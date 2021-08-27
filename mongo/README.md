@@ -192,6 +192,14 @@ Datadog APM integrates with Mongo to see the traces across your distributed syst
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -215,6 +223,9 @@ _Available for Agent versions >6.0_
 3. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -232,6 +243,14 @@ LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%""], "username
 ```
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
 
@@ -259,6 +278,9 @@ Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the
 
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Kubernetes" xxx -->
 
 #### Kubernetes
@@ -293,6 +315,14 @@ spec:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
 
 Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
@@ -308,6 +338,8 @@ spec:
   containers:
     - name: mongo
 ```
+
+{{< /site-region >}}
 
 ##### Trace collection
 
@@ -326,6 +358,9 @@ See [Tracing Kubernetes Applications][33] and the [Kubernetes DaemonSet Setup][3
 Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "ECS" xxx -->
 
 #### ECS
@@ -352,6 +387,14 @@ Set [Autodiscovery Integrations Templates][27] as Docker labels on your applicat
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][28].
@@ -369,6 +412,8 @@ Then, set [Log Integrations][29] as Docker labels:
   }]
 }
 ```
+
+{{< /site-region >}}
 
 ##### Trace collection
 
@@ -389,6 +434,8 @@ Then, [instrument your application container][32] and set `DD_AGENT_HOST` to the
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+{{< /site-region >}}
 
 ### Validation
 

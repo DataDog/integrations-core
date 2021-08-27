@@ -81,6 +81,16 @@ See [metadata.csv][12] for a list of metrics provided by this integration.
 The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][11] for custom metric inspiration.
 
 ### Log collection
+<<<<<<< Updated upstream
+=======
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+>>>>>>> Stashed changes
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
 

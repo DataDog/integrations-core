@@ -28,6 +28,14 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -46,6 +54,8 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
     Change the `path` parameter value based on your environment. See the [sample kyototycoon.d/conf.yaml][3] for all available configuration options.
 
 3. [Restart the Agent][4].
+
+{{< /site-region >}}
 
 ### Validation
 

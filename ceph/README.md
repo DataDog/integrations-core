@@ -37,6 +37,14 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -56,6 +64,8 @@ _Available for Agent versions >6.0_
    ```
 
 3. [Restart the Agent][10].
+
+{{< /site-region >}}
 
 ### Validation
 

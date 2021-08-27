@@ -53,6 +53,15 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][6].
 
 ##### Log collection
+<<<<<<< Updated upstream
+=======
+
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+>>>>>>> Stashed changes
 
 You can use the [Datadog FluentD plugin][7] to forward the logs directly from FluentD to your Datadog account.
 

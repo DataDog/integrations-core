@@ -54,6 +54,13 @@ configuration options.
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -77,6 +84,8 @@ configuration options.
 3. [Restart the Agent][8].
 
 See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+{{< /site-region >}}
 
 ### Validation
 

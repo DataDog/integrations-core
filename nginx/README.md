@@ -166,6 +166,14 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -207,6 +215,9 @@ http {
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -227,6 +238,13 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
 
@@ -237,6 +255,9 @@ LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Kubernetes" xxx -->
 
 #### Kubernetes
@@ -276,6 +297,13 @@ spec:
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
 
@@ -293,6 +321,9 @@ metadata:
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "ECS" xxx -->
 
 #### ECS
@@ -321,6 +352,15 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
 
@@ -339,6 +379,9 @@ Then, set [Log Integrations][22] as Docker labels:
 ```
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxz tabs xxx -->
 
 ### Validation

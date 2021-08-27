@@ -59,6 +59,14 @@ With the default configuration, the Nagios check doesn't collect any metrics. Bu
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -77,6 +85,8 @@ With the default configuration, the Nagios check doesn't collect any metrics. Bu
     Change the `path` parameter value based on your environment, see `log_file` value in your nagios configuration file. See the [sample nagios.d/conf.yaml][3] for all available configuration options.
 
 3. [Restart the Agent][4].
+
+{{< /site-region >}}
 
 ### Events
 

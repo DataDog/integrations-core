@@ -104,6 +104,14 @@ Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -132,6 +140,8 @@ Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need
 3. [Restart the Agent][107].
 
 See [Datadog's documentation][108] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
+{{< /site-region >}}
 
 ### Validation
 

@@ -24,6 +24,14 @@ along with integrations for any other AWS services you're running with EKS (e.g.
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 The setup is exactly the same as for Kubernetes.
@@ -32,6 +40,8 @@ To start collecting logs from all your containers, use your Datadog Agent [envir
 Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes][9].
 
 Follow the [container log collection steps][10] to learn more about those environment variables and discover more advanced setup options.
+
+{{< /site-region >}}
 
 ## Troubleshooting
 

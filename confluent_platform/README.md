@@ -49,6 +49,14 @@ The Confluent Platform check is included in the [Datadog Agent][2] package. No a
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -74,6 +82,8 @@ _Available for Agent versions >6.0_
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][7].
+
+{{< /site-region >}}
 
 ##### Metric collection
 

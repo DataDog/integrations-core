@@ -67,6 +67,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
       ```yaml
@@ -91,6 +99,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 3. [Restart the Agent][6].
 
 See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
+
+{{< /site-region >}}
 
 ### Validation
 

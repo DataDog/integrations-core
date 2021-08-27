@@ -71,6 +71,14 @@ Datadog APM integrates with Elasticsearch to see the traces across your distribu
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
@@ -140,6 +148,9 @@ _Available for Agent versions >6.0_
 4. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
+
+{{< /site-region >}}
+
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -158,6 +169,14 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
 
@@ -166,6 +185,8 @@ Then, set [Log Integrations][24] as Docker labels:
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source":"elasticsearch","service":"<SERVICE_NAME>"}]'
 ```
+
+{{< /site-region >}}
 
 ##### Trace collection
 
@@ -216,6 +237,14 @@ spec:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
 
@@ -232,6 +261,8 @@ spec:
   containers:
     - name: elasticsearch
 ```
+
+{{< /site-region >}}
 
 ##### Trace collection
 
@@ -276,6 +307,14 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+
+Log collection is not supported for this site.
+
+{{< /site-region >}}
+
+{{< site-region region="us,eu,gov" >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].
 
@@ -292,6 +331,8 @@ Then, set [Log Integrations][32] as Docker labels:
   }]
 }
 ```
+
+{{< /site-region >}}
 
 ##### Trace collection
 
