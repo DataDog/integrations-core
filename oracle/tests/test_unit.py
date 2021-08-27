@@ -123,8 +123,6 @@ def test__get_connection_failure(check, dd_run_check, aggregator):
     Test the right service check is sent upon _get_connection failures
     """
     expected_tags = ['server:localhost:1521', 'optional:tag1']
-    service_check = mock.MagicMock()
-    check.service_check = service_check
     dd_run_check(check)
 
     aggregator.assert_service_check("oracle.can_connect", check.CRITICAL, count=1, tags=expected_tags)
