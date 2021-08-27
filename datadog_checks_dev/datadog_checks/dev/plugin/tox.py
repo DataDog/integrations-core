@@ -20,6 +20,8 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 # We pin deps in order to make CI more stable/reliable.
 ISORT_DEP = 'isort==5.8.0'
 BLACK_DEP = 'black==20.8b1'
+# Until this is fixed https://bitbucket.org/mrabarnett/mrab-regex/issues/421/2021827-results-in-fatal-python-error
+REGEX_DEP = 'regex==2021.8.21'
 FLAKE8_DEP = 'flake8==3.9.1'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
@@ -127,6 +129,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         FLAKE8_BUGBEAR_DEP,
         FLAKE8_LOGGING_FORMAT_DEP,
         BLACK_DEP,
+        REGEX_DEP,
         ISORT_DEP,
         PYDANTIC_DEP,
     ]
