@@ -54,6 +54,10 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
