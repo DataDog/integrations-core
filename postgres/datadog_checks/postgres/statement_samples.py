@@ -118,7 +118,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self._activity_last_query_start = None
         self._tags_no_db = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
@@ -178,9 +177,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         else:
             query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
-        if self._activity_last_query_start:
-            query = query + " AND query_start > %s"
-            params = params + (self._activity_last_query_start,)
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
@@ -213,8 +209,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             if query == '<insufficient privilege>':
                 insufficient_privilege_count += 1
                 continue
-            if self._activity_last_query_start is None or row['query_start'] > self._activity_last_query_start:
-                self._activity_last_query_start = row['query_start']
             yield row
         if insufficient_privilege_count > 0:
             self._log.warning(
