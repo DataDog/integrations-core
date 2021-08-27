@@ -252,13 +252,14 @@ class LogsCategoryValidator(BaseManifestValidator):
         categories = decoded.get_path(path) or []
 
         check_has_logs = has_logs(check_name)
-        check_has_logs_category = self.LOG_COLLECTION_CATEGORY[self.version] in categories
+        log_collection_category = self.LOG_COLLECTION_CATEGORY[self.version]
+        check_has_logs_category = log_collection_category in categories
 
         if check_has_logs == check_has_logs_category or check_name in self.IGNORE_LIST:
             return
 
         if check_has_logs:
-            output = '  required category: ' + self.LOG_COLLECTION_CATEGORY
+            output = '  required category: ' + log_collection_category
             if fix:
                 correct_categories = sorted(categories + [self.LOG_COLLECTION_CATEGORY])
                 decoded.set_path(path, correct_categories)
@@ -268,7 +269,7 @@ class LogsCategoryValidator(BaseManifestValidator):
         else:
             output = (
                 '  This integration does not have logs, please remove the category: '
-                + self.LOG_COLLECTION_CATEGORY
+                + log_collection_category
                 + ' or define the logs properly'
             )
             self.fail(output)
