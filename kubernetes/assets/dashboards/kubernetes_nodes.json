@@ -555,13 +555,25 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "formula": "100 - query1 * 100"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
@@ -1399,13 +1411,25 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "formula": "100 - query1 * 100"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
