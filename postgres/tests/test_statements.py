@@ -564,6 +564,21 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
+def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
+    dbm_instance["username"] = "datadog"
+    dbm_instance["dbname"] = "postgres"
+    check = integration_check(dbm_instance)
+    assert not check.pg_settings, "pg_settings should not have been initialized yet"
+    check._connect()
+    check._get_db(dbm_instance["dbname"])
+    assert "track_activity_query_size" in check.pg_settings
+    check.pg_settings["test_key"] = True
+    check._get_db(dbm_instance["dbname"])
+    assert (
+        "test_key" in check.pg_settings
+    ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
+
+
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
     # test the main collection loop rate limit
     collection_interval = 0.1
