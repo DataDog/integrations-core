@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
 
-   **Note**: This is a new default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][15].
+   **Note**: This is the default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][15].
 
 2. [Restart the Agent][9].
 
