@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import os
 
 import click
 
@@ -58,6 +59,7 @@ def dashboards(check):
             annotate_error(manifest_file, message)
 
         for dashboard_file in dashboard_relative_locations:
+            dashboard_filename = os.path.basename(dashboard_file)
             try:
                 decoded = json.loads(read_file(dashboard_file).strip())
             except json.JSONDecodeError as e:
@@ -74,14 +76,14 @@ def dashboards(check):
                 missing_fields = REQUIRED_ATTRIBUTES.difference(all_keys)
                 file_failed = True
                 display_queue.append(
-                    (echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}"),
+                    (echo_failure, f"    {dashboard_filename} does not contain the required fields: {missing_fields}"),
                 )
 
             # Confirm the dashboard payload comes from the old API for now
             if not _is_dashboard_format(decoded):
                 file_failed = True
                 display_queue.append(
-                    (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
+                    (echo_failure, f'    {dashboard_filename} is not using the new /dashboard payload format.'),
                 )
 
             if file_failed:

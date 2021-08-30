@@ -1,5 +1,5 @@
 {
-	"names": "[CoreDNS] Cache hits count is low",
+	"name": "[CoreDNS] Cache hits count is low",
 	"type": "query alert",
 	"query": "avg(last_4h):anomalies(avg:coredns.cache_hits_count{*}.as_count(), 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
 	"message": "The number of cache hits is lower than usual",
