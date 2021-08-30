@@ -33,6 +33,7 @@ from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,
     InfrastructureData,
+    InfrastructureDataItem,
     InstanceConfig,
     MetricName,
     MorBatch,
@@ -238,7 +239,7 @@ class VSphereCheck(AgentCheck):
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
-                runtime_host_props = {}
+                runtime_host_props = {}  # type: InfrastructureDataItem
                 if runtime_host:
                     if runtime_host in infrastructure_data:
                         runtime_host_props = infrastructure_data.get(runtime_host, {}) if runtime_host else {}
