@@ -234,6 +234,9 @@ Need help? Contact [Datadog support][13].
 
 ## Further Reading
 
+Additional helpful documentation, links, and articles:
+
+- [Monitoring HCP Consul with Datadog][19]
 - [Monitor Consul health and performance with Datadog][14]
 - [Consul at Datadog][15]
 
@@ -255,3 +258,4 @@ Need help? Contact [Datadog support][13].
 [16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time
 [18]: https://github.com/DataDog/integrations-core/blob/master/consul/assets/service_checks.json
+[19]: https://docs.datadoghq.com/integrations/guide/hcp-consul
