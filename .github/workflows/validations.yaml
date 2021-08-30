@@ -42,3 +42,7 @@ jobs:
     - name: Run legacy signature validation
       run: |
         ddev validate legacy-signature
+
+    - name: Run service checks validation
+      run: |
+        ddev validate service-checks
