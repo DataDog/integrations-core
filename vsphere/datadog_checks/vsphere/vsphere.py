@@ -238,7 +238,7 @@ class VSphereCheck(AgentCheck):
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
-                runtime_host_props = infrastructure_data[runtime_host] if runtime_host else {}
+                runtime_host_props = infrastructure_data.get(runtime_host, {}) if runtime_host else {}
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
