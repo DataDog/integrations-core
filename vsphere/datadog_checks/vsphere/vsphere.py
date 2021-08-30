@@ -242,7 +242,7 @@ class VSphereCheck(AgentCheck):
                 runtime_host_props = {}  # type: InfrastructureDataItem
                 if runtime_host:
                     if runtime_host in infrastructure_data:
-                        runtime_host_props = infrastructure_data.get(runtime_host, {}) if runtime_host else {}
+                        runtime_host_props = infrastructure_data.get(runtime_host, {})
                     else:
                         self.log.debug("Missing runtime.host details for VM %s", mor_name)
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
