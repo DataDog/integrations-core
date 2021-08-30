@@ -262,17 +262,3 @@ def get_message_queue_info(timeout, sev):
             {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
         ],
     }
-
-
-def get_ibm_mq_info(timeout):
-    return {
-        'name': 'ibm_mq_info',
-        'query': {
-            'text': 'SELECT QNAME, COUNT(*) FROM TABLE(MQREADALL()) GROUP BY QNAME',
-            'timeout': timeout,
-        },
-        'columns': [
-            {'name': 'message_queue_name', 'type': 'tag'},
-            {'name': 'ibm_i.ibm_mq.size', 'type': 'gauge'},
-        ],
-    }

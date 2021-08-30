@@ -20,10 +20,6 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
-def instance_fetch_ibm_mq_metrics(field, value):
-    return True
-
-
 def instance_job_query_timeout(field, value):
     return 600
 

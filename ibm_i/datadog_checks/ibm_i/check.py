@@ -229,9 +229,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
             else:
                 query_list.append(queries.get_base_disk_usage_72(self.config.query_timeout))
 
-            if self.config.fetch_ibm_mq_metrics and self.ibm_mq_check():
-                query_list.append(queries.get_ibm_mq_info(self.config.query_timeout))
-
             self._query_manager = QueryManager(
                 self,
                 self.execute_query,
@@ -241,28 +238,6 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 error_handler=self.handle_query_error,
             )
             self._query_manager.compile_queries()
-
-    def ibm_mq_check(self):
-        # Try to get data from the IBM MQ tables. If they're not present,
-        # an exception is raised, and we return that IBM MQ is not available.
-        query = {
-            'text': "SELECT QNAME, COUNT(*) FROM TABLE(MQREADALL()) GROUP BY QNAME",
-            'timeout': self.config.query_timeout,
-        }
-        try:
-            # self.execute_query(query) yields a generator, therefore the SQL query is actually run
-            # only when needed (eg. when looping through it, transforming it
-            # into a list, using next on it to get the next element).
-            # We do need the query to be executed, which is why we do an operation on it.
-            # We use the list operation because we know it will work as long as the query doesn't
-            # raise an error (if we were to use next, we'd have to take care of the case where
-            # the generator raises a StopIteration exception because the query is valid but returns 0 rows).
-            list(self.execute_query(query, disconnect_on_error=False))  # type: List[Tuple[str]]
-        except Exception as e:
-            self.log.debug("Couldn't find IBM MQ data, turning off IBM MQ queries: %s", e)
-            return False
-
-        return True
 
     def fetch_system_info(self):
         try:

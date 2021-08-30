@@ -20,7 +20,6 @@ class InstanceConfig(BaseModel):
     connection_string: Optional[str]
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
-    fetch_ibm_mq_metrics: Optional[bool]
     job_query_timeout: Optional[int]
     min_collection_interval: Optional[float]
     password: Optional[str]

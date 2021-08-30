@@ -73,21 +73,7 @@ def test_set_up_query_manager_7_2(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck.ibm_mq_check', return_value=True):
-        check.set_up_query_manager()
-    assert check._query_manager is not None
-    assert len(check._query_manager.queries) == 9
-
-
-def test_set_up_query_manager_7_2_no_ibm_mq(instance):
-    check = IbmICheck('ibm_i', {}, [instance])
-    check.log = mock.MagicMock()
-    check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck.ibm_mq_check', return_value=False):
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 2)):
         check.set_up_query_manager()
     assert check._query_manager is not None
     assert len(check._query_manager.queries) == 8
@@ -97,21 +83,7 @@ def test_set_up_query_manager_7_4(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck.ibm_mq_check', return_value=True):
-        check.set_up_query_manager()
-    assert check._query_manager is not None
-    assert len(check._query_manager.queries) == 11
-
-
-def test_set_up_query_manager_7_4_no_ibm_mq(instance):
-    check = IbmICheck('ibm_i', {}, [instance])
-    check.log = mock.MagicMock()
-    check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck.ibm_mq_check', return_value=False):
+    with mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)):
         check.set_up_query_manager()
     assert check._query_manager is not None
     assert len(check._query_manager.queries) == 10
@@ -139,5 +111,4 @@ def test_check_query_error(aggregator, instance):
         check.check(instance)
     assert check._query_manager is not None
     aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
-    aggregator.assert_metric("ibm_i.check.duration", hostname="host", tags=["check_id:{}".format(check.check_id)])
     aggregator.assert_all_metrics_covered()
