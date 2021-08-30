@@ -4,6 +4,7 @@
 import fcntl
 import os
 import subprocess
+import sys
 import time
 from datetime import datetime
 from typing import List, NamedTuple, Tuple
@@ -86,9 +87,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
 
     def _create_connection_subprocess(self):
         self._subprocess = subprocess.Popen(
-            # TODO: Change to sys.executable once we're based on Agent 7.30.0
             [
-                "/opt/datadog-agent/embedded/bin/python3",
+                sys.executable,
                 "-c",
                 "from datadog_checks.ibm_i.query_script import query; query()",
             ],
