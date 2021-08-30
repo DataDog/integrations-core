@@ -73,7 +73,10 @@ class StatsCollector(object):
             else:
                 raise
         finally:
-            queue.close()
+            try:
+                queue.close()
+            except pymqi.PYIFError as e:
+                self.log.debug("Could not close queue: %s", str(e))
 
     def _collect_channel_stats(self, channel_stats):
         self.log.debug('Collect channel stats. Number of channels: %s', len(channel_stats.channels))
