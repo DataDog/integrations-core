@@ -8,7 +8,7 @@ import os
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error, annotate_display_queue
+from ...annotations import annotate_display_queue, annotate_error
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -47,7 +47,7 @@ def recommended_monitors(check):
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
             message = f'{file} does not exist'
-            echo_failure(f'  ' + message)
+            echo_failure('  ' + message)
             failed_checks += 1
             annotate_error(manifest_file, message)
 
@@ -60,7 +60,7 @@ def recommended_monitors(check):
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
                 message = f'invalid json: {e}'
-                echo_failure(f'  ' + message)
+                echo_failure('  ' + message)
                 annotate_error(monitor_file, message)
                 continue
 

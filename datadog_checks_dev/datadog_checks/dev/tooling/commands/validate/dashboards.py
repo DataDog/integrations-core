@@ -7,7 +7,7 @@ import os
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error, annotate_display_queue
+from ...annotations import annotate_display_queue, annotate_error
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
