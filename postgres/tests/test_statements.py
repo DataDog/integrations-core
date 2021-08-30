@@ -332,7 +332,7 @@ def test_failed_explain_handling(
     assert err is None
 
     for _ in range(failed_explain_test_repeat_count):
-        check.statement_samples._run_explain_safe(dbname, query, query, "test1")
+        check.statement_samples._run_explain_safe(dbname, query, query, query)
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
@@ -547,7 +547,7 @@ def test_statement_run_explain_errors(
     check._connect()
 
     check.check(dbm_instance)
-    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query)
+    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
