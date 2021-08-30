@@ -6,7 +6,7 @@ import json
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error
+from ...annotations import annotate_error, annotate_display_queue
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -76,7 +76,6 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}"),
                 )
-                annotate_error(dashboard_file, "Detected missing required fields: {}".format(missing_fields))
 
             # Confirm the dashboard payload comes from the old API for now
             if not _is_dashboard_format(decoded):
@@ -84,13 +83,13 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
-                annotate_error(dashboard_file, "This dashboard payload is not using the new /dashboard format")
 
             if file_failed:
                 failed_checks += 1
                 # Display detailed info if file is invalid
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
+                annotate_display_queue(dashboard_file, display_queue)
                 for display_func, message in display_queue:
                     display_func(message)
                 display_queue = []
