@@ -26,6 +26,7 @@ class LegacyKafkaCheck_0_10_2(object):
 
     def __init__(self, parent_check):
         self._parent_check = parent_check
+        self._kafka_client = None
 
         # Note: We cannot skip validation if monitor_unlisted_consumer_groups is True because this legacy check only
         # supports that functionality for Zookeeper, not Kafka.
@@ -51,17 +52,17 @@ class LegacyKafkaCheck_0_10_2(object):
             )
             self._zk_client.start()
 
-    @property
-    def kafka_client(self):
-        if self._kafka_client is None:
-            self._kafka_client = self._create_kafka_client()
-        return self._kafka_client
-
     def __getattr__(self, item):
         try:
             return getattr(self._parent_check, item)
         except AttributeError:
             raise AttributeError("LegacyKafkaCheck_0_10_2 has no attribute called {}".format(item))
+
+    @property
+    def kafka_client(self):
+        if self._kafka_client is None:
+            self._kafka_client = self._create_kafka_client()
+        return self._kafka_client
 
     def check(self):
         """The main entrypoint of the check."""
