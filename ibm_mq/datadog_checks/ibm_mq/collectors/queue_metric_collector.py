@@ -105,8 +105,10 @@ class QueueMetricCollector(object):
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
-                    queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(to_string(queue).strip())
+                    queue = to_string(queue_info[pymqi.CMQC.MQCA_Q_NAME]).strip()
+                    self.log.debug("Discovered queue: %s", queue)
+                    queues.append(queue)
+                self.log.debug("%s queues discovered", str(len(queues)))
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
                 # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
