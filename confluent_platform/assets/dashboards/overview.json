@@ -1,6 +1,6 @@
 {
     "title": "Confluent Platform Overview",
-    "descriptions": "The default Dashboard for monitoring Confluent Platform including:\n\n* Brokers,\n* Producers, and Consumers (Java-based)\n* Kafka Connect\n* Schema Registry\n* REST Proxy\n* KSQLDB",
+    "description": "The default Dashboard for monitoring Confluent Platform including:\n\n* Brokers,\n* Producers, and Consumers (Java-based)\n* Kafka Connect\n* Schema Registry\n* REST Proxy\n* KSQLDB",
     "widgets": [
         {
             "id": 0,
