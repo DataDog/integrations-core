@@ -26,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 statement_samples_keys = ["query_samples", "statement_samples"]
 
+# default test query to use that is guaranteed to succeed as it's using a fully qualified table name so it doesn't
+# depend on a default schema being set on the connection
+DEFAULT_FQ_SUCCESS_QUERY = "SELECT * FROM information_schema.TABLES"
+
 
 @pytest.fixture
 def dbm_instance(instance_complex):
@@ -222,7 +226,7 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
         (
             None,
             'select name as nam from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'procedure_strategy_requires_default_schema', 'message': None}],
+            None,
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -368,6 +372,64 @@ def test_statement_samples_collect(
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
     mysql_check._statement_samples._close_db_conn()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "current_schema,sql_text,optimal_strategy_cached,attempt_count,total_error_count,db_error_count",
+    [
+        # if there is no default schema then we have only two possible strategies as the PROCEDURE strategy requires
+        # a default schema, so (3*2=6)
+        (None, 'select * from fake_table', True, 3, 6, 2),
+        (None, 'select * from fake_table', False, 3, 6, 6),
+        # if there is a default schema then we'll try all three possible strategies (3*3 = 9)
+        ('testdb', 'select * from fake_table', True, 3, 9, 3),
+        ('testdb', 'select * from fake_table', False, 3, 9, 9),
+        # if there is an issue accessing the schema then we won't event attempt to explain the query and schema error
+        # will be cached so we won't try to re-access the schema, therefore there will be only one database error.
+        ('invalid_schema', 'select * from fake_table', False, 3, 3, 1),
+    ],
+)
+def test_statement_samples_failed_explain_handling(
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    current_schema,
+    sql_text,
+    optimal_strategy_cached,
+    attempt_count,
+    total_error_count,
+    db_error_count,
+):
+    # pin the table we use for consistency
+    dbm_instance['query_samples']['events_statements_table'] = "events_statements_history_long"
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(mysql_check)
+
+    total_error_states = []
+    with closing(mysql_check._statement_samples._get_db_connection().cursor()) as cursor:
+        if optimal_strategy_cached:
+            # run a query in that schema which we know will succeed to ensure the optimal strategy is cached
+            _, error_states = mysql_check._statement_samples._explain_statement(
+                cursor, DEFAULT_FQ_SUCCESS_QUERY, current_schema, DEFAULT_FQ_SUCCESS_QUERY, DEFAULT_FQ_SUCCESS_QUERY
+            )
+            assert not error_states
+        else:
+            # reset all internal caches to make sure there is no previously cached strategy
+            mysql_check._statement_samples._init_caches()
+
+        aggregator.reset()
+
+        for _ in range(attempt_count):
+            _, error_states = mysql_check._statement_samples._explain_statement(
+                cursor, sql_text, current_schema, sql_text, sql_text
+            )
+            total_error_states.extend(error_states)
+
+    assert len(total_error_states) == total_error_count
+    aggregator.assert_metric("dd.mysql.db.error", value=db_error_count)
 
 
 @pytest.mark.integration
