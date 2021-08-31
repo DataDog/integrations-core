@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
-import select
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -493,6 +492,92 @@ def test_statement_samples_collect(
                 assert event['db']['plan']['collection_errors'] == expected_collection_errors
             else:
                 assert event['db']['plan']['collection_errors'] is None
+
+    finally:
+        conn.close()
+
+
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize(
+    "user,password,dbname,query,arg,expected_out,expected_keys",
+    [
+        (
+                "bob",
+                "bob",
+                "datadog_test",
+                "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
+                "hello",
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'bob',
+                    'state': 'idle in transaction',
+                    'query_signature': 'd9193c18a6f372d8',
+                    'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
+                },
+                ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+        ),
+    ],
+)
+def test_activity_snapshot_collection(
+        aggregator,
+        integration_check,
+        dbm_instance,
+        pg_stat_activity_view,
+        user,
+        password,
+        dbname,
+        query,
+        arg,
+        expected_out,
+        expected_keys,
+):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # the simple query protocol, sending the whole query as a plain string to postgres.
+    # if a client is using the extended query protocol with prepare then the query would appear as
+    # leave connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    try:
+        # turn off auto commit so we can manage transactions manually
+        # this should allow us to catch queries in the 'idle in transaction' state
+        conn.autocommit = False
+        conn.cursor().execute(query, (arg,))
+        check.check(dbm_instance)
+        dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
+
+        event = dbm_activity_event[0]
+        assert event['host'] == "stubbed.hostname"
+        assert event['ddsource'] == "postgres"
+        assert event['dbm_type'] == "activity"
+        assert len(event['active_queries']) > 0
+        # find bob's query.
+        bobs_query = None
+        for query_json in event['active_queries']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_query = query_json
+        assert bobs_query is not None
+
+        for key in expected_out:
+            assert expected_out[key] == bobs_query[key]
+        for val in expected_keys:
+            assert val in bobs_query
+
+        expected_tags = dbm_instance['tags'] + [
+            'server:{}'.format(HOST),
+            'port:{}'.format(PORT),
+        ]
+
+        assert event['ddtags'] == expected_tags
 
     finally:
         conn.close()

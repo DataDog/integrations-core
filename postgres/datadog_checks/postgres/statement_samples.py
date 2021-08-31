@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Dict, Optional, Tuple
 
 import psycopg2
-import six
 from cachetools import TTLCache
 from six import PY2
 
@@ -91,6 +90,7 @@ class DBExplainError(Enum):
 
 
 DEFAULT_COLLECTION_INTERVAL = 1
+DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 
 
 class PostgresStatementSamples(DBMAsyncJob):
@@ -148,10 +148,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
 
-        self._activity_coll_enabled = is_affirmative(self._config.activity_samples_config.get('enabled', False))
+        self._activity_coll_enabled = is_affirmative(self._config.activity_snapshots_config.get('enabled', False))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
-            self._config.activity_samples_config.get('collection_interval', collection_interval), collection_interval
+            self._config.activity_snapshots_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
+            collection_interval,
         )
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
@@ -239,7 +240,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_samples.time", (time.time() - start_time) * 1000, tags=self._tags
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self._tags
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
@@ -281,14 +282,16 @@ class PostgresStatementSamples(DBMAsyncJob):
             return None
 
     @staticmethod
-    def _collect_active_query(row, query_signature):
-        if row['state'] is not None and row['state'] == 'active':
-            # make a copy of the current row, remove all null values
-            # and then replace the query with its query_signature
-            active_row = {key: val for key, val in row.items() if val is not None}
+    def _to_active_session(row, query_signature, obfuscated_statement):
+        if row['state'] is not None and row['state'] in {'active', 'idle in transaction'}:
+            # Create an active_row, for each session by
+            # 1. Removing all null key/value pairs and the original query
+            # 2. Add query_signature
+            # 3. Add full obfuscated query text
+            active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             active_row['query_signature'] = query_signature
-            del active_row['query']
-            return six.ensure_str(json.dumps(active_row, default=default_json_event_encoding))
+            active_row['statement'] = obfuscated_statement
+            return active_row
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
@@ -499,7 +502,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 if not obfuscated_statement:
                     continue
                 query_signature = compute_sql_signature(obfuscated_statement)
-                active_row = self._collect_active_query(row, query_signature)
+                active_row = self._to_active_session(row, query_signature, obfuscated_statement)
                 if active_row:
                     active_query_rows.append(active_row)
                 event = self._collect_plan_for_statement(row, obfuscated_statement, query_signature)
