@@ -502,34 +502,35 @@ def test_statement_samples_collect(
     "user,password,dbname,query,arg,expected_out,expected_keys",
     [
         (
-                "bob",
-                "bob",
-                "datadog_test",
-                "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
-                "hello",
-                {
-                    'datname': 'datadog_test',
-                    'usename': 'bob',
-                    'state': 'idle in transaction',
-                    'query_signature': 'd9193c18a6f372d8',
-                    'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
-                },
-                ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            "bob",
+            "bob",
+            "datadog_test",
+            "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
+            "hello",
+            {
+                'datname': 'datadog_test',
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'query_signature': 'd9193c18a6f372d8',
+                'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
+            },
+            ["xact_start", "query_start", "pid", "client_port", "client_addr"],
         ),
     ],
 )
 def test_activity_snapshot_collection(
-        aggregator,
-        integration_check,
-        dbm_instance,
-        pg_stat_activity_view,
-        user,
-        password,
-        dbname,
-        query,
-        arg,
-        expected_out,
-        expected_keys,
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_activity_view,
+    user,
+    password,
+    dbname,
+    query,
+    arg,
+    expected_out,
+    expected_keys,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -559,6 +560,7 @@ def test_activity_snapshot_collection(
         assert event['host'] == "stubbed.hostname"
         assert event['ddsource'] == "postgres"
         assert event['dbm_type'] == "activity"
+        assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['active_queries']) > 0
         # find bob's query.
         bobs_query = None
@@ -571,6 +573,8 @@ def test_activity_snapshot_collection(
             assert expected_out[key] == bobs_query[key]
         for val in expected_keys:
             assert val in bobs_query
+
+        assert 'query' not in bobs_query
 
         expected_tags = dbm_instance['tags'] + [
             'server:{}'.format(HOST),

@@ -530,6 +530,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         event = {
             "host": self._db_hostname,
             "ddsource": "postgres",
+            "dbm_type": "activity",
+            "ddagentversion": datadog_agent.get_version(),
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "active_queries": active_query_rows,
