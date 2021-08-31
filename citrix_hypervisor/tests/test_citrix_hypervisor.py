@@ -49,6 +49,7 @@ def _assert_metrics(aggregator, custom_tags, count=1):
 
 
 @pytest.mark.usefixtures('mock_responses')
+@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
 def test_check(aggregator, instance):
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
@@ -61,6 +62,7 @@ def test_check(aggregator, instance):
 
 
 @pytest.mark.usefixtures('mock_responses')
+@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
 @pytest.mark.parametrize(
     'url, expected_status',
@@ -78,6 +80,7 @@ def test_service_check(aggregator, url, expected_status):
 
 
 @pytest.mark.usefixtures('mock_responses')
+@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
 def test_initialization(caplog):
     caplog.clear()

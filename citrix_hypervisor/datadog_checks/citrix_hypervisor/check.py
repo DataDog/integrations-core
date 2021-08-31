@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
+from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -28,6 +29,7 @@ class CitrixHypervisorCheck(AgentCheck):
         self._base_url = self.instance['url'].rstrip('/')
 
         self.tags = self.instance.get('tags', [])
+        self.xenserver = None
 
         self.check_initializations.append(self._check_connection)
 
@@ -39,6 +41,11 @@ class CitrixHypervisorCheck(AgentCheck):
             self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
         else:
             self.log.warning("Couldn't initialize the timestamp due to HTTP error %s, set it to 0", r.reason)
+
+        try:
+            self.xenserver = xmlrpclib.Server(self._base_url)
+        except Exception as e:
+            self.log.warning(str(e))
 
     def _get_updated_metrics(self):
         # type: () -> Dict
@@ -71,22 +78,48 @@ class CitrixHypervisorCheck(AgentCheck):
             metric_name, tags = build_metric(legends[i], self.log)
 
             if metric_name is not None:
-                self.gauge(metric_name, values[i], tags=self.tags + tags)
+                self.gauge(metric_name, values[i], tags=self.tags + self._additional_tags + tags)
+
+    def open_session(self):
+        # type: () -> Optional[Dict[str, str]]
+        if self.xenserver is None:
+            return None
+
+        session = self.xenserver.session.login_with_password(
+            self.instance.get('username', ''), self.instance.get('password', '')
+        )
+
+        if session.get('Status') == 'Failure':
+            if 'HOST_IS_SLAVE' in session.get('ErrorDescription', []):
+                self._additional_tags.append('server_type:slave')
+            return None
+
+        self._additional_tags.append('server_type:master')
+
+        return session
 
     def check(self, _):
         # type: (Any) -> None
+        self._additional_tags = []  # type: List[str]
+        session = self.open_session()
+
         try:
             data = self._get_updated_metrics()
 
             self.service_check(
-                self.SERVICE_CHECK_CONNECT, self.OK, ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags
+                self.SERVICE_CHECK_CONNECT,
+                self.OK,
+                ['citrix_hypervisor_url:{}'.format(self._base_url)] + self._additional_tags + self.tags,
             )
         except Exception as e:
             self.service_check(
                 self.SERVICE_CHECK_CONNECT,
                 self.CRITICAL,
-                ['citrix_hypervisor_url:{}'.format(self._base_url)] + self.tags,
+                ['citrix_hypervisor_url:{}'.format(self._base_url)] + self._additional_tags + self.tags,
             )
             self.log.exception(e)
         else:
             self.submit_metrics(data)
+
+        if session is not None:
+            self.xenserver.session.logout(session.get('Value'))
