@@ -20,10 +20,6 @@ def instance_collections_indexes_stats(field, value):
     return False
 
 
-def instance_connection_scheme(field, value):
-    return 'mongodb'
-
-
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
@@ -53,7 +49,7 @@ def instance_replica_check(field, value):
 
 
 def instance_server(field, value):
-    return 'mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>'
+    return get_default_field_value(field, value)
 
 
 def instance_service(field, value):

@@ -5,6 +5,6 @@ def instance():
     return {
         'server': {
             'Release': '8.0.0',
-            'Migration': 'Use the following options instead:\nhosts, username, password, database, options, connection_scheme\n',
+            'Migration': 'Use the following options instead:\nhosts, username, password, database, options\n',
         }
     }

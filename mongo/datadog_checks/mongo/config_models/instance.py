@@ -13,7 +13,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
-class Fields(BaseModel):
+class Field(BaseModel):
     class Config:
         allow_mutation = False
 
@@ -27,9 +27,9 @@ class CustomQuery(BaseModel):
         allow_mutation = False
 
     database: Optional[str]
-    fields: Optional[Fields]
+    fields: Optional[Sequence[Field]]
     metric_prefix: Optional[str]
-    query: Optional[str]
+    query: Optional[Mapping[str, Any]]
     tags: Optional[Sequence[str]]
 
 
@@ -40,7 +40,6 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[Sequence[str]]
     collections: Optional[Sequence[str]]
     collections_indexes_stats: Optional[bool]
-    connection_scheme: Optional[str]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
     empty_default_hostname: Optional[bool]
