@@ -25,7 +25,7 @@ You can fetch it from the [IBM i Access - Client Solutions][9] page. Click on `D
 
 Choose the `ACS App Pkg` package for your platform (e.g. `ACS Linux App Pkg` for Linux hosts), download it and follow the installation instructions to install the driver.
 
-## Configure the ODBC driver in the embedded Agent environment
+#### Configure the ODBC driver in the embedded Agent environment
 
 Once the ODBC driver is installed, find the ODBC configuration files: `odbc.ini` and `odbcinst.ini`. The location may vary depending on your system. On Linux they may be located in the `/etc` directory or in the `/etc/unixODBC` directory.
 
@@ -44,7 +44,7 @@ UsageCount=1
 
 defines a driver named `IBM i Access ODBC Driver 64-bit`. The name of the IBM i ODBC driver is needed to configure the IBM i check.
 
-### Set up the IBM i check configuration.
+#### Set up the IBM i check configuration.
 
 1. Edit the `ibm_i.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM i performance data. See the [sample ibm_i.d/conf.yaml][3] for all available configuration options.
    Use the driver name from the `obdcinst.ini` file.
