@@ -5,11 +5,12 @@ import time
 from collections import namedtuple
 
 import requests
+from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .errors import ApiUnreachable
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
 
 try:
     from json import JSONDecodeError
@@ -56,7 +57,9 @@ class Vault(OpenMetricsBaseCheck):
             name,
             init_config,
             instances,
-            default_instances={self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP]}},
+            default_instances={
+                self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP] + ROUTE_METRICS_TO_TRANSFORM},
+            },
             default_namespace=self.CHECK_NAME,
         )
 
@@ -89,6 +92,14 @@ class Vault(OpenMetricsBaseCheck):
         # potential configuration errors as part of the check run phase.
         self.check_initializations.append(self.parse_config)
 
+        self._metric_transformers = {
+            'vault_route_create_*': self.transform_route_metrics,
+            'vault_route_delete_*': self.transform_route_metrics,
+            'vault_route_list_*': self.transform_route_metrics,
+            'vault_route_read_*': self.transform_route_metrics,
+            'vault_route_rollback_*': self.transform_route_metrics,
+        }
+
     def check(self, _):
         submission_queue = []
         dynamic_tags = []
@@ -107,7 +118,7 @@ class Vault(OpenMetricsBaseCheck):
         if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
-                self.process(self._scraper_config)
+                self.process(self._scraper_config, self._metric_transformers)
             except Exception as e:
                 error = str(e)
                 if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
@@ -257,7 +268,7 @@ class Vault(OpenMetricsBaseCheck):
         return json_data
 
     def parse_config(self):
-        if not self._api_url:
+        if PY2 and not self._api_url:
             raise ConfigurationError('Vault setting `api_url` is required')
 
         api_version = self._api_url[-1]
@@ -324,3 +335,21 @@ class Vault(OpenMetricsBaseCheck):
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it
         pass
+
+    def transform_route_metrics(self, metric, scraper_config, transformerkey):
+        # Backward compatibility: submit old metric
+        if metric.name in METRIC_ROLLBACK_COMPAT_MAP:
+            self.submit_openmetric(METRIC_ROLLBACK_COMPAT_MAP[metric.name], metric, scraper_config)
+
+        metric_name = metric.name.replace('_', '.').rstrip('.')
+
+        # Remove extra vault prefix
+        if metric_name.startswith('vault.'):
+            metric_name = metric_name[len('vault.') :]
+
+        metric_tag = metric.name[len(transformerkey) - 1 : -1]
+        for i in metric.samples:
+            i.labels['mountpoint'] = metric_tag
+
+        normalized_metric_name = metric_name.replace('.' + metric_tag, '')
+        self.submit_openmetric(normalized_metric_name, metric, scraper_config)

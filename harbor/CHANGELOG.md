@@ -1,6 +1,14 @@
 # CHANGELOG - Harbor
 
-## 1.8.1 / 2021-03-07
+## 1.9.1 / 2021-08-22
+
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+
+## 1.9.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8925](https://github.com/DataDog/integrations-core/pull/8925).
+
+## 1.8.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

@@ -1,594 +1,920 @@
 {
-    "title": "Vault - Overview",
-    "description": "## Vault\n\nThis dashboard provides a high-level overview of your Vault clusters so you can monitor its performance and cluster health.\n\n- [Official Vault integration docs](https://docs.datadoghq.com/integrations/vault/)\n- [Monitoring HashiCorp Vault with Datadog](https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog/)",
-    "widgets": [
+  "author_name": "Datadog",
+  "description": "## Vault\n\nThis dashboard provides a high-level overview of your Vault clusters so you can monitor its performance and cluster health.\n\n- [Official Vault integration docs](https://docs.datadoghq.com/integrations/vault/)\n- [Monitoring HashiCorp Vault with Datadog](https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "layout_type": "free",
+  "template_variables": [
       {
-        "id": 0,
-        "definition": {
-          "type": "image",
-          "url": "/static/images/logos/vault_large.svg",
-          "sizing": "zoom"
-        },
-        "layout": {
-          "x": 0,
-          "y": 1,
-          "width": 12,
-          "height": 7
-        }
+          "default": "*",
+          "name": "vault_cluster",
+          "prefix": "vault_cluster"
       },
       {
-        "id": 1,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.core.handle.request.sum{*}/avg:vault.vault.core.handle.request.count{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "orange",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Average Request Latency",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": -9,
-          "y": 37,
-          "width": 43,
-          "height": 19
-        }
-      },
-      {
-        "id": 2,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "max:vault.vault.runtime.alloc.bytes{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            },
-            {
-              "q": "max:vault.vault.runtime.sys.bytes{role:vault} by {vault_cluster}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Allocated Memory",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 44,
-          "y": 9,
-          "width": 42,
-          "height": 19
-        }
-      },
-      {
-        "id": 3,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "diff(max:vault.vault.runtime.total.gc.pause_ns{*} by {host})",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "GC Time",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": -9,
-          "y": 9,
-          "width": 43,
-          "height": 19
-        }
-      },
-      {
-        "id": 4,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "max:vault.vault.core.handle.login_request.sum{*}, max:vault.vault.core.handle.login_request.count{*}, max:vault.vault.core.handle.login_request.sum{*}/max:vault.vault.core.handle.login_request.count{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "orange",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Average Login Latency",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 44,
-          "y": 37,
-          "width": 42,
-          "height": 19
-        }
-      },
-      {
-        "id": 5,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "per_second(max:vault.vault.core.handle.login_request.count{*})",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Logins Per Second",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 44,
-          "y": 57,
-          "width": 42,
-          "height": 19
-        }
-      },
-      {
-        "id": 6,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "per_second(max:vault.vault.core.handle.request.count{*} by {instance})",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Request Handled Per Second",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": -9,
-          "y": 57,
-          "width": 43,
-          "height": 19
-        }
-      },
-      {
-        "id": 7,
-        "definition": {
-          "type": "note",
-          "content": "Runtime",
-          "background_color": "gray",
-          "font_size": "24",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 28,
-          "y": 1,
-          "width": 58,
-          "height": 7
-        }
-      },
-      {
-        "id": 8,
-        "definition": {
-          "type": "note",
-          "content": "Performance",
-          "background_color": "gray",
-          "font_size": "24",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": -9,
-          "y": 30,
-          "width": 86,
-          "height": 6
-        }
-      },
-      {
-        "id": 9,
-        "definition": {
-          "type": "note",
-          "content": "Tokens",
-          "background_color": "gray",
-          "font_size": "24",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 88,
-          "y": 1,
-          "width": 63,
-          "height": 7
-        }
-      },
-      {
-        "id": 10,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.core.check.token.sum{*}/avg:vault.vault.core.check.token.count{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Average Time of Token Checks",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 88,
-          "y": 29,
-          "width": 63,
-          "height": 19
-        }
-      },
-      {
-        "id": 11,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.token.lookup.count{*}",
-              "display_type": "bars",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Token Lookups Count",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 104,
-          "y": 9,
-          "width": 47,
-          "height": 19
-        }
-      },
-      {
-        "id": 12,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "sum:vault.vault.expire.renew_token.count{*}",
-              "aggregator": "avg"
-            }
-          ],
-          "custom_links": [],
-          "title": "Total token renewals",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 88,
-          "y": 19,
-          "width": 14,
-          "height": 9
-        }
-      },
-      {
-        "id": 13,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "sum:vault.vault.expire.num_leases{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Number of leases",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 88,
-          "y": 58,
-          "width": 63,
-          "height": 18
-        }
-      },
-      {
-        "id": 14,
-        "definition": {
-          "type": "note",
-          "content": "Leases",
-          "background_color": "gray",
-          "font_size": "24",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 88,
-          "y": 50,
-          "width": 63,
-          "height": 7
-        }
-      },
-      {
-        "id": 15,
-        "definition": {
-          "type": "query_value",
-          "requests": [
-            {
-              "q": "avg:vault.vault.token.create.count{*}",
-              "aggregator": "avg"
-            }
-          ],
-          "custom_links": [],
-          "title": "Tokens Created",
-          "title_size": "16",
-          "title_align": "left",
-          "autoscale": true,
-          "precision": 2
-        },
-        "layout": {
-          "x": 88,
-          "y": 9,
-          "width": 14,
-          "height": 9
-        }
-      },
-      {
-        "id": 16,
-        "definition": {
-          "type": "note",
-          "content": "Storage Backend",
-          "background_color": "gray",
-          "font_size": "24",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": -8,
-          "y": 78,
-          "width": 86,
-          "height": 6
-        }
-      },
-      {
-        "id": 17,
-        "definition": {
-          "type": "note",
-          "content": "Default storage backend on this dashboard is Consul. Vault supports the following [storage backend providers](https://www.vaultproject.io/docs/internals/telemetry.html#storage-backend-metrics)",
-          "background_color": "yellow",
-          "font_size": "14",
-          "text_align": "left",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "left"
-        },
-        "layout": {
-          "x": 88,
-          "y": 79,
-          "width": 18,
-          "height": 11
-        }
-      },
-      {
-        "id": 18,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.consul.get.sum{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Consul GET",
-          "title_size": "16",
-          "title_align": "center",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 0,
-          "y": 85,
-          "width": 43,
-          "height": 15
-        }
-      },
-      {
-        "id": 19,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.consul.put.sum{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Consul PUT",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 44,
-          "y": 85,
-          "width": 42,
-          "height": 15
-        }
-      },
-      {
-        "id": 20,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.consul.list.sum{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Consul LIST",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 0,
-          "y": 101,
-          "width": 43,
-          "height": 15
-        }
-      },
-      {
-        "id": 21,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:vault.vault.consul.delete.sum{*}",
-              "display_type": "line",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Consul DELETE",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 44,
-          "y": 101,
-          "width": 42,
-          "height": 15
-        }
-      },
-      {
-        "id": 22,
-        "definition": {
-          "type": "check_status",
-          "title": "Check Health",
-          "title_size": "16",
-          "title_align": "center",
-          "check": "vault.prometheus.health",
-          "grouping": "cluster",
-          "group_by": [],
-          "tags": [
-            "*"
-          ]
-        },
-        "layout": {
-          "x": 13,
-          "y": 1,
-          "width": 14,
-          "height": 7
-        }
+          "default": "*",
+          "name": "api_url",
+          "prefix": "api_url"
       }
-    ],
-    "template_variables": [],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30258
-  }
+  ],
+  "title": "Vault - Overview",
+  "widgets": [
+      {
+          "definition": {
+              "sizing": "center",
+              "type": "image",
+              "url": "/static/images/logos/vault_large.svg"
+          },
+          "id": 3656302514884816,
+          "layout": {
+              "height": 13,
+              "width": 22,
+              "x": 0,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "check": "vault.can_connect",
+              "group_by": [
+                  "$api_url"
+              ],
+              "grouping": "cluster",
+              "tags": [
+                  "*"
+              ],
+              "title": "Can connect",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "check_status"
+          },
+          "id": 1503450889951406,
+          "layout": {
+              "height": 8,
+              "width": 15,
+              "x": 24,
+              "y": 6
+          }
+      },
+      {
+          "definition": {
+              "background_color": "vivid_blue",
+              "content": "Summary",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 6282428875182114,
+          "layout": {
+              "height": 5,
+              "width": 47,
+              "x": 24,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "check": "vault.initialized",
+              "group_by": [
+                  "$vault_cluster",
+                  "$api_url"
+              ],
+              "grouping": "cluster",
+              "tags": [
+                  "*"
+              ],
+              "title": "Initialized",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "check_status"
+          },
+          "id": 2956928031828464,
+          "layout": {
+              "height": 8,
+              "width": 15,
+              "x": 40,
+              "y": 6
+          }
+      },
+      {
+          "definition": {
+              "check": "vault.unsealed",
+              "group_by": [
+                  "$vault_cluster",
+                  "$api_url"
+              ],
+              "grouping": "cluster",
+              "tags": [
+                  "*"
+              ],
+              "title": "Unsealed",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "check_status"
+          },
+          "id": 8918805839327892,
+          "layout": {
+              "height": 8,
+              "width": 15,
+              "x": 56,
+              "y": 6
+          }
+      },
+      {
+          "definition": {
+              "background_color": "vivid_blue",
+              "content": "Performance",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 2173524944577770,
+          "layout": {
+              "height": 5,
+              "width": 47,
+              "x": 73,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "background_color": "blue",
+              "content": "Token",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 8154853957581232,
+          "layout": {
+              "height": 5,
+              "width": 47,
+              "x": 73,
+              "y": 71
+          }
+      },
+      {
+          "definition": {
+              "background_color": "vivid_blue",
+              "content": "Runtime",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 7367325651845146,
+          "layout": {
+              "height": 5,
+              "width": 47,
+              "x": 24,
+              "y": 16
+          }
+      },
+      {
+          "definition": {
+              "background_color": "vivid_blue",
+              "content": "Logs",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 6893911135307690,
+          "layout": {
+              "height": 5,
+              "width": 47,
+              "x": 122,
+              "y": 0
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "query6"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query6",
+                              "query": "avg:vault.vault.runtime.gc.pause_ns.sum{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "GC pause time over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 3991152345671276,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 24,
+              "y": 22
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "query2"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query2",
+                              "query": "max:vault.vault.runtime.alloc.bytes{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  },
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "query2"
+                          }
+                      ],
+                      "on_right_yaxis": false,
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query2",
+                              "query": "max:vault.vault.runtime.sys.bytes{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Allocated memory over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 6028138022653232,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 24,
+              "y": 38
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "diff(query3) / query7"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "sum:vault.vault.core.handle.request.sum{$vault_cluster,$api_url}"
+                          },
+                          {
+                              "data_source": "metrics",
+                              "name": "query7",
+                              "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url}.as_count()"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Request latency over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 3120879135554394,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 73,
+              "y": 6
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "bars",
+                      "formulas": [
+                          {
+                              "formula": "query4"
+                          }
+                      ],
+                      "on_right_yaxis": false,
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query4",
+                              "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url}.as_count()"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Number of requests over $vault_cluster,$api_cluster",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 3036011336694786,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 73,
+              "y": 22
+          }
+      },
+      {
+          "definition": {
+              "background_color": "neutral",
+              "content": "## Vault\n\nThis dashboard provides a high-level overview of your Vault clusters so you can monitor its performance and cluster health.\n\n- [Official Vault integration docs](https://docs.datadoghq.com/integrations/vault/)\n- [Monitoring HashiCorp Vault with Datadog](https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog/)",
+              "font_size": "14",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "left",
+              "tick_edge": "right",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 3310587962530184,
+          "layout": {
+              "height": 24,
+              "width": 22,
+              "x": 0,
+              "y": 19
+          }
+      },
+      {
+          "definition": {
+              "columns": [
+                  "host",
+                  "service"
+              ],
+              "indexes": [],
+              "message_display": "expanded-md",
+              "query": "source:vault",
+              "show_date_column": true,
+              "show_message_column": true,
+              "sort": {
+                  "column": "time",
+                  "order": "desc"
+              },
+              "title": "",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "log_stream"
+          },
+          "id": 92806357546094,
+          "layout": {
+              "height": 86,
+              "width": 47,
+              "x": 122,
+              "y": 6
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "diff(query3) / query7"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "sum:vault.vault.core.handle.login_request.sum{$vault_cluster,$api_url}"
+                          },
+                          {
+                              "data_source": "metrics",
+                              "name": "query7",
+                              "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url}.as_count()"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Login request latency over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 3565406550023488,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 73,
+              "y": 38
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "bars",
+                      "formulas": [
+                          {
+                              "formula": "query5"
+                          }
+                      ],
+                      "on_right_yaxis": false,
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query5",
+                              "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url}.as_count()"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Number of login requests over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 8514661760064600,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 73,
+              "y": 54
+          }
+      },
+      {
+          "definition": {
+              "background_color": "blue",
+              "content": "Storage Backend",
+              "font_size": "18",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "center",
+              "tick_edge": "bottom",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+          },
+          "id": 5561732126756220,
+          "layout": {
+              "height": 5,
+              "width": 71,
+              "x": 0,
+              "y": 55
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "diff(query3)"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "avg:vault.vault.consul.get.sum{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Consul GET duration over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 4252604468843818,
+          "layout": {
+              "height": 15,
+              "width": 35,
+              "x": 0,
+              "y": 61
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "diff(query3)"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "avg:vault.vault.consul.put.sum{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Consul PUT duration over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 7213662971512152,
+          "layout": {
+              "height": 15,
+              "width": 35,
+              "x": 0,
+              "y": 77
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "diff(query3)"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "avg:vault.vault.consul.list.sum{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Consul LIST duration over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 7902532950059980,
+          "layout": {
+              "height": 15,
+              "width": 35,
+              "x": 36,
+              "y": 61
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "line",
+                      "formulas": [
+                          {
+                              "formula": "query3"
+                          }
+                      ],
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query3",
+                              "query": "avg:vault.vault.consul.delete.sum{$vault_cluster,$api_url}"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Consul DELETE duration over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 5062538762894802,
+          "layout": {
+              "height": 15,
+              "width": 35,
+              "x": 36,
+              "y": 77
+          }
+      },
+      {
+          "definition": {
+              "legend_columns": [
+                  "avg",
+                  "min",
+                  "max",
+                  "value",
+                  "sum"
+              ],
+              "legend_layout": "auto",
+              "markers": [],
+              "requests": [
+                  {
+                      "display_type": "bars",
+                      "formulas": [
+                          {
+                              "formula": "query2"
+                          }
+                      ],
+                      "on_right_yaxis": false,
+                      "queries": [
+                          {
+                              "data_source": "metrics",
+                              "name": "query2",
+                              "query": "sum:vault.vault.token.create.count{$vault_cluster,$api_url}.as_count()"
+                          }
+                      ],
+                      "response_format": "timeseries",
+                      "style": {
+                          "line_type": "solid",
+                          "line_width": "normal",
+                          "palette": "dog_classic"
+                      }
+                  }
+              ],
+              "show_legend": true,
+              "title": "Number of token created over $vault_cluster,$api_url",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries",
+              "yaxis": {
+                  "include_zero": true,
+                  "label": "",
+                  "max": "auto",
+                  "min": "auto",
+                  "scale": "linear"
+              }
+          },
+          "id": 1580400542094336,
+          "layout": {
+              "height": 15,
+              "width": 47,
+              "x": 73,
+              "y": 77
+          }
+      }
+  ]
+}

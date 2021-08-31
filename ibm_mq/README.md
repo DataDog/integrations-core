@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM MQ][1] versions 5 to 9.0.
+This check monitors [IBM MQ][1] versions 8 to 9.0.
 
 ## Setup
 
@@ -12,15 +12,12 @@ The IBM MQ check is included in the [Datadog Agent][2] package.
 
 To use the IBM MQ check, you need to:
 
-1. Make sure the [IBM MQ Client][3] 9.1+ is installed (unless the IBM MQ server is already installed).
-2. Update your LD_LIBRARY_PATH and C_INCLUDE_PATH to include the location of the libraries
-
-For example:
+1. Make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host).
+2. Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don’t exist yet.) For example:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=/opt/mqm/inc
-
+export C_INCLUDE_PATH=/opt/mqm/inc:$C_INCLUDE_PATH
 ```
 
 **Note**: Agent v6+ uses `upstart`, `systemd` or `launchd` to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
@@ -249,26 +246,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ibm_mq.can_connect**:<br/>
-Returns `CRITICAL` if the Agent cannot connect to the MQ server for any reason, otherwise returns `OK`.
-
-**ibm_mq.queue_manager**:<br/>
-Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager, otherwise returns `OK`.
-
-**ibm_mq.queue**:<br/>
-Returns `CRITICAL` if the Agent cannot retrieve queue stats, otherwise returns `OK`.
-
-**ibm_mq.channel**:<br/>
-Returns `CRITICAL` if the Agent cannot retrieve channel stats, otherwise returns `OK`.
-
-**ibm_mq.channel.status**:<br/>
-Return `CRITICAL` if the status is INACTIVE/STOPPED/STOPPING. Returns `OK` if the status is RUNNING. Returns `WARNING` if the status might lead to running.
-
 ### Events
 
 IBM MQ does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -292,3 +276,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
 [12]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
+[13]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json

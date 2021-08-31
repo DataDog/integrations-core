@@ -1,6 +1,14 @@
 # CHANGELOG - openldap
 
-## 1.6.1 / 2021-03-07
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8964](https://github.com/DataDog/integrations-core/pull/8964).
+
+## 1.6.2 / 2021-04-19 / Agent 7.28.0
+
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+
+## 1.6.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

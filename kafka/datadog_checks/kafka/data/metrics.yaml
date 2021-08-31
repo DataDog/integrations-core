@@ -664,3 +664,21 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.sync.rate
+
+    #
+    # Session stats
+    #
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=FetchSessionCache,name=NumIncrementalFetchSessions'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.session.fetch.count
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=FetchSessionCache,name=IncrementalFetchSessionEvictionsPerSec'
+        attribute:
+          Count:
+            alias: kafka.session.fetch.eviction
+            metric_type: rate

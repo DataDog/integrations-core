@@ -4,14 +4,12 @@
   value:
     type: string
 - name: namespace
-  required: true
   hidden: true
   description: The namespace to be prepended to all metrics.
   value:
     type: string
     example: service
 - name: metrics
-  required: true
   hidden: true
   description: |
     List of metrics to be fetched from the prometheus endpoint, if there's a
@@ -19,11 +17,15 @@
   value:
     type: array
     example:
-      - processor:cpu
-      - memory:mem
+      - processor: cpu
+      - memory: mem
       - io
     items:
-      type: string
+      anyOf:
+      - type: string
+      - type: object
+        additionalProperties:
+          type: string
 - name: prometheus_metrics_prefix
   description: Removes a given <PREFIX> from exposed Prometheus metrics.
   value:
@@ -138,17 +140,17 @@
     example: <TOKEN_PATH>
     type: string
 - name: ignore_metrics
-  description: A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+  description: |
+    A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
+    The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
   value:
     type: array
     items:
       type: string
     example:
       - <IGNORED_METRIC_NAME>
-      - <PREFIX_*>
-      - <*_SUFFIX>
-      - <PREFIX_*_SUFFIX>
-      - <*_SUBSTRING_*>
+      - <SUBSTRING_*>
+      - <*_SUBSTRING>
 - name: ignore_metrics_by_labels
   description: |
     A mapping of labels where metrics with matching label key and values are ignored.
@@ -165,5 +167,16 @@
     example:
       <KEY_1>: [<LABEL_1>, <LABEL_2>]
       <KEY_2>: ['*']
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

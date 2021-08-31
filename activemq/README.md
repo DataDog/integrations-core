@@ -4,7 +4,7 @@
 
 The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
 
-**Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metrics][#metrics] for more details.
+**Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metadata.csv][9] for a list of metrics provided by this integration.
 
 **Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][1].
 
@@ -113,8 +113,7 @@ The ActiveMQ check does not include any events.
 
 ### Service Checks
 
-**activemq.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance, otherwise returns `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -142,3 +141,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [15]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/metrics.yaml
+[16]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json

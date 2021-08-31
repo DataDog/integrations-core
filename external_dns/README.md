@@ -49,8 +49,7 @@ The external DNS check does not include any events.
 
 ### Service Checks
 
-**external_dns.prometheus.health**:<br>
-Returns `CRITICAL` if the check cannot access the metrics endpoint, otherwise returns `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -63,3 +62,4 @@ Need help? Contact [Datadog support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://github.com/kubernetes-incubator/external-dns
+[8]: https://github.com/DataDog/integrations-core/blob/master/external_dns/assets/service_checks.json

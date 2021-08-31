@@ -240,6 +240,13 @@ class AgentCheck(object):
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
             ),
+            '_config_renamed': (
+                False,
+                (
+                    'DEPRECATION NOTICE: The `%s` config option has been renamed '
+                    'to `%s` and will be removed in a future release.'
+                ),
+            ),
         }  # type: Dict[str, Tuple[bool, str]]
 
         # Setup metric limits
@@ -375,10 +382,11 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def load_configuration_models(self):
-        # 'datadog_checks.<PACKAGE>.<MODULE>...'
-        module_parts = self.__module__.split('.')
-        package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
+    def load_configuration_models(self, package_path=None):
+        if package_path is None:
+            # 'datadog_checks.<PACKAGE>.<MODULE>...'
+            module_parts = self.__module__.split('.')
+            package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
 
         if self._config_model_shared is None:
             raw_shared_config = self._get_config_model_initialization_data()
@@ -476,8 +484,10 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool) -> None
+    def submit_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
+    ):
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -508,7 +518,22 @@ class AgentCheck(object):
             monotonic,
             hostname,
             tags,
+            flush_first_value,
         )
+
+    def database_monitoring_query_sample(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+
+    def database_monitoring_query_metrics(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False

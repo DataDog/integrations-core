@@ -44,7 +44,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -61,10 +61,10 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
 
 
-def test_e2e_regex_match(dd_agent_check):
+def test_e2e_regex_match(dd_agent_check, aggregator):
     metrics = [
         {
             'MIB': "IF-MIB",
@@ -126,6 +126,7 @@ def test_e2e_regex_match(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
     config['init_config']['loader'] = 'core'
+    aggregator.reset()
     aggregator = dd_agent_check(config, rate=True)
 
     # raw sysName: 41ba948911b9
@@ -136,6 +137,7 @@ def test_e2e_regex_match(dd_agent_check):
             'remainder:ba948911b9',
             'letter1:4',
             'letter2:1',
+            'loader:core',
             'snmp_device:' + instance['ip_address'],
         ],
     )
@@ -158,8 +160,16 @@ def test_e2e_symbol_metric_tags(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
-def test_e2e_extract_value_using_regex(dd_agent_check):
+def test_e2e_inline_profile_def(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config'] = {'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES}}}}
+    config['instances'][0]['profile'] = 'profile1'
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_custom_metrics_cases(dd_agent_check):
     metrics = [
+        # extract value using regex
         {
             "MIB": "DUMMY-MIB",
             'symbol': {
@@ -167,12 +177,22 @@ def test_e2e_extract_value_using_regex(dd_agent_check):
                 'name': "aTemperatureValueInferred",
                 'extract_value': '(\\d+)C',
             },
-        }
+        },
+        # string float value
+        {
+            "MIB": "DUMMY-MIB",
+            'symbol': {
+                'OID': "1.3.6.1.4.1.123456789.5.0",
+                'name': "aStringFloatValue",
+            },
+        },
     ]
     config = common.generate_container_instance_config(metrics)
     instance = config['instances'][0]
     instance["community_string"] = "dummy"
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check, config, assert_value_metrics=ASSERT_VALUE_METRICS + ['snmp.aStringFloatValue']
+    )
 
 
 # Profile tests
@@ -207,7 +227,7 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
     config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=5108 + 5)
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
@@ -308,7 +328,9 @@ def test_e2e_profile_palo_alto(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
+def assert_python_vs_core(
+    dd_agent_check, config, expected_total_count=None, metrics_to_skip=None, assert_value_metrics=ASSERT_VALUE_METRICS
+):
     python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
@@ -359,7 +381,7 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
             print("\t{}".format(key))
 
     for (name, mtype, tags), stubs in python_metrics.items():
-        if name in ASSERT_VALUE_METRICS:
+        if name in assert_value_metrics:
             for stub in stubs:
                 aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs), value=stub.value)
         else:

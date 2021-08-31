@@ -162,12 +162,10 @@ class Memcache(AgentCheck):
             except ZeroDivisionError:
                 pass
 
-            uptime = stats.get("uptime", 0)
             self.service_check(
                 self.SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=service_check_tags,
-                message="Server has been up for %s seconds" % uptime,
             )
         except BadResponseError:
             raise

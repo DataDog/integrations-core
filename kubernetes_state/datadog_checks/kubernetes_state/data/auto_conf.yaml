@@ -29,13 +29,14 @@ instances:
     #
     # label_joins:
     #  kube_deployment_labels:
-    #    labels_to_match: deployment
+    #    labels_to_match:
+    #      - deployment
     #    labels_to_get:
     #      - label_addonmanager_kubernetes_io_mode
 
     ## @param hostname_override - boolean - optional - default: true
     ## By default the hostname for metrics containing the node label is
-    ## overriden by the value of the label, this can be deactivated (all metrics
+    ## overridden by the value of the label, this can be deactivated (all metrics
     ## will be attached to the host running KSM)
     #
     # hostname_override: true

@@ -711,7 +711,11 @@ class HAProxyCheckLegacy(AgentCheck):
                 service_check_tags.append('backend:%s' % hostname)
 
             status = Services.STATUS_TO_SERVICE_CHECK[status]
-            message = "%s reported %s:%s %s" % (haproxy_hostname, service_name, hostname, status)
+            message = (
+                "%s reported %s:%s %s" % (haproxy_hostname, service_name, hostname, status)
+                if status is not AgentCheck.OK
+                else None
+            )
             self.service_check(
                 self.SERVICE_CHECK_NAME, status, message=message, hostname=check_hostname, tags=service_check_tags
             )

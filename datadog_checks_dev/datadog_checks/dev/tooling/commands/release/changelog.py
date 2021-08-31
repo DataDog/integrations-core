@@ -9,7 +9,7 @@ from io import StringIO
 import click
 from semver import parse_version_info
 
-from ....utils import stream_file_lines, write_file
+from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
@@ -121,7 +121,8 @@ def changelog(
             thanks_note = ''
             if entry.from_contributor:
                 thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-            new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
+            title_period = "." if not entry.title.endswith(".") else ""
+            new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
     # read the old contents

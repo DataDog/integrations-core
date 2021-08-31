@@ -11,7 +11,7 @@ from datadog_checks.mongo.common import (
 
 
 class CustomQueriesCollector(MongoCollector):
-    """A collector dedicated to running cutom queries defined in the configuration."""
+    """A collector dedicated to running custom queries defined in the configuration."""
 
     def __init__(self, check, db_name, tags, custom_queries):
         super(CustomQueriesCollector, self).__init__(check, tags)
@@ -56,8 +56,10 @@ class CustomQueriesCollector(MongoCollector):
         mongo_query = deepcopy(raw_query.get('query'))
         if not mongo_query:  # no cov
             raise ValueError("Custom query field `query` is required")
+        # The mongo command to run (find, aggregate, count...)
         mongo_command = self._extract_command_from_mongo_query(mongo_query)
-        collection_name = mongo_query[mongo_command]
+        # The value of the command, it is usually the collection name on which to run the query.
+        mongo_command_value = mongo_query[mongo_command]
         del mongo_query[mongo_command]
         if mongo_command not in ALLOWED_CUSTOM_QUERIES_COMMANDS:
             raise ValueError("Custom query command must be of type {}".format(ALLOWED_CUSTOM_QUERIES_COMMANDS))
@@ -90,19 +92,25 @@ class CustomQueriesCollector(MongoCollector):
             if field_type not in ALLOWED_CUSTOM_METRICS_TYPES + ['tag']:
                 raise ValueError('Field `type` must be one of {}'.format(ALLOWED_CUSTOM_METRICS_TYPES + ['tag']))
 
-        tags = list(tags)
-        tags.extend(raw_query.get('tags', []))
-        tags.append('collection:{}'.format(collection_name))
-
         try:
             # This is where it is necessary to extract the command and its argument from the query to pass it as the
             # first two params.
-            result = db.command(mongo_command, collection_name, **mongo_query)
+            result = db.command(mongo_command, mongo_command_value, **mongo_query)
             if result['ok'] == 0:
                 raise pymongo.errors.PyMongoError(result['errmsg'])
         except pymongo.errors.PyMongoError:
             self.log.error("Failed to run custom query for metric %s", metric_prefix)
             raise
+
+        # `1` is Mongo default value for commands that are collection agnostics.
+        if str(mongo_command_value) == '1':
+            # https://github.com/mongodb/mongo-python-driver/blob/01e34cebdb9aac96c72ddb649e9b0040a0dfd3a0/pymongo/aggregation.py#L208
+            collection_name = '{}.{}'.format(db_name, mongo_command)
+        else:
+            collection_name = mongo_command_value
+
+        tags.append('collection:{}'.format(collection_name))
+        tags.extend(raw_query.get('tags', []))
 
         if mongo_command == 'count':
             # A count query simply returns a number, no need to iterate through it.

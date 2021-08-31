@@ -48,7 +48,7 @@ def assert_collection(aggregator, tags, runs=1):
 
     # Remove metrics that only appear occasionally
     for metric in list(metrics):
-        if metric.startswith(('vault.rollback.', 'vault.route.rollback.')):
+        if metric.startswith(('vault.rollback.', 'vault.route.rollback.', 'vault.cache.')):
             metrics.remove(metric)
 
     # Summaries
@@ -69,6 +69,8 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.runtime.total.gc.runs',
     ):
         summaries.remove(metric)
+
+    summaries = {metric for metric in summaries if not metric.startswith('vault.cache.')}
 
     for metric in summaries:
         metrics.remove(metric)

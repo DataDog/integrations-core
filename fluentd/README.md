@@ -36,7 +36,7 @@ In your Fluentd configuration file, add a `monitor_agent` source:
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your [Fluentd metrics](#metrics). See the [sample fluentd.d/conf.yaml][5] for all available configuration options.
 
@@ -52,7 +52,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 You can use the [Datadog FluentD plugin][7] to forward the logs directly from FluentD to your Datadog account.
 
@@ -60,7 +60,7 @@ You can use the [Datadog FluentD plugin][7] to forward the logs directly from Fl
 
 Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped via the [remapping for reserved attributes][8].
 
-###### Source and Custom tags
+###### Source and custom tags
 
 Add the `ddsource` attribute with [the name of the log integration][9] in your logs in order to trigger the [integration automatic setup][10] in Datadog.
 [Host tags][11] are automatically set on your logs if there is a matching hostname in your [infrastructure list][12]. Use the `ddtags` attribute to add custom tags to your logs:
@@ -109,8 +109,7 @@ Additional parameters can be used to change the endpoint used in order to go thr
 - `use_ssl`: Instructs the Agent to initialize a secure TCP/SSL connection to Datadog (default value: `true`).
 - `no_ssl_validation`: Disables SSL hostname validation (default value: `false`).
 
-
-This also can be used to send logs to **Datadog EU** by setting:
+**Note**: Set `host` and `port` to your region {{< region-param key="http_endpoint" code="true" >}} {{< region-param key="http_port" code="true" >}}.
 
 ```conf
 <match datadog.**>
@@ -178,8 +177,7 @@ The FluentD check does not include any events.
 
 ### Service Checks
 
-**fluentd.is_ok**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Fluentd to collect metrics, otherwise returns `OK`.
+See [service_checks.json][19] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -207,3 +205,4 @@ Need help? Contact [Datadog support][16].
 [16]: https://docs.datadoghq.com/help/
 [17]: https://www.datadoghq.com/blog/monitor-fluentd-datadog
 [18]: https://docs.datadoghq.com/agent/kubernetes/log/
+[19]: https://github.com/DataDog/integrations-core/blob/master/fluentd/assets/service_checks.json

@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev import EnvVars, run_command
 from datadog_checks.dev._env import E2E_PREFIX, TESTING_PLUGIN
-from datadog_checks.dev.utils import chdir, remove_path
+from datadog_checks.dev.fs import chdir, remove_path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE))))

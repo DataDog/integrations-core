@@ -5,11 +5,14 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.utils import get_check_files, get_default_config_spec, get_valid_integrations
+from datadog_checks.dev.tooling.annotations import annotate_error
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 
+from ...testing import process_checks_option
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
+
 EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
 REQUEST_LIBRARY_FUNCTIONS = {
@@ -21,6 +24,8 @@ REQUEST_LIBRARY_FUNCTIONS = {
     'requests.delete',
     'requests.options',
 }
+
+TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
 
 
 def validate_config_http(file, check):
@@ -39,21 +44,29 @@ def validate_config_http(file, check):
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
         for _, line in enumerate(f):
-            if 'instances/http' in line or 'instances/openmetrics_legacy' in line:
+            if any('instances/{}'.format(temp) in line for temp in TEMPLATES):
                 has_instance_http = True
-            if 'init_config/http' in line or 'init_config/openmetrics_legacy' in line:
+
+            if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
                 has_init_config_http = True
 
+            if has_init_config_http and has_instance_http:
+                break
+
     if not has_instance_http:
-        echo_failure(
+        message = (
             f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
         )
+        echo_failure(message)
+        annotate_error(file, message)
         has_failed = True
 
     if not has_init_config_http:
-        echo_failure(
+        message = (
             f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
         )
+        echo_failure(message)
+        annotate_error(file, message)
         has_failed = True
 
     return has_failed
@@ -78,6 +91,11 @@ def validate_use_http_wrapper_file(file, check):
                     echo_failure(
                         f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
                         f'please use the HTTP wrapper instead'
+                    )
+                    annotate_error(
+                        file,
+                        "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
+                        line=num + 1,
                     )
                     has_failed = True
 
@@ -104,12 +122,16 @@ def validate_use_http_wrapper(check):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate usage of http wrapper')
-def http():
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def http(check):
     """Validate all integrations for usage of http wrapper."""
 
     has_failed = False
-    echo_info("Validating all integrations for usage of http wrapper...")
-    for check in sorted(get_valid_integrations()):
+
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating {len(checks)} integrations for usage of http wrapper...")
+
+    for check in checks:
         check_uses_http_wrapper = False
 
         # Validate use of http wrapper (self.http.[...]) in check's .py files
