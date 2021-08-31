@@ -76,7 +76,11 @@ def dashboards(check):
                 missing_fields = REQUIRED_ATTRIBUTES.difference(all_keys)
                 file_failed = True
                 display_queue.append(
-                    (echo_failure, f"    {dashboard_filename} does not contain the required fields: {', '.join(sorted(missing_fields))}"),
+                    (
+                        echo_failure,
+                        f"    {dashboard_filename} does not contain the required fields: "
+                        f"{', '.join(sorted(missing_fields))}",
+                    ),
                 )
 
             # Confirm the dashboard payload comes from the old API for now
