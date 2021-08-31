@@ -101,7 +101,7 @@ def test_service_with_socket_ok(instance_socket, aggregator, dd_run_check):
     See https://docs.docker.com/docker-for-mac/osxfs/#file-types
     See open PR https://github.com/docker/for-mac/issues/483
     """
-    check = Memcache('mcache', None, {}, [instance_socket])
+    check = Memcache('mcache', {}, [instance_socket])
     dd_run_check(check)
 
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
