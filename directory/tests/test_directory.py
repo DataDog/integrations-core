@@ -10,8 +10,8 @@ import mock
 import pytest
 
 from datadog_checks.base.errors import CheckException, ConfigurationError
-from datadog_checks.dev.utils import create_file
-from datadog_checks.dev.utils import temp_dir as temp_directory
+from datadog_checks.dev.fs import create_file
+from datadog_checks.dev.fs import temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
 
 from . import common
@@ -274,6 +274,19 @@ def test_file_metrics_many(aggregator):
 
         # Raises when coverage < 100%
         assert aggregator.metrics_asserted_pct == 100.0
+
+
+def test_omit_histograms(aggregator, dd_run_check):
+    check = DirectoryCheck('directory', {}, [{'directory': temp_dir + '/main', 'submit_histograms': False}])
+    dd_run_check(check)
+
+    aggregator.assert_metric('system.disk.directory.bytes', count=1)
+    aggregator.assert_metric('system.disk.directory.files', count=1)
+    aggregator.assert_metric('system.disk.directory.file.bytes', count=0)
+    aggregator.assert_metric('system.disk.directory.file.modified_sec_ago', count=0)
+    aggregator.assert_metric('system.disk.directory.file.created_sec_ago', count=0)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def test_non_existent_directory(aggregator):

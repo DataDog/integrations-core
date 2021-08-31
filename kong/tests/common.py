@@ -10,6 +10,7 @@ CHECK_NAME = 'kong'
 HOST = get_docker_hostname()
 PORT = 8001
 
+METRICS_URL = 'http://{}:{}/metrics'.format(HOST, PORT)
 STATUS_URL = 'http://{}:{}/status/'.format(HOST, PORT)
 
 instance_1 = {'kong_status_url': STATUS_URL, 'tags': ['first_instance']}

@@ -54,7 +54,7 @@ CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated'
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
-BETA_PACKAGES = {'datadog_checks_dev', 'datadog_checks_downloader'}
+BETA_PACKAGES = {}
 
 NOT_CHECKS = {'datadog_checks_dev'}
 
@@ -139,3 +139,7 @@ def get_integration_changelog(check):
     Return the full path to the integration changelog.
     """
     return os.path.join(get_root(), check, 'CHANGELOG.md')
+
+
+def get_license_attribution_file():
+    return os.path.join(get_root(), 'LICENSE-3rdparty.csv')

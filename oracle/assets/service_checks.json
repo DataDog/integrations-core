@@ -11,6 +11,6 @@
             "server"
         ],
         "name": "Can Connect",
-        "description": "Returns OK if the integration can connect to the oracle database, CRITICAL otherwise"
+        "description": "Returns OK if the integration can connect to the oracle database and can run all the queries, CRITICAL otherwise"
     }
 ]

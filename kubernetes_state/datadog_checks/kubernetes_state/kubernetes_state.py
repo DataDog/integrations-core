@@ -32,13 +32,14 @@ ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
     'job': 'kube_job',
+    'job_name': 'kube_job',
     'cronjob': 'kube_cronjob',
     'pod': 'pod_name',
     'phase': 'pod_phase',
     'daemonset': 'kube_daemon_set',
     'replicationcontroller': 'kube_replication_controller',
     'replicaset': 'kube_replica_set',
-    'statefulset ': 'kube_stateful_set',
+    'statefulset': 'kube_stateful_set',
     'deployment': 'kube_deployment',
     'container': 'kube_container_name',
     'container_id': 'container_id',
@@ -104,6 +105,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'metric_name': 'deployment.count',
                 'allowed_labels': ['namespace'],
             },
+            'kube_statefulset_status_observed_generation': {
+                'metric_name': 'statefulset.count',
+                'allowed_labels': ['namespace'],
+            },
         }
 
         self.METRIC_TRANSFORMERS = {
@@ -130,6 +135,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
+            'kube_statefulset_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -322,7 +328,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicationcontroller_metadata_generation',
                     'kube_replicationcontroller_status_observed_generation',
                     'kube_statefulset_metadata_generation',
-                    'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
                     # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
@@ -477,18 +482,25 @@ class KubernetesState(OpenMetricsBaseCheck):
         if bool(sample[self.SAMPLE_VALUE]) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
 
+        metric_name = scraper_config['namespace'] + '.node.by_condition'
+        metric_tags = []
+        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            metric_tags += self._build_tags(label_name, label_value, scraper_config)
+        self.gauge(
+            metric_name,
+            sample[self.SAMPLE_VALUE],
+            tags=tags + metric_tags,
+            hostname=self.get_hostname_for_sample(sample, scraper_config),
+        )
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, sample[self.SAMPLE_LABELS])
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
 
-        node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
-        condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-        message = "{} is currently reporting {} = {}".format(node, condition, label_value)
-
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle %s - unknown condition %s", service_check_name, label_value)
         else:
-            self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
+            self.service_check(service_check_name, mapping[label_value], tags=tags)
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':

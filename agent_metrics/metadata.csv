@@ -49,7 +49,7 @@ datadog.agent.memstats.alloc,gauge,,,,,0,agent_metrics,mem alloc
 datadog.agent.memstats.free,gauge,,,,,0,agent_metrics,mem free
 datadog.agent.memstats.heap_alloc,gauge,,,,,0,agent_metrics,mem heap alloc
 datadog.agent.memstats.heap_idle,gauge,,,,,0,agent_metrics,mem heap idle
-datadog.agent.memstats.heap_insue,gauge,,,,,0,agent_metrics,mem heap insue
+datadog.agent.memstats.heap_inuse,gauge,,,,,0,agent_metrics,mem heap inuse
 datadog.agent.memstats.heap_objects,gauge,,,,,0,agent_metrics,mem heap objects
 datadog.agent.memstats.heap_released,gauge,,,,,0,agent_metrics,mem heap released
 datadog.agent.memstats.heap_sys,gauge,,,,,0,agent_metrics,mem heap sys

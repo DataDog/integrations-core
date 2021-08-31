@@ -33,7 +33,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -75,7 +75,7 @@ To configure this check for an Agent running on a host:
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-#### Metric Collection
+#### Metric collection
 
 | Parameter            | Value                                                      |
 |----------------------|------------------------------------------------------------|
@@ -104,21 +104,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][8] for a list of metrics provided by this check.
 
-### Service Checks
-
-**proxysql.can_connect**:<br>
-Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`. This service check is tagged by `server` and `port`
-
-**proxysql.backend.status**:<br>
-Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise. This service check is tagged by `hostgroup`, `srv_host` and `srv_port`.
-
 ### Events
 
 The ProxySQL check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
+
 
 [1]: https://proxysql.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -131,3 +128,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/help/
 [11]: https://docs.datadoghq.com/help
+[12]: https://github.com/DataDog/integrations-core/blob/master/proxysql/assets/service_checks.json

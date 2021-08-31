@@ -27,16 +27,44 @@ def test_down(aggregator):
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
 
 
-def test_reattempt_resolution():
+def test_reattempt_resolution_on_error():
     instance = deepcopy(common.INSTANCE)
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    check.check(instance)
 
-    def failed_connection(self):
-        raise Exception()
+    assert check.ip_cache_duration is None
 
-    check.connect = failed_connection
-
+    # IP is not normally re-resolved after the first check run
     with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+        check.check(instance)
+        assert not resolve_ip.called
+
+    # Upon connection failure, cached resolved IP is cleared
+    with mock.patch.object(check, 'connect', wraps=check.connect) as connect:
+        connect.side_effect = lambda self: Exception()
+        check.check(instance)
+        assert check._addr is None
+
+    # On next check run IP is re-resolved
+    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+        check.check(instance)
+        assert resolve_ip.called
+
+
+def test_reattempt_resolution_on_duration():
+    instance = deepcopy(common.INSTANCE)
+    instance['ip_cache_duration'] = 0
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    check.check(instance)
+
+    assert check.ip_cache_duration is not None
+
+    # ip_cache_duration = 0 means IP is re-resolved every check run
+    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+        check.check(instance)
+        assert resolve_ip.called
+        check.check(instance)
+        assert resolve_ip.called
         check.check(instance)
         assert resolve_ip.called
 

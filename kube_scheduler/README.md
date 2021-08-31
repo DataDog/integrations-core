@@ -4,6 +4,8 @@
 
 This check monitors [Kubernetes Scheduler][1], part of the Kubernetes control plane.
 
+**Note**: This check does not collect data for Amazon EKS clusters, as those services are not exposed.
+
 ## Setup
 
 ### Installation
@@ -39,18 +41,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**kube_scheduler.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, otherwise returns `OK`.
-
 ### Events
 
 Kube Scheduler does not include any events.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/datadog_checks/kube_scheduler/data/conf.yaml.example
@@ -62,3 +64,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/assets/service_checks.json

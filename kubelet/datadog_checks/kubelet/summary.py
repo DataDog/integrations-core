@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+from fnmatch import fnmatch
+
 from datadog_checks.base.utils.tagging import tagger
 
 from .common import replace_container_rt_prefix, tags_for_docker, tags_for_pod
@@ -49,13 +51,16 @@ class SummaryScraperMixin(object):
         # Metrics below should already be gathered by another mean (cadvisor endpoints)
         if not main_stats_source:
             return
-
-        rx_bytes = pod.get('network', {}).get('rxBytes')
-        if rx_bytes:
-            self.rate(self.NAMESPACE + '.network.rx_bytes', rx_bytes, pod_tags)
-        tx_bytes = pod.get('network', {}).get('txBytes')
-        if tx_bytes:
-            self.rate(self.NAMESPACE + '.network.tx_bytes', tx_bytes, pod_tags)
+        # Processing summary based network level metrics
+        net_pod_metrics = {'rxBytes': 'kubernetes.network.rx_bytes', 'txBytes': 'kubernetes.network.tx_bytes'}
+        for k, v in net_pod_metrics.items():
+            # ensure we can filter out metrics per the configuration.
+            pod_level_match = any([fnmatch(v, p) for p in self.pod_level_metrics])
+            enabled_rate = any([fnmatch(v, p) for p in self.enabled_rates])
+            if pod_level_match and enabled_rate:
+                net_bytes = pod.get('network', {}).get(k)
+                if net_bytes:
+                    self.rate(v, net_bytes, pod_tags)
 
     def _report_container_stats(
         self, pod_namespace, pod_name, containers, pod_list_utils, instance_tags, main_stats_source

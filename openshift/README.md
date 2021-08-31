@@ -43,16 +43,16 @@ Depending on your needs and the [security constraints][3] of your cluster, three
 
 | Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host) | [Custom](#custom-datadog-scc-for-all-features) |
 |--------------------------------|------------------------------------------|-----------------------|------------------------------------------------|
-| Kubernetes layer monitoring    | ✅                                       | ✅                     | ✅                                             |
-| Kubernetes-based Autodiscovery | ✅                                       | ✅                     | ✅                                             |
-| Dogstatsd intake               | 🔶                                       | ✅                     | ✅                                             |
-| APM trace intake               | 🔶                                       | ✅                     | ✅                                             |
-| Logs network intake            | 🔶                                       | ✅                     | ✅                                             |
-| Host network metrics           | ❌                                       | ❌                     | ✅                                             |
-| Docker layer monitoring        | ❌                                       | ❌                     | ✅                                             |
-| Container logs collection      | ❌                                       | ❌                     | ✅                                             |
-| Live Container monitoring      | ❌                                       | ❌                     | ✅                                             |
-| Live Process monitoring        | ❌                                       | ❌                     | ✅                                             |
+| Kubernetes layer monitoring    | Supported                                | Supported             | Supported                                             |
+| Kubernetes-based Autodiscovery | Supported                                | Supported             | Supported                                             |
+| Dogstatsd intake               | Not supported                            | Supported             | Supported                                             |
+| APM trace intake               | Not supported                            | Supported             | Supported                                             |
+| Logs network intake            | Not supported                            | Supported             | Supported                                             |
+| Host network metrics           | Not supported                            | Supported             | Supported                                             |
+| Docker layer monitoring        | Not supported                            | Not supported         | Supported                                             |
+| Container logs collection      | Not supported                            | Not supported         | Supported                                             |
+| Live Container monitoring      | Not supported                            | Not supported         | Supported                                             |
+| Live Process monitoring        | Not supported                            | Not supported         | Supported                                             |
 
 <div class="alert alert-warning">
 <bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
@@ -72,7 +72,7 @@ This mode does not require granting special permissions to the [`datadog-agent` 
 
 The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Datadog Agent to a host port. This way, the target IP is constant and easily discoverable by your applications. As the default restricted OpenShift SCC does not allow to bind to host port, you can set the Agent to listen on it's own IP, but you will need to handle the discovery of that IP from your application.
 
-The Agent suports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
+The Agent supports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
 #### Host
 
@@ -145,4 +145,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset

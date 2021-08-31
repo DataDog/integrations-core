@@ -134,7 +134,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 `INSTANCE_CONFIG` needs to be customized depending on your vault authentication config. See example in Host section above. 
 
-#### Log Collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -197,17 +197,7 @@ This event fires when the cluster leader changes.
 
 ### Service Checks
 
-**vault.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Vault, otherwise `OK`.
-
-**vault.unsealed**:<br>
-Returns `CRITICAL` if Vault is sealed, otherwise `OK`.
-
-**vault.initialized**:<br>
-Returns `CRITICAL` if Vault is not yet initialized, otherwise `OK`.
-
-**vault.prometheus.health**:<br>
-Returns `CRITICAL` if the check cannot access the metrics endpoint. Otherwise, returns `OK`.
+See [service_checks.json][20] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -218,6 +208,9 @@ Need help? Contact [Datadog support][9].
 Additional helpful documentation, links, and articles:
 
 - [Monitor HashiCorp Vault with Datadog][10]
+- [Monitor HashiCorp Vault metrics and logs][17]
+- [Tools for HashiCorp Vault monitoring][18]
+- [How to monitor HashiCorp Vault with Datadog][19]
 
 [1]: https://www.vaultproject.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -235,3 +228,7 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
 [15]: https://www.vaultproject.io/docs/auth
 [16]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus
+[17]: https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/
+[18]: https://www.datadoghq.com/blog/vault-monitoring-tools
+[19]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog
+[20]: https://github.com/DataDog/integrations-core/blob/master/vault/assets/service_checks.json

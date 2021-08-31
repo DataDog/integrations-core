@@ -6,8 +6,8 @@ import os
 import pytest
 from mock import MagicMock, Mock, patch
 
-from .common import LAB_INSTANCE
-from .mocked_api import MockedAPI, mock_http_rest_api
+from .common import LAB_INSTANCE, VSPHERE_VERSION
+from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
 try:
     from contextlib import ExitStack
@@ -30,6 +30,7 @@ def realtime_instance():
         'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
         'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
         'ssl_verify': False,
+        'rest_api_options': None,
     }
 
 
@@ -99,5 +100,9 @@ def mock_api():
 
 @pytest.fixture
 def mock_rest_api():
-    with patch('requests.api.request', mock_http_rest_api):
-        yield
+    if VSPHERE_VERSION.startswith('7.'):
+        with patch('requests.api.request', mock_http_rest_api_v7):
+            yield
+    else:
+        with patch('requests.api.request', mock_http_rest_api_v6):
+            yield

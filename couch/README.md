@@ -26,7 +26,7 @@ The CouchDB check is included in the [Datadog Agent][2] package, so you don't ne
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your CouchDB performance data. See the [sample couch.d/conf.yaml][4] for all available configuration options:
 
@@ -112,8 +112,7 @@ The Couch check does not include any events.
 
 ### Service Checks
 
-**couchdb.can_connect**:<br>
-Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics, otherwise returns `OK`.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -134,3 +133,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog
+[12]: https://github.com/DataDog/integrations-core/blob/master/couch/assets/service_checks.json

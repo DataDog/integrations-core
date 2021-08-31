@@ -8,12 +8,12 @@ import re
 import click
 import requests
 
-from ....utils import ensure_dir_exists, path_join, write_file
+from ....fs import ensure_dir_exists, path_join, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_success
 
-BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.*'
+BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)'
 DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
 REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
 
@@ -38,32 +38,33 @@ def export(ctx, url, integration, author):
     if integration and integration not in get_valid_integrations():
         abort(f'Unknown integration `{integration}`')
 
-    org = ctx.obj['org']
-    if not org:
+    org_name = ctx.obj['org']
+    if not org_name:
         abort('No `org` has been set')
 
-    if org not in ctx.obj['orgs']:
-        abort(f'Selected org {org} is not in `orgs`')
+    if org_name not in ctx.obj['orgs']:
+        abort(f'Selected org {org_name} is not in `orgs`')
 
-    org = ctx.obj['orgs'][org]
+    org = ctx.obj['orgs'][org_name]
 
     api_key = org.get('api_key')
     if not api_key:
-        abort(f'No `api_key` has been set for org `{org}`')
+        abort(f'No `api_key` has been set for org `{org_name}`')
 
     app_key = org.get('app_key')
     if not app_key:
-        abort(f'No `app_key` has been set for org `{org}`')
+        abort(f'No `app_key` has been set for org `{org_name}`')
 
     site = org.get('site')
     if not site:
-        abort(f'No `site` has been set for org `{org}`')
+        abort(f'No `site` has been set for org `{org_name}`')
 
-    match = re.search(BOARD_ID_PATTERN.format(site=re.escape(site)), url)
+    url_pattern = BOARD_ID_PATTERN.format(site=re.escape(site))
+    match = re.search(url_pattern, url)
     if match:
         board_id = match.group(1)
     else:
-        abort('Invalid `url`')
+        abort(f"Invalid `url`, does not match pattern `{url_pattern}` for org `{org_name}`")
 
     try:
         response = requests.get(
@@ -92,7 +93,7 @@ def export(ctx, url, integration, author):
                 match = display_name
 
         if match:
-            new_file_name = file_name.replace(match, '', 1).strip()
+            new_file_name = file_name.replace(match, '', 1).strip(" -")
             if new_file_name:
                 file_name = new_file_name
 

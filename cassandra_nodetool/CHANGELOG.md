@@ -1,6 +1,10 @@
 # CHANGELOG - Cassandra Nodetool Check
 
-## 1.7.1 / 2021-03-07
+## 1.8.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8891](https://github.com/DataDog/integrations-core/pull/8891).
+
+## 1.7.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

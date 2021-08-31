@@ -87,8 +87,7 @@ The Mesos-master check does not include any events.
 
 ### Service Checks
 
-**mesos_master.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -107,3 +106,4 @@ Need help? Contact [Datadog support][6].
 [7]: https://www.datadoghq.com/blog/deploy-datadog-dcos
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
+[10]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/assets/service_checks.json

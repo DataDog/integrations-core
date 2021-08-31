@@ -18,7 +18,7 @@ The HDFS DataNode check is included in the [Datadog Agent][3] package, so you do
 
 ### Configuration
 
-#### Prepare the DataNode
+#### Prepare the node
 
 1. The Agent collects metrics from the DataNode's JMX remote interface. The interface is disabled by default, enable it by setting the following option in `hadoop-env.sh` (usually found in $HADOOP_HOME/conf):
 
@@ -33,7 +33,7 @@ The HDFS DataNode check is included in the [Datadog Agent][3] package, so you do
 
 #### Connect the Agent
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -116,8 +116,7 @@ The HDFS-datanode check does not include any events.
 
 ### Service Checks
 
-**hdfs.datanode.jmx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -143,3 +142,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
+[14]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/assets/service_checks.json

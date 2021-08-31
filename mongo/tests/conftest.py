@@ -45,7 +45,7 @@ def dd_environment():
             WaitFor(create_shard_user, attempts=60, wait=5),
         ],
     ):
-        yield common.INSTANCE_BASIC, {'custom_hosts': get_custom_hosts()}
+        yield common.INSTANCE_CUSTOM_QUERIES, {'custom_hosts': get_custom_hosts()}
 
 
 def get_custom_hosts():
@@ -75,47 +75,7 @@ def instance_authdb():
 
 @pytest.fixture
 def instance_custom_queries():
-    instance = copy.deepcopy(common.INSTANCE_USER)
-    instance['custom_queries'] = [
-        {
-            'metric_prefix': 'dd.custom.mongo.query_a',
-            'query': {'find': 'orders', 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
-            'fields': [
-                {'field_name': 'cust_id', 'name': 'cluster_id', 'type': 'tag'},
-                {'field_name': 'status', 'name': 'status_tag', 'type': 'tag'},
-                {'field_name': 'amount', 'name': 'amount', 'type': 'count'},
-                {'field_name': 'elements', 'name': 'el', 'type': 'count'},
-            ],
-            'tags': ['tag1:val1', 'tag2:val2'],
-        },
-        {
-            'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
-            'database': 'test',
-            'metric_prefix': 'dd.custom.mongo.count',
-            'tags': ['tag1:val1', 'tag2:val2'],
-            'count_type': 'gauge',
-        },
-        {
-            'query': {
-                'aggregate': 'orders',
-                'pipeline': [
-                    {'$match': {'status': 'A'}},
-                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
-                    {'$sort': {'total': -1}},
-                ],
-                'cursor': {},
-            },
-            'database': 'test2',
-            'fields': [
-                {'field_name': 'total', 'name': 'total', 'type': 'count'},
-                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
-            ],
-            'metric_prefix': 'dd.custom.mongo.aggregate',
-            'tags': ['tag1:val1', 'tag2:val2'],
-        },
-    ]
-
-    return instance
+    return copy.deepcopy(common.INSTANCE_CUSTOM_QUERIES)
 
 
 @pytest.fixture
@@ -215,7 +175,7 @@ class InitializeDB(LazyFunction):
             {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
         ]
 
-        for db_name in ['test', 'test2']:
+        for db_name in ['test', 'test2', 'admin']:
             db = cli[db_name]
             db.foo.insert_many(foos)
             db.bar.insert_many(bars)

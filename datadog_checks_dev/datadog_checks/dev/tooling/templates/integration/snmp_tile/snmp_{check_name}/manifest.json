@@ -3,7 +3,6 @@
   "maintainer": "{email}",
   "manifest_version": "1.0.0",
   "name": "snmp_{check_name}",
-  "metric_prefix": "snmp.",
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "Collect SNMP metrics from your {integration_name} network devices.",

@@ -10,7 +10,8 @@ ALLOWED_RESOURCES_FOR_FILTERS = ['database', 'forest', 'host', 'server']
 BASE_ENDPOINT = '/manage/v2'
 
 RESOURCE_TYPES = {
-    'cluster': {'plural': None, 'singular': 'cluster', 'tag_name': 'cluster_name'},
+    'cluster': {'plural': 'clusters', 'singular': 'cluster', 'tag_name': 'cluster_name'},
+    'clusters': {'plural': 'clusters', 'singular': 'cluster', 'tag_name': 'cluster_name'},
     'forest': {'plural': 'forests', 'singular': 'forest', 'tag_name': 'forest_name'},
     'forests': {'plural': 'forests', 'singular': 'forest', 'tag_name': 'forest_name'},
     'database': {'plural': 'databases', 'singular': 'database', 'tag_name': 'database_name'},

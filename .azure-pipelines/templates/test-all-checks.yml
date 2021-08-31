@@ -4,6 +4,7 @@ parameters:
   run_py2_tests: true
   force_base_package: false
   test_e2e: true
+  ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -12,6 +13,7 @@ jobs:
     run_py2_tests: ${{ parameters.run_py2_tests }}
     force_base_package: ${{ parameters.force_base_package }}
     test_e2e: ${{ parameters.test_e2e }}
+    ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -55,12 +57,12 @@ jobs:
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
-    - checkName: azure_iot_edge
-      displayName: Azure IoT Edge
+    - checkName: avi_vantage
+      displayName: Avi Vantage
       os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
-      os: windows
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
@@ -108,6 +110,9 @@ jobs:
       os: linux
     - checkName: crio
       displayName: CRI-O
+      os: linux
+    - checkName: datadog_cluster_agent
+      displayName: Datadog Cluster Agent
       os: linux
     - checkName: directory
       displayName: Directory
@@ -323,7 +328,7 @@ jobs:
       displayName: Oracle Database
       os: linux
     - checkName: pdh_check
-      displayName: PDH
+      displayName: PDH (Windows)
       os: windows
     - checkName: pgbouncer
       displayName: PGBouncer

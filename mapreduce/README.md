@@ -87,13 +87,7 @@ The Mapreduce check does not include any events.
 
 ### Service Checks
 
-**mapreduce.resource_manager.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Resource Manager.
-Returns `OK` otherwise.
-
-**mapreduce.application_master.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Application Master.
-Returns `OK` otherwise.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -120,3 +114,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
 [14]: https://docs.datadoghq.com/agent/docker/log/
+[15]: https://github.com/DataDog/integrations-core/blob/master/mapreduce/assets/service_checks.json

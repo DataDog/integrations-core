@@ -6,7 +6,7 @@ import os
 from pkg_resources import parse_version
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 HERE = get_here()
 
@@ -16,6 +16,8 @@ IGNITE_VERSION = os.environ.get('IGNITE_VERSION', '')
 IS_PRE_2_9 = False if not IGNITE_VERSION else parse_version(IGNITE_VERSION) < parse_version('2.9')
 
 GAUGES = [
+    'ignite.total_allocated_size',
+    'ignite.total_allocated_pages',
     'ignite.cache.offheap_miss_percentage',
     'ignite.jobs.wait_time.maximum',
     'ignite.cache.size',
@@ -163,7 +165,7 @@ GAUGES = [
     'ignite.jobs.waiting.average',
     'ignite.checkpoint.last_copied_on_write_pages',
     'ignite.wal.last_rollover',
-] + JVM_E2E_METRICS
+] + JVM_E2E_METRICS_NEW
 
 if IS_PRE_2_9:
     GAUGES += [
@@ -212,8 +214,6 @@ MONOTONIC_COUNTS = [
     "ignite.sent_messages",
     "ignite.threads.completed_tasks",
     "ignite.threads.tasks",
-    "ignite.total_allocated_pages",
-    "ignite.total_allocated_size",
     "ignite.total_executed_tasks",
     "ignite.total_started_threads",
     "ignite.transaction.committed",
