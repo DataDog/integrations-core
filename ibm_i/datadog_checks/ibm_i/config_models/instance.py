@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,14 +20,14 @@ class InstanceConfig(BaseModel):
     connection_string: Optional[str]
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
-    job_query_timeout: Optional[int]
+    job_query_timeout: Optional[int] = Field(None, gt=0.0)
     min_collection_interval: Optional[float]
     password: Optional[str]
-    query_timeout: Optional[int]
+    query_timeout: Optional[int] = Field(None, gt=0.0)
     service: Optional[str]
-    severity_threshold: Optional[int]
+    severity_threshold: Optional[int] = Field(None, ge=0.0, le=99.0)
     system: Optional[str]
-    system_mq_query_timeout: Optional[int]
+    system_mq_query_timeout: Optional[int] = Field(None, gt=0.0)
     tags: Optional[Sequence[str]]
     username: Optional[str]
 
