@@ -325,7 +325,7 @@ def test_failed_explain_handling(
     check.check(dbm_instance)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
-    aggregator.__init__()
+    aggregator.reset()
 
     db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
     assert db_explain_error is None
