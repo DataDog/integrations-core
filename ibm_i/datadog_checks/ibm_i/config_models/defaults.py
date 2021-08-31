@@ -21,7 +21,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_job_query_timeout(field, value):
-    return 600
+    return 240
 
 
 def instance_min_collection_interval(field, value):
@@ -49,7 +49,7 @@ def instance_system(field, value):
 
 
 def instance_system_mq_query_timeout(field, value):
-    return 60
+    return 80
 
 
 def instance_tags(field, value):
