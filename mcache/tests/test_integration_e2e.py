@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.mcache import Memcache
+
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
 from .metrics import GAUGES, ITEMS_GAUGES, ITEMS_RATES, RATES, SLABS_AGGREGATES, SLABS_GAUGES, SLABS_RATES
 from .utils import count_connections, get_host_socket_path
-from datadog_checks.mcache import Memcache
 
 
 def assert_check_coverage(aggregator):
