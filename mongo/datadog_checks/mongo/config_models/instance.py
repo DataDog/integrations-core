@@ -43,7 +43,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
     empty_default_hostname: Optional[bool]
-    hosts: Sequence[str]
+    hosts: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     options: Optional[Mapping[str, Any]]
     password: Optional[str]

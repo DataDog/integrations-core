@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
     - name: hosts
-      required: true
+      enabled: true
       description: |
         The host (and optional port number) where the mongod instance (or mongos instances for
         a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
