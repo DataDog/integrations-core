@@ -36,6 +36,9 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               datadog/agent:latest
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Configuration
 
 1. Edit the `systemd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
@@ -43,9 +46,6 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
    See the [sample systemd.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 
