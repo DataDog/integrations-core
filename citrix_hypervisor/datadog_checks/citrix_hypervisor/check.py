@@ -173,8 +173,7 @@ class CitrixHypervisorCheck(AgentCheck):
             if software_version.get('Status') != 'Success':
                 self.log.warning('get_software_version call failed: %s', str(software_version))
 
-            product_version = software_version.get('product_version')
-
+            product_version = software_version['Value'].get('product_version')
             if product_version:
                 self.set_metadata('version', product_version)
         except Exception as e:

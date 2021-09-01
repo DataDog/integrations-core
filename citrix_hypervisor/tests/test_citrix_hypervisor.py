@@ -10,30 +10,9 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-SESSION_MASTER = {
-    'Status': 'Success',
-    'Value': 'OpaqueRef:c908ccc4-4355-4328-b07d-c85dc7242b03',
-}
-SESSION_SLAVE = {
-    'Status': 'Failure',
-    'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102'],
-}
-SESSION_ERROR = {
-    'Status': 'Failure',
-    'ErrorDescription': ['SESSION_AUTHENTICATION_FAILED'],
-}
+from .common import SESSION_MASTER, mocked_xenserver
 
-SERVER_TYPE_SESSION_MAP = {
-    'master': SESSION_MASTER,
-    'slave': SESSION_SLAVE,
-    'error': SESSION_ERROR,
-}
-
-
-def mocked_xenserver(server_type):
-    xenserver = mock.MagicMock()
-    xenserver.session.login_with_password.return_value = SERVER_TYPE_SESSION_MAP.get(server_type, {})
-    return xenserver
+pytestmark = pytest.mark.unit
 
 
 def _assert_metrics(aggregator, custom_tags, count=1):
@@ -95,7 +74,6 @@ def test_open_session(instance, side_effect, expected_session, tag):
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.unit
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
 def test_check(aggregator, instance, server_type):
     with mock.patch('six.moves.xmlrpc_client.Server', return_value=mocked_xenserver(server_type)):
@@ -109,7 +87,6 @@ def test_check(aggregator, instance, server_type):
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.unit
 @pytest.mark.parametrize(
     'url, expected_status',
     [
@@ -126,7 +103,6 @@ def test_service_check(aggregator, url, expected_status):
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.unit
 def test_initialization(caplog):
     caplog.clear()
     caplog.set_level(logging.WARNING)
