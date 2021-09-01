@@ -7,7 +7,6 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import six
-from jsonpointer import resolve_pointer, set_pointer
 
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
 from .warn import warning
@@ -93,15 +92,35 @@ class TempDir(object):
 
 
 class JSONDict(dict):
-    """Subclass of dict which adds jsonpointer access method"""
+    """Subclass of dict which adds jsonpointer-like access methods"""
+
+    def _resolve(self, path):
+        parts = path.lstrip('/').split('/')
+
+        obj = self
+        for p in parts:
+            # first try to convert integer refs
+            try:
+                p = int(p)
+            except Exception:
+                pass
+
+            try:
+                obj = obj[p]
+            except KeyError:
+                return None
+
+        return obj
 
     def get_path(self, path):
-        try:
-            value = resolve_pointer(self, path)
-        except Exception:
-            value = None
-        return value
+        return self._resolve(path)
 
     def set_path(self, path, value):
-        # note we don't catch exceptions
-        set_pointer(self, path, value)
+        # resolve the containing object
+        *obj_path, tail = path.lstrip('/').split('/')
+
+        obj = self
+        if obj_path:
+            obj = self._resolve('/'.join(obj_path))
+
+        obj[tail] = value
