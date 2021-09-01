@@ -31,6 +31,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     password: str
+    persist_db_connections: Optional[bool]
     port: Optional[int]
     server: str
     service: Optional[str]
@@ -46,7 +47,6 @@ class InstanceConfig(BaseModel):
     use_hana_hostnames: Optional[bool]
     use_tls: Optional[bool]
     username: str
-    persist_db_connections: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
