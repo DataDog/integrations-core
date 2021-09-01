@@ -62,7 +62,7 @@ class SapHanaCheck(AgentCheck):
         self._connection_lost = False
 
         # Whether or not to persist database connection
-        self._persist_db_connections = self.instance.get('persist_db_connections')
+        self._persist_db_connections = self.instance.get('persist_db_connections', True)
 
         # Whether or not to use the hostnames contained in the queried views
         self._use_hana_hostnames = is_affirmative(self.instance.get('use_hana_hostnames', False))
@@ -106,14 +106,15 @@ class SapHanaCheck(AgentCheck):
                 try:
                     self._conn.close()
                 except OperationalError:
-                    self.log.debug("Could not close lost connection")
+                    self.log.debug("Could not close lost connection.")
                 self._conn = None
                 self._connection_lost = False
             if not self._persist_db_connections:
+                self.log.debug("Refreshing database connection.")
                 try:
                     self._conn.close()
                 except OperationalError:
-                    self.log.debug("Could not close connection")
+                    self.log.debug("Could not close connection.")
                 self._conn = None
 
     def query_master_database(self):
