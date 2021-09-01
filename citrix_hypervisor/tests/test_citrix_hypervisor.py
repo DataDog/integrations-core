@@ -10,19 +10,29 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
+SESSION_MASTER = {
+    'Status': 'Success',
+    'Value': 'OpaqueRef:c908ccc4-4355-4328-b07d-c85dc7242b03',
+}
+SESSION_SLAVE = {
+    'Status': 'Failure',
+    'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102'],
+}
+SESSION_ERROR = {
+    'Status': 'Failure',
+    'ErrorDescription': ['SESSION_AUTHENTICATION_FAILED'],
+}
+
+SERVER_TYPE_SESSION_MAP = {
+    'master': SESSION_MASTER,
+    'slave': SESSION_SLAVE,
+    'error': SESSION_ERROR,
+}
+
 
 def mocked_xenserver(server_type):
     xenserver = mock.MagicMock()
-    if server_type == 'master':
-        xenserver.session.login_with_password.return_value = {
-            'Status': 'Success',
-            'Value': 'OpaqueRef:c908ccc4-4355-4328-b07d-c85dc7242b03',
-        }
-    else:
-        xenserver.session.login_with_password.return_value = {
-            'Status': 'Failure',
-            'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102'],
-        }
+    xenserver.session.login_with_password.return_value = SERVER_TYPE_SESSION_MAP.get(server_type, {})
     return xenserver
 
 
@@ -62,6 +72,26 @@ def _assert_metrics(aggregator, custom_tags, count=1):
 
     for m in METRICS:
         aggregator.assert_metric('citrix_hypervisor.{}'.format(m[0]), tags=m[1] + custom_tags, count=count)
+
+
+@pytest.mark.parametrize(
+    'side_effect, expected_session, tag',
+    [
+        pytest.param([mocked_xenserver('error')], {}, []),
+        pytest.param([mocked_xenserver('master')], SESSION_MASTER, ['server_type:master']),
+        pytest.param([mocked_xenserver('slave'), mocked_xenserver('master')], SESSION_MASTER, ['server_type:slave']),
+        pytest.param([mocked_xenserver('slave'), mocked_xenserver('error')], {}, ['server_type:slave']),
+        pytest.param(mock.Mock(side_effect=Exception('Error')), {}, []),
+        pytest.param([mocked_xenserver('slave'), mock.Mock(side_effect=Exception('Error'))], {}, ['server_type:slave']),
+    ],
+)
+def test_open_session(instance, side_effect, expected_session, tag):
+    with mock.patch('six.moves.xmlrpc_client.Server', side_effect=side_effect):
+        check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
+        session = check.open_session()
+
+        assert session == expected_session
+        assert tag == check._additional_tags
 
 
 @pytest.mark.usefixtures('mock_responses')

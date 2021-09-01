@@ -27,6 +27,7 @@ class CitrixHypervisorCheck(AgentCheck):
 
         self.tags = self.instance.get('tags', [])
         self.xenserver = None  # type: Any
+        self._additional_tags = []  # type: List[str]
 
         self.check_initializations.append(self._check_connection)
 
@@ -93,7 +94,7 @@ class CitrixHypervisorCheck(AgentCheck):
 
         master_session = self._session_login(master_xenserver)
 
-        if session.get('Status') == 'Success':
+        if master_session.get('Status') == 'Success':
             self.xenserver = master_xenserver
             return master_session
 
@@ -130,7 +131,7 @@ class CitrixHypervisorCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        self._additional_tags = []  # type: List[str]
+        self._additional_tags = []
         session = self.open_session()
         if session.get('Value'):
             ref = session['Value']
