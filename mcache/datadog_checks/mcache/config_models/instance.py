@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -17,26 +17,16 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
-    countonly: Optional[bool]
-    directory: str
-    dirs_patterns_full: Optional[bool]
-    dirtagname: Optional[str]
-    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    exclude_dirs: Optional[Sequence[str]]
-    filegauges: Optional[bool]
-    filetagname: Optional[str]
-    follow_symlinks: Optional[bool]
-    ignore_missing: Optional[bool]
     min_collection_interval: Optional[float]
-    name: Optional[str]
-    pattern: Optional[str]
-    recursive: Optional[bool]
+    options: Optional[Mapping[str, Any]]
+    password: Optional[str]
+    port: Optional[int]
     service: Optional[str]
-    stat_follow_symlinks: Optional[bool]
-    submit_histograms: Optional[bool]
+    socket: Optional[str]
     tags: Optional[Sequence[str]]
+    url: Optional[str]
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

@@ -31,6 +31,23 @@ def test__get_connection_instant_client(check, dd_run_check):
         service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
 
 
+def test__get_connection_instant_client_server_wrong(instance, dd_run_check):
+    """
+    Test the _get_connection method using the instant client when the server is formatted incorrectly
+    """
+    con = mock.MagicMock()
+    service_check = mock.MagicMock()
+    instance['server'] = 'localhost:1521a'
+    check = Oracle(CHECK_NAME, {}, [instance])
+    check.service_check = service_check
+    check.use_oracle_client = True
+    expected_tags = ['server:localhost:1521a', 'optional:tag1']
+    with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
+        cx.connect.return_value = con
+        dd_run_check(check)
+        service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
+
+
 def test__get_connection_jdbc(check, dd_run_check):
     """
     Test the _get_connection method using the JDBC client

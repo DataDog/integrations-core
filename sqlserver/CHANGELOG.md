@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 4.1.0 / 2021-08-31
+
+* [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).
+
 ## 4.0.0 / 2021-08-22
 
 * [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).

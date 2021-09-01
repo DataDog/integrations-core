@@ -153,6 +153,13 @@
                             "children": [
                                 {
                                     "spec": "VirtualMachine",
+                                    "name": "VM-on-fake-host",
+                                    "mo_id": "VM-fake-host",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "DOES_NOT_EXIST"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
                                     "name": "VM4-2",
                                     "mo_id": "VM4-2-1",
                                     "runtime.powerState": "on",

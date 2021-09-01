@@ -278,6 +278,80 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
     assert db_explain_error == expected_db_explain_error
 
 
+failed_explain_test_repeat_count = 5
+
+
+@pytest.mark.parametrize(
+    "query,expected_error_tag,explain_function_override,expected_fail_count",
+    [
+        ("select * from fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        ("select * from fake_schema.fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        (
+            "select * from pg_settings where name = $1",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            None,
+            1,
+        ),
+        (
+            "select * from pg_settings where name = 'this query is truncated' limi",
+            "error:explain-<class 'psycopg2.errors.SyntaxError'>",
+            None,
+            1,
+        ),
+        (
+            "select * from persons",
+            "error:explain-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "datadog.explain_statement_noaccess",
+            failed_explain_test_repeat_count,
+        ),
+    ],
+)
+def test_failed_explain_handling(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+    expected_error_tag,
+    explain_function_override,
+    expected_fail_count,
+):
+    dbname = "datadog_test"
+    if explain_function_override:
+        dbm_instance['query_samples']['explain_function'] = explain_function_override
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # run check so all internal state is correctly initialized
+    check.check(dbm_instance)
+
+    # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
+    aggregator.reset()
+
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error is None
+    assert err is None
+
+    for _ in range(failed_explain_test_repeat_count):
+        check.statement_samples._run_explain_safe(dbname, query, query, query)
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
+        expected_error_tag,
+    ]
+
+    aggregator.assert_metric(
+        # even though we tried to explain the query multiple times, only a single error was registered, showing
+        # that the cached error response was used
+        'dd.postgres.statement_samples.error',
+        count=expected_fail_count,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
+
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated",
@@ -473,7 +547,7 @@ def test_statement_run_explain_errors(
     check._connect()
 
     check.check(dbm_instance)
-    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query)
+    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err

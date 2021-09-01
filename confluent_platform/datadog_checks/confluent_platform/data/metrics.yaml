@@ -489,7 +489,7 @@ jmx_metrics:
           alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-size-max:
-          # The average number of bytes fetched per request.
+          # The maximum number of bytes fetched per request.
           alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         bytes-consumed-rate:
