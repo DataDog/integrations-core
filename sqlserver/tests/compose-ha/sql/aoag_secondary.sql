@@ -2,6 +2,17 @@
 USE [master]
 GO
 
+CREATE LOGIN bob WITH PASSWORD = 'hey-there-bob123';
+CREATE USER bob FOR LOGIN bob;
+GRANT CONNECT ANY DATABASE to bob;
+
+CREATE LOGIN datadog WITH PASSWORD = 'hey-there-datadog123';
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT on sys.dm_os_performance_counters to datadog;
+GRANT VIEW SERVER STATE to datadog;
+GRANT CONNECT ANY DATABASE to datadog;
+GRANT VIEW ANY DEFINITION to datadog;
+
 --create login for aoag
 -- this password could also be originate from an environemnt variable passed in to this script through SQLCMD
 -- it should however, match the password from the primary script
@@ -46,4 +57,3 @@ GO
 ALTER AVAILABILITY GROUP [AG1] JOIN WITH (CLUSTER_TYPE = NONE)
 ALTER AVAILABILITY GROUP [AG1] GRANT CREATE ANY DATABASE
 GO
-
