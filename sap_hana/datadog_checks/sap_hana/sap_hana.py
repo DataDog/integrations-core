@@ -61,6 +61,9 @@ class SapHanaCheck(AgentCheck):
         # Whether or not the connection was lost
         self._connection_lost = False
 
+        # Whether or not to persist database connection
+        self._persist_db_connections = self.instance.get('persist_db_connections')
+
         # Whether or not to use the hostnames contained in the queried views
         self._use_hana_hostnames = is_affirmative(self.instance.get('use_hana_hostnames', False))
 

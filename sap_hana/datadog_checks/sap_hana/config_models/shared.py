@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
+from xmlrpc.client import Boolean
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -19,6 +20,7 @@ class SharedConfig(BaseModel):
 
     global_custom_queries: Optional[Sequence[Mapping[str, Any]]]
     service: Optional[str]
+    persist_db_connections: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

@@ -12,6 +12,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_persist_db_connections(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_batch_size(field, value):
     return 1000
 
@@ -78,3 +82,7 @@ def instance_use_hana_hostnames(field, value):
 
 def instance_use_tls(field, value):
     return False
+
+
+def instance_persist_db_connections(field, value):
+    return get_default_field_value(field, value)
