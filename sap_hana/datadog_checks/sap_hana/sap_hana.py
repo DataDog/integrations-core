@@ -109,7 +109,7 @@ class SapHanaCheck(AgentCheck):
                     self.log.debug("Could not close lost connection.")
                 self._conn = None
                 self._connection_lost = False
-            if not self._persist_db_connections:
+            elif not self._persist_db_connections:
                 self.log.debug("Refreshing database connection.")
                 try:
                     self._conn.close()

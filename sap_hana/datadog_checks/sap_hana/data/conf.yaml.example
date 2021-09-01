@@ -2,6 +2,11 @@
 #
 init_config:
 
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -19,11 +24,6 @@ init_config:
     ## Additionally, this sets the default `service` for every log source.
     #
     # service: <SERVICE>
-
-    ## @param persist_db_connections - boolean - optional - default: true
-    ## Whether or not to persist database connections.
-    #
-    # persist_db_connections: true
 
 ## Every instance is scheduled independent of the others.
 #

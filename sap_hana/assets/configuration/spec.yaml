@@ -4,14 +4,13 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/db
-      - template: init_config/default
       - name: persist_db_connections
         description: Whether or not to persist database connections.
         value:
           type: boolean
-          display_default: true
           example: true
+      - template: init_config/db
+      - template: init_config/default
   - template: instances
     options:
       - name: server
@@ -56,7 +55,6 @@ files:
         description: Whether or not to persist database connections.
         value:
           type: boolean
-          display_default: true
           example: true
       - name: use_tls
         description: |
