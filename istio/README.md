@@ -52,7 +52,7 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
          - connection_security_policy
     ```
    
-       Note: `connectionID` Prometheus label is excluded, the conf.yaml.example also has a list of suggested labels to exclude.
+       **Note**: `connectionID` Prometheus label is excluded, the conf.yaml.example also has a list of suggested labels to exclude.
 
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].   
 
