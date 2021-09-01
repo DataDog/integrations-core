@@ -162,6 +162,7 @@ class Oracle(AgentCheck):
                 host, port = self._server.split(':')
                 port = int(port)
         except Exception:
+            self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
         return cx_Oracle.makedsn(host, port, service_name=self._service)
 

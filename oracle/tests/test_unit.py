@@ -49,6 +49,22 @@ def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregat
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
+def test__get_connection_instant_client_server_wrong(instance, dd_run_check, aggregator):
+    """
+    Test the _get_connection method using the instant client when the server is formatted incorrectly
+    """
+    con = mock.MagicMock()
+    instance['server'] = 'localhost:1521a'
+    check = Oracle(CHECK_NAME, {}, [instance])
+    check.use_oracle_client = True
+    expected_tags = ['server:localhost:1521a', 'optional:tag1']
+    with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
+        cx.connect.return_value = con
+        dd_run_check(check)
+        aggregator.assert_service_check("oracle.can_connect", check.CRITICAL, count=1, tags=expected_tags)
+        aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
+
+
 def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the JDBC client and unsuccessfully query DB
@@ -126,9 +142,6 @@ def test__get_connection_failure(check, dd_run_check, aggregator):
     aggregator.assert_service_check("oracle.can_connect", check.CRITICAL, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
     assert check._cached_connection is None
-
-
-# test that has successful connection to db and can_query
 
 
 def test__check_only_custom_queries(instance):
