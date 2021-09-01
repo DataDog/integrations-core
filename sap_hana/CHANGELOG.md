@@ -1,11 +1,5 @@
 # CHANGELOG - SAP HANA
 
-## 1.6.2-beta.1 / 2021-09-01
-
-
-## 1.6.1-beta.1 / 2021-09-01
-
-
 ## 1.6.0 / 2021-08-22
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
