@@ -49,7 +49,7 @@ def test__get_connection_instant_client_query_fail(check, dd_run_check, aggregat
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
-def test__get_connection_instant_client_server_wrong(instance, dd_run_check, aggregator):
+def test__get_connection_instant_client_server_incorrect_formatting(instance, dd_run_check, aggregator):
     """
     Test the _get_connection method using the instant client when the server is formatted incorrectly
     """
@@ -63,39 +63,6 @@ def test__get_connection_instant_client_server_wrong(instance, dd_run_check, agg
         dd_run_check(check)
         aggregator.assert_service_check("oracle.can_connect", check.CRITICAL, count=1, tags=expected_tags)
         aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
-
-
-def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
-    """
-    Test the _get_connection method using the JDBC client and unsuccessfully query DB
-    """
-    check.use_oracle_client = False
-    con = mock.MagicMock()
-    expected_tags = ['server:localhost:1521', 'optional:tag1']
-
-    check._query_manager.executor = mock_bad_executor()
-    cx = mock.MagicMock(DatabaseError=RuntimeError)
-    cx.clientversion.side_effect = cx.DatabaseError()
-
-    jdb = mock.MagicMock()
-    jdb.connect.return_value = con
-    jpype = mock.MagicMock(isJVMStarted=lambda: False)
-
-    check._query_errors = 1
-
-    mocks = [
-        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
-        ('datadog_checks.oracle.oracle.jdb', jdb),
-        ('datadog_checks.oracle.oracle.jpype', jpype),
-        ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),
-    ]
-    with ExitStack() as stack:
-        for mock_call in mocks:
-            stack.enter_context(mock.patch(*mock_call))
-        dd_run_check(check)
-
-    aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
-    aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
 def test__get_connection_jdbc(check, dd_run_check, aggregator):
@@ -130,6 +97,39 @@ def test__get_connection_jdbc(check, dd_run_check, aggregator):
     )
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)
+
+
+def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
+    """
+    Test the _get_connection method using the JDBC client and unsuccessfully query DB
+    """
+    check.use_oracle_client = False
+    con = mock.MagicMock()
+    expected_tags = ['server:localhost:1521', 'optional:tag1']
+
+    check._query_manager.executor = mock_bad_executor()
+    cx = mock.MagicMock(DatabaseError=RuntimeError)
+    cx.clientversion.side_effect = cx.DatabaseError()
+
+    jdb = mock.MagicMock()
+    jdb.connect.return_value = con
+    jpype = mock.MagicMock(isJVMStarted=lambda: False)
+
+    check._query_errors = 1
+
+    mocks = [
+        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
+        ('datadog_checks.oracle.oracle.jdb', jdb),
+        ('datadog_checks.oracle.oracle.jpype', jpype),
+        ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),
+    ]
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        dd_run_check(check)
+
+    aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
+    aggregator.assert_service_check("oracle.can_query", check.CRITICAL, count=1, tags=expected_tags)
 
 
 def test__get_connection_failure(check, dd_run_check, aggregator):
