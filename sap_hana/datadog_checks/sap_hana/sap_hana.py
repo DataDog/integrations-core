@@ -109,6 +109,12 @@ class SapHanaCheck(AgentCheck):
                     self.log.debug("Could not close lost connection")
                 self._conn = None
                 self._connection_lost = False
+            if not self._persist_db_connections:
+                try:
+                    self._conn.close()
+                except OperationalError:
+                    self.log.debug("Could not close connection")
+                self._conn = None
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
