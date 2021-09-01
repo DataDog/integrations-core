@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import yaml
 from six.moves import xmlrpc_client as xmlrpclib
@@ -9,9 +9,6 @@ from six.moves import xmlrpc_client as xmlrpclib
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .metrics import build_metric
-
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
 
 
 class CitrixHypervisorCheck(AgentCheck):
@@ -29,7 +26,7 @@ class CitrixHypervisorCheck(AgentCheck):
         self._base_url = self.instance['url'].rstrip('/')
 
         self.tags = self.instance.get('tags', [])
-        self.xenserver = None
+        self.xenserver = None  # type: Any
 
         self.check_initializations.append(self._check_connection)
 
@@ -41,11 +38,6 @@ class CitrixHypervisorCheck(AgentCheck):
             self._last_timestamp = int(float(r.json()['lastupdate'])) - 60
         else:
             self.log.warning("Couldn't initialize the timestamp due to HTTP error %s, set it to 0", r.reason)
-
-        try:
-            self.xenserver = xmlrpclib.Server(self._base_url)
-        except Exception as e:
-            self.log.warning(str(e))
 
     def _get_updated_metrics(self):
         # type: () -> Dict
@@ -80,19 +72,57 @@ class CitrixHypervisorCheck(AgentCheck):
             if metric_name is not None:
                 self.gauge(metric_name, values[i], tags=self.tags + self._additional_tags + tags)
 
-    def open_session(self):
-        # type: () -> Optional[Dict[str, str]]
-        if self.xenserver is None:
-            return None
+    def _session_login(self, server):
+        # type: (Any) -> Dict[str, str]
+        try:
+            session = server.session.login_with_password(
+                self.instance.get('username', ''), self.instance.get('password', '')
+            )
+            return session
+        except Exception as e:
+            self.log.warning(e)
+        return {}
 
-        session = self.xenserver.session.login_with_password(
-            self.instance.get('username', ''), self.instance.get('password', '')
-        )
+    def _get_master_session(self, session):
+        # type: (Dict[str, str]) -> Dict[str, str]
+        # {'Status': 'Failure', 'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102']}
+        master_address = session['ErrorDescription'][1]
+        if not master_address.startswith('http://'):
+            master_address = 'http://' + master_address
+        master_xenserver = xmlrpclib.Server(master_address)
+
+        master_session = self._session_login(master_xenserver)
+
+        if session.get('Status') == 'Success':
+            self.xenserver = master_xenserver
+            return master_session
+
+        return {}
+
+    def open_session(self):
+        # type: () -> Dict[str, str]
+        try:
+            self.xenserver = xmlrpclib.Server(self._base_url)
+        except Exception as e:
+            self.log.warning(str(e))
+            return {}
+
+        # See reference https://xapi-project.github.io/xen-api/classes/session.html
+        session = self._session_login(self.xenserver)
 
         if session.get('Status') == 'Failure':
+            if 'SESSION_AUTHENTICATION_FAILED' in session.get('ErrorDescription', []):
+                self.log.warning('Connection failed with xmlrpc: %s', str(session['ErrorDescription']))
+                return {}
             if 'HOST_IS_SLAVE' in session.get('ErrorDescription', []):
+                # If xenserver host is a slave, open a connection with the pool master
+                # {'Status': 'Failure', 'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102']}
+                self.log.debug('Host is a slave, trying to connect to the pool master')
                 self._additional_tags.append('server_type:slave')
-            return None
+                return self._get_master_session(session)
+
+            self.log.warning('Unknown xmlrpc error: %s', str(session))
+            return {}
 
         self._additional_tags.append('server_type:master')
 
@@ -102,6 +132,10 @@ class CitrixHypervisorCheck(AgentCheck):
         # type: (Any) -> None
         self._additional_tags = []  # type: List[str]
         session = self.open_session()
+        if session.get('Value'):
+            ref = session['Value']
+            self._collect_version(ref)
+            self.xenserver.session.logout(ref)
 
         try:
             data = self._get_updated_metrics()
@@ -121,5 +155,26 @@ class CitrixHypervisorCheck(AgentCheck):
         else:
             self.submit_metrics(data)
 
-        if session is not None:
-            self.xenserver.session.logout(session.get('Value'))
+    @AgentCheck.metadata_entrypoint
+    def _collect_version(self, sessionref):
+        # type: (str) -> None
+        """
+        In a pool, Citrix Hypervisors must have the same product version, so the version
+        of the master hypervisors is also the version of the current hypervisor.
+        https://docs.citrix.com/en-us/xencenter/current-release/pools-requirements.html
+        """
+        try:
+            host = self.xenserver.session.get_this_host(sessionref, sessionref)
+            if host.get('Status') != 'Success':
+                self.log.warning('get_this_host call failed: %s', str(host))
+
+            software_version = self.xenserver.host.get_software_version(sessionref, host['Value'])
+            if software_version.get('Status') != 'Success':
+                self.log.warning('get_software_version call failed: %s', str(software_version))
+
+            product_version = software_version.get('product_version')
+
+            if product_version:
+                self.set_metadata('version', product_version)
+        except Exception as e:
+            self.log.warning("Couldn't get product version: %s", str(e))

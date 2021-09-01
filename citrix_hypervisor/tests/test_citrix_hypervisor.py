@@ -3,11 +3,27 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.citrix_hypervisor import CitrixHypervisorCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+
+
+def mocked_xenserver(server_type):
+    xenserver = mock.MagicMock()
+    if server_type == 'master':
+        xenserver.session.login_with_password.return_value = {
+            'Status': 'Success',
+            'Value': 'OpaqueRef:c908ccc4-4355-4328-b07d-c85dc7242b03',
+        }
+    else:
+        xenserver.session.login_with_password.return_value = {
+            'Status': 'Failure',
+            'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102'],
+        }
+    return xenserver
 
 
 def _assert_metrics(aggregator, custom_tags, count=1):
@@ -49,20 +65,20 @@ def _assert_metrics(aggregator, custom_tags, count=1):
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
-def test_check(aggregator, instance):
-    check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
-    check.check(instance)
+@pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
+def test_check(aggregator, instance, server_type):
+    with mock.patch('six.moves.xmlrpc_client.Server', return_value=mocked_xenserver(server_type)):
+        check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
+        check.check(instance)
 
-    _assert_metrics(aggregator, ['foo:bar'])
+        _assert_metrics(aggregator, ['foo:bar', 'server_type:{}'.format(server_type)])
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
 @pytest.mark.parametrize(
     'url, expected_status',
@@ -80,7 +96,6 @@ def test_service_check(aggregator, url, expected_status):
 
 
 @pytest.mark.usefixtures('mock_responses')
-@pytest.mark.usefixtures('host_is_master')
 @pytest.mark.unit
 def test_initialization(caplog):
     caplog.clear()
