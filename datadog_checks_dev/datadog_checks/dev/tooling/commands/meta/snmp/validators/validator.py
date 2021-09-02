@@ -259,9 +259,7 @@ class TableColumnHasTagValidator(ProfileValidator):
 
     def validate(self, profile, path):
         file_contents = find_profile_in_path(profile, path)
-        metrics = {}
-        if file_contents.get('metrics'):
-            metrics = file_contents.get('metrics')
+        metrics = file_contents.get('metrics', {})
         for metric in metrics:
             if metric.get('table'):
                 if not metric.get('metric_tags'):
