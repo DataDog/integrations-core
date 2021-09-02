@@ -10,6 +10,7 @@ from ....fs import file_exists, read_file, write_file
 from ....structures import JSONDict
 from ...constants import get_root
 from ...manifest_validator import get_all_validators
+from ...manifest_validator.constants import V1_STRING
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
@@ -56,7 +57,7 @@ def manifest(ctx, check, fix):
                 echo_failure(f'  invalid json: {e}')
                 continue
 
-            version = decoded.get('manifest_version', '1.0.0')
+            version = decoded.get('manifest_version', V1_STRING)
             all_validators = get_all_validators(ctx, version, is_extras, is_marketplace)
 
             for validator in all_validators:

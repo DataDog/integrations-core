@@ -9,7 +9,7 @@ from .v1.validator import get_v1_validators
 from .v2.validator import get_v2_validators
 
 
-def get_all_validators(ctx, version, is_extras=False, is_marketplace=False):
+def get_all_validators(ctx, version_string, is_extras=False, is_marketplace=False):
     if parse(version) < V2:
         return get_v1_validators(is_extras, is_marketplace)
     else:

@@ -4,5 +4,8 @@
 
 from packaging.version import parse
 
-V1 = parse("1.0.0")
-V2 = parse("2.0.0")
+V1_STRING = "1.0.0"
+V1 = parse(V1_STRING)
+
+V2_STRING = "2.0.0"
+V2 = parse(V2_STRING)
