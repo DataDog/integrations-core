@@ -531,6 +531,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "host": self._db_hostname,
             "ddsource": "postgres",
             "dbm_type": "activity",
+            "collection_interval": self._activity_coll_interval,
             "ddagentversion": datadog_agent.get_version(),
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
