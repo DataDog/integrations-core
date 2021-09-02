@@ -116,6 +116,7 @@ def uds_path():
                 "UDS_HOST_DIRECTORY": tmp_dir,
                 'UDS_FILENAME': uds_filename,
             },
+            sleep=60,
         ):
             yield uds_path
 
