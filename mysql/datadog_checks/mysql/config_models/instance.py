@@ -86,7 +86,6 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     charset: Optional[str]
-    check_generic_tags: Optional[bool]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
     dbm: Optional[bool]

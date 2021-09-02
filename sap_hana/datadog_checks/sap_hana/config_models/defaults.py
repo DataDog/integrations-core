@@ -16,10 +16,6 @@ def instance_batch_size(field, value):
     return 1000
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 

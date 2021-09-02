@@ -48,10 +48,6 @@ def instance_catalog_checks(field, value):
     return False
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 

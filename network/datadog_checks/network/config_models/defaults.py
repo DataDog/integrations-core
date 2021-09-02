@@ -12,10 +12,6 @@ def instance_blacklist_conntrack_metrics(field, value):
     return []
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_aws_ena_metrics(field, value):
     return False
 

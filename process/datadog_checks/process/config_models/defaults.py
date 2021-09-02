@@ -24,10 +24,6 @@ def shared_shared_process_list_cache_duration(field, value):
     return 120
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_children(field, value):
     return False
 

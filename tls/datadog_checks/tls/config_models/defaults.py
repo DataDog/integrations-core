@@ -20,10 +20,6 @@ def instance_allowed_versions(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_days_critical(field, value):
     return 7.0
 

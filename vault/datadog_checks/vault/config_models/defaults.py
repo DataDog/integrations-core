@@ -40,10 +40,6 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_client_token(field, value):
     return get_default_field_value(field, value)
 

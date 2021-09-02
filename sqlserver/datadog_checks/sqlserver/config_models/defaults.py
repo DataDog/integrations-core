@@ -36,10 +36,6 @@ def instance_availability_group(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_command_timeout(field, value):
     return 5
 

@@ -40,7 +40,6 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    check_generic_tags: Optional[bool]
     client_token: Optional[str]
     client_token_path: Optional[str]
     connect_timeout: Optional[float]

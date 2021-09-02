@@ -18,7 +18,6 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     broker_requests_batch_size: Optional[int]
-    check_generic_tags: Optional[bool]
     consumer_groups: Optional[Mapping[str, Any]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]

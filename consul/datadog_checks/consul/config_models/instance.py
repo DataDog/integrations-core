@@ -41,7 +41,6 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     catalog_checks: Optional[bool]
-    check_generic_tags: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     disable_legacy_service_tag: Optional[bool]

@@ -18,7 +18,6 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     allowed_versions: Optional[Sequence[str]]
-    check_generic_tags: Optional[bool]
     days_critical: Optional[float]
     days_warning: Optional[float]
     disable_generic_tags: Optional[bool]

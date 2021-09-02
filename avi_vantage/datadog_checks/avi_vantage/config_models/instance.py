@@ -68,7 +68,6 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
-    check_generic_tags: Optional[bool]
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]

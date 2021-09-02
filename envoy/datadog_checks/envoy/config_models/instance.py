@@ -40,7 +40,6 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     cache_metrics: Optional[bool]
-    check_generic_tags: Optional[bool]
     collect_server_info: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]

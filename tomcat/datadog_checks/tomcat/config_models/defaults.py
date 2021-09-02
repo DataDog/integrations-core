@@ -24,10 +24,6 @@ def shared_service_check_prefix(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_default_jvm_metrics(field, value):
     return True
 

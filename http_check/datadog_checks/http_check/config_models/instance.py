@@ -41,7 +41,6 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     check_certificate_expiration: Optional[bool]
-    check_generic_tags: Optional[bool]
     check_hostname: Optional[bool]
     collect_response_time: Optional[bool]
     connect_timeout: Optional[float]

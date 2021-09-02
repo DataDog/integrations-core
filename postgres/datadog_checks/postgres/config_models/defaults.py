@@ -12,10 +12,6 @@ def instance_application_name(field, value):
     return 'datadog-agent'
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_activity_metrics(field, value):
     return False
 

@@ -12,10 +12,6 @@ def instance_add_missing_keys(field, value):
     return False
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_disable_generic_tags(field, value):
     return False
 

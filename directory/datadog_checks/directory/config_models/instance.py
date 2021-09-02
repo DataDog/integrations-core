@@ -17,7 +17,6 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
     countonly: Optional[bool]
     directory: str
     dirs_patterns_full: Optional[bool]

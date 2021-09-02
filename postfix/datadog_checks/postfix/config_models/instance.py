@@ -17,7 +17,6 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
     config_directory: Optional[str]
     directory: str
     disable_generic_tags: Optional[bool]

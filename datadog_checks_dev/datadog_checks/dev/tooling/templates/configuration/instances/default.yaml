@@ -10,12 +10,3 @@
     display_default: false
     example: true
   hidden: true
-- name: check_generic_tags
-  description: |
-    When a generic tag such as `cluster` is detected, a matching <integration_name>_cluster tag will be emitted as well to avoid
-    getting mixed with other integraton tags
-  value:
-    type: boolean
-    display_default: false
-    example: true
-  hidden: true

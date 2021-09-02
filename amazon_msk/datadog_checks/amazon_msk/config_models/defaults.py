@@ -52,10 +52,6 @@ def instance_cache_shared_labels(field, value):
     return True
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_counters_with_distributions(field, value):
     return False
 

@@ -57,7 +57,6 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     application_name: Optional[str]
-    check_generic_tags: Optional[bool]
     collect_activity_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_database_size_metrics: Optional[bool]

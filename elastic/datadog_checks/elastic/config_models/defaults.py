@@ -48,10 +48,6 @@ def instance_cat_allocation_stats(field, value):
     return False
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_cluster_stats(field, value):
     return False
 

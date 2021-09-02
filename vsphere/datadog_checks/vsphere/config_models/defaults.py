@@ -24,10 +24,6 @@ def instance_batch_tags_collector_size(field, value):
     return 200
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_attributes(field, value):
     return False
 

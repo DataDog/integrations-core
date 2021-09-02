@@ -31,7 +31,6 @@ class InstanceConfig(BaseModel):
     autodiscovery_exclude: Optional[Sequence[str]]
     autodiscovery_include: Optional[Sequence[str]]
     availability_group: Optional[str]
-    check_generic_tags: Optional[bool]
     command_timeout: Optional[int]
     connection_string: Optional[str]
     connector: Optional[str]
