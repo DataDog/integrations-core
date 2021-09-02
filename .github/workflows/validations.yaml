@@ -46,3 +46,16 @@ jobs:
     - name: Run service checks validation
       run: |
         ddev validate service-checks
+
+  notify:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Comment PR on failure
+        if: ${{ failure() }}
+        with:
+          message: 'The validations job has failed, please check Files Changed for possible suggestions to resolve.'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
