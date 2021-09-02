@@ -5,6 +5,7 @@ import pytest
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.fs import create_file
 
 HERE = get_here()
 
@@ -108,6 +109,7 @@ def uds_path():
         compose_file = os.path.join(HERE, 'compose', 'uds.yaml')
         uds_filename = 'tmp.sock'
         uds_path = os.path.join(tmp_dir, uds_filename)
+        create_file(uds_path)
         with docker_run(
             compose_file=compose_file,
             env_vars={
