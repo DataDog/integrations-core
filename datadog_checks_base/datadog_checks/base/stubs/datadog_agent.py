@@ -21,7 +21,7 @@ class DatadogAgentStub(object):
         self._hostname = 'stubbed.hostname'
 
     def get_default_config(self):
-        return {'enable_metadata_collection': True}
+        return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
 
     def reset(self):
         self._metadata.clear()
