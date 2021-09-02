@@ -38,6 +38,36 @@ def test_no_msg_errors_are_caught(get_check, instance, caplog):
         assert not caplog.records
 
 
+def test_unknown_service_check(aggregator, get_check, instance, caplog):
+    # Late import to ignore missing library for e2e
+    from pymqi import MQMIError, PCFExecute
+    from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
+
+    m = mock.MagicMock()
+    with mock.patch('datadog_checks.ibm_mq.collectors.channel_metric_collector.pymqi.PCFExecute', new=m), mock.patch(
+        'datadog_checks.ibm_mq.collectors.queue_metric_collector.pymqi.PCFExecute', new=m
+    ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.pymqi.PCFExecute', new=m):
+        error = MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE)
+        m.side_effect = error
+        m.unpack = PCFExecute.unpack
+        check = get_check(instance)
+        check.check(instance)
+
+        tags = [
+            'queue_manager:{}'.format(common.QUEUE_MANAGER),
+            'mq_host:{}'.format(common.HOST),
+            'port:{}'.format(common.PORT),
+            'connection_name:{}({})'.format(common.HOST, common.PORT),
+            'foo:bar',
+        ]
+
+        # assert all channel serive checks are UNKNOWN
+        channels = [common.CHANNEL, common.BAD_CHANNEL, '*']
+        for channel in channels:
+            channel_tags = tags + ['channel:{}'.format(channel)]
+            aggregator.assert_service_check('ibm_mq.channel', check.UNKNOWN, tags=channel_tags, count=1)
+
+
 def test_errors_are_loogged(get_check, instance, caplog):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute

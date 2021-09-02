@@ -26,12 +26,12 @@ class LegacyKafkaCheck_0_10_2(object):
 
     def __init__(self, parent_check):
         self._parent_check = parent_check
+        self._kafka_client = None
 
         # Note: We cannot skip validation if monitor_unlisted_consumer_groups is True because this legacy check only
         # supports that functionality for Zookeeper, not Kafka.
         self.validate_consumer_groups()
 
-        self._kafka_client = self._create_kafka_client()
         self._zk_hosts_ports = self.instance.get('zk_connect_str')
 
         # If we are collecting from Zookeeper, then create a long-lived zk client
@@ -57,6 +57,12 @@ class LegacyKafkaCheck_0_10_2(object):
             return getattr(self._parent_check, item)
         except AttributeError:
             raise AttributeError("LegacyKafkaCheck_0_10_2 has no attribute called {}".format(item))
+
+    @property
+    def kafka_client(self):
+        if self._kafka_client is None:
+            self._kafka_client = self._create_kafka_client()
+        return self._kafka_client
 
     def check(self):
         """The main entrypoint of the check."""
@@ -84,7 +90,7 @@ class LegacyKafkaCheck_0_10_2(object):
         # Fetch consumer group offsets from Kafka
         # Support for storing offsets in Kafka not available until Kafka 0.8.2. Also, for legacy reasons, this check
         # only fetches consumer offsets from Kafka if Zookeeper is omitted or kafka_consumer_offsets is True.
-        if self._kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
+        if self.kafka_client.config.get('api_version') >= (0, 8, 2) and is_affirmative(
             self.instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)
         ):
             try:
@@ -98,7 +104,7 @@ class LegacyKafkaCheck_0_10_2(object):
             self.log.debug(
                 'Identified api_version: %s, kafka_consumer_offsets: %s, zk_connection_string: %s.'
                 ' Skipping consumer offset collection',
-                str(self._kafka_client.config.get('api_version')),
+                str(self.kafka_client.config.get('api_version')),
                 str(self.instance.get('kafka_consumer_offsets')),
                 str(self._zk_hosts_ports),
             )
@@ -139,14 +145,14 @@ class LegacyKafkaCheck_0_10_2(object):
 
     def _make_blocking_req(self, request, node_id=None):
         if node_id is None:
-            node_id = self._kafka_client.least_loaded_node()
+            node_id = self.kafka_client.least_loaded_node()
 
-        while not self._kafka_client.ready(node_id):
+        while not self.kafka_client.ready(node_id):
             # poll until the connection to broker is ready, otherwise send() will fail with NodeNotReadyError
-            self._kafka_client.poll()
+            self.kafka_client.poll()
 
-        future = self._kafka_client.send(node_id, request)
-        self._kafka_client.poll(future=future)  # block until we get response.
+        future = self.kafka_client.send(node_id, request)
+        self.kafka_client.poll(future=future)  # block until we get response.
         if future.failed():
             raise future.exception  # pylint: disable-msg=raising-bad-type
         response = future.value
@@ -174,11 +180,11 @@ class LegacyKafkaCheck_0_10_2(object):
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._kafka_consumer_offsets}
             tps_with_consumer_offset.update({(topic, partition) for (_, topic, partition) in self._zk_consumer_offsets})
 
-        for broker in self._kafka_client.cluster.brokers():
+        for broker in self.kafka_client.cluster.brokers():
             if len(self._highwater_offsets) >= contexts_limit:
                 self.warning("Context limit reached. Skipping highwater offsets collection.")
                 return
-            broker_led_partitions = self._kafka_client.cluster.partitions_for_broker(broker.nodeId)
+            broker_led_partitions = self.kafka_client.cluster.partitions_for_broker(broker.nodeId)
             if broker_led_partitions is None:
                 continue
             # Take the partitions for which this broker is the leader and group them by topic in order to construct the
@@ -225,7 +231,7 @@ class LegacyKafkaCheck_0_10_2(object):
                         topic,
                         partition,
                     )
-                    self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                    self.kafka_client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
@@ -257,7 +263,7 @@ class LegacyKafkaCheck_0_10_2(object):
                 consumer_group_tags.append('source:%s' % kwargs['source'])
             consumer_group_tags.extend(self._custom_tags)
 
-            partitions = self._kafka_client.cluster.partitions_for_topic(topic)
+            partitions = self.kafka_client.cluster.partitions_for_topic(topic)
             if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
@@ -299,7 +305,7 @@ class LegacyKafkaCheck_0_10_2(object):
                         "included in the cluster partitions, so skipping reporting these offsets."
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
-                self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                self.kafka_client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_zk_path_children(self, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
@@ -384,7 +390,7 @@ class LegacyKafkaCheck_0_10_2(object):
                         # If partitions omitted, then we assume the group is consuming all partitions for the topic.
                         # Fetch consumer offsets even for unavailable partitions because those will be valid once the
                         # partition finishes leader failover.
-                        topic_partitions[topic] = self._kafka_client.cluster.partitions_for_topic(topic)
+                        topic_partitions[topic] = self.kafka_client.cluster.partitions_for_topic(topic)
 
                 coordinator_id = self._get_group_coordinator(consumer_group)
                 if coordinator_id is not None:
@@ -400,7 +406,7 @@ class LegacyKafkaCheck_0_10_2(object):
                             # -1, meaning there is no recorded offset for that partition... for example, if the
                             # partition doesn't exist in the cluster. So ignore it.
                             if offset == -1 or error_type is not kafka_errors.NoError:
-                                self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+                                self.kafka_client.cluster.request_update()  # force metadata update on next poll()
                                 continue
                             key = (consumer_group, topic, partition)
                             self._kafka_consumer_offsets[key] = offset

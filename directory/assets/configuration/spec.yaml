@@ -64,7 +64,7 @@ files:
       description: |
         Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
         Setting this option to `false` excludes any directory in the traversal with the provided name.
-        Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories 
+        Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories
         with the same name aren't all excluded.
       value:
         example: false
@@ -77,7 +77,7 @@ files:
     - name: follow_symlinks
       description: |
         Follow symlinks when traversing directories.
-        When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops. 
+        When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops.
       value:
         example: true
         type: boolean
@@ -97,5 +97,10 @@ files:
       description: When true the check does not raise an exception on missing or inaccessible directories.
       value:
         example: false
+        type: boolean
+    - name: submit_histograms
+      description: Whether or not to submit histograms.
+      value:
+        example: true
         type: boolean
     - template: instances/default

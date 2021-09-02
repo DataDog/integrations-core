@@ -1,5 +1,13 @@
 # CHANGELOG - vsphere
 
+## 5.11.2 / 2021-08-30
+
+* [Fixed] Fix crash when some permissions are missing. See [#10012](https://github.com/DataDog/integrations-core/pull/10012).
+
+## 5.11.1 / 2021-08-25
+
+* [Fixed] Fix collect_events default. See [#9979](https://github.com/DataDog/integrations-core/pull/9979).
+
 ## 5.11.0 / 2021-08-22
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
