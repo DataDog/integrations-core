@@ -16,7 +16,7 @@ variables:
 #     - master
 #   script:
 #     - ./.gitlab/reminder/release-reminder.sh 2>&1
-#   tags: [ "runner:main", "size:large" ]
+#   tags: [ "runner:main" ]
 
 stages:
   - build
@@ -45,7 +45,7 @@ validate-log-integrations:
     - errors.txt
     expire_in: 1 day
     when: always
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 trigger-agent-build:
   stage: trigger
@@ -75,7 +75,7 @@ trigger-agent-build:
     - pipeline_id.txt
     expire_in: 1 day
     when: always
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 validate-agent-build:
@@ -111,7 +111,7 @@ validate-agent-build:
         echo "A pipeline was not triggered, skipping this job."
       fi
 
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 notify-slack:
   stage: notify
@@ -128,7 +128,7 @@ notify-slack:
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 notify-failed-pipeline:
@@ -141,7 +141,7 @@ notify-failed-pipeline:
     - |
       MESSAGE="The pipeline uncountered an unexpected error."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 release-auto:
@@ -156,7 +156,7 @@ release-auto:
     - ddev config set core .
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 release-manual:
   stage: release
@@ -178,7 +178,7 @@ release-manual:
       else
           ./.gitlab/tagger/build-packages.sh
       fi
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 reminder-image-builder:
   stage: build
@@ -193,7 +193,7 @@ reminder-image-builder:
     - docker images $REMINDER_IMAGE
     - docker push $REMINDER_IMAGE
   except: [ tags, schedules ]
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 tagger-image-builder:
   stage: build
@@ -209,7 +209,7 @@ tagger-image-builder:
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 validate-log-intgs-builder:
   stage: build
@@ -224,7 +224,7 @@ validate-log-intgs-builder:
     - docker build --tag $VALIDATE_LOG_INTGS .
     - docker images $VALIDATE_LOG_INTGS
     - docker push $VALIDATE_LOG_INTGS
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 validate-agent-build-builder:
   stage: build
@@ -240,4 +240,4 @@ validate-agent-build-builder:
     - docker build --tag $VALIDATE_AGENT_BUILD .
     - docker images $VALIDATE_AGENT_BUILD
     - docker push $VALIDATE_AGENT_BUILD
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
