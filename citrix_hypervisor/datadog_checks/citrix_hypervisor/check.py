@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
+from xml.etree import ElementTree
 
-import yaml
 from six.moves import xmlrpc_client as xmlrpclib
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 
 from .metrics import build_metric
 
@@ -41,37 +41,47 @@ class CitrixHypervisorCheck(AgentCheck):
             self.log.warning("Couldn't initialize the timestamp due to HTTP error %s, set it to 0", r.reason)
 
     def _get_updated_metrics(self):
-        # type: () -> Dict
+        # type: () -> Tuple[Optional[ElementTree.Element], Optional[ElementTree.Element]]
         params = {
             'start': self._last_timestamp,
             'host': 'true',
-            'json': 'true',
-            'cf': 'AVERAGE|MIN|MAX',
         }
         r = self.http.get(self._base_url + '/rrd_updates', params=params)
         r.raise_for_status()
         # Response is not formatted for simplejson, it's missing double quotes " around the field names
-        data = yaml.safe_load(r.content)
+        content = to_native_string(r.content).replace('\\n', '')
+        data = ElementTree.fromstring(content)
 
-        if data['meta'].get('end') is not None:
-            self._last_timestamp = int(data['meta']['end'])
-        else:
-            for key in data['meta'].keys():
-                if data['meta'][key] is None and key.startswith('end'):
-                    self._last_timestamp = int(key.split(':')[-1])
+        meta = data.find('meta')
+        if meta is None:
+            return None, None
+        last_timestamp = meta.find('end')
+        if last_timestamp is not None:
+            self._last_timestamp = int(to_native_string(last_timestamp.text))
 
-        return data
+        values = data.find('data')
+        if values is None:
+            return None, None
 
-    def submit_metrics(self, data):
-        # type: (Dict) -> None
-        legends = data['meta']['legend']
-        values = data['data'][0]['values']
+        # The first row is the latest one
+        return meta.find('legend'), values.find('row')
+
+    def submit_metrics(self, legends, values):
+        # type: (ElementTree.Element, ElementTree.Element) -> None
+
+        # First entry of values is the timestamp
+        if len(legends) != len(values) - 1:
+            return
+
         for i in range(len(legends)):
-            # TODO
-            metric_name, tags = build_metric(legends[i], self.log)
+            metric_name, tags = build_metric(to_native_string(legends[i].text), self.log)
 
             if metric_name is not None:
-                self.gauge(metric_name, values[i], tags=self.tags + self._additional_tags + tags)
+                self.gauge(
+                    metric_name,
+                    float(to_native_string(values[i + 1].text)),
+                    tags=self.tags + self._additional_tags + tags,
+                )
 
     def _session_login(self, server):
         # type: (Any) -> Dict[str, str]
@@ -139,7 +149,7 @@ class CitrixHypervisorCheck(AgentCheck):
             self.xenserver.session.logout(ref)
 
         try:
-            data = self._get_updated_metrics()
+            legends, values = self._get_updated_metrics()
 
             self.service_check(
                 self.SERVICE_CHECK_CONNECT,
@@ -154,7 +164,8 @@ class CitrixHypervisorCheck(AgentCheck):
             )
             self.log.exception(e)
         else:
-            self.submit_metrics(data)
+            if legends is not None and values is not None:
+                self.submit_metrics(legends, values)
 
     @AgentCheck.metadata_entrypoint
     def _collect_version(self, sessionref):

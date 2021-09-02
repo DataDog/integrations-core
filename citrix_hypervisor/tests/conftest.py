@@ -27,7 +27,8 @@ def mock_requests_get(url, *args, **kwargs):
     if url_parts[0] != 'mocked':
         return MockResponse(status_code=404)
 
-    path = os.path.join(common.HERE, 'fixtures', '{}.json'.format(url_parts[1]))
+    extension = 'json' if kwargs['params'].get('json') else 'xml'
+    path = os.path.join(common.HERE, 'fixtures', '{}.{}'.format(url_parts[1], extension))
     if not os.path.exists(path):
         return MockResponse(status_code=404)
 
