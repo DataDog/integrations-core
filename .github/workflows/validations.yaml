@@ -47,15 +47,12 @@ jobs:
       run: |
         ddev validate service-checks
 
-  notify:
-    needs: build
-    runs-on: ubuntu-latest
+    - name: Comment PR on failure
+      if: failure()
+      uses: actions/github-script@0.3.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+          github.issues.createComment({ issue_number, owner, repo, body: "The validations job has failed, please check Files Changed for possible suggestions to resolve." });
 
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Comment PR on failure
-        if: ${{ failure() }}
-        with:
-          message: 'The validations job has failed, please check Files Changed for possible suggestions to resolve.'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
