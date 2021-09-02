@@ -4,7 +4,6 @@ from os.path import join
 import yaml
 from genericpath import isfile
 from yaml.error import YAMLError
-from yaml.events import StreamEndEvent
 from yaml.loader import SafeLoader
 
 from datadog_checks.dev.tooling.commands.console import echo_failure
@@ -14,7 +13,6 @@ from datadog_checks.dev.tooling.constants import get_root
 def initialize_path(directory):
     path = []
     path.append('./')
-
 
     if directory:
         if isinstance(directory, tuple):
