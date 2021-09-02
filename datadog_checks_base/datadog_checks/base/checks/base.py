@@ -277,7 +277,7 @@ class AgentCheck(object):
             # NOTE: Agent 6+ will now always pass an instance when calling into a check, but we still need to
             # account for this case due to some tests not always passing an instance on init.
             self.log.debug(
-                "No instance provided (this is deprecated!). Reverting to the default metric limit: %s",
+                "Noo instance provided (this is deprecated!). Reverting to the default metric limit: %s",
                 self.DEFAULT_METRIC_LIMIT,
             )
             return self.DEFAULT_METRIC_LIMIT
