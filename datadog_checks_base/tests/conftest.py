@@ -113,8 +113,7 @@ def uds_path():
                 "UDS_HOST_DIRECTORY": tmp_dir,
                 'UDS_FILENAME': uds_filename,
             },
-            # sleep=30,
-            conditions=[WaitFor(lambda: os.path.exists(uds_path))]
+            conditions=[WaitFor(lambda: os.path.exists(uds_path))],
         ):
             yield uds_path
 
