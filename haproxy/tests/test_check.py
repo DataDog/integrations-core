@@ -5,7 +5,7 @@ import pytest
 
 from . import common
 
-pytestmark = [common.requires_new_environment, pytest.mark.usefixtures('dd_environment')]
+pytestmark = [common.requires_new_environment, pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
 def test_check(aggregator, dd_run_check, check, prometheus_metrics):
