@@ -4,8 +4,7 @@ import pytest
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import TempDir, docker_run, get_here
-from datadog_checks.dev.conditions import CheckDockerLogs
-
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 HERE = get_here()
 
 
@@ -114,7 +113,8 @@ def uds_path():
                 "UDS_HOST_DIRECTORY": tmp_dir,
                 'UDS_FILENAME': uds_filename,
             },
-            sleep=60,
+            # sleep=30,
+            conditions=[WaitFor(lambda: os.path.exists(uds_path))]
         ):
             yield uds_path
 
