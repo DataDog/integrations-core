@@ -49,6 +49,21 @@ class GUIDValidator(BaseManifestValidator):
         return self.result
 
 
+class IsPublicValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        correct_is_public = True
+        path = '/is_public'
+        is_public = decoded.get_path(path)
+        if not isinstance(is_public, bool):
+            output = '  required boolean: is_public'
+
+            if fix:
+                decoded.set_path(path, correct_is_public)
+                self.fix(output, f'  new `is_public`: {correct_is_public}')
+            else:
+                self.fail(output)
+
+
 class ManifestVersionValidator(BaseManifestValidator):
     def __init__(self, *args, **kwargs):
         super(ManifestVersionValidator, self).__init__(*args, **kwargs)
@@ -107,6 +122,23 @@ class ManifestVersionValidator(BaseManifestValidator):
                     self.fail(output)
 
 
+class NameValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        correct_name = check_name
+
+        name = decoded.get_path('/name')
+
+        if check_name.startswith('datadog') and check_name != 'datadog_cluster_agent':
+            self.fail(f'  An integration check folder cannot start with `datadog`: {check_name}')
+        if not isinstance(name, str) or name.lower() != correct_name.lower():
+            output = f'  incorrect `name`: {name}'
+            if fix:
+                decoded.set_path('/name', correct_name)
+                self.fix(output, f'  new `name`: {correct_name}')
+            else:
+                self.fail(output)
+
+
 class SupportValidator(BaseManifestValidator):
     def validate(self, check_name, decoded, fix):
         if self.is_extras:
@@ -145,12 +177,12 @@ def get_v1_validators(is_extras, is_marketplace):
         GUIDValidator(),
         ManifestVersionValidator(),
         common.MaintainerValidator(is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False),
-        common.NameValidator(),
+        NameValidator(),
         common.MetricsMetadataValidator(),
         common.MetricToCheckValidator(),
         SupportValidator(is_extras, is_marketplace),
         SupportedOSValidator(),
-        common.IsPublicValidator(),
+        IsPublicValidator(),
         common.ImmutableAttributesValidator(),
         common.LogsCategoryValidator(),
     ]

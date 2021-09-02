@@ -49,6 +49,11 @@ class BaseManifestValidator(object):
         self.skip_if_errors = skip_if_errors
 
     def should_validate(self):
+        """Determine if validator applicable given the current repo.
+
+        Logic will always validate integrations-core, but flags exist to
+        selectively include extras and marketplace
+        """
         if not self.is_extras and not self.is_marketplace:
             return True
         if self.is_extras and self.check_in_extras:
@@ -100,27 +105,6 @@ class MaintainerValidator(BaseManifestValidator):
                 self.fail(output)
 
 
-class NameValidator(BaseManifestValidator):
-
-    NAME_PATH = {V1: '/name', V2: '/assets/integration/id'}
-
-    def validate(self, check_name, decoded, fix):
-        correct_name = check_name
-
-        path = self.NAME_PATH[self.version]
-        name = decoded.get_path(path)
-
-        if check_name.startswith('datadog') and check_name != 'datadog_cluster_agent':
-            self.fail(f'  An integration check folder cannot start with `datadog`: {check_name}')
-        if not isinstance(name, str) or name.lower() != correct_name.lower():
-            output = f'  incorrect `name`: {name}'
-            if fix:
-                decoded.set_path(path, correct_name)
-                self.fix(output, f'  new `name`: {correct_name}')
-            else:
-                self.fail(output)
-
-
 class MetricsMetadataValidator(BaseManifestValidator):
 
     METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
@@ -161,7 +145,8 @@ class MetricToCheckValidator(BaseManifestValidator):
         metric_path = self.METRIC_PATH[self.version]
         metric_to_check = decoded.get_path(metric_path)
 
-        pricing = decoded.get_path("/pricing") or []
+        pricing_path = self.PRICING_PATH[self.version]
+        pricing = decoded.get_path(pricing_path) or []
 
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
@@ -187,23 +172,6 @@ class MetricToCheckValidator(BaseManifestValidator):
                     # there are cases of metadata.csv files with just a header but no metrics
                     if row:
                         self.fail('  metric_to_check not included in manifest.json')
-
-
-class IsPublicValidator(BaseManifestValidator):
-    PUBLIC_PATH = {V1: "/is_public", V2: "/display_on_public_website"}
-
-    def validate(self, check_name, decoded, fix):
-        correct_is_public = True
-        path = self.PUBLIC_PATH[self.version]
-        is_public = decoded.get_path(path)
-        if not isinstance(is_public, bool):
-            output = '  required boolean: is_public'
-
-            if fix:
-                decoded.set_path(path, correct_is_public)
-                self.fix(output, f'  new `is_public`: {correct_is_public}')
-            else:
-                self.fail(output)
 
 
 class ImmutableAttributesValidator(BaseManifestValidator):
