@@ -25,15 +25,15 @@ def test_check(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_connection_failure(aggregator):
+def test_connection_failure(aggregator, dd_run_check):
     """
     Make sure we're failing when the URL isn't right
     """
 
-    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], instances=BAD_CONFIG['instances'])
+    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], instances=[BAD_CONFIG['instances'][0]])
 
     with pytest.raises(ConnectionError):
-        gitlab_runner.check(BAD_CONFIG['instances'][0])
+        dd_run_check(gitlab_runner)
 
     # We should get two failed service checks
     aggregator.assert_service_check(
@@ -48,10 +48,10 @@ def test_connection_failure(aggregator):
     )
 
 
-def test_version_metadata(aggregator, datadog_agent):
-    check_instance = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
+def test_version_metadata(aggregator, datadog_agent, dd_run_check):
+    check_instance = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=[CONFIG['instances'][0]])
     check_instance.check_id = 'test:123'
-    check_instance.check(CONFIG['instances'][0])
+    dd_run_check(check_instance)
 
     raw_version = GITLAB_RUNNER_VERSION
 
