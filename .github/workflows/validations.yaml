@@ -46,3 +46,13 @@ jobs:
     - name: Run service checks validation
       run: |
         ddev validate service-checks
+
+    - name: Comment PR on failure
+      if: failure()
+      uses: actions/github-script@0.3.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+          github.issues.createComment({ issue_number, owner, repo, body: "The validations job has failed, please check Files Changed for possible suggestions to resolve." });
+
