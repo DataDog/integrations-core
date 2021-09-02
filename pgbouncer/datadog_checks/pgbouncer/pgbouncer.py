@@ -77,6 +77,9 @@ class PgBouncer(AgentCheck):
                             self.log.debug("Processing row: %r", row)
 
                             if 'key' in row:  # We are processing "config metrics"
+                                # Make a copy of the row to allow mutation
+                                # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
+                                row = row.copy()
                                 # We flip/rotate the row: row value becomes the column name
                                 row[row['key']] = row['value']
                             else:
