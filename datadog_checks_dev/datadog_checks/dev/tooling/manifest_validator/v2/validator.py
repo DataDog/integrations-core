@@ -8,6 +8,8 @@ import requests
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 
+from ..constants import V2
+
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
@@ -70,13 +72,13 @@ class SchemaValidator(BaseManifestValidator):
 def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
         common.MaintainerValidator(
-            is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version="v2"
+            is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version=V2
         ),
-        common.NameValidator(version="v2"),
-        common.MetricsMetadataValidator(),
-        common.MetricToCheckValidator(),
-        common.ImmutableAttributesValidator(),
-        common.LogsCategoryValidator(),
+        common.NameValidator(version=V2),
+        common.MetricsMetadataValidator(version=V2),
+        common.MetricToCheckValidator(version=V2),
+        common.ImmutableAttributesValidator(version=V2),
+        common.LogsCategoryValidator(version=V2),
         # keep SchemaValidator last, and avoid running this validation if errors already found
-        SchemaValidator(ctx=ctx, version="v2", skip_if_errors=True),
+        SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]

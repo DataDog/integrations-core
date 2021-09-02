@@ -11,6 +11,8 @@ import six
 from datadog_checks.dev.tooling.git import content_changed
 from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
+from ..constants import V1, V2
+
 
 class ValidationResult(object):
     def __init__(self):
@@ -34,7 +36,7 @@ class BaseManifestValidator(object):
         check_in_extras=True,
         check_in_marketplace=True,
         ctx=None,
-        version="v1",
+        version=V1,
         skip_if_errors=False,
     ):
         self.result = ValidationResult()
@@ -76,7 +78,7 @@ class BaseManifestValidator(object):
 
 class MaintainerValidator(BaseManifestValidator):
 
-    MAINTAINER_PATH = {"v1": '/maintainer', "v2": '/author/support_email'}
+    MAINTAINER_PATH = {V1: '/maintainer', V2: '/author/support_email'}
 
     def validate(self, check_name, decoded, fix):
         if not self.should_validate():
@@ -100,7 +102,7 @@ class MaintainerValidator(BaseManifestValidator):
 
 class NameValidator(BaseManifestValidator):
 
-    NAME_PATH = {"v1": '/name', "v2": '/assets/integration/id'}
+    NAME_PATH = {V1: '/name', V2: '/assets/integration/id'}
 
     def validate(self, check_name, decoded, fix):
         correct_name = check_name
@@ -121,7 +123,7 @@ class NameValidator(BaseManifestValidator):
 
 class MetricsMetadataValidator(BaseManifestValidator):
 
-    METADATA_PATH = {"v1": "/assets/metrics_metadata", "v2": "/assets/integration/metrics/metadata_path"}
+    METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
 
     def validate(self, check_name, decoded, fix):
         # metrics_metadata
@@ -144,9 +146,9 @@ class MetricToCheckValidator(BaseManifestValidator):
         'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
         'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
     }
-    METADATA_PATH = {"v1": "/assets/metrics_metadata", "v2": "/assets/integration/metrics/metadata_path"}
-    METRIC_PATH = {"v1": "/metric_to_check", "v2": "/assets/integration/metrics/check"}
-    PRICING_PATH = {"v1": "/pricing", "v2": "/pricing"}
+    METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
+    METRIC_PATH = {V1: "/metric_to_check", V2: "/assets/integration/metrics/check"}
+    PRICING_PATH = {V1: "/pricing", V2: "/pricing"}
 
     def validate(self, check_name, decoded, _):
         if not self.should_validate() or check_name == 'snmp' or check_name == 'moogsoft':
@@ -188,7 +190,7 @@ class MetricToCheckValidator(BaseManifestValidator):
 
 
 class IsPublicValidator(BaseManifestValidator):
-    PUBLIC_PATH = {"v1": "/is_public", "v2": "/display_on_public_website"}
+    PUBLIC_PATH = {V1: "/is_public", V2: "/display_on_public_website"}
 
     def validate(self, check_name, decoded, fix):
         correct_is_public = True
@@ -210,14 +212,14 @@ class ImmutableAttributesValidator(BaseManifestValidator):
     """
 
     FIELDS_NOT_ALLOWED_TO_CHANGE = {
-        "v1": ("integration_id", "display_name", "guid"),
-        "v2": ("id", "source_type_name", "app_id"),
+        V1: ("integration_id", "display_name", "guid"),
+        V2: ("id", "source_type_name", "app_id"),
     }
 
     def validate(self, check_name, decoded, fix):
         manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
         if 'new file' not in manifest_fields_changed:
-            for field in self.FIELDS_NOT_ALLOWED_TO_CHANGE:
+            for field in self.FIELDS_NOT_ALLOWED_TO_CHANGE[self.version]:
                 if field in manifest_fields_changed:
                     output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
                     self.fail(output)
@@ -230,9 +232,9 @@ class ImmutableAttributesValidator(BaseManifestValidator):
 class LogsCategoryValidator(BaseManifestValidator):
     """If an integration defines logs it should have the log collection category"""
 
-    LOG_COLLECTION_CATEGORY = {"v1": "log collection", "v2": "Category::Log Collection"}
+    LOG_COLLECTION_CATEGORY = {V1: "log collection", V2: "Category::Log Collection"}
 
-    CATEGORY_PATH = {"v1": "/categories", "v2": "/tile/classifier_tags"}
+    CATEGORY_PATH = {V1: "/categories", V2: "/tile/classifier_tags"}
 
     IGNORE_LIST = {
         'docker_daemon',
