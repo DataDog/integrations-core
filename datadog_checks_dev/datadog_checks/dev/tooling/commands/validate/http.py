@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+
 import click
 
 from datadog_checks.dev.tooling.annotations import annotate_error
@@ -120,11 +121,13 @@ def validate_use_http_wrapper(check):
             check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
             if check_uses_http_wrapper and has_arg_warning:
                 # Check for headers= or auth=
-                echo_warning(f"{check}: \n"
-                             f"    The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
-                             f"this configuration is handled by the wrapper automatically.\n"
-                             f"    If this a genuine usage of the parameters, "
-                             f"please inline comment `# SKIP_HTTP_VALIDATION`")
+                echo_warning(
+                    f"{check}: \n"
+                    f"    The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
+                    f"this configuration is handled by the wrapper automatically.\n"
+                    f"    If this a genuine usage of the parameters, "
+                    f"please inline comment `# SKIP_HTTP_VALIDATION`"
+                )
                 pass
 
     if has_failed:
