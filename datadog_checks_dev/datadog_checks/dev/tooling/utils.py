@@ -551,6 +551,8 @@ def has_e2e(check):
 
 def has_process_signature(check):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -578,6 +580,8 @@ def has_recommended_monitor(check):
 
 def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
