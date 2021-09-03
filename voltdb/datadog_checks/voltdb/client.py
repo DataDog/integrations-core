@@ -32,7 +32,7 @@ class Client(object):
                 parameters = json.dumps(parameters)
             params['Parameters'] = parameters
 
-        return self._http_get(url, auth=auth, params=params)
+        return self._http_get(url, auth=auth, params=params)  # SKIP_HTTP_VALIDATION
 
 
 class VoltDBAuth(requests.auth.AuthBase):
