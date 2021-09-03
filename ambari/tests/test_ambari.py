@@ -7,9 +7,12 @@ from datadog_checks.ambari import AmbariCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 
+import pytest
 from . import responses
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_flatten_service_metrics():
     metrics = AmbariCheck.flatten_service_metrics(
         {
@@ -278,3 +281,12 @@ def test_should_collect_service_status(instance):
 
 def _mock_clusters(ambari):
     ambari.get_clusters = MagicMock(return_value=['LabCluster'])
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator):
+    instance = {}
+    try:
+        dd_agent_check(instance, rate=True)
+    except Exception:
+        aggregator.assert_service_check("ambari.can_connect", AgentCheck.CRITICAL)
