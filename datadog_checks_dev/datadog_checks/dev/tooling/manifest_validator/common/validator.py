@@ -150,9 +150,10 @@ class MetricToCheckValidator(BaseManifestValidator):
 
         if metric_to_check:
             metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
-            if any(p.get('metric') in metrics_to_check for p in pricing):
-                return
             for metric in metrics_to_check:
+                # if metric found in pricing, skip and continue evaluating other metrics_to_check
+                if any(p.get('metric') == metric for p in pricing):
+                    continue
                 metric_integration_check_name = check_name
                 # snmp vendor specific integrations define metric_to_check
                 # with metrics from `snmp` integration
