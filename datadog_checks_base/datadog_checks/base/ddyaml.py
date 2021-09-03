@@ -38,7 +38,9 @@ def safe_yaml_dump_all(
     tags=None,
 ):
     if Dumper != yDumper:
-        log.debug("`%s` YAML dumper is used instead of the default one, please make sure it is safe to do so", Dumper.__name__)
+        log.debug(
+            "`%s` YAML dumper is used instead of the default one, please make sure it is safe to do so", Dumper.__name__
+        )
 
     if pyyaml_dump_all:
         return pyyaml_dump_all(
@@ -80,7 +82,9 @@ def safe_yaml_dump_all(
 
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.debug("`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__)
+        log.debug(
+            "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+        )
 
     if pyyaml_load:
         return pyyaml_load(stream, Loader=Loader)
@@ -90,7 +94,9 @@ def safe_yaml_load(stream, Loader=yLoader):
 
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.debug("`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__)
+        log.debug(
+            "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+        )
 
     if pyyaml_load_all:
         return pyyaml_load_all(stream, Loader=Loader)
