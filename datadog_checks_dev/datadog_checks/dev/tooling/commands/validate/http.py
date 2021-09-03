@@ -16,17 +16,9 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
-REQUEST_LIBRARY_FUNCTIONS = {
-    'requests.get',
-    'requests.post',
-    'requests.head',
-    'requests.put',
-    'requests.patch',
-    'requests.delete',
-    'requests.options',
-}
-
-TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
+REQUEST_LIBRARY_FUNC_RE = r"requests.[get|post|head|put|patch|delete]*\("
+HTTP_WRAPPER_INIT_CONFIG_RE = r"init_config\/[http|openmetrics_legacy|openmetrics]*"
+HTTP_WRAPPER_INSTANCE_RE = r"instances\/[http|openmetrics_legacy|openmetrics]*"
 
 
 def validate_config_http(file, check):
@@ -40,19 +32,13 @@ def validate_config_http(file, check):
     if not os.path.exists(file):
         return
 
-    has_instance_http = False
-    has_init_config_http = False
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
-        for _, line in enumerate(f):
-            if any('instances/{}'.format(temp) in line for temp in TEMPLATES):
-                has_instance_http = True
-
-            if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
-                has_init_config_http = True
-
-            if has_init_config_http and has_instance_http:
-                break
+        read_file = f.read()
+        has_init_config_http = re.search(HTTP_WRAPPER_INIT_CONFIG_RE, read_file)
+        has_instance_http = re.search(HTTP_WRAPPER_INSTANCE_RE, read_file)
+        if has_init_config_http and has_instance_http:
+            return
 
     if not has_instance_http:
         message = (
@@ -83,25 +69,24 @@ def validate_use_http_wrapper_file(file, check):
     file_uses_http_wrapper = False
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
-        for num, line in enumerate(f):
-            if ('self.http' in line or 'OpenMetricsBaseCheck' in line) and 'SKIP_HTTP_VALIDATION' not in line:
-                file = f.read()
-                found_match = re.search(r"auth=|header=", file)
+        read_file = f.read()
+        found_match_arg = re.search(r"auth=|header=", read_file)
+        found_http = re.search(r"self.http|OpenMetricsBaseCheck", read_file)
+        skip_validation = re.search(r"SKIP_HTTP_VALIDATION", read_file)
+        if found_http and not skip_validation:
+            return found_http, has_failed, found_match_arg
 
-                return True, has_failed, found_match
-
-            for http_func in REQUEST_LIBRARY_FUNCTIONS:
-                if http_func in line:
-                    echo_failure(
-                        f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
-                        f'please use the HTTP wrapper instead'
-                    )
-                    annotate_error(
-                        file,
-                        "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
-                        line=num + 1,
-                    )
-                    return False, True, None
+        http_func = re.search(REQUEST_LIBRARY_FUNC_RE, read_file)
+        if http_func:
+            echo_failure(
+                f'Check `{check}` uses `{http_func}` in `{os.path.basename(file)}`, '
+                f'please use the HTTP wrapper instead'
+            )
+            annotate_error(
+                file,
+                "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
+            )
+            return False, True, None
 
     return file_uses_http_wrapper, has_failed, None
 
