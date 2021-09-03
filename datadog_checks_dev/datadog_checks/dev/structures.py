@@ -99,7 +99,7 @@ class JSONDict(dict):
 
         obj = self
         for p in parts:
-            # first try to convert integer refs
+            # first, try to convert integer refs
             try:
                 p = int(p)
             except Exception:
@@ -117,10 +117,24 @@ class JSONDict(dict):
 
     def set_path(self, path, value):
         # resolve the containing object
-        *obj_path, tail = path.lstrip('/').split('/')
+
+        # Note: more elegantly handled in python3 via:
+        # *obj_path, tail = path.lstrip('/').split('/')
+        parts = path.lstrip('/').split('/')
+        if len(parts) > 1:
+            obj_path, tail = parts[:-1], parts[-1]
+        elif len(parts) == 1:
+            obj_path, tail = None, parts[0]
+        else:
+            raise Exception('Unable to parse path successfully: {}'.format(path))
 
         obj = self
         if obj_path:
             obj = self._resolve('/'.join(obj_path))
+
+        try:
+            tail = int(tail)
+        except Exception:
+            pass
 
         obj[tail] = value
