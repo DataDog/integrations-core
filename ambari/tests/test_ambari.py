@@ -1,18 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 from mock import MagicMock
 
 from datadog_checks.ambari import AmbariCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 
-import pytest
 from . import responses
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_flatten_service_metrics():
     metrics = AmbariCheck.flatten_service_metrics(
         {

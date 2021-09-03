@@ -6,16 +6,16 @@ from copy import deepcopy
 import pytest
 
 INSTANCE = {
-        'url': 'localhost',
-        'port': 80,
-        'username': 'admin',
-        'password': 'admin',
-        'services': {
-            "HDFS": {"NAMENODE": [], "DATANODE": []},
-            "YARN": {"NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"], "YARNCLIENT": []},
-            "MAPREDUCE2": {"HISTORYSERVER": ["BufferPool", "Memory", "jvm"]},
-        },
-    }
+    'url': 'localhost',
+    'port': 80,
+    'username': 'admin',
+    'password': 'admin',
+    'services': {
+        "HDFS": {"NAMENODE": [], "DATANODE": []},
+        "YARN": {"NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"], "YARNCLIENT": []},
+        "MAPREDUCE2": {"HISTORYSERVER": ["BufferPool", "Memory", "jvm"]},
+    },
+}
 
 
 @pytest.fixture(scope="session")
