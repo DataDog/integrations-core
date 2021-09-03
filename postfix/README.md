@@ -40,8 +40,9 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
      postfix_user: postfix
 
    instances:
-     ## @param directory - string - required
-     ## Path to the postfix directory.
+     ## @param directory - string - optional - default: /var/spool/postfix
+     ## Path to the postfix directory. The directory parameter is required if `postqueue: false` is set. For more 
+     ## information, please refer to the following link: https://docs.datadoghq.com/integrations/postfix/#using-sudo
      #
      - directory: /var/spool/postfix
 
