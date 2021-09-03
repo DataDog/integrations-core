@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-
+import re
 import click
 
 from datadog_checks.dev.tooling.annotations import annotate_error
 from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
 
 from ...testing import process_checks_option
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 
@@ -84,7 +84,10 @@ def validate_use_http_wrapper_file(file, check):
     with open(file, 'r', encoding='utf-8') as f:
         for num, line in enumerate(f):
             if ('self.http' in line or 'OpenMetricsBaseCheck' in line) and 'SKIP_HTTP_VALIDATION' not in line:
-                return True, has_failed
+                file = f.read()
+                found_match = re.search(r"auth=|header=", file)
+
+                return True, has_failed, found_match
 
             for http_func in REQUEST_LIBRARY_FUNCTIONS:
                 if http_func in line:
@@ -97,9 +100,9 @@ def validate_use_http_wrapper_file(file, check):
                         "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
                         line=num + 1,
                     )
-                    has_failed = True
+                    return False, True, None
 
-    return file_uses_http_wrapper, has_failed
+    return file_uses_http_wrapper, has_failed, None
 
 
 def validate_use_http_wrapper(check):
@@ -112,9 +115,16 @@ def validate_use_http_wrapper(check):
     check_uses_http_wrapper = False
     for file in get_check_files(check, include_tests=False):
         if file.endswith('.py'):
-            file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
+            file_uses_http_wrapper, file_uses_request_lib, has_arg_warning = validate_use_http_wrapper_file(file, check)
             has_failed = has_failed or file_uses_request_lib
             check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
+            if check_uses_http_wrapper and has_arg_warning:
+                # Check for headers= or auth=
+                echo_warning(f"{check}: the HTTP wrapper contains parameter `{has_arg_warning.group()}`, "
+                             f"this configuration is handled by the wrapper automatically.\n"
+                             f"    If this a genuine usage of the parameters, "
+                             f"please inline comment `# SKIP_HTTP_VALIDATION`")
+                pass
 
     if has_failed:
         abort()
