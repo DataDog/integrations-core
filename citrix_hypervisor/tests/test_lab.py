@@ -82,7 +82,7 @@ def test_lab(aggregator):
 
         aggregator.assert_service_check('citrix_hypervisor.can_connect', CitrixHypervisorCheck.OK)
         for m in METRICS:
-            aggregator.assert_metric('citrix_hypervisor.{}'.format(m))
+            aggregator.assert_metric('citrix_hypervisor.{}'.format(m), at_least=0)
 
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics())

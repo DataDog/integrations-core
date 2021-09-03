@@ -93,8 +93,8 @@ class CitrixHypervisorCheck(AgentCheck):
             master_address = 'http://' + master_address
         master_xenserver = xmlrpclib.Server(master_address)
 
-        # Master credentials can be different, we can specify new `master_username` and 
-        # `master_password` options later if requested 
+        # Master credentials can be different, we can specify new `master_username` and
+        # `master_password` options later if requested
         master_session = self._session_login(master_xenserver)
 
         if master_session.get('Status') == 'Success':
