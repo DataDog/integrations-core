@@ -18,7 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     config_directory: Optional[str]
-    directory: str
+    directory: Optional[str]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     queues: Sequence[str]
