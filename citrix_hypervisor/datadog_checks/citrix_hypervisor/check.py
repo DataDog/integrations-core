@@ -68,7 +68,6 @@ class CitrixHypervisorCheck(AgentCheck):
         legends = data['meta']['legend']
         values = data['data'][0]['values']
         for i in range(len(legends)):
-            # TODO
             metric_name, tags = build_metric(legends[i], self.log)
 
             if metric_name is not None:

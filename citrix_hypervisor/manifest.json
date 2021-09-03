@@ -1,4 +1,7 @@
 {
+  "aliases": [
+    "xenserver"
+  ],
   "display_name": "Citrix Hypervisor",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
@@ -6,7 +9,7 @@
   "metric_prefix": "citrix_hypervisor.",
   "metric_to_check": "citrix_hypervisor.host.cpu",
   "creates_events": false,
-  "short_description": "TODO",
+  "short_description": "Monitor the health and performance of a Citrix Hypervisor host.",
   "guid": "d6c1911b-f7fd-4537-af4f-1aa40dae40c2",
   "support": "core",
   "supported_os": [
