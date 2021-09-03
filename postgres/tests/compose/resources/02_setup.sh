@@ -50,6 +50,19 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
 
     ALTER FUNCTION datadog.explain_statement(l_query text, out explain json) OWNER TO postgres;
     ALTER FUNCTION datadog.pg_stat_activity() owner to postgres;
+
+    -- datadog.explain_statement_noaccess is not part of the standard setup
+    -- it's added only for the purpose of testing an explain function owned by a user with inadequate permissions
+    CREATE OR REPLACE FUNCTION datadog.explain_statement_noaccess(l_query text, out explain JSON) RETURNS SETOF JSON AS
+    $$
+      BEGIN
+          RETURN QUERY EXECUTE 'EXPLAIN (FORMAT JSON) ' || l_query;
+      END;
+    $$
+    LANGUAGE plpgsql
+    RETURNS NULL ON NULL INPUT
+    SECURITY DEFINER;
+    ALTER FUNCTION datadog.explain_statement_noaccess(l_query text, out explain json) OWNER TO datadog;
 EOSQL
 
 done

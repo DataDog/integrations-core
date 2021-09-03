@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
     - name: hosts
-      required: true
+      enabled: true
       description: |
         The host (and optional port number) where the mongod instance (or mongos instances for
         a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
@@ -158,16 +158,18 @@ files:
             - name: database
               type: string
             - name: query
-              type: string
-            - name: fields
               type: object
-              properties:
-                - name: field_name
-                  type: string
-                - name: name
-                  type: string
-                - name: type
-                  type: string
+            - name: fields
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: field_name
+                    type: string
+                  - name: name
+                    type: string
+                  - name: type
+                    type: string
             - name: tags
               type: array
               items:

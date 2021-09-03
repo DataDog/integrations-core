@@ -10,9 +10,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db import Query
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
-from .conftest import CHECK_NAME
-
-EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
+from .common import CHECK_NAME, EXPECTED_TAGS
 
 
 def test_storage_metrics(dd_run_check, aggregator, instance):

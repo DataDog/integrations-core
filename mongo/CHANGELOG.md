@@ -1,6 +1,10 @@
 # CHANGELOG - mongo
 
-## 2.5.0 / 2021-07-12
+## 2.6.0 / 2021-08-22
+
+* [Added] Support collection-agnostic aggregations for custom queries. See [#9857](https://github.com/DataDog/integrations-core/pull/9857).
+
+## 2.5.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Bump pymongo to 3.8. See [#9557](https://github.com/DataDog/integrations-core/pull/9557).
 * [Fixed] Update description of the `hosts` config parameter. See [#9542](https://github.com/DataDog/integrations-core/pull/9542).

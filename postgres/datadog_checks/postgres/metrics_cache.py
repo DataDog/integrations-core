@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
-    """ Mantains a cache of metrics to collect """
+    """ Maintains a cache of metrics to collect """
 
     def __init__(self, config):
         self.config = config
@@ -177,7 +177,7 @@ class PostgresMetricsCache:
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         metrics_data = self.activity_metrics
 

@@ -1,6 +1,11 @@
 # CHANGELOG - rabbitmq
 
-## 1.18.0 / 2021-06-23
+## 2.0.0 / 2021-08-22
+
+* [Fixed] Fix documented default value of `use_legacy_auth_encoding`. See [#9880](https://github.com/DataDog/integrations-core/pull/9880).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.18.0 / 2021-06-23 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8976](https://github.com/DataDog/integrations-core/pull/8976).
 

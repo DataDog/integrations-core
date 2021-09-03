@@ -79,9 +79,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._config = config
         self.log = get_check_logger()
         self._state = StatementMetrics()
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=self._config.full_statement_text_cache_max_size,
@@ -121,11 +119,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
             # truncate query text to the maximum length supported by metrics tags
             for row in rows:
-                row['digest_text'] = row['digest_text'][0:200]
+                row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
 
             payload = {
-                'host': self._db_hostname,
+                'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
+                'ddagentversion': datadog_agent.get_version(),
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
                 'mysql_rows': rows,
@@ -166,7 +165,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                    `sum_no_index_used`,
                    `sum_no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
-            WHERE `digest_text` NOT LIKE 'EXPLAIN %'
+            WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
@@ -187,7 +186,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                obfuscated_statement = (
+                    datadog_agent.obfuscate_sql(row['digest_text'], self._obfuscate_options)
+                    if row['digest_text'] is not None
+                    else None
+                )
             except Exception as e:
                 self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
                 continue
@@ -207,7 +210,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
             row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname,
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

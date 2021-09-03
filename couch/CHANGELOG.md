@@ -1,6 +1,10 @@
 # CHANGELOG - couch
 
-## 3.13.3 / 2021-07-12
+## 4.0.0 / 2021-08-22
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.13.3 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Use Agent 8 signature. See [#9522](https://github.com/DataDog/integrations-core/pull/9522).
 

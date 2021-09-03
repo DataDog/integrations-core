@@ -78,10 +78,11 @@ The TCP check does not include any events.
 
 See [service_checks.json][11] for a list of service checks provided by this integration.
 
+**Note:** To set an alert on this service check, create a [Network Monitor][12].
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
-
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tcp_check/images/netgraphs.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -94,3 +95,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://app.datadoghq.com/monitors#/create
 [10]: https://docs.datadoghq.com/help/
 [11]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/assets/service_checks.json
+[12]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert

@@ -13,7 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param hosts - list of strings - required
+    ## @param hosts - list of strings - optional
     ## The host (and optional port number) where the mongod instance (or mongos instances for
     ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
     ## socket. Specify as many hosts as appropriate for your deployment topology:
@@ -205,7 +205,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

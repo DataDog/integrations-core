@@ -222,7 +222,7 @@ def get_extra_license_files():
     for path in os.listdir(get_root()):
         if not file_exists(get_manifest_file(path)):
             continue
-        extra_license_file = os.path.join(get_root(), path, 'LICENSE-3rdparty-extra.csv')
+        extra_license_file = os.path.join(get_root(), path, '3rdparty-extra-LICENSE.csv')
         if file_exists(extra_license_file):
             yield extra_license_file
 
@@ -266,6 +266,10 @@ def get_assets_from_manifest(check_name, asset_type):
 
 def get_config_file(check_name):
     return os.path.join(get_data_directory(check_name), 'conf.yaml.example')
+
+
+def get_check_req_file(check_name):
+    return os.path.join(get_root(), check_name, 'requirements.in')
 
 
 def get_config_spec(check_name):
@@ -414,7 +418,7 @@ def read_metadata_rows(metadata_file):
 
 def read_license_file_rows(license_file):
     """
-    Iterate over the rows of a `LICENSE-3rdparty-extra.csv` or `LICENSE-3rdparty.csv` file.
+    Iterate over the rows of a `3rdparty-extra-LICENSE.csv` or `LICENSE-3rdparty.csv` file.
     """
     with io.open(license_file, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -547,6 +551,8 @@ def has_e2e(check):
 
 def has_process_signature(check):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -574,6 +580,8 @@ def has_recommended_monitor(check):
 
 def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -658,8 +666,9 @@ def find_legacy_signature(check):
     for path, _, files in os.walk(get_check_directory(check)):
         for f in files:
             if f.endswith('.py'):
-                with open(os.path.join(path, f)) as test_file:
+                file_path = os.path.join(path, f)
+                with open(file_path) as test_file:
                     for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return str(f), num
+                            return file_path, num + 1
     return None

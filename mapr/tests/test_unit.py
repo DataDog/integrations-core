@@ -4,6 +4,7 @@
 import pytest
 from six import iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mapr import MaprCheck
 from datadog_checks.mapr.common import ALLOWED_METRICS, COUNT_METRICS, GAUGE_METRICS, MONOTONIC_COUNTER_METRICS
 from datadog_checks.mapr.utils import get_stream_id_for_topic
@@ -97,8 +98,8 @@ def test_submit_bucket(instance, aggregator):
         "table_fid:2070.42.262546",
         "table_path:/var/mapr/mapr.monitoring/tsdb-meta",
     ]
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, True, 'stubbed.hostname', expected_tags)
-    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, True, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 21, 2, 5, False, 'stubbed.hostname', expected_tags)
+    aggregator.assert_histogram_bucket('mapr.db.table.latency', 11, 5, 10, False, 'stubbed.hostname', expected_tags)
     aggregator.assert_all_metrics_covered()  # No metrics submitted
 
 
@@ -111,3 +112,4 @@ def test_check(aggregator, instance):
     for m in METRICS_IN_FIXTURE:
         aggregator.assert_metric(m)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

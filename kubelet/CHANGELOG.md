@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 7.0.0 / 2021-05-28
+## 7.0.0 / 2021-05-28 / Agent 7.29.0
 
 * [Changed] Increase default scraping time from 15s to 20s. See [#9193](https://github.com/DataDog/integrations-core/pull/9193).
 

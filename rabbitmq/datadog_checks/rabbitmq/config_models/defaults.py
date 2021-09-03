@@ -185,7 +185,7 @@ def instance_tls_verify(field, value):
 
 
 def instance_use_legacy_auth_encoding(field, value):
-    return True
+    return False
 
 
 def instance_username(field, value):

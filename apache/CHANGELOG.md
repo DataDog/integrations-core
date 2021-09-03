@@ -1,6 +1,6 @@
 # CHANGELOG - apache
 
-## 1.17.0 / 2021-06-09
+## 1.17.0 / 2021-06-09 / Agent 7.30.0
 
 * [Added] Added metrics from the apache scoreboard. See [#9355](https://github.com/DataDog/integrations-core/pull/9355). Thanks [daanleenders](https://github.com/daanleenders).
 

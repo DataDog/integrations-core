@@ -1,10 +1,10 @@
 # CHANGELOG - etcd
 
-## 2.7.1 / 2021-07-12
+## 2.7.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] etcd signature. See [#9551](https://github.com/DataDog/integrations-core/pull/9551).
 
-## 2.7.0 / 2021-05-28
+## 2.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

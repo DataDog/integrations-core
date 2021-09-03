@@ -59,7 +59,10 @@ files:
           items:
             type: string
       - name: queue_patterns
-        description: Collect from queues that match a MQ pattern
+        description: |
+          Collect from queues that match a MQ pattern
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_regex` as it may lead to
+          unexpected results.
         value:
           example:
             - 'DEV.*'          # match queues starting with "DEV."
@@ -68,7 +71,10 @@ files:
           items:
             type: string
       - name: queue_regex
-        description: Collect from queues that match a regex
+        description: |
+          Collect from queues that match a regex
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_patterns` as it may lead to
+          unexpected results.
         value:
           example:
             - '^DEV\..*$'          # match queues starting with "DEV."
@@ -107,7 +113,8 @@ files:
           properties: []
       - name: auto_discover_queues
         description: |
-          Autodiscover the queues to monitor
+          Autodiscover the queues to monitor.
+          Note: Do not use in conjunction with `queue_patterns` or `queue_regex` as it may lead to unexpected results.
           Warning: this will lead to some warnings in your logs
         value:
           example: false
@@ -134,6 +141,12 @@ files:
         value:
           example: false
           type: boolean
+      - name: timeout
+        description: |
+          The number of seconds to wait for IBM MQ to respond.
+        value:
+          example: 5
+          type: number
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:

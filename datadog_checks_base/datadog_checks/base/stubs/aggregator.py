@@ -39,24 +39,15 @@ def backend_normalize_metric_name(metric_name):
 
 
 def check_tag_names(metric, tags):
-    forbidden_tags = [
-        'cluster_name',
-        'clustername',
-        'cluster',
-        'clusterid',
-        'cluster_id',
-        'env',
-        'host_name',
-        'hostname',
-        'host',
-        'service',
-        'version',
-    ]
-
     if not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        try:
+            from datadog_checks.base.utils.tagging import GENERIC_TAGS
+        except ImportError:
+            GENERIC_TAGS = []
+
         for tag in tags:
             tag_name = tag.split(':')[0]
-            if tag_name in forbidden_tags:
+            if tag_name in GENERIC_TAGS:
                 raise Exception(
                     "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
                     "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
@@ -265,6 +256,9 @@ class AggregatorStub(object):
             if hostname and hostname != bucket.hostname:
                 continue
 
+            if monotonic != bucket.monotonic:
+                continue
+
             candidates.append(bucket)
 
         expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
@@ -403,7 +397,7 @@ class AggregatorStub(object):
                 actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                 # We only check `*.count` metrics for histogram and historate submissions
-                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted
+                # Note: all Openmetrics histogram and summary metrics are actually separately submitted
                 if check_submission_type and actual_metric_type in ['histogram', 'historate']:
                     metric_stub_name += '.count'
 

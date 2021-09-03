@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import time
 from contextlib import contextmanager
 
-from datadog_checks.dev.tooling.commands.console import echo_debug
+from datadog_checks.dev.errors import SubprocessError
+from datadog_checks.dev.tooling.commands.console import echo_debug, echo_warning
 
 from ...subprocess import run_command
 from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
@@ -267,7 +269,17 @@ class DockerInterface(object):
 
     def update_agent(self):
         if self.agent_build and '/' in self.agent_build:
-            run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
+            attempts = 3
+            while attempts:
+                try:
+                    run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
+                    break
+                except SubprocessError:
+                    attempts -= 1
+                    if not attempts:
+                        raise
+                    echo_warning("There was a problem pulling the agent docker image, will try again")
+                    time.sleep(5)
 
     def start_agent(self):
         if not self.agent_build:

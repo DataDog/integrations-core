@@ -1,12 +1,16 @@
 # CHANGELOG - Vault
 
+## 2.15.0 / 2021-08-22
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
 ## 2.14.0 / 2021-07-20
 
 * [Added] Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).
 * [Added] Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
 * [Added] Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
 
-## 2.13.0 / 2021-05-28
+## 2.13.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
 

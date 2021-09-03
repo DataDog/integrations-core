@@ -89,14 +89,14 @@ class TwistlockCheck(AgentCheck):
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
 
-        licence_status = AgentCheck.OK
+        license_status = AgentCheck.OK
         if expiration_date < warning_date:
-            licence_status = AgentCheck.WARNING
+            license_status = AgentCheck.WARNING
         if expiration_date < critical_date:
-            licence_status = AgentCheck.CRITICAL
-        self.service_check(
-            service_check_name, licence_status, tags=self._config.tags, message=license.get("expiration_date")
-        )
+            license_status = AgentCheck.CRITICAL
+
+        message = license.get("expiration_date") if license_status is not AgentCheck.OK else None
+        self.service_check(service_check_name, license_status, tags=self._config.tags, message=message)
 
     def report_registry_scan(self):
         namespace = "{}.registry".format(self.NAMESPACE)

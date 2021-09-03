@@ -77,13 +77,13 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional
+    ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
     ## Cancelled queries won't log any metrics.
     #
-    # query_timeout: 1000
+    # query_timeout: 5000
 
     ## @param relations - (list of string or mapping) - optional
     ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -274,12 +274,12 @@ instances:
     #
     obfuscator_options:
 
-        ## @param quantize_sql_tables - boolean - optional - default: false
-        ## Set to `true` to perform quantization on your SQL tables.
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ##
         ## Note that this option only applies when `dbm` is enabled.
         #
-        # quantize_sql_tables: false
+        # replace_digits: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -316,7 +316,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

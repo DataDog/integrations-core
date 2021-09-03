@@ -13,6 +13,8 @@ class TCPCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
+    CONFIGURATION_ERROR_MSG = "`{}` is an invalid `{}`; a {} must be specified."
+    DEFAULT_IP_CACHE_DURATION = None
 
     def __init__(self, name, init_config, instances):
         super(TCPCheck, self).__init__(name, init_config, instances)
@@ -24,16 +26,27 @@ class TCPCheck(AgentCheck):
         self.host = instance.get('host', None)
         self.socket_type = None
         self._addr = None
+        self.ip_cache_last_ts = 0
+        self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
+
+        ip_cache_duration = instance.get('ip_cache_duration', None)
+        if ip_cache_duration is not None:
+            try:
+                self.ip_cache_duration = int(ip_cache_duration)
+            except Exception:
+                raise ConfigurationError(
+                    self.CONFIGURATION_ERROR_MSG.format(ip_cache_duration, 'ip_cache_duration', 'number')
+                )
 
         port = instance.get('port', None)
         try:
             self.port = int(port)
         except Exception:
-            raise ConfigurationError("{} is not a correct port.".format(str(port)))
+            raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(port, 'port', 'number'))
         try:
             split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
-            raise ConfigurationError("A valid url must be specified")
+            raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
 
         custom_tags = instance.get('tags', [])
         self.tags = [
@@ -51,7 +64,9 @@ class TCPCheck(AgentCheck):
         if len(split_url) == 8:  # It may then be a IP V6 address, we check that
             for block in split_url:
                 if len(block) != 4:
-                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.host))
+                    raise ConfigurationError(
+                        self.CONFIGURATION_ERROR_MSG.format(self.host, 'IPv6 address', 'valid address')
+                    )
             # It's a correct IP V6 address
             self._addr = self.host
             self.socket_type = socket.AF_INET6
@@ -65,7 +80,7 @@ class TCPCheck(AgentCheck):
             try:
                 self.resolve_ip()
             except Exception as e:
-                self.log.debug(str(e))
+                self.log.error(str(e))
                 msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
         return self._addr
@@ -73,6 +88,11 @@ class TCPCheck(AgentCheck):
     def resolve_ip(self):
         self._addr = socket.gethostbyname(self.host)
         self.log.debug("%s resolved to %s", self.host, self._addr)
+
+    def should_resolve_ip(self):
+        if self.ip_cache_duration is None:
+            return False
+        return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
     def connect(self):
         with closing(socket.socket(self.socket_type)) as sock:
@@ -84,7 +104,12 @@ class TCPCheck(AgentCheck):
 
     def check(self, _):
         start = get_precise_time()  # Avoid initialisation warning
-        self.log.debug("Connecting to %s %d", self.host, self.port)
+
+        if self.should_resolve_ip():
+            self.resolve_ip()
+            self.ip_cache_last_ts = start
+
+        self.log.debug("Connecting to %s on port %d", self.host, self.port)
         try:
             response_time = self.connect()
             self.log.debug("%s:%d is UP", self.host, self.port)
@@ -124,7 +149,7 @@ class TCPCheck(AgentCheck):
                 self._addr = None
 
     def report_as_service_check(self, status, msg=None):
-        if status == AgentCheck.OK:
+        if status is AgentCheck.OK:
             msg = None
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.service_check_tags, message=msg)
         # Report as a metric as well

@@ -217,7 +217,7 @@
               "id": 4016470968177076,
               "definition": {
                 "type": "note",
-                "content": "The sum of request processing times across all requests handled by the request processors (in milliseconds) per second.",
+                "content": "The number of client requests hitting your server. Request counts provide a baseline for understanding the levels of traffic to your server throughout the day.",
                 "background_color": "purple",
                 "font_size": "14",
                 "text_align": "left",
@@ -275,7 +275,7 @@
               "id": 8536291398921956,
               "definition": {
                 "type": "note",
-                "content": "The number of client requests hitting your server. Request counts provide a baseline for understanding the levels of traffic to your server throughout the day.",
+                "content": "The sum of request processing times across all requests handled by the request processors (in milliseconds) per second.",
                 "background_color": "purple",
                 "font_size": "14",
                 "text_align": "left",
@@ -550,7 +550,13 @@
             }
           ]
         },
-        "layout": { "is_column_break": true }
+        "layout": {
+          "x": 0,
+          "y": 12,
+          "width": 12,
+          "height": 5,
+          "is_column_break": true
+        }
       },
       {
         "id": 273973929660372,
@@ -749,4 +755,3 @@
     "reflow_type": "fixed",
     "id": "ge2-uba-mu8"
   }
-  

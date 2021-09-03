@@ -717,7 +717,7 @@ def test_profile_by_file(aggregator):
     instance['profile'] = 'profile1'
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
-        with open(profile_file, 'w') as f:
+        with open(profile_file, 'wb') as f:
             f.write(yaml.safe_dump({'metrics': common.SUPPORTED_METRIC_TYPES}))
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
@@ -1217,6 +1217,7 @@ def test_timeout(aggregator, caplog):
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
     # All metrics but `ifAdminStatus` should still arrive
+    aggregator.assert_metric('snmp.ifNumber', count=1)
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)

@@ -1,6 +1,10 @@
 # CHANGELOG - Nfsstat
 
-## 1.7.0 / 2021-05-28
+## 1.8.0 / 2021-08-22
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8961](https://github.com/DataDog/integrations-core/pull/8961).
 

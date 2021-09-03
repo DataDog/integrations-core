@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
     recursive: Optional[bool]
     service: Optional[str]
     stat_follow_symlinks: Optional[bool]
+    submit_histograms: Optional[bool]
     tags: Optional[Sequence[str]]
 
     @root_validator(pre=True)

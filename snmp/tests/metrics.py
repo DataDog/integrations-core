@@ -45,6 +45,7 @@ IF_RATES = [
     'ifOutErrors.rate',
     'ifOutDiscards.rate',
 ]
+IF_SCALAR_GAUGE = ['ifNumber']
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
 IF_BANDWIDTH_USAGE = ['ifBandwidthInUsage.rate', 'ifBandwidthOutUsage.rate']
 
