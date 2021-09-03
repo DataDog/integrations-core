@@ -715,7 +715,9 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     pattern = query_template.format("(city,?)+")
     matching = [e for e in dbm_samples if re.match(pattern, e['db']['statement'])]
 
-    assert len(matching) > 0, "should have collected exactly at least one matching event"
+    assert len(matching) > 0, "should have collected exactly at least one matching event. Collected: {}".format(
+        [e['db']['statement'] for e in dbm_samples]
+    )
 
 
 def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
