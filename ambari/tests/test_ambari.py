@@ -283,9 +283,9 @@ def _mock_clusters(ambari):
     ambari.get_clusters = MagicMock(return_value=['LabCluster'])
 
 
+# Minimal E2E testing
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, aggregator):
-    instance = {}
+def test_e2e(dd_agent_check, aggregator, instance):
     try:
         dd_agent_check(instance, rate=True)
     except Exception:
