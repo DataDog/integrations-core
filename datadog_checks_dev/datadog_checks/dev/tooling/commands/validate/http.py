@@ -121,7 +121,7 @@ def validate_use_http_wrapper(check):
             if check_uses_http_wrapper and has_arg_warning:
                 # Check for headers= or auth=
                 echo_warning(f"{check}: \n"
-                             f"    The HTTP wrapper contains parameter `{has_arg_warning.group()}`, "
+                             f"    The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
                              f"this configuration is handled by the wrapper automatically.\n"
                              f"    If this a genuine usage of the parameters, "
                              f"please inline comment `# SKIP_HTTP_VALIDATION`")
