@@ -17,7 +17,7 @@ from aws_requests_auth import boto_utils as requests_aws
 from flaky import flaky
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
-from six import iteritems, PY2
+from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.headers import headers as agent_headers
