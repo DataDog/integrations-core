@@ -691,11 +691,13 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     # leave bob's connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
     cursor = bob_conn.cursor()
+    cursor.execute('begin')
     for _ in range(3):
         # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
         for q in queries:
             cursor.execute(q)
             check.check(dbm_instance)
+    cursor.execute('commit')
     cursor.close()
 
     def _sample_key(e):
