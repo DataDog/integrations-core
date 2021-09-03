@@ -8,6 +8,9 @@ from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixt
 
 from datadog_checks.aspdotnet import AspdotnetCheck
 
+from aspdotnet.tests.conftest import windows_ci
+from datadog_checks_base.datadog_checks.base import AgentCheck
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 MINIMAL_INSTANCE = {'host': '.'}
 
@@ -82,3 +85,10 @@ def test_with_tags(aggregator):
             aggregator.assert_metric(metric, tags=['tag1', 'another:tag', "instance:%s" % i], count=1)
 
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+@windows_ci
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    dd_agent_check(instance)
+    aggregator.assert_service_check("aspdotnet.can_connect", AgentCheck.CRITICAL)
