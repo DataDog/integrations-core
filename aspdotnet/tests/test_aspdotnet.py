@@ -4,12 +4,11 @@
 import os
 
 import pytest
+from aspdotnet.tests.conftest import windows_ci
+from datadog_checks_base.datadog_checks.base import AgentCheck
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.aspdotnet import AspdotnetCheck
-
-from aspdotnet.tests.conftest import windows_ci
-from datadog_checks_base.datadog_checks.base import AgentCheck
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 MINIMAL_INSTANCE = {'host': '.'}
