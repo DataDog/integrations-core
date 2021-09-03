@@ -90,12 +90,17 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
      postqueue: true
 
    instances:
+     ## @param directory - string - required
+     ## Path to the postfix directory.
+     #
+     - directory: /var/spool/postfix
+   
      ## @param config_directory - string - optional
      ## The config_directory option only applies when `postqueue: true`.
      ## The config_directory is the location of the Postfix configuration directory
      ## where main.cf lives.
      #
-     - config_directory: /etc/postfix
+       config_directory: /etc/postfix
 
        ## @param queues - list of string - required
        ## List of queues to monitor.
