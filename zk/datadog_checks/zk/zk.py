@@ -222,7 +222,7 @@ class ZookeeperCheck(AgentCheck):
         gauges[mode] = 1
         for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
-            self.gauge(gauge_name, v)
+            self.gauge(gauge_name, v, tags=self.base_tags)
 
     @staticmethod
     def _get_data(sock, command):
