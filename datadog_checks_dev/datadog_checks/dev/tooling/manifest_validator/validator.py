@@ -197,6 +197,8 @@ class NameValidator(ManifestValidator):
     def validate(self, check_name, decoded, fix):
         correct_name = check_name
         name = decoded.get('name')
+        if check_name.startswith('datadog') and check_name != 'datadog_cluster_agent':
+            self.fail(f'  An integration check folder cannot start with `datadog`: {check_name}')
         if not isinstance(name, str) or name.lower() != correct_name.lower():
             output = f'  incorrect `name`: {name}'
             if fix:

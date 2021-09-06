@@ -68,5 +68,9 @@ def instance_stat_follow_symlinks(field, value):
     return True
 
 
+def instance_submit_histograms(field, value):
+    return True
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)

@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 9.0.2 / 2021-08-27
+
+* [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).
+
 ## 9.0.1 / 2021-08-25
 
 * [Fixed] Fix postgres collection_errors error reference. See [#9982](https://github.com/DataDog/integrations-core/pull/9982).

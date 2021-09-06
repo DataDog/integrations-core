@@ -15,7 +15,7 @@ HERE = get_here()
 
 
 @pytest.fixture(scope='session')
-def dd_environment(unit_instance):
+def dd_environment(integration_instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     # We need a custom condition to wait a bit longer
     with docker_run(
@@ -25,7 +25,7 @@ def dd_environment(unit_instance):
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
     ):
-        yield unit_instance
+        yield integration_instance
 
 
 @pytest.fixture

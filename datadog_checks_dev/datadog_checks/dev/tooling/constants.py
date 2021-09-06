@@ -54,7 +54,7 @@ CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated'
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
-BETA_PACKAGES = {'datadog_checks_dev', 'datadog_checks_downloader'}
+BETA_PACKAGES = {}
 
 NOT_CHECKS = {'datadog_checks_dev'}
 
