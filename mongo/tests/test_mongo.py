@@ -167,7 +167,9 @@ def test_mongo_1valid_and_1invalid_custom_queries(
 
 
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run_check):
+    # Run the check against our running server
     check = check(instance_custom_queries)
+    dd_run_check(check)
 
     aggregator.assert_metric("dd.custom.mongo.count", value=70, count=1, metric_type=aggregator.GAUGE)
     aggregator.assert_metric_has_tag("dd.custom.mongo.count", 'collection:foo', count=1)
