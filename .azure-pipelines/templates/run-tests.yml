@@ -29,7 +29,7 @@ steps:
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
   - script: |
       docker run datadog/agent-dev:alex-snmp-corecheck-refactor-py3 agent version
-      ddev env test --base --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck-refactor-py3
+      ddev env test --base --new-env --junit ${{ parameters.check }} --agent datadog/agent-dev:alex-snmp-corecheck-refactor-with-autodiscovery-py3
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
