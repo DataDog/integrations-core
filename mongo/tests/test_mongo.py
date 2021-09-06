@@ -199,7 +199,9 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
-    aggregator.assert_metric("dd.mongodb.custom.queries_slower_than_60sec.secs_running", metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        "dd.mongodb.custom.queries_slower_than_60sec.secs_running", metric_type=aggregator.GAUGE, at_least=0
+    )
 
 
 def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_user, caplog, dd_run_check):
