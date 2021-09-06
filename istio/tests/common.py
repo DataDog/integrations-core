@@ -32,6 +32,22 @@ MOCK_V2_ISTIOD_INSTANCE = {
 
 MOCK_LEGACY_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
 
+CONFIG_EXCLUDE_LABELS = [
+    "source_version",
+    "destination_version",
+    "source_canonical_revision",
+    "destination_canonical_revision",
+    "source_principal",
+    "destination_principal",
+    "source_cluster",
+    "destination_cluster",
+    "source_canonical_service",
+    "destination_canonical_service",
+    "source_workload_namespace",
+    "destination_workload_namespace",
+    "request_protocol",
+    "connection_security_policy",
+]
 LEGACY_MESH_METRICS = [
     'istio.mesh.request.count',
     'istio.mesh.request.size.count',

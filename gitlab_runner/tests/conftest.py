@@ -3,13 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from time import sleep
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from .common import (
     CONFIG,
@@ -36,15 +34,15 @@ def dd_environment():
         'GITLAB_LOCAL_MASTER_PORT': str(GITLAB_LOCAL_MASTER_PORT),
         'GITLAB_LOCAL_RUNNER_PORT': str(GITLAB_LOCAL_RUNNER_PORT),
     }
-
+    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
+        compose_file=compose_file,
         env_vars=env,
-        conditions=[CheckEndpoints(GITLAB_RUNNER_URL, attempts=180)],
+        conditions=[
+            CheckDockerLogs(
+                compose_file, ['Gitlab is up!', 'Configuration loaded', 'Metrics server listening'], wait=5
+            ),
+            CheckEndpoints(GITLAB_RUNNER_URL, attempts=180),
+        ],
     ):
-        # run pre-test commands
-        for _ in range(100):
-            requests.get(GITLAB_RUNNER_URL)
-        sleep(2)
-
         yield CONFIG, E2E_METADATA

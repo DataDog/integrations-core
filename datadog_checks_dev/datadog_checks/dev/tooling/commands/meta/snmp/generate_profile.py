@@ -3,14 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 import os
-import sys
 from collections import namedtuple
 from tempfile import gettempdir
 
 import click
 import yaml
 
-from ...console import CONTEXT_SETTINGS, echo_debug, echo_info, echo_warning, set_debug
+from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Generate an SNMP profile from a collection of MIB files')
@@ -111,8 +110,7 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
 
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
-        echo_warning('🙄 no mib file provided, need at least one mib file to generate a profile', file=sys.stderr)
-        return
+        abort('🙄 no mib file provided, need at least one mib file to generate a profile')
 
     # create a list of all mib files directories and mib names
     source_directories = set()

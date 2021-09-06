@@ -86,6 +86,20 @@
         }
     ],
     [
+        "VM-on-fake-host",
+        {
+            "vsphere": [
+                "vsphere_host:unknown",
+                "vsphere_folder:Datacenters",
+                "vsphere_datacenter:Datacenter2",
+                "vsphere_folder:vm",
+                "vsphere_folder:Discovered virtual machine",
+                "vsphere_type:vm",
+                "vcenter_server:FAKE"
+            ]
+        }
+    ],
+    [
         "VM3-1",
         {
             "vsphere": [
