@@ -82,10 +82,9 @@ class PgBouncer(AgentCheck):
                                 row = row.copy()
                                 # We flip/rotate the row: row value becomes the column name
                                 row[row['key']] = row['value']
-                            else:
-                                # Skip the "pgbouncer" database
-                                if row['database'] == self.DB_NAME:
-                                    continue
+                            # Skip the "pgbouncer" database
+                            elif row.get('database') == self.DB_NAME:
+                                continue
 
                             tags = list(self.tags)
                             tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
