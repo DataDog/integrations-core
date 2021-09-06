@@ -73,7 +73,6 @@ pyyaml==5.4.1
 redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0
-# Newer requests versions are incomopatible with latest py2 supported snowflake-connector
 requests==2.22.0; python_version < '3.0'
 requests==2.25.0; python_version > '3.0'
 requests_ntlm==1.1.0
