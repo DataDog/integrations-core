@@ -190,7 +190,7 @@ def test(
             enter_pdb=enter_pdb,
             debug=debug,
             bench=bench,
-            latest_metrics=latest,
+            latest=latest,
             coverage=coverage,
             junit=junit,
             marker=marker,

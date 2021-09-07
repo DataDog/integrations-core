@@ -206,7 +206,7 @@ def construct_pytest_options(
     enter_pdb=False,
     debug=False,
     bench=False,
-    latest_metrics=False,
+    latest=False,
     coverage=False,
     junit=False,
     marker='',
@@ -236,7 +236,7 @@ def construct_pytest_options(
     else:
         pytest_options += ' --benchmark-skip'
 
-    if latest_metrics:
+    if latest:
         pytest_options += ' --run-latest-metrics'
 
     if ddtrace:
