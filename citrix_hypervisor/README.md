@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [citrix_hypervisor][1] through the Datadog Agent.
+This check monitors [Citrix Hypervisor][1] through the Datadog Agent.
 
 ## Setup
 
@@ -10,17 +10,17 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The citrix_hypervisor check is included in the [Datadog Agent][2] package.
+The Citrix Hypervisor check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.  
-The recommended way to monitor Citrix Hypervisors is to install one Datadog Agent on each hypervisor.
+The recommended way to monitor Citrix hypervisors is to install one Datadog Agent on each hypervisor.
 
 #### Datadog User
 
-The Citrix Hypervisor integration needs a user with at least [`read-only`](https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html) access to monitor the service.
+The Citrix Hypervisor integration requires a user with at least [`read-only`](https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html) access to monitor the service.
 
 ### Configuration
 
-1. Edit the `citrix_hypervisor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your citrix_hypervisor performance data. See the [sample citrix_hypervisor.d/conf.yaml][3] for all available configuration options.
+1. Edit the `citrix_hypervisor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Citrix Hypervisor performance data. See the [sample citrix_hypervisor.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 
@@ -36,11 +36,11 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 
-The citrix_hypervisor integration does not include any events.
+The Citrix Hypervisor integration does not include any events.
 
 ### Service Checks
 
-The citrix_hypervisor integration does not include any service checks.
+The Citrix Hypervisor integration does not include any service checks.
 
 See [service_checks.json][7] for a list of service checks provided by this integration.
 
