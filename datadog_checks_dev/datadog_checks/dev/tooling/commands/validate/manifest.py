@@ -7,8 +7,8 @@ import os
 import click
 
 from ....fs import file_exists, read_file, write_file
-from ....structures import JSONDict
 from ...constants import get_root
+from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
 from ...manifest_validator.constants import V1_STRING
 from ...testing import process_checks_option

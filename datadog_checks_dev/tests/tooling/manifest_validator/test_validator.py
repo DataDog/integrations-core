@@ -4,8 +4,8 @@
 import os
 from pathlib import Path
 
-from datadog_checks.dev.structures import JSONDict
 from datadog_checks.dev.tooling.constants import get_root, set_root
+from datadog_checks.dev.tooling.datastructures import JSONDict
 from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 
 
