@@ -87,6 +87,9 @@ class CitrixHypervisorCheck(AgentCheck):
     def _get_master_session(self, session):
         # type: (Dict[str, str]) -> Dict[str, str]
         # {'Status': 'Failure', 'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102']}
+        if len(session.get('ErrorDescription'), []) < 1:
+            return {}
+
         master_address = session['ErrorDescription'][1]
         if not master_address.startswith('http://'):
             master_address = 'http://' + master_address
