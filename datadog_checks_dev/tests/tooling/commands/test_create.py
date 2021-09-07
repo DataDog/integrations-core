@@ -15,7 +15,13 @@ CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE
 
 
 @pytest.mark.parametrize(
-    'integration_type, installable', [('check', True), ('jmx', True), ('tile', False), ('logs', False)]
+    'integration_type, installable',
+    [
+        ('check', True),
+        #('jmx', True),
+        #('tile', False),
+        #('logs', False)
+    ]
 )
 def test_new_check_test(integration_type, installable):
     check_path = os.path.join(CORE_ROOT, 'my_check')

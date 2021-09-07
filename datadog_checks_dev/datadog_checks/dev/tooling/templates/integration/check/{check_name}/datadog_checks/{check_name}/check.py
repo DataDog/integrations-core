@@ -9,8 +9,11 @@ from datadog_checks.base import AgentCheck
 
 
 class {check_class}(AgentCheck):
+
+    __NAMESPACE__ = {check_name}
+
     def __init__(self, name, init_config, instances):
-        # super({check_class}, self).__init__(name, init_config, instances)
+        super({check_class}, self).__init__(name, init_config, instances)
 
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
@@ -24,7 +27,7 @@ class {check_class}(AgentCheck):
         # }}
         # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
         # self.check_initializations.append(self._query_manager.compile_queries)
-        pass
+
 
     def check(self, _):
         # type: (Any) -> None
@@ -41,11 +44,9 @@ class {check_class}(AgentCheck):
         #     response_json = response.json()
 
         # except Timeout as e:
-        #     self.service_check(
-        #         "{check_name}.can_connect",
-        #         AgentCheck.CRITICAL,
+        self.service_check("{check_name}.can_connect", AgentCheck.CRITICAL,
         #         message="Request timeout: {{}}, {{}}".format(url, e),
-        #     )
+        )
         #     raise
 
         # except (HTTPError, InvalidURL, ConnectionError) as e:
