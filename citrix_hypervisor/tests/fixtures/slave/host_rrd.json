@@ -1,0 +1,1 @@
+{"version":"0003","step":"5","lastupdate":"1627907537.3586","ds":[{"name":"memory_reclaimed_max","type":"GAUGE","minimal_hearbeat":"300.0000","min":"-Infinity","max":"Infinity","last_ds":"0","value":"0.0","unknown_sec":"0"}]}

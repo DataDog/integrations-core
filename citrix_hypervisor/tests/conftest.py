@@ -6,6 +6,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
 
 from . import common
@@ -13,7 +14,15 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    with docker_run(
+        common.COMPOSE_FILE,
+        endpoints=[
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[0]['url']),
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[1]['url']),
+            '{}/rrd_updates'.format(common.E2E_INSTANCE[2]['url']),
+        ],
+    ):
+        yield common.E2E_INSTANCE
 
 
 @pytest.fixture
@@ -27,7 +36,7 @@ def mock_requests_get(url, *args, **kwargs):
     if url_parts[0] != 'mocked':
         return MockResponse(status_code=404)
 
-    path = os.path.join(common.HERE, 'fixtures', '{}.json'.format(url_parts[1]))
+    path = os.path.join(common.HERE, 'fixtures', 'standalone', '{}.json'.format(url_parts[1]))
     if not os.path.exists(path):
         return MockResponse(status_code=404)
 

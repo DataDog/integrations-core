@@ -75,19 +75,19 @@ class CitrixHypervisorCheck(AgentCheck):
 
     def _session_login(self, server):
         # type: (Any) -> Dict[str, str]
-        try:
-            session = server.session.login_with_password(
-                self.instance.get('username', ''), self.instance.get('password', '')
-            )
-            return session
-        except Exception as e:
-            self.log.warning(e)
+        # try:
+        session = server.session.login_with_password(
+            self.instance.get('username', ''), self.instance.get('password', '')
+        )
+        return session
+        # except Exception as e:
+        #     self.log.warning(e)
         return {}
 
     def _get_master_session(self, session):
         # type: (Dict[str, str]) -> Dict[str, str]
         # {'Status': 'Failure', 'ErrorDescription': ['HOST_IS_SLAVE', '192.168.101.102']}
-        if len(session.get('ErrorDescription'), []) < 1:
+        if len(session.get('ErrorDescription', [])) < 1:
             return {}
 
         master_address = session['ErrorDescription'][1]
@@ -129,10 +129,11 @@ class CitrixHypervisorCheck(AgentCheck):
 
             self.log.warning('Unknown xmlrpc error: %s', str(session))
             return {}
+        elif session.get('Status') == 'Success':
+            self._additional_tags.append('server_type:master')
 
-        self._additional_tags.append('server_type:master')
-
-        return session
+            return session
+        return {}
 
     def check(self, _):
         # type: (Any) -> None

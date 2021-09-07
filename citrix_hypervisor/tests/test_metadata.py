@@ -24,7 +24,7 @@ def test_collect_metadata(datadog_agent, instance):
         'version.raw': '8.2.0',
     }
 
-    with open(os.path.join(common.HERE, 'fixtures', 'xmlrpc_version.json'), 'rb') as f:
+    with open(os.path.join(common.HERE, 'fixtures', 'standalone', 'version.json'), 'rb') as f:
         content = json.load(f)
 
         xenserver = common.mocked_xenserver('master')
