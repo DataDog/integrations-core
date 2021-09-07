@@ -82,7 +82,7 @@ DATASTORE_METRICS = {
     'datastore.numberWriteAveraged.average' : None,
     'disk.capacity.latest' : None,
     'disk.provisioned.latest' : None,
-    'disk.used.latest' : None,
+    'disk.used.latest' : ",DISKFILE,DELTAFILE,OTHERFILE",
 #     'disk.numberReadAveraged.average' : "*",
 #     'disk.numberWriteAveraged.average' : "*",
 }

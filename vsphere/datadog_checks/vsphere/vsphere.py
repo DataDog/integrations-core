@@ -67,6 +67,8 @@ HISTORICAL_RESOURCES = [vim.Datastore, vim.ClusterComputeResource]
 ALL_RESOURCES_WITH_METRICS = REALTIME_RESOURCES + HISTORICAL_RESOURCES
 ALL_RESOURCES_WITH_NO_METRICS = [vim.Folder,vim.Datacenter]
 
+DATASTORE_METRIC_FILE_TYPES = ["DISKFILE","DELTAFILE","OTHERFILE"]
+
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
 JOB_TIMEOUT = 10
@@ -1302,7 +1304,13 @@ class VSphereCheck(AgentCheck):
                                 self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
                                 continue
 
-                            instance_name = perf_metric.id.instance or "none"
+                            metric_instance = str(perf_metric.id.instance)
+                            instance_name = metric_instance or "none"
+                            # append metric name with valid instance value for datastore metrics
+                            if isinstance(entity_metrics.entity,vim.Datastore):
+                                if metric_instance and metric_instance in DATASTORE_METRIC_FILE_TYPES:
+                                    metric_name = "{0}.{1}".format(metric_name,metric_instance.lower())
+
                             # Get the most recent value that isn't negative
                             valid_values = [v for v in perf_metric.value if v >= 0]
                             if not valid_values:
