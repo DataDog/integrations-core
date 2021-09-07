@@ -32,7 +32,7 @@ class SnowflakeCheck(AgentCheck):
 
     __NAMESPACE__ = 'snowflake'
 
-    SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
