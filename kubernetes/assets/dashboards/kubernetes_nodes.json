@@ -557,7 +557,8 @@
                     {
                         "formulas": [
                             {
-                                "formula": "100 - query1 * 100"
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
                             }
                         ],
                         "queries": [
@@ -582,7 +583,7 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
+                        "value": "y = 1",
                         "display_type": "error dashed"
                     }
                 ],
@@ -1413,7 +1414,8 @@
                     {
                         "formulas": [
                             {
-                                "formula": "100 - query1 * 100"
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
                             }
                         ],
                         "queries": [
@@ -1438,14 +1440,14 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
-                        "display_type": "error dashed",
-                        "label": "y = 100"
+                        "label": "y = 1",
+                        "value": "y = 1",
+                        "display_type": "error dashed"
                     },
                     {
-                        "value": "y = 80",
-                        "display_type": "warning dashed",
-                        "label": "y = 80"
+                        "label": "y = 0.8",
+                        "value": "y = 0.8",
+                        "display_type": "warning dashed"
                     }
                 ],
                 "title": "Memory utilization % per node",
