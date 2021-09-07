@@ -5,7 +5,6 @@
 * [Added] Add dependency `foundationdb` version `6.3.18`. See [#10050](https://github.com/DataDog/integrations-core/pull/10050).
 * [Fixed] Bump snowflake and requests for Py3. See [#10060](https://github.com/DataDog/integrations-core/pull/10060).
 * [Fixed] Allow non-default yaml loader and dumper. See [#10032](https://github.com/DataDog/integrations-core/pull/10032).
-* [Fixed] Rerun test on PY2. See [#10043](https://github.com/DataDog/integrations-core/pull/10043).
 * [Fixed] Set disable_unsafe_yaml default value. See [#10026](https://github.com/DataDog/integrations-core/pull/10026).
 
 ## 21.0.1 / 2021-08-23
