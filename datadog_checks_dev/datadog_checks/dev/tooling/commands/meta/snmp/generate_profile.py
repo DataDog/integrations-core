@@ -7,9 +7,10 @@ from collections import namedtuple
 from tempfile import gettempdir
 
 import click
+from datadog_checks.dev.tooling.commands.meta.snmp.constants import MIB_SOURCE_URL
 import yaml
 
-from ....constants import MIB_SOURCE_URL
+
 from ...console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, set_debug
 
 
