@@ -336,6 +336,9 @@ def test_e2e_discovery(dd_agent_check):
         'datadog.snmp.check_interval',
         'datadog.snmp.submitted_metrics',
         'datadog.snmp.check_duration',
+
+        # TODO: remove when this PR is merged https://github.com/DataDog/integrations-core/pull/10072
+        'snmp.discovered_devices_count',
     ]
     # execute 2 times with 300ms interval to be sure the autodiscovery has time to discover the devices
     # we might need to increase pause if the test is too flaky
