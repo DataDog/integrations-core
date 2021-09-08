@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
 import socket
 from collections import defaultdict
 from copy import deepcopy
 
-import ipaddress
 import pytest
+from tests.test_e2e_core import assert_apc_ups_metrics
 
 from datadog_checks.base import to_native_string
 from datadog_checks.base.stubs.common import MetricStub
-from tests.test_e2e_core import assert_apc_ups_metrics
 
 from . import common
 
@@ -346,9 +346,14 @@ def test_e2e_discovery(dd_agent_check):
 
 
 def assert_python_vs_core(
-        dd_agent_check, config, expected_total_count=None, metrics_to_skip=None,
-        assert_value_metrics=ASSERT_VALUE_METRICS,
-        rate=True, pause=0, times=1
+    dd_agent_check,
+    config,
+    expected_total_count=None,
+    metrics_to_skip=None,
+    assert_value_metrics=ASSERT_VALUE_METRICS,
+    rate=True,
+    pause=0,
+    times=1,
 ):
     python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
