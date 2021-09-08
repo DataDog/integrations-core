@@ -80,7 +80,6 @@ setup(
             'datamodel-code-generator~=0.11.4',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
-            'jsonpointer',
             'jsonschema',
             'markdown',
             'orjson',
