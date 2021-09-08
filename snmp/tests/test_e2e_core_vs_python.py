@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
+import socket
 from collections import defaultdict
 from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base import to_native_string
 from datadog_checks.base.stubs.common import MetricStub
 
 from . import common
@@ -18,7 +21,6 @@ SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32"}},  # Gauge32
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.88.1.1.1.0", 'name': "IAmAnInteger"}},  # Integer
 ]
-
 
 ASSERT_VALUE_METRICS = [
     'snmp.devices_monitored',
@@ -328,8 +330,39 @@ def test_e2e_profile_palo_alto(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
+def test_e2e_discovery(dd_agent_check):
+    host = socket.gethostbyname(common.HOST)
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+
+    instance = {
+        # Make sure the check handles bytes
+        'network_address': to_native_string(network),
+        'port': common.PORT,
+        'community_string': 'apc_ups',
+    }
+    config = {'init_config': {}, 'instances': [instance]}
+    # skip telemetry metrics since they are implemented different for python and corecheck
+    # python integration autodiscovery submit telemetry metrics once for all devices
+    # core integration autodiscovery submit telemetry metrics once for each device
+    skip_metrics = [
+        'datadog.snmp.check_interval',
+        'datadog.snmp.submitted_metrics',
+        'datadog.snmp.check_duration',
+    ]
+    # execute 2 times with 300ms interval to be sure the autodiscovery has time to discover the devices
+    # we might need to increase pause if the test is too flaky
+    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=2, metrics_to_skip=skip_metrics)
+
+
 def assert_python_vs_core(
-    dd_agent_check, config, expected_total_count=None, metrics_to_skip=None, assert_value_metrics=ASSERT_VALUE_METRICS
+    dd_agent_check,
+    config,
+    expected_total_count=None,
+    metrics_to_skip=None,
+    assert_value_metrics=ASSERT_VALUE_METRICS,
+    rate=True,
+    pause=0,
+    times=1,
 ):
     python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
@@ -338,7 +371,7 @@ def assert_python_vs_core(
     metrics_to_skip = metrics_to_skip or []
 
     # building expected metrics (python)
-    aggregator = dd_agent_check(python_config, rate=True)
+    aggregator = dd_agent_check(python_config, rate=rate, pause=pause, times=times)
     python_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
