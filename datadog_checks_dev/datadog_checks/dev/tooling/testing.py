@@ -101,10 +101,7 @@ def get_tox_envs(
                 envs_selected[:] = selected
             else:
                 envs_selected[:] = [
-                    e for e in envs_available
-                    if 'bench' not in e
-                    and 'format_style' not in e
-                    and e != 'latest'
+                    e for e in envs_available if 'bench' not in e and 'format_style' not in e and e != 'latest'
                 ]
 
         if tox_env_filter_re:
