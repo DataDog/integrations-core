@@ -1,14 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import ipaddress
-import socket
 from collections import defaultdict
 from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base import to_native_string
 from datadog_checks.base.stubs.common import MetricStub
 
 from . import common
@@ -331,16 +328,7 @@ def test_e2e_profile_palo_alto(dd_agent_check):
 
 
 def test_e2e_discovery(dd_agent_check):
-    host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
-
-    instance = {
-        # Make sure the check handles bytes
-        'network_address': to_native_string(network),
-        'port': common.PORT,
-        'community_string': 'apc_ups',
-    }
-    config = {'init_config': {}, 'instances': [instance]}
+    config = common.generate_container_profile_config_with_ad('apc_ups')
     # skip telemetry metrics since they are implemented different for python and corecheck
     # python integration autodiscovery submit telemetry metrics once for all devices
     # core integration autodiscovery submit telemetry metrics once for each device
@@ -348,10 +336,11 @@ def test_e2e_discovery(dd_agent_check):
         'datadog.snmp.check_interval',
         'datadog.snmp.submitted_metrics',
         'datadog.snmp.check_duration',
+        'snmp.discovered_devices_count',  # TODO: fix me, should be asserted
     ]
     # execute 2 times with 300ms interval to be sure the autodiscovery has time to discover the devices
     # we might need to increase pause if the test is too flaky
-    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=2, metrics_to_skip=skip_metrics)
+    assert_python_vs_core(dd_agent_check, config, rate=False, pause=500, times=3, metrics_to_skip=skip_metrics)
 
 
 def assert_python_vs_core(
