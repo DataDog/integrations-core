@@ -336,11 +336,10 @@ def test_e2e_discovery(dd_agent_check):
         'datadog.snmp.check_interval',
         'datadog.snmp.submitted_metrics',
         'datadog.snmp.check_duration',
-        'snmp.discovered_devices_count',  # TODO: fix me, should be asserted
     ]
     # execute 2 times with 300ms interval to be sure the autodiscovery has time to discover the devices
     # we might need to increase pause if the test is too flaky
-    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=2, metrics_to_skip=skip_metrics)
+    assert_python_vs_core(dd_agent_check, config, rate=False, times=3, metrics_to_skip=skip_metrics)
 
 
 def assert_python_vs_core(
