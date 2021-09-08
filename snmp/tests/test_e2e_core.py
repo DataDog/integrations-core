@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import ipaddress
-import socket
-
 import pytest
-
-from datadog_checks.base import to_native_string
 
 from . import common
 
@@ -68,24 +63,10 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
     assert_apc_ups_metrics(dd_agent_check, config)
 
 
-def test_e2e_discovery(dd_agent_check):
-    host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
-
-    instance = {
-        # Make sure the check handles bytes
-        'network_address': to_native_string(network),
-        'port': common.PORT,
-        'community_string': 'apc_ups',
-    }
-    config = {'init_config': {}, 'instances': [instance]}
-    assert_apc_ups_metrics(dd_agent_check, config, rate=False, pause=300, times=3)
-
-
-def assert_apc_ups_metrics(dd_agent_check, config, rate=True, pause=0, times=1):
+def assert_apc_ups_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    aggregator = dd_agent_check(config, rate=rate, pause=pause, times=times)
+    aggregator = dd_agent_check(config, rate=True)
 
     profile_tags = [
         'snmp_profile:apc_ups',
