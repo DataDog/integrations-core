@@ -66,7 +66,7 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-pytestmark = common.python_autodiscovery_only
+pytestmark = common.snmp_integration_only
 
 
 def test_load_profiles(caplog):

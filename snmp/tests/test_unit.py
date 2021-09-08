@@ -31,7 +31,7 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
+pytestmark = [pytest.mark.unit, common.snmp_integration_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")

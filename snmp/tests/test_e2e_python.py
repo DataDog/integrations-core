@@ -11,7 +11,7 @@ from . import common
 pytestmark = pytest.mark.e2e
 
 
-@common.python_autodiscovery_only
+@common.snmp_integration_only
 def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
     config = common.generate_container_instance_config(metrics)
