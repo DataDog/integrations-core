@@ -109,6 +109,9 @@ def generate_profile_from_mibs(ctx, mib_files, filters, aliases, debug, interact
     """
     if debug:
         set_debug()
+        from pysmi import debug
+
+        debug.setLogger(debug.Debug('all'))
 
     # ensure at least one mib file is provided
     if len(mib_files) == 0:
