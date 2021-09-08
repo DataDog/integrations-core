@@ -213,6 +213,13 @@ class QueueMetricCollector(object):
                         msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
                         msg = msg.format(mname, queue_name)
                         self.log.debug(msg)
+                for qname, qvalues in iteritems(metrics.queue_status_metrics(queue_info)):
+                        qfailure_value = qvalues['failure']
+                        qstatus_val = int(qvalues['pymqi_value'])
+                        qstatus_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, qname)
+
+                        if qstatus_val > qfailure_value:
+                            self.send_metric(GAUGE, qstatus_name, qstatus_val, tags=tags)
         finally:
             if pcf is not None:
                 pcf.disconnect()

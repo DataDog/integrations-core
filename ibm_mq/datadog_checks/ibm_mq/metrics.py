@@ -4,6 +4,15 @@
 
 from __future__ import division
 
+import datetime
+from time import time as epoch_offset
+
+# TODO: need to get this import to work
+# from datadog_checks.base.utils.time import get_precise_time
+from datadog_checks.base.utils.common import ensure_unicode, round_value
+
+from .utils import sanitize_strings
+
 try:
     import pymqi
 except ImportError:
@@ -158,3 +167,40 @@ def depth_percent(queue_info):
     depth_as_percent = depth_fraction * 100
 
     return depth_as_percent
+
+
+def queue_status_metrics(queue_info):
+    last_put_time = get_queue_status_metrics(
+        queue_info, pymqi.CMQCFC.MQCACF_LAST_PUT_DATE, pymqi.CMQCFC.MQCACF_LAST_PUT_TIME
+    )
+    last_get_time = get_queue_status_metrics(
+        queue_info, pymqi.CMQCFC.MQCACF_LAST_PUT_DATE, pymqi.CMQCFC.MQCACF_LAST_GET_TIME
+    )
+
+    return {
+        'last_put_time': {'pymqi_value': last_put_time, 'failure': -1},
+        'last_get_time': {'pymqi_value': last_get_time, 'failure': -1},
+    }
+
+
+def get_queue_status_metrics(queue_info, datestamp, timestamp=None):
+    if timestamp is not None:
+        timestamp_str = queue_info[timestamp]
+        datestamp_str = queue_info[datestamp]
+        return convert_to_elapsed(ensure_unicode(datestamp_str), ensure_unicode(timestamp_str))
+    else:
+        return convert_to_elapsed(datestamp)
+
+
+def convert_to_elapsed(datestamp, timestamp=None):
+    current_time = epoch_offset()
+    if timestamp is not None:
+        timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
+        timestamp_epoch = datetime.datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').timestamp()
+    else:
+        timestamp_str = sanitize_strings(datestamp)
+        timestamp_epoch = datetime.datetime.strptime(timestamp_str, '%Y-%m-%d').timestamp()
+
+    elapsed = round_value(current_time - timestamp_epoch)
+
+    return elapsed
