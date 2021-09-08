@@ -43,8 +43,13 @@ steps:
     displayName: 'Run benchmarks'
 
 - ${{ if eq(parameters.latest_metrics, 'true') }}:
-    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
-      displayName: 'Verify latest metrics supported'
+    - script: ddev test --latest --junit ${{ parameters.check }}
+      displayName: 'Run tests and verify support for the latest version'
+
+    - script: ddev env test --base --new-env --junit ${{ parameters.check }}:latest
+      displayName: 'Run E2E tests for the latest version'
+      env:
+        DD_API_KEY: $(DD_API_KEY)
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
   condition: succeededOrFailed()
