@@ -14,12 +14,12 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
 from .common import (
-    SNMP_LISTENER_ENV,
     COMPOSE_DIR,
     PORT,
     SCALAR_OBJECTS,
     SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
+    SNMP_LISTENER_ENV,
     TABULAR_OBJECTS,
     TOX_ENV_NAME,
     generate_container_instance_config,
