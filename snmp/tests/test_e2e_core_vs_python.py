@@ -7,7 +7,6 @@ from collections import defaultdict
 from copy import deepcopy
 
 import pytest
-from tests.test_e2e_core import assert_apc_ups_metrics
 
 from datadog_checks.base import to_native_string
 from datadog_checks.base.stubs.common import MetricStub
@@ -342,7 +341,15 @@ def test_e2e_discovery(dd_agent_check):
         'community_string': 'apc_ups',
     }
     config = {'init_config': {}, 'instances': [instance]}
-    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=2)
+    # skip telemetry metrics since they are implemented different for python and corecheck
+    # python integration autodiscovery submit telemetry metrics once for all devices
+    # core integration autodiscovery submit telemetry metrics once for each device
+    skip_metrics = [
+        'datadog.snmp.check_interval',
+        'datadog.snmp.submitted_metrics',
+        'datadog.snmp.check_duration',
+    ]
+    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=2, metrics_to_skip=skip_metrics)
 
 
 def assert_python_vs_core(
