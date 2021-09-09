@@ -15,6 +15,7 @@ INSTANCE = {
     'database': 'SNOWFLAKE',
     'schema': 'ACCOUNT_USAGE',
     'role': 'ACCOUNTADMIN',
+    'disable_generic_tags': True,
 }
 OAUTH_INSTANCE = {
     'user': 'testuser',
@@ -24,6 +25,7 @@ OAUTH_INSTANCE = {
     'role': 'ACCOUNTADMIN',
     'authenticator': 'oauth',
     'token': 'testtoken',
+    'disable_generic_tags': True,
 }
 
 EXPECTED_TAGS = ['account:test_acct.us-central1.gcp']
