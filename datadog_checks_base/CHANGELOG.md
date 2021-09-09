@@ -2,7 +2,7 @@
 
 ## 21.2.0 / 2021-09-09
 
-* [Added] Disable generic tags - option 2. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Disable generic tags config option. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 
 ## 21.1.0 / 2021-09-07
 
