@@ -5,7 +5,7 @@ from contextlib import closing
 
 import snowflake.connector as sf
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -159,3 +159,26 @@ class SnowflakeCheck(AgentCheck):
         else:
             if version:
                 self.set_metadata('version', version)
+
+    # override
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+        if self.disable_generic_tags:
+            return super(self, SnowflakeCheck)._normalize_tags_type(tags, device_name, metric_name)
+
+        # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
+        # version to ease transition.
+        normalized_tags = []
+        for tag in tags:
+            if tag is None:
+                continue
+            try:
+                tag = to_native_string(tag)
+            except UnicodeError:
+                self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                continue
+            non_general_tag = self.degeneralise_tag(tag)
+            normalized_tags.append(non_general_tag)
+            if tag != non_general_tag:
+                normalized_tags.append(tag)
+
+        return normalized_tags
