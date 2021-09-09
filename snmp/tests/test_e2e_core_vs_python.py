@@ -339,7 +339,9 @@ def test_e2e_discovery(dd_agent_check):
     ]
     # execute 2 times with 300ms interval to be sure the autodiscovery has time to discover the devices
     # we might need to increase pause if the test is too flaky
-    assert_python_vs_core(dd_agent_check, config, rate=False, pause=300, times=3, metrics_to_skip=skip_metrics)
+    assert_python_vs_core(
+        dd_agent_check, config, rate=False, pause=300, times=3, metrics_to_skip=skip_metrics, assert_count=False
+    )
 
 
 def assert_python_vs_core(
@@ -347,6 +349,7 @@ def assert_python_vs_core(
     config,
     expected_total_count=None,
     metrics_to_skip=None,
+    assert_count=True,
     assert_value_metrics=ASSERT_VALUE_METRICS,
     rate=True,
     pause=0,
@@ -402,11 +405,15 @@ def assert_python_vs_core(
             print("\t{}".format(key))
 
     for (name, mtype, tags), stubs in python_metrics.items():
+        count = None
+        if assert_count:
+            count = len(stubs)
+
         if name in assert_value_metrics:
             for stub in stubs:
-                aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs), value=stub.value)
+                aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count, value=stub.value)
         else:
-            aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs))
+            aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
 
