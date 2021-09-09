@@ -28,6 +28,7 @@ class InstanceConfig(BaseModel):
 
     auth_type: Optional[Literal['default', 'negotiate', 'kerberos', 'ntlm']]
     bookmark_frequency: Optional[int]
+    disable_generic_tags: Optional[bool]
     domain: Optional[str]
     empty_default_hostname: Optional[bool]
     event_format: Optional[Sequence[str]]

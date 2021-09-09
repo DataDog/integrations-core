@@ -66,6 +66,7 @@ class InstanceConfig(BaseModel):
     bearer_token_path: Optional[str]
     collect_nginx_histograms: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]
