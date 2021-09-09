@@ -1,0 +1,3 @@
+# Default metrics collected by this check. You should not have to modify this.
+jmx_metrics:
+  # Gauges

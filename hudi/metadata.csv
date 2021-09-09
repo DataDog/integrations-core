@@ -1,0 +1,23 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+hudi.commit.time,gauge,,,,The amount of time it took to successfully commit a batch of records,0,hudi,commit_time
+hudi.commit.duration,gauge,,,,The amount of time it took to successfully commit a batch of records,0,hudi,commit_dur
+hudi.commit.bytes_written,gauge,,byte,,The total amount of bytes written,0,hudi,bytes
+hudi.commit.compacted_records_updated,gauge,,record,,The amount of compacted records updated.,0,hudi,comp_rec
+hudi.commit.create_time,gauge,,,,The total time it took to create a commit,0,hudi,create_time
+hudi.commit.files_inserted,gauge,,file,,The amount of files inserted,0,hudi,files_in
+hudi.commit.files_updated,gauge,,file,,The amount of files updated,0,hudi,files_up
+hudi.commit.insert_records_written,gauge,,record,,The number of insert records written,0,hudi,insert_recs
+hudi.commit.log_files_compacted,gauge,,file,,The number of log files compacted,0,hudi,logs_comp
+hudi.commit.log_files_size,gauge,,,,The size of all the log files,0,hudi,logs_size
+hudi.commit.partitions_written,gauge,,,,The number of partitions written,0,hudi,parts 
+hudi.commit.records_written,gauge,,record,,The number of records written,0,hudi,recs
+hudi.commit.scan_time,gauge,,,,The total time spent scanned,0,hudi,scan
+hudi.commit.update_records_written,gauge,,record,,The amount of update records written,0,hudi,up_recs
+hudi.commit.upsert_time,gauge,,,,The total time spent upserting,0,hudi,upsert
+hudi.finalize.duration,gauge,,,,The total time spent finalizing,0,hudi,fin_dur
+hudi.finalize.num_files,gauge,,file,,The number of files finalized,0,hudi,fin_files
+hudi.index.upsert_duration,gauge,,,,The time spent UPSERTing,0,hudi,up_dur
+hudi.index.lookup_duration,gauge,,,,The time spent in lookup,0,hudi,look_dir
+hudi.clean_time,gauge,,,,The time spent cleaning,0,hudi,clean_time
+hudi.commit_time,gauge,,,,The time spent committing,0,hudi,commit_time
+hudi.finalize_time,gauge,,,,The time spent finalizing,0,hudi,fin_time
