@@ -160,7 +160,7 @@ class SnowflakeCheck(AgentCheck):
     # override
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         if self.disable_generic_tags:
-            return super(self, SnowflakeCheck)._normalize_tags_type(tags, device_name, metric_name)
+            return super(SnowflakeCheck, self)._normalize_tags_type(tags, device_name, metric_name)
 
         # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
         # version to ease transition.
@@ -177,5 +177,4 @@ class SnowflakeCheck(AgentCheck):
             normalized_tags.append(non_general_tag)
             if tag != non_general_tag:
                 normalized_tags.append(tag)
-
         return normalized_tags
