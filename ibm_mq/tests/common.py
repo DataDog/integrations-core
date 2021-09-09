@@ -181,6 +181,8 @@ QUEUE_METRICS = [
 
 QUEUE_STATUS_METRICS = [
     ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+    ('ibm_mq.queue.last_get_time', GAUGE),
+    ('ibm_mq.queue.last_put_time', GAUGE),
 ]
 
 CHANNEL_METRICS = [
