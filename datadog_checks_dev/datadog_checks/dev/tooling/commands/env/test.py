@@ -47,7 +47,9 @@ from .stop import stop
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, ddtrace, test_filter, changed):
+def test(
+    ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, ddtrace, test_filter, changed
+):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True, changed_only=changed)
     tests_ran = False
