@@ -339,7 +339,7 @@ def test_e2e_discovery(dd_agent_check):
     ]
     # we don't assert count, since the count might be off by 1 due to devices not being discovered at first check run
     assert_python_vs_core(
-        dd_agent_check, config, rate=False, pause=300, times=2, metrics_to_skip=skip_metrics, assert_count=False
+        dd_agent_check, config, rate=False, pause=300, times=3, metrics_to_skip=skip_metrics, assert_count=False
     )
 
 
