@@ -6,13 +6,14 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
-
 from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
+from ...datastructures import JSONDict
+from ...manifest_validator import get_all_validators
+from ...manifest_validator.constants import V1_STRING
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
@@ -37,7 +38,8 @@ def manifest(ctx, check, fix):
     echo_info(f"Validating manifest.json files for {len(checks)} checks ...")
 
     for check_name in checks:
-        all_validators = get_all_validators(is_extras, is_marketplace)
+        echo_debug(f"Validating manifest.json files for {check_name} ...")
+
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):
@@ -47,6 +49,7 @@ def manifest(ctx, check, fix):
 
             try:
                 decoded = json.loads(read_file(manifest_file).strip())
+                decoded = JSONDict(decoded)
             except json.JSONDecodeError as e:
                 failed_checks += 1
                 echo_info(f"{check_name}/manifest.json... ", nl=False)
@@ -54,7 +57,13 @@ def manifest(ctx, check, fix):
                 echo_failure(f'  invalid json: {e}')
                 continue
 
+            version = decoded.get('manifest_version', V1_STRING)
+            all_validators = get_all_validators(ctx, version, is_extras, is_marketplace)
+
             for validator in all_validators:
+                if validator.skip_if_errors and file_failures > 0:
+                    echo_info(f'Skipping validation {validator} since errors have already been found.')
+                    continue
                 validator.validate(check_name, decoded, fix)
                 file_failures += 1 if validator.result.failed else 0
                 file_fixed += 1 if validator.result.fixed else 0

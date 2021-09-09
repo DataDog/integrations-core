@@ -21,7 +21,7 @@ jobs:
     test: false
     test_e2e: false
     benchmark: false
-    latest_metrics: true
+    latest: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |

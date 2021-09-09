@@ -4,7 +4,7 @@ parameters:
   run_py2_tests: true
   force_base_package: false
   test_e2e: true
-  latest_metrics: false
+  latest: false
   ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
@@ -14,7 +14,7 @@ jobs:
     run_py2_tests: ${{ parameters.run_py2_tests }}
     force_base_package: ${{ parameters.force_base_package }}
     test_e2e: ${{ parameters.test_e2e }}
-    latest_metrics: ${{ parameters.latest_metrics }}
+    latest: ${{ parameters.latest }}
     ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base

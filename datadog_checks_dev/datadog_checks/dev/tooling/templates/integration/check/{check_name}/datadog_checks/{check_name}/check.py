@@ -9,8 +9,12 @@ from datadog_checks.base import AgentCheck
 
 
 class {check_class}(AgentCheck):
+
+    # This will be the prefix of every metric and service check the integration sends
+    __NAMESPACE__ = '{check_name}'
+
     def __init__(self, name, init_config, instances):
-        # super({check_class}, self).__init__(name, init_config, instances)
+        super({check_class}, self).__init__(name, init_config, instances)
 
         # If the check is going to perform SQL queries you should define a query manager here.
         # More info at
@@ -24,7 +28,6 @@ class {check_class}(AgentCheck):
         # }}
         # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
         # self.check_initializations.append(self._query_manager.compile_queries)
-        pass
 
     def check(self, _):
         # type: (Any) -> None
@@ -42,7 +45,7 @@ class {check_class}(AgentCheck):
 
         # except Timeout as e:
         #     self.service_check(
-        #         "{check_name}.can_connect",
+        #         "can_connect",
         #         AgentCheck.CRITICAL,
         #         message="Request timeout: {{}}, {{}}".format(url, e),
         #     )
@@ -50,7 +53,7 @@ class {check_class}(AgentCheck):
 
         # except (HTTPError, InvalidURL, ConnectionError) as e:
         #     self.service_check(
-        #         "{check_name}.can_connect",
+        #         "can_connect",
         #         AgentCheck.CRITICAL,
         #         message="Request failed: {{}}, {{}}".format(url, e),
         #     )
@@ -58,7 +61,7 @@ class {check_class}(AgentCheck):
 
         # except JSONDecodeError as e:
         #     self.service_check(
-        #         "{check_name}.can_connect",
+        #         "can_connect",
         #         AgentCheck.CRITICAL,
         #         message="JSON Parse failed: {{}}, {{}}".format(url, e),
         #     )
@@ -66,7 +69,7 @@ class {check_class}(AgentCheck):
 
         # except ValueError as e:
         #     self.service_check(
-        #         "{check_name}.can_connect", AgentCheck.CRITICAL, message=str(e)
+        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
         #     )
         #     raise
 
@@ -87,6 +90,7 @@ class {check_class}(AgentCheck):
         # If your check ran successfully, you can send the status.
         # More info at
         # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("{check_name}.can_connect", AgentCheck.OK)
+        # self.service_check("can_connect", AgentCheck.OK)
 
-        pass
+        # If it didn't then it should send a critical service check
+        self.service_check("can_connect", AgentCheck.CRITICAL)
