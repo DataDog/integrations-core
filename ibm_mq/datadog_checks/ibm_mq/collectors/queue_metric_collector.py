@@ -201,25 +201,17 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                for mname, values in iteritems(metrics.pcf_metrics()):
+                for mname, values in iteritems(metrics.pcf_metrics(queue_info)):
                     failure_value = values['failure']
                     pymqi_value = values['pymqi_value']
                     mname = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
-                    m = int(queue_info[pymqi_value])
 
-                    if m > failure_value:
-                        self.send_metric(GAUGE, mname, m, tags=tags)
+                    if pymqi_value > failure_value:
+                        self.send_metric(GAUGE, mname, pymqi_value, tags=tags)
                     else:
                         msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
                         msg = msg.format(mname, queue_name)
                         self.log.debug(msg)
-                for qname, qvalues in iteritems(metrics.queue_status_metrics(queue_info)):
-                        qfailure_value = qvalues['failure']
-                        qstatus_val = int(qvalues['pymqi_value'])
-                        qstatus_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, qname)
-
-                        if qstatus_val > qfailure_value:
-                            self.send_metric(GAUGE, qstatus_name, qstatus_val, tags=tags)
         finally:
             if pcf is not None:
                 pcf.disconnect()
