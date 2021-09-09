@@ -13,17 +13,17 @@ Follow the instructions below to install and configure this check for an Agent r
 The IBM i check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-### Configuration
-
-The IBM i check queries an IBM i system remotely from a host running the Datadog Agent. To communicate with the IBM i system, you need to set up the IBM i ODBC driver on the host running the Datadog Agent.
-
-#### Set up IBM i ODBC driver
+#### ODBC driver
 
 The IBM i check uses the IBM i ODBC driver to connect remotely to the IBM i host. 
 
 Download the driver from the [IBM i Access - Client Solutions][9] page. Click on `Downloads for IBM i Access Client Solutions` and login to gain access to the downloads page.
 
 Choose the `ACS App Pkg` package for your platform, such as `ACS Linux App Pkg` for Linux hosts. Download the package and follow the installation instructions to install the driver.
+
+### Configuration
+
+The IBM i check queries an IBM i system remotely from a host running the Datadog Agent. To communicate with the IBM i system, you need to set up the IBM i ODBC driver on the host running the Datadog Agent.
 
 #### ODBC driver
 

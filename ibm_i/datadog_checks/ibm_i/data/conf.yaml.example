@@ -20,22 +20,22 @@ instances:
     # system: <SYSTEM>
 
     ## @param username - string - optional
-    ## The user profile name to use to authenticate to the system.
+    ## The user profile name used to authenticate to the system.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## The user profile password to use to authenticate to the system.
+    ## The user profile password used to authenticate to the system.
     #
     # password: <PASSWORD>
 
     ## @param driver - string - optional - default: iSeries Access ODBC Driver
-    ## The name of the ODBC driver to use to connect to the system.
+    ## The name of the ODBC driver used to connect to the system.
     #
     # driver: iSeries Access ODBC Driver
 
     ## @param connection_string - string - optional
-    ## The raw connection string to use to connect to the system, ignoring all of the above options.
+    ## The raw connection string used to connect to the system, ignoring all of the above options.
     #
     # connection_string: <CONNECTION_STRING>
 
