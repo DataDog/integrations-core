@@ -43,10 +43,10 @@ steps:
     displayName: 'Run benchmarks'
 
 - ${{ if eq(parameters.latest, 'true') }}:
-    - script: ddev test --latest --junit ${{ parameters.check }}
+    - script: ddev test --latest --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
       displayName: 'Run tests and verify support for the latest version'
 
-    - script: ddev env test --base --new-env --junit ${{ parameters.check }}:latest
+    - script: ddev env test --base --new-env --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}:latest
       displayName: 'Run E2E tests for the latest version'
       env:
         DD_API_KEY: $(DD_API_KEY)
