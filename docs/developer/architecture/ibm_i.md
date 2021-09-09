@@ -14,16 +14,16 @@ Limitations in the IBM i ODBC driver make it necessary to structure the check in
 
 ODBC drivers can optionally support custom configuration through *connection attributes*, which help configure how a connection works.
 One fundamental connection attribute is `SQL_ATTR_QUERY_TIMEOUT` (and related `_TIMEOUT` attributes), which set the timeout for SQL queries done through the driver (or the timeout for other connection steps for other `_TIMEOUT` attributes).
-If this connection attribute is not set there will be no timeout, which means the driver will get stuck waiting for a reply when a network issue happens.
+If this connection attribute is not set there is no timeout, which means the driver gets stuck waiting for a reply when a network issue happens.
 
-As of the writing of this document the IBM i ODBC driver behavior when setting the `SQL_ATTR_QUERY_TIMEOUT` connection attribute seems to be similar to the one described on [this document](https://www.ibm.com/support/pages/odbc-query-timeout-property-sql0666-estimated-query-processing-time-exceeds-limit) for the IBM i DB2 driver: the driver will estimate the running time of a query and preemptively abort the query if the estimate is above the specified threshold, but it will not take into account the actual running time of the query (and thus, it's not useful for avoiding network issues).
+As of the writing of this document, the IBM i ODBC driver behavior when setting the `SQL_ATTR_QUERY_TIMEOUT` connection attribute is similar to the one described in [ODBC Query Timeout Property](https://www.ibm.com/support/pages/odbc-query-timeout-property-sql0666-estimated-query-processing-time-exceeds-limit). For the IBM i DB2 driver: the driver estimates the running time of a query and preemptively aborts the query if the estimate is above the specified threshold, but it does not take into account the actual running time of the query (and thus, it's not useful for avoiding network issues).
 
 ### IBM i check workaround
 
 To deal with the OBDC driver limitations, the IBM i check needs to have an alternative way to abort a query once a given timeout has passed.
-To do so, the IBM i check runs queries in a subprocess which it kills and restarts when timeouts pass. This subprocess runs the [`query_script.py`](https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/query_script.py) Python script using the embedded Python interpreter.
+To do so, the IBM i check runs queries in a subprocess which it kills and restarts when timeouts pass. This subprocess runs [`query_script.py`](https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/query_script.py) using the embedded Python interpreter.
 
-It is essential that the connection is kept across queries: for a given connection, `ELAPSED_` columns on IBM i views report statistics since the last time the table was queried on that connection, thus if using different connections these values will always be zero.
+It is essential that the connection is kept across queries. For a given connection, `ELAPSED_` columns on IBM i views report statistics since the last time the table was queried on that connection, thus if using different connections these values are always zero.
 
 To communicate with the main Agent process, the subprocess and the IBM i check exchange JSON-encoded messages through pipes until the special `ENDOFQUERY` message is received. Special care is needed to avoid blocking on reads and writes of the pipes.
 

@@ -11,6 +11,6 @@
             "critical"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored IBM i instance. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect and collect metrics from the monitored IBM i instance, otherwise returns `OK`."
     }
 ]

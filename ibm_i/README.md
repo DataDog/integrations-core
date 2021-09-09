@@ -21,17 +21,17 @@ The IBM i check queries an IBM i system remotely from a host running the Datadog
 
 The IBM i check uses the IBM i ODBC driver to connect remotely to the IBM i host. 
 
-You can fetch it from the [IBM i Access - Client Solutions][9] page. Click on `Downloads for IBM i Access Client Solutions`. You'll be redirected to the IBM login page. Once logged in, you will have access to the downloads page.
+Download the driver from the [IBM i Access - Client Solutions][9] page. Click on `Downloads for IBM i Access Client Solutions` and login to gain access to the downloads page.
 
-Choose the `ACS App Pkg` package for your platform (e.g. `ACS Linux App Pkg` for Linux hosts), download it and follow the installation instructions to install the driver.
+Choose the `ACS App Pkg` package for your platform, such as `ACS Linux App Pkg` for Linux hosts. Download the package and follow the installation instructions to install the driver.
 
-#### Configure the ODBC driver in the embedded Agent environment
+#### ODBC driver
 
 Once the ODBC driver is installed, find the ODBC configuration files: `odbc.ini` and `odbcinst.ini`. The location may vary depending on your system. On Linux they may be located in the `/etc` directory or in the `/etc/unixODBC` directory.
 
-Copy these configuration files to the embedded Agent environment (e.g.: under `/opt/datadog-agent/embedded/etc/` on Linux hosts).
+Copy these configuration files to the embedded Agent environment, such as `/opt/datadog-agent/embedded/etc/` on Linux hosts.
 
-The `odbcinst.ini` file defines the available ODBC drivers for the Agent. Each section defines one driver. For instance, the following section:
+The `odbcinst.ini` file defines the available ODBC drivers for the Agent. Each section defines one driver. For instance, the following section defines a driver named `IBM i Access ODBC Driver 64-bit`:
 ```
 [IBM i Access ODBC Driver 64-bit]
 Description=IBM i Access for Linux 64-bit ODBC Driver
@@ -42,9 +42,9 @@ DontDLClose=1
 UsageCount=1
 ```
 
-defines a driver named `IBM i Access ODBC Driver 64-bit`. The name of the IBM i ODBC driver is needed to configure the IBM i check.
+The name of the IBM i ODBC driver is needed to configure the IBM i check.
 
-#### Set up the IBM i check configuration.
+#### IBM i check
 
 1. Edit the `ibm_i.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM i performance data. See the [sample ibm_i.d/conf.yaml][3] for all available configuration options.
    Use the driver name from the `obdcinst.ini` file.
@@ -67,13 +67,13 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ### Events
 
-IBM i does not include any events.
+The IBM i check does not include any events.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.ibm.com/it-infrastructure/power/os/ibm-i
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

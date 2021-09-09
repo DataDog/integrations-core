@@ -14,23 +14,23 @@ files:
         type: string
     - name: username
       description: |
-        The user profile name to use to authenticate to the system.
+        The user profile name used to authenticate to the system.
       value:
         type: string
     - name: password
       description: |
-        The user profile password to use to authenticate to the system.
+        The user profile password used to authenticate to the system.
       value:
         type: string
     - name: driver
       description: |
-        The name of the ODBC driver to use to connect to the system.
+        The name of the ODBC driver used to connect to the system.
       value:
         type: string
         example: iSeries Access ODBC Driver
     - name: connection_string
       description: |
-        The raw connection string to use to connect to the system, ignoring all of the above options.
+        The raw connection string used to connect to the system, ignoring all of the above options.
       value:
         type: string
     - name: severity_threshold
