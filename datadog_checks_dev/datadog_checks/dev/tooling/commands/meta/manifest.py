@@ -6,7 +6,7 @@ import json
 import click
 
 from datadog_checks.dev.fs import write_file
-from datadog_checks.dev.structures import JSONDict
+from datadog_checks.dev.tooling.datastructures import JSONDict
 from datadog_checks.dev.tooling.utils import get_manifest_file, get_valid_integrations, load_manifest
 
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success
@@ -21,7 +21,7 @@ TODO_FILL_IN = "TODO Please Fill In"
 SUPPORTED_MANIFEST_VERSIONS = ["1.0.0", "2.0.0"]
 SUPPORTED_VERSION_UPGRADE_PATHS = {"1.0.0": ["2.0.0"]}
 
-# JSONDict mapp all v2 fields to their v1 counterparts
+# JSONDict map all v2 fields to their v1 counterparts
 # Skipping any fields that need manual intervention of custom logic
 V2_TO_V1_MAP = JSONDict(
     {
@@ -152,7 +152,8 @@ def migrate(ctx, integration, to_version):
         else:
             final_value = val
 
-        migrated_manifest.set_path(key, final_value)
+        if final_value is not None:
+            migrated_manifest.set_path(key, final_value)
 
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list

@@ -89,38 +89,3 @@ class TempDir(object):
                 self._cleanup(self.directory)
         else:
             self._cleanup(self.directory)
-
-
-class JSONDict(dict):
-    """Subclass of dict which adds jsonpointer-like access methods"""
-
-    def _resolve(self, path):
-        parts = path.lstrip('/').split('/')
-
-        obj = self
-        for p in parts:
-            # first try to convert integer refs
-            try:
-                p = int(p)
-            except Exception:
-                pass
-
-            try:
-                obj = obj[p]
-            except KeyError:
-                return None
-
-        return obj
-
-    def get_path(self, path):
-        return self._resolve(path)
-
-    def set_path(self, path, value):
-        # resolve the containing object
-        *obj_path, tail = path.lstrip('/').split('/')
-
-        obj = self
-        if obj_path:
-            obj = self._resolve('/'.join(obj_path))
-
-        obj[tail] = value
