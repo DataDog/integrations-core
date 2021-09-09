@@ -418,10 +418,11 @@ def assert_python_vs_core(
         aggregator.assert_service_check(name, status, tags, count=count, message=message)
 
     # assert count
-    total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
-    assert total_count_python == total_count_corecheck
-    if expected_total_count is not None:
-        assert expected_total_count == total_count_corecheck
+    if assert_count:
+        total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
+        assert total_count_python == total_count_corecheck
+        if expected_total_count is not None:
+            assert expected_total_count == total_count_corecheck
 
 
 def normalize_stub_metric(stub):
