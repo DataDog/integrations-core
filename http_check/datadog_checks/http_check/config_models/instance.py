@@ -48,6 +48,7 @@ class InstanceConfig(BaseModel):
     data: Optional[Union[Mapping[str, Any], str]]
     days_critical: Optional[int]
     days_warning: Optional[int]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]

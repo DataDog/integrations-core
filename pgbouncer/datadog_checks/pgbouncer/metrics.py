@@ -6,6 +6,13 @@ from datadog_checks.base import AgentCheck
 RATE = AgentCheck.rate
 GAUGE = AgentCheck.gauge
 
+CONFIG_METRICS = {
+    'descriptors': [],
+    'metrics': [
+        ('max_client_conn', ('pgbouncer.max_client_conn', GAUGE)),
+    ],
+    'query': """SHOW CONFIG""",
+}
 
 STATS_METRICS = {
     'descriptors': [('database', 'db')],

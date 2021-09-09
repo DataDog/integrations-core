@@ -6,6 +6,8 @@ import os
 import click
 import yaml
 
+from datadog_checks.dev.tooling.commands.meta.snmp.constants import MIB_SOURCE_URL
+
 from ...console import CONTEXT_SETTINGS
 
 
@@ -37,7 +39,7 @@ def fetch_mib(mib, source_url):
 @click.argument('profile_path')
 @click.option(
     '--mib_source_url',
-    default='https://raw.githubusercontent.com/projx/snmp-mibs/master/@mib@',
+    default=MIB_SOURCE_URL,
     help='Source url to fetch missing MIBS',
 )
 @click.pass_context

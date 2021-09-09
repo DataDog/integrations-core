@@ -8,7 +8,7 @@ from psycopg2 import extras as pgextras
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
+from datadog_checks.pgbouncer.metrics import CONFIG_METRICS, DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
 class ShouldRestartException(Exception):
@@ -55,7 +55,7 @@ class PgBouncer(AgentCheck):
     def _collect_stats(self, db):
         """Query pgbouncer for various metrics"""
 
-        metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS]
+        metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS, CONFIG_METRICS]
 
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
@@ -76,8 +76,14 @@ class PgBouncer(AgentCheck):
                         for row in rows:
                             self.log.debug("Processing row: %r", row)
 
+                            if 'key' in row:  # We are processing "config metrics"
+                                # Make a copy of the row to allow mutation
+                                # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
+                                row = row.copy()
+                                # We flip/rotate the row: row value becomes the column name
+                                row[row['key']] = row['value']
                             # Skip the "pgbouncer" database
-                            if row['database'] == self.DB_NAME:
+                            elif row.get('database') == self.DB_NAME:
                                 continue
 
                             tags = list(self.tags)

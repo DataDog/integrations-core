@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     catalog_checks: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     disable_legacy_service_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
