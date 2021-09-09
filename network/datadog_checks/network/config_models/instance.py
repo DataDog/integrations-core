@@ -18,7 +18,6 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     blacklist_conntrack_metrics: Optional[Sequence[str]]
-    check_generic_tags: Optional[bool]
     collect_aws_ena_metrics: Optional[bool]
     collect_connection_queues: Optional[bool]
     collect_connection_state: Optional[bool]

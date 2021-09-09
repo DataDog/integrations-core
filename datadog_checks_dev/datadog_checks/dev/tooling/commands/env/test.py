@@ -106,6 +106,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,
                         test_filter=test_filter,
+                        latest=env == 'latest',
                     )
             finally:
                 if new_env:

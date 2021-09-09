@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Note**: This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's [ECS Fargate integration][22].
+**Note**: This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's [ECS Fargate integration][28].
 
 Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
 
@@ -413,7 +413,7 @@ Need help? Contact [Datadog support][22].
 [16]: https://docs.datadoghq.com/developers/dogstatsd/
 [17]: http://docs.datadoghq.com/tracing/setup
 [18]: https://aws.amazon.com/blogs/containers/fluent-bit-for-amazon-eks-on-aws-fargate-is-here/
-[19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
+[19]: http://docs.datadoghq.com/tracing/#send-traces-to-datadog
 [20]: https://docs.datadoghq.com/help
 [21]: https://app.datadoghq.com/containers
 [22]: https://app.datadoghq.com/process
@@ -421,5 +421,5 @@ Need help? Contact [Datadog support][22].
 [24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
 [25]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
 [26]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
-[27]: /agent/cluster_agent/setup/
-
+[27]: http://docs.datadoghq.com/agent/cluster_agent/setup/
+[28]: http://docs.datadoghq.com/integrations/ecs_fargate/

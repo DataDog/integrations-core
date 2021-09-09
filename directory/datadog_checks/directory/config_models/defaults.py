@@ -8,10 +8,6 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_countonly(field, value):
     return False
 
@@ -73,6 +69,10 @@ def instance_service(field, value):
 
 
 def instance_stat_follow_symlinks(field, value):
+    return True
+
+
+def instance_submit_histograms(field, value):
     return True
 
 

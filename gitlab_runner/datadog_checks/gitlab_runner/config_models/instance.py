@@ -64,7 +64,6 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[bool]
     bearer_token_path: Optional[str]
-    check_generic_tags: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]

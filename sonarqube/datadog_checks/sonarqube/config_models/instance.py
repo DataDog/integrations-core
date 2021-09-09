@@ -48,7 +48,6 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    check_generic_tags: Optional[bool]
     collect_default_jvm_metrics: Optional[bool]
     components: Optional[Components]
     connect_timeout: Optional[float]

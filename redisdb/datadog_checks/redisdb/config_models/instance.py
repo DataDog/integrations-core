@@ -17,7 +17,6 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
     collect_client_metrics: Optional[bool]
     command_stats: Optional[bool]
     db: Optional[int]

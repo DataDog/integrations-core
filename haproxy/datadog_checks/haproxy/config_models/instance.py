@@ -65,7 +65,6 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     bearer_token_auth: Optional[bool]
     bearer_token_path: Optional[str]
-    check_generic_tags: Optional[bool]
     collate_status_tags_per_host: Optional[bool]
     collect_aggregates_only: Optional[Union[bool, str]]
     collect_status_metrics: Optional[bool]

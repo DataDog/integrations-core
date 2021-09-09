@@ -39,7 +39,6 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
-    check_generic_tags: Optional[bool]
     cluster_name: str
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]

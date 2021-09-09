@@ -8,8 +8,9 @@ import os
 import click
 
 from ....utils import read_file
+from ...annotations import annotate_display_queue, annotate_error
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_assets_from_manifest, load_manifest
+from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
@@ -41,11 +42,14 @@ def recommended_monitors(check):
         file_failed = False
         manifest = load_manifest(check_name)
         monitors_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'monitors')
+        manifest_file = get_manifest_file(check_name)
         for file in invalid_files:
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  {file} does not exist')
+            message = f'{file} does not exist'
+            echo_failure('  ' + message)
             failed_checks += 1
+            annotate_error(manifest_file, message)
 
         for monitor_file in monitors_relative_locations:
             monitor_filename = os.path.basename(monitor_file)
@@ -55,7 +59,9 @@ def recommended_monitors(check):
                 failed_checks += 1
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
-                echo_failure(f'  invalid json: {e}')
+                message = f'invalid json: {e}'
+                echo_failure('  ' + message)
+                annotate_error(monitor_file, message)
                 continue
 
             all_keys = set(decoded.keys())
@@ -75,8 +81,7 @@ def recommended_monitors(check):
                     ),
                 )
             else:
-                # If all required keys exist, validate values
-
+                # If all required keys exist, validate value
                 monitor_type = decoded.get('type')
                 if monitor_type not in ALLOWED_MONITOR_TYPES:
                     file_failed = True
@@ -112,16 +117,17 @@ def recommended_monitors(check):
                         (echo_failure, f"    {monitor_filename} name must contain the integration name"),
                     )
 
-        if file_failed:
-            failed_checks += 1
-            # Display detailed info if file is invalid
-            echo_info(f'{check_name}... ', nl=False)
-            echo_failure(' FAILED')
-            for display_func, message in display_queue:
-                display_func(message)
-            display_queue = []
-        else:
-            ok_checks += 1
+            if file_failed:
+                failed_checks += 1
+                # Display detailed info if file is invalid
+                echo_info(f'{check_name}... ', nl=False)
+                echo_failure(' FAILED')
+                annotate_display_queue(monitor_file, display_queue)
+                for display_func, message in display_queue:
+                    display_func(message)
+                display_queue = []
+            else:
+                ok_checks += 1
 
     if ok_checks:
         echo_success(f"{ok_checks} valid files")

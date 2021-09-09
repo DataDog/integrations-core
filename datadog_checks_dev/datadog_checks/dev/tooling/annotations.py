@@ -7,10 +7,25 @@ Functions to annotate in Github Actions workflows.
 import os
 
 from datadog_checks.dev.ci import running_on_gh_actions  # noqa: F401
+from datadog_checks.dev.tooling.commands.console import echo_failure, echo_warning
 
 ANNOTATE_WARNING = 'warning'
 ANNOTATE_ERROR = 'error'
 GH_ANNOTATION_LEVELS = [ANNOTATE_WARNING, ANNOTATE_ERROR]
+
+
+def annotate_display_queue(file, display_queue):
+    errors = ""
+    warnings = ""
+    for func, message in display_queue:
+        if func == echo_failure:
+            errors += message + "%0A"
+        elif func == echo_warning:
+            warnings += message + "%0A"
+    if errors:
+        annotate_error(file, errors)
+    if warnings:
+        annotate_warning(file, warnings)
 
 
 def annotate_warning(file, message, line=1):

@@ -36,10 +36,6 @@ def instance_bookmark_frequency(field, value):
     return '<PAYLOAD_SIZE>'
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_disable_generic_tags(field, value):
     return False
 

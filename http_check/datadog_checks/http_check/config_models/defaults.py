@@ -48,10 +48,6 @@ def instance_check_certificate_expiration(field, value):
     return True
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_check_hostname(field, value):
     return True
 

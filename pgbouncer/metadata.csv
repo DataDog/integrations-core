@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+pgbouncer.max_client_conn,gauge,,connection,,The maximum number of client connections allowed.,0,pgbouncer,max client conns
 pgbouncer.stats.requests_per_second,rate,,request,second,The request rate,0,pgbouncer,requests
 pgbouncer.stats.queries_per_second,rate,,query,second,The query rate,0,pgbouncer,queries
 pgbouncer.stats.transactions_per_second,rate,,transaction,second,The transaction rate,0,pgbouncer,transactions

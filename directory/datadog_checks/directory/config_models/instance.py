@@ -17,7 +17,6 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
     countonly: Optional[bool]
     directory: str
     dirs_patterns_full: Optional[bool]
@@ -35,6 +34,7 @@ class InstanceConfig(BaseModel):
     recursive: Optional[bool]
     service: Optional[str]
     stat_follow_symlinks: Optional[bool]
+    submit_histograms: Optional[bool]
     tags: Optional[Sequence[str]]
 
     @root_validator(pre=True)

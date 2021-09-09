@@ -758,7 +758,7 @@ class OpenStackControllerCheck(AgentCheck):
                     "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
-                self.warning("Configuration Incomplete: %s! Check your openstack.yaml file", e)
+                self.warning("Configuration Incomplete: %s! Check your openstack_controller config file", e)
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()

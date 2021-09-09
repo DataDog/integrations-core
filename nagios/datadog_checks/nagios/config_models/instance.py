@@ -17,7 +17,6 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    check_generic_tags: Optional[bool]
     collect_events: Optional[bool]
     collect_host_performance_data: Optional[bool]
     collect_service_performance_data: Optional[bool]

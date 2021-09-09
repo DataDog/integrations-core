@@ -189,7 +189,6 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
-        self.check_generic_tags = is_affirmative(self.instance.get('check_generic_tags', False)) if instance else False
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
@@ -1097,15 +1096,16 @@ class AgentCheck(object):
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-            if self.check_generic_tags or self.disable_generic_tags:
-                tag_name, value = tag.split(':')
-                tag_is_generic = tag_name in GENERIC_TAGS
-                if not tag_is_generic or not self.disable_generic_tags:
-                    normalized_tags.append(tag)
-                if tag_is_generic:
-                    new_name = '{}_{}'.format(self.name, tag_name)
-                    normalized_tags.append('{}:{}'.format(new_name, value))
+            if self.disable_generic_tags:
+                normalized_tags.append(self.degeneralise_tag(tag))
             else:
                 normalized_tags.append(tag)
-
         return normalized_tags
+
+    def degeneralise_tag(self, tag):
+        tag_name, value = tag.split(':')
+        if tag_name in GENERIC_TAGS:
+            new_name = '{}_{}'.format(self.name, tag_name)
+            return '{}:{}'.format(new_name, value)
+        else:
+            return tag

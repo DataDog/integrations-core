@@ -128,6 +128,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             ttl=config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
         )
 
+        self._explain_errors_cache = TTLCache(
+            maxsize=config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
+            # only try to re-explain invalid statements once per day
+            ttl=config.statement_samples_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
+        )
+
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
@@ -320,8 +326,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 return None
             return result[0][0]
 
-    def _run_explain_safe(self, dbname, statement, obfuscated_statement):
-        # type: (str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+    def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
+        # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
             return None, DBExplainError.no_plans_possible, None
 
@@ -351,6 +357,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             )
             return None, db_explain_error, '{}'.format(type(err))
 
+        cached_error_response = self._explain_errors_cache.get(query_signature)
+        if cached_error_response:
+            return cached_error_response
+
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg2.errors.DatabaseError as e:
@@ -361,7 +371,18 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._dbtags(dbname, "error:explain-{}".format(type(e))) + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
-            return None, DBExplainError.database_error, '{}'.format(type(err))
+            error_response = None, DBExplainError.database_error, '{}'.format(type(e))
+
+            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
+                e, psycopg2.errors.InsufficientPrivilege
+            ):
+                # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
+                # we don't want to cache things like permission errors for a very long time because they can be fixed
+                # dynamically by the user. the goal here is to cache only those queries which there is no reason to
+                # retry
+                self._explain_errors_cache[query_signature] = error_response
+
+            return error_response
 
     def _collect_plan_for_statement(self, row):
         try:
@@ -388,7 +409,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
-            row['datname'], row['query'], obfuscated_statement
+            row['datname'], row['query'], obfuscated_statement, query_signature
         )
         collection_errors = None
         if explain_err_code:

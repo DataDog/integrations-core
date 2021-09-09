@@ -16,10 +16,6 @@ def instance_backup_servers(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_client_lib_log_level(field, value):
     return get_default_field_value(field, value)
 

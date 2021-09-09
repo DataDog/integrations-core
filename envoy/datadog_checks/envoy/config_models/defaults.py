@@ -44,10 +44,6 @@ def instance_cache_metrics(field, value):
     return True
 
 
-def instance_check_generic_tags(field, value):
-    return False
-
-
 def instance_collect_server_info(field, value):
     return True
 
