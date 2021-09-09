@@ -2,7 +2,7 @@
 
 ## 2.16.0 / 2021-09-09
 
-* [Added] Disable generic tags - option 2. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Added] Update vault metrics. See [#9953](https://github.com/DataDog/integrations-core/pull/9953).
 
 ## 2.15.0 / 2021-08-22
