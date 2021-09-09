@@ -405,10 +405,7 @@ def assert_python_vs_core(
             print("\t{}".format(key))
 
     for (name, mtype, tags), stubs in python_metrics.items():
-        count = None
-        if assert_count:
-            count = len(stubs)
-
+        count = len(stubs) if assert_count else None
         if name in assert_value_metrics:
             for stub in stubs:
                 aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count, value=stub.value)
@@ -418,7 +415,8 @@ def assert_python_vs_core(
     aggregator.assert_all_metrics_covered()
 
     for (name, status, tags, message), stubs in python_service_checks.items():
-        aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
+        count = len(stubs) if assert_count else None
+        aggregator.assert_service_check(name, status, tags, count=count, message=message)
 
     # assert count
     total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
