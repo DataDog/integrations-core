@@ -40,6 +40,21 @@ Depending of the `collection_level` value you set in your check configuration, n
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
+#### Collecting per-instance metrics
+
+Note that the vSphere integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, only per-instance, or both. 
+
+By default, the vSphere integration will only collect per-resource metrics, which will cause some metrics that are per-instance to be ignored. These can be configured using the `collect_per_instance_filters` option. See below for example:
+
+```
+collect_per_instance_filters:
+  host:
+    - 'disk\.totalLatency\.avg'
+    - 'disk\.deviceReadLatency\.avg'
+```
+
+`disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` in order to collect them.
+
 ### Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It emits the following event types:
