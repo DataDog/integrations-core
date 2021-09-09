@@ -5,8 +5,7 @@ cachetools==3.1.1
 contextlib2==0.6.0; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
 cryptography==3.4.6; python_version > '3.0'
-ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
-ddtrace==0.48.0; sys_platform != 'win32' or python_version > '3.0'
+ddtrace==0.52.1
 enum34==1.1.6; python_version < '3.0'
 immutables==0.15; python_version > '3.0'
 ipaddress==1.0.22; python_version < '3.0'
