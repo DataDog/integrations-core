@@ -178,13 +178,12 @@ def migrate(ctx, integration, to_version):
     if ctx.obj['repo_name'] == "marketplace":
         migrated_manifest.set_path("/author/vendor_id", TODO_FILL_IN)
         migrated_manifest.set_path("/author/sales_email", loaded_manifest.get_path("/terms/legal_email"))
-        migrated_manifest.set_path("/author/vendor_id", SKIP_IF_FOUND)
 
         migrated_manifest.set_path("/pricing", loaded_manifest.get_path("/pricing"))
         migrated_manifest.set_path("/legal_terms", {})
         migrated_manifest.set_path("/legal_terms/eula", "/terms/eula")
 
-        for idx, pricing_option in enumerate(migrated_manifest.get_path("/pricing") or []):
+        for idx, _ in enumerate(migrated_manifest.get_path("/pricing") or []):
             migrated_manifest.set_path(f"/pricing/{idx}/product_id", TODO_FILL_IN)
             migrated_manifest.set_path(f"/pricing/{idx}/short_description", TODO_FILL_IN)
             migrated_manifest.set_path(f"/pricing/{idx}/includes_assets", True)
