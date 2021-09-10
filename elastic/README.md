@@ -91,7 +91,7 @@ _Available for Agent versions >6.0_
        "index.indexing.slowlog.threshold.index.trace": "0ms",
        "index.indexing.slowlog.level": "trace",
        "index.indexing.slowlog.source": "1000"
-     }
+     }'
      ```
 
    - To configure search slow logs for a given index `<INDEX>`:
@@ -106,7 +106,7 @@ _Available for Agent versions >6.0_
        "index.search.slowlog.threshold.fetch.info": "0ms",
        "index.search.slowlog.threshold.fetch.debug": "0ms",
        "index.search.slowlog.threshold.fetch.trace": "0ms"
-     }
+     }'
      ```
 
 3. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
