@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     collect_node_metrics: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exchanges: Optional[Sequence[str]]
     exchanges_regexes: Optional[Sequence[str]]

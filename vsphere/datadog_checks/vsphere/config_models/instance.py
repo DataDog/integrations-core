@@ -112,6 +112,7 @@ class InstanceConfig(BaseModel):
     collect_tags: Optional[bool]
     collection_level: Optional[int]
     collection_type: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: bool
     excluded_host_tags: Optional[Sequence[str]]
     host: str

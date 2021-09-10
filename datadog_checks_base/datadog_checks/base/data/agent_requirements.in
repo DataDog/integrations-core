@@ -20,6 +20,7 @@ dnspython==1.16.0
 enum34==1.1.6; python_version < "3.0"
 flup-py3==1.0.3; python_version > "3.0"
 flup==1.0.3.dev-20110405; python_version < "3.0"
+foundationdb==6.3.18; python_version > "3.0"
 futures==3.3.0; python_version < "3.0"
 gearman==2.0.2; sys_platform != "win32" and python_version < "3.0"
 immutables==0.15; python_version > "3.0"
@@ -72,7 +73,8 @@ pyyaml==5.4.1
 redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0
-requests==2.22.0
+requests==2.22.0; python_version < '3.0'
+requests==2.25.0; python_version > '3.0'
 requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
 rethinkdb==2.4.4
@@ -84,7 +86,8 @@ serpent==1.27; sys_platform == "win32"
 service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.16.0
-snowflake-connector-python==2.1.3
+snowflake-connector-python==2.1.3; python_version < '3.0'
+snowflake-connector-python==2.6.0; python_version > '3.0'
 supervisor==4.1.0
 tuf==0.17.0
 typing==3.7.4.1; python_version < "3.0"

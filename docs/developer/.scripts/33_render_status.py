@@ -5,6 +5,8 @@ from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
     get_default_config_spec,
+    get_testable_checks,
+    get_tox_file,
     get_valid_checks,
     get_valid_integrations,
     has_logs,
@@ -35,6 +37,7 @@ def patch(lines):
         render_recommended_monitors_progress,
         render_config_spec_progress,
         render_e2e_progress,
+        render_latest_version_progress,
         render_config_validation_progress,
         render_metadata_progress,
         render_process_signatures_progress,
@@ -184,6 +187,41 @@ def render_e2e_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_e2e}/{total_checks}"'
+    return lines
+
+
+def render_latest_version_progress():
+    valid_checks = sorted(get_testable_checks())
+    total_checks = len(valid_checks)
+    supported_checks = 0
+
+    lines = ['## New version support', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        skip_check = False
+
+        with open(get_tox_file(check)) as tox_file:
+            for line in tox_file:
+                if line.startswith('[testenv:latest]'):
+                    supported_checks += 1
+                    status = 'X'
+                    break
+                elif line.startswith('# SKIP-LATEST-VERSION-CHECK'):
+                    skip_check = True
+                    break
+            else:
+                status = ' '
+
+        if skip_check:
+            total_checks -= 1
+            continue
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = supported_checks / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {supported_checks}/{total_checks}"'
     return lines
 
 

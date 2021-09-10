@@ -43,6 +43,7 @@ def get_tox_envs(
     changed_only=False,
     sort=False,
     e2e_tests_only=False,
+    latest=False,
 ):
     testable_checks = get_testable_checks()
     # Run `get_changed_checks` at most once because git calls are costly
@@ -73,7 +74,7 @@ def get_tox_envs(
             checks_seen.add(check)
 
         envs_selected = envs_selected.split(',') if envs_selected else []
-        envs_available = get_available_tox_envs(check, sort=sort, e2e_tests_only=e2e_tests_only)
+        envs_available = get_available_tox_envs(check, sort=sort, e2e_only=latest, e2e_tests_only=e2e_tests_only)
 
         if format_style:
             envs_selected[:] = [e for e in envs_available if 'format_style' in e]
@@ -81,6 +82,8 @@ def get_tox_envs(
             envs_selected[:] = [e for e in envs_available if e in STYLE_CHECK_ENVS]
         elif benchmark:
             envs_selected[:] = [e for e in envs_available if 'bench' in e]
+        elif latest:
+            envs_selected[:] = [e for e in envs_available if e == 'latest']
         else:
             if every:
                 envs_selected[:] = envs_available
@@ -97,7 +100,9 @@ def get_tox_envs(
 
                 envs_selected[:] = selected
             else:
-                envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
+                envs_selected[:] = [
+                    e for e in envs_available if 'bench' not in e and 'format_style' not in e and e != 'latest'
+                ]
 
         if tox_env_filter_re:
             envs_selected[:] = [e for e in envs_selected if not tox_env_filter_re.match(e)]
@@ -203,7 +208,7 @@ def construct_pytest_options(
     enter_pdb=False,
     debug=False,
     bench=False,
-    latest_metrics=False,
+    latest=False,
     coverage=False,
     junit=False,
     marker='',
@@ -233,9 +238,8 @@ def construct_pytest_options(
     else:
         pytest_options += ' --benchmark-skip'
 
-    if latest_metrics:
+    if latest:
         pytest_options += ' --run-latest-metrics'
-        marker = 'latest_metrics'
 
     if ddtrace:
         pytest_options += ' --ddtrace'

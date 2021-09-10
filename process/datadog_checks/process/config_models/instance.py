@@ -18,6 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     collect_children: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exact_match: Optional[bool]
     ignore_denied_access: Optional[bool]
