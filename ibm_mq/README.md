@@ -179,8 +179,14 @@ To configure this check for an Agent running on a host:
       - APP.QUEUE.1
       - ADMIN.QUEUE.1
     ```
+    
+    **Note**: To collect `ibm_mq.queue.last_get_time` and `ibm_mq.queue.last_put_time`, `MONQ` must be enabled at the individual queue level or at the queue manager level. 
 
-2. [Restart the Agent][5].
+```
+
+```
+
+3. [Restart the Agent][5].
 
 ##### Log collection
 
