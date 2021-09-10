@@ -42,7 +42,7 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 
 #### Collecting per-instance metrics
 
-Note that the vSphere integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, only per-instance, or both. 
+**Note**: The vSphere integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both. 
 
 By default, the vSphere integration only collects per-resource metrics, which causes some metrics that are per-instance to be ignored. These can be configured using the `collect_per_instance_filters` option. See below for an example:
 
