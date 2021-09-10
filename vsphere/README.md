@@ -53,7 +53,7 @@ collect_per_instance_filters:
     - 'disk\.deviceReadLatency\.avg'
 ```
 
-`disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` in order to collect them.
+`disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` to be collected.
 
 ### Events
 
