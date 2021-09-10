@@ -13,7 +13,7 @@ PORT = '9200'
 CLUSTER_TAG = ["cluster_name:test-cluster"]
 ELASTIC_CLUSTER_TAG = ["elastic_cluster:test-cluster"]
 IS_OPENSEARCH = 'opensearch' in os.getenv('ELASTIC_REGISTRY')
-URL = 'https://{}:{}'.format(HOST, PORT)
+URL = 'http://{}:{}'.format(HOST, PORT)
 if IS_OPENSEARCH:
     URL = 'https://{}:{}'.format(HOST, PORT)
 
