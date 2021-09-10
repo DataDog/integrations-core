@@ -50,16 +50,12 @@ class AmbariCheck(AgentCheck):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=self.base_url)
         service_check_tags = self.base_tags + ["url:{}".format(self.base_url)]
 
-        try:
-            resp = self._make_request(clusters_endpoint)
-            if resp is None:
-                self._submit_service_checks("can_connect", self.CRITICAL, service_check_tags)
-                raise CheckException(
-                    "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint)
-                )
-        except Exception:
+        resp = self._make_request(clusters_endpoint)
+        if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, service_check_tags)
-            raise
+            raise CheckException(
+                "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint)
+            )
 
         self._submit_service_checks("can_connect", self.OK, service_check_tags)
         return self._get_response_clusters(resp)
@@ -199,6 +195,8 @@ class AmbariCheck(AgentCheck):
             )
         except Timeout:
             self.warning("Connection timeout when connecting to %s", url)
+        except Exception as e:
+            self.warning("Couldn't connect to URL: %s with exception: %s.", url, e)
 
     def _submit_gauge(self, name, value, tags, hostname=None):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)
