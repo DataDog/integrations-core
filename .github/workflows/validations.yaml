@@ -31,10 +31,6 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
-    - name: Run codeowners validation
-      run: |
-        ddev validate codeowners
-
     - name: Run configuration validation
       run: |
         ddev validate config
