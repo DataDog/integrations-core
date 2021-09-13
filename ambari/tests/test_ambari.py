@@ -284,7 +284,5 @@ def _mock_clusters(ambari):
 # Minimal E2E testing
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-    try:
-        dd_agent_check(instance, rate=True)
-    except Exception:
-        aggregator.assert_service_check("ambari.can_connect", AgentCheck.CRITICAL)
+    dd_agent_check(instance, rate=True)
+    aggregator.assert_service_check("ambari.can_connect", AgentCheck.CRITICAL)
