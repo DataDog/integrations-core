@@ -158,8 +158,11 @@ class PostgreSql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self._config.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self._config.host)
+        if self._resolved_hostname is None:
+            if self._config.dbm_enabled:
+                self._resolved_hostname = resolve_db_host(self._config.host)
+            else:
+                self._resolved_hostname = datadog_agent.get_hostname()
         return self._resolved_hostname
 
     @property
