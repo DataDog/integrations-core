@@ -23,7 +23,7 @@ from datadog_checks.elastic.metrics import (
     stats_for_version,
 )
 
-from .common import CLUSTER_TAG, JVM_RATES, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER
 
 log = logging.getLogger('test_elastic')
 
@@ -89,6 +89,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 
+@pytest.mark.skipif(IS_OPENSEARCH, reason='Test unavailable for OpenSearch')
 @pytest.mark.integration
 def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
     slm_instance = deepcopy(instance)
@@ -173,7 +174,7 @@ def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregat
 
 @pytest.mark.integration
 def test_pshard_metrics(dd_environment, aggregator):
-    instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
+    instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD, 'tls_verify': False}
     elastic_check = ESCheck('elastic', {}, instances=[instance])
     es_version = elastic_check._get_es_version()
 
@@ -216,12 +217,12 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
 @pytest.mark.integration
 def test_health_event(dd_environment, aggregator):
     dummy_tags = ['elastique:recherche']
-    instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
+    instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags, 'tls_verify': False}
     elastic_check = ESCheck('elastic', {}, instances=[instance])
     es_version = elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 

@@ -3,12 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+import requests
+
 from . import tables
 
 TABLE_PATTERN = re.compile(r'from (\w+)')
 
 
 def connect(*args, **kwargs):
+    # Check for:
+    # https://github.com/snowflakedb/snowflake-connector-python/issues/324
+    response = requests.get('https://www.google.com')
+    response.raise_for_status()
+
     return Connection(*args, **kwargs)
 
 
