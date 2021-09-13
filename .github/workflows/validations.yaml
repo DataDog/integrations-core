@@ -43,6 +43,10 @@ jobs:
       run: |
         ddev validate http
 
+    - name: Run imports validation
+      run: |
+        ddev validate imports
+
     - name: Run legacy signature validation
       run: |
         ddev validate legacy-signature

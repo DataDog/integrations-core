@@ -4,6 +4,7 @@
 
 import click
 
+from datadog_checks.dev.tooling.annotations import annotate_error, annotate_warning
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_check_files
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
@@ -74,13 +75,14 @@ def imports(ctx, check, autofix):
     if validation_fails:
         num_files = len(validation_fails)
         num_failures = sum(len(lines) for lines in validation_fails.values())
-        echo_failure(f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n')
+        header_message = f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n'
+        echo_failure(header_message)
         for f, lines in validation_fails.items():
             for line in lines:
                 linenum, linetext = line
                 echo_warning(f'{f}: line # {linenum}', indent='  ')
                 echo_info(f'{linetext}', indent='    ')
-
+                annotate_error(f, linetext, line=linenum)
         abort()
 
     else:
