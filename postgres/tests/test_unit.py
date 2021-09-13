@@ -274,7 +274,6 @@ def test_host_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
     assert set(tags) == {
         'db:datadog_test',
         'port:5432',
-        'postgres_host:localhost',
         'foo:bar',
         'postgres_server:localhost',
     }
@@ -290,7 +289,6 @@ def test_host_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
         'foo:bar',
         'port:5432',
         'host:localhost',
-        'postgres_host:localhost',
         'postgres_server:localhost',
         'server:localhost',
     }

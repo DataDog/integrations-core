@@ -80,10 +80,10 @@ class PostgreSql(AgentCheck):
 
     def _get_service_check_tags(self):
         host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
-        service_check_tags = {"postgres_host:%s" % host}
+        service_check_tags = []
         if not self.disable_generic_tags:
-            service_check_tags.add("host:%s" % host)
-        service_check_tags.update(self._config.tags)
+            service_check_tags.append("host:%s" % host)
+        service_check_tags.extend(self._config.tags)
         return list(service_check_tags)
 
     def _get_replication_role(self):

@@ -75,7 +75,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
-        'postgres_host:{}'.format(HOST),
         'postgres_server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
@@ -244,7 +243,7 @@ def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instanc
         'postgres.can_connect',
         count=1,
         status=PostgreSql.OK,
-        tags=expected_tags_with_db + ['postgres_host:{}'.format(expected_hostname_service_check)],
+        tags=expected_tags_with_db,
         hostname=expected_hostname,
     )
 
