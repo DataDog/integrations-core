@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import datetime
-# TODO import precise_time from base check
-from time import time as epoch_offset
+from datetime import datetime
 
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.base.utils.time import get_timestamp
 
 
 def sanitize_strings(s):
@@ -22,13 +21,13 @@ def sanitize_strings(s):
 
 def calculate_elapsed_time(datestamp, timestamp, current_time=None):
     if current_time is None:
-        current_time = epoch_offset()
+        current_time = get_timestamp()
     else:
         current_time = current_time
 
     if datestamp and timestamp:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
-        timestamp_epoch = datetime.datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').timestamp()
+        timestamp_epoch = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').timestamp()
     else:
         return
 

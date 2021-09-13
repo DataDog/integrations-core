@@ -26,13 +26,14 @@ def test_sanitize_strings(input_string, expected):
 @pytest.mark.parametrize(
     'datestamp,timestamp,expected',
     [
-        pytest.param('2021-09-08', '19.19.41', 76518.0, id='convert 1'),
-        pytest.param('2020-01-01', '10.25.13', 53327386.0, id='convert 2'),
+        pytest.param('2021-09-08', '19.19.41', 76518.0, id='elasped 21h'),
+        pytest.param('2020-01-01', '10.25.13', 53327386.0, id='elapsed 2y'),
+        pytest.param('2021-08-01', '12.00.00', 3386099.0, id='elapsed past'),
     ],
 )
 def test_calculate_elapsed_time(datestamp, timestamp, expected):
-    current_time = float('1631219699.193989')
-
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
+
+    current_time = float('1631219699.193989')
 
     assert expected == calculate_elapsed_time(datestamp, timestamp, current_time)
