@@ -212,7 +212,6 @@ def test_emit_generic_and_non_generic_tags_by_default(instance):
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     normalised_tags = tags + ['snowflake_service:COMPUTE_WH']
-    check._normalize_tags_type(tags)
     assert set(normalised_tags) == set(check._normalize_tags_type(tags))
 
 
