@@ -102,6 +102,8 @@ class VSphereCheck(AgentCheck):
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
+        else:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.base_tags, hostname=None)
 
         if self._config.should_collect_tags:
             try:
@@ -611,7 +613,6 @@ class VSphereCheck(AgentCheck):
             if self.is_metadata_collection_enabled():
                 self.set_metadata('version', version_info.version_str)
         except Exception:
-            # Explicitly do not attach any host to the service checks.
             self.log.warning('The vCenter API is not responding. Trying to reconnect.')
             self.initiate_api_connection()
         else:
