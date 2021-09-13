@@ -49,7 +49,6 @@ class AmbariCheck(AgentCheck):
     def get_clusters(self):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=self.base_url)
         service_check_tags = self.base_tags + ["url:{}".format(self.base_url)]
-
         resp = self._make_request(clusters_endpoint)
         if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, service_check_tags)
