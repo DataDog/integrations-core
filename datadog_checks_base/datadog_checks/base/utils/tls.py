@@ -88,6 +88,9 @@ class TlsContextWrapper(object):
 
             config[field] = value
 
+        if config['tls_ca_cert']:
+            config['tls_verify'] = True
+
         # Populate with the higher-priority configuration options if set
         for field in default_fields:
             unique_name = UNIQUE_FIELD_PREFIX + field
