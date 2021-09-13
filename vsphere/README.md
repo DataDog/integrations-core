@@ -40,6 +40,23 @@ Depending of the `collection_level` value you set in your check configuration, n
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
+#### Collecting per-instance metrics
+
+**Note**: The vSphere integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both. 
+A resource represents a physical or virtual representation of a machine. This can be represented by vm, host, datastore, cluster in vSphere.
+An instance represents individual entities found within a resource. More information on vSphere resources can be found in the [VMWare Infrastructure Architecture Overview white paper][15].
+
+By default, the vSphere integration only collects per-resource metrics, which causes some metrics that are per-instance to be ignored. These can be configured using the `collect_per_instance_filters` option. See below for an example:
+
+```
+collect_per_instance_filters:
+  host:
+    - 'disk\.totalLatency\.avg'
+    - 'disk\.deviceReadLatency\.avg'
+```
+
+`disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` to be collected.
+
 ### Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It emits the following event types:
@@ -87,3 +104,4 @@ See our [blog post][11] on monitoring vSphere environments with Datadog.
 [12]: https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.monitoring.doc/GUID-25800DE4-68E5-41CC-82D9-8811E27924BC.html
 [13]: https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/
 [14]: https://github.com/DataDog/integrations-core/blob/master/vsphere/assets/service_checks.json
+[15]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
