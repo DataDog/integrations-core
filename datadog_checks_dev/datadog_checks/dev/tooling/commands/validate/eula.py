@@ -41,7 +41,7 @@ def eula(check):
         if not eula_relative_location.endswith(".pdf"):
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            message = f'{eula_relative_location} is missing the pdf extension''
+            message = f'{eula_relative_location} is missing the pdf extension'
             echo_failure('  ' + message)
             annotate_error(manifest_file, message)
             continue
