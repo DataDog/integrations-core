@@ -54,6 +54,7 @@ def eula(check):
                 echo_info(' FAILED')
                 message = f'{eula_relative_location} is not a PDF file'
                 echo_failure('  ' + message)
+                annotate_error(manifest_file, message)
                 failed_checks += 1
                 continue
 
