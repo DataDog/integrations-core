@@ -101,7 +101,6 @@ class PostgresConfig:
         # preset tags to host
         if not self.disable_generic_tags:
             tags.append('server:{}'.format(self.host))
-        tags.append('postgres_server:{}'.format(self.host))
         if self.port:
             tags.append('port:{}'.format(self.port))
         else:

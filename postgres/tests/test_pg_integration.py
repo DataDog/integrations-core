@@ -30,7 +30,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_bgw_metrics(aggregator, expected_tags)
 
     expected_tags += ['db:{}'.format(DB_NAME)]
@@ -64,7 +64,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     # Verify our mocking was called
     assert called == [True]
 
-    expected_tags = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_bgw_metrics(aggregator, expected_tags)
 
     expected_tags += ['db:{}'.format(DB_NAME)]
@@ -75,7 +75,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
-        'postgres_server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
     ]
@@ -104,7 +103,6 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
 
     expected_tags = pg_instance['tags'] + [
         'db:{}'.format(DB_NAME),
-        'postgres_server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'schema:public',
     ]
@@ -116,7 +114,7 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
     expected_tags += ['db:datadog_test']
@@ -141,7 +139,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
     for name in ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
@@ -209,7 +207,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
 
     for _ in range(3):
         check.check(pg_instance)
@@ -231,7 +229,7 @@ def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instanc
         expected_hostname = None
         expected_hostname_service_check = HOST
 
-    expected_tags_no_db = pg_instance['tags'] + ['postgres_server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags_no_db = pg_instance['tags'] + ['port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
     for name in COMMON_METRICS + ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)

@@ -239,7 +239,7 @@ def test_get_wal_dir(integration_check, pg_instance, pg_version, wal_path):
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = ['foo:bar', 'postgres_server:localhost', 'port:5432']
+    base_tags = ['foo:bar', 'port:5432']
     app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
     app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
 
@@ -266,7 +266,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
         pass
 
 
-def test_host_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
+def test_host_and_server_tags_not_emitted_when_disable_generic_tags_enabled(pg_instance):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = True
     check = PostgreSql('test_instance', {}, [instance])
@@ -275,11 +275,10 @@ def test_host_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
         'db:datadog_test',
         'port:5432',
         'foo:bar',
-        'postgres_server:localhost',
     }
 
 
-def test_host_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
+def test_host_and_server_tags_emitted_when_disable_generic_tags_disabled(pg_instance):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = False
     check = PostgreSql('test_instance', {}, [instance])
@@ -289,6 +288,5 @@ def test_host_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
         'foo:bar',
         'port:5432',
         'host:localhost',
-        'postgres_server:localhost',
         'server:localhost',
     }
