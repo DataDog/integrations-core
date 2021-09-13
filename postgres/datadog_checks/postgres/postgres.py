@@ -159,7 +159,7 @@ class PostgreSql(AgentCheck):
             if self._config.dbm_enabled:
                 self._resolved_hostname = resolve_db_host(self._config.host)
             else:
-                self._resolved_hostname = self.agent_hostname()
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     @property

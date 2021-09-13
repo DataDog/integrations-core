@@ -266,7 +266,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
         pass
 
 
-def test_host_and_server_tags_not_emitted_when_disable_generic_tags_enabled(pg_instance):
+def test_server_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = True
     check = PostgreSql('test_instance', {}, [instance])
@@ -278,7 +278,7 @@ def test_host_and_server_tags_not_emitted_when_disable_generic_tags_enabled(pg_i
     }
 
 
-def test_host_and_server_tags_emitted_when_disable_generic_tags_disabled(pg_instance):
+def test_server_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = False
     check = PostgreSql('test_instance', {}, [instance])
@@ -287,6 +287,5 @@ def test_host_and_server_tags_emitted_when_disable_generic_tags_disabled(pg_inst
         'db:datadog_test',
         'foo:bar',
         'port:5432',
-        'host:localhost',
         'server:localhost',
     }
