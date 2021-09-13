@@ -36,8 +36,9 @@ files:
   - template: instances
     options:
     - name: directory
-      required: true
-      description: Path to the postfix directory.
+      description: |
+        Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+        information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
       value:
         example: /var/spool/postfix
         type: string
