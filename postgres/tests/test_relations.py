@@ -50,7 +50,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(pg_instance['host']),
+        'postgres_server:{}'.format(pg_instance['host']),
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
@@ -58,7 +58,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     ]
 
     expected_size_tags = pg_instance['tags'] + [
-        'server:{}'.format(pg_instance['host']),
+        'postgres_server:{}'.format(pg_instance['host']),
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
@@ -85,7 +85,7 @@ def test_bloat_metric(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(pg_instance['host']),
+        'postgres_server:{}'.format(pg_instance['host']),
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:pg_index',
@@ -111,7 +111,7 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     expected_tags = {}
     for relation in relations:
         expected_tags[relation] = pg_instance['tags'] + [
-            'server:{}'.format(pg_instance['host']),
+            'postgres_server:{}'.format(pg_instance['host']),
             'port:{}'.format(pg_instance['port']),
             'db:%s' % pg_instance['dbname'],
             'table:{}'.format(relation.lower()),
@@ -162,7 +162,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(pg_instance['host']),
+        'postgres_server:{}'.format(pg_instance['host']),
         'port:{}'.format(pg_instance['port']),
         'db:dogs',
         'table:breed',
@@ -184,7 +184,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
     check_with_lock(check, pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
+        'postgres_server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
