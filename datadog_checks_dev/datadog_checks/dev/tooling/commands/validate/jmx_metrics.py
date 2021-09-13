@@ -6,11 +6,11 @@ from collections import defaultdict
 import click
 import yaml
 
-from datadog_checks.dev.utils import file_exists, read_file
 from datadog_checks.dev.tooling.annotations import annotate_error
+from datadog_checks.dev.utils import file_exists, read_file
 
 from ...testing import process_checks_option
-from ...utils import check_root, complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration
+from ...utils import complete_valid_checks, get_default_config_spec, get_jmx_metrics_file, is_jmx_integration
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
@@ -38,7 +38,7 @@ def jmx_metrics(check, verbose):
         if not errors:
             continue
         check_name, filepath = key
-        annotate_error(filepath, "\n",join(errors))
+        annotate_error(filepath, "\n".join(errors))
         echo_info(f"{check_name}:")
         for err in errors:
             echo_failure(f"    - {err}")
@@ -76,7 +76,9 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
         if (not domain) and (not beans):
             # Require `domain` or `bean` to be present,
             # that helps JMXFetch to better scope the beans to retrieve
-            saved_errors[(check_name, jmx_metrics_file)].append(f"domain or bean attribute is missing for rule: {include_str}")
+            saved_errors[(check_name, jmx_metrics_file)].append(
+                f"domain or bean attribute is missing for rule: {include_str}"
+            )
 
 
 def validate_config_spec(check_name, saved_errors):
@@ -101,9 +103,9 @@ def validate_config_spec(check_name, saved_errors):
                     instances_jmx = True
 
     if not init_config_jmx:
-        saved_errors[(check_name, config_file)].append(f"config spec: does not use `init_config/jmx` template")
+        saved_errors[(check_name, config_file)].append("config spec: does not use `init_config/jmx` template")
     if not instances_jmx:
-        saved_errors[(check_name, config_file)].append(f"config spec: does not use `instances/jmx` template")
+        saved_errors[(check_name, config_file)].append("config spec: does not use `instances/jmx` template")
 
 
 def truncate_message(s, verbose):
