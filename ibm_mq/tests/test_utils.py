@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from six import PY2
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.skipif(PY2, reason='Test only available on Python 3')]
 
 
 @pytest.mark.parametrize(
@@ -26,9 +27,9 @@ def test_sanitize_strings(input_string, expected):
 @pytest.mark.parametrize(
     'datestamp,timestamp,expected',
     [
-        pytest.param('2021-09-08', '19.19.41', 76518.0, id='elasped 21h'),
-        pytest.param('2020-01-01', '10.25.13', 53327386.0, id='elapsed 2y'),
-        pytest.param('2021-08-01', '12.00.00', 3386099.0, id='elapsed past'),
+        pytest.param('2021-09-08', '19.19.41', 76518.19, id='elasped 21h'),
+        pytest.param('2020-01-01', '10.25.13', 53327386.19, id='elapsed 2y'),
+        pytest.param('2021-08-01', '12.00.00', 3386099.19, id='elapsed past'),
     ],
 )
 def test_calculate_elapsed_time(datestamp, timestamp, expected):

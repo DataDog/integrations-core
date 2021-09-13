@@ -31,6 +31,6 @@ def calculate_elapsed_time(datestamp, timestamp, current_time=None):
     else:
         return
 
-    elapsed = round_value(current_time - timestamp_epoch)
+    elapsed = round_value(current_time - timestamp_epoch, 2)
 
     return elapsed

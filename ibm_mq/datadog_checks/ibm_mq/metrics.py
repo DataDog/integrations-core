@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from __future__ import division
+
+from six import PY2
 
 from datadog_checks.base.utils.common import ensure_unicode
 
@@ -63,12 +64,20 @@ def pcf_metrics(queue_info):
     )
     oldest_message_age = int(queue_info[pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE])
     uncommitted_msgs = int(queue_info[pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS])
-    return {
-        'oldest_message_age': {'pymqi_value': oldest_message_age, 'failure': -1},
-        'uncommitted_msgs': {'pymqi_value': uncommitted_msgs, 'failure': -1},
-        'last_put_time': {'pymqi_value': last_put_time, 'failure': -1},
-        'last_get_time': {'pymqi_value': last_get_time, 'failure': -1},
-    }
+
+    # last_put_time and last_get_time are not calculated for Python 2
+    if PY2:
+        return {
+            'oldest_message_age': {'pymqi_value': oldest_message_age, 'failure': -1},
+            'uncommitted_msgs': {'pymqi_value': uncommitted_msgs, 'failure': -1},
+        }
+    else:
+        return {
+            'oldest_message_age': {'pymqi_value': oldest_message_age, 'failure': -1},
+            'uncommitted_msgs': {'pymqi_value': uncommitted_msgs, 'failure': -1},
+            'last_put_time': {'pymqi_value': last_put_time, 'failure': -1},
+            'last_get_time': {'pymqi_value': last_get_time, 'failure': -1},
+        }
 
 
 def pcf_status_reset_metrics():
