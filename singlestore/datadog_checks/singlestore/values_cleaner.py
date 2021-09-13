@@ -1,0 +1,63 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import AnyStr, Callable, Optional, Sequence, Union
+
+from datadog_checks.singlestore.queries import AGGREGATORS, MV_GLOBAL_STATUS
+
+
+class SingleStoreCleaningException(Exception):
+    pass
+
+
+UNITS = {
+    'GB': 1e9,
+    'MB': 1e6,
+    'KB': 1e3,
+    'Bytes': 1,
+    'ms': 1e-3,
+    'ns': 1e-9,
+    'units': 1,
+}
+
+
+def get_row_cleaner(query):
+    # type: (AnyStr) -> Optional[Callable[[Sequence], Sequence]]
+    cleaners = {MV_GLOBAL_STATUS['query']: _clean_mv_global_status, AGGREGATORS['query']: _clean_aggregators}
+    return cleaners.get(query)
+
+
+def _clean_units(value):
+    # type: (str) -> Union[float, str]
+    # Possible variable_value formats:
+    # - "12.4"
+    # - "120.1 MB"
+    # - "12 ms"
+    # - "267.883 (+267.883) MB"
+    if value == '':
+        return 0.0
+
+    try:
+        components = value.split(' ')
+        scale = UNITS.get(components[-1], 1)
+        return float(components[0]) * scale
+    except Exception:
+        return value
+
+
+def _clean_mv_global_status(row):
+    # type: (Sequence) -> Sequence
+    if len(row) != 6:
+        raise SingleStoreCleaningException(
+            "row {} for query 'MV_GLOBAL_STATUS' should have 6 elements, found {}".format(row, len(row))
+        )
+    return row[0], row[1], row[2], row[3], row[4], _clean_units(row[5])
+
+
+def _clean_aggregators(row):
+    # type: (Sequence) -> Sequence
+    if len(row) != 6:
+        raise SingleStoreCleaningException(
+            "row {} for query 'AGGREGATORS' should have 6 elements, found {}".format(row, len(row))
+        )
+    return row[0], row[1], row[2], row[3], row[4], _clean_units(row[5])

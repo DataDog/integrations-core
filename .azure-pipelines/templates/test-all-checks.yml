@@ -396,6 +396,9 @@ jobs:
     - checkName: scylla
       displayName: Scylla
       os: linux
+    - checkName: singlestore
+      displayName: SingleStore
+      os: linux
     - checkName: snmp
       displayName: SNMP
       os: linux
