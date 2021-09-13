@@ -91,7 +91,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
