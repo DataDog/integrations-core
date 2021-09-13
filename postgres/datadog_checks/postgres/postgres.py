@@ -79,7 +79,6 @@ class PostgreSql(AgentCheck):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
 
     def _get_service_check_tags(self):
-        host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
         service_check_tags = []
         service_check_tags.extend(self._config.tags)
         return list(service_check_tags)
