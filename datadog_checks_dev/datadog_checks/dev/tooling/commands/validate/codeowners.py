@@ -62,7 +62,6 @@ def codeowners():
     for integration, codeowner in codeowner_map.items():
         if not codeowner:
             has_failed = True
-            raise Exception(integration, codeowner)
             message = f"Integration {integration} does not have a valid `CODEOWNERS` entry."
             echo_failure(message)
             annotate_error(codeowners_file, message)
@@ -73,7 +72,9 @@ def codeowners():
             annotate_error(codeowners_file, message)
         elif not codeowner.startswith("@") and integration not in IGNORE_TILES:
             has_failed = True
-            message = f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
+            message = (
+                f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
+            )
             echo_failure(message)
             annotate_error(codeowners_file, message)
 
