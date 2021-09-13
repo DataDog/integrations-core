@@ -10,7 +10,7 @@ import requests
 from six import iteritems
 from six.moves.urllib.parse import quote, urljoin
 
-from datadog_checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers
 from datadog_checks.couch import errors
