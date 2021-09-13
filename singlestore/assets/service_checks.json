@@ -1,0 +1,16 @@
+[
+    {
+        "agent_version": "7.31.0",
+        "integration": "SingleStore",
+        "groups": [
+            "singlestore_endpoint"
+        ],
+        "check": "singlestore.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SingleStore instance. Returns `OK` otherwise."
+    }
+]

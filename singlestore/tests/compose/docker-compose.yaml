@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  singlestore:
+    image: 'singlestore/cluster-in-a-box:centos-7.5.9-a8744b5453-3.2.11-1.12.1'
+    ports:
+      - 3306:3306
+      - 8080:8080
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      ROOT_PASSWORD: 'password'
+      START_AFTER_INIT: 'Y'

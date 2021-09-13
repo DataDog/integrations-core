@@ -1,0 +1,2 @@
+4,"node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",3306,1,"node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",3306,11,0.584
+5,"node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",3306,2,"node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",3306,12,0.463

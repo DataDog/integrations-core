@@ -1,0 +1,54 @@
+[
+  {
+        "name": "singlestore.leaves.opened_connections",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_leaf_availability_group:1",
+            "singlestore_pair_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_pair_node_port:3306"
+        ],
+        "value": 11.0
+    },
+    {
+        "name": "singlestore.leaves.opened_connections",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_leaf_availability_group:2",
+            "singlestore_pair_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_pair_node_port:3306"
+        ],
+        "value": 12.0
+    },
+    {
+        "name": "singlestore.leaves.average_roundtrip_latency",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:4",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_leaf_availability_group:1",
+            "singlestore_pair_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_pair_node_port:3306"
+        ],
+        "value": 0.584
+    },
+    {
+        "name": "singlestore.leaves.average_roundtrip_latency",
+        "type": 0,
+        "tags": [
+            "singlestore_node_id:5",
+            "singlestore_node_name:node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",
+            "singlestore_node_port:3306",
+            "singlestore_leaf_availability_group:2",
+            "singlestore_pair_node_name:node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",
+            "singlestore_pair_node_port:3306"
+        ],
+        "value": 0.463
+    }
+]

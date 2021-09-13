@@ -446,6 +446,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      SingleStore:
+        target: 75
+        flags:
+        - singlestore
       Snowflake:
         target: 75
         flags:
@@ -1092,6 +1096,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  singlestore:
+    carryforward: true
+    paths:
+    - singlestore/datadog_checks/singlestore
+    - singlestore/tests
   snmp:
     carryforward: true
     paths:

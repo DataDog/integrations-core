@@ -1,0 +1,2 @@
+# CHANGELOG - SingleStore
+
