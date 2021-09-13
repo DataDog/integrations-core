@@ -206,10 +206,20 @@ def test_metric_group_exceptions(instance):
         )
 
 
-def test_normalise_tags(instance):
+def test_emit_generic_and_non_generic_tags_by_default(instance):
     instance = copy.deepcopy(instance)
     instance['disable_generic_tags'] = False
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
     tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
     normalised_tags = tags + ['snowflake_service:COMPUTE_WH']
+    check._normalize_tags_type(tags)
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+def test_emit_non_generic_tags_when_disabled(instance):
+    instance = copy.deepcopy(instance)
+    instance['disable_generic_tags'] = True
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
+    normalised_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     assert set(normalised_tags) == set(check._normalize_tags_type(tags))

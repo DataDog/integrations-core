@@ -166,15 +166,11 @@ class SnowflakeCheck(AgentCheck):
         # version to ease transition.
         normalized_tags = []
         for tag in tags:
-            if tag is None:
-                continue
-            try:
-                tag = to_native_string(tag)
-            except UnicodeError:
-                self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
-                continue
-            non_general_tag = self.degeneralise_tag(tag)
-            normalized_tags.append(non_general_tag)
-            if tag != non_general_tag:
-                normalized_tags.append(tag)
+            if tag is not None:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+                normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
         return normalized_tags
