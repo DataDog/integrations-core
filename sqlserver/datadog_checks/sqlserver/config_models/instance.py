@@ -39,6 +39,7 @@ class InstanceConfig(BaseModel):
     database_autodiscovery: Optional[bool]
     database_autodiscovery_interval: Optional[int]
     db_fragmentation_object_names: Optional[Sequence[str]]
+    disable_generic_tags: Optional[bool]
     driver: Optional[str]
     dsn: Optional[str]
     empty_default_hostname: Optional[bool]

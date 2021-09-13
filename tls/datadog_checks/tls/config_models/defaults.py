@@ -28,6 +28,10 @@ def instance_days_warning(field, value):
     return 14.0
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 

@@ -669,6 +669,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+@pytest.mark.skip(reason='debugging flaky test (2021-09-03)')
 def test_statement_samples_unique_plans_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
     # tests rate limiting ingestion of samples per unique (query, plan)
     cache_max_size = 10

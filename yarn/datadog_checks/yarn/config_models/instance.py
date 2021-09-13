@@ -45,6 +45,7 @@ class InstanceConfig(BaseModel):
     collect_app_metrics: Optional[bool]
     collect_node_metrics: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]

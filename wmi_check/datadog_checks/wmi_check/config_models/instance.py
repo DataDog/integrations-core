@@ -18,6 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     class_: str = Field(..., alias='class')
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     filters: Optional[Sequence[Mapping[str, Any]]]
     host: Optional[str]

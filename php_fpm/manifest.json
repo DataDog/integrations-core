@@ -17,6 +17,7 @@
   "name": "php_fpm",
   "process_signatures": [
     "php-fpm",
+    "php-fpm:",
     "php7.0-fpm",
     "php7.0-fpm start",
     "service php-fpm",
