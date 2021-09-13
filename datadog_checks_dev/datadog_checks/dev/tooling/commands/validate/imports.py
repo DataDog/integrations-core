@@ -81,9 +81,9 @@ def imports(ctx, check, autofix):
         for f, lines in validation_fails.items():
             for line in lines:
                 linenum, linetext = line
-                echo_warning(f'{f}: line # {linenum}', indent='  ')
+                echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
                 echo_info(f'{linetext}', indent='    ')
-                annotate_error(f, linetext, line=linenum)
+                annotate_error(f, linetext, line=linenum + 1)
         abort()
 
     else:
