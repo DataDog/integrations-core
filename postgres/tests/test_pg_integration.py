@@ -244,7 +244,7 @@ def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instanc
         'postgres.can_connect',
         count=1,
         status=PostgreSql.OK,
-        tags=expected_tags_with_db + ['host:{}'.format(expected_hostname_service_check)],
+        tags=expected_tags_with_db + ['postgres_host:{}'.format(expected_hostname_service_check)],
         hostname=expected_hostname,
     )
 

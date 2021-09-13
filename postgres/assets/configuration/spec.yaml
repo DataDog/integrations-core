@@ -332,6 +332,8 @@ files:
             type: boolean
             example: false
     - template: instances/default
+      disable_generic_tags.hidden: False
+      disable_generic_tags.enabled: True
   - template: logs
     example:
     - type: file
