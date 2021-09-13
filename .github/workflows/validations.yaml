@@ -31,6 +31,10 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
+    - name: Run agent requirements validation
+      run: |
+        ddev validate agent-reqs
+
     - name: Run configuration validation
       run: |
         ddev validate config
