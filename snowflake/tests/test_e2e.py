@@ -31,11 +31,11 @@ def test_mock_data(dd_agent_check, datadog_agent, instance):
 
     aggregator.assert_metric(
         'snowflake.billing.cloud_service.sum',
-        tags=EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH'],
+        tags=EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH'],
     )
     aggregator.assert_metric(
         'snowflake.billing.cloud_service.avg',
-        tags=EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH'],
+        tags=EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH'],
     )
     aggregator.assert_metric('snowflake.billing.total_credit.sum')
     aggregator.assert_metric('snowflake.billing.total_credit.avg')
