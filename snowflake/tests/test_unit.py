@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, EXPECTED_TAGS
 
 PROXY_CONFIG = {'http': 'http_host', 'https': 'https_host', 'no_proxy': 'uri1,uri2;uri3,uri4'}
 INVALID_PROXY = {'http': 'unused', 'https': 'unused', 'no_proxy': 'unused'}
@@ -204,3 +204,21 @@ def test_metric_group_exceptions(instance):
         check.log.warning.assert_called_once_with(
             "Invalid metric_groups found in snowflake conf.yaml: fake.metric.group"
         )
+
+
+def test_emit_generic_and_non_generic_tags_by_default(instance):
+    instance = copy.deepcopy(instance)
+    instance['disable_generic_tags'] = False
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
+    normalised_tags = tags + ['snowflake_service:COMPUTE_WH']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+def test_emit_non_generic_tags_when_disabled(instance):
+    instance = copy.deepcopy(instance)
+    instance['disable_generic_tags'] = True
+    check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+    tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
+    normalised_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))

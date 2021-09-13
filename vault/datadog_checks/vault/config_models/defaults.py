@@ -56,6 +56,10 @@ def instance_detect_leader(field, value):
     return False
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_disable_legacy_cluster_tag(field, value):
     return False
 

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from decimal import Decimal
 from typing import Any, Callable, Dict
 
@@ -11,6 +12,14 @@ from datadog_checks.base.utils.db import Query
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .common import CHECK_NAME, EXPECTED_TAGS
+
+
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+    config = copy.deepcopy(instance)
+    config['login_timeout'] = 5
+    check = SnowflakeCheck(CHECK_NAME, {}, [config])
+    dd_run_check(check)
+    aggregator.assert_service_check('snowflake.can_connect', SnowflakeCheck.CRITICAL)
 
 
 def test_storage_metrics(dd_run_check, aggregator, instance):
@@ -59,7 +68,7 @@ def test_credit_usage_metrics(dd_run_check, aggregator, instance):
             Decimal('1.066997500000'),
         )
     ]
-    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'service:COMPUTE_WH']
+    expected_tags = EXPECTED_TAGS + ['service_type:WAREHOUSE_METERING', 'snowflake_service:COMPUTE_WH']
     with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_credit_usage):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check._conn = mock.MagicMock()
