@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
+
 import mock
 import psycopg2
 import pytest
@@ -262,3 +264,33 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
+
+
+def test_host_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = True
+    check = PostgreSql('test_instance', {}, [instance])
+    tags = check._get_service_check_tags()
+    assert set(tags) == {
+        'db:datadog_test',
+        'port:5432',
+        'postgres_host:localhost',
+        'foo:bar',
+        'postgres_server:localhost',
+    }
+
+
+def test_host_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = False
+    check = PostgreSql('test_instance', {}, [instance])
+    tags = check._get_service_check_tags()
+    assert set(tags) == {
+        'db:datadog_test',
+        'foo:bar',
+        'port:5432',
+        'host:localhost',
+        'postgres_host:localhost',
+        'postgres_server:localhost',
+        'server:localhost',
+    }
