@@ -75,13 +75,13 @@ class CitrixHypervisorCheck(AgentCheck):
 
     def _session_login(self, server):
         # type: (Any) -> Dict[str, str]
-        # try:
-        session = server.session.login_with_password(
-            self.instance.get('username', ''), self.instance.get('password', '')
-        )
-        return session
-        # except Exception as e:
-        #     self.log.warning(e)
+        try:
+            session = server.session.login_with_password(
+                self.instance.get('username', ''), self.instance.get('password', '')
+            )
+            return session
+        except Exception as e:
+            self.log.warning(e)
         return {}
 
     def _get_master_session(self, session):
@@ -95,7 +95,7 @@ class CitrixHypervisorCheck(AgentCheck):
             master_address = 'http://' + master_address
         master_xenserver = xmlrpclib.Server(master_address)
 
-        # Master credentials can be different, we can specify new `master_username` and
+        # Master credentials can be different, we could specify new `master_username` and
         # `master_password` options later if requested
         master_session = self._session_login(master_xenserver)
 
