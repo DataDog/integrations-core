@@ -104,6 +104,10 @@ To configure this check for an Agent running on a host:
        ## Note: If omitted, the default system postgres database is queried.
        #
        dbname: "<DB_NAME>"
+   
+       # Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+       # getting mixed with other integration tags.
+       disable_generic_tags: true
    ```
 
 2. [Restart the Agent][4].
