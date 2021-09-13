@@ -105,8 +105,8 @@ To configure this check for an Agent running on a host:
        #
        dbname: "<DB_NAME>"
    
-       # Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-       # getting mixed with other integration tags.
+       # @param disable_generic_tags - boolean - optional - default: false
+       # The integration will stop sending server tag as is reduntant with host tag
        disable_generic_tags: true
    ```
 
