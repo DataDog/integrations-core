@@ -144,7 +144,7 @@ data:
 
 To configure this check for an Agent running on a host:
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
 ##### Metric collection
 
