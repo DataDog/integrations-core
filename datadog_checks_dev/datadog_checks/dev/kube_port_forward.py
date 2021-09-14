@@ -20,18 +20,11 @@ def _build_temp_key(namespace, deployment, remote_port):
 
 
 @contextmanager
-def port_forward(kubeconfig, namespace, remote_port, deployment=None, service=None):
+def port_forward(kubeconfig, namespace, remote_port, resource, resource_name):
     """Use `kubectl` to forward a remote port locally."""
-    if not deployment and not service:
-        raise Exception("You must specify a deployment or service")
-    if deployment:
-        set_up = PortForwardUp(kubeconfig, namespace, remote_port, deployment=deployment)
-        key = _build_temp_key(namespace, deployment, remote_port)
-        tear_down = KillProcess(key, PID_FILE)
-    else:
-        set_up = PortForwardUp(kubeconfig, namespace, remote_port, service=service)
-        key = _build_temp_key(namespace, service, remote_port)
-        tear_down = KillProcess(key, PID_FILE)
+    set_up = PortForwardUp(kubeconfig, namespace, remote_port, resource, resource_name)
+    key = _build_temp_key(namespace, resource_name, remote_port)
+    tear_down = KillProcess(key, PID_FILE)
 
     with environment_run(up=set_up, down=tear_down) as result:
         yield result
@@ -40,21 +33,15 @@ def port_forward(kubeconfig, namespace, remote_port, deployment=None, service=No
 class PortForwardUp(LazyFunction):
     """Setup `kubectl port-forward`."""
 
-    def __init__(self, kubeconfig, namespace, remote_port, deployment=None, service=None):
+    def __init__(self, kubeconfig, namespace, remote_port, resource, resource_name):
         self.kubeconfig = kubeconfig
         self.namespace = namespace
         self.remote_port = remote_port
-        self.deployment = deployment
-        self.service = service
+        self.resource = resource
+        self.resource_name = resource_name
 
     def __call__(self):
-        if self.deployment:
-            key = _build_temp_key(self.namespace, self.deployment, self.remote_port)
-            subject = 'deployment/{}'.format(self.deployment)
-        else:
-            key = _build_temp_key(self.namespace, self.service, self.remote_port)
-            subject = 'service/{}'.format(self.service)
-
+        key = _build_temp_key(self.namespace, self.resource_name, self.remote_port)
         with TempDir(key) as temp_dir:
             # Run in the temp dir to put kube cache files there
             with chdir(temp_dir):
@@ -67,7 +54,7 @@ class PortForwardUp(LazyFunction):
                     ip,
                     '--namespace',
                     self.namespace,
-                    subject,
+                    "{}/{}".format(self.resource, self.resource_name),
                     '{}:{}'.format(local_port, self.remote_port),
                 ]
                 env = os.environ.copy()
