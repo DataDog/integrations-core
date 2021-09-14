@@ -60,7 +60,6 @@ def package(check):
             annotate_display_queue(setup_file_path, display_queue)
             for display_func, message in display_queue:
                 display_func(message)
-            display_queue = []
         else:
             ok_checks += 1
 
