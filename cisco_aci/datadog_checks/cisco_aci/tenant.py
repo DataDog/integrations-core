@@ -99,7 +99,7 @@ class Tenant:
             name = list(s.keys())[0]
             # we only want to collect the 15 minutes metrics.
             if '15min' not in name:
-                self.log.debug("Skipping metric: %s because does not contain 15min in name", name)
+                self.log.debug("Skipping metric: %s because it does not contain 15min in its name", name)
                 continue
 
             attrs = s.get(name, {}).get("attributes", {})
