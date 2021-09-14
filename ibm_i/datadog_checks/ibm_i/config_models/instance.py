@@ -18,6 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     connection_string: Optional[str]
+    disable_generic_tags: Optional[bool]
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
     job_query_timeout: Optional[int] = Field(None, gt=0.0)
