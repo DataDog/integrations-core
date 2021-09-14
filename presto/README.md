@@ -30,6 +30,10 @@ Use the default configuration of your `presto.d/conf.yaml` file to activate the 
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:

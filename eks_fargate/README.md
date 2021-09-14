@@ -264,6 +264,10 @@ Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Liv
 
 ## Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 
 You can use [Fluent Bit][18] to route EKS logs to CloudWatch Logs. 
