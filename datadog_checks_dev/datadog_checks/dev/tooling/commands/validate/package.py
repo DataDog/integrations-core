@@ -5,7 +5,7 @@ import re
 
 import click
 
-from ...annotations import annotate_display_queue, annotate_error
+from ...annotations import annotate_display_queue
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_setup_file, normalize_package_name, read_setup_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
