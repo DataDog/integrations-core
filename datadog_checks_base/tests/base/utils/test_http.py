@@ -437,64 +437,64 @@ class TestAuth:
                 principal=None,
             )
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_kerberos_auth_noconf(self, kerberos):
-        instance = {}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(kerberos["url"])
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_kerberos_auth_noconf(self, kerberos):
+    #     instance = {}
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
+    #     response = http.get(kerberos["url"])
 
-        assert response.status_code == 401
+    #     assert response.status_code == 401
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_kerberos_auth_principal_inexistent(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'auth_type': 'kerberos',
-            'kerberos_auth': 'required',
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
-            'kerberos_keytab': kerberos["keytab"],
-            'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'false',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 401
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_kerberos_auth_principal_inexistent(self, kerberos):
+    #     instance = {
+    #         'url': kerberos["url"],
+    #         'auth_type': 'kerberos',
+    #         'kerberos_auth': 'required',
+    #         'kerberos_hostname': kerberos["hostname"],
+    #         'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+    #         'kerberos_keytab': kerberos["keytab"],
+    #         'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
+    #         'kerberos_force_initiate': 'false',
+    #     }
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
+    #     response = http.get(instance["url"])
+    #     assert response.status_code == 401
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'auth_type': 'kerberos',
-            'kerberos_auth': 'required',
-            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'true',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 200
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
+    #     instance = {
+    #         'url': kerberos["url"],
+    #         'auth_type': 'kerberos',
+    #         'kerberos_auth': 'required',
+    #         'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+    #         'kerberos_hostname': kerberos["hostname"],
+    #         'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
+    #         'kerberos_force_initiate': 'true',
+    #     }
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
+    #     response = http.get(instance["url"])
+    #     assert response.status_code == 200
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'auth_type': 'kerberos',
-            'kerberos_auth': 'required',
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
-            'kerberos_keytab': kerberos["keytab"],
-            'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'true',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 200
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
+    #     instance = {
+    #         'url': kerberos["url"],
+    #         'auth_type': 'kerberos',
+    #         'kerberos_auth': 'required',
+    #         'kerberos_hostname': kerberos["hostname"],
+    #         'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
+    #         'kerberos_keytab': kerberos["keytab"],
+    #         'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
+    #         'kerberos_force_initiate': 'true',
+    #     }
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
+    #     response = http.get(instance["url"])
+    #     assert response.status_code == 200
 
     @pytest.mark.skipif(True, reason='Test fixture for Agent QA only')
     def test_kerberos_auth_with_agent(self, kerberos_agent):
@@ -1315,34 +1315,34 @@ class TestProxies:
         http.get('http://www.google.com')
         http.get('http://nginx')
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_no_proxy_single_wildcard(self, socks5_proxy):
-        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar,*'}}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_no_proxy_single_wildcard(self, socks5_proxy):
+    #     instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar,*'}}
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
 
-        http.get('http://www.example.org')
-        http.get('http://www.example.com')
-        http.get('http://127.0.0.9')
+    #     http.get('http://www.example.org')
+    #     http.get('http://www.example.com')
+    #     http.get('http://127.0.0.9')
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_no_proxy_domain(self, socks5_proxy):
-        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'}}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_no_proxy_domain(self, socks5_proxy):
+    #     instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'}}
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
 
-        # no_proxy match: .google.com
-        http.get('http://www.google.com')
+    #     # no_proxy match: .google.com
+    #     http.get('http://www.google.com')
 
-        # no_proxy match: *.example.org
-        http.get('http://www.example.org')
+    #     # no_proxy match: *.example.org
+    #     http.get('http://www.example.org')
 
-        # no_proxy match: example.com
-        http.get('http://www.example.com')
-        http.get('http://example.com')
+    #     # no_proxy match: example.com
+    #     http.get('http://www.example.com')
+    #     http.get('http://example.com')
 
-        # no_proxy match: 9
-        http.get('http://127.0.0.9')
+    #     # no_proxy match: 9
+    #     http.get('http://127.0.0.9')
 
     @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_no_proxy_domain_fail(self, socks5_proxy):
@@ -1366,34 +1366,34 @@ class TestProxies:
         with pytest.raises((ConnectTimeout, ProxyError)):
             http.get('http://127.0.0.99', timeout=1)
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
-    def test_no_proxy_ip(self, socks5_proxy):
-        instance = {
-            'proxy': {
-                'http': 'http://1.2.3.4:567',
-                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
-            }
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
+    # @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    # def test_no_proxy_ip(self, socks5_proxy):
+    #     instance = {
+    #         'proxy': {
+    #             'http': 'http://1.2.3.4:567',
+    #             'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+    #         }
+    #     }
+    #     init_config = {}
+    #     http = RequestsWrapper(instance, init_config)
 
-        # no_proxy match: 127.0.0.1
-        http.get('http://127.0.0.1', timeout=1)
+    #     # no_proxy match: 127.0.0.1
+    #     http.get('http://127.0.0.1', timeout=1)
 
-        # no_proxy match: 127.0.0.2/32
-        http.get('http://127.0.0.2', timeout=1)
+    #     # no_proxy match: 127.0.0.2/32
+    #     http.get('http://127.0.0.2', timeout=1)
 
-        # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
-        http.get('http://127.1.0.50', timeout=1)
-        http.get('http://127.1.0.100', timeout=1)
+    #     # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
+    #     http.get('http://127.1.0.50', timeout=1)
+    #     http.get('http://127.1.0.100', timeout=1)
 
-        # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
-        http.get('http://127.1.1.50', timeout=1)
-        http.get('http://127.1.1.100', timeout=1)
+    #     # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
+    #     http.get('http://127.1.1.50', timeout=1)
+    #     http.get('http://127.1.1.100', timeout=1)
 
-        # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
-        http.get('http://127.1.2.50', timeout=1)
-        http.get('http://127.1.2.100', timeout=1)
+    #     # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
+    #     http.get('http://127.1.2.50', timeout=1)
+    #     http.get('http://127.1.2.100', timeout=1)
 
     @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_no_proxy_ip_fail(self, socks5_proxy):
@@ -1998,3 +1998,10 @@ class TestAIAChasing:
     def test_incomplete_chain(self):
         http = RequestsWrapper({}, {})
         http.get("https://incomplete-chain.badssl.com/")
+
+class TestAllowRedirect:
+    def test_config_default(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is True 
