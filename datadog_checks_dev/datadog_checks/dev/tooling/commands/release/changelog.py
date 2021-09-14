@@ -36,7 +36,8 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 )
 @click.pass_context
 def changelog(
-    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization, exclude_branch,
+    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization,
+    exclude_branch,
 ):
     """Perform the operations needed to update the changelog.
 
