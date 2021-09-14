@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from six import PY2
 
 pytestmark = pytest.mark.unit
 
@@ -21,3 +22,20 @@ def test_sanitize_strings(input_string, expected):
     from datadog_checks.ibm_mq.utils import sanitize_strings
 
     assert expected == sanitize_strings(input_string)
+
+
+@pytest.mark.parametrize(
+    'datestamp,timestamp,expected',
+    [
+        pytest.param('2021-09-08', '19.19.41', 76518, id='elasped 21h'),
+        pytest.param('2020-01-01', '10.25.13', 53327386, id='elapsed 2y'),
+        pytest.param('2021-08-01', '12.00.00', 3386099, id='elapsed past'),
+    ],
+)
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_calculate_elapsed_time(datestamp, timestamp, expected):
+    from datadog_checks.ibm_mq.utils import calculate_elapsed_time
+
+    current_time = float('1631219699.193989')
+
+    assert expected == calculate_elapsed_time(datestamp, timestamp, current_time)

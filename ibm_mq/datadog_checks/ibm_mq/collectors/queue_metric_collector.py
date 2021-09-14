@@ -202,17 +202,26 @@ class QueueMetricCollector(object):
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
                 for mname, values in iteritems(metrics.pcf_metrics()):
-                    failure_value = values['failure']
-                    pymqi_value = values['pymqi_value']
-                    mname = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
-                    m = int(queue_info[pymqi_value])
-
-                    if m > failure_value:
-                        self.send_metric(GAUGE, mname, m, tags=tags)
+                    metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
+                    if callable(values):
+                        metric_value = values(queue_info)
+                        if metric_value is not None:
+                            self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                        else:
+                            msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                            msg.format(metric_name, queue_name)
+                            self.log.debug(msg)
                     else:
-                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                        msg = msg.format(mname, queue_name)
-                        self.log.debug(msg)
+                        failure_value = values['failure']
+                        pymqi_value = values['pymqi_value']
+                        metric_value = int(queue_info[pymqi_value])
+
+                        if metric_value > failure_value:
+                            self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                        else:
+                            msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                            msg = msg.format(metric_name, queue_name)
+                            self.log.debug(msg)
         finally:
             if pcf is not None:
                 pcf.disconnect()

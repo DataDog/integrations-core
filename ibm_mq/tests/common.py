@@ -4,6 +4,8 @@
 
 import os
 
+from six import PY2
+
 from datadog_checks.dev import get_docker_hostname
 
 # Ignore missing library to not require it for e2e
@@ -179,9 +181,18 @@ QUEUE_METRICS = [
     ('ibm_mq.queue.time_since_reset', COUNT),
 ]
 
-QUEUE_STATUS_METRICS = [
-    ('ibm_mq.queue.uncommitted_msgs', GAUGE),
-]
+if PY2:
+    QUEUE_STATUS_METRICS = [
+        ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+        ('ibm_mq.queue.oldest_message_age', GAUGE),
+    ]
+else:
+    QUEUE_STATUS_METRICS = [
+        ('ibm_mq.queue.oldest_message_age', GAUGE),
+        ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+        ('ibm_mq.queue.last_get_time', GAUGE),
+        ('ibm_mq.queue.last_put_time', GAUGE),
+    ]
 
 CHANNEL_METRICS = [
     ('ibm_mq.channel.batch_size', GAUGE),

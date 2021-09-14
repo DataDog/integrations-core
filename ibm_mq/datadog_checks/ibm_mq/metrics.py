@@ -4,6 +4,12 @@
 
 from __future__ import division
 
+from six import PY2
+
+from datadog_checks.base.utils.common import ensure_unicode
+
+from .utils import calculate_elapsed_time
+
 try:
     import pymqi
 except ImportError:
@@ -51,10 +57,18 @@ def queue_metrics():
 
 
 def pcf_metrics():
-    return {
-        'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
-        'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
-    }
+    if PY2:
+        return {
+            'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+            'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+        }
+    else:
+        return {
+            'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+            'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+            'last_put_time': get_last_put_time,
+            'last_get_time': get_last_get_time,
+        }
 
 
 def pcf_status_reset_metrics():
@@ -158,3 +172,25 @@ def depth_percent(queue_info):
     depth_as_percent = depth_fraction * 100
 
     return depth_as_percent
+
+
+def get_last_put_time(queue_info):
+    if pymqi.CMQCFC.MQCACF_LAST_PUT_DATE not in queue_info or pymqi.CMQCFC.MQCACF_LAST_PUT_TIME not in queue_info:
+        return None
+
+    last_put_datestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_PUT_DATE]
+    last_put_timestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_PUT_TIME]
+
+    if last_put_datestamp is not None and last_put_timestamp is not None:
+        return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp))
+
+
+def get_last_get_time(queue_info):
+    if pymqi.CMQCFC.MQCACF_LAST_GET_DATE not in queue_info or pymqi.CMQCFC.MQCACF_LAST_GET_TIME not in queue_info:
+        return None
+
+    last_get_datestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_GET_DATE]
+    last_get_timestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_GET_TIME]
+
+    if last_get_datestamp is not None and last_get_timestamp is not None:
+        return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp))
