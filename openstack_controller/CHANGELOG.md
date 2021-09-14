@@ -1,6 +1,6 @@
 # CHANGELOG - Openstack_controller
 
-## 1.12.0 / 2021-08-22
+## 1.12.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Bump openstacksdk and add missing metrics. See [#9861](https://github.com/DataDog/integrations-core/pull/9861).
 * [Fixed] Do not leak password on logs. See [#9637](https://github.com/DataDog/integrations-core/pull/9637).
