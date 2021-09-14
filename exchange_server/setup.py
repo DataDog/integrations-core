@@ -30,7 +30,7 @@ def get_dependencies():
 CHECKS_BASE_REQ = 'datadog-checks-base>=11.2.0'
 
 setup(
-    name='ddog-exchange_server',
+    name='datadog-exchange_server',
     version=ABOUT["__version__"],
     description='The MS Exchange check',
     long_description=long_description,
