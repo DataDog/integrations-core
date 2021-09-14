@@ -104,7 +104,7 @@ class Tenant:
 
             attrs = s.get(name, {}).get("attributes", {})
             if 'index' in attrs:
-                self.log.debug("Skipping metric: %s because contains index in attributes", name)
+                self.log.debug("Skipping metric: %s because it contains index in its attributes", name)
                 continue
 
             self.log.debug("submitting metrics for: %s", name)
