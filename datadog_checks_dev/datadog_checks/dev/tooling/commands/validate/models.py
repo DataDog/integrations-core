@@ -13,6 +13,7 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
+from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
@@ -67,6 +68,7 @@ def models(ctx, check, sync, verbose):
         spec.load()
 
         if spec.errors:
+            annotate_error(spec_path, '\n'.join(spec.errors))
             specs_failed[spec_path] = True
             echo_info(f'{check}:')
             for error in spec.errors:
@@ -140,6 +142,7 @@ def models(ctx, check, sync, verbose):
 
         if check_display_queue or verbose:
             echo_info(f'{check}:')
+            annotate_display_queue(model_file_path, check_display_queue)
             if verbose:
                 check_display_queue.append(lambda **kwargs: echo_info('Valid spec', **kwargs))
             for display in check_display_queue:
