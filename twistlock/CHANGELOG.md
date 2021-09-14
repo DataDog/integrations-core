@@ -1,6 +1,6 @@
 # CHANGELOG - Twistlock
 
-## 2.0.0 / 2021-08-22
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
 

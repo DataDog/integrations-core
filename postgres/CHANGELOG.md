@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 9.0.2 / 2021-08-27
+## 9.0.2 / 2021-08-27 / Agent 7.31.0
 
 * [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).
 

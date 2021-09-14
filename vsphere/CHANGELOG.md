@@ -4,7 +4,7 @@
 
 * [Fixed] Fix crash when some permissions are missing. See [#10012](https://github.com/DataDog/integrations-core/pull/10012).
 
-## 5.11.1 / 2021-08-25
+## 5.11.1 / 2021-08-25 / Agent 7.31.0
 
 * [Fixed] Fix collect_events default. See [#9979](https://github.com/DataDog/integrations-core/pull/9979).
 
