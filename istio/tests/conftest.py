@@ -59,7 +59,7 @@ def dd_environment():
         with ExitStack() as stack:
             if VERSION == '1.5.1':
                 istiod_host, istiod_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 8080, deployment='istiod')
+                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
                 )
                 instance = {'istiod_endpoint': 'http://{}:{}/metrics'.format(istiod_host, istiod_port)}
 

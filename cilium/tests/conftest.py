@@ -54,7 +54,7 @@ def dd_environment():
     with kind_run(conditions=[setup_cilium]) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', port, deployment='cilium-operator'))
+                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
                 for port in PORTS
             ]
         instances = {

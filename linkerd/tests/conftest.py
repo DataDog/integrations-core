@@ -38,7 +38,7 @@ def dd_environment():
         ):
             with ExitStack() as stack:
                 ip, port = stack.enter_context(
-                    port_forward(kubeconfig, 'linkerd', 4191, deployment='linkerd-controller')
+                    port_forward(kubeconfig, 'linkerd', 4191, 'deployment', 'linkerd-controller')
                 )
 
             instance = {
