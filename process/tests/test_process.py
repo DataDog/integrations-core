@@ -69,21 +69,21 @@ def noop_get_pagefault_stats(pid):
 def test_psutil_wrapper_simple(aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, [{}])
-    name = process.psutil_wrapper(get_psutil_proc(), 'name')
+    name = process.psutil_wrapper(get_psutil_proc(), 'name', None, False)
     assert name is not None
 
 
 def test_psutil_wrapper_simple_fail(aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, [{}])
-    name = process.psutil_wrapper(get_psutil_proc(), 'blah')
+    name = process.psutil_wrapper(get_psutil_proc(), 'blah', None, False)
     assert name is None
 
 
 def test_psutil_wrapper_accessors(aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, [{}])
-    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_info', ['rss', 'vms', 'foo'])
+    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_info', ['rss', 'vms', 'foo'], False)
     assert 'rss' in meminfo
     assert 'vms' in meminfo
     assert 'foo' not in meminfo
@@ -92,7 +92,7 @@ def test_psutil_wrapper_accessors(aggregator):
 def test_psutil_wrapper_accessors_fail(aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, [{}])
-    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'])
+    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'], False)
     assert 'rss' not in meminfo
     assert 'vms' not in meminfo
 
@@ -149,7 +149,7 @@ def mock_find_pid(name, search_string, exact_match=True, ignore_ad=True, refresh
     return config_stubs[int(idx)]['mocked_processes']
 
 
-def mock_psutil_wrapper(method, accessors):
+def mock_psutil_wrapper(process, method, accessors, try_sudo, *args, **kwargs):
     if method == 'num_handles':  # win32 only
         return None
     if accessors is None:
