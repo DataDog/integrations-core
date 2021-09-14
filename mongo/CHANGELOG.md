@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 2.6.0 / 2021-08-22
+## 2.6.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Support collection-agnostic aggregations for custom queries. See [#9857](https://github.com/DataDog/integrations-core/pull/9857).
 
