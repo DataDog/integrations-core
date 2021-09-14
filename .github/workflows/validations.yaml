@@ -51,6 +51,10 @@ jobs:
       run: |
         ddev validate recommended-monitors
 
+    - name: Run package validation
+      run: |
+        ddev validate package
+
     - name: Run service checks validation
       run: |
         ddev validate service-checks
