@@ -25,9 +25,7 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 @click.option(
     '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
 )
-@click.option(
-    '--exclude-branch', default=None, help="Exclude changes comming from a specific branch"
-)
+@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
 def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, exclude_branch):
     """Show all the pending PRs for a given check."""
