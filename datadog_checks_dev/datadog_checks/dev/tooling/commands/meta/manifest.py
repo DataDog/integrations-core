@@ -181,7 +181,7 @@ def migrate(ctx, integration, to_version):
 
         migrated_manifest.set_path("/pricing", loaded_manifest.get_path("/pricing"))
         migrated_manifest.set_path("/legal_terms", {})
-        migrated_manifest.set_path("/legal_terms/eula", "/terms/eula")
+        migrated_manifest.set_path("/legal_terms/eula", loaded_manifest.get_path("/terms/eula"))
 
         for idx, _ in enumerate(migrated_manifest.get_path("/pricing") or []):
             migrated_manifest.set_path(f"/pricing/{idx}/product_id", TODO_FILL_IN)
