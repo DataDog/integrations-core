@@ -11,7 +11,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -158,7 +158,7 @@ class PostgreSql(AgentCheck):
         # type: () -> str
         if self._resolved_hostname is None:
             if self._config.dbm_enabled or self.disable_generic_tags:
-                self._resolved_hostname = resolve_db_host(self._config.host)
+                self._resolved_hostname = self.resolve_db_host()
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
@@ -169,6 +169,9 @@ class PostgreSql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self._config.host)
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:

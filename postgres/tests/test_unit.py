@@ -289,3 +289,20 @@ def test_server_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
         'port:5432',
         'server:localhost',
     }
+
+
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'stubbed.hostname')]
+)
+def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = PostgreSql('test_instance', {}, [instance])
+
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
+    ) as resolve_db_host:
+        assert check.resolved_hostname == expected_hostname
+        assert resolve_db_host.called == disable_generic_tags, 'Expected resolve_db_host.called to be ' + str(
+            disable_generic_tags
+        )
