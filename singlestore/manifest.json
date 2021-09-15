@@ -3,6 +3,9 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "singlestore",
+  "process_signatures": [
+    "memsqld"
+  ],
   "metric_prefix": "singlestore.",
   "metric_to_check": "singlestore.bytes_received",
   "creates_events": false,
