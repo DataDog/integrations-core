@@ -39,6 +39,7 @@ from .common import (
     REGISTRIES_PRE_1_8_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
+    USERS_URL,
     VERSION_1_6,
     VERSION_1_8,
     VOLUME_INFO_FIXTURE,
@@ -61,7 +62,7 @@ def dd_environment(e2e_instance):
 class CreateSimpleUser(LazyFunction):
     def __call__(self, *args, **kwargs):
         requests.post(
-            URL + '/api/users',
+            URL + USERS_URL,
             auth=("admin", "Harbor12345"),
             json={
                 "username": "NotAnAdmin",

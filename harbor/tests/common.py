@@ -5,14 +5,16 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
-USERS_URL = '{base_url}/api/users/'
 VERSION_1_5 = [1, 5, 0]
 VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
+VERSION_2_2 = [2, 2, 0]
 
 HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
 
 HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
+
+USERS_URL = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges
