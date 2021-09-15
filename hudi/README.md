@@ -58,7 +58,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][4].
 
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://hudi.apache.org/
 [2]: https://github.com/DataDog/integrations-core/blob/master/hudi/datadog_checks/hudi/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/integrations/java/
 [4]: https://docs.datadoghq.com/help/
