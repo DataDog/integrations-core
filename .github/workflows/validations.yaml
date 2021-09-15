@@ -55,9 +55,21 @@ jobs:
       run: |
         ddev validate legacy-signature
 
+    - name: Run licenses validation
+      run: |
+        ddev validate licenses
+        
+    - name: Run readmes validation
+      run: |
+        ddev validate readmes
+
     - name: Run recommended monitors validation
       run: |
         ddev validate recommended-monitors
+
+    - name: Run package validation
+      run: |
+        ddev validate package
 
     - name: Run service checks validation
       run: |

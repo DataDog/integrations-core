@@ -12,6 +12,7 @@ from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
+from ...annotations import annotate_error
 from ...constants import get_agent_requirements, get_license_attribution_file
 from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -190,6 +191,7 @@ def validate_extra_licenses():
                 errors = True
                 any_errors = True
                 echo_failure(f"{license_file}:{line_no} Has the wrong amount of columns")
+                annotate_error(license_file, "Contains the wrong amount of columns", line=line_no)
                 continue
 
             # all headers exist, no invalid headers
@@ -199,10 +201,12 @@ def validate_extra_licenses():
                 invalid_headers = all_keys.difference(ALL_HEADERS)
                 if invalid_headers:
                     echo_failure(f'{license_file}:{line_no} Invalid column {invalid_headers}')
+                    annotate_error(license_file, f"Detected invalid column {invalid_headers}", line=line_no)
 
                 missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     echo_failure(f'{license_file}:{line_no} Missing columns {missing_headers}')
+                    annotate_error(license_file, f"Detected missing columns {invalid_headers}", line=line_no)
 
                 errors = True
                 any_errors = True
@@ -212,6 +216,7 @@ def validate_extra_licenses():
                 errors = True
                 any_errors = True
                 echo_failure(f'{license_file}:{line_no} Invalid license type {license_type}')
+                annotate_error(license_file, f"Detected invalid license type {license_type}", line=line_no)
                 continue
             if not errors:
                 lines.append(line)

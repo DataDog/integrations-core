@@ -234,36 +234,33 @@ class ProcessCheck(AgentCheck):
         elif method == 'num_handles' and not Platform.is_win32():
             return result
 
-        try:
-            res = getattr(process, method)(*args, **kwargs)
-            if accessors is None:
-                result = res
-            else:
-                for acc in accessors:
-                    try:
-                        result[acc] = getattr(res, acc)
-                    except AttributeError:
-                        self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
-        except (NotImplementedError, AttributeError):
-            self.log.debug("psutil method %s not implemented", method)
-        except psutil.AccessDenied:
-            self.log.debug("psutil was denied access for method %s", method)
-            if method == 'num_fds' and Platform.is_unix() and try_sudo:
-                try:
-                    # It is up the agent's packager to grant
-                    # corresponding sudo policy on unix platforms
-                    ls_args = ['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)]
-                    process_ls = subprocess.check_output(ls_args)
-                    result = len(process_ls.splitlines())
+        # Try running `num_fds` with sudo if possible
+        if method == 'num_fds' and self.try_sudo:
+            self.log.debug("Running num_fds using sudo")
+            try:
+                ls_args = ['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)]
+                process_ls = subprocess.check_output(ls_args)
+                result = len(process_ls.splitlines())
+            except Exception as e:
+                self.log.exception("Trying to retrieve %s with sudo failed with error: %s", method, e)
 
-                except subprocess.CalledProcessError as e:
-                    self.log.exception(
-                        "trying to retrieve %s with sudo failed with return code %s", method, e.returncode
-                    )
-                except Exception:
-                    self.log.exception("trying to retrieve %s with sudo also failed", method)
-        except psutil.NoSuchProcess:
-            self.warning("Process %s disappeared while scanning", process.pid)
+        else:
+            try:
+                res = getattr(process, method)(*args, **kwargs)
+                if accessors is None:
+                    result = res
+                else:
+                    for acc in accessors:
+                        try:
+                            result[acc] = getattr(res, acc)
+                        except AttributeError:
+                            self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
+            except (NotImplementedError, AttributeError):
+                self.log.debug("psutil method %s not implemented", method)
+            except psutil.AccessDenied:
+                self.log.debug("psutil was denied access for method %s", method)
+            except psutil.NoSuchProcess:
+                self.warning("Process %s disappeared while scanning", process.pid)
 
         return result
 
