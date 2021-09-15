@@ -5,6 +5,7 @@ import org.apache.hudi.DataSourceReadOptions._
 import org.apache.hudi.DataSourceWriteOptions._
 import org.apache.hudi.config.HoodieWriteConfig._
 
+//code examples found in https://hudi.apache.org/docs/quick-start-guide
 val tableName = "hudi_trips_cow"
 val basePath = "file:///tmp/hudi_trips_cow"
 val dataGen = new DataGenerator
@@ -13,12 +14,7 @@ val df = spark.read.json(spark.sparkContext.parallelize(convertToStringList(data
 
 df.write.format("hudi").
   options(getQuickstartWriteConfigs).
-  option("metadata.enabled", "true").
-  option("hoodie.embed.timeline.server", "true").
-  option("hoodie.write.markers.type", "TIMELINE_SERVER_BASED").
-  option("hoodie.filesystem.view.type", "EMBEDDED_KV_STORE").
   option("hoodie.metrics.on", "true").
-  option("hoodie.metrics.executor.enable", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
   option(PRECOMBINE_FIELD_OPT_KEY, "ts").
@@ -36,7 +32,6 @@ df.write.format("hudi").
   option("hoodie.metrics.on", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
-  option("hoodie.metrics.executor.enable", "true").
   option(PRECOMBINE_FIELD_OPT_KEY, "ts").
   option(RECORDKEY_FIELD_OPT_KEY, "uuid").
   option(PARTITIONPATH_FIELD_OPT_KEY, "partitionpath").
@@ -57,7 +52,6 @@ val tripsIncrementalDF = spark.read.format("hudi").
   option("hoodie.metrics.on", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
-  option("hoodie.metrics.executor.enable", "true").
   option(QUERY_TYPE_OPT_KEY, QUERY_TYPE_INCREMENTAL_OPT_VAL).
   option(BEGIN_INSTANTTIME_OPT_KEY, beginTime).
   load(basePath)
@@ -73,7 +67,6 @@ val tripsPointInTimeDF = spark.read.format("hudi").
   option("hoodie.metrics.on", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
-  option("hoodie.metrics.executor.enable", "true").
   option(QUERY_TYPE_OPT_KEY, QUERY_TYPE_INCREMENTAL_OPT_VAL).
   option(BEGIN_INSTANTTIME_OPT_KEY, beginTime).
   option(END_INSTANTTIME_OPT_KEY, endTime).
@@ -94,7 +87,6 @@ df.write.format("hudi").
   option("hoodie.metrics.on", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
-  option("hoodie.metrics.executor.enable", "true").
   option(OPERATION_OPT_KEY,"delete"). 
   option(PRECOMBINE_FIELD_OPT_KEY, "ts"). 
   option(RECORDKEY_FIELD_OPT_KEY, "uuid"). 
@@ -117,7 +109,6 @@ df.write.format("hudi").
   option("hoodie.metrics.on", "true").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
-  option("hoodie.metrics.executor.enable", "true").
   option(OPERATION_OPT_KEY,"insert_overwrite_table").
   option(PRECOMBINE_FIELD_OPT_KEY, "ts").
   option(RECORDKEY_FIELD_OPT_KEY, "uuid").
@@ -145,7 +136,6 @@ df.write.format("hudi").
   option("hoodie.metrics.reporter.type", "JMX").
   option("hoodie.metrics.jmx.port", "9999").
   option("hoodie.embed.timeline.server", "true").
-  option("hoodie.metrics.executor.enable", "true").
   option(OPERATION_OPT_KEY,"insert_overwrite").
   option(PRECOMBINE_FIELD_OPT_KEY, "ts").
   option(RECORDKEY_FIELD_OPT_KEY, "uuid").

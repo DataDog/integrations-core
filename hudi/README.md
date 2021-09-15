@@ -13,13 +13,13 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Configure the [Metrics Reporter][4] in Hudi.
-
-     Update your configuration 
+1. Configure the [JMX Metrics Reporter][8] in Hudi:
 
     ```yaml
-    hoodie.metrics.on: True
-    hoodie.metrics.reporter.type: 
+    hoodie.metrics.on=true
+    hoodie.metrics.reporter.type=JMX
+    hoodie.metrics.jmx.host=<JMX_HOST>
+    hoodie.metrics.jmx.port=<JMX_PORT>
     ```
 
 
@@ -34,29 +34,6 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5]
 
-
-#### Log collection
-
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
-
-    ```yaml
-    logs_enabled: true
-    ```
-
-2. Add this configuration block to your `hudi.d/conf.yaml` file to start collecting your VoltDB logs:
-
-    ```yaml
-    logs:
-      - type: file
-        path: /var/log/hudi.log
-        source: voltdb
-    ```
-
-  Change the `path` value based on your environment. See the [sample `hudi.d/conf.yaml` file][3] for all available configuration options.
-
-  3. [Restart the Agent][4].
-
-  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
@@ -88,3 +65,4 @@ Need help? Contact [Datadog support][4].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
+[8]: https://hudi.apache.org/docs/metrics/#jmxmetricsreporter
