@@ -4,7 +4,7 @@
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error, annotate_warning
+from ...annotations import annotate_error
 from ...constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
 from ...release import get_package_name
 from ...testing import process_checks_option
