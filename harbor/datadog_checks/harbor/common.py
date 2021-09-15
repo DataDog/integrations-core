@@ -13,12 +13,10 @@ REGISTRIES_URL = "{base_url}/api/registries/"
 REGISTRIES_PRE_1_8_URL = "{base_url}/api/targets/"
 REGISTRIES_PING_URL = "{base_url}/api/registries/ping/"
 REGISTRIES_PING_PRE_1_8_URL = "{base_url}/api/targets/ping/"
-VOLUME_INFO_PRE_2_2_URL = "{base_url}/api/systeminfo/volumes/"
 VOLUME_INFO_URL = "{base_url}/api/systeminfo/volumes/"
 
 VERSION_1_5 = [1, 5, 0]
 VERSION_1_7 = [1, 7, 0]
 VERSION_1_8 = [1, 8, 0]
-VERSION_2_2 = [2, 2, 0]
 
 HEALTHY = 'healthy'

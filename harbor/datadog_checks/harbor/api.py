@@ -13,8 +13,6 @@ from .common import (
     REGISTRIES_URL,
     SYSTEM_INFO_URL,
     VERSION_1_8,
-    VERSION_2_2,
-    VOLUME_INFO_PRE_2_2_URL,
     VOLUME_INFO_URL,
 )
 
