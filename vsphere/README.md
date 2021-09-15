@@ -86,11 +86,6 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 
 See [service_checks.json][14] for a list of service checks provided by this integration.
 
-## Troubleshooting
-
-- [Can I limit the number of VMs that are pulled in via the VMWare integration?][10]
-- [My vSpehre VMs are duplicated in the Infrastructure List view][13]
-
 ## Further Reading
 
 See our [blog post][11] on monitoring vSphere environments with Datadog.
