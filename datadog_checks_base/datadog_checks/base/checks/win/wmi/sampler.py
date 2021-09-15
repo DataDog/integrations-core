@@ -390,12 +390,15 @@ class WMISampler(object):
         """
         Transform filters to a comprehensive WQL `WHERE` clause.
 
-        Specifying more than 1 filter defaults to an `OR` operator in the `WHERE` clause.
+        Specifying more than 1 filter defaults to an `OR` logic operator in the `WHERE` clause.
+
+        Specifying more than 1 condition defaults to an `OR` logic operator in the unless specified otherwise.
 
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
                 - [{'Property': value},...] or
-                - [{'Property': [comparison_op, value]},...]
+                - [{'Property': [comparison_op, value]},...] or
+                - [{'Property': {logic_op: [comparison_op, value]},...}]
 
                 NOTE: If we just provide a value we default to '=' comparison operator.
                 Otherwise, specify the operator in a list as above: [comp_op, value]
@@ -403,21 +406,71 @@ class WMISampler(object):
                 to use LIKE
         """
 
+        # https://docs.microsoft.com/en-us/windows/win32/wmisdk/wql-operators
+        WQL_OPERATORS = ('=', '<', '>', '<=', '>=', '!=', '<>')
+
+        # Supported logical/bool operators
+        LOGIC_OPERATORS = ('AND', 'OR', 'NAND', 'NOR')
+
         def build_where_clause(fltr):
+            def add_to_bool_ops(k, v, should_extend=False):
+                if should_extend:
+                    bool_ops[k].extend(v)
+                else:
+                    bool_ops[k].append(v)
+
             f = fltr.pop()
             wql = ""
             while f:
+                bool_ops = dict((op, []) for op in LOGIC_OPERATORS)
+                default_bool_op = 'OR'
+                default_comp_op = '='
+                clauses = []
                 prop, value = f.popitem()
-
-                if isinstance(value, (tuple, list)) and len(value) == 2 and isinstance(value[0], string_types):
-                    oper = value[0]
-                    value = value[1]
-                elif isinstance(value, string_types) and '%' in value:
-                    oper = 'LIKE'
-                else:
-                    oper = '='
+                for p in and_props:
+                    if p.lower() in prop.lower():
+                        default_bool_op = 'AND'
+                        break
 
                 if isinstance(value, (tuple, list)):
+                    # Append if PROPERTY: ['<>', 'foo']
+                    # Extend if PROPERTY: [['<>', 'foo']]
+                    # Extend if PROPERTY: ['foo%', '%bar']
+                    should_extend = False if len(value) == 2 and value[0] in WQL_OPERATORS else True
+                    add_to_bool_ops(default_bool_op, value, should_extend)
+                elif isinstance(value, dict):
+                    # e.g.
+                    # PROPERTY:
+                    #   AND:
+                    #     - ['<>', 'foo']
+                    #     - ['<>', 'bar']
+                    #     - baz
+                    for k, v in iteritems(value):
+                        # Append if PROPERTY: { AND: ['<>', 'foo']}
+                        # Extend if PROPERTY: { AND: [['<>', 'foo']]}
+                        # Extend if PROPERTY: { AND: [['foo%', '%bar']]}
+                        should_extend = (
+                            False if isinstance(v, (tuple, list)) and len(v) == 2 and v[0] in WQL_OPERATORS else True
+                        )
+                        bool_op = default_bool_op
+                        if k.upper() in LOGIC_OPERATORS:
+                            bool_op = k.upper()
+                        elif k.upper() == 'NOT':
+                            # map NOT to NOR or NAND
+                            bool_op = 'N{}'.format(default_bool_op)
+                        add_to_bool_ops(bool_op, v, should_extend)
+                elif isinstance(value, string_types) and '%' in value:
+                    # Override operator to LIKE if wildcard detected
+                    # e.g.
+                    # PROPERTY: 'foo%'  -> PROPERTY LIKE 'foo%'
+                    add_to_bool_ops(default_bool_op, ['LIKE', value])
+                else:
+                    # Use default comparison operator
+                    # e.g.
+                    # PROPERTY: 'bar'  -> PROPERTY = 'foo'
+                    add_to_bool_ops(default_bool_op, [default_comp_op, value])
+
+                for bool_op, value in iteritems(bool_ops):
                     if not len(value):
                         continue
 
@@ -425,18 +478,14 @@ class WMISampler(object):
                         lambda x: (prop, x)
                         if isinstance(x, (tuple, list))
                         else (prop, ('LIKE', x))
-                        if '%' in x
-                        else (prop, (oper, x)),
+                        if isinstance(x, string_types) and '%' in v
+                        else (prop, (default_comp_op, x)),
                         value,
                     )
 
-                    bool_op = ' OR '
-                    for p in and_props:
-                        if p.lower() in prop.lower():
-                            bool_op = ' AND '
-                            break
-
-                    clause = bool_op.join(
+                    negate = True if bool_op.upper() in ('NAND', 'NOR') else False
+                    op = ' {} '.format(bool_op[1:] if negate else bool_op)
+                    clause = op.join(
                         [
                             '{0} {1} \'{2}\''.format(k, v[0], v[1])
                             if isinstance(v, (list, tuple))
@@ -446,12 +495,13 @@ class WMISampler(object):
                     )
 
                     if bool_op.strip() == 'OR':
-                        wql += "( {clause} )".format(clause=clause)
+                        clauses.append("( {clause} )".format(clause=clause))
+                    elif negate:
+                        clauses.append("NOT ( {clause} )".format(clause=clause))
                     else:
-                        wql += "{clause}".format(clause=clause)
+                        clauses.append("{clause}".format(clause=clause))
 
-                else:
-                    wql += "{property} {cmp} '{constant}'".format(property=prop, cmp=oper, constant=value)
+                wql += ' {} '.format(default_bool_op).join(clauses)
                 if f:
                     wql += " AND "
 
