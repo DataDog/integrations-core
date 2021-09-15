@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 from datetime import datetime
 
 from datadog_checks.base import to_string
@@ -20,14 +21,19 @@ def sanitize_strings(s):
 
 
 def calculate_elapsed_time(datestamp, timestamp, current_time=None):
+    """
+    Calculate elapsed time in seconds from IBM MQ queue status date and timestamps
+    """
+    local_tz = time.tzname[time.daylight]
+
     if current_time is None:
         current_time = get_timestamp()
     else:
         current_time = current_time
 
     if datestamp and timestamp:
-        timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
-        timestamp_epoch = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').timestamp()
+        timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp) + ' ' + local_tz
+        timestamp_epoch = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timestamp()
     else:
         return
 

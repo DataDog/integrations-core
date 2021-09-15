@@ -25,17 +25,26 @@ def test_sanitize_strings(input_string, expected):
 
 
 @pytest.mark.parametrize(
-    'datestamp,timestamp,expected',
+    'datestamp,timestamp',
     [
-        pytest.param('2021-09-08', '19.19.41', 76518, id='elasped 21h'),
-        pytest.param('2020-01-01', '10.25.13', 53327386, id='elapsed 2y'),
-        pytest.param('2021-08-01', '12.00.00', 3386099, id='elapsed past'),
+        pytest.param('2021-09-08', '19.19.41', id='elapsed a'),
+        pytest.param('2020-01-01', '10.25.13', id='elapsed b'),
+        pytest.param('2021-08-01', '12.00.00', id='elapsed c'),
     ],
 )
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-def test_calculate_elapsed_time(datestamp, timestamp, expected):
+def test_calculate_elapsed_time(datestamp, timestamp):
+    import time
+    from datetime import datetime
+
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
-    current_time = float('1631219699.193989')
+    current_tz = time.tzname[time.daylight]
+    current_time_str = '2021-09-15 18:46:00' + ' ' + current_tz
+    current_timestamp = datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S %Z').timestamp()
 
-    assert expected == calculate_elapsed_time(datestamp, timestamp, current_time)
+    expected = current_timestamp - (
+        datetime.strptime((datestamp + ' ' + timestamp + ' ' + current_tz), '%Y-%m-%d %H.%M.%S %Z').timestamp()
+    )
+
+    assert expected == calculate_elapsed_time(datestamp, timestamp, current_timestamp)
