@@ -180,7 +180,7 @@ class ProcessCheck(AgentCheck):
                         # As the process list isn't necessarily scanned right after it's created
                         # (since we're using a shared cache), there can be cases where processes
                         # in the list are dead when an instance of the check tries to scan them.
-                        self.log.exception('Process disappeared while scanning')
+                        self.log.warning('Process disappeared while scanning')
                     except psutil.AccessDenied as e:
                         ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
                         ad_error_logger('Error: {}'.format(e))
@@ -203,7 +203,7 @@ class ProcessCheck(AgentCheck):
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
                 else:
-                    self.log.exception(
+                    self.log.debug(
                         "Unable to find process named %s among processes: %s", search_string, ', '.join(processes)
                     )
 
@@ -242,7 +242,7 @@ class ProcessCheck(AgentCheck):
                 process_ls = subprocess.check_output(ls_args)
                 result = len(process_ls.splitlines())
             except Exception as e:
-                self.log.exception("Trying to retrieve %s with sudo failed with error: %s", method, e)
+                self.log.debug("Trying to retrieve %s with sudo failed with error: %s", method, e)
 
         else:
             try:
@@ -256,9 +256,9 @@ class ProcessCheck(AgentCheck):
                         except AttributeError:
                             self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
             except (NotImplementedError, AttributeError):
-                self.log.exception("psutil method %s not implemented", method)
+                self.log.debug("psutil method %s not implemented", method)
             except psutil.AccessDenied:
-                self.log.exception("psutil was denied access for method %s", method)
+                self.log.debug("psutil was denied access for method %s", method)
             except psutil.NoSuchProcess:
                 self.warning("Process %s disappeared while scanning", process.pid)
 
@@ -285,7 +285,7 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('New process in cache: %s', pid)
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.log.exception('Process %s disappeared while scanning', pid)
+                    self.log.debug('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
                     self.process_list_cache.reset()
@@ -368,9 +368,7 @@ class ProcessCheck(AgentCheck):
         try:
             data = file_to_string('/{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
         except Exception:
-            self.log.exception(
-                'error getting proc stats: file_to_string failed for /%s/%s/stat', psutil.PROCFS_PATH, pid
-            )
+            self.log.debug('error getting proc stats: file_to_string failed for /%s/%s/stat', psutil.PROCFS_PATH, pid)
             return None
         return (int(i) for i in data.split()[9:13])
 
@@ -383,7 +381,7 @@ class ProcessCheck(AgentCheck):
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
-                self.log.exception("Unable to get children for process because process %s does not exist", pid)
+                self.log.debug("Unable to get children for process because process %s does not exist", pid)
 
         return children_pids
 
@@ -409,7 +407,7 @@ class ProcessCheck(AgentCheck):
         # FIXME 8.x remove me
         if self.search_string is not None:
             if "All" in self.search_string:
-                self.warning(
+                self.log.warning(
                     'Deprecated: Having "All" in your search_string will greatly reduce the '
                     'performance of the check and will be removed in a future version of the agent.'
                 )
@@ -430,7 +428,7 @@ class ProcessCheck(AgentCheck):
                     pids = self._get_pid_set(int(pid_line))
             except IOError as e:
                 # pid file doesn't exist, assuming the process is not running
-                self.log.exception('Unable to find pid file: %s', e)
+                self.log.debug('Unable to find pid file: %s', e)
                 pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
@@ -482,7 +480,7 @@ class ProcessCheck(AgentCheck):
         try:
             return {psutil.Process(pid).pid}
         except psutil.NoSuchProcess:
-            self.log.exception("Unable to get pid set, process %s does not exist", pid)
+            self.log.debug("Unable to get pid set, process %s does not exist", pid)
             return set()
 
     def _process_service_check(self, name, nb_procs, bounds, tags):
@@ -534,7 +532,7 @@ class ProcessCheck(AgentCheck):
                 else:
                     self.log.debug("Discarding pid %s not belonging to %s", pid, user)
             except psutil.NoSuchProcess:
-                self.log.exception("Unable to filter pids by username, process %s does not exist", pid)
+                self.log.debug("Unable to filter pids by username, process %s does not exist", pid)
                 pass
 
         return filtered_pids
