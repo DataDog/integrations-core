@@ -15,9 +15,34 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+##### Metric collection
 1. Edit the `singlestore.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your singlestore performance data. See the [sample singlestore.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+#### Metric collection
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `singlestore`                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}`       |
+
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -29,13 +54,18 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
+By default the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS` and `LEAVES` table.
+To collect additional system level metrics (cpu, disk, network io and memory), you can set the following field in the `singlestore.d/conf.yaml` file:
+
+```yaml
+    collect_system_metrics: true
+```
+
 ### Events
 
 The SingleStore integration does not include any events.
 
 ### Service Checks
-
-The SingleStore integration does not include any service checks.
 
 See [service_checks.json][7] for a list of service checks provided by this integration.
 
@@ -44,7 +74,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][8].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.singlestore.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/singlestore/datadog_checks/singlestore/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
