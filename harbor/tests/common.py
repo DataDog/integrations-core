@@ -97,7 +97,8 @@ REGISTRIES_FIXTURE = [
     }
 ]
 
-VOLUME_INFO_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
+VOLUME_INFO_PRE_2_2_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
+VOLUME_INFO_FIXTURE = {"storage": [{"total": 1e6, "free": 5e5}]}
 
 SYSTEM_INFO_FIXTURE = {"harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION'])}
 if HARBOR_VERSION >= VERSION_1_5:
