@@ -33,10 +33,10 @@ def calculate_elapsed_time(datestamp, timestamp, current_time=None):
 
     if datestamp and timestamp:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp) + ' ' + local_tz
-        timestamp_epoch = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timestamp()
+        timestamp_posix = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timestamp()
     else:
         return
 
-    elapsed = round_value(current_time - timestamp_epoch)
+    elapsed = round_value(current_time - timestamp_posix)
 
     return elapsed
