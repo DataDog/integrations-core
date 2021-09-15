@@ -155,6 +155,7 @@ class PostgreSql(AgentCheck):
 
     @property
     def resolved_hostname(self):
+        # type: () -> str
         if self._resolved_hostname is None:
             if self._config.dbm_enabled or self.disable_generic_tags:
                 self._resolved_hostname = resolve_db_host(self._config.host)
@@ -164,6 +165,7 @@ class PostgreSql(AgentCheck):
 
     @property
     def agent_hostname(self):
+        # type: () -> str
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
