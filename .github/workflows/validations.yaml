@@ -51,6 +51,10 @@ jobs:
       run: |
         ddev validate jmx-metrics
 
+    - name: Run legacy metadata validation
+      run: |
+        ddev validate metadata
+
     - name: Run legacy signature validation
       run: |
         ddev validate legacy-signature
