@@ -254,7 +254,7 @@ class ProcessCheck(AgentCheck):
                         try:
                             result[acc] = getattr(res, acc)
                         except AttributeError:
-                            self.log.exception("psutil.%s().%s attribute does not exist", method, acc)
+                            self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
             except (NotImplementedError, AttributeError):
                 self.log.debug("psutil method %s not implemented", method)
             except psutil.AccessDenied:
