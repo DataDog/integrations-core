@@ -2,7 +2,7 @@
 
 ## 1.10.0 / 2021-09-15
 
-* [Added] Support v2 system volumes api . See [#10133](https://github.com/DataDog/integrations-core/pull/10133).
+* [Added] Support v2 system volumes api. See [#10133](https://github.com/DataDog/integrations-core/pull/10133).
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 
 ## 1.9.1 / 2021-08-22 / Agent 7.31.0
