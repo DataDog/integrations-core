@@ -15,9 +15,6 @@
     "windows"
   ],
   "public_title": "Hudi",
-  "categories": [
-    "log collection"
-  ],
   "type": "check",
   "is_public": false,
   "integration_id": "hudi",
@@ -31,9 +28,6 @@
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "hudi"
-    },
     "metrics_metadata": "metadata.csv"
   }
 }
