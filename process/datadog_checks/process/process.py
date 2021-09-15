@@ -242,7 +242,7 @@ class ProcessCheck(AgentCheck):
                 process_ls = subprocess.check_output(ls_args)
                 result = len(process_ls.splitlines())
             except Exception as e:
-                self.log.debug("Trying to retrieve %s with sudo failed with error: %s", method, e)
+                self.log.exception("Trying to retrieve %s with sudo failed with error: %s", method, e)
 
         else:
             try:
@@ -285,7 +285,7 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('New process in cache: %s', pid)
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.log.warning('Process %s disappeared while scanning', pid)
+                    self.warning('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
                     self.process_list_cache.reset()
@@ -389,14 +389,14 @@ class ProcessCheck(AgentCheck):
         tags = list(self.tags)
 
         if self._conflicting_procfs:
-            self.log.warning(
+            self.warning(
                 'The `procfs_path` defined in `process.yaml is different from the one defined in '
                 '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
                 'value defined in `datadog.conf`: %s',
                 psutil.PROCFS_PATH,
             )
         elif self._deprecated_init_procfs:
-            self.log.warning(
+            self.warning(
                 'DEPRECATION NOTICE: Specifying `procfs_path` in process.yaml` is deprecated. '
                 'Please specify it in `datadog.conf` instead'
             )
@@ -407,7 +407,7 @@ class ProcessCheck(AgentCheck):
         # FIXME 8.x remove me
         if self.search_string is not None:
             if "All" in self.search_string:
-                self.log.warning(
+                self.warning(
                     'Deprecated: Having "All" in your search_string will greatly reduce the '
                     'performance of the check and will be removed in a future version of the agent.'
                 )
@@ -448,7 +448,7 @@ class ProcessCheck(AgentCheck):
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.log.warning("No matching process '%s' was found", self.name)
+            self.warning("No matching process '%s' was found", self.name)
             # reset the process caches now, something changed
             self.last_pid_cache_ts[self.name] = 0
             self.process_list_cache.reset()
