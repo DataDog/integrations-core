@@ -210,7 +210,7 @@ class QueueMetricCollector(object):
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                             else:
                                 msg = """
-                                    Unable to get {}, turn on queue level monitoring to access these metrics for {}. 
+                                    Unable to get {}, turn on queue level monitoring to access these metrics for {}.
                                     Check `DISPLAY QSTATUS({}) MONITOR`. Returned result: {}.
                                     """
                                 msg.format(metric_name, queue_name, queue_name, metric_value)

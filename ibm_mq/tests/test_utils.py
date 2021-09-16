@@ -34,6 +34,7 @@ def test_sanitize_strings(input_string, expected):
 def test_calculate_elapsed_time(datestamp, timestamp):
     import time
     from datetime import datetime
+
     from six import PY2
 
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
