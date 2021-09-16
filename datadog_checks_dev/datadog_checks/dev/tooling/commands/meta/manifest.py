@@ -52,7 +52,7 @@ V2_TO_V1_MAP = JSONDict(
         "/assets/integration/metrics": {},
         "/assets/integration/metrics/prefix": "/metric_prefix",
         "/assets/integration/metrics/check": "/metric_to_check",
-        "/assets/integration/metrics/metadata_path": "/metrics_metadata",
+        "/assets/integration/metrics/metadata_path": "/assets/metrics_metadata",
         "/assets/integration/service_checks": {},
         "/assets/integration/service_checks/metadata_path": "/assets/service_checks",
         "/assets/dashboards": "/assets/dashboards",
