@@ -209,8 +209,11 @@ class QueueMetricCollector(object):
                             if metric_value is not None:
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                             else:
-                                msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                                msg.format(metric_name, queue_name)
+                                msg = """
+                                    Unable to get {}, turn on queue level monitoring to access these metrics for {}. 
+                                    Check `DISPLAY QSTATUS({}) MONITOR`. Returned result: {}.
+                                    """
+                                msg.format(metric_name, queue_name, queue_name, metric_value)
                                 self.log.debug(msg)
                         else:
                             failure_value = values['failure']
