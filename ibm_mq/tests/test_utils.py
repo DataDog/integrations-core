@@ -31,7 +31,6 @@ def test_sanitize_strings(input_string, expected):
         pytest.param('2021-08-01', '12.00.00', id='elapsed c'),
     ],
 )
-# @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_calculate_elapsed_time(datestamp, timestamp):
     import time
     from datetime import datetime
