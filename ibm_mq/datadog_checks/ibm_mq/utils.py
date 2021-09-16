@@ -25,6 +25,9 @@ def sanitize_strings(s):
 def calculate_elapsed_time(datestamp, timestamp, current_time=None):
     """
     Calculate elapsed time in seconds from IBM MQ queue status date and timestamps
+    Assume queue manager uses local system timezone.
+    Expected Timestamp format: %H.%M.%S, e.g. 18:45:20
+    Expected Datestamp format: %Y-%m-%d, e.g. 2021-09-15
     """
     local_tz = time.tzname[time.daylight]
 
