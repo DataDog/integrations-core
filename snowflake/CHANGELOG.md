@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 3.1.0 / 2021-08-22
+## 3.1.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Pin snowflake-connector and requests. See [#9905](https://github.com/DataDog/integrations-core/pull/9905).
 * [Fixed] Revert request bump. See [#9912](https://github.com/DataDog/integrations-core/pull/9912).

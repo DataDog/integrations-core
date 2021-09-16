@@ -1,6 +1,6 @@
 # CHANGELOG - Avi Vantage
 
-## 1.0.1 / 2021-08-23
+## 1.0.1 / 2021-08-23 / Agent 7.31.0
 
 * [Fixed] Bump base package requirement. See [#9960](https://github.com/DataDog/integrations-core/pull/9960).
 

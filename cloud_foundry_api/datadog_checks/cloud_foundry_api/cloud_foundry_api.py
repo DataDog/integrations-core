@@ -111,7 +111,7 @@ class CloudFoundryApiCheck(AgentCheck):
         try:
             res = self.http.get(
                 join_url(self._uaa_url, "oauth/token"),
-                auth=(self._client_id, self._client_secret),
+                auth=(self._client_id, self._client_secret),  # SKIP_HTTP_VALIDATION`
                 params={"grant_type": "client_credentials"},
             )
         except RequestException:

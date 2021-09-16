@@ -311,8 +311,12 @@ def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
 
+def get_codeowners_file():
+    return os.path.join(get_root(), '.github', 'CODEOWNERS')
+
+
 def get_codeowners():
-    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    codeowners_file = get_codeowners_file()
     contents = read_file_lines(codeowners_file)
     return contents
 

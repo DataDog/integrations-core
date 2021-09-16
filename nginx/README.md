@@ -144,7 +144,7 @@ data:
 
 To configure this check for an Agent running on a host:
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
 ##### Metric collection
 
@@ -165,6 +165,10 @@ Follow the instructions below to configure this check for an Agent running on a 
 3. [Restart the Agent][7] to start sending NGINX metrics to Datadog.
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 
@@ -227,6 +231,10 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
 
@@ -276,6 +284,10 @@ spec:
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
 
@@ -320,6 +332,10 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].

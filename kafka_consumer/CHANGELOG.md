@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.10.0 / 2021-08-22
+## 2.10.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 * [Fixed] Correctly handle errors during initialization + code refactor. See [#9626](https://github.com/DataDog/integrations-core/pull/9626).

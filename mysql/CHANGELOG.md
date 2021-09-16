@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 6.0.0 / 2021-08-22
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add agent version to mysql database monitoring payloads. See [#9916](https://github.com/DataDog/integrations-core/pull/9916).
 * [Added] Add fetching of null row in events_statements_by_digest. See [#9892](https://github.com/DataDog/integrations-core/pull/9892).

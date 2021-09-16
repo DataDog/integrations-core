@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 4.4.0 / 2021-08-05
+## 4.4.0 / 2021-08-05 / Agent 7.31.0
 
 * [Added] Add option to use `lsblk` command for labeling. See [#9827](https://github.com/DataDog/integrations-core/pull/9827).
 

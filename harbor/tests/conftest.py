@@ -39,9 +39,12 @@ from .common import (
     REGISTRIES_PRE_1_8_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
+    USERS_URL,
     VERSION_1_6,
     VERSION_1_8,
+    VERSION_2_2,
     VOLUME_INFO_FIXTURE,
+    VOLUME_INFO_PRE_2_2_FIXTURE,
 )
 
 
@@ -61,7 +64,7 @@ def dd_environment(e2e_instance):
 class CreateSimpleUser(LazyFunction):
     def __call__(self, *args, **kwargs):
         requests.post(
-            URL + '/api/users',
+            URL + USERS_URL,
             auth=("admin", "Harbor12345"),
             json={
                 "username": "NotAnAdmin",
@@ -158,6 +161,8 @@ def mocked_requests(_, *args, **kwargs):
     elif match(args[0], REGISTRIES_PING_PRE_1_8_URL, REGISTRIES_PING_URL):
         return MockResponse(None, 200)
     elif match(args[0], VOLUME_INFO_URL):
+        if HARBOR_VERSION < VERSION_2_2:
+            return MockResponse(VOLUME_INFO_PRE_2_2_FIXTURE, 200)
         return MockResponse(VOLUME_INFO_FIXTURE, 200)
     elif match(args[0], SYSTEM_INFO_URL):
         return MockResponse(SYSTEM_INFO_FIXTURE, 200)
