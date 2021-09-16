@@ -190,8 +190,8 @@ def get_last_get_time(queue_info):
     if pymqi.CMQCFC.MQCACF_LAST_GET_DATE not in queue_info or pymqi.CMQCFC.MQCACF_LAST_GET_TIME not in queue_info:
         return None
 
-    last_get_datestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_GET_DATE]
-    last_get_timestamp = queue_info[pymqi.CMQCFC.MQCACF_LAST_GET_TIME]
+    last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE, None)
+    last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME, None)
 
     if last_get_datestamp is not None and last_get_timestamp is not None:
         return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp))
