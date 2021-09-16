@@ -40,7 +40,7 @@ def calculate_elapsed_time(datestamp, timestamp, current_time=None):
         else:
             timestamp_posix = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timestamp()
     else:
-        return
+        return None
 
     elapsed = round_value(current_time - timestamp_posix)
 
