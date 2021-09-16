@@ -203,25 +203,29 @@ class QueueMetricCollector(object):
             for queue_info in response:
                 for mname, values in iteritems(metrics.pcf_metrics()):
                     metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
-                    if callable(values):
-                        metric_value = values(queue_info)
-                        if metric_value is not None:
-                            self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                    try:
+                        if callable(values):
+                            metric_value = values(queue_info)
+                            if metric_value is not None:
+                                self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                            else:
+                                msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                                msg.format(metric_name, queue_name)
+                                self.log.debug(msg)
                         else:
-                            msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                            msg.format(metric_name, queue_name)
-                            self.log.debug(msg)
-                    else:
-                        failure_value = values['failure']
-                        pymqi_value = values['pymqi_value']
-                        metric_value = int(queue_info[pymqi_value])
+                            failure_value = values['failure']
+                            pymqi_value = values['pymqi_value']
+                            metric_value = int(queue_info[pymqi_value])
 
-                        if metric_value > failure_value:
-                            self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
-                        else:
-                            msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                            msg = msg.format(metric_name, queue_name)
-                            self.log.debug(msg)
+                            if metric_value > failure_value:
+                                self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
+                            else:
+                                msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                                msg = msg.format(metric_name, queue_name)
+                                self.log.debug(msg)
+                    except Exception as e:
+                        msg = "Unable to get metric {} from queue {}. Error is {}.".format(metric_name, queue_name, e)
+                        self.log.warning(msg)
         finally:
             if pcf is not None:
                 pcf.disconnect()
