@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.12.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8989](https://github.com/DataDog/integrations-core/pull/8989).

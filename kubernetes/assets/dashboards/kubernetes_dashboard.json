@@ -132,7 +132,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -199,7 +199,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -270,7 +270,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -739,7 +739,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -1172,7 +1172,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",

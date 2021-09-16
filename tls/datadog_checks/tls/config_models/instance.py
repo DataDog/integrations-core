@@ -20,6 +20,7 @@ class InstanceConfig(BaseModel):
     allowed_versions: Optional[Sequence[str]]
     days_critical: Optional[float]
     days_warning: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     fetch_intermediate_certs: Optional[bool]
     intermediate_cert_refresh_interval: Optional[float]

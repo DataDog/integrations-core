@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.12.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).

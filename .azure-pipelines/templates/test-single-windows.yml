@@ -6,7 +6,7 @@ parameters:
   test_e2e: true
   ddtrace_flag: ''
   benchmark: false
-  latest_metrics: false
+  latest: false
   validate: false
   validate_changed: ''
   validate_codeowners: false
@@ -71,7 +71,7 @@ jobs:
       test_e2e: ${{ parameters.test_e2e }}
       dd_flag: ${{ parameters.ddtrace_flag }}
       benchmark: ${{ parameters.benchmark }}
-      latest_metrics: ${{ parameters.latest_metrics }}
+      latest: ${{ parameters.latest }}
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}

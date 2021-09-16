@@ -19,26 +19,26 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
 
 1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
 
-   ```yaml
-   init_config:
+  ```yaml
+  init_config:
 
-   instances:
+  instances:
 
-    ## @param name - string - required
-    ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
-    #
-      - name: ssh
+  ## @param name - string - required
+  ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
+  #
+        - name: ssh
 
-    ## @param search_string - list of strings - optional
-    ## If one of the elements in the list matches, it returns the count of
-    ## all the processes that match the string exactly by default. Change this behavior with the
-    ## parameter `exact_match: false`.
-    ##
-    ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
-    #
-    search_string:
-      - ssh
-      - sshd
+  ## @param search_string - list of strings - optional
+  ## If one of the elements in the list matches, it returns the count of
+  ## all the processes that match the string exactly by default. Change this behavior with the
+  ## parameter `exact_match: false`.
+  ##
+  ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
+  #
+          search_string:
+            - ssh
+            - sshd
    ```
 
     Some process metrics require either running the Datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the Datadog collector as `root`, the `try_sudo` option lets the Process Check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work:

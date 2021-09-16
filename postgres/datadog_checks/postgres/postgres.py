@@ -423,11 +423,12 @@ class PostgreSql(AgentCheck):
                 db = self._new_connection(dbname)
                 db.set_session(autocommit=True)
                 self._db_pool[dbname] = db
+                if self._config.dbname == dbname:
+                    # reload settings for the main DB only once every time the connection is reestablished
+                    self._load_pg_settings(db)
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
-            if self._config.dbname == dbname:
-                self._load_pg_settings(db)
             return db
 
     def _close_db_pool(self):

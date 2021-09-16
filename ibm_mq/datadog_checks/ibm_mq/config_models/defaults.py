@@ -32,6 +32,10 @@ def instance_convert_endianness(field, value):
     return False
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 

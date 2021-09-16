@@ -1,5 +1,10 @@
 # CHANGELOG - IBM MQ
 
+## 3.14.1 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Do not store previously discovered queues. See [#9821](https://github.com/DataDog/integrations-core/pull/9821).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+
 ## 3.14.0 / 2021-08-13
 
 * [Added] Add `timeout` option. See [#9896](https://github.com/DataDog/integrations-core/pull/9896).

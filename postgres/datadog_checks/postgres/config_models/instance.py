@@ -68,6 +68,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]

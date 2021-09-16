@@ -1,5 +1,11 @@
 # CHANGELOG - mapr
 
+## 1.6.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Disable generic tags. See [#9791](https://github.com/DataDog/integrations-core/pull/9791).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Fixed] Bump base package requirement. See [#9838](https://github.com/DataDog/integrations-core/pull/9838).
+
 ## 1.5.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] More precise errors. See [#9453](https://github.com/DataDog/integrations-core/pull/9453).

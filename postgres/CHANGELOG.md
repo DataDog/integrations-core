@@ -1,5 +1,23 @@
 # CHANGELOG - postgres
 
+## 9.0.2 / 2021-08-27 / Agent 7.31.0
+
+* [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).
+
+## 9.0.1 / 2021-08-25
+
+* [Fixed] Fix postgres collection_errors error reference. See [#9982](https://github.com/DataDog/integrations-core/pull/9982).
+
+## 9.0.0 / 2021-08-22
+
+* [Added] Collect settings from pg_settings and submit pg_stat_statements metrics. See [#9928](https://github.com/DataDog/integrations-core/pull/9928).
+* [Added] Add agent version to postgres database monitoring payloads. See [#9917](https://github.com/DataDog/integrations-core/pull/9917).
+* [Fixed] Send the correct hostname with metrics when DBM is enabled. See [#9865](https://github.com/DataDog/integrations-core/pull/9865).
+* [Fixed] Revert "Upgrade `psycopg2` on Python 3". See [#9835](https://github.com/DataDog/integrations-core/pull/9835).
+* [Changed] Update postgres obfuscator options config. See [#9884](https://github.com/DataDog/integrations-core/pull/9884).
+* [Changed] Set a default statement timeout for postgres to 5s. See [#9847](https://github.com/DataDog/integrations-core/pull/9847).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 8.2.0 / 2021-08-03
 
 * [Added] Add metric for estimated table bloat percentage. See [#9786](https://github.com/DataDog/integrations-core/pull/9786).

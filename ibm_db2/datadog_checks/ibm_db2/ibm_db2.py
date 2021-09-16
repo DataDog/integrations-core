@@ -52,6 +52,14 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
+        self._query_methods = (
+            self.query_instance,
+            self.query_database,
+            self.query_buffer_pool,
+            self.query_table_space,
+            self.query_transaction_log,
+            self.query_custom,
+        )
 
     def check(self, instance):
         if self._conn is None:
@@ -63,14 +71,7 @@ class IbmDb2Check(AgentCheck):
 
         self.collect_metadata()
 
-        for query_method in (
-            self.query_instance,
-            self.query_database,
-            self.query_buffer_pool,
-            self.query_table_space,
-            self.query_transaction_log,
-            self.query_custom,
-        ):
+        for query_method in self._query_methods:
             try:
                 query_method()
             except ConnectionError:

@@ -44,6 +44,7 @@ class InstanceConfig(BaseModel):
     client_token_path: Optional[str]
     connect_timeout: Optional[float]
     detect_leader: Optional[bool]
+    disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]

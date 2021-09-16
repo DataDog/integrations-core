@@ -31,14 +31,64 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
+    - name: Run agent requirements validation
+      run: |
+        ddev validate agent-reqs
+
     - name: Run configuration validation
       run: |
         ddev validate config
+
+    - name: Run dashboard validation
+      run: |
+        ddev validate dashboards
 
     - name: Run HTTP wrapper validation
       run: |
         ddev validate http
 
+    - name: Run JMX metrics validation
+      run: |
+        ddev validate jmx-metrics
+
+    - name: Run legacy metadata validation
+      run: |
+        ddev validate metadata
+
     - name: Run legacy signature validation
       run: |
         ddev validate legacy-signature
+
+    - name: Run licenses validation
+      run: |
+        ddev validate licenses
+        
+    - name: Run readmes validation
+      run: |
+        ddev validate readmes
+
+    - name: Run recommended monitors validation
+      run: |
+        ddev validate recommended-monitors
+
+    - name: Run package validation
+      run: |
+        ddev validate package
+
+    - name: Run saved views validation
+      run: |
+        ddev validate saved-views
+
+    - name: Run service checks validation
+      run: |
+        ddev validate service-checks
+
+    - name: Comment PR on failure
+      if: failure()
+      uses: actions/github-script@0.3.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+          github.issues.createComment({ issue_number, owner, repo, body: "The `validations` job has failed; please review the `Files changed` tab for possible suggestions to resolve." });
+

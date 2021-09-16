@@ -31,9 +31,21 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
+@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
 def changelog(
-    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization
+    ctx,
+    check,
+    version,
+    old_version,
+    initial,
+    quiet,
+    dry_run,
+    output_file,
+    tag_prefix,
+    no_semver,
+    organization,
+    exclude_branch,
 ):
     """Perform the operations needed to update the changelog.
 
@@ -62,7 +74,7 @@ def changelog(
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, None if initial else target_tag)
+    diff_lines = get_commits_since(check, None if initial else target_tag, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)

@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add agent version to mysql database monitoring payloads. See [#9916](https://github.com/DataDog/integrations-core/pull/9916).
+* [Added] Add fetching of null row in events_statements_by_digest. See [#9892](https://github.com/DataDog/integrations-core/pull/9892).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Update mysql obfuscator options config. See [#9885](https://github.com/DataDog/integrations-core/pull/9885).
+* [Changed] Send the correct hostname with metrics when DBM is enabled. See [#9878](https://github.com/DataDog/integrations-core/pull/9878).
+
 ## 5.0.4 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).

@@ -1,6 +1,10 @@
 # CHANGELOG - oracle
 
-## 3.3.4 / 2021-08-04
+## 3.4.0 / 2021-09-02
+
+* [Added] Add new service check `oracle.can_query`. See [#10004](https://github.com/DataDog/integrations-core/pull/10004).
+
+## 3.3.4 / 2021-08-04 / Agent 7.31.0
 
 * [Fixed] Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
 

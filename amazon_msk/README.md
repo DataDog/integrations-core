@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
 
-    **Note**: If you reuse the sample file, change the file name from `conf.yaml.example` to `conf.yaml`.
+   **Note**: This is the default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][15].
 
 2. [Restart the Agent][9].
 
@@ -60,3 +60,4 @@ Need help? Contact [Datadog support][12].
 [12]: https://docs.datadoghq.com/help/
 [13]: https://docs.aws.amazon.com/msk/latest/developerguide/open-monitoring.html
 [14]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/assets/service_checks.json
+[15]: https://github.com/DataDog/integrations-core/blob/7.31.x/amazon_msk/datadog_checks/amazon_msk/data/conf.yaml.example

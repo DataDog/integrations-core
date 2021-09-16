@@ -31,6 +31,7 @@ class InstanceConfig(BaseModel):
     connection_load_balance: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     db: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     metric_groups: Optional[Sequence[str]]
     min_collection_interval: Optional[float]

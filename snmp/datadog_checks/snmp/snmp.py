@@ -391,7 +391,7 @@ class SnmpCheck(AgentCheck):
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
-            tags = ['network:{}'.format(config.ip_network)]
+            tags = ['network:{}'.format(config.ip_network), 'autodiscovery_subnet:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:

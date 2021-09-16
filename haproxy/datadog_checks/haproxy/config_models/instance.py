@@ -71,6 +71,7 @@ class InstanceConfig(BaseModel):
     collect_status_metrics_by_host: Optional[bool]
     connect_timeout: Optional[float]
     count_status_by_service: Optional[bool]
+    disable_generic_tags: Optional[bool]
     disable_legacy_service_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_service_check: Optional[bool]

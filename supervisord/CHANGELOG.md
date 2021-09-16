@@ -1,5 +1,9 @@
 # CHANGELOG - supervisord
 
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.9.1 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).

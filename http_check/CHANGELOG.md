@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 5.3.2 / 2021-06-07 / Agent 7.29.0
 
 * [Fixed] Fix data configuration type. See [#9482](https://github.com/DataDog/integrations-core/pull/9482).

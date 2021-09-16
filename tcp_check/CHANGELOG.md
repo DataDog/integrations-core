@@ -1,5 +1,14 @@
 # CHANGELOG - tcp_check
 
+## 4.0.1 / 2021-08-24 / Agent 7.31.0
+
+* [Fixed] Elevate log level for failed connections. See [#9965](https://github.com/DataDog/integrations-core/pull/9965).
+
+## 4.0.0 / 2021-08-22
+
+* [Added] Re-resolve IP after a set duration. See [#9699](https://github.com/DataDog/integrations-core/pull/9699).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 3.1.1 / 2021-07-07 / Agent 7.30.0
 
 * [Fixed] Do not resolve IP on __init__. See [#9644](https://github.com/DataDog/integrations-core/pull/9644).

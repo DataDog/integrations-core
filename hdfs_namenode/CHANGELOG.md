@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.15.1 / 2021-02-09 / Agent 7.27.0
 
 * [Fixed] Avoid ZeroDivisionError for hdfs.namenode.capacity_in_use . See [#8567](https://github.com/DataDog/integrations-core/pull/8567).

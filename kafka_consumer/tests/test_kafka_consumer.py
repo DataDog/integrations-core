@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import os
 
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
+from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
 from .common import KAFKA_CONNECT_STR, is_legacy_check, is_supported
 
@@ -17,6 +20,26 @@ pytestmark = pytest.mark.skipif(
 BROKER_METRICS = ['kafka.broker_offset']
 
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+
+
+@pytest.mark.unit
+def test_uses_legacy_implementation_when_legacy_version_specified(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.1'
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    kafka_consumer_check._init_check_based_on_kafka_version()
+
+    assert isinstance(kafka_consumer_check.sub_check, LegacyKafkaCheck_0_10_2)
+
+
+@pytest.mark.unit
+def test_uses_new_implementation_when_new_version_specified(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = '0.10.2'
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    kafka_consumer_check._init_check_based_on_kafka_version()
+
+    assert isinstance(kafka_consumer_check.sub_check, NewKafkaConsumerCheck)
 
 
 @pytest.mark.integration

@@ -9,7 +9,8 @@ def initialize_instance(values, **kwargs):
         values['collect_events'] = True
     elif collection_type == 'historical':
         values['collect_events'] = False
-    elif values.get('collect_events_only', False):
+
+    if values.get('collect_events_only', False):
         values['collect_events'] = True
 
     return values

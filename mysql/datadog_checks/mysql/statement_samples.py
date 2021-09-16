@@ -1,5 +1,6 @@
 import re
 import time
+from collections import namedtuple
 from contextlib import closing
 from enum import Enum
 
@@ -204,7 +205,7 @@ class StatementTruncationState(Enum):
     not_truncated = 'not_truncated'
 
 
-class DBExplainError(Enum):
+class DBExplainErrorCode(Enum):
     """
     Denotes the various reasons a query may not have an explain statement.
     """
@@ -218,14 +219,18 @@ class DBExplainError(Enum):
     # some statements cannot be explained i.e AUTOVACUUM
     no_plans_possible = 'no_plans_possible'
 
-    # unable to collect an exec plan with the strategy 'PROCEDURE' without a default schema
-    procedure_strategy_requires_default_schema = 'procedure_strategy_requires_default_schema'
-
     # agent may not have access to the default schema
     use_schema_error = 'use_schema_error'
 
     # a truncated query can't be explained
     query_truncated = 'query_truncated'
+
+
+# ExplainState describes the current state of an explain strategy
+# If there is no error then the strategy is valid
+ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_message'])
+
+EMPTY_EXPLAIN_STATE = ExplainState(strategy=None, error_code=None, error_message=None)
 
 
 class MySQLStatementSamples(DBMAsyncJob):
@@ -304,6 +309,14 @@ class MySQLStatementSamples(DBMAsyncJob):
             ttl=60 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
+        # explain_error_states_cache. cache {(schema, query_signature) -> [explain_error_state])
+        self._explain_error_states_cache = TTLCache(
+            maxsize=self._config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
+            # only try to re-explain failed statements once every two hours, so in the worst case the maximum
+            # re-explain rate of failed queries is ~ 5000/(2*60*60) = 1/second
+            ttl=self._config.statement_samples_config.get('explain_errors_cache_ttl', 2 * 60 * 60),
+        )
+
         # seen_samples_cache: limit the ingestion rate per (query_signature, plan_signature)
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
@@ -340,12 +353,48 @@ class MySQLStatementSamples(DBMAsyncJob):
             finally:
                 self._db = None
 
-    def _cursor_run(self, cursor, query, params=None, obfuscated_params=None):
+    def _use_schema(self, cursor, schema, explain_state_cache_key):
+        """
+        Try to use the schema (if provided), caching errors to avoid excessive futile re-attempts
+        """
+        cached_state = self._collection_strategy_cache.get(explain_state_cache_key, EMPTY_EXPLAIN_STATE)
+        if cached_state.error_code:
+            return cached_state
+        try:
+            # If there was a default schema when this query was run, then switch to it before trying to collect
+            # the execution plan. This is necessary when the statement uses non-fully qualified tables
+            # e.g. `select * from mytable` instead of `select * from myschema.mytable`
+            if schema:
+                self._cursor_run(cursor, 'USE `{}`'.format(schema))
+                return None
+        except pymysql.err.DatabaseError as e:
+            if len(e.args) != 2:
+                raise
+            error_state = ExplainState(
+                strategy=None,
+                error_code=DBExplainErrorCode.use_schema_error,
+                error_message=str(type(e)),
+            )
+            if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
+                self._collection_strategy_cache[explain_state_cache_key] = error_state
+            return error_state
+
+    def _cursor_run(self, cursor, query, params=None, obfuscated_params=None, obfuscated_query=None):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
-        self._log.debug("Running query [%s] %s", query, obfuscated_params if obfuscated_params else params)
-        cursor.execute(query, params)
+        try:
+            logged_query = obfuscated_query if obfuscated_query else query
+            self._log.debug("Running query [%s] %s", logged_query, obfuscated_params if obfuscated_params else params)
+            cursor.execute(query, params)
+        except pymysql.DatabaseError as e:
+            self._check.count(
+                "dd.mysql.db.error",
+                1,
+                tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            raise
 
     def _get_new_events_statements(self, events_statements_table, row_limit):
         # Select the most recent events with a bias towards events which have higher wait times
@@ -456,47 +505,26 @@ class MySQLStatementSamples(DBMAsyncJob):
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
-        plan, explain_errors = None, None
-        truncated = self._get_truncation_state(row['sql_text'])
-        if truncated == StatementTruncationState.truncated:
-            self._check.count(
-                "dd.mysql.query_samples.error",
-                1,
-                tags=self._tags
-                + ["error:explain-{}".format(DBExplainError.query_truncated)]
-                + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
+        with closing(self._get_db_connection().cursor()) as cursor:
+            plan, error_states = self._explain_statement(
+                cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
             )
-            explain_errors = [
-                (
-                    None,
-                    DBExplainError.query_truncated,
-                    'truncated length: {}'.format(len(row['sql_text'])),
-                )
-            ]
-        else:
-            with closing(self._get_db_connection().cursor()) as cursor:
-                try:
-                    plan, explain_errors = self._explain_statement(
-                        cursor, row['sql_text'], row['current_schema'], obfuscated_statement
-                    )
-                except Exception as e:
-                    self._check.count(
-                        "dd.mysql.query_samples.error",
-                        1,
-                        tags=self._tags + ["error:explain-{}".format(type(e))] + self._check._get_debug_tags(),
-                        hostname=self._check.resolved_hostname,
-                    )
-                    self._log.exception("Failed to explain statement: %s", obfuscated_statement)
 
         collection_errors = []
-        if explain_errors:
-            for strategy, explain_err_code, explain_err in explain_errors:
+        if error_states:
+            for state in error_states:
+                error_tag = "error:explain-{}-{}".format(state.error_code, state.error_message)
+                self._check.count(
+                    "dd.mysql.query_samples.error",
+                    1,
+                    tags=self._tags + [error_tag] + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
                 collection_errors.append(
                     {
-                        'strategy': strategy if strategy else None,
-                        'code': explain_err_code.value if explain_err_code else None,
-                        'message': explain_err if explain_err else None,
+                        'strategy': state.strategy,
+                        'code': state.error_code.value if state.error_code else None,
+                        'message': state.error_message,
                     }
                 )
 
@@ -530,7 +558,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     "query_signature": query_signature,
                     "resource_hash": apm_resource_hash,
                     "statement": obfuscated_statement,
-                    "query_truncated": truncated.value,
+                    "query_truncated": self._get_truncation_state(row['sql_text']).value,
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
@@ -576,9 +604,9 @@ class MySQLStatementSamples(DBMAsyncJob):
         - how long should the rate and time limits be
         :return: (table, rate_limit)
         """
-        cached_strategy = self._collection_strategy_cache.get("plan_collection_strategy")
+        cached_strategy = self._collection_strategy_cache.get("events_statements_strategy")
         if cached_strategy:
-            self._log.debug("Using cached plan_collection_strategy: %s", cached_strategy)
+            self._log.debug("Using cached events_statements_strategy: %s", cached_strategy)
             return cached_strategy
 
         enabled_consumers = self._get_enabled_performance_schema_consumers()
@@ -631,7 +659,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             events_statements_table,
             collection_interval,
         )
-        self._collection_strategy_cache["plan_collection_strategy"] = strategy
+        self._collection_strategy_cache["events_statements_strategy"] = strategy
         return strategy
 
     def run_job(self):
@@ -688,79 +716,90 @@ class MySQLStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
         )
 
-    def _explain_statement(self, cursor, statement, schema, obfuscated_statement):
+    def _explain_statement(self, cursor, statement, schema, obfuscated_statement, query_signature):
         """
         Tries the available methods used to explain a statement for the given schema. If a non-retryable
         error occurs (such as a permissions error), then statements executed under the schema will be
         disallowed in future attempts.
-        returns: An execution plan, otherwise it returns a list of tuples containing: (strategy, error code, error)
-        rtype: Optional[Dict], List[Tuple[Optional[str], Optional[DBExplainError], Optional[Exception]]]
+        returns: An execution plan, otherwise it returns a list of error ExplainStates
+        rtype: Optional[Dict], List[ExplainState]
         """
-        start_time = time.time()
-        strategy_cache_key = 'explain_strategy:%s' % schema
-        tags = self._tags + ["schema:{}".format(schema)] + self._check._get_debug_tags()
-
-        self._log.debug('explaining statement. schema=%s, statement="%s"', schema, statement)
+        if self._get_truncation_state(statement) == StatementTruncationState.truncated:
+            error_state = ExplainState(
+                strategy=None,
+                error_code=DBExplainErrorCode.query_truncated,
+                error_message='truncated length: {}'.format(len(statement)),
+            )
+            return None, [error_state]
 
         if not self._can_explain(obfuscated_statement):
             self._log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
-            return None, [(None, DBExplainError.no_plans_possible, None)]
-
-        cached_strategy = self._collection_strategy_cache.get(strategy_cache_key)
-        if cached_strategy:
-            _, explain_err_code, _ = cached_strategy[0]  # (strategy, explain_err_code, explain_err)
-            if explain_err_code:
-                self._log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
-                return None, None
-
-        try:
-            # If there was a default schema when this query was run, then switch to it before trying to collect
-            # the execution plan. This is necessary when the statement uses non-fully qualified tables
-            # e.g. `select * from mytable` instead of `select * from myschema.mytable`
-            if schema:
-                self._cursor_run(cursor, 'USE `{}`'.format(schema))
-        except pymysql.err.DatabaseError as e:
-            if len(e.args) != 2:
-                raise
-            explain_errors = [(None, DBExplainError.use_schema_error, '{}'.format(type(e)))]
-            if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
-                self._collection_strategy_cache[strategy_cache_key] = explain_errors
-            self._check.count(
-                "dd.mysql.query_samples.error",
-                1,
-                tags=tags + ["error:explain-use-schema-{}".format(type(e))],
-                hostname=self._check.resolved_hostname,
+            error_state = ExplainState(
+                strategy=None, error_code=DBExplainErrorCode.no_plans_possible, error_message=None
             )
+            return None, [error_state]
+
+        # for caching an ExplainState (whether error or OK) per schema
+        explain_state_cache_key = 'explain_state:%s' % schema
+
+        # for caching a list of *error* ExplainStates per query
+        query_cache_key = (schema, query_signature)
+
+        start_time = time.time()
+        self._log.debug('explaining statement. schema=%s, statement="%s"', schema, obfuscated_statement)
+        error_state = self._use_schema(cursor, schema, explain_state_cache_key)
+        if error_state:
             self._log.debug(
-                'Failed to collect execution plan because schema could not be accessed. error=%s, schema=%s, '
-                'statement="%s"',
-                e.args,
+                'Failed to collect execution plan because schema could not be accessed. schema=%s error=%s: %s',
                 schema,
+                error_state,
                 obfuscated_statement,
             )
-            return None, explain_errors
+            return None, [error_state]
 
-        # Use a cached strategy for the schema, if any, or try each strategy to collect plans
-        strategies = list(self._preferred_explain_strategies)
-        cached_strategy = self._collection_strategy_cache.get(strategy_cache_key)
-        if cached_strategy:
-            strategy, _, _ = cached_strategy[0]  # (strategy, explain_err_code, explain_err)
-            strategies.remove(strategy)
-            strategies.insert(0, strategy)
+        preferred_strategies = list(self._preferred_explain_strategies)
+        explain_state = self._collection_strategy_cache.get(explain_state_cache_key, EMPTY_EXPLAIN_STATE)
 
-        explain_errors = []
-        for strategy in strategies:
+        # if we've cached a successful non-error strategy, put it at the front of the list
+        if explain_state.strategy and not explain_state.error_code:
+            preferred_strategies.remove(explain_state.strategy)
+            preferred_strategies.insert(0, explain_state.strategy)
+
+        # if there is a default schema on the connection then the only way we can guarantee collection of plans is
+        # by having that same default schema set when invoking the EXPLAIN, which is what we do with the "PROCEDURE"
+        # strategy. If there is no default schema then we can collect it from anywhere, typically FQ_PROCEDURE, which
+        # is expected to be in the dedicated datadog schema.
+        optimal_strategy = "PROCEDURE" if schema else "FQ_PROCEDURE"
+        is_optimal_strategy_cached = explain_state.strategy == optimal_strategy and not explain_state.error_code
+        if is_optimal_strategy_cached:
+            # if the optimal strategy was cached then that means at least one recent query must have been successfully
+            # collected from this schema and therefore the schema is probably setup OK.
+            # knowing that the schema is setup OK, if we fail to collect an execution plan for a given query then
+            # it's likely a problem with that specific query and it's not worth trying it again so we cache those
+            # errors for a longer time to avoid excessive futile explain attempts.
+            cached_error_states = self._explain_error_states_cache.get(query_cache_key, None)
+            if cached_error_states:
+                self._log.debug(
+                    'Skipping execution plan collection for query due to cached failures %s: %s',
+                    cached_error_states,
+                    obfuscated_statement,
+                )
+                return None, cached_error_states
+
+        error_states = []
+        for strategy in preferred_strategies:
+            if not schema and strategy == "PROCEDURE":
+                self._log.debug(
+                    'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
+                    obfuscated_statement,
+                )
+                continue
             try:
-                if not schema and strategy == "PROCEDURE":
-                    explain_errors.append((strategy, DBExplainError.procedure_strategy_requires_default_schema, None))
-                    self._log.debug(
-                        'skipping PROCEDURE strategy as there is no default schema for this statement="%s"',
-                        obfuscated_statement,
-                    )
-                    continue
                 plan = self._explain_strategies[strategy](cursor, statement, obfuscated_statement)
                 if plan:
-                    self._collection_strategy_cache[strategy_cache_key] = [(strategy, None, None)]
+                    self._collection_strategy_cache[explain_state_cache_key] = ExplainState(
+                        strategy=strategy, error_code=None, error_message=None
+                    )
                     self._log.debug(
                         'Successfully collected execution plan. strategy=%s, schema=%s, statement="%s"',
                         strategy,
@@ -777,16 +816,10 @@ class MySQLStatementSamples(DBMAsyncJob):
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
-                # we don't cache failed plan collection failures for specific queries because some queries in a schema
-                # can fail while others succeed. The failed collection will be cached for the specific query
-                # so we won't try to explain it again for the cache duration there.
-                explain_errors.append((strategy, DBExplainError.database_error, '{}'.format(type(e))))
-                self._check.count(
-                    "dd.mysql.query_samples.error",
-                    1,
-                    tags=tags + ["error:explain-attempt-{}-{}".format(strategy, type(e))],
-                    hostname=self._check.resolved_hostname,
+                error_state = ExplainState(
+                    strategy=strategy, error_code=DBExplainErrorCode.database_error, error_message=str(type(e))
                 )
+                error_states.append(error_state)
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',
                     e.args,
@@ -795,14 +828,27 @@ class MySQLStatementSamples(DBMAsyncJob):
                     obfuscated_statement,
                 )
                 continue
-        return None, explain_errors
+
+        if is_optimal_strategy_cached and error_states:
+            self._log.debug(
+                'Caching execution plan failure for query to skip future explains %s: %s',
+                error_states,
+                obfuscated_statement,
+            )
+            self._explain_error_states_cache[query_cache_key] = error_states
+
+        return None, error_states
 
     def _run_explain(self, cursor, statement, obfuscated_statement):
         """
         Run the explain using the EXPLAIN statement
         """
-        self._log.debug("running query [EXPLAIN FORMAT=json %s]", obfuscated_statement)
-        cursor.execute('EXPLAIN FORMAT=json {}'.format(statement))
+        self._cursor_run(
+            cursor,
+            'EXPLAIN FORMAT=json {}'.format(statement),
+            obfuscated_query='EXPLAIN FORMAT=json %s',
+            obfuscated_params=obfuscated_statement,
+        )
         return cursor.fetchone()[0]
 
     def _run_explain_procedure(self, cursor, statement, obfuscated_statement):

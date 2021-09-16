@@ -429,6 +429,8 @@ def test_router(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     interfaces = [
         ('eth0', 'kept'),
         ('eth1', 'their forward oxen'),

@@ -1,5 +1,34 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 13.0.1 / 2021-08-27
+
+* [Fixed] Pin regex. See [#10005](https://github.com/DataDog/integrations-core/pull/10005).
+
+## 13.0.0 / 2021-08-22
+
+* [Added] Add support for specifying a config path to `kind_run` utility. See [#9930](https://github.com/DataDog/integrations-core/pull/9930).
+* [Added] Ignore `cluster-agent` trello cards. See [#9933](https://github.com/DataDog/integrations-core/pull/9933).
+* [Added] Add typos validation. See [#9902](https://github.com/DataDog/integrations-core/pull/9902).
+* [Added] Add annotations to legacy agent signature. See [#9873](https://github.com/DataDog/integrations-core/pull/9873).
+* [Added] Add annotations to http validation. See [#9870](https://github.com/DataDog/integrations-core/pull/9870).
+* [Added] Add commands to automatically update and sync dependencies. See [#9811](https://github.com/DataDog/integrations-core/pull/9811).
+* [Added] Add manifest validator for `supported_os` field. See [#9871](https://github.com/DataDog/integrations-core/pull/9871).
+* [Added] Add annotation utils and config spec annotation. See [#9868](https://github.com/DataDog/integrations-core/pull/9868).
+* [Added] [NDM] Validate SysObjectID Consistency. See [#9806](https://github.com/DataDog/integrations-core/pull/9806).
+* [Added] Add option to generate profile using custom MIB source. See [#9761](https://github.com/DataDog/integrations-core/pull/9761).
+* [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
+* [Added] Allow extra 3rd party licenses . See [#9796](https://github.com/DataDog/integrations-core/pull/9796).
+* [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Fixed] Update `metrics` option in legacy OpenMetrics example config. See [#9891](https://github.com/DataDog/integrations-core/pull/9891).
+* [Fixed] Update GitHub `agent-network` team name. See [#9678](https://github.com/DataDog/integrations-core/pull/9678).
+* [Fixed] Better 'Invalid url' error message in dash export. See [#9837](https://github.com/DataDog/integrations-core/pull/9837).
+* [Fixed] Wait for E2E Agent to be started when running Python 2. See [#9828](https://github.com/DataDog/integrations-core/pull/9828).
+* [Fixed] Re-attempt to pull docker images. See [#9823](https://github.com/DataDog/integrations-core/pull/9823).
+* [Fixed] Validate all integrations for base and dev updates. See [#9787](https://github.com/DataDog/integrations-core/pull/9787).
+* [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
+
 ## 12.4.1 / 2021-07-20
 
 * [Fixed] Support empty config options for job or codecov. See [#9736](https://github.com/DataDog/integrations-core/pull/9736).

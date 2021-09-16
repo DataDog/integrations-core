@@ -1,5 +1,34 @@
 # CHANGELOG - datadog_checks_base
 
+## 21.2.0 / 2021-09-10
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 21.1.0 / 2021-09-07
+
+* [Added] Add dependency `foundationdb` version `6.3.18`. See [#10050](https://github.com/DataDog/integrations-core/pull/10050).
+* [Fixed] Bump snowflake and requests for Py3. See [#10060](https://github.com/DataDog/integrations-core/pull/10060).
+* [Fixed] Allow non-default yaml loader and dumper. See [#10032](https://github.com/DataDog/integrations-core/pull/10032).
+* [Fixed] Set disable_unsafe_yaml default value. See [#10026](https://github.com/DataDog/integrations-core/pull/10026).
+
+## 21.0.1 / 2021-08-23 / Agent 7.31.0
+
+* [Fixed] Revert "Raise exception during tests for OK service checks sent with messages". See [#9936](https://github.com/DataDog/integrations-core/pull/9936).
+
+## 21.0.0 / 2021-08-22
+
+* [Added] Raise exception during tests for OK service checks sent with messages. See [#9898](https://github.com/DataDog/integrations-core/pull/9898).
+* [Added] Add `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).
+* [Added] Bump openstacksdk and add missing metrics. See [#9861](https://github.com/DataDog/integrations-core/pull/9861).
+* [Added] Extend `QueryManager` query type. See [#9874](https://github.com/DataDog/integrations-core/pull/9874).
+* [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
+* [Added] Disable generic tags. See [#9791](https://github.com/DataDog/integrations-core/pull/9791).
+* [Fixed] Revert requests bump back to 2.22.0. See [#9912](https://github.com/DataDog/integrations-core/pull/9912).
+* [Fixed] Send the correct hostname with metrics when DBM is enabled. See [#9865](https://github.com/DataDog/integrations-core/pull/9865).
+* [Fixed] Fix database checks' failure caused by a hostname that is too long. See [#9778](https://github.com/DataDog/integrations-core/pull/9778). Thanks [ichizero](https://github.com/ichizero).
+* [Fixed] Check monotonic type when asserting histograms. See [#9825](https://github.com/DataDog/integrations-core/pull/9825).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 20.2.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Upgrade downloader after ceremony. See [#9556](https://github.com/DataDog/integrations-core/pull/9556).

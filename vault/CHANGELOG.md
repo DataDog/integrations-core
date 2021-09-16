@@ -1,5 +1,14 @@
 # CHANGELOG - Vault
 
+## 2.16.0 / 2021-09-09
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Update vault metrics. See [#9953](https://github.com/DataDog/integrations-core/pull/9953).
+
+## 2.15.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
 ## 2.14.0 / 2021-07-20
 
 * [Added] Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).

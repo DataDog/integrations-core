@@ -112,6 +112,10 @@ class Connection(object):
 
         return db_exists, context
 
+    def check_database_conns(self, db_name):
+        self.open_db_connections(None, db_name=db_name, is_default=False)
+        self.close_db_connections(None, db_name)
+
     @contextmanager
     def open_managed_default_database(self):
         with self._open_managed_db_connections(None, db_name=self.DEFAULT_DATABASE):
@@ -128,14 +132,13 @@ class Connection(object):
         yield
         self.close_db_connections(db_key, db_name)
 
-    def open_db_connections(self, db_key, db_name=None):
+    def open_db_connections(self, db_key, db_name=None, is_default=True):
         """
         We open the db connections explicitly, so we can ensure they are open
         before we use them, and are closable, once we are finished. Open db
         connections keep locks on the db, presenting issues such as the SQL
         Server Agent being unable to stop.
         """
-
         conn_key = self._conn_key(db_key, db_name)
 
         _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
@@ -154,7 +157,7 @@ class Connection(object):
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 rawconn = pyodbc.connect(cs, timeout=self.timeout)
 
-            self.service_check_handler(AgentCheck.OK, host, database)
+            self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
 
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
@@ -168,13 +171,16 @@ class Connection(object):
                 self._conns[conn_key] = rawconn
         except Exception as e:
             cx = "{} - {}".format(host, database)
-            message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
 
+            if is_default:
+                message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
+            else:
+                message = "Unable to connect to Database: {} for instance {}: {}".format(database, host, repr(e))
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)
 
-            self.service_check_handler(AgentCheck.CRITICAL, host, database, message)
+            self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
 
             raise_from(SQLConnectionError(message), None)
 

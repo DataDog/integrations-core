@@ -71,6 +71,7 @@ class InstanceConfig(BaseModel):
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
     entities: Optional[Sequence[Literal['controller', 'pool', 'serviceengine', 'virtualservice']]]

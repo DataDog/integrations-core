@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cluster_name: Optional[str]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]

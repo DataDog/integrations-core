@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.11.2 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Set timeout for socket connection. See [#9722](https://github.com/DataDog/integrations-core/pull/9722).
+
 ## 1.11.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

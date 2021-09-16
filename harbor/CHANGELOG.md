@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.9.1 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+
 ## 1.9.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8925](https://github.com/DataDog/integrations-core/pull/8925).

@@ -223,6 +223,63 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    # verify that the old status check returns OK
+    aggregator.assert_service_check(
+        'sqlserver.can_connect', tags=['db:master', 'optional:tag1', 'host:localhost,1433'], status=SQLServer.OK
+    )
+
+    # verify all databses in autodiscovery have a service check
+    for database in instance_autodiscovery['autodiscovery_include']:
+        aggregator.assert_service_check(
+            'sqlserver.database.can_connect',
+            tags=['db:{}'.format(database), 'optional:tag1', 'host:localhost,1433'],
+            status=SQLServer.OK,
+        )
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master']
+    instance_autodiscovery['autodiscovery_exclude'] = ['msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+
+    dd_run_check(check)
+
+    # assert no connection is created for an excluded database
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect',
+        tags=['db:msdb', 'optional:tag1', 'host:localhost,1433'],
+        status=SQLServer.OK,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect',
+        tags=['db:master', 'optional:tag1', 'host:localhost,1433'],
+        status=SQLServer.OK,
+    )
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_no_autodiscovery_service_checks(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+
+    # assert no database service checks
+    aggregator.assert_service_check('sqlserver.database.can_connect', count=0)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodiscovery):
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])

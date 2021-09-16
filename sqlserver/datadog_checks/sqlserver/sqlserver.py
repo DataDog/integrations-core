@@ -26,6 +26,7 @@ from .const import (
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
+    DATABASE_SERVICE_CHECK_NAME,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -134,17 +135,22 @@ class SQLServer(AgentCheck):
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
 
-    def handle_service_check(self, status, host, database, message=None):
+    def handle_service_check(self, status, host, database, message=None, is_default=True):
         custom_tags = self.instance.get("tags", [])
         if custom_tags is None:
             custom_tags = []
+
         service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
         if status is AgentCheck.OK:
             message = None
-        self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+
+        if is_default:
+            self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        if self.autodiscovery:
+            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
@@ -445,6 +451,10 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
+            if self.autodiscovery:
+                for db_name in self.databases:
+                    if db_name != self.connection.DEFAULT_DATABASE:
+                        self.connection.check_database_conns(db_name)
         else:
             self.log.debug("Skipping check")
 

@@ -14,9 +14,10 @@ import requests_kerberos
 import requests_ntlm
 import requests_unixsocket
 from aws_requests_auth import boto_utils as requests_aws
+from flaky import flaky
 from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
-from six import iteritems
+from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.headers import headers as agent_headers
@@ -1615,6 +1616,7 @@ class TestUnixDomainSocket:
         assert adapter is not None
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
+    @flaky(max_runs=3, rerun_filter=lambda err, name, test, plugin: PY2)
     @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None

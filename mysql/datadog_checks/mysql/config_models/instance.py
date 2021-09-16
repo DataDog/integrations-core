@@ -90,6 +90,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[Sequence[CustomQuery]]
     dbm: Optional[bool]
     defaults_file: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     max_custom_queries: Optional[int]

@@ -96,6 +96,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     NAME: The display name of the integration that will appear in documentation.
     """
+    if name.lower().startswith("datadog"):
+        abort("Integration names cannot start with datadog")
 
     if name.islower():
         echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')

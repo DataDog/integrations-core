@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.11.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
 ## 1.10.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#9008](https://github.com/DataDog/integrations-core/pull/9008).

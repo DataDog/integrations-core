@@ -1,5 +1,10 @@
 # CHANGELOG - istio
 
+## 3.14.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#9588](https://github.com/DataDog/integrations-core/pull/9588).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
 ## 3.13.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add more pilot metrics. See [#9337](https://github.com/DataDog/integrations-core/pull/9337). Thanks [hari2192](https://github.com/hari2192).

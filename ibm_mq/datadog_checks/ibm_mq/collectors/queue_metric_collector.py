@@ -101,18 +101,25 @@ class QueueMetricCollector(object):
                 # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
                 if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
                     self.log.debug("No queue info available")
+                elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
+                    self.log.debug("No matching queue of type %d for pattern %s", queue_type, mq_pattern_filter)
                 else:
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
-                    queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(to_string(queue).strip())
+                    queue = to_string(queue_info[pymqi.CMQC.MQCA_Q_NAME]).strip()
+                    self.log.debug("Discovered queue: %s", queue)
+                    queues.append(queue)
+                self.log.debug("%s queues discovered", str(len(queues)))
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
                 # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
                 # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
                 if pcf is not None:
                     pcf.disconnect()
+
+        if not queues:
+            self.warning("No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern %s", mq_pattern_filter)
 
         return queues
 
