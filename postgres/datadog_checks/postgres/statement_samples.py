@@ -52,6 +52,16 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
 """,
 ).strip()
 
+PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT application_name, state, usename, count(*) as connections
+    FROM {pg_stat_activity_view}
+    WHERE client_port IS NOT NULL
+""",
+).strip()
+
 EXPLAIN_VALIDATION_QUERY = "SELECT * FROM pg_stat_activity"
 
 
@@ -168,6 +178,40 @@ class PostgresStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
+    # TODO: also transactions?
+    def _get_active_connections(self):
+        start_time = time.time()
+        query = PG_ACTIVE_CONNECTIONS_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
+        params = ()
+        if self._config.dbstrict:
+            query = query + " AND datname = %s"
+            params = params + (self._config.dbname,)
+        else:
+            query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
+            params = params + tuple(self._config.ignore_databases)
+
+        # add groupings to query
+        query = query + " GROUP BY application_name, state, usename"
+        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+        self._check.histogram(
+            "dd.postgres.get_active_connections.time",
+            (time.time() - start_time) * 1000,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.histogram(
+            "dd.postgres.get_active_connections.rows",
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
+        # cast each row to dict so it can be serialized as json
+        return [dict(row) for row in rows]
+
     def _get_new_pg_stat_activity(self):
         start_time = time.time()
         query = PG_STAT_ACTIVITY_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
@@ -197,6 +241,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
+    # TODO: we need to filter out idle queries we have already seen..
     def _filter_valid_statement_rows(self, rows):
         insufficient_privilege_count = 0
         total_count = 0
@@ -236,6 +281,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
         if activity_event is not None:
+            self._log.warning(json.dumps(activity_event, default=default_json_event_encoding))
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
@@ -526,6 +572,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_activity_event
         if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
             return None
+        # run query to get number of connections by app/user
+        active_connections = self._get_active_connections()
         self._time_since_last_activity_event = time.time()
         event = {
             "host": self._db_hostname,
@@ -536,6 +584,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "postgres_activity": active_query_rows,
+            "connections": active_connections,
         }
         return event
 

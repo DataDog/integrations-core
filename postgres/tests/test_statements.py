@@ -562,6 +562,8 @@ def test_activity_snapshot_collection(
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
+        # TODO: we can test this further by opening a bunch of connections at once, but for now this is fine.
+        assert len(event['connections']) > 0
         # find bob's query.
         bobs_query = None
         for query_json in event['postgres_activity']:
