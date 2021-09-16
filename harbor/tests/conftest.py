@@ -54,7 +54,7 @@ def dd_environment(e2e_instance):
     expected_log = "http server Running on" if HARBOR_VERSION < [1, 10, 0] else "API server is serving at"
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3),
-        lambda: time.sleep(4),
+        lambda: time.sleep(10),
         CreateSimpleUser(),
     ]
     with docker_run(compose_file, conditions=conditions):
