@@ -75,6 +75,10 @@ jobs:
       run: |
         ddev validate package
 
+    - name: Run saved views validation
+      run: |
+        ddev validate saved-views
+
     - name: Run service checks validation
       run: |
         ddev validate service-checks
