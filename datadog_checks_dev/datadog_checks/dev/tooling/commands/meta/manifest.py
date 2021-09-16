@@ -150,6 +150,10 @@ def migrate(ctx, integration, to_version):
         )
 
     migrated_manifest = JSONDict()
+
+    # Explicitly set the manifest_version first so it appears at the top of the manifest
+    migrated_manifest.set_path("/manifest_version", "2.0.0")
+
     for key, val in V2_TO_V1_MAP.items():
         if val == SKIP_IF_FOUND:
             continue
@@ -164,7 +168,6 @@ def migrate(ctx, integration, to_version):
 
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list
-    migrated_manifest.set_path("/manifest_version", "2.0.0")
     migrated_manifest.set_path("/classifier_tags", TODO_FILL_IN)
     migrated_manifest.set_path("/assets/integration/configuration/spec", TODO_FILL_IN)
 
