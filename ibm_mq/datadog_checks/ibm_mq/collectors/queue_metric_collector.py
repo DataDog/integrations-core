@@ -107,7 +107,7 @@ class QueueMetricCollector(object):
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
-                    queue = to_string(queue_info[pymqi.CMQC.MQCA_Q_NAME]).strip()
+                    queue = to_string(queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)).strip()
                     self.log.debug("Discovered queue: %s", queue)
                     queues.append(queue)
                 self.log.debug("%s queues discovered", str(len(queues)))
@@ -174,7 +174,7 @@ class QueueMetricCollector(object):
                     self.log.debug("Date for attribute %s not found for queue %s", metric_suffix, queue_name)
             else:
                 if mq_attr in queue_info:
-                    metric_value = queue_info[mq_attr]
+                    metric_value = queue_info.get(mq_attr, None)
                     self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                 else:
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
@@ -215,7 +215,7 @@ class QueueMetricCollector(object):
                         else:
                             failure_value = values['failure']
                             pymqi_value = values['pymqi_value']
-                            metric_value = int(queue_info[pymqi_value])
+                            metric_value = int(queue_info.get(pymqi_value, None))
 
                             if metric_value > failure_value:
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)

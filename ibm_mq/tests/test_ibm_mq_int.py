@@ -68,7 +68,7 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog):
             aggregator.assert_service_check('ibm_mq.channel', check.UNKNOWN, tags=channel_tags, count=1)
 
 
-def test_errors_are_loogged(get_check, instance, caplog):
+def test_errors_are_logged(get_check, instance, caplog):
     # Late import to ignore missing library for e2e
     from pymqi import MQMIError, PCFExecute
     from pymqi.CMQC import MQCC_FAILED, MQRC_BUFFER_ERROR
