@@ -22,7 +22,7 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
-INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS}
+INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'tls_verify': False}
 
 
 def ping_elastic():
@@ -31,7 +31,7 @@ def ping_elastic():
     as soon as ES is available. This is just one possible ping strategy but it's needed
     as a fixture for tests that require that index to exist in order to pass.
     """
-    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD))
+    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
     response.raise_for_status()
 
 
@@ -44,6 +44,7 @@ def create_slm():
         '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
         json=create_backup_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
+        verify=False,
     )
     response.raise_for_status()
 
@@ -58,6 +59,7 @@ def create_slm():
         '{}/_slm/policy/daily-snapshots?pretty'.format(INSTANCE['url']),
         json=create_slm_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
+        verify=False,
     )
     response.raise_for_status()
 
@@ -84,7 +86,14 @@ def instance():
 
 @pytest.fixture(scope='session')
 def instance_normalize_hostname():
-    return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'node_name_as_host': True}
+    return {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': CUSTOM_TAGS,
+        'node_name_as_host': True,
+        'tls_verify': False,
+    }
 
 
 @pytest.fixture(scope='session')

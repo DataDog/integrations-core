@@ -1,6 +1,6 @@
 # CHANGELOG - cassandra
 
-## 1.13.0 / 2021-08-05
+## 1.13.0 / 2021-08-05 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 

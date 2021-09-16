@@ -1,6 +1,6 @@
 # CHANGELOG - win32_event_log
 
-## 2.10.0 / 2021-08-22
+## 2.10.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 * [Fixed] Fix AttributeError when filters are not set. See [#9655](https://github.com/DataDog/integrations-core/pull/9655).

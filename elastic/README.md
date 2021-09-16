@@ -71,6 +71,10 @@ Datadog APM integrates with Elasticsearch to see the traces across your distribu
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
@@ -91,7 +95,7 @@ _Available for Agent versions >6.0_
        "index.indexing.slowlog.threshold.index.trace": "0ms",
        "index.indexing.slowlog.level": "trace",
        "index.indexing.slowlog.source": "1000"
-     }
+     }'
      ```
 
    - To configure search slow logs for a given index `<INDEX>`:
@@ -106,7 +110,7 @@ _Available for Agent versions >6.0_
        "index.search.slowlog.threshold.fetch.info": "0ms",
        "index.search.slowlog.threshold.fetch.debug": "0ms",
        "index.search.slowlog.threshold.fetch.trace": "0ms"
-     }
+     }'
      ```
 
 3. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
@@ -157,6 +161,10 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 ```
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
@@ -215,6 +223,10 @@ spec:
 ```
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
@@ -275,6 +287,10 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 ```
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].

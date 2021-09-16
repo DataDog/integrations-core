@@ -1,6 +1,6 @@
 # CHANGELOG - kong
 
-## 1.15.0 / 2021-08-22
+## 1.15.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
 
