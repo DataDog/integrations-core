@@ -30,6 +30,10 @@ V2_TO_V1_MAP = JSONDict(
         "/classifier_tags": [],
         "/display_on_public_website": "/is_public",
         "/tile": {},
+        "/tile/overview": "README.md#Overview",
+        "/tile/configuration": "README.md#Setup",
+        "/tile/support": "README.md#Support",
+        "/tile/changelog": "CHANGELOG.md",
         "/tile/description": "/short_description",
         "/tile/title": "/public_title",
         "/tile/media": [],
@@ -131,23 +135,26 @@ def migrate(ctx, integration, to_version):
 
     # Perform input validations
     if integration and integration not in get_valid_integrations():
-        abort(f'    Unknown integration `{integration}`')
+        abort(f'    Unknown integration `{integration}`, is your repo set properly in `ddev config`?')
 
     loaded_manifest = JSONDict(load_manifest(integration))
     manifest_version = loaded_manifest.get_path("/manifest_version")
 
     if to_version not in SUPPORTED_MANIFEST_VERSIONS:
-        abort(f"    Unknown to_version: `{to_version}`")
+        abort(f"    Unknown to_version: `{to_version}`. Valid options are: {SUPPORTED_MANIFEST_VERSIONS}")
     if to_version == manifest_version:
         abort(f"    {integration} is already on version `{manifest_version}`")
     if to_version not in SUPPORTED_VERSION_UPGRADE_PATHS.get(manifest_version, []):
-        abort(f"    Can't migrate from version `{manifest_version}` to version: `{to_version}`")
+        abort(
+            f"    Can't migrate from version `{manifest_version}` to version: `{to_version}`. Unsupported upgrade path"
+        )
 
     migrated_manifest = JSONDict()
     for key, val in V2_TO_V1_MAP.items():
         if val == SKIP_IF_FOUND:
             continue
-        elif isinstance(val, str):
+        # If the value is a string and is a JSONPath, then load the value from the JSON Path
+        elif isinstance(val, str) and val.startswith("/"):
             final_value = loaded_manifest.get_path(val)
         else:
             final_value = val
@@ -191,6 +198,6 @@ def migrate(ctx, integration, to_version):
     write_file(get_manifest_file(integration), json.dumps(migrated_manifest, indent=2))
 
     echo_success(
-        f"Successfully migrated {integration} manifest to {to_version}. Please update any empty fields that "
-        f"are marked with `{TODO_FILL_IN}`"
+        f"Successfully migrated {integration} manifest to version {to_version}. Please update any needed fields, "
+        f"especially those that are marked with `{TODO_FILL_IN}`"
     )
