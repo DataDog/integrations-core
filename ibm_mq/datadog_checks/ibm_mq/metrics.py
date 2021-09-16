@@ -4,8 +4,6 @@
 
 from __future__ import division
 
-from six import PY2
-
 from datadog_checks.base.utils.common import ensure_unicode
 
 from .utils import calculate_elapsed_time
@@ -57,18 +55,12 @@ def queue_metrics():
 
 
 def pcf_metrics():
-    if PY2:
-        return {
-            'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
-            'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
-        }
-    else:
-        return {
-            'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
-            'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
-            'last_put_time': get_last_put_time,
-            'last_get_time': get_last_get_time,
-        }
+    return {
+        'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+        'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+        'last_put_time': get_last_put_time,
+        'last_get_time': get_last_get_time,
+    }
 
 
 def pcf_status_reset_metrics():
