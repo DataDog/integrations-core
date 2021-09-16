@@ -120,12 +120,16 @@ services:
     image: goharbor/redis-photon:v2.3.2
     container_name: redis
     restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     cap_drop:
       - ALL
     cap_add:
       - CHOWN
       - SETGID
       - SETUID
+    volumes:
+      - ./config/redis:/etc/redis:z
     networks:
       harbor:
       harbor-chartmuseum:
