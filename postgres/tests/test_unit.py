@@ -266,29 +266,34 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
         pass
 
 
-def test_server_tag_not_emitted_when_disable_generic_tags_enabled(pg_instance):
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_tags',
+    [
+        (
+            True,
+            {
+                'db:datadog_test',
+                'port:5432',
+                'foo:bar',
+            },
+        ),
+        (
+            False,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+            },
+        ),
+    ],
+)
+def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
     instance = copy.deepcopy(pg_instance)
-    instance['disable_generic_tags'] = True
+    instance['disable_generic_tags'] = disable_generic_tags
     check = PostgreSql('test_instance', {}, [instance])
     tags = check._get_service_check_tags()
-    assert set(tags) == {
-        'db:datadog_test',
-        'port:5432',
-        'foo:bar',
-    }
-
-
-def test_server_tag_emitted_when_disable_generic_tags_disabled(pg_instance):
-    instance = copy.deepcopy(pg_instance)
-    instance['disable_generic_tags'] = False
-    check = PostgreSql('test_instance', {}, [instance])
-    tags = check._get_service_check_tags()
-    assert set(tags) == {
-        'db:datadog_test',
-        'foo:bar',
-        'port:5432',
-        'server:localhost',
-    }
+    assert set(tags) == expected_tags
 
 
 @pytest.mark.parametrize(
