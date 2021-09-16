@@ -4,8 +4,6 @@
 import time
 from datetime import datetime
 
-from six import PY2
-
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.base.utils.time import get_timestamp
@@ -39,10 +37,7 @@ def calculate_elapsed_time(datestamp, timestamp, current_time=None):
 
     if datestamp and timestamp:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp) + ' ' + local_tz
-        if PY2:
-            timestamp_posix = time.mktime(datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timetuple())
-        else:
-            timestamp_posix = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timestamp()
+        timestamp_posix = time.mktime(datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timetuple())
     else:
         return None
 

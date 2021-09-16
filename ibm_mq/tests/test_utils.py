@@ -35,26 +35,16 @@ def test_calculate_elapsed_time(datestamp, timestamp):
     import time
     from datetime import datetime
 
-    from six import PY2
-
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     current_tz = time.tzname[time.daylight]
     current_time_str = '2021-09-15 18:46:00' + ' ' + current_tz
 
-    if PY2:
-        current_timestamp = time.mktime(datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S %Z').timetuple())
-
-        expected = current_timestamp - (
-            time.mktime(
-                datetime.strptime((datestamp + ' ' + timestamp + ' ' + current_tz), '%Y-%m-%d %H.%M.%S %Z').timetuple()
-            )
+    current_timestamp = time.mktime(datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S %Z').timetuple())
+    expected = current_timestamp - (
+        time.mktime(
+            datetime.strptime((datestamp + ' ' + timestamp + ' ' + current_tz), '%Y-%m-%d %H.%M.%S %Z').timetuple()
         )
-    else:
-        current_timestamp = datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S %Z').timestamp()
-
-        expected = current_timestamp - (
-            datetime.strptime((datestamp + ' ' + timestamp + ' ' + current_tz), '%Y-%m-%d %H.%M.%S %Z').timestamp()
-        )
+    )
 
     assert expected == calculate_elapsed_time(datestamp, timestamp, current_timestamp)
