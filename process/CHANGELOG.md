@@ -1,5 +1,10 @@
 # CHANGELOG - process
 
+## 2.1.0 / 2021-09-15
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Update logic to run sudo for `num_fds`. See [#10109](https://github.com/DataDog/integrations-core/pull/10109).
+
 ## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add runtime configuration validation. See [#8974](https://github.com/DataDog/integrations-core/pull/8974).

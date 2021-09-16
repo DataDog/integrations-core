@@ -26,11 +26,16 @@ Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of
 
 Starting with version 5.0.0 of the check, shipped in Agent version 6.18.0/7.18.0, a new implementation of the integration was introduced which required changes to the configuration file. To preserve backwards compatibility, a configuration parameter called `use_legacy_implementation` was temporarily introduced,
 If you are upgrading from an older version of the integration, this parameter is unset in the config and forces the agent to use the older implementation.
-If you are configuring the integration from the first time or if you want to benefit from the new features (like tag collection and advanced filtering options), refer to the [sample vsphere.d/conf.yaml][4] configuration file. In particular, make sure to set `use_legacy_implementation: false`.
+If you are configuring the integration for the first time or if you want to benefit from the new features (like tag collection and advanced filtering options), refer to the [sample vsphere.d/conf.yaml][4] configuration file. In particular, make sure to set `use_legacy_implementation: false`.
 
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `vsphere` under the Checks section.
+
+### Troubleshooting
+
+- [Can I limit the number of VMs that are pulled in via the VMWare integration?][10]
+- [My vSpehre VMs are duplicated in the Infrastructure List view][13]
 
 ## Data Collected
 
@@ -80,11 +85,6 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 ### Service Checks
 
 See [service_checks.json][14] for a list of service checks provided by this integration.
-
-## Troubleshooting
-
-- [Can I limit the number of VMs that are pulled in via the VMWare integration?][10]
-- [My vSpehre VMs are duplicated in the Infrastructure List view][13]
 
 ## Further Reading
 

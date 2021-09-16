@@ -5,14 +5,16 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
-USERS_URL = '{base_url}/api/users/'
 VERSION_1_5 = [1, 5, 0]
 VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
+VERSION_2_2 = [2, 2, 0]
 
 HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
 
 HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
+
+USERS_URL = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges
@@ -95,7 +97,8 @@ REGISTRIES_FIXTURE = [
     }
 ]
 
-VOLUME_INFO_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
+VOLUME_INFO_PRE_2_2_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
+VOLUME_INFO_FIXTURE = {"storage": [{"total": 1e6, "free": 5e5}]}
 
 SYSTEM_INFO_FIXTURE = {"harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION'])}
 if HARBOR_VERSION >= VERSION_1_5:
