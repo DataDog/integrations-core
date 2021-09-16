@@ -283,7 +283,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @staticmethod
     def _to_active_session(row, query_signature, obfuscated_statement):
-        if row['state'] is not None and row['state'] in {'active', 'idle in transaction'}:
+        if row['state'] is not None and row['state'] != 'idle':
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. Add query_signature
@@ -494,7 +494,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return event
 
     def _collect_events(self, rows):
-        active_query_rows = []
+        active_session_rows = []
         events = []
         for row in rows:
             try:
@@ -504,7 +504,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 query_signature = compute_sql_signature(obfuscated_statement)
                 active_row = self._to_active_session(row, query_signature, obfuscated_statement)
                 if active_row:
-                    active_query_rows.append(active_row)
+                    active_session_rows.append(active_row)
                 event = self._collect_plan_for_statement(row, obfuscated_statement, query_signature)
                 if event:
                     events.append(event)
@@ -518,7 +518,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
-        return events, self._create_activity_event(active_query_rows)
+        return events, self._create_activity_event(active_session_rows)
 
     def _create_activity_event(self, active_query_rows):
         # Only send an event if we are configured to do so, and
@@ -535,7 +535,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
-            "active_queries": active_query_rows,
+            "postgres_activity": active_query_rows,
         }
         return event
 

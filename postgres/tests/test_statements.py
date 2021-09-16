@@ -561,10 +561,10 @@ def test_activity_snapshot_collection(
         assert event['ddsource'] == "postgres"
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
-        assert len(event['active_queries']) > 0
+        assert len(event['postgres_activity']) > 0
         # find bob's query.
         bobs_query = None
-        for query_json in event['active_queries']:
+        for query_json in event['postgres_activity']:
             if 'usename' in query_json and query_json['usename'] == "bob":
                 bobs_query = query_json
         assert bobs_query is not None
