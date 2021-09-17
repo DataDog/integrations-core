@@ -237,7 +237,7 @@ class SQLServer(AgentCheck):
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor:
-                    self.existing_databases[row.name] = True
+                    self.existing_databases[row[0]] = True
 
             except Exception, e:
                 self.log.error("Failed to check if database %s exists: %s" % (database, e))
