@@ -167,7 +167,7 @@ class QueueMetricCollector(object):
         for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
             metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_suffix)
             if callable(mq_attr):
-                metric_value = mq_attr(queue_info)
+                metric_value = mq_attr(self, queue_info)
                 if metric_value is not None:
                     self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                 else:

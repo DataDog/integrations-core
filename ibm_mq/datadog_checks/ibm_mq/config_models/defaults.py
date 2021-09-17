@@ -60,6 +60,10 @@ def instance_port(field, value):
     return 1414
 
 
+def instance_queue_manager_tz(field, value):
+    return 'UTC'
+
+
 def instance_queue_patterns(field, value):
     return get_default_field_value(field, value)
 

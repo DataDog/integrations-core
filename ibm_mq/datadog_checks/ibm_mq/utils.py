@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 from datetime import datetime
+from dateutil import tz
 
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
@@ -20,15 +21,15 @@ def sanitize_strings(s):
     return s.strip()
 
 
-def calculate_elapsed_time(datestamp, timestamp, current_time=None):
+def calculate_elapsed_time(self, datestamp, timestamp, current_time=None):
     """
     Calculate elapsed time in seconds from IBM MQ queue status date and timestamps
-    Assume queue manager uses local system timezone.
     Expected Timestamp format: %H.%M.%S, e.g. 18.45.20
     Expected Datestamp format: %Y-%m-%d, e.g. 2021-09-15
     https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-display-qstatus-display-queue-status#q086260___3
     """
-    local_tz = time.tzname[time.daylight]
+
+    qm_tz = tz.gettz(self.queue_manager_tz)
 
     if current_time is None:
         current_time = get_timestamp()
