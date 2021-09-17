@@ -126,7 +126,14 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         check.check(instance)
 
         http_wargs = dict(
-            auth=ANY, cert=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY, allow_redirects=ANY)
+            auth=ANY,
+            cert=ANY,
+            headers=ANY,
+            proxies=ANY,
+            timeout=ANY,
+            verify=ANY,
+            allow_redirects=ANY,
+        )
         http_wargs.update(expected_http_kwargs)
 
         r.assert_called_with(ANY, **http_wargs)
