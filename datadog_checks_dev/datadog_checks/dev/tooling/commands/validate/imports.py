@@ -84,8 +84,8 @@ def imports(ctx, check, autofix):
                 echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
                 echo_info(f'{linetext}', indent='    ')
 
-                if check in linetext:
-                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check))
+                if check_name in linetext:
+                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check_name))
                 else:
                     suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{base/dev}')
                 annotate_error(
