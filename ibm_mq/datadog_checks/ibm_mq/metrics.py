@@ -167,24 +167,20 @@ def depth_percent(queue_info):
 
 
 def get_last_put_time(queue_info):
-    if pymqi.CMQCFC.MQCACF_LAST_PUT_DATE not in queue_info or pymqi.CMQCFC.MQCACF_LAST_PUT_TIME not in queue_info:
-        return None
+    last_put_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_DATE)
+    last_put_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_TIME)
 
-    last_put_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_DATE, None)
-    last_put_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_TIME, None)
+    if not last_put_datestamp or not last_put_timestamp:
+        return
 
-    if last_put_datestamp is not None and last_put_timestamp is not None:
-        return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp))
-    return None
+    return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp))
 
 
 def get_last_get_time(queue_info):
-    if pymqi.CMQCFC.MQCACF_LAST_GET_DATE not in queue_info or pymqi.CMQCFC.MQCACF_LAST_GET_TIME not in queue_info:
-        return None
+    last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE)
+    last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME)
 
-    last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE, None)
-    last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME, None)
+    if not last_get_datestamp or not last_get_timestamp:
+        return
 
-    if last_get_datestamp is not None and last_get_timestamp is not None:
-        return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp))
-    return None
+    return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp))
