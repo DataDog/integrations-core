@@ -82,8 +82,8 @@ def imports(ctx, check, autofix):
                     linenum, linetext = line
                     echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
                     echo_info(f'{linetext}', indent='    ')
-                    message = 'Detected deprecated import: {}, run "ddev validate imports --autofix" to fix.'.format(
-                        linetext
+                    message = 'Detected deprecated import: `{}`, run "ddev validate imports --autofix" to fix.'.format(
+                        linetext.strip("\n")
                     )
                     annotate_error(
                         f,
