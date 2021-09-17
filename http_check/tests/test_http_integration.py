@@ -197,7 +197,9 @@ def test_check_allow_redirects(aggregator):
 
         redirect_service_tags = ['url:https://valid.mock/301', 'instance:allow_redirect_service']
         http_check.check(CONFIG_HTTP_ALLOW_REDIRECTS['instances'][0])
-        aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=redirect_service_tags, count=1)
+        aggregator.assert_service_check(
+            HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=redirect_service_tags, count=1
+        )
 
 
 @pytest.mark.usefixtures("dd_environment")
