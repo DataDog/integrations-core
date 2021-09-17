@@ -19,14 +19,8 @@ def shared_skip_proxy(field, value):
 def shared_timeout(field, value):
     return 10
 
-
-def instance_allow_redirects(field, value):
-    return True
-
-
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
-
 
 def instance_auth_type(field, value):
     return 'basic'
