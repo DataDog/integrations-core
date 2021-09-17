@@ -51,7 +51,7 @@ jobs:
       run: |
         ddev validate imports
 
-- name: Run JMX metrics validation
+    - name: Run JMX metrics validation
       run: |
         ddev validate jmx-metrics
 
