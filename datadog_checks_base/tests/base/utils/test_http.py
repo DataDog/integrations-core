@@ -2007,9 +2007,16 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         http.get("https://incomplete-chain.badssl.com/")
 
+
 class TestAllowRedirect:
-    def test_config_default(self):
+    def test_allow_redirect_default(self): 
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
-        assert http.options['allow_redirects'] is True 
+        assert http.options['allow_redirects'] is True
+
+    def test_allow_redirect_overide_default(self): 
+        instance = {'allow_redirects':False}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is False

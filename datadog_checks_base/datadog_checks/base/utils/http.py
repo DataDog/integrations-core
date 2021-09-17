@@ -132,7 +132,6 @@ class RequestsWrapper(object):
         default_fields['tls_ignore_warning'] = init_config.get(
             'tls_ignore_warning', default_fields['tls_ignore_warning']
         )
-        # default_fields['allow_redirects'] = init_config.get('allow_redirects', default_fields['allow_redirects'])
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
@@ -219,11 +218,7 @@ class RequestsWrapper(object):
 
         auth = AUTH_TYPES[auth_type](config)
 
-        allow_redirects = True
-        if isinstance(config['allow_redirects'], bool):
-            allow_redirects = config['allow_redirects']
-        elif not is_affirmative(config['allow_redirects']):
-            allow_redirects = False
+        allow_redirects = is_affirmative(config['allow_redirects'])
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
@@ -276,7 +271,7 @@ class RequestsWrapper(object):
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
             'verify': verify,
-            'allow_redirects':allow_redirects
+            'allow_redirects':allow_redirects,
         }
 
         # For manual parsing until `requests` properly handles `no_proxy`
