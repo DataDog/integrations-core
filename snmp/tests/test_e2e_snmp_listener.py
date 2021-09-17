@@ -30,8 +30,8 @@ def _build_device_ip(container_ip, last_digit='1'):
     return snmp_device
 
 
-@common.agent_autodiscovery_only
-def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_ready):
+@common.snmp_listener_only
+def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     Test Agent Autodiscovery
 

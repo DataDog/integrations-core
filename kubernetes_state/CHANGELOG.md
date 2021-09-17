@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## 6.0.0 / 2021-08-22
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).
 * [Fixed] [ksm] Fix statefulset tag. See [#9832](https://github.com/DataDog/integrations-core/pull/9832).

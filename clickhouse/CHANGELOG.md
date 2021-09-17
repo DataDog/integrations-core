@@ -1,6 +1,6 @@
 # CHANGELOG - ClickHouse
 
-## 2.3.0 / 2021-08-22
+## 2.3.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add support for Clickhouse v21. See [#9235](https://github.com/DataDog/integrations-core/pull/9235).
 

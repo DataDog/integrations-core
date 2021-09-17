@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.3.0 / 2021-08-22
+## 5.3.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add `ifNumber` to `_generic-if.yaml`. See [#9875](https://github.com/DataDog/integrations-core/pull/9875).
 * [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
