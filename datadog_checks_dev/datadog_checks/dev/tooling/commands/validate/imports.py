@@ -83,7 +83,17 @@ def imports(ctx, check, autofix):
                 linenum, linetext = line
                 echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
                 echo_info(f'{linetext}', indent='    ')
-                annotate_error(f, f"Detected deprecated import: {linetext}", line=linenum + 1)
+
+                if check in linetext:
+                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check))
+                else:
+                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{base/dev}')
+                annotate_error(
+                    f,
+                    f"Detected deprecated import: {linetext}, run `ddev validate imports --autofix` to fix import. "
+                    f"Import should look like: {suggested_line}",
+                    line=linenum + 1,
+                )
         abort()
 
     else:
