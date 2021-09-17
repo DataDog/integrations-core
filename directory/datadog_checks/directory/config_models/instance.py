@@ -25,6 +25,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     exclude_dirs: Optional[Sequence[str]]
     filegauges: Optional[bool]
+    filetagname: Optional[str]
     follow_symlinks: Optional[bool]
     ignore_missing: Optional[bool]
     min_collection_interval: Optional[float]
