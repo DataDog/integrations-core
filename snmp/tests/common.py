@@ -19,7 +19,7 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
-AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
+SNMP_LISTENER_ENV = os.environ['SNMP_LISTENER_ENV']
 TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
@@ -189,8 +189,8 @@ RESOLVED_TABULAR_OBJECTS = [
     }
 ]
 
-agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
-python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Python discovery only')
+snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
+snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
 
 
 def generate_instance_config(metrics, template=None):

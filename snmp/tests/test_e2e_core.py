@@ -5,7 +5,7 @@ import pytest
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.python_autodiscovery_only]
+pytestmark = [pytest.mark.e2e, common.snmp_integration_only]
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
