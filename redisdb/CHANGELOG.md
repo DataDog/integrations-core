@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 4.1.0 / 2021-08-22
+## 4.1.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add runtime configuration validation. See [#8977](https://github.com/DataDog/integrations-core/pull/8977).
 

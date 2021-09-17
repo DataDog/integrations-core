@@ -37,7 +37,9 @@ def dd_environment():
             conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=120)],
         ):
             with ExitStack() as stack:
-                ip, port = stack.enter_context(port_forward(kubeconfig, 'linkerd', 'linkerd-controller', 4191))
+                ip, port = stack.enter_context(
+                    port_forward(kubeconfig, 'linkerd', 4191, 'deployment', 'linkerd-controller')
+                )
 
             instance = {
                 'prometheus_url': 'http://{ip}:{port}/metrics'.format(ip=ip, port=port),

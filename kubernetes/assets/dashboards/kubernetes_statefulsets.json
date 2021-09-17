@@ -21,7 +21,7 @@
       {
           "default": "*",
           "name": "kube_stateful_set",
-          "prefix": "statefulset"
+          "prefix": "kube_stateful_set"
       }
   ],
   "title": "Kubernetes StatefulSets Overview",
@@ -91,7 +91,7 @@
                           {
                               "data_source": "metrics",
                               "name": "query1",
-                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {statefulset}"
+                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_stateful_set}"
                           }
                       ],
                       "response_format": "timeseries",
@@ -188,7 +188,7 @@
                           {
                               "data_source": "metrics",
                               "name": "query1",
-                              "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {statefulset}"
+                              "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_stateful_set}"
                           }
                       ],
                       "response_format": "timeseries",
@@ -262,7 +262,7 @@
                           {
                               "data_source": "metrics",
                               "name": "query1",
-                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,kube_namespace,statefulset}"
+                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,kube_namespace,kube_stateful_set}"
                           }
                       ],
                       "response_format": "timeseries",
@@ -1149,12 +1149,12 @@
                           {
                               "data_source": "metrics",
                               "name": "query1",
-                              "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_cluster_name,kube_namespace,statefulset}"
+                              "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_cluster_name,kube_namespace,kube_stateful_set}"
                           },
                           {
                               "data_source": "metrics",
                               "name": "query2",
-                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_cluster_name,kube_namespace,statefulset}"
+                              "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$kube_cluster_name,$kube_namespace,$kube_stateful_set} by {kube_cluster_name,kube_namespace,kube_stateful_set}"
                           }
                       ],
                       "response_format": "timeseries",

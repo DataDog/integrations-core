@@ -11,7 +11,7 @@
 * [Fixed] Allow non-default yaml loader and dumper. See [#10032](https://github.com/DataDog/integrations-core/pull/10032).
 * [Fixed] Set disable_unsafe_yaml default value. See [#10026](https://github.com/DataDog/integrations-core/pull/10026).
 
-## 21.0.1 / 2021-08-23
+## 21.0.1 / 2021-08-23 / Agent 7.31.0
 
 * [Fixed] Revert "Raise exception during tests for OK service checks sent with messages". See [#9936](https://github.com/DataDog/integrations-core/pull/9936).
 
