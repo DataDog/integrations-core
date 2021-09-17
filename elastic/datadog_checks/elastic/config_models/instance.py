@@ -43,6 +43,7 @@ class InstanceConfig(BaseModel):
     cat_allocation_stats: Optional[bool]
     cluster_stats: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]

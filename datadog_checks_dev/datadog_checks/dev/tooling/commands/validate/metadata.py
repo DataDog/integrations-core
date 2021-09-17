@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import click
 
+from ...annotations import annotate_display_queue
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
@@ -264,6 +265,7 @@ def metadata(check, check_duplicates, show_warnings):
     errors = False
 
     for current_check in checks:
+        display_queue = []
         if current_check.startswith('datadog_checks_'):
             continue
 
@@ -277,7 +279,7 @@ def metadata(check, check_duplicates, show_warnings):
         display_name = manifest['display_name']
 
         metadata_file = get_metadata_file(current_check)
-        echo_debug(f"Checking {metadata_file}")
+        display_queue.append((echo_debug, f"Checking {metadata_file}"))
 
         # To make logging less verbose, common errors are counted for current check
         metric_prefix_count = defaultdict(int)
@@ -290,13 +292,17 @@ def metadata(check, check_duplicates, show_warnings):
         metric_prefix_error_shown = False
         if os.stat(metadata_file).st_size == 0:
             errors = True
-            echo_failure(f"{current_check} metadata file is empty. This file needs the header row at minimum")
+            display_queue.append(
+                (echo_failure, f"{current_check} metadata file is empty. This file needs the header row at minimum")
+            )
 
         for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
             if None in row.values():
                 errors = True
-                echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
+                )
                 continue
 
             # all headers exist, no invalid headers
@@ -305,13 +311,12 @@ def metadata(check, check_duplicates, show_warnings):
                 invalid_headers = all_keys.difference(ALL_HEADERS)
                 if invalid_headers:
                     errors = True
-                    echo_failure(f'{current_check}:{line} Invalid column {invalid_headers}')
+                    display_queue.append((echo_failure, f'{current_check}:{line} Invalid column {invalid_headers}'))
 
                 missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     errors = True
-                    echo_failure(f'{current_check}:{line} Missing columns {missing_headers}')
-
+                    display_queue.append(echo_failure(f'{current_check}:{line} Missing columns {missing_headers}'))
                 continue
 
             errors = errors or check_duplicate_values(
@@ -325,9 +330,12 @@ def metadata(check, check_duplicates, show_warnings):
             normalized_metric_name = normalize_metric_name(row['metric_name'])
             if row['metric_name'] != normalized_metric_name:
                 errors = True
-                echo_failure(
-                    f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid, "
-                    f"it should be normalized as {normalized_metric_name}"
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid, "
+                        f"it should be normalized as {normalized_metric_name}",
+                    )
                 )
 
             # metric_name header
@@ -340,36 +348,50 @@ def metadata(check, check_duplicates, show_warnings):
                 errors = True
                 if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
                     metric_prefix_error_shown = True
-                    echo_failure(f'{current_check}:{line} metric_prefix does not exist in manifest')
+                    display_queue.append(
+                        (echo_failure, f'{current_check}:{line} metric_prefix does not exist in manifest')
+                    )
 
             # metric_type header
             if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['metric_type']}` is an invalid metric_type.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} `{row['metric_type']}` is an invalid metric_type.")
+                )
 
             # unit_name header
             if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
+                )
 
             # per_unit_name header
             if row['per_unit_name'] and row['per_unit_name'] not in VALID_UNIT_NAMES:
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
+                )
 
             # integration header
             integration = row['integration']
             normalized_integration = normalize_display_name(display_name)
             if integration != normalized_integration and normalized_integration not in EXCLUDE_INTEGRATIONS:
                 errors = True
-                echo_failure(
-                    f"{current_check}:{line} integration: `{row['integration']}` should be: {normalized_integration}"
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"{current_check}:{line} integration: `{row['integration']}` should be: "
+                        f"{normalized_integration}",
+                    )
                 )
 
             # orientation header
             if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['orientation']}` is an invalid orientation.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} `{row['orientation']}` is an invalid orientation.")
+                )
 
             # empty required fields
             for header in REQUIRED_HEADERS:
@@ -382,38 +404,52 @@ def metadata(check, check_duplicates, show_warnings):
 
             elif "|" in row['description']:
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
+                display_queue.append((echo_failure, f"{current_check}:{line} `{row['metric_name']}` contains a `|`."))
 
             # check if there is unicode
             elif any(not content.isascii() for _, content in row.items()):
                 errors = True
-                echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
+                )
 
             # exceeds max allowed length of description
             elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                 errors = True
-                echo_failure(
-                    f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
-                    f"{MAX_DESCRIPTION_LENGTH} for descriptions."
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                        f"{MAX_DESCRIPTION_LENGTH} for descriptions.",
+                    )
                 )
             if row['interval'] and not row['interval'].isdigit():
                 errors = True
-                echo_failure(f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
+                display_queue.append(
+                    (echo_failure, f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
+                )
 
         for header, count in empty_count.items():
             errors = True
-            echo_failure(f'{current_check}: {header} is empty in {count} rows.')
+            display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
 
         for prefix, count in metric_prefix_count.items():
-            echo_failure(
-                f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                "defined in the manifest."
+            display_queue.append(
+                (
+                    echo_failure,
+                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                    "defined in the manifest.",
+                )
             )
 
         if show_warnings:
             for header, count in empty_warning_count.items():
                 echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 
+        if display_queue:
+            annotate_display_queue(metadata_file, display_queue)
+            for func, message in display_queue:
+                func(message)
     if errors:
         abort()
 

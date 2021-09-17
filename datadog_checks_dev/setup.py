@@ -24,6 +24,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     "contextlib2; python_version < '3.0'",
     'coverage>=5.0.3',
+    'flaky',
     'mock',
     'psutil',
     'PyYAML==5.4.1',

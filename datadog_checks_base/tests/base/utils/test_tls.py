@@ -43,12 +43,19 @@ class TestVerify:
         tls = TlsContextWrapper({'tls_verify': False})
         assert tls.config['tls_verify'] is False
 
-    @pytest.mark.parametrize('param', ('tls_ca_cert', 'tls_cert', 'tls_private_key', 'tls_private_key_password'))
+    @pytest.mark.parametrize('param', ['tls_ca_cert'])
     def test_config_overwrite(self, param):
         config = {'tls_verify': False, param: 'foo'}
         with patch('ssl.SSLContext'):
             tls = TlsContextWrapper(config)
         assert tls.config['tls_verify'] is True
+
+    @pytest.mark.parametrize('param', ('tls_cert', 'tls_private_key'))
+    def test_config_no_overwrite_tls_verify(self, param):
+        config = {'tls_verify': False, param: 'foo'}
+        with patch('ssl.SSLContext'):
+            tls = TlsContextWrapper(config)
+        assert tls.config['tls_verify'] is False
 
 
 @pytest.mark.parametrize(
@@ -90,6 +97,12 @@ class TestRemapper:
         remapper = {'disable_tls_validation': {'name': 'tls_verify', 'invert': True}}
         tls = TlsContextWrapper(instance, remapper)
         assert tls.config['tls_verify'] is True
+
+    def test_remap_validate_cert(self):
+        instance = {'validate_cert': False}
+        remapper = {'validate_cert': {'name': 'tls_verify', 'default': True}}
+        tls = TlsContextWrapper(instance, remapper)
+        assert tls.config['tls_verify'] is False
 
 
 class TestHigherPriorityRemapper:

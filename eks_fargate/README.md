@@ -43,7 +43,7 @@ If the Agent is running as a sidecar, it can communicate only with containers on
 To collect data from your applications running in AWS EKS Fargate over a Fargate node, follow these setup steps:
 
 - [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
-- [Deploy the Agent as a sidecar](#running-the-agent-as-a-side-car).
+- [Deploy the Agent as a sidecar](#running-the-agent-as-a-sidecar).
 - Set up Datadog [metrics](#metrics-collection), [logs](#log-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
 To have EKS Fargate containers in the Datadog Live Container View, enable `shareProcessNamespace` on your pod spec. See [Process Collection](#process-collection).
@@ -263,6 +263,10 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][22] page. To enable live processes, [enable shareProcessNamespace in the pod spec][23].
 
 ## Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 ### Collecting logs from EKS on Fargate with Fluent Bit.
 

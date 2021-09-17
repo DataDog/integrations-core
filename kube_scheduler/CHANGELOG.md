@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## 2.0.1 / 2021-08-25
+## 2.0.1 / 2021-08-25 / Agent 7.31.0
 
 * [Fixed] Correctly use SSL options for health checks. See [#9977](https://github.com/DataDog/integrations-core/pull/9977).
 

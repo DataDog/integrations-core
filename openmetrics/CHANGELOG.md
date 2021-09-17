@@ -1,6 +1,6 @@
 # CHANGELOG - OpenMetrics
 
-## 1.14.1 / 2021-08-22
+## 1.14.1 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Update `metrics` option in legacy OpenMetrics example config. See [#9891](https://github.com/DataDog/integrations-core/pull/9891).
 

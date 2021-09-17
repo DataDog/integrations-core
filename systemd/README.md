@@ -11,6 +11,10 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 ### Installation
 
+The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+
+### Configuration
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -18,7 +22,11 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 To configure this check for an Agent running on a host:
 
-The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+1. Edit the `systemd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
+   Agent's configuration directory to start collecting your systemd performance data.
+   See the [sample systemd.d/conf.yaml][3] for all available configuration options.
+
+2. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -35,14 +43,6 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               -e DD_API_KEY=<YOUR_API_KEY> \
               datadog/agent:latest
 ```
-
-### Configuration
-
-1. Edit the `systemd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your systemd performance data.
-   See the [sample systemd.d/conf.yaml][3] for all available configuration options.
-
-2. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

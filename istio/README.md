@@ -5,10 +5,10 @@
 Datadog monitors every aspect of your Istio environment, so you can:
 - Assess the health of Envoy and the Istio control plane with logs ([see below](#log-collection)).
 - Break down the performance of your service mesh with request, bandwidth, and resource consumption metrics ([see below](#metrics)).
-- Map network communication between containers, pods, and services over the mesh with [Network Performance Monitoring][19].
-- Drill into distributed traces for applications transacting over the mesh with [APM][20].
+- Map network communication between containers, pods, and services over the mesh with [Network Performance Monitoring][18].
+- Drill into distributed traces for applications transacting over the mesh with [APM][19].
 
-To learn more about monitoring your Istio environment with Datadog, [see the Istio blog][21].
+To learn more about monitoring your Istio environment with Datadog, [see the Istio blog][20].
 
 ## Setup
 
@@ -20,45 +20,41 @@ Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your I
 
 #### Envoy
 
-If you want to monitor the Envoy proxies in Istio, configure the [Envoy integration][23].
+If you want to monitor the Envoy proxies in Istio, configure the [Envoy integration][22].
 
 ### Configuration
 
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options.
 
 #### Metric collection
-
-Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
-
-1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
+1. To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
     
     ```yaml
     init_config:
     
     instances:
       - istiod_endpoint: http://istiod.istio-system:15014/metrics
+      - istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+        exclude_labels:
+         - source_version
+         - destination_version
+         - source_canonical_revision
+         - destination_canonical_revision
+         - source_principal
+         - destination_principal
+         - source_cluster
+         - destination_cluster
+         - source_canonical_service
+         - destination_canonical_service
+         - source_workload_namespace
+         - destination_workload_namespace
+         - request_protocol
+         - connection_security_policy
     ```
-    
-   To monitor Istio mesh metrics, continue to use `istio_mesh_endpoint`. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
    
-   **NOTE**: Be sure to enable [V1 Telemetry][18] for Istio `v1.6` or higher to collect mesh metrics.
-   
-2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
-    ```yaml
-    init_config:
+       **Note**: `connectionID` Prometheus label is excluded, the conf.yaml.example also has a list of suggested labels to exclude.
 
-    instances:
-      - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
-        mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
-        galley_endpoint: http://istio-galley.istio-system:15014/metrics
-        pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
-        citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
-        send_histograms_buckets: true
-    ```
-
-Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
-
-Note: `connectionID` Prometheus label is excluded.
+   Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].   
 
 ##### Disable sidecar injection for Datadog Agent pods
 
@@ -84,6 +80,10 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 ```
 
 #### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][12] and [Istio logs][11].
 
@@ -112,7 +112,7 @@ The Istio check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][22] for a list of service checks provided by this integration.
+See [service_checks.json][21] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -143,9 +143,8 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
-[18]: https://istio.io/v1.1/docs/tasks/telemetry/
-[19]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
-[20]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
-[21]: https://www.datadoghq.com/blog/istio-datadog/
-[22]: https://github.com/DataDog/integrations-core/blob/master/istio/assets/service_checks.json
-[23]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio
+[18]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
+[19]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
+[20]: https://www.datadoghq.com/blog/istio-datadog/
+[21]: https://github.com/DataDog/integrations-core/blob/master/istio/assets/service_checks.json
+[22]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio

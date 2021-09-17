@@ -166,8 +166,21 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
     #
-    # exclude_labels:
-    #   - timestamp
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
 
     ## @param bearer_token_auth - boolean - optional - default: false
     ## If set to true, adds a bearer token authentication header.

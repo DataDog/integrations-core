@@ -197,6 +197,10 @@ Use the default configuration in your `airflow.d/conf.yaml` file to activate you
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -316,6 +320,10 @@ This should direct the StatsD traffic from the Airflow container to a Datadog Ag
 See the Datadog `integrations-core` repo for an [example setup][15].
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 

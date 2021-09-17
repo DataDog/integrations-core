@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cluster_name: str
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     executor_level_metrics: Optional[bool]

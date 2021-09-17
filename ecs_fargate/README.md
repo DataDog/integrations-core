@@ -96,7 +96,7 @@ Resources:
               apikey: <API_KEY>
           MemoryReservation: 500
         - Name: log_router
-          Image: 'amazon/aws-for-fluent-bit:latest'
+          Image: 'amazon/aws-for-fluent-bit:stable'
           Essential: true
           FirelensConfiguration:
             Type: fluentbit
@@ -221,6 +221,10 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 
 ### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 You can monitor Fargate logs by using the AWS FireLens integration built on Datadogs Fluentbit output plugin to send logs to Datadog, or by using the `awslogs` log driver and a Lambda function to route logs to Datadog. Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
 
 <!-- xxx tabs xxx -->
@@ -234,7 +238,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    ```json
    {
      "essential": true,
-     "image": "amazon/aws-for-fluent-bit:latest",
+     "image": "amazon/aws-for-fluent-bit:stable",
      "name": "log_router",
      "firelensConfiguration": {
        "type": "fluentbit",
@@ -248,7 +252,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    ```json
    {
      "essential": true,
-     "image": "amazon/aws-for-fluent-bit:latest",
+     "image": "amazon/aws-for-fluent-bit:stable",
      "name": "log_router",
      "firelensConfiguration": {
        "type": "fluentbit",
