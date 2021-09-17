@@ -187,6 +187,7 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
             proxies=mock.ANY,
             timeout=mock.ANY,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)

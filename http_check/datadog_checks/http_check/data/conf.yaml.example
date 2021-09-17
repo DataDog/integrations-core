@@ -66,8 +66,7 @@ instances:
     ## request with the data parameter.
     ## SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
     #
-    # data:
-    #   <KEY>: <VALUE>
+    # data: <DATA>
 
     ## @param content_match - string - optional
     ## The content_match parameter allows the check
@@ -168,11 +167,6 @@ instances:
     ## override the hostname to match with ssl_server_name.
     #
     # ssl_server_name: <SSL_SERVER_NAME>
-
-    ## @param allow_redirects - boolean - optional - default: true
-    ## The allow_redirects parameter can enable redirection for the HTTP check.
-    #
-    # allow_redirects: true
 
     ## @param stream - boolean - optional - default: false
     ## The stream parameter can be used to check the status code and/or
