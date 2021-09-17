@@ -1,7 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 import pytest
+from tests.common import SNMP_CONTAINER_NAME
+
+from datadog_checks.dev.docker import get_container_ip
 
 from . import common
 
@@ -123,3 +127,33 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=2)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_core_discovery(dd_agent_check):
+    config = common.generate_container_profile_config_with_ad('apc_ups')
+    config['init_config']['loader'] = 'core'
+    aggregator = dd_agent_check(config, rate=False, times=5)
+
+    network = config['instances'][0]['network_address']
+    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
+    tags = [
+        # profile
+        'snmp_profile:apc_ups',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        'device_vendor:apc',
+        # autodiscovery
+        'autodiscovery_subnet:' + network,
+        'snmp_device:' + ip_address,
+    ]
+
+    tags_with_loader = tags + ['loader:core']
+
+    # test that for a specific metric we are getting as many times as we are running the check
+    # it might be off by 1 due to devices not being discovered yet at first check run
+    aggregator.assert_metric(
+        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags_with_loader, at_least=4, value=1
+    )
+    aggregator.assert_metric('snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=tags, at_least=4)

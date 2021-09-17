@@ -3,13 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import ipaddress
 import logging
 import os
+import socket
 
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
 
@@ -213,6 +215,27 @@ def generate_container_instance_config(metrics):
 def generate_container_profile_config(profile):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
+
+    init_config = {}
+
+    instance = generate_instance_config([], template=conf)
+    instance['community_string'] = profile
+    instance['enforce_mib_constraints'] = False
+    return {
+        'init_config': init_config,
+        'instances': [instance],
+    }
+
+
+def generate_container_profile_config_with_ad(profile):
+    host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    conf = {
+        # Make sure the check handles bytes
+        'network_address': to_native_string(network),
+        'port': PORT,
+        'community_string': 'apc_ups',
+    }
 
     init_config = {}
 
