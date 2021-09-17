@@ -87,8 +87,8 @@ def imports(ctx, check, autofix):
                         suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check_name))
                     else:
                         suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{base/dev}')
-                    message = f"Detected deprecated import: {linetext}, run `ddev validate imports --autofix` to fix import. \n" \
-                              f"Import should look like: {suggested_line}",
+                    message = "Detected deprecated import: {}, run `ddev validate imports --autofix` to fix. \n" \
+                              "Import should look like: {}".format(linetext, suggested_line),
                     annotate_error(
                         f,
                         message,
