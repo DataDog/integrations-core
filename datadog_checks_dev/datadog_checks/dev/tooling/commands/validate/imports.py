@@ -57,13 +57,11 @@ def imports(ctx, check, autofix):
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
     """
-
-    validation_fails = {}
-
     checks = process_checks_option(check, source='integrations')
     echo_info(f"Validating imports for {len(checks)} checks to avoid deprecated modules ...")
-
+    failed = False
     for check_name in checks:
+        validation_fails = {}
         echo_debug(f'Checking {check_name}')
 
         # focus on check and testing directories
@@ -71,30 +69,32 @@ def imports(ctx, check, autofix):
             success, lines = validate_import(fpath, check_name, autofix)
 
             if not success:
+                failed = True
                 validation_fails[fpath] = lines
 
-    if validation_fails:
-        num_files = len(validation_fails)
-        num_failures = sum(len(lines) for lines in validation_fails.values())
-        header_message = f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n'
-        echo_failure(header_message)
-        for f, lines in validation_fails.items():
-            for line in lines:
-                linenum, linetext = line
-                echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
-                echo_info(f'{linetext}', indent='    ')
+        if validation_fails:
+            num_files = len(validation_fails)
+            num_failures = sum(len(lines) for lines in validation_fails.values())
+            header_message = f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n'
+            echo_failure(header_message)
+            for f, lines in validation_fails.items():
+                for line in lines:
+                    linenum, linetext = line
+                    echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
+                    echo_info(f'{linetext}', indent='    ')
 
-                if check_name in linetext:
-                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check_name))
-                else:
-                    suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{base/dev}')
-                annotate_error(
-                    f,
-                    f"Detected deprecated import: {linetext}, run `ddev validate imports --autofix` to fix import. "
-                    f"Import should look like: {suggested_line}",
-                    line=linenum + 1,
-                )
-        abort()
+                    if check_name in linetext:
+                        suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{}'.format(check_name))
+                    else:
+                        suggested_line = linetext.replace('datadog_checks', 'datadog_checks.{base/dev}')
+                    annotate_error(
+                        f,
+                        f"Detected deprecated import: {linetext}, run `ddev validate imports --autofix` to fix import."
+                        f"Import should look like: {suggested_line}",
+                        line=linenum + 1,
+                    )
 
+        if failed:
+            abort()
     else:
         echo_success('Validation passed!')
