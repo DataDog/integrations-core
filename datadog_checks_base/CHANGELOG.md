@@ -1,5 +1,8 @@
 # CHANGELOG - datadog_checks_base
 
+## 19.2.0-beta.1 / 2021-09-17
+
+
 ## 19.1.0-beta.1 / 2021-09-17
 
 
