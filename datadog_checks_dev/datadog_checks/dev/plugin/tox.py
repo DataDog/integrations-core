@@ -13,6 +13,7 @@ STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
 TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
+MYPY_ADDITIONAL_DEPS = 'dd_mypy_deps'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
@@ -142,11 +143,15 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # Each integration should explicitly specify its options and which files it'd like to type check, which is
         # why we're defaulting to 'no arguments' by default.
         mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
+        mypy_deps = sections['testenv'].get(MYPY_ADDITIONAL_DEPS, "").splitlines()
 
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
         dependencies.append(MYPY_DEP)
+        for mypy_dep in mypy_deps:
+            dependencies.append(mypy_dep)
+
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {

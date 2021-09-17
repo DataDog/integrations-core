@@ -4,7 +4,7 @@
 import click
 
 from ....utils import read_file
-from ...annotations import annotate_error, annotate_warning
+from ...annotations import annotate_error
 from ...constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
 from ...release import get_package_name
 from ...testing import process_checks_option
@@ -43,7 +43,6 @@ def agent_reqs(check):
                 unreleased_checks.append(check_name)
                 message = f'{check_name} has not yet been released'
                 echo_warning(message)
-                annotate_warning(release_requirements_file, message)
             elif check_version != pinned_version:
                 failed_checks += 1
                 message = f"{check_name} has version {check_version} but is pinned to {pinned_version}"

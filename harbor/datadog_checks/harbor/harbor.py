@@ -92,10 +92,17 @@ class HarborCheck(AgentCheck):
                 self.log.debug(e, exc_info=True)
                 return
             raise e
-        disk_free = volume_info['storage']['free']
-        disk_total = volume_info['storage']['total']
-        self.gauge('harbor.disk.free', disk_free, tags=base_tags)
-        self.gauge('harbor.disk.total', disk_total, tags=base_tags)
+        info = {}
+        if isinstance(volume_info['storage'], list):
+            info = volume_info['storage'][0]
+        else:
+            info = volume_info['storage']
+
+        if info.get('free') is None:
+            self.log.warning("Volume info has an unexpected format: %s", str(info))
+        else:
+            self.gauge('harbor.disk.free', info['free'], tags=base_tags)
+            self.gauge('harbor.disk.total', info['total'], tags=base_tags)
 
     def _submit_read_only_status(self, api, base_tags):
         read_only_status = api.read_only_status()
