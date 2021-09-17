@@ -831,6 +831,7 @@ def test_perform_kubelet_check(monkeypatch):
                 stream=False,
                 timeout=(10.0, 10.0),
                 verify=None,
+                allow_redirects=True,
             )
         ]
     )
