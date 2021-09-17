@@ -1,5 +1,8 @@
 # CHANGELOG - datadog_checks_base
 
+## 19.1.0-beta.1 / 2021-09-17
+
+
 ## 19.0.0 / 2021-05-28
 
 * [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
