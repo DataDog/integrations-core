@@ -37,7 +37,6 @@ class InstanceConfig(BaseModel):
     ssl_cafile: Optional[str]
     ssl_certfile: Optional[str]
     ssl_check_hostname: Optional[bool]
-    ssl_context: Optional[str]
     ssl_crlfile: Optional[str]
     ssl_keyfile: Optional[str]
     ssl_password: Optional[str]
