@@ -2027,7 +2027,7 @@ def test_requests_wrapper_config():
             timeout=(42.0, 42.0),
             proxies=None,
             verify=True,
-            allow_redirects= True,
+            allow_redirects=True,
         )
 
         check.poll(instance_http['prometheus_endpoint'])
@@ -2040,5 +2040,5 @@ def test_requests_wrapper_config():
             timeout=(42.0, 42.0),
             proxies=None,
             verify=True,
-            allow_redirects= True,
+            allow_redirects=True,
         )

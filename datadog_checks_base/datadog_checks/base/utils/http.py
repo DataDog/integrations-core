@@ -271,7 +271,7 @@ class RequestsWrapper(object):
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
             'verify': verify,
-            'allow_redirects':allow_redirects,
+            'allow_redirects': allow_redirects,
         }
 
         # For manual parsing until `requests` properly handles `no_proxy`
