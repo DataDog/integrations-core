@@ -6,7 +6,7 @@ from os.path import exists, join, relpath
 from time import time
 from typing import Any
 
-from datadog_checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.directory.config import DirectoryConfig
 

@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 
-from datadog_checks import DirectoryCheck
+from datadog_checks.directory import DirectoryCheck
 
 
 def test_run(benchmark):
