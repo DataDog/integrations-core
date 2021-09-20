@@ -26,7 +26,15 @@ def config_e2e():
 
     return {
         'init_config': {},
-        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [
+            {
+                'host': common.HOST,
+                'user': common.USER,
+                'pass': common.PASS,
+                'port': common.PORT,
+                'disable_generic_tags': 'true',
+            }
+        ],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -82,6 +90,7 @@ def instance_complex():
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
+        'disable_generic_tags': 'true',
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -115,6 +124,7 @@ def instance_custom_queries():
         'pass': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
         'custom_queries': [
             {
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
@@ -130,7 +140,7 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
 
 
 @pytest.fixture(scope='session')

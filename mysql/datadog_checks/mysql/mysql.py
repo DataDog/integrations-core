@@ -205,9 +205,12 @@ class MySql(AgentCheck):
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
         if self._config.mysql_sock != '':
             self.service_check_tags = [
-                'server:{0}'.format(self._config.mysql_sock),
+                'mysql_server:{0}'.format(self._config.mysql_sock),
                 'port:unix_socket',
             ] + self._config.tags
+            if not self.disable_generic_tags:
+                self.service_check_tags.append('server:{0}'.format(self._config.mysql_sock))
+
             connection_args.update({'unix_socket': self._config.mysql_sock})
         else:
             connection_args.update({'host': self._config.host})
