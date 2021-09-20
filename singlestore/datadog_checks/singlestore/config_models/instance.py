@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -13,12 +13,22 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    columns: Optional[Sequence[Mapping[str, Any]]]
+    query: Optional[str]
+    tags: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
     collect_system_metrics: Optional[bool]
     connect_timeout: Optional[int]
+    custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
@@ -34,6 +44,7 @@ class InstanceConfig(BaseModel):
     tls_private_key_password: Optional[str]
     tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]
+    use_global_custom_queries: Optional[str]
     use_tls: Optional[bool]
     username: Optional[str]
 
