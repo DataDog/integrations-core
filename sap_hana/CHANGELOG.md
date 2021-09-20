@@ -1,5 +1,11 @@
 # CHANGELOG - SAP HANA
 
+## 1.7.0 / 2021-09-20
+
+* [Added] Add option to disable persistent database connections. See [#10023](https://github.com/DataDog/integrations-core/pull/10023).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
 ## 1.6.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
