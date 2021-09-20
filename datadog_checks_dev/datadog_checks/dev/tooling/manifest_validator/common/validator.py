@@ -4,6 +4,7 @@
 
 import abc
 import os
+import re
 from typing import Dict
 
 import six
@@ -187,15 +188,25 @@ class ImmutableAttributesValidator(BaseManifestValidator):
 
     def validate(self, check_name, decoded, fix):
         manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
-        if 'new file' not in manifest_fields_changed:
+
+        # Skip this validation if the manifest was updated from 1.0.0 -> 2.0.0
+        manifest_upgrade_regex = re.compile(r'\+\s+"manifest_version": "2.0.0",')
+        version_upgraded = manifest_upgrade_regex.findall(manifest_fields_changed)
+
+        if 'new file' not in manifest_fields_changed and not version_upgraded:
             for field in self.FIELDS_NOT_ALLOWED_TO_CHANGE[self.version]:
                 if field in manifest_fields_changed:
                     output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
                     self.fail(output)
         else:
-            self.result.messages['info'].append(
-                "  skipping check for changed fields: integration not on default branch"
-            )
+            if 'new file' in manifest_fields_changed:
+                self.result.messages['info'].append(
+                    "  skipping check for changed fields: integration not on default branch"
+                )
+            elif version_upgraded:
+                self.result.messages['info'].append(
+                    "  skipping check for changed fields: manifest version was upgraded"
+                )
 
 
 class LogsCategoryValidator(BaseManifestValidator):
