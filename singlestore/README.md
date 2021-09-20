@@ -54,7 +54,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-By default the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS` and `LEAVES` table.
+By default the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS` and `LEAVES` tables.
 To collect additional system level metrics (cpu, disk, network io and memory), you can set the following field in the `singlestore.d/conf.yaml` file:
 
 ```yaml
