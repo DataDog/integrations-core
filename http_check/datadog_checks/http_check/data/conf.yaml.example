@@ -66,7 +66,8 @@ instances:
     ## request with the data parameter.
     ## SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
     #
-    # data: <DATA>
+    # data:
+    #   <KEY>: <VALUE>
 
     ## @param content_match - string - optional
     ## The content_match parameter allows the check
