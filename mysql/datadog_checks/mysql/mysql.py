@@ -7,7 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -204,13 +204,7 @@ class MySql(AgentCheck):
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
         if self._config.mysql_sock != '':
-            self.service_check_tags = [
-                'mysql_server:{0}'.format(self._config.mysql_sock),
-                'port:unix_socket',
-            ] + self._config.tags
-            if not self.disable_generic_tags:
-                self.service_check_tags.append('server:{0}'.format(self._config.mysql_sock))
-
+            self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
         else:
             connection_args.update({'host': self._config.host})
@@ -219,16 +213,21 @@ class MySql(AgentCheck):
             connection_args.update({'port': self._config.port})
         return connection_args
 
-    @contextmanager
-    def _connect(self):
-        server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
-
+    def _service_check_tags(self, server=None):
+        # type: (Optional[str]) -> List[str]
+        if server is None:
+            server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
             'mysql_server:{0}'.format(server),
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
         ] + self._config.tags
         if not self.disable_generic_tags:
             service_check_tags.append('server:{0}'.format(server))
+        return service_check_tags
+
+    @contextmanager
+    def _connect(self):
+        service_check_tags = self._service_check_tags()
         db = None
         try:
             connect_args = self._get_connection_args()

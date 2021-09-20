@@ -7,7 +7,6 @@ from os import environ
 
 import mock
 import psutil
-import pymysql
 import pytest
 from pkg_resources import parse_version
 
@@ -491,69 +490,6 @@ def test__get_is_aurora():
     assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
     assert None is check._is_aurora
     assert False is check._get_is_aurora(None)
-
-
-@pytest.mark.unit
-def test__get_runtime_aurora_tags():
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-
-    class MockCursor:
-        def __init__(self, rows, side_effect=None):
-            self.rows = rows
-            self.side_effect = side_effect
-
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def execute(self, command):
-            if self.side_effect:
-                raise self.side_effect
-
-        def close(self):
-            return MockCursor(None)
-
-        def fetchone(self):
-            return self.rows.pop(0)
-
-    class MockDatabase:
-        def __init__(self, cursor):
-            self.cursor = cursor
-
-        def cursor(self):
-            return self.cursor
-
-    reader_row = ('reader',)
-    writer_row = ('writer',)
-
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[reader_row])))
-    assert tags == ['replication_role:reader']
-
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[writer_row])))
-    assert tags == ['replication_role:writer']
-
-    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[(1, 'reader')])))
-    assert tags == []
-
-    # Error cases for non-aurora databases; any error should be caught and not fail the check
-
-    tags = mysql_check._get_runtime_aurora_tags(
-        MockDatabase(
-            MockCursor(
-                rows=[], side_effect=pymysql.err.InternalError(pymysql.constants.ER.UNKNOWN_TABLE, 'Unknown Table')
-            )
-        )
-    )
-    assert tags == []
-
-    tags = mysql_check._get_runtime_aurora_tags(
-        MockDatabase(
-            MockCursor(
-                rows=[],
-                side_effect=pymysql.err.ProgrammingError(pymysql.constants.ER.DBACCESS_DENIED_ERROR, 'Access Denied'),
-            )
-        )
-    )
-    assert tags == []
 
 
 @pytest.mark.integration
