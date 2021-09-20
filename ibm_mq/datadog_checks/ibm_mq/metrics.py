@@ -173,7 +173,9 @@ def get_last_put_time(self, queue_info):
     if not last_put_datestamp or not last_put_timestamp:
         return
 
-    return calculate_elapsed_time(self, ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp))
+    return calculate_elapsed_time(
+        ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp), self.qm_locale
+    )
 
 
 def get_last_get_time(self, queue_info):
@@ -183,4 +185,6 @@ def get_last_get_time(self, queue_info):
     if not last_get_datestamp or not last_get_timestamp:
         return
 
-    return calculate_elapsed_time(self, ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp))
+    return calculate_elapsed_time(
+        self, ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp), self.qm_locale
+    )

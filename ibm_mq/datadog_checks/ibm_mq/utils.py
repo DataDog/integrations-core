@@ -7,7 +7,7 @@ from dateutil import tz
 
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.time import EPOCH, get_timestamp
 
 
 def sanitize_strings(s):
@@ -21,15 +21,15 @@ def sanitize_strings(s):
     return s.strip()
 
 
-def calculate_elapsed_time(self, datestamp, timestamp, current_time=None):
+def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None):
     """
     Calculate elapsed time in seconds from IBM MQ queue status date and timestamps
     Expected Timestamp format: %H.%M.%S, e.g. 18.45.20
     Expected Datestamp format: %Y-%m-%d, e.g. 2021-09-15
     https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-display-qstatus-display-queue-status#q086260___3
     """
-    if self.queue_manager_tz is not None:
-        qm_tz = tz.gettz(self.queue_manager_tz)
+    if qm_timezone is not None:
+        qm_tz = tz.gettz(qm_timezone)
     else:
         qm_tz = tz.gettz('UTC')
 
@@ -40,9 +40,8 @@ def calculate_elapsed_time(self, datestamp, timestamp, current_time=None):
 
     if datestamp and timestamp and qm_tz is not None:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
-        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S')
-        timestamp_tz = timestamp.astimezone(tz=qm_tz)
-        timestamp_posix = (timestamp_tz - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
+        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').replace(tzinfo=qm_tz)
+        timestamp_posix = (timestamp - EPOCH).total_seconds()
     else:
         return None
 

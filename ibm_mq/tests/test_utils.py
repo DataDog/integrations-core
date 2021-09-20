@@ -36,21 +36,18 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
 
     from dateutil import tz
 
+    from datadog_checks.base.utils.time import EPOCH
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     current_tz = tz.gettz('UTC')
-    current_time_str = '2021-09-15 18:46:00'
-    current_time = datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S')
-    current_timestamp = current_time.astimezone(tz=current_tz)
-    current_posix = (current_timestamp - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
+    current_time = datetime.strptime('2021-09-15 18:46:00', '%Y-%m-%d %H:%M:%S')
+    current_timestamp = current_time.replace(tzinfo=current_tz)
+    current_posix = (current_timestamp - EPOCH).total_seconds()
 
-    param_str = datestamp + ' ' + timestamp
-    param_time = datetime.strptime(param_str, '%Y-%m-%d %H.%M.%S')
+    param_time = datetime.strptime(datestamp + ' ' + timestamp, '%Y-%m-%d %H.%M.%S')
     param_timestamp = param_time.replace(tzinfo=tz.gettz(time_zone))
-    param_posix = (param_timestamp - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
+    param_posix = (param_timestamp - EPOCH).total_seconds()
 
     expected = current_posix - param_posix
 
-    instance = {"queue_manager_tz": time_zone}
-
-    assert expected == calculate_elapsed_time(instance, datestamp, timestamp, current_timestamp)
+    assert expected == calculate_elapsed_time(datestamp, timestamp, time_zone, current_posix)
