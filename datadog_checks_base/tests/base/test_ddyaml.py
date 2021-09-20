@@ -12,7 +12,7 @@ from datadog_checks.base.ddyaml import (
     safe_yaml_load_all,
     yDumper,
 )
-from datadog_checks.base.utils import yaml as y
+from datadog_checks.base.utils.yaml import yaml_load_force_loader
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'fixtures', 'ddyaml')
 
@@ -99,5 +99,5 @@ def test_force_loader():
     conf = os.path.join(FIXTURE_PATH, "valid_conf.yaml")
     with open(conf) as f:
         stream = f.read()
-        yaml_config = y.yaml_load_force_loader(stream, yaml.SafeLoader)
+        yaml_config = yaml_load_force_loader(stream, yaml.SafeLoader)
         assert yaml_config is not None
