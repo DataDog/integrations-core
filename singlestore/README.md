@@ -21,7 +21,7 @@ No additional installation is needed on your server.
 #### Host
 
 ##### Metric collection
-1. Edit the `singlestore.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your singlestore performance data. See the [sample singlestore.d/conf.yaml][3] for all available configuration options.
+1. Edit the `singlestore.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your SingleStore performance data. See the [sample singlestore.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 
