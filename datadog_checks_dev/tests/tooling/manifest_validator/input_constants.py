@@ -196,9 +196,11 @@ DISPLAY_ON_PUBLIC_INVALID_MANIFEST = JSONDict({"app_id": "datadog-oracle"})
 
 DISPLAY_ON_PUBLIC_VALID_MANIFEST = JSONDict({"display_on_public_website": True})
 
-INVALID_DIFF = ['app_id', 'id']
+INVALID_DIFF = 'app_id id'
 
-VALID_DIFF = ['new file', 'other_val']
+VERSION_UPGRADE_DIFF = '+ "manifest_version": "2.0.0",'
+
+VALID_DIFF = 'new file'
 
 
 class MockedResponseInvalid:
