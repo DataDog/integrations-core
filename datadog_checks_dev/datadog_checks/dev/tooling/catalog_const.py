@@ -39,6 +39,7 @@ DASHBOARD_NOT_POSSIBLE = {
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
 INTEGRATION_LOGS_NOT_POSSIBLE = {
+    'avi_vantage',  # TODO: requires submitting logs via the agent
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',

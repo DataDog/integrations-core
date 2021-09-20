@@ -75,6 +75,10 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 #### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 _Available for Agent versions >6.0_
 
 1. Add this configuration block to your `mcache.d/conf.yaml` file to start collecting your Memcached Logs:

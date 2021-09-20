@@ -104,6 +104,10 @@ To configure this check for an Agent running on a host:
        ## Note: If omitted, the default system postgres database is queried.
        #
        dbname: "<DB_NAME>"
+   
+       # @param disable_generic_tags - boolean - optional - default: false
+       # The integration will stop sending server tag as is reduntant with host tag
+       disable_generic_tags: true
    ```
 
 2. [Restart the Agent][4].
@@ -116,6 +120,10 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 2. [Instrument your application that makes requests to Postgres][6].
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 
@@ -193,6 +201,10 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][21].
 
@@ -254,6 +266,10 @@ spec:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][25].
 
@@ -313,6 +329,10 @@ Set [Autodiscovery Integrations Templates][28] as Docker labels on your applicat
 ```
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][29].

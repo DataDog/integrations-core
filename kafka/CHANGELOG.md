@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-## 2.9.0 / 2021-08-22
+## 2.9.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 

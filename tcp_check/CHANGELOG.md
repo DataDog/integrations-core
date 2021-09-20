@@ -1,6 +1,6 @@
 # CHANGELOG - tcp_check
 
-## 4.0.1 / 2021-08-24
+## 4.0.1 / 2021-08-24 / Agent 7.31.0
 
 * [Fixed] Elevate log level for failed connections. See [#9965](https://github.com/DataDog/integrations-core/pull/9965).
 

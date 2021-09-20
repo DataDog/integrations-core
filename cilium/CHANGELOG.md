@@ -1,6 +1,6 @@
 # CHANGELOG - Cilium
 
-## 1.7.2 / 2021-08-22
+## 1.7.2 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Re-revert cilium AD change. See [#9901](https://github.com/DataDog/integrations-core/pull/9901).
 

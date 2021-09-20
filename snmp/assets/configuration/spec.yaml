@@ -82,7 +82,7 @@ files:
                   - This means new OIDs are also only picked up every refresh interval.
                   - With auto discovery, if the same IP is assigned to a different device with different OIDs,
                   the OIDs are refreshed only according to the refresh interval.
-          
+
 
         value:
           type: integer
@@ -298,21 +298,25 @@ files:
       - name: discovery_interval
         description: |
           Interval between 2 discovery starts, in seconds.
-          Only available using python SNMP integration.
         value:
           type: integer
           example: 3600
       - name: discovery_allowed_failures
         description: |
           Number of times a discovered host can fail before it is removed from the discovered list.
-          Only available using python SNMP integration.
         value:
           type: integer
           example: 3
       - name: workers
         description: |
-          Number of workers used for check when using discovery.
-          Only available using python SNMP integration.
+          Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
+        value:
+          type: integer
+          example: 5
+      - name: discovery_workers
+        description: |
+          Number of workers used to discover new devices.
+          Only available using corecheck SNMP integration.
         value:
           type: integer
           example: 5
