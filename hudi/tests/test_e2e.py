@@ -7,6 +7,8 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import CHECK_CONFIG
 from .metrics import METRICS
@@ -21,6 +23,8 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
+
 
     for instance in CHECK_CONFIG['instances']:
         tags = [

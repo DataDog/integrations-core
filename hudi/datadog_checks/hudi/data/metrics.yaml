@@ -253,7 +253,7 @@ jmx_metrics:
       attribute:
         Value:
           metric_type: gauge
-          alias: hudi.action.files_finalized
+          alias: hudi.finalize.files_finalized
       tags:
         table_name: $1
       exclude_tags:

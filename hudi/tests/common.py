@@ -5,8 +5,8 @@ from datadog_checks.dev import get_docker_hostname, get_here, load_jmx_config
 
 HERE = get_here()
 HOST = get_docker_hostname()
+JMX_PORT = 9999
 
-INSTANCES = [{'host': 'localhost', 'port': '9999'}]
-
+INSTANCE = [{'host': HOST, 'port': JMX_PORT}]
 CHECK_CONFIG = load_jmx_config()
-CHECK_CONFIG['instances'] = INSTANCES
+CHECK_CONFIG['instances'] = INSTANCE

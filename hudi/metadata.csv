@@ -1,22 +1,23 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 hudi.action.duration,gauge,,millisecond,,"The amount of time it took to successfully perform an action on a batch of records (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,act dur
-hudi.action.bytes_written,count,,byte,,The total amount of bytes written,0,hudi,bytes
-hudi.action.compacted_records_updated,count,,record,,The amount of compacted records updated.,0,hudi,comp_rec
-hudi.action.create_time,count,,millisecond,,The creation time of an action,0,hudi,create_time
+hudi.action.bytes_written,rate,,byte,,The total amount of bytes written,0,hudi,bytes
+hudi.action.compacted_records_updated,rate,,record,,The amount of compacted records updated.,0,hudi,comp_rec
+hudi.action.create_time,rate,,millisecond,,The creation time of an action,0,hudi,create_time
+hudi.action.upsert_time,rate,,millisecond,,The upsert time of an action,0,hudi,create_time
 hudi.action.commit_time,gauge,,millisecond,,The commit time of an action,0,hudi,create_time
-hudi.action.files_inserted,count,,file,,The amount of files inserted,0,hudi,files_in
-hudi.action.files_updated,count,,file,,The amount of files updated,0,hudi,files_up
-hudi.action.insert_records_written,count,,record,,The number of insert records written,0,hudi,insert_recs
-hudi.action.log_files_compacted,count,,file,,The number of log files compacted,0,hudi,logs_comp
-hudi.action.log_files_size,count,,,,The size of all the log files,0,hudi,logs_size
-hudi.action.partitions_written,count,,,,The number of partitions written,0,hudi,parts 
-hudi.action.records_written,count,,record,,The number of records written,0,hudi,recs
-hudi.action.scan_time,count,,millisecond,,The total time spent scanned,0,hudi,scan
-hudi.action.update_records_written,count,,record,,The amount of update records written,0,hudi,up_recs
+hudi.action.files_inserted,rate,,file,,The amount of files inserted,0,hudi,files_in
+hudi.action.files_updated,rate,,file,,The amount of files updated,0,hudi,files_up
+hudi.action.insert_records_written,rate,,record,,The number of insert records written,0,hudi,insert_recs
+hudi.action.log_files_compacted,rate,,file,,The number of log files compacted,0,hudi,logs_comp
+hudi.action.log_files_size,rate,,,,The size of all the log files,0,hudi,logs_size
+hudi.action.partitions_written,rate,,,,The number of partitions written,0,hudi,parts 
+hudi.action.records_written,rate,,record,,The number of records written,0,hudi,recs
+hudi.action.scan_time,rate,,millisecond,,The total time spent scanned,0,hudi,scan
+hudi.action.update_records_written,rate,,record,,The amount of update records written,0,hudi,up_recs
 hudi.command.time,gauge,,millisecond,,"The total time spent performing a command (UPSERT, INSERT_OVERWRITE, etc)",0,hudi,command
 hudi.finalize.duration,gauge,,millisecond,,"The total time spent cleaning",0,hudi,clean dur
 hudi.finalize.files_finalized,gauge,,file,,The number of files finalized,0,hudi,fin files
-hudi.clean.duration,gauge,,millisecond,,"The total time spent finalizing,0,hudi,fin dur
+hudi.clean.duration,gauge,,millisecond,,"The total time spent cleaning,0,hudi,fin dur
 hudi.clean.files_deleted,gauge,,file,,The number of files deleted in cleans,0,hudi,roll del files
 hudi.rollback.duration,gauge,,millisecond,,"The total time spent in rollback",0,hudi,roll dur
 hudi.rollback.files_deleted,gauge,,file,,The number of files deleted in rollback,0,hudi,cl del files
@@ -27,7 +28,7 @@ hudi.action.time.95th_percentile,gauge,,,,Measures 95th percentile of time to co
 hudi.action.time.98th_percentile,gauge,,,,Measures 98th percentile of time to complete an action,0,hudi,time 98
 hudi.action.time.99th_percentile,gauge,,,,Measures 99th percentile of time to complete an action,0,hudi,time 99
 hudi.action.time.999th_percentile,gauge,,,,Measures 999th percentile of time to complete an action,0,hudi,time 999
-hudi.action.time.count,count,,,,Measures count of times to complete an action,0,hudi,time ct
+hudi.action.time.count,rate,,,,Measures count of times to complete an action,0,hudi,time ct
 hudi.action.time.max,gauge,,,,Measures maximum amount of time to complete an action,0,hudi,time max
 hudi.action.time.mean,gauge,,,,Measures mean amount of time to complete an action,0,hudi,time mean
 hudi.action.time.min,gauge,,,,Measures minimum amount of time to complete an action,0,hudi,time min

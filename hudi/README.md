@@ -8,7 +8,7 @@ This check monitors [Hudi][1].
 
 ### Installation
 
-The Hudi check is included in the [Datadog Agent][2] package.
+The Hudi check is included in the [Datadog Agent][9] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -66,3 +66,4 @@ Need help? Contact [Datadog support][4].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
 [8]: https://hudi.apache.org/docs/metrics/#jmxmetricsreporter
+[9]: https://docs.datadoghq.com/agent/
