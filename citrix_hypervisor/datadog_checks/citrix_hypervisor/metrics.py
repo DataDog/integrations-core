@@ -75,4 +75,4 @@ def build_metric(metric_name, logger):
 
     logger.debug('Found metric %s (%s)', name, metric_name)
 
-    return (name, additional_tags)
+    return name, additional_tags
