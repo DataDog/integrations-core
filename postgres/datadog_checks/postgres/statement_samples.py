@@ -129,6 +129,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check = check
         self._config = config
         self._tags_no_db = None
+        self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
@@ -178,7 +179,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
-    # TODO: also transactions?
     def _get_active_connections(self):
         start_time = time.time()
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
@@ -222,6 +222,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         else:
             query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
+        if self._activity_last_query_start:
+            # do not re-read old idle connections
+            query = query + " AND NOT (query_start < %s AND state = 'idle')"
+            params = params + (self._activity_last_query_start,)
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
@@ -241,7 +245,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
-    # TODO: we need to filter out idle queries we have already seen..
     def _filter_valid_statement_rows(self, rows):
         insufficient_privilege_count = 0
         total_count = 0
@@ -255,6 +258,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             if query == '<insufficient privilege>':
                 insufficient_privilege_count += 1
                 continue
+            if self._activity_last_query_start is None or row['query_start'] > self._activity_last_query_start:
+                self._activity_last_query_start = row['query_start']
             yield row
         if insufficient_privilege_count > 0:
             self._log.warning(
@@ -281,7 +286,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
         if activity_event is not None:
-            self._log.warning(json.dumps(activity_event, default=default_json_event_encoding))
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
