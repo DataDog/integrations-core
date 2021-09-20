@@ -167,17 +167,19 @@ class QueueMetricCollector(object):
         for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
             metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_suffix)
             if callable(mq_attr):
-                metric_value = mq_attr(self, queue_info)
+                metric_value = mq_attr(queue_info)
                 if metric_value is not None:
                     self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                 else:
                     self.log.debug("Date for attribute %s not found for queue %s", metric_suffix, queue_name)
             else:
-                if mq_attr in queue_info:
+                try:
                     metric_value = queue_info.get(mq_attr, None)
                     self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
-                else:
-                    self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
+                except Exception as e:
+                    self.log.debug(
+                        "Attribute %s (%s) not found for queue %s. Error: {}", metric_suffix, mq_attr, queue_name, e
+                    )
 
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
         pcf = None
@@ -205,7 +207,7 @@ class QueueMetricCollector(object):
                     metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
                     try:
                         if callable(values):
-                            metric_value = values(queue_info)
+                            metric_value = values(self.config.qm_timezone, queue_info)
                             if metric_value is not None:
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                             else:

@@ -30,6 +30,9 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     """
     if qm_timezone is not None:
         qm_tz = tz.gettz(qm_timezone)
+        if qm_tz is None:
+            msg = "Unable to determine time zone for {}.".format(qm_timezone)
+            raise ValueError(msg)
     else:
         qm_tz = tz.gettz('UTC')
 

@@ -60,7 +60,7 @@ def instance_port(field, value):
     return 1414
 
 
-def instance_queue_manager_locale(field, value):
+def instance_queue_manager_timezone(field, value):
     return 'UTC'
 
 

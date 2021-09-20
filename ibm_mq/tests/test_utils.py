@@ -51,3 +51,19 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     expected = current_posix - param_posix
 
     assert expected == calculate_elapsed_time(datestamp, timestamp, time_zone, current_posix)
+
+
+@pytest.mark.parametrize(
+    'datestamp,timestamp,time_zone,valid',
+    [
+        pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid timezone A'),
+        pytest.param('2021-08-01', '12.00.00', 'Americas/Paris', False, id='Invalid timezone B'),
+        pytest.param('2020-01-01', '10.25.13', 'EST', True, id='Valid timezone A'),
+        pytest.param('2021-08-01', '12.00.00', 'Europe/Paris', True, id='Valid timezone B'),
+    ],
+)
+def test_calculate_elapsed_time_invalid_tz(datestamp, timestamp, time_zone):
+    from datadog_checks.ibm_mq.utils import calculate_elapsed_time
+
+    with pytest.raises(ValueError):
+        calculate_elapsed_time(datestamp, timestamp, time_zone)

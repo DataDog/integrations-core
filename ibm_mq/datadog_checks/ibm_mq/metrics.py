@@ -166,25 +166,21 @@ def depth_percent(queue_info):
     return depth_as_percent
 
 
-def get_last_put_time(self, queue_info):
+def get_last_put_time(qm_timezone, queue_info):
     last_put_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_DATE)
     last_put_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_TIME)
 
     if not last_put_datestamp or not last_put_timestamp:
         return
 
-    return calculate_elapsed_time(
-        ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp), self.qm_locale
-    )
+    return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp), qm_timezone)
 
 
-def get_last_get_time(self, queue_info):
+def get_last_get_time(qm_timezone, queue_info):
     last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE)
     last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME)
 
     if not last_get_datestamp or not last_get_timestamp:
         return
 
-    return calculate_elapsed_time(
-        self, ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp), self.qm_locale
-    )
+    return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp), qm_timezone)
