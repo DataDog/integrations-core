@@ -10,9 +10,9 @@ from datadog_checks.base.ddyaml import (
     safe_yaml_dump_all,
     safe_yaml_load,
     safe_yaml_load_all,
+    yaml_load_force_loader,
     yDumper,
 )
-from datadog_checks.base.utils.yaml import yaml_load_force_loader
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'fixtures', 'ddyaml')
 
