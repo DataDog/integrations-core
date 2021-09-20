@@ -7,6 +7,7 @@ import yaml
 from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.ddyaml import yaml_load_force_loader
 
 from .metrics import build_metric
 
@@ -52,7 +53,7 @@ class CitrixHypervisorCheck(AgentCheck):
         # Response is not formatted for simplejson, it's missing double quotes " around the field names
         # Explicitly use the python safe loader, the C binding is failing
         # See https://github.com/yaml/pyyaml/issues/443
-        data = yaml.load(r.content, Loader=yaml.SafeLoader)
+        data = yaml_load_force_loader(r.content, Loader=yaml.SafeLoader)
 
         if data['meta'].get('end') is not None:
             self._last_timestamp = int(data['meta']['end'])
