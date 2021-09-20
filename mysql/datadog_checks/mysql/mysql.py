@@ -221,10 +221,14 @@ class MySql(AgentCheck):
 
     @contextmanager
     def _connect(self):
+        server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
+
         service_check_tags = [
-            'server:{0}'.format((self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host)),
+            'mysql_server:{0}'.format(server),
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
         ] + self._config.tags
+        if not self.disable_generic_tags:
+            service_check_tags.append('server:{0}'.format(server))
         db = None
         try:
             connect_args = self._get_connection_args()
