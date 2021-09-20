@@ -223,6 +223,20 @@ def test_manifest_v2_immutable_attributes_validator_invalid_change(_, setup_rout
 
 @mock.patch(
     'datadog_checks.dev.tooling.manifest_validator.common.validator.content_changed',
+    return_value=input_constants.VERSION_UPGRADE_DIFF,
+)
+def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_route):
+    # Use specific validator
+    validator = common.ImmutableAttributesValidator(version=V2)
+    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+
+    # Assert test case
+    assert not validator.result.failed, validator.result
+    assert not validator.result.fixed
+
+
+@mock.patch(
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.content_changed',
     return_value=input_constants.VALID_DIFF,
 )
 def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route):
