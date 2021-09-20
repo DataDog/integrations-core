@@ -5,6 +5,7 @@ files:
   - template: init_config
     options:
     - template: init_config/default
+    - template: init_config/db
   - template: instances
     options:
     - name: host
@@ -39,6 +40,7 @@ files:
       required: false
       value:
         type: integer
+    - template: instances/db
     - name: collect_system_metrics
       description: |
         Collect additional system metrics from the MV_SYSINFO_* tables. Disabled by default to limit
