@@ -90,7 +90,7 @@ class IBMMQConfig:
         )  # type: Dict[str, str]
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
-        self.queue_manager_tz = instance.get('queue_manager_tz', 'UTC') # type: str
+        self.queue_manager_tz = instance.get('queue_manager_tz', 'UTC')  # type: str
 
         custom_tags = instance.get('tags', [])  # type: List[str]
         tags = [

@@ -24,27 +24,33 @@ def test_sanitize_strings(input_string, expected):
 
 
 @pytest.mark.parametrize(
-    'datestamp,timestamp',
+    'datestamp,timestamp,time_zone',
     [
-        pytest.param('2021-09-08', '19.19.41', id='elapsed a'),
-        pytest.param('2020-01-01', '10.25.13', id='elapsed b'),
-        pytest.param('2021-08-01', '12.00.00', id='elapsed c'),
+        pytest.param('2021-09-08', '19.19.41', 'UTC', id='elapsed a'),
+        pytest.param('2020-01-01', '10.25.13', 'EST', id='elapsed b'),
+        pytest.param('2021-08-01', '12.00.00', 'Europe/Paris', id='elapsed c'),
     ],
 )
-def test_calculate_elapsed_time(datestamp, timestamp):
-    import time
+def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     from datetime import datetime
+
+    from dateutil import tz
 
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
-    current_tz = time.tzname[time.daylight]
-    current_time_str = '2021-09-15 18:46:00' + ' ' + current_tz
+    current_tz = tz.gettz('UTC')
+    current_time_str = '2021-09-15 18:46:00'
+    current_time = datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S')
+    current_timestamp = current_time.astimezone(tz=current_tz)
+    current_posix = (current_timestamp - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
 
-    current_timestamp = time.mktime(datetime.strptime(current_time_str, '%Y-%m-%d %H:%M:%S %Z').timetuple())
-    expected = current_timestamp - (
-        time.mktime(
-            datetime.strptime((datestamp + ' ' + timestamp + ' ' + current_tz), '%Y-%m-%d %H.%M.%S %Z').timetuple()
-        )
-    )
+    param_str = datestamp + ' ' + timestamp
+    param_time = datetime.strptime(param_str, '%Y-%m-%d %H.%M.%S')
+    param_timestamp = param_time.replace(tzinfo=tz.gettz(time_zone))
+    param_posix = (param_timestamp - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
 
-    assert expected == calculate_elapsed_time(datestamp, timestamp, current_timestamp)
+    expected = current_posix - param_posix
+
+    instance = {"queue_manager_tz": time_zone}
+
+    assert expected == calculate_elapsed_time(instance, datestamp, timestamp, current_timestamp)

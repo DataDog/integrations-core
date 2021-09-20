@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 from datetime import datetime
+
 from dateutil import tz
 
 from datadog_checks.base import to_string
@@ -28,17 +28,21 @@ def calculate_elapsed_time(self, datestamp, timestamp, current_time=None):
     Expected Datestamp format: %Y-%m-%d, e.g. 2021-09-15
     https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-display-qstatus-display-queue-status#q086260___3
     """
-
-    qm_tz = tz.gettz(self.queue_manager_tz)
+    if self.queue_manager_tz is not None:
+        qm_tz = tz.gettz(self.queue_manager_tz)
+    else:
+        qm_tz = tz.gettz('UTC')
 
     if current_time is None:
         current_time = get_timestamp()
     else:
         current_time = current_time
 
-    if datestamp and timestamp:
-        timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp) + ' ' + local_tz
-        timestamp_posix = time.mktime(datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S %Z').timetuple())
+    if datestamp and timestamp and qm_tz is not None:
+        timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
+        timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S')
+        timestamp_tz = timestamp.astimezone(tz=qm_tz)
+        timestamp_posix = (timestamp_tz - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds()
     else:
         return None
 
