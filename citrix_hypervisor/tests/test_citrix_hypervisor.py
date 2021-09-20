@@ -37,10 +37,10 @@ def test_open_session(instance, side_effect, expected_session, tag):
 
 @pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
-def test_check(aggregator, instance, server_type):
+def test_check(aggregator, dd_run_check, instance, server_type):
     with mock.patch('six.moves.xmlrpc_client.Server', return_value=mocked_xenserver(server_type)):
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
 
         _assert_standalone_metrics(aggregator, ['foo:bar', 'server_type:{}'.format(server_type)])
 
@@ -56,10 +56,10 @@ def test_check(aggregator, instance, server_type):
         pytest.param('wrong', AgentCheck.CRITICAL),
     ],
 )
-def test_service_check(aggregator, url, expected_status):
+def test_service_check(aggregator, dd_run_check, url, expected_status):
     instance = {'url': url}
     check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_service_check('citrix_hypervisor.can_connect', expected_status, tags=[])
 

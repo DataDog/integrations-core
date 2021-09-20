@@ -35,7 +35,7 @@ METRICS = [
 ]
 
 
-def test_lab(aggregator):
+def test_lab(aggregator, dd_run_check):
     """
     This test is intended to be run manually to connect to a real vSphere Instance
 
@@ -78,7 +78,7 @@ def test_lab(aggregator):
     for instance in instances:
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
         check._check_connection()
-        check.check(None)
+        dd_run_check(check)
 
         aggregator.assert_service_check('citrix_hypervisor.can_connect', CitrixHypervisorCheck.OK)
         for m in METRICS:
