@@ -30,6 +30,25 @@ def test_format_filter_value():
 
 @requires_windows
 @pytest.mark.unit
+def test_format_filter_values():
+    filters = [{'a': {'AND': [['<>', 'c'], ['<>', 'd']]}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( a <> 'c' AND a <> 'd' )"
+
+    filters = [{'a': {'NOR': ['c', 'd']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( a = 'c' OR a = 'd' ) )"
+
+    filters = [{'a': {'NAND': ['c%', '%d']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( a LIKE 'c%' AND a LIKE '%d' ) )"
+
+
+@requires_windows
+@pytest.mark.unit
 def test_format_filter_like():
     filters = [{'a': '%foo'}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -44,6 +63,11 @@ def test_format_filter_list_expected():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( a < '3' )"
+
+    filters = [{'a': [1, 3]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a = '1' OR a = '3' ) )"
 
 
 @requires_windows
@@ -70,7 +94,7 @@ def test_format_filter_win32_log():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
     formatted_filters = sampler.formatted_filters
     assert (
-        formatted_filters == " WHERE ( ( SourceName = 'MSSQLSERVER' ) "
+        formatted_filters == " WHERE ( SourceName = 'MSSQLSERVER' "
         "AND ( Type = 'Warning' OR Type = 'Error' ) AND TimeGenerated >= '202056101355.000000+' )"
     )
 
