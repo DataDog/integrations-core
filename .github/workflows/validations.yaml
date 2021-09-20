@@ -47,6 +47,10 @@ jobs:
       run: |
         ddev validate http
 
+    - name: Run imports validation
+      run: |
+        ddev validate imports
+
     - name: Run JMX metrics validation
       run: |
         ddev validate jmx-metrics
