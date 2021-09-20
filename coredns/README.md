@@ -192,6 +192,7 @@ Need help? Contact [Datadog support][6].
 [9]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
 [13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
 [15]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=kubernetes#examples---datadog-redis-integration
