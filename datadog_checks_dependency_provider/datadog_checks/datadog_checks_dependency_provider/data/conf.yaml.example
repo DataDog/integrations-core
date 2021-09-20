@@ -1,4 +1,4 @@
-init_config:
+init_config: {}
 instances:
     ## @param required - boolean - required
     ## required

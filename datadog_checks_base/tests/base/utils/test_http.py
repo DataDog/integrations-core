@@ -2015,7 +2015,7 @@ class TestAllowRedirect:
         http = RequestsWrapper(instance, init_config)
         assert http.options['allow_redirects'] is True
 
-    def test_allow_redirect_overide_default(self):
+    def test_allow_redirect_override_default(self):
         instance = {'allow_redirects': False}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
