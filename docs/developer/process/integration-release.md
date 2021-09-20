@@ -187,6 +187,15 @@ ddev release upload datadog_checks_[base|dev]
 ## Troubleshooting
 
 - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
+- If you receive this error when signing with your Yubikey, check if you have more than one Yubikey inserted in your computer. Try removing the Yubikey that's not used for signing and try signing again.
+```
+  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/in_toto/runlib.py", line 529, in in_toto_run
+    securesystemslib.formats.KEYID_SCHEMA.check_match(gpg_keyid)
+  File "/Users/<USER>/.pyenv/versions/3.9.4/lib/python3.9/site-packages/securesystemslib/schema.py", line 1004, in check_match
+    raise exceptions.FormatError(
+securesystemslib.exceptions.FormatError: '[none]' did not match 'pattern /[a-fA-F0-9]+$/'
+```
+
 - If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
   without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
 
