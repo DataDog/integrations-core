@@ -1103,7 +1103,7 @@ class AgentCheck(object):
         return normalized_tags
 
     def degeneralise_tag(self, tag):
-        tag_name, value = tag.split(':')
+        tag_name, value = tag.split(':', 1)
         if tag_name in GENERIC_TAGS:
             new_name = '{}_{}'.format(self.name, tag_name)
             return '{}:{}'.format(new_name, value)

@@ -33,12 +33,16 @@ def get_expected_metrics():
     def _get_metrics(endpoint=None):
         with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
             expected_metrics = json.load(f)
+
         if endpoint is None:
-            return expected_metrics
+            endpoint = 'https://34.123.32.255/'
 
         transformed_expected_metrics = []
         for metric in expected_metrics:
-            tags = [t.replace('https://34.123.32.255/', endpoint) for t in metric['tags']]
+            tags = [
+                t.replace('https://34.123.32.255/', endpoint).replace('server:', 'avi_vantage_server:')
+                for t in metric['tags']
+            ]
             transformed_expected_metrics.append(
                 {"name": metric['name'], "type": metric['type'], "value": metric['value'], "tags": tags}
             )
