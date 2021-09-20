@@ -310,6 +310,11 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## The integration will stop sending server tag as is reduntant with host tag
+    #
+    disable_generic_tags: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
