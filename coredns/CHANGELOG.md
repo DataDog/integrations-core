@@ -1,5 +1,9 @@
 # CHANGELOG - CoreDNS
 
+## 1.9.0 / 2021-09-21 / Agent 7.32.0
+
+* [Changed] Replace cache_misses_count with cache_requests_count for coredns 1.8.5.
+
 ## 1.8.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
