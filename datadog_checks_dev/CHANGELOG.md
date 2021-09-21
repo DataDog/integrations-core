@@ -37,7 +37,7 @@
 * [Fixed] Allow double quote on requirement. See [#10028](https://github.com/DataDog/integrations-core/pull/10028).
 * [Fixed] Don't read from nonexistent manifest files. See [#10041](https://github.com/DataDog/integrations-core/pull/10041).
 * [Fixed] Prevent creation of datadog named integrations. See [#10014](https://github.com/DataDog/integrations-core/pull/10014).
-* [Fixed] Fix bug when PR body is empty and include DBM team to selector. See [#9951](https://github.com/DataDog/integrations-core/pull/9951).
+* [Fixed] Fix bug when PR body is empty and includes DBM team to selector. See [#9951](https://github.com/DataDog/integrations-core/pull/9951).
 * [Changed] Update immutable attributes validator for manifest upgrades v2. See [#10175](https://github.com/DataDog/integrations-core/pull/10175).
 * [Changed] Update mib_source_url to our own fork of mibs.snmplabs.com. See [#9952](https://github.com/DataDog/integrations-core/pull/9952).
 
