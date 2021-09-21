@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import AnyStr, Callable, Optional, Sequence, Union
+from typing import AnyStr, Callable, Sequence, Union
 
 from datadog_checks.singlestore.queries import AGGREGATORS, MV_GLOBAL_STATUS
 
@@ -22,9 +22,14 @@ UNITS = {
 
 
 def get_row_cleaner(query):
-    # type: (AnyStr) -> Optional[Callable[[Sequence], Sequence]]
+    # type: (AnyStr) -> Callable[[Sequence], Sequence]
     cleaners = {MV_GLOBAL_STATUS['query']: _clean_mv_global_status, AGGREGATORS['query']: _clean_aggregators}
-    return cleaners.get(query)
+    return cleaners.get(query, _identity_method)
+
+
+def _identity_method(row):
+    # type: (Sequence) -> Sequence
+    return row
 
 
 def _clean_units(value):
@@ -37,12 +42,9 @@ def _clean_units(value):
     if value == '':
         return 0.0
 
-    try:
-        components = value.split(' ')
-        scale = UNITS.get(components[-1], 1)
-        return float(components[0]) * scale
-    except Exception:
-        return value
+    components = value.split(' ')
+    scale = UNITS[components[-1]]
+    return float(components[0]) * scale
 
 
 def _clean_mv_global_status(row):

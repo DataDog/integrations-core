@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
-from typing import Any, AnyStr, Dict, Iterable, Iterator, List, cast
+from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast
 
 import pymysql
 
@@ -54,7 +54,7 @@ class SinglestoreCheck(AgentCheck):
             self._connection = cast(pymysql.Connection, None)
 
     def execute_query_raw(self, query):
-        # type: (AnyStr) -> Iterable[List[float]]
+        # type: (AnyStr) -> Iterable[Sequence]
         with closing(self._connection.cursor()) as cursor:
             cursor.execute(query)
             if cursor.rowcount < 1:
@@ -64,7 +64,11 @@ class SinglestoreCheck(AgentCheck):
             cleaner_method = get_row_cleaner(query)
 
             for row in cursor.fetchall():
-                yield cleaner_method(row) if cleaner_method else row
+                try:
+                    yield cleaner_method(row)
+                except Exception:
+                    self.log.debug("Unable to clean row %r.", exc_info=True)
+                    yield row
 
     @contextmanager
     def connect(self):
