@@ -20,7 +20,7 @@
 * [Added] Add borrower and pysmi logs to MIB compiler. See [#10074](https://github.com/DataDog/integrations-core/pull/10074).
 * [Added] Allow the use of ddtrace for E2E tests. See [#10082](https://github.com/DataDog/integrations-core/pull/10082).
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
-* [Added] Add support for manifest v2 validations. See [#9968](https://github.com/DataDog/integrations-core/pull/9968).
+* [Added] Add support for manifest V2 validations. See [#9968](https://github.com/DataDog/integrations-core/pull/9968).
 * [Added] Add critical service check test to integration template. See [#10063](https://github.com/DataDog/integrations-core/pull/10063).
 * [Added] Add support for testing new versions of products. See [#9945](https://github.com/DataDog/integrations-core/pull/9945).
 * [Added] Update release tooling to support `datadog_checks_dependency_provider`. See [#10046](https://github.com/DataDog/integrations-core/pull/10046).
