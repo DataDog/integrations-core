@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 21.3.0 / 2021-09-21
+
+* [Added] Add force yaml loader utils. See [#10163](https://github.com/DataDog/integrations-core/pull/10163).
+
 ## 21.2.1 / 2021-09-20
 
 * [Fixed] Add limit to tag split. See [#10165](https://github.com/DataDog/integrations-core/pull/10165).
