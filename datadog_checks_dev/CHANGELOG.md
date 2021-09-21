@@ -26,7 +26,7 @@
 * [Added] Update release tooling to support `datadog_checks_dependency_provider`. See [#10046](https://github.com/DataDog/integrations-core/pull/10046).
 * [Added] Add pytest plugin dependency to handle flakes. See [#10043](https://github.com/DataDog/integrations-core/pull/10043).
 * [Added] Annotate dashboard and recommended monitors validation. See [#9899](https://github.com/DataDog/integrations-core/pull/9899).
-* [Added] Annotating display_queue. See [#9944](https://github.com/DataDog/integrations-core/pull/9944).
+* [Added] Annotate display_queue. See [#9944](https://github.com/DataDog/integrations-core/pull/9944).
 * [Fixed] Add Avi Vantage to INTEGRATION_LOGS_NOT_POSSIBLE. See [#9667](https://github.com/DataDog/integrations-core/pull/9667).
 * [Fixed] Remove annotation for unnecessary warning. See [#10124](https://github.com/DataDog/integrations-core/pull/10124).
 * [Fixed] Fix mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
