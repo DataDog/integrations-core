@@ -6,7 +6,7 @@
 * [Added] Annotate imports validation. See [#10112](https://github.com/DataDog/integrations-core/pull/10112).
 * [Added] Annotate models validations. See [#10131](https://github.com/DataDog/integrations-core/pull/10131).
 * [Added] Meta command to migrate manifest to V2. See [#10088](https://github.com/DataDog/integrations-core/pull/10088).
-* [Added] Allow kube port forwarding to support any resource. See [#10127](https://github.com/DataDog/integrations-core/pull/10127).
+* [Added] Allow Kubernetes port forwarding to support any resource. See [#10127](https://github.com/DataDog/integrations-core/pull/10127).
 * [Added] Annotate saved views validation. See [#10130](https://github.com/DataDog/integrations-core/pull/10130).
 * [Added] Annotate metadata validation. See [#10128](https://github.com/DataDog/integrations-core/pull/10128).
 * [Added] Annotate package validation. See [#10115](https://github.com/DataDog/integrations-core/pull/10115).
