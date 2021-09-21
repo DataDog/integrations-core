@@ -66,6 +66,7 @@ python-binary-memcached,PyPI,MIT,Jayson Reis
 python-dateutil,PyPI,Apache-2.0,Gustavo Niemeyer
 python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
 python3-gearman,PyPI,Apache-2.0,
+pytz,PyPI,MIT,Stuart Bishop
 pyvmomi,PyPI,Apache-2.0,"VMware, Inc."
 pywin32,PyPI,PSF,Mark Hammond (et al)
 redis,PyPI,MIT,Andy McCurdy
