@@ -60,6 +60,8 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     SELECT application_name, state, usename, count(*) as connections
     FROM {pg_stat_activity_view}
     WHERE client_port IS NOT NULL
+    {extra_query_config}
+    GROUP BY application_name, state, usename
 """,
 ).strip()
 
@@ -182,17 +184,18 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _get_active_connections(self):
         start_time = time.time()
-        query = PG_ACTIVE_CONNECTIONS_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
+        extra_query_config = ""
         params = ()
         if self._config.dbstrict:
-            query = query + " AND datname = %s"
+            extra_query_config = " AND datname = %s"
             params = params + (self._config.dbname,)
         else:
-            query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
+            extra_query_config = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
 
-        # add groupings to query
-        query = query + " GROUP BY application_name, state, usename"
+        query = PG_ACTIVE_CONNECTIONS_QUERY.format(
+            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_query_config=extra_query_config
+        )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
@@ -502,7 +505,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
-            row['datname'], row['query'], row['statement'], row['query_signature'])
+            row['datname'], row['query'], row['statement'], row['query_signature']
+        )
         collection_errors = None
         if explain_err_code:
             collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
