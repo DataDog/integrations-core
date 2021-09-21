@@ -145,7 +145,6 @@ files:
         description: |
           Timezone of the queue manager if it is different from the host system timezone. Valid values are a time zone name (IANA, or, on Windows, Windows keys), location of a tzfile(5) zoneinfo file or TZ variable style time zone specifier. If `localtime`, queue_manager_timezone will be set to host's local system timezone.
           Used for calculating `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
-          For more details, see https://dateutil.readthedocs.io/en/stable/tz.html#dateutil.tz.gettz
         value:
           example: UTC
           type: string
