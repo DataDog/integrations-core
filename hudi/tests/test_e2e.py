@@ -25,7 +25,6 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
 
-
     for instance in CHECK_CONFIG['instances']:
         tags = [
             'instance:hudi-{}-{}'.format(instance['host'], instance['port']),

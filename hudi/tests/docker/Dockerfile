@@ -1,14 +1,13 @@
 FROM openjdk:8-jdk-alpine
 
-ENV SPARK_VERSION=3.1.1
-ENV HADOOP_VERSION=3.2
-
+ARG SPARK_VERSION
+ARG HADOOP_VERSION
 # adapted from https://github.com/big-data-europe/docker-spark/blob/master/template/scala/Dockerfile
 RUN apk add --no-cache curl bash \
-      && wget https://archive.apache.org/dist/spark/spark-3.0.1/spark-3.0.1-bin-hadoop3.2.tgz \
-      && tar -xvzf spark-3.0.1-bin-hadoop3.2.tgz \
-      && mv spark-3.0.1-bin-hadoop3.2 spark \
-      && rm spark-3.0.1-bin-hadoop3.2.tgz \
+      && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
+      && tar -xvzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
+      && mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} spark \
+      && rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
       && cd /
 
 RUN wget -O - https://github.com/sbt/sbt/releases/download/v1.4.1/sbt-1.4.1.tgz | gunzip | tar -x -C /usr/local

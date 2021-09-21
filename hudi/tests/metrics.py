@@ -10,7 +10,7 @@ METRICS = [
     "hudi.action.create_time",
     "hudi.action.files_inserted",
     "hudi.action.files_updated",
-    #"hudi.action.insert_records_written",
+    # "hudi.action.insert_records_written",
     "hudi.action.log_files_compacted",
     "hudi.action.log_files_size",
     "hudi.action.partitions_written",
@@ -21,8 +21,8 @@ METRICS = [
     "hudi.finalize.duration",
     "hudi.finalize.files_finalized",
     "hudi.index.command.duration",
-    #"hudi.clean.duration",
-    #"hudi.clean.files_deleted"
+    # "hudi.clean.duration",
+    # "hudi.clean.files_deleted"
     "hudi.action.commit_time",
     "hudi.action.time.min",
     "hudi.action.time.max",
