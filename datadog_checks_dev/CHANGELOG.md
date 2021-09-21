@@ -24,7 +24,7 @@
 * [Added] Add critical service check test to integration template. See [#10063](https://github.com/DataDog/integrations-core/pull/10063).
 * [Added] Add support for testing new versions of products. See [#9945](https://github.com/DataDog/integrations-core/pull/9945).
 * [Added] Update release tooling to support `datadog_checks_dependency_provider`. See [#10046](https://github.com/DataDog/integrations-core/pull/10046).
-* [Added] Add pytest plugin dependency to handle flakes. See [#10043](https://github.com/DataDog/integrations-core/pull/10043).
+* [Added] Add Pytest plugin dependency to handle flakes. See [#10043](https://github.com/DataDog/integrations-core/pull/10043).
 * [Added] Annotate dashboard and recommended monitors validation. See [#9899](https://github.com/DataDog/integrations-core/pull/9899).
 * [Added] Annotate display_queue. See [#9944](https://github.com/DataDog/integrations-core/pull/9944).
 * [Fixed] Add Avi Vantage to INTEGRATION_LOGS_NOT_POSSIBLE. See [#9667](https://github.com/DataDog/integrations-core/pull/9667).
