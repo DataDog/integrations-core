@@ -133,10 +133,7 @@ instances:
     # convert_endianness: false
 
     ## @param queue_manager_timezone - string - optional - default: UTC
-    ## Timezone of the queue manager if it is different from the host system timezone. Valid values are a
-    ## time zone name (IANA, or, on Windows, Windows keys), location of a tzfile(5) zoneinfo file or
-    ## TZ variable style time zone specifier. If `localtime`, queue_manager_timezone will be set to host's
-    ## local system timezone.
+    ## Timezone of the queue manager in Olson timezone format, if it is different from the host system timezone.
     ## Used for calculating `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
     #
     # queue_manager_timezone: UTC
