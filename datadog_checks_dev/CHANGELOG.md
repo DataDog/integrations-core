@@ -33,7 +33,7 @@
 * [Fixed] Bump mypy. See [#10119](https://github.com/DataDog/integrations-core/pull/10119).
 * [Fixed] Use regex to parse for http wrapper instead of reading by line. See [#10055](https://github.com/DataDog/integrations-core/pull/10055).
 * [Fixed] Instantiate borrowers in snmp profile generator. See [#10086](https://github.com/DataDog/integrations-core/pull/10086).
-* [Fixed] [ddev] Fix warning for snmp generate profile command. See [#9967](https://github.com/DataDog/integrations-core/pull/9967).
+* [Fixed] Fix warning for snmp generate profile command. See [#9967](https://github.com/DataDog/integrations-core/pull/9967).
 * [Fixed] Allow double quote on requirement. See [#10028](https://github.com/DataDog/integrations-core/pull/10028).
 * [Fixed] Don't read from nonexistent manifest files. See [#10041](https://github.com/DataDog/integrations-core/pull/10041).
 * [Fixed] prevent creation of datadog named integrations. See [#10014](https://github.com/DataDog/integrations-core/pull/10014).
