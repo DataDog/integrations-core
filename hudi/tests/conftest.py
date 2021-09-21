@@ -4,9 +4,10 @@
 import os
 
 import pytest
+from subprocess import Popen
 
-from datadog_checks.dev import docker_run
-
+from datadog_checks.dev import docker_run, run_command
+from datadog_checks.dev.conditions import CheckCommandOutput
 from .common import CHECK_CONFIG, HERE
 
 
@@ -16,4 +17,11 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
         sleep=5,
     ):
+        run_spark()
         yield CHECK_CONFIG, {'use_jmx': True}
+
+
+def run_spark():
+    cmd = "docker exec spark-app-hudi /spark/bin/spark-submit --packages org.apache.spark:spark-avro_2.12:2.4.4 --conf 'spark.serializer=org.apache.spark.serializer.KryoSerializer' --jars /hudi/packaging/hudi-spark-bundle/target/hudi-spark3-bundle_2.12-0.10.0-SNAPSHOT.jar /usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"
+
+    proc = Popen([cmd], shell=True, stdin=None, stdout=None, stderr=None)
