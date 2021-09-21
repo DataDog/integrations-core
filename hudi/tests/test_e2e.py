@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 from typing import Any
 
 import pytest
@@ -30,5 +29,6 @@ def test_e2e(dd_agent_check):
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)

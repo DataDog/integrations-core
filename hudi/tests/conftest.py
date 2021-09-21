@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
-from subprocess import Popen
 
 import pytest
 
@@ -18,19 +17,5 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
         sleep=5,
     ):
-        run_spark()
         time.sleep(60)
         yield CHECK_CONFIG, {'use_jmx': True}
-
-
-def run_spark():
-    cmd = (
-        "docker exec spark-app-hudi /spark/bin/spark-submit "
-        "--packages org.apache.spark:spark-avro_2.12:2.4.4 "
-        "--conf 'spark.serializer=org.apache.spark.serializer.KryoSerializer' "
-        "--jars /hudi/packaging/hudi-spark-bundle/target/hudi-spark3-bundle_2.12-0.10.0-SNAPSHOT.jar "
-        "/usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"
-    )
-
-    # TODO update run_command to handle this
-    #Popen(cmd, stdin=None, stdout=None, stderr=None)
