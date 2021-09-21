@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import time
 
 import pytest
 
@@ -15,7 +14,6 @@ from .common import CHECK_CONFIG, HERE
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
-        sleep=200,
+        sleep=100,
     ):
-        time.sleep(100)
         yield CHECK_CONFIG, {'use_jmx': True}
