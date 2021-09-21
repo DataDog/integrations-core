@@ -2,7 +2,7 @@
 
 ## 1.9.0 / 2021-09-21 / Agent 7.32.0
 
-* [Changed] Replace cache_misses_count with cache_requests_count for coredns 1.8.5.
+* [Changed] Replace cache_misses_count with cache_requests_count for coredns 1.8.5. See [#10187](https://github.com/DataDog/integrations-core/pull/10187).
 
 ## 1.8.0 / 2021-05-28 / Agent 7.29.0
 
