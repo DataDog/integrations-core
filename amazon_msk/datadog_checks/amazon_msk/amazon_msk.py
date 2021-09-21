@@ -10,6 +10,10 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_aff
 
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 class AmazonMskCheck(OpenMetricsBaseCheck):
     """
@@ -52,6 +56,7 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
         )
         self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
+        self._proxies = self.instance.get('proxy', init_config.get('proxy'), datadog_agent.get_config('proxy'))
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
@@ -77,11 +82,16 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
+                proxies=self._proxies,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
-            client = boto3.client('kafka', region_name=self._region_name)
+            client = boto3.client(
+                'kafka',
+                proxies=self._proxies,
+                region_name=self._region_name,
+            )
 
         try:
             response = client.list_nodes(ClusterArn=self._cluster_arn)
