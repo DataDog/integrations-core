@@ -33,7 +33,7 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
         qm_tz = tz.gettz(qm_timezone)
         if qm_tz is None or type(qm_tz) == str:
             msg = """Unable to determine queue manager timezone for configured value: {}. Please use a time zone name
-            (IANA, or, on Windows, Windows keys) or location of a tzfile(5) zoneinfo file.'.format(qm_timezone)"""
+            (IANA, or, on Windows, Windows keys) or location of a tzfile(5) zoneinfo file.""".format(qm_timezone)
             raise ValueError(msg)
     elif qm_timezone == 'localtime':
         if get_os() == 'windows':
