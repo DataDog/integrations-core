@@ -2864,6 +2864,7 @@ def test_template_array():
         'read_timeout',
         'log_requests',
         'persist_connections',
+        'allow_redirects',
         'bar',
     ]
 

@@ -104,6 +104,10 @@ To configure this check for an Agent running on a host:
        ## Note: If omitted, the default system postgres database is queried.
        #
        dbname: "<DB_NAME>"
+   
+       # @param disable_generic_tags - boolean - optional - default: false
+       # The integration will stop sending server tag as is reduntant with host tag
+       disable_generic_tags: true
    ```
 
 2. [Restart the Agent][4].

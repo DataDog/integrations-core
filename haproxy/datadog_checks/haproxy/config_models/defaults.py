@@ -24,6 +24,10 @@ def instance_active_tag(field, value):
     return False
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 

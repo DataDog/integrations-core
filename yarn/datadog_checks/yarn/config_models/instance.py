@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     application_status_mapping: Optional[Mapping[str, Any]]
     application_tags: Optional[Mapping[str, Any]]
     auth_token: Optional[AuthToken]

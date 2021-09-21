@@ -78,7 +78,7 @@ To increase the verbosity of the data plane logs, see [the official Linkerd docu
 
 ### Metrics
 
-See [metadata.csv][8] for a list of default metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 For linkerd v1, see [finagle metrics docs][9] for a detailed description of some of the available metrics and [this gist][10] for an example of metrics exposed by linkerd.
 

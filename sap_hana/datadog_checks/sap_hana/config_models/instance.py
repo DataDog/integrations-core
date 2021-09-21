@@ -32,6 +32,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     password: str
+    persist_db_connections: Optional[bool]
     port: Optional[int]
     server: str
     service: Optional[str]
