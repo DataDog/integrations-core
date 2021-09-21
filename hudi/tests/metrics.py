@@ -4,13 +4,18 @@
 from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 METRICS = [
+    # metrics commented out can be emitted but not without adding more complex updates to the environment
+    # "hudi.clean.duration",
+    # "hudi.clean.files_deleted"
+    # "hudi.rollback.files_deleted",
+    # "hudi.rollback.duration",
+    "hudi.action.insert_records_written",
     "hudi.action.duration",
     "hudi.action.bytes_written",
     "hudi.action.compacted_records_updated",
     "hudi.action.create_time",
     "hudi.action.files_inserted",
     "hudi.action.files_updated",
-    # "hudi.action.insert_records_written",
     "hudi.action.log_files_compacted",
     "hudi.action.log_files_size",
     "hudi.action.partitions_written",
@@ -21,8 +26,7 @@ METRICS = [
     "hudi.finalize.duration",
     "hudi.finalize.files_finalized",
     "hudi.index.command.duration",
-    # "hudi.clean.duration",
-    # "hudi.clean.files_deleted"
+    "hudi.command.time",
     "hudi.action.commit_time",
     "hudi.action.time.min",
     "hudi.action.time.max",

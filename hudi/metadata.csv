@@ -33,4 +33,3 @@ hudi.action.time.max,gauge,15,,,"Measures maximum amount of time to complete an 
 hudi.action.time.mean,gauge,15,,,"Measures mean amount of time to complete an action (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,time mean
 hudi.action.time.min,gauge,15,,,"Measures minimum amount of time to complete an action (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,time min
 hudi.action.time.std_dev,gauge,15,,,"Measures standard deviation of time to complete an action (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,time std
-hudi.action.time.snapshot_size,gauge,15,,,"Measures snapshot size of time to complete an action (commit, deltacommit, replacecommit, compaction, etc)",0,hudi,time snap

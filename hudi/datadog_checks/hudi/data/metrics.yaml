@@ -115,8 +115,8 @@ jmx_metrics:
       tags:
         table_name: $1
         action: $2
-        exclude_tags:
-            - name
+      exclude_tags:
+        - name
   - include:
       domain: metrics
       bean_regex:
@@ -300,7 +300,4 @@ jmx_metrics:
           metric_type: gauge
         StdDev:
           alias: hudi.action.time.std_dev
-          metric_type: gauge
-        SnapshotSize:
-          alias: hudi.action.time.snapshot_size
           metric_type: gauge
