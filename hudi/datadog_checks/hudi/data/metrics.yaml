@@ -3,7 +3,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalCreateTime,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalCreateTime,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -16,7 +16,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).commitTime,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).commitTime,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -29,7 +29,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).duration,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).duration,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -42,7 +42,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalBytesWritten,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalBytesWritten,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -55,7 +55,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalCompactedRecordsUpdated,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalCompactedRecordsUpdated,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -68,7 +68,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalCreateTime,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalCreateTime,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count 
@@ -81,7 +81,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*)(.commit|.deltacommit|.replacecommit|.compaction).totalFilesInsert,type=gauges
+        - metrics:name=(.*?)(.commit|.deltacommit|.replacecommit|.compaction).totalFilesInsert,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -94,7 +94,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalFilesUpdate,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalFilesUpdate,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -107,7 +107,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalInsertRecordsWritten,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalInsertRecordsWritten,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -120,7 +120,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalLogFilesCompacted,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalLogFilesCompacted,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -133,7 +133,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalLogFilesSize,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalLogFilesSize,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -146,7 +146,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalPartitionsWritten,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalPartitionsWritten,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -159,7 +159,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalRecordsWritten,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalRecordsWritten,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -172,7 +172,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalScanTime,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalScanTime,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -185,7 +185,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalUpdateRecordsWritten,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalUpdateRecordsWritten,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -198,7 +198,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(commit|deltacommit|replacecommit|compaction).totalUpsertTime,type=gauges
+        - metrics:name=(.*?).(commit|deltacommit|replacecommit|compaction).totalUpsertTime,type=gauges
       attribute:
         Value:
           metric_type: monotonic_count
@@ -211,7 +211,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).index.(.*).duration,type=gauges
+        - metrics:name=(.*?).index.(.*?).duration,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -224,7 +224,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(clean|finalize|rollback).duration,type=gauges
+        - metrics:name=(.*?).(clean|finalize|rollback).duration,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -237,7 +237,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).(clean|rollback).numFilesDeleted,type=gauges
+        - metrics:name=(.*?).(clean|rollback).numFilesDeleted,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -249,7 +249,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).finalize.numFilesFinalized,type=gauges
+        - metrics:name=(.*?).finalize.numFilesFinalized,type=gauges
       attribute:
         Value:
           metric_type: gauge
@@ -261,7 +261,7 @@ jmx_metrics:
   - include:
       domain: metrics
       bean_regex:
-        - metrics:name=(.*).timer.(.*),type=timers
+        - metrics:name=(.*?).timer.(.*?),type=timers
       exclude_tags:
         - name
       tags:

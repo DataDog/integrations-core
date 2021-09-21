@@ -161,5 +161,9 @@ object SimpleApp {
         select("uuid","partitionpath").
         sort("partitionpath","uuid").
         show(100, false)
+
+    while(true) {
+        Thread.sleep(10)
+    }
   }
 }

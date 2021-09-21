@@ -15,7 +15,7 @@ from .common import CHECK_CONFIG, HERE
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
-        sleep=5,
+        sleep=200,
     ):
-        time.sleep(60)
+        time.sleep(100)
         yield CHECK_CONFIG, {'use_jmx': True}

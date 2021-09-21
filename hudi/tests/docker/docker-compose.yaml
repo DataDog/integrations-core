@@ -11,7 +11,7 @@ services:
     tty: true
     container_name: spark-app-hudi
     entrypoint: ["/spark/bin/spark-submit"]
-    command: ["--packages", "org.apache.spark:spark-avro_2.12:2.4.4", "--conf", "spark.serializer=org.apache.spark.serializer.KryoSerializer", "--jars", "/hudi/packaging/hudi-spark-bundle/target/hudi-spark3-bundle_2.12-0.10.0-SNAPSHOT.jar", "/usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"]
+    command: ["--packages", "org.apache.spark:spark-avro_2.12:${SPARK_VERSION}", "--conf", "spark.serializer=org.apache.spark.serializer.KryoSerializer", "--jars", "/hudi/packaging/hudi-spark-bundle/target/hudi-spark3-bundle_2.12-0.10.0-SNAPSHOT.jar", "/usr/src/app/target/scala-2.12/app_2.12-0.1.0-SNAPSHOT.jar"]
     ports:
       - "4040:4040"
       - "9999:9999"
