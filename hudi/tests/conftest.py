@@ -33,4 +33,4 @@ def run_spark():
 
     # TODO update run_command to handle this
     Popen([cmd], shell=True, stdin=None, stdout=None, stderr=None)
-    time.sleep(150)
+    time.sleep(300)
