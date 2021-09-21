@@ -7,11 +7,13 @@ import re
 import ssl
 from contextlib import contextmanager
 from copy import deepcopy
+from functools import partial
 from io import open
 from ipaddress import ip_address, ip_network
 
 import requests
 import requests_unixsocket
+from binary import KIBIBYTE
 from cryptography.x509 import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
@@ -53,6 +55,10 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+# 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
+# https://www.bittorrent.org/beps/bep_0003.html
+DEFAULT_CHUNK_SIZE = 16
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'auth_token': None,
@@ -76,6 +82,7 @@ STANDARD_FIELDS = {
     'persist_connections': False,
     'proxy': None,
     'read_timeout': None,
+    'request_size': DEFAULT_CHUNK_SIZE,
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
@@ -119,6 +126,7 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
+        'request_size',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -280,6 +288,8 @@ class RequestsWrapper(object):
         # Ignore warnings for lack of SSL validation
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
+        self.request_size = int(float(config['request_size']) * KIBIBYTE)
+
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
         # http://docs.python-requests.org/en/master/user/advanced/#session-objects
@@ -370,6 +380,10 @@ class RequestsWrapper(object):
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+
+            response.iter_content = partial(response.iter_content, chunk_size=self.request_size)
+            response.iter_lines = partial(response.iter_lines, chunk_size=self.request_size)
+
             return response
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
