@@ -73,7 +73,7 @@ pyyaml==5.4.1
 redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0
-requests==2.25.0;
+requests==2.25.0
 requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
 rethinkdb==2.4.4
