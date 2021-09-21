@@ -562,7 +562,7 @@ def test_activity_snapshot_collection(
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
-        assert len(event['connections']) > 0
+        assert len(event['postgres_connections']) > 0
         # find bob's query.
         bobs_query = None
         for query_json in event['postgres_activity']:
@@ -649,10 +649,10 @@ def test_active_conns_collection(
         assert event['ddsource'] == "postgres"
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
-        assert len(event['connections']) > 0
+        assert len(event['postgres_connections']) > 0
         # find bob's query.
         bobs_query = None
-        for query_json in event['connections']:
+        for query_json in event['postgres_connections']:
             if 'usename' in query_json and query_json['usename'] == "bob":
                 bobs_query = query_json
         assert bobs_query is not None
