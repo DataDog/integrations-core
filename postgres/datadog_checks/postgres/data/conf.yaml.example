@@ -270,17 +270,17 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
-    ## Configure collection of activity snapshots
+    ## Configure collection of query activity
     #
     query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of activity query snapshots. Requires `dbm: true`, and enabling query_samples.
+        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 1
-        ## Set the activity snapshot collection interval (in seconds). This number cannot be smaller than
+        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
         ## query_samples configured collection_interval.
         #
         # collection_interval: 1

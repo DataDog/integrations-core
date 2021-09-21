@@ -578,7 +578,6 @@ def test_activity_snapshot_collection(
         assert 'query' not in bobs_query
 
         expected_tags = dbm_instance['tags'] + [
-            'server:{}'.format(HOST),
             'port:{}'.format(PORT),
         ]
 

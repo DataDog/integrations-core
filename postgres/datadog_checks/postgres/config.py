@@ -82,7 +82,7 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
-        self.activity_snapshots_config = instance.get('query_activity', {}) or {}
+        self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {

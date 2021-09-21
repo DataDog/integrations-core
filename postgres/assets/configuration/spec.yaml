@@ -321,17 +321,17 @@ files:
             type: integer
             example: 10000
     - name: query_activity
-      description: Configure collection of activity snapshots
+      description: Configure collection of query activity
       options:
         - name: enabled
           description: |
-            Enable collection of activity query snapshots. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the activity snapshot collection interval (in seconds). This number cannot be smaller than
+            Set the query activity collection interval (in seconds). This number cannot be smaller than
             query_samples configured collection_interval.
           value:
             type: number
