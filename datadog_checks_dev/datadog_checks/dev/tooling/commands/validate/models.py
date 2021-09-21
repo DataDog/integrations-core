@@ -137,7 +137,7 @@ def models(ctx, check, sync, verbose):
                     check_display_queue.append(
                         (
                             echo_failure,
-                            f'File `{model_file}` is not in sync, run "ddev validate models -s"',
+                            f'File `{model_file}` is not in sync, run "ddev validate models {check} -s"',
                         )
                     )
 
