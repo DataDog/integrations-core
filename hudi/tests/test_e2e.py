@@ -18,7 +18,6 @@ from .metrics import METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     # type: (Any) -> None
-    time.sleep(100)
 
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
