@@ -17,7 +17,7 @@
 * [Added] Annotate EULA and agent requirements validation. See [#10108](https://github.com/DataDog/integrations-core/pull/10108).
 * [Added] Annotate codeowners. See [#10107](https://github.com/DataDog/integrations-core/pull/10107).
 * [Added] Echo warning for unnecessary params used. See [#10053](https://github.com/DataDog/integrations-core/pull/10053).
-* [Added] Add borrower and pysmi logs to MIB compiler. See [#10074](https://github.com/DataDog/integrations-core/pull/10074).
+* [Added] Add borrower and PySMI logs to MIB compiler. See [#10074](https://github.com/DataDog/integrations-core/pull/10074).
 * [Added] Allow the use of ddtrace for E2E tests. See [#10082](https://github.com/DataDog/integrations-core/pull/10082).
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Added] Add support for manifest V2 validations. See [#9968](https://github.com/DataDog/integrations-core/pull/9968).
