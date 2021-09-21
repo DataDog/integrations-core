@@ -108,8 +108,12 @@ class QueueMetricCollector(object):
             else:
                 for queue_info in response:
                     queue = to_string(queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)).strip()
-                    self.log.debug("Discovered queue: %s", queue)
-                    queues.append(queue)
+                    if queue is None:
+                        self.log.debug('Discovered queue with empty name, skipping.')
+                        continue
+                    else:
+                        self.log.debug("Discovered queue: %s", queue)
+                        queues.append(queue)
                 self.log.debug("%s queues discovered", str(len(queues)))
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
