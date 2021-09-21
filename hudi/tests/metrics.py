@@ -26,7 +26,6 @@ METRICS = [
     "hudi.finalize.duration",
     "hudi.finalize.files_finalized",
     "hudi.index.command.duration",
-    "hudi.command.time",
     "hudi.action.commit_time",
     "hudi.action.time.min",
     "hudi.action.time.max",
