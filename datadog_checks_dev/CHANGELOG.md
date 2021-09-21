@@ -29,8 +29,8 @@
 * [Added] Annotate display_queue. See [#9944](https://github.com/DataDog/integrations-core/pull/9944).
 * [Fixed] Add Avi Vantage to INTEGRATION_LOGS_NOT_POSSIBLE. See [#9667](https://github.com/DataDog/integrations-core/pull/9667).
 * [Fixed] Remove annotation for unnecessary warning. See [#10124](https://github.com/DataDog/integrations-core/pull/10124).
-* [Fixed] Fix mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
-* [Fixed] Bump mypy. See [#10119](https://github.com/DataDog/integrations-core/pull/10119).
+* [Fixed] Fix Mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+* [Fixed] Bump Mypy. See [#10119](https://github.com/DataDog/integrations-core/pull/10119).
 * [Fixed] Use regex to parse for http wrapper instead of reading by line. See [#10055](https://github.com/DataDog/integrations-core/pull/10055).
 * [Fixed] Instantiate borrowers in snmp profile generator. See [#10086](https://github.com/DataDog/integrations-core/pull/10086).
 * [Fixed] Fix warning for snmp generate profile command. See [#9967](https://github.com/DataDog/integrations-core/pull/9967).
