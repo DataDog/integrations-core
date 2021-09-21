@@ -133,8 +133,8 @@ instances:
     # convert_endianness: false
 
     ## @param queue_manager_timezone - string - optional - default: UTC
-    ## Timezone of the queue manager in Olson timezone format, if it is different from the host system timezone.
-    ## Used for calculating `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+    ## Time zone of the queue manager in Olson timezone format, if it differs from the host system's time zone.
+    ## Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
     #
     # queue_manager_timezone: UTC
 
