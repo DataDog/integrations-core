@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
+from os.path import realpath
 
 import yaml
+from six import string_types
 
 try:
     from yaml import CSafeDumper as yDumper
@@ -38,15 +40,14 @@ def safe_yaml_dump_all(
     tags=None,
 ):
     if Dumper != yDumper:
-        log.debug(
-            "`%s` YAML dumper is used instead of the default one, please make sure it is safe to do so", Dumper.__name__
-        )
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in %s", stream_name)
 
     if pyyaml_dump_all:
         return pyyaml_dump_all(
             documents,
             stream,
-            Dumper,
+            yDumper,
             default_style,
             default_flow_style,
             canonical,
@@ -64,7 +65,7 @@ def safe_yaml_dump_all(
     return yaml.dump_all(
         documents,
         stream,
-        Dumper,
+        yDumper,
         default_style,
         default_flow_style,
         canonical,
@@ -82,26 +83,55 @@ def safe_yaml_dump_all(
 
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.debug(
-            "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
-        )
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in %s", stream_name)
 
     if pyyaml_load:
-        return pyyaml_load(stream, Loader=Loader)
+        return pyyaml_load(stream, Loader=yLoader)
 
-    return yaml.load(stream, Loader=Loader)
+    return yaml.load(stream, Loader=yLoader)
 
 
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.debug(
-            "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
-        )
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in %s", stream_name)
 
     if pyyaml_load_all:
-        return pyyaml_load_all(stream, Loader=Loader)
+        return pyyaml_load_all(stream, Loader=yLoader)
 
-    return yaml.load_all(stream, Loader=Loader)
+    return yaml.load_all(stream, Loader=yLoader)
+
+
+def get_stream_name(stream):
+    """Using the same logic as pyyaml to handle both string types and file types. All file objects do not necessarily
+    have a `name` attribute, in that case we can only say the stream is a file."""
+    if isinstance(stream, string_types):
+        return "<string>"
+    elif hasattr(stream, 'name'):
+        return realpath(stream.name)
+    else:
+        return "<file>"
+
+
+def yaml_load_force_loader(stream, Loader):
+    """ Override the default monkey patch for this call """
+    log.debug(
+        "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+    )
+    if pyyaml_load is None:
+        return yaml.load(stream, Loader)
+    return pyyaml_load(stream, Loader)
+
+
+def yaml_load_all_force_loader(stream, Loader):
+    """ Override the default monkey patch for this call """
+    log.debug(
+        "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+    )
+    if pyyaml_load_all is None:
+        return yaml.load_all(stream, Loader)
+    return pyyaml_load_all(stream, Loader)
 
 
 def monkey_patch_pyyaml():

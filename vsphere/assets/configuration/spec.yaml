@@ -337,6 +337,8 @@ files:
           not available, it will fallback to the VM name.
           Use this if you install the agent in VMs so that the hosts are not duplicated
           in the web application UI.
+          Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+                https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
         value:
           type: boolean
           example: false

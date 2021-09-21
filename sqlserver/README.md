@@ -85,6 +85,10 @@ Extra configuration steps are required to get the SQL Server integration running
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -129,6 +133,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 See [Autodiscovery template variables][23] for details on passing `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 

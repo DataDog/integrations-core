@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-## 1.15.1 / 2021-08-22
+## 1.15.1 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
 

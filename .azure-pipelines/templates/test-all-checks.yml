@@ -90,6 +90,9 @@ jobs:
     - checkName: cisco_aci
       displayName: Cisco ACI
       os: linux
+    - checkName: citrix_hypervisor
+      displayName: Citrix Hypervisor
+      os: linux
     - checkName: clickhouse
       displayName: ClickHouse
       os: linux
@@ -209,6 +212,9 @@ jobs:
       os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
+      os: linux
+    - checkName: ibm_i
+      displayName: IBM i
       os: linux
     - checkName: ibm_mq
       displayName: IBM MQ

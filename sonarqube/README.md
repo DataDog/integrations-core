@@ -117,6 +117,10 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
 1. Enable SonarQube [logging][7].
 
 2. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -174,6 +178,10 @@ To configure this check for an Agent running on a host:
 For containerized environments, see the [Autodiscovery with JMX][8] guide.
 
 ##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 

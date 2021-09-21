@@ -167,12 +167,6 @@ instances:
     #
     # sasl_kerberos_domain_name: localhost
 
-    ## @param ssl_context - string - optional
-    ## Pre-configured SSLContext for wrapping socket connections.
-    ## If provided, all other ssl_* configurations are ignored.
-    #
-    # ssl_context: <SSL_CONTEXT>
-
     ## @param ssl_check_hostname - boolean - optional - default: true
     ## Flag to configure whether SSL handshake should verify that the
     ## certificate matches the broker’s hostname.

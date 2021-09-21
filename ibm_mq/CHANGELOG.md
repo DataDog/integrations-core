@@ -1,6 +1,14 @@
 # CHANGELOG - IBM MQ
 
-## 3.14.1 / 2021-08-22
+## 3.15.0 / 2021-09-20
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+* [Fixed] Stop emitting incorrect queue warning. See [#10017](https://github.com/DataDog/integrations-core/pull/10017).
+* [Fixed] Add debug lines about discovered queues. See [#9969](https://github.com/DataDog/integrations-core/pull/9969).
+* [Fixed] Add try-catch on queue closure. See [#9955](https://github.com/DataDog/integrations-core/pull/9955).
+
+## 3.14.1 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Do not store previously discovered queues. See [#9821](https://github.com/DataDog/integrations-core/pull/9821).
 * [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).

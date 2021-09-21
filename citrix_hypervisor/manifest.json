@@ -1,0 +1,38 @@
+{
+  "aliases": [
+    "xenserver"
+  ],
+  "display_name": "Citrix Hypervisor",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "citrix_hypervisor",
+  "metric_prefix": "citrix_hypervisor.",
+  "metric_to_check": "citrix_hypervisor.host.cpu",
+  "creates_events": false,
+  "short_description": "Monitor the health and performance of a Citrix Hypervisor host.",
+  "guid": "d6c1911b-f7fd-4537-af4f-1aa40dae40c2",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Citrix Hypervisor",
+  "categories": [
+    "cloud"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "citrix-hypervisor",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

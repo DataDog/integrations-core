@@ -31,6 +31,10 @@ jobs:
         ddev config set repos.core .
         ddev config set repo core
 
+    - name: Run agent requirements validation
+      run: |
+        ddev validate agent-reqs
+
     - name: Run configuration validation
       run: |
         ddev validate config
@@ -43,13 +47,45 @@ jobs:
       run: |
         ddev validate http
 
+    - name: Run imports validation
+      run: |
+        ddev validate imports
+
+    - name: Run JMX metrics validation
+      run: |
+        ddev validate jmx-metrics
+
+    - name: Run legacy metadata validation
+      run: |
+        ddev validate metadata
+
     - name: Run legacy signature validation
       run: |
         ddev validate legacy-signature
 
+    - name: Run licenses validation
+      run: |
+        ddev validate licenses
+
+    - name: Run models validation
+      run: |
+        ddev validate models
+        
+    - name: Run package validation
+      run: |
+        ddev validate package
+        
+    - name: Run readmes validation
+      run: |
+        ddev validate readmes
+
     - name: Run recommended monitors validation
       run: |
         ddev validate recommended-monitors
+
+    - name: Run saved views validation
+      run: |
+        ddev validate saved-views
 
     - name: Run service checks validation
       run: |

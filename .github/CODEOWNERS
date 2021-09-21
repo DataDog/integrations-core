@@ -90,6 +90,8 @@ assets/               @DataDog/agent-integrations
 /process/                                 @DataDog/agent-integrations @DataDog/agent-platform
 /otel/                                    @DataDog/agent-integrations @DataDog/agent-platform
 /nvidia_jetson/                           @DataDog/agent-integrations @DataDog/agent-platform
+/ibm_i/                                   @DataDog/agent-integrations @DataDog/agent-platform
+/ibm_i/*.md                           @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
 
 
 # Database monitoring
