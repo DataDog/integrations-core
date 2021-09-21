@@ -7,6 +7,7 @@ from dateutil import tz
 
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.base.utils.platform import get_os
 from datadog_checks.base.utils.time import EPOCH, get_timestamp
 
 
@@ -30,9 +31,15 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     """
     if qm_timezone is not None:
         qm_tz = tz.gettz(qm_timezone)
-        if qm_tz is None:
-            msg = "Unable to determine time zone for {}.".format(qm_timezone)
+        if qm_tz is None or type(qm_tz) == str:
+            msg = """Unable to determine queue manager timezone for configured value: {}. Please use a time zone name
+            (IANA, or, on Windows, Windows keys) or location of a tzfile(5) zoneinfo file.'.format(qm_timezone)"""
             raise ValueError(msg)
+    elif qm_timezone == 'localtime':
+        if get_os() == 'windows':
+            qm_tz = tz.tzwinlocal
+        else:
+            qm_tz = tz.tzlocal
     else:
         qm_tz = tz.gettz('UTC')
 
@@ -41,7 +48,7 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     else:
         current_time = current_time
 
-    if datestamp and timestamp and qm_tz is not None:
+    if datestamp and timestamp:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
         timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S').replace(tzinfo=qm_tz)
         timestamp_posix = (timestamp - EPOCH).total_seconds()

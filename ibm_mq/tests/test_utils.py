@@ -56,14 +56,18 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
 @pytest.mark.parametrize(
     'datestamp,timestamp,time_zone,valid',
     [
-        pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid timezone A'),
-        pytest.param('2021-08-01', '12.00.00', 'Americas/Paris', False, id='Invalid timezone B'),
-        pytest.param('2020-01-01', '10.25.13', 'EST', True, id='Valid timezone A'),
-        pytest.param('2021-08-01', '12.00.00', 'Europe/Paris', True, id='Valid timezone B'),
+        pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid TZ: Fake/Timezone'),
+        pytest.param('2021-08-01', '12.00.00', 'MT', False, id='Invalid TZ: MT'),
+        pytest.param('2020-01-01', '10.25.13', 'MST', True, id='Valid TZ: MST'),
+        pytest.param('2021-05-25', '18.48.20', 'America/Los_Angeles', True, id='Valid TZ: IANA format'),
+        pytest.param('2021-05-25', '18.48.20', '/usr/share/zoneinfo/EST', True, id='Valid TZ: tzfile(5) format'),
     ],
 )
-def test_calculate_elapsed_time_invalid_tz(datestamp, timestamp, time_zone):
+def test_calculate_elapsed_time_valid_tz(datestamp, timestamp, time_zone, valid):
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
-    with pytest.raises(ValueError):
-        calculate_elapsed_time(datestamp, timestamp, time_zone)
+    if not valid:
+        with pytest.raises(ValueError):
+            calculate_elapsed_time(datestamp, timestamp, time_zone)
+    elif valid:
+        assert calculate_elapsed_time(datestamp, timestamp, time_zone) is not None
