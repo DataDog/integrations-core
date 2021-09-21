@@ -13,7 +13,7 @@
 * [Added] Annotate licenses. See [#10114](https://github.com/DataDog/integrations-core/pull/10114).
 * [Added] Annotate readme validations. See [#10116](https://github.com/DataDog/integrations-core/pull/10116).
 * [Added] Allow exclusion of specific branch for changelog generation. See [#10106](https://github.com/DataDog/integrations-core/pull/10106).
-* [Added] Annotate jmx metric validation. See [#10113](https://github.com/DataDog/integrations-core/pull/10113).
+* [Added] Annotate JMX metric validation. See [#10113](https://github.com/DataDog/integrations-core/pull/10113).
 * [Added] Annotate EULA and agent requirements validation. See [#10108](https://github.com/DataDog/integrations-core/pull/10108).
 * [Added] Annotate codeowners. See [#10107](https://github.com/DataDog/integrations-core/pull/10107).
 * [Added] Echo warning for unnecessary params used. See [#10053](https://github.com/DataDog/integrations-core/pull/10053).
