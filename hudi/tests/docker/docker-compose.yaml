@@ -1,0 +1,12 @@
+version: '3'
+
+# Adapted from https://github.com/big-data-europe/docker-spark/tree/master/template
+services:
+  spark-app-hudi:
+    build:
+      context: .
+    tty: true
+    container_name: spark-app-hudi
+    ports:
+      - "4040:4040"
+      - "9999:9999"
