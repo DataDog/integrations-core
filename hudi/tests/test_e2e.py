@@ -19,15 +19,14 @@ def test_e2e(dd_agent_check):
     # type: (Any) -> None
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
-
     for instance in CHECK_CONFIG['instances']:
         tags = [
             'instance:hudi-{}-{}'.format(instance['host'], instance['port']),
             'jmx_server:{}'.format(instance['host']),
         ]
         aggregator.assert_service_check('hudi.can_connect', status=AgentCheck.OK, tags=tags)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)

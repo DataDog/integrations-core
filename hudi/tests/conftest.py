@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from subprocess import Popen
 
 import pytest
@@ -15,7 +16,7 @@ from .common import CHECK_CONFIG, HERE
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
-        sleep=150,
+        sleep=5,
     ):
         run_spark()
         yield CHECK_CONFIG, {'use_jmx': True}
@@ -32,3 +33,4 @@ def run_spark():
 
     # TODO update run_command to handle this
     Popen([cmd], shell=True, stdin=None, stdout=None, stderr=None)
+    time.sleep(150)
