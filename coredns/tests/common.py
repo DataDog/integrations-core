@@ -54,7 +54,7 @@ COMMON_METRICS = [
     NAMESPACE + '.process.virtual_memory_bytes',
     NAMESPACE + '.request_count',
     NAMESPACE + '.cache_size.count',
-    NAMESPACE + '.cache_misses_count',
+    NAMESPACE + '.cache_requests_count',
     NAMESPACE + '.response_code_count',
     NAMESPACE + '.response_size.bytes.sum',
     NAMESPACE + '.response_size.bytes.count',

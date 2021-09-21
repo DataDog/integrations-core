@@ -7,7 +7,7 @@ coredns.response_code_count,count,,,,number of responses per zone and rcode,1,co
 coredns.proxy_request_count,count,,request,,query count per upstream.,1,coredns,proxy request count
 coredns.cache_drops_count,count,,response,,"Counter of responses excluded from the cache due to request/response question name mismatch.",0,coredns,cache drop
 coredns.cache_hits_count,count,,hit,,Counter of cache hits by cache type,1,coredns,cache hit
-coredns.cache_misses_count,count,,miss,,Counter of cache misses.,1,coredns,cache miss
+coredns.cache_requests_count,count,,request,,Counter of cache requests.,1,coredns,cache request count
 coredns.cache_prefetch_count,count,,,,"The number of time the cache has prefetched a cached item.",1,coredns,cache prefetch
 coredns.cache_stale_count,count,,request,,"Counter of requests served from stale cache entries.",0,coredns,cache stale
 coredns.dnssec.cache_size,gauge,,,,"Total elements in the cache, type is signature.",0,coredns,dnssec cache size
