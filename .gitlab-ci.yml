@@ -25,6 +25,12 @@ stages:
   - release
   - notify
 
+cache: &slack-cache
+  key: integrations-core-slack-cache
+  paths:
+    - .slack-cache
+  policy: pull-push
+
 validate-log-integrations:
   stage: validate
   image: $VALIDATE_LOG_INTGS
@@ -50,7 +56,10 @@ validate-log-integrations:
 trigger-agent-build:
   stage: trigger
   image: $VALIDATE_AGENT_BUILD
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
     - export AGENT_REQUIREMENTS_CHANGED="false"
     - git fetch origin master
@@ -82,7 +91,10 @@ validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
   timeout: 2 hours
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
       if [[ -s ./pipeline_id.txt ]]; then
           # Fetch secrets from SCM
@@ -118,7 +130,10 @@ notify-slack:
   image: $NOTIFIER_IMAGE
   only:
   - schedules
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
       if [[ -s ./errors.txt ]]; then
           cat errors.txt
@@ -137,7 +152,10 @@ notify-failed-pipeline:
   only:
   - master
   when: on_failure
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
       MESSAGE="The pipeline uncountered an unexpected error."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
