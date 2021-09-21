@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 from typing import Any
 
 import pytest
@@ -17,6 +18,8 @@ from .metrics import METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     # type: (Any) -> None
+    time.sleep(100)
+
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
     for instance in CHECK_CONFIG['instances']:

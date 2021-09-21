@@ -19,6 +19,7 @@ def dd_environment():
         sleep=5,
     ):
         run_spark()
+        time.sleep(400)
         yield CHECK_CONFIG, {'use_jmx': True}
 
 
@@ -33,4 +34,3 @@ def run_spark():
 
     # TODO update run_command to handle this
     Popen([cmd], shell=True, stdin=None, stdout=None, stderr=None)
-    time.sleep(300)
