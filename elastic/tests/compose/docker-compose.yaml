@@ -12,6 +12,7 @@ services:
       - "path.repo=[\"/backup/my_backup_location\"]"
       - "ELASTIC_PASSWORD=admin"
       - "ELASTIC_USERNAME=admin"
+      - "DISABLE_SECURITY_PLUGIN=true"
     ports:
       - "9200:9200"
     restart: always
