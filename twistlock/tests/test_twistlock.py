@@ -108,6 +108,7 @@ def test_config_project(aggregator, fixture_group):
             proxies=mock.ANY,
             timeout=mock.ANY,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
     # Check if metrics are tagged with the project.
     for metric in METRICS:

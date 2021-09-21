@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     api_url: str
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]

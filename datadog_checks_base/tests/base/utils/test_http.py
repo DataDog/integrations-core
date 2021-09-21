@@ -43,6 +43,7 @@ DEFAULT_OPTIONS = {
     'proxies': None,
     'timeout': (10.0, 10.0),
     'verify': True,
+    'allow_redirects': True,
 }
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'fixtures')
@@ -166,6 +167,7 @@ class TestHeaders:
                 proxies=None,
                 timeout=(10.0, 10.0),
                 verify=True,
+                allow_redirects=True,
             )
 
         # make sure the original headers are not modified
@@ -949,6 +951,7 @@ class TestAuthTokenReadFile:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1037,6 +1040,7 @@ class TestAuthTokenWriteHeader:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1069,6 +1073,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1085,6 +1090,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1128,6 +1134,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1165,6 +1172,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1998,3 +2006,17 @@ class TestAIAChasing:
     def test_incomplete_chain(self):
         http = RequestsWrapper({}, {})
         http.get("https://incomplete-chain.badssl.com/")
+
+
+class TestAllowRedirect:
+    def test_allow_redirect_default(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is True
+
+    def test_allow_redirect_override_default(self):
+        instance = {'allow_redirects': False}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is False

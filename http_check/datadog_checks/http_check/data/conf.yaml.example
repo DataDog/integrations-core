@@ -169,11 +169,6 @@ instances:
     #
     # ssl_server_name: <SSL_SERVER_NAME>
 
-    ## @param allow_redirects - boolean - optional - default: true
-    ## The allow_redirects parameter can enable redirection for the HTTP check.
-    #
-    # allow_redirects: true
-
     ## @param stream - boolean - optional - default: false
     ## The stream parameter can be used to check the status code and/or
     ## response time of URLs that return an endless stream of data.
@@ -493,3 +488,8 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not allow following URL redirection.
+    #
+    # allow_redirects: true
