@@ -10,6 +10,7 @@ from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 
 
 def test_manifest_ok():
+    # fmt: off
     manifest = JSONDict(
         {
             "categories": ["os & system", "log collection"],
@@ -31,7 +32,11 @@ def test_manifest_ok():
             "integration_id": "active-directory",
             "assets": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
-                "monitors": {},
+                "monitors": {
+                    "[Active Directory] Elevated LDAP binding duration for host {{host.name}}": "assets/monitors/ldap_binding.json",  # noqa: E501
+                    "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}": "assets/monitors/ldap_client_sessions.json",  # noqa: E501
+                    "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}": "assets/monitors/ldap_binding_successful.json",  # noqa: E501
+                },
                 "dashboards": {"Active Directory": "assets/dashboards/active_directory.json"},
                 "service_checks": "assets/service_checks.json",
                 "logs": {"source": "ruby"},
@@ -39,6 +44,8 @@ def test_manifest_ok():
             },
         }
     )
+
+    # fmt: on
     root = Path(os.path.realpath(__file__)).parent.parent.parent.parent.parent.absolute()
     current_root = get_root()
     set_root(str(root))
