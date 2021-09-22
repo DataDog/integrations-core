@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 9.1.0 / 2021-09-22 / Agent 7.32.0
+
+* [FEATURE] Add support for live queries feature. See [#10006](https://github.com/DataDog/integrations-core/pull/9866).
+
 ## 9.0.2 / 2021-08-27 / Agent 7.31.0
 
 * [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).
