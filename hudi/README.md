@@ -28,8 +28,8 @@ No additional installation is needed on your server.
    Agent's configuration directory to start collecting your hudi performance data.
    See the [sample hudi.d/conf.yaml][6] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
-   You can specify the metrics you are interested in by editing the configuration below.
+   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][12].
+   You can specify the metrics you are interested in by editing the [configuration][6].
    To learn how to customize the metrics to collect visit the [JMX Checks documentation][7] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][8].
 
@@ -69,3 +69,4 @@ Need help? Contact [Datadog support][8].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
+[12]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#agent-information
