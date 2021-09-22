@@ -31,18 +31,16 @@ def setup_cilium():
     config = os.path.join(HERE, 'kind', 'cilium.yaml')
     run_command(
         [
-            "kubectl",
-            "create",
-            "clusterrolebinding",
-            "cluster-admin-binding",
-            "--clusterrole",
-            "cluster-admin",
-            "--user",
-            "ddtest@google.email",
+            "curl",
+            "-o",
+            "cilium.tar.gz",
+            "https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz",
         ]
     )
+    run_command(["tar", "xzvf", "cilium.tar.gz"])
+    run_command(["rm", "cilium.tar.gz"])
     run_command(["kubectl", "create", "ns", "cilium"])
-    run_command(["kubectl", "create", "-f", config])
+    run_command(["./cilium", "install", "-n", "cilium"])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
