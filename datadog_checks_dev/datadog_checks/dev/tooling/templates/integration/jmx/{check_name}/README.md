@@ -45,7 +45,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][4].
+Need help? Contact [Datadog support][5].
 
 
 [1]: **LINK_TO_INTEGERATION_SITE**
