@@ -53,8 +53,10 @@ files:
         example: /metrics
     - name: boto_config
       description: |
-        Specify additional configuration options for botocore clients.
+        Specify additional configuration options for the botocore Config object.
 
+        Note: Configuration values set in your AWS config file can be singularly overwritten
+        through the use of a Config object.
         https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
       value:
         example:
