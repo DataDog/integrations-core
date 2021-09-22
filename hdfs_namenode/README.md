@@ -75,10 +75,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:

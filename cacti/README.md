@@ -125,10 +125,6 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
