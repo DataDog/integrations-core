@@ -274,16 +274,16 @@ instances:
     #
     query_activity:
 
-        ## @param enabled - boolean - optional - default: true
+        ## @param enabled - boolean - optional - default: false
         ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
         #
-        # enabled: true
+        # enabled: false
 
-        ## @param collection_interval - number - optional - default: 1
+        ## @param collection_interval - number - optional - default: 10
         ## Set the query activity collection interval (in seconds). This number cannot be smaller than
         ## query_samples configured collection_interval.
         #
-        # collection_interval: 1
+        # collection_interval: 10
 
     ## Configure how the SQL obfuscator behaves.
     #

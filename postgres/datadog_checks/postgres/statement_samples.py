@@ -184,20 +184,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         return t
 
     def _get_active_connections(self):
-        active_connections = []
-        try:
-            active_connections = self._run_active_conn_query()
-        except Exception as e:
-            self._log.debug("Failed to query active connections: %s", repr(e))
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._tags + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-        return active_connections
-
-    def _run_active_conn_query(self):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params()
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
