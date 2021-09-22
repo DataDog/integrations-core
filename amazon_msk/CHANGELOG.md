@@ -1,5 +1,11 @@
 # CHANGELOG - Amazon MSK
 
+## 1.9.0-beta.1 / 2021-09-22
+
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Changed] Update Amazon MSK documentation to the new implementation. See [#9993](https://github.com/DataDog/integrations-core/pull/9993).
+
 ## 1.8.1 / 2021-07-16 / Agent 7.30.0
 
 * [Fixed] Describe py3 requirement of use_openmetrics option. See [#9714](https://github.com/DataDog/integrations-core/pull/9714).
