@@ -499,7 +499,7 @@ def test_statement_samples_collect(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_out,expected_keys",
+    "user,password,dbname,query,arg,expected_out,expected_keys,expected_conn_out",
     [
         (
             "bob",
@@ -515,6 +515,12 @@ def test_statement_samples_collect(
                 'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
             },
             ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            {
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'application_name': '',
+                'connections': 1,
+            },
         ),
     ],
 )
@@ -531,6 +537,7 @@ def test_activity_snapshot_collection(
     arg,
     expected_out,
     expected_keys,
+    expected_conn_out,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
@@ -562,7 +569,6 @@ def test_activity_snapshot_collection(
         assert event['dbm_type'] == "activity"
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert len(event['postgres_activity']) > 0
-        assert len(event['postgres_connections']) > 0
         # find bob's query.
         bobs_query = None
         for query_json in event['postgres_activity']:
@@ -581,83 +587,19 @@ def test_activity_snapshot_collection(
             'port:{}'.format(PORT),
         ]
 
-        assert event['ddtags'] == expected_tags
-
-    finally:
-        conn.close()
-
-
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
-@pytest.mark.parametrize(
-    "user,password,dbname,query,arg,expected_out",
-    [
-        (
-            "bob",
-            "bob",
-            "datadog_test",
-            "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
-            "hello",
-            {
-                'usename': 'bob',
-                'state': 'idle in transaction',
-                'application_name': '',
-                'connections': 1,
-            },
-        ),
-    ],
-)
-def test_active_conns_collection(
-    aggregator,
-    integration_check,
-    dbm_instance,
-    datadog_agent,
-    pg_stat_activity_view,
-    user,
-    password,
-    dbname,
-    query,
-    arg,
-    expected_out,
-):
-    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
-    check = integration_check(dbm_instance)
-    check._connect()
-
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
-    # the simple query protocol, sending the whole query as a plain string to postgres.
-    # if a client is using the extended query protocol with prepare then the query would appear as
-    # leave connection open until after the check has run to ensure we're able to see the query in
-    # pg_stat_activity
-    try:
-        # turn off auto commit so we can manage transactions manually
-        # this should allow us to catch queries in the 'idle in transaction' state
-        conn.autocommit = False
-        conn.cursor().execute(query, (arg,))
-        check.check(dbm_instance)
-        dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
-
-        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
-            # cannot catch any queries from other users
-            # only can see own queries
-            return
-
-        event = dbm_activity_event[0]
-        assert event['host'] == "stubbed.hostname"
-        assert event['ddsource'] == "postgres"
-        assert event['dbm_type'] == "activity"
-        assert event['ddagentversion'] == datadog_agent.get_version()
+        # check postgres_connections are set
         assert len(event['postgres_connections']) > 0
-        # find bob's query.
-        bobs_query = None
+        # find bob's connections.
+        bobs_conns = None
         for query_json in event['postgres_connections']:
             if 'usename' in query_json and query_json['usename'] == "bob":
-                bobs_query = query_json
-        assert bobs_query is not None
+                bobs_conns = query_json
+        assert bobs_conns is not None
 
-        for key in expected_out:
-            assert expected_out[key] == bobs_query[key]
+        for key in expected_conn_out:
+            assert expected_conn_out[key] == bobs_conns[key]
+
+        assert event['ddtags'] == expected_tags
 
     finally:
         conn.close()

@@ -50,6 +50,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     SELECT * FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
+    {extra_filters}
 """,
 ).strip()
 
@@ -60,7 +61,7 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     SELECT application_name, state, usename, count(*) as connections
     FROM {pg_stat_activity_view}
     WHERE client_port IS NOT NULL
-    {extra_query_config}
+    {extra_filters}
     GROUP BY application_name, state, usename
 """,
 ).strip()
@@ -183,75 +184,52 @@ class PostgresStatementSamples(DBMAsyncJob):
         return t
 
     def _get_active_connections(self):
-        start_time = time.time()
-        extra_query_config = ""
-        params = ()
-        if self._config.dbstrict:
-            extra_query_config = " AND datname = %s"
-            params = params + (self._config.dbname,)
-        else:
-            extra_query_config = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
-            params = params + tuple(self._config.ignore_databases)
+        active_connections = []
+        try:
+            active_connections = self._run_active_conn_query()
+        except Exception as e:
+            self._log.debug("Failed to query active connections: %s", repr(e))
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+        return active_connections
 
+    def _run_active_conn_query(self):
+        start_time = time.time()
+        extra_filters, params = self._get_extra_filters_and_params()
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
-            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_query_config=extra_query_config
+            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
-        self._check.histogram(
-            "dd.postgres.get_active_connections.time",
-            (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.histogram(
-            "dd.postgres.get_active_connections.rows",
-            len(rows),
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
+
+        self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
-        # cast each row to dict so it can be serialized as json
         return [dict(row) for row in rows]
 
     def _get_new_pg_stat_activity(self):
         start_time = time.time()
-        query = PG_STAT_ACTIVITY_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
-        params = ()
-        if self._config.dbstrict:
-            query = query + " AND datname = %s"
-            params = params + (self._config.dbname,)
-        else:
-            query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
-            params = params + tuple(self._config.ignore_databases)
-        if self._activity_last_query_start:
-            # do not re-read old idle connections
-            query = query + " AND NOT (query_start < %s AND state = 'idle')"
-            params = params + (self._activity_last_query_start,)
+        extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        query = PG_STAT_ACTIVITY_QUERY.format(
+            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
+        )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
-        self._check.histogram(
-            "dd.postgres.get_new_pg_stat_activity.time",
-            (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.histogram(
-            "dd.postgres.get_new_pg_stat_activity.rows",
-            len(rows),
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
+        self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
-    def _filter_valid_statement_rows(self, rows):
+    def _filter_and_normalize_statement_rows(self, rows):
         insufficient_privilege_count = 0
         total_count = 0
+        normalized_rows = []
         for row in rows:
             total_count += 1
             if not row['datname']:
@@ -264,7 +242,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 continue
             if self._activity_last_query_start is None or row['query_start'] > self._activity_last_query_start:
                 self._activity_last_query_start = row['query_start']
-            yield row
+            normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
             self._log.warning(
                 "Insufficient privilege for %s/%s queries when collecting from %s.", self._config.pg_stat_activity_view
@@ -275,6 +253,53 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
+        return normalized_rows
+
+    def _normalize_row(self, row):
+        normalized_row = dict(copy.copy(row))
+        obfuscated_statement = None
+        try:
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+        except Exception as e:
+            self._log.debug("Failed to obfuscate statement: %s", e)
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+        normalized_row['statement'] = obfuscated_statement
+        return normalized_row
+
+    def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
+        extra_filters = ""
+        params = ()
+        if self._config.dbstrict:
+            extra_filters = " AND datname = %s"
+            params = params + (self._config.dbname,)
+        else:
+            extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
+            params = params + tuple(self._config.ignore_databases)
+        if filter_stale_idle_conn and self._activity_last_query_start:
+            # do not re-read old idle connections
+            extra_filters = extra_filters + " AND NOT (query_start < %s AND state = 'idle')"
+            params = params + (self._activity_last_query_start,)
+        return extra_filters, params
+
+    def _report_check_hist_metrics(self, start_time, row_len, method_name):
+        self._check.histogram(
+            "dd.postgres.{}.time".format(method_name),
+            (time.time() - start_time) * 1000,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.histogram(
+            "dd.postgres.{}.rows".format(method_name),
+            row_len,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
@@ -283,16 +308,16 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_statement_samples(self):
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
-        rows = self._filter_valid_statement_rows(rows)
-        rows = self._normalize_rows(rows)
-        event_samples = self._collect_events(rows)
+        rows = self._filter_and_normalize_statement_rows(rows)
+        event_samples = self._collect_plans(rows)
         submitted_count = 0
         for e in event_samples:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
 
-        activity_event = self._create_activity_event(rows)
-        if activity_event is not None:
+        if self._report_activity_event():
+            active_connections = self._get_active_connections()
+            activity_event = self._create_activity_event(rows, active_connections)
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
@@ -324,36 +349,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-
-    def _normalize_rows(self, rows):
-        normalized_rows = []
-        for row in rows:
-            obfuscated_statement = None
-            normalized_row = dict(copy.copy(row))
-            try:
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-            except Exception as e:
-                # obfuscation errors are relatively common so only log them during debugging
-                self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
-
-            normalized_row['statement'] = obfuscated_statement
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
-            normalized_rows.append(normalized_row)
-
-        return normalized_rows
-
-    def _obfuscate_query(self, row):
-        try:
-            return datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-        except Exception as e:
-            self._log.debug("Failed to obfuscate statement: %s", e)
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            return None
 
     @staticmethod
     def _to_active_session(row):
@@ -566,7 +561,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
 
-    def _collect_events(self, rows):
+    def _collect_plans(self, rows):
         events = []
         for row in rows:
             try:
@@ -587,20 +582,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 )
         return events
 
-    def _create_activity_event(self, rows):
-        # Only send an event if we are configured to do so, and
-        # don't report more often than the configured collection interval
-        elapsed_s = time.time() - self._time_since_last_activity_event
-        if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
-            return None
+    def _create_activity_event(self, rows, active_connections):
+        self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in rows:
             active_row = self._to_active_session(row)
             if active_row:
                 active_sessions.append(active_row)
-        # run query to get number of connections by app/user
-        active_connections = self._get_active_connections()
-        self._time_since_last_activity_event = time.time()
         event = {
             "host": self._db_hostname,
             "ddsource": "postgres",
@@ -613,6 +601,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             "postgres_connections": active_connections,
         }
         return event
+
+    def _report_activity_event(self):
+        # Only send an event if we are configured to do so, and
+        # don't report more often than the configured collection interval
+        elapsed_s = time.time() - self._time_since_last_activity_event
+        if elapsed_s < self._activity_coll_interval and not self._activity_coll_enabled:
+            return False
+        return True
 
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
