@@ -328,7 +328,7 @@ files:
             Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the query activity collection interval (in seconds). This number cannot be smaller than

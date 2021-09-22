@@ -274,10 +274,10 @@ instances:
     #
     query_activity:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 10
         ## Set the query activity collection interval (in seconds). This number cannot be smaller than
