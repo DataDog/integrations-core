@@ -4,6 +4,7 @@
 import json
 
 import boto3
+from botocore.config import Config
 from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
@@ -68,6 +69,10 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         self.check_initializations.append(self.parse_config)
 
     def check(self, _):
+        # Configure boto config
+        boto_config = Config(
+            proxies=self._proxies,
+        )
         # Create assume_role credentials if assume_role ARN is specified in config
         if self._assume_role:
             self.log.info('Assume role %s found. Creating temporary credentials using role...', self._assume_role)
@@ -83,14 +88,14 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
-                proxies=self._proxies,
+                config=boto_config,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
             client = boto3.client(
                 'kafka',
-                proxies=self._proxies,
+                config=boto_config,
                 region_name=self._region_name,
             )
 
