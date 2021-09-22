@@ -17,6 +17,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'aws.msk'
 
@@ -34,7 +35,7 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._endpoint_prefix = None
         self._static_tags = None
         self._service_check_tags = None
-        self._proxies = self.instance.get('proxy', init_config.get('proxy'), datadog_agent.get_config('proxy'))
+        self._proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
 
         self.check_initializations.append(self.parse_config)
 
@@ -55,14 +56,14 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
-                proxies = self._proxies,
+                proxies=self._proxies,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
             client = boto3.client(
                 'kafka',
-                proxies = self._proxies,
+                proxies=self._proxies,
                 region_name=self._region_name,
             )
 
