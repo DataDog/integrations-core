@@ -3,7 +3,7 @@ aerospike==4.0.0; sys_platform != "win32" and sys_platform != "darwin" and pytho
 aerospike==6.0.0; sys_platform != "win32" and sys_platform != "darwin" and python_version > "3.0"
 aws-requests-auth==0.4.2
 beautifulsoup4==4.5.1
-binary==1.0.0;
+binary==1.0.0
 boto3==1.17.91
 boto==2.46.1
 botocore==1.20.91
