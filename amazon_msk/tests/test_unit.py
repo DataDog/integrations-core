@@ -25,7 +25,7 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=None)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -60,7 +60,7 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
     cluster_arn = instance['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', config=None, region_name=region_name)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -156,7 +156,7 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=None)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
