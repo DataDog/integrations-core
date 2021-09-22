@@ -59,7 +59,12 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         )
         self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
         proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
-        self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        try:
+            self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        except TypeError as e:
+            self.log.debug("Got error when constructing Config object: {}".format(str(e)))
+            self.log.debug("Boto Config parameters: {}".format(self.instance.get('boto_config')))
+            self._boto_config = None
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
