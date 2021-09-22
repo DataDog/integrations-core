@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime
 
-from pytz import UTC, UnknownTimeZoneError, timezone
+from pytz import UTC, common_timezones, timezone
 
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
@@ -29,11 +29,14 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-display-qstatus-display-queue-status#q086260___3
     """
     if qm_timezone is not None:
-        try:
+        if qm_timezone in common_timezones:
             qm_tz = timezone(qm_timezone)
-        except UnknownTimeZoneError:
-            msg = 'Timezone `{}` is not recognized. Please specify timezone in Olson format.'.format(qm_timezone)
-            raise UnknownTimeZoneError(msg)
+        else:
+            msg = (
+                'Time zone `{}` is not recognized or may be deprecated. '
+                'Please specify a valid time zone in IANA/Olson format.'.format(qm_timezone)
+            )
+            raise ValueError(msg)
     else:
         qm_tz = UTC
 
@@ -44,7 +47,7 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
 
     '''
     1. Construct a datetime object from the IBM MQ timestamp string format
-    2. Localize the datetime object to the QM timezone
+    2. Localize the datetime object to the QM time zone
     3. Normalize the datetime object to UTC to account for DST
     4. Calculate the POSIX timestamp in seconds since EPOCH
     '''

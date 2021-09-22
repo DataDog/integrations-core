@@ -27,7 +27,7 @@ def test_sanitize_strings(input_string, expected):
     'datestamp,timestamp,time_zone',
     [
         pytest.param('2021-09-08', '19.19.41', 'UTC', id='elapsed a'),
-        pytest.param('2020-01-01', '10.25.13', 'EST', id='elapsed b'),
+        pytest.param('2020-01-01', '10.25.13', 'America/New_York', id='elapsed b'),
         pytest.param('2021-08-01', '12.00.00', 'Europe/Paris', id='elapsed c'),
     ],
 )
@@ -61,45 +61,42 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     [
         pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid TZ: Fake/Timezone'),
         pytest.param('2021-08-01', '12.00.00', 'MT', False, id='Invalid TZ: MT'),
-        pytest.param('2020-01-01', '10.25.13', 'MST', True, id='Valid TZ: MST'),
-        pytest.param('2021-05-25', '18.48.20', 'America/Los_Angeles', True, id='Valid TZ: IANA/Olson format'),
+        pytest.param('2020-01-01', '10.25.13', 'America/Denver', True, id='Valid TZ: America/Denver'),
+        pytest.param('2021-05-25', '18.48.20', 'Europe/Madrid', True, id='Valid TZ: Europe/Madrid'),
     ],
 )
 def test_calculate_elapsed_time_valid_tz(datestamp, timestamp, time_zone, valid):
-    from pytz import UnknownTimeZoneError
-
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     if not valid:
-        with pytest.raises(UnknownTimeZoneError):
+        with pytest.raises(ValueError):
             calculate_elapsed_time(datestamp, timestamp, time_zone)
     elif valid:
         assert calculate_elapsed_time(datestamp, timestamp, time_zone) is not None
 
 
 @pytest.mark.parametrize(
-    'datestamp,timestamp,timestamp_dst,time_zone,time_zone_dst',
+    'datestamp,timestamp,timestamp_dst,time_zone',
     [
-        pytest.param('2021-11-7', '02.10.00', '01.55.00', 'EST', 'EST5EDT', id='DST: EST vs EST5EDT'),
-        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'MST', 'MST7MDT', id='DST: MST vs MST7EDT'),
-        pytest.param('2021-12-31', '18.30.30', '18.45.30', 'America/Chicago', 'CST6CDT', id='Not DST: CST vs CST6CDT'),
+        pytest.param('2021-11-7', '02.10.00', '01.55.00', 'America/New_York', id='DST: America/New_York'),
+        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'Pacific/Honolulu', id='DST: Pacific/Honolulu'),
+        pytest.param('2021-12-31', '18.30.30', '18.45.30', 'America/Chicago', id='Not DST: America/Chicago'),
         pytest.param(
             '2021-02-15',
             '13.45.00',
             '14.00.00',
             'America/Los_Angeles',
-            'PST8PDT',
-            id='Not DST: America_Los_Angeles vs PST8PDT',
+            id='Not DST: America/Los_Angeles',
         ),
     ],
 )
-def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, time_zone, time_zone_dst):
+def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, time_zone):
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     assert (
         abs(
             calculate_elapsed_time(datestamp, timestamp, time_zone)
-            - calculate_elapsed_time(datestamp, timestamp_dst, time_zone_dst)
+            - calculate_elapsed_time(datestamp, timestamp_dst, time_zone)
         )
         == 900
     )
