@@ -8,8 +8,8 @@ from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
-from .utils import construct_boto_config
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
+from .utils import construct_boto_config
 
 try:
     import datadog_agent

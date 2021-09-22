@@ -9,9 +9,9 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.base.utils.serialization import json
 
-from .utils import construct_boto_config
 from .config_models import ConfigMixin
 from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
+from .utils import construct_boto_config
 
 try:
     import datadog_agent
