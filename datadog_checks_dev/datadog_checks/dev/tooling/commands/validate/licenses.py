@@ -245,9 +245,8 @@ def licenses(ctx, sync):
         except Exception as e:
             rel_file = os.path.basename(agent_requirements_file)
             line = i + 1
-            message = f"Detected error in {rel_file}:{line} {e}"
-            annotate_error(agent_requirements_file, message, line=line)
-            echo_failure(message)
+            annotate_error(agent_requirements_file, str(e), line=line)
+            echo_failure(f"Detected error in {rel_file}:{line} {e}")
 
     api_urls = []
     for package, versions in packages.items():
