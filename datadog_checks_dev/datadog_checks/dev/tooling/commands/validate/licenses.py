@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import click
 import orjson
+import os
 import requests
 from aiohttp import request
 from aiomultiprocess import Pool
@@ -237,9 +238,16 @@ def licenses(ctx, sync):
         abort('Out of sync, run again with the --sync flag')
 
     packages = defaultdict(set)
-    for line in read_file_lines(agent_requirements_file):
-        requirement = Requirement(line.strip())
-        packages[requirement.name].add(str(requirement.specifier)[2:])
+    for i, line in enumerate(read_file_lines(agent_requirements_file)):
+        try:
+            requirement = Requirement(line.strip())
+            packages[requirement.name].add(str(requirement.specifier)[2:])
+        except Exception as e:
+            rel_file = os.path.basename(agent_requirements_file)
+            line = i + 1
+            message = f"Detected error in {rel_file}:{line} {e}"
+            annotate_error(agent_requirements_file, message, line=line)
+            echo_failure(message)
 
     api_urls = []
     for package, versions in packages.items():
