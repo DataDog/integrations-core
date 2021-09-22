@@ -15,6 +15,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+
 class AmazonMskCheck(OpenMetricsBaseCheck):
     """
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
@@ -56,7 +57,7 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
         )
         self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
-        self._proxies = self.instance.get('proxy', init_config.get('proxy'), datadog_agent.get_config('proxy'))
+        self._proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
