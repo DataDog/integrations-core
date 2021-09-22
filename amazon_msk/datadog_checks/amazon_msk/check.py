@@ -4,12 +4,12 @@
 from collections import ChainMap
 
 import boto3
-from botocore.config import Config
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.base.utils.serialization import json
 
+from .utils import construct_boto_config
 from .config_models import ConfigMixin
 from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
 
@@ -36,15 +36,11 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._endpoint_prefix = None
         self._static_tags = None
         self._service_check_tags = None
-        self._proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
-
+        proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
         self.check_initializations.append(self.parse_config)
 
     def refresh_scrapers(self):
-        # Configure boto config
-        boto_config = Config(
-            proxies=self._proxies,
-        )
         # Create assume_role credentials if assume_role ARN is specified in config
         assume_role = self.config.assume_role
         if assume_role:
@@ -61,14 +57,14 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
-                config=boto_config,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
             client = boto3.client(
                 'kafka',
-                config=boto_config,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
 

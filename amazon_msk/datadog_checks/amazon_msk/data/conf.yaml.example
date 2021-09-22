@@ -85,6 +85,18 @@ instances:
     #
     # prometheus_metrics_path: /metrics
 
+    ## @param boto_config - mapping - optional
+    ## Specify additional configuration options for botocore clients.
+    ##
+    ## https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+    #
+    # boto_config:
+    #   proxies_config:
+    #     proxy_client_cert: /path/of/certificate
+    #     proxy_ca_bundle: path/to/ca/bundle
+    #     proxy_use_forwarding_for_https: false
+    #   signature_version: s3v4
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.

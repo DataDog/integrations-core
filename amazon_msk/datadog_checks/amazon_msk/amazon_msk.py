@@ -4,11 +4,11 @@
 import json
 
 import boto3
-from botocore.config import Config
 from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
+from .utils import construct_boto_config
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
 try:
@@ -58,7 +58,8 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
         )
         self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
-        self._proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
@@ -69,10 +70,6 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         self.check_initializations.append(self.parse_config)
 
     def check(self, _):
-        # Configure boto config
-        boto_config = Config(
-            proxies=self._proxies,
-        )
         # Create assume_role credentials if assume_role ARN is specified in config
         if self._assume_role:
             self.log.info('Assume role %s found. Creating temporary credentials using role...', self._assume_role)
@@ -88,14 +85,14 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
-                config=boto_config,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
             client = boto3.client(
                 'kafka',
-                config=boto_config,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
 
