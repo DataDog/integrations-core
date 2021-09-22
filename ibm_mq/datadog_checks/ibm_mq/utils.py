@@ -45,17 +45,17 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     else:
         current_time = current_time
 
-    '''
+    """
     1. Construct a datetime object from the IBM MQ timestamp string format
     2. Localize the datetime object to the QM time zone
     3. Normalize the datetime object to UTC to account for DST
     4. Calculate the POSIX timestamp in seconds since EPOCH
-    '''
+    """
     if datestamp and timestamp:
         timestamp_str = sanitize_strings(datestamp) + ' ' + sanitize_strings(timestamp)
         timestamp_dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H.%M.%S')
         timestamp_dt_loc = qm_tz.localize(timestamp_dt)
-        timestamp_dt_norm = (UTC).normalize(timestamp_dt_loc)
+        timestamp_dt_norm = UTC.normalize(timestamp_dt_loc)
         timestamp_posix = (timestamp_dt_norm - EPOCH).total_seconds()
     else:
         return None

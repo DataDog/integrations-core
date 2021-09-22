@@ -107,13 +107,14 @@ class QueueMetricCollector(object):
                     self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
-                    queue = to_string(queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)).strip()
-                    if queue is None:
+                    queue = queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)
+                    if queue is not None:
+                        queue_name = to_string(queue).strip()
+                        self.log.debug("Discovered queue: %s", queue_name)
+                        queues.append(queue_name)
+                    elif queue is None:
                         self.log.debug('Discovered queue with empty name, skipping.')
                         continue
-                    else:
-                        self.log.debug("Discovered queue: %s", queue)
-                        queues.append(queue)
                 self.log.debug("%s queues discovered", str(len(queues)))
             finally:
                 # Close internal reply queue to prevent filling up a dead-letter queue.
@@ -177,13 +178,11 @@ class QueueMetricCollector(object):
                 else:
                     self.log.debug("Date for attribute %s not found for queue %s", metric_suffix, queue_name)
             else:
-                try:
-                    metric_value = queue_info.get(mq_attr, None)
+                if mq_attr in queue_info:
+                    metric_value = queue_info[mq_attr]
                     self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
-                except Exception as e:
-                    self.log.debug(
-                        "Attribute %s (%s) not found for queue %s. Error: {}", metric_suffix, mq_attr, queue_name, e
-                    )
+                else:
+                    self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
         pcf = None
