@@ -71,6 +71,7 @@ NEW_METRICS = {
     'coredns_autopath_success_total': 'autopath.success_count',
     # cache: https://github.com/coredns/coredns/tree/v1.7.0/plugin/cache
     'coredns_cache_entries': 'cache_size.count',
+    # cache: https://github.com/coredns/coredns/tree/v1.8.5/plugin/cache
     'coredns_cache_requests_total': 'cache_request_count',
     # dnssec: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dnssec
     'coredns_dnssec_cache_entries': 'dnssec.cache_size',
