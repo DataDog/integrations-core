@@ -54,7 +54,8 @@ COMMON_METRICS = [
     NAMESPACE + '.process.virtual_memory_bytes',
     NAMESPACE + '.request_count',
     NAMESPACE + '.cache_size.count',
-    NAMESPACE + '.cache_requests_count',
+    NAMESPACE + '.cache_misses_count',
+    NAMESPACE + '.cache_request_count',
     NAMESPACE + '.response_code_count',
     NAMESPACE + '.response_size.bytes.sum',
     NAMESPACE + '.response_size.bytes.count',
@@ -84,6 +85,7 @@ METRICS_V1_7 = COMMON_METRICS + [
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',
+    NAMESPACE + '.cache_request_count',
     NAMESPACE + '.plugin_enabled',
 ]
 

@@ -13,7 +13,7 @@ DEFAULT_METRICS = {
     # cache: https://github.com/coredns/coredns/tree/v1.6.9/plugin/cache
     'coredns_cache_size': 'cache_size.count',
     'coredns_cache_hits_total': 'cache_hits_count',
-    'coredns_cache_requests_total': 'cache_requests_count',
+    'coredns_cache_misses_total': 'cache_misses_count',
     'coredns_cache_drops_total': 'cache_drops_count',
     'coredns_cache_prefetch_total': 'cache_prefetch_count',
     'coredns_cache_served_stale_total': 'cache_stale_count',
@@ -71,6 +71,7 @@ NEW_METRICS = {
     'coredns_autopath_success_total': 'autopath.success_count',
     # cache: https://github.com/coredns/coredns/tree/v1.7.0/plugin/cache
     'coredns_cache_entries': 'cache_size.count',
+    'coredns_cache_requests_total': 'cache_request_count',
     # dnssec: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dnssec
     'coredns_dnssec_cache_entries': 'dnssec.cache_size',
     # forward: https://github.com/coredns/coredns/tree/v1.7.0/plugin/forward

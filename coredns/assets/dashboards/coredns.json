@@ -78,7 +78,7 @@
                     "on_right_yaxis": false,
                     "queries": [
                       {
-                        "query": "avg:coredns.cache_requests_count{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()-avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {type}.as_count()",
+                        "query": "avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label}.as_count()",
                         "data_source": "metrics",
                         "name": "query1"
                       }
@@ -152,7 +152,7 @@
                 "type": "heatmap",
                 "requests": [
                   {
-                    "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()*100/(avg:coredns.cache_requests_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count())",
+                    "q": "avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()*100/(avg:coredns.cache_hits_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count()+avg:coredns.cache_misses_count{$cluster,$deployment,$service,$namespace,$node,$label} by {host}.as_count())",
                     "style": { "palette": "purple" }
                   }
                 ]
