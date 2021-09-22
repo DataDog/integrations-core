@@ -245,7 +245,7 @@ def licenses(ctx, sync):
         except Exception as e:
             rel_file = os.path.basename(agent_requirements_file)
             line = i + 1
-            annotate_error(agent_requirements_file, str(e).strip('"'), line=line)
+            annotate_error(agent_requirements_file, str(e).replace('\"', ''), line=line)
             echo_failure(f"Detected error in {rel_file}:{line} {e}")
 
     api_urls = []
