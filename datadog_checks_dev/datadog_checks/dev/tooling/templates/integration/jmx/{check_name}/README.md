@@ -21,7 +21,7 @@ This check monitors [{integration_name}][1].
    To learn how to customize the metrics to collect visit the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][6]
 
 ### Validation
 
