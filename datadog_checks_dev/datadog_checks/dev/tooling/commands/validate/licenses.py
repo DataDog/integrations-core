@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import os
 from collections import defaultdict
 
 import click
 import orjson
-import os
 import requests
 from aiohttp import request
 from aiomultiprocess import Pool
