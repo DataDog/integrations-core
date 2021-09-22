@@ -1,5 +1,15 @@
 # CHANGELOG - nagios
 
+## 1.11.0-rc.1 / 2021-09-22
+
+
+## 1.10.0-rc.1 / 2021-09-22
+
+
+## 1.9.0-rc.1 / 2021-09-22
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 1.8.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8959](https://github.com/DataDog/integrations-core/pull/8959).
