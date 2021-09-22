@@ -192,10 +192,6 @@ Datadog APM integrates with Mongo to see the traces across your distributed syst
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -236,10 +232,6 @@ LABEL "com.datadoghq.ad.instances"='[{"hosts": ["%%host%%:%%port%%""], "username
 ```
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][20].
 
@@ -301,10 +293,6 @@ spec:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][24].
 
 Then, set [Log Integrations][25] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][26].
@@ -363,10 +351,6 @@ Set [Autodiscovery Integrations Templates][27] as Docker labels on your applicat
 ```
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 

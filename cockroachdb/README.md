@@ -25,10 +25,6 @@ To configure this check for an Agent running on a host:
 2. [Restart the Agent][6]
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
@@ -69,10 +65,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:8080/_status/vars"}` |
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][11].
 
