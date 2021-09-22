@@ -1,5 +1,8 @@
 # CHANGELOG - Amazon MSK
 
+## 1.9.0-beta.2 / 2021-09-22
+
+
 ## 1.9.0-beta.1 / 2021-09-22
 
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
