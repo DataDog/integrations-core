@@ -29,7 +29,11 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
-    DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
+    ${{ if eq($DDEV_E2E_AGENT_WIN, "") }}:
+      DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
+    ${{ if ne($DDEV_E2E_AGENT_WIN, "") }}:
+      DDEV_E2E_AGENT: $DDEV_E2E_AGENT_WIN
+    
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests

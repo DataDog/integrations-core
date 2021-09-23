@@ -2,12 +2,17 @@ parameters:
 - name: agent_image
   displayName: Agent Docker Image
   type: string
-  default: gcr.io/datadoghq/agent:latest
+  default: datadog/agent-dev:latest
+- name: agent_windows_image
+  displayName: Windows Agent Docker Image
+  type: string
+  default: datadog/agent-dev:master-py2-win-servercore
 
 trigger: none
 
 variables:
   DDEV_E2E_AGENT: ${{ parameters.agent_image }}
+  DDEV_E2E_AGENT_WIN: ${{ parameters.agent_windows_image }}
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
   DD_TRACE_AGENT_PORT: 8127
