@@ -189,6 +189,7 @@ class ImmutableAttributesValidator(BaseManifestValidator):
         V1: ("integration_id", "display_name", "guid"),
         V2: (
             "app_id",
+            "app_uuid",
             "assets/integration/id",
             "assets/integration/source_type_name",
         ),
@@ -219,7 +220,7 @@ class ImmutableAttributesValidator(BaseManifestValidator):
             )
             return
 
-        # Skip this validation if the manifest was updated from 1.0.0 -> 2.0.0
+        # Skip this validation if the manifest is being updated from 1.0.0 -> 2.0.0
         current_manifest = decoded
         if (
             previous_manifest[self.MANIFEST_VERSION_PATH] == "1.0.0"
@@ -229,7 +230,6 @@ class ImmutableAttributesValidator(BaseManifestValidator):
             return
 
         # Check for differences in immutable attributes
-        immutable_attribute_changed = False
         for key_path in self.IMMUTABLE_FIELD_PATHS[self.version]:
             previous_value = previous_manifest.get_path(key_path)
             current_value = current_manifest.get_path(key_path)
@@ -237,12 +237,7 @@ class ImmutableAttributesValidator(BaseManifestValidator):
             if previous_value != current_value:
                 output = f'Attribute `{current_value}` at `{key_path}` is not allowed to be modified. Please revert it \
 to the original value `{previous_value}`.'
-                immutable_attribute_changed = True
                 self.fail(output)
-
-        # If already failed, stop validations with failure messages gathered above
-        if immutable_attribute_changed:
-            return
 
         # Check for differences in `short_name` keys
         for key_path in self.SHORT_NAME_PATHS[self.version]:
