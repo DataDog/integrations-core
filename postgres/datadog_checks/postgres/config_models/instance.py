@@ -26,7 +26,7 @@ class QueryActivity(BaseModel):
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
-    max_active_rows: Optional[float]
+    payload_row_limit: Optional[float]
 
 
 class QueryMetrics(BaseModel):

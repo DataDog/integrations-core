@@ -608,110 +608,98 @@ def test_activity_snapshot_collection(
         conn.close()
 
 
+def new_time():
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def old_time():
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def very_old_time():
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
 @pytest.mark.parametrize(
-    "active_rows",
+    "active_rows,expected_users",
     [
         (
             [
                 {
                     'datname': 'datadog_test',
                     'usename': 'newbob',
-                    'xact_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': new_time(),
+                    'query_start': new_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'oldbob',
-                    'xact_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 19, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'veryoldbob',
-                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': very_old_time(),
+                    'query_start': very_old_time(),
                 },
-            ]
+            ],
+            ["veryoldbob", "oldbob"],
         ),
         (
             [
                 {
                     'datname': 'datadog_test',
                     'usename': 'newbob',
-                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': new_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'oldbob',
-                    'xact_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'veryoldbob',
-                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': very_old_time(),
                 },
-            ]
+            ],
+            ["veryoldbob", "oldbob"],
         ),
         (
             [
                 {
                     'datname': 'datadog_test',
                     'usename': 'newbob',
-                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': new_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'sameoldtxbob',
-                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 21, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
                 },
                 {
                     'datname': 'datadog_test',
                     'usename': 'sameoldtxboblongquery',
-                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
-                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'xact_start': old_time(),
+                    'query_start': very_old_time(),
                 },
-            ]
+            ],
+            ["sameoldtxboblongquery", "sameoldtxbob"],
         ),
     ],
 )
-def test_truncate_activity_rows(aggregator, integration_check, dbm_instance, active_rows):
-    # set max active rows to truncate to the two longest running transactions
-    dbm_instance['query_activity']['max_active_rows'] = 2
+def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, expected_users):
     check = integration_check(dbm_instance)
     check._connect()
-    with mock.patch(
-        'datadog_checks.postgres.statement_samples.PostgresStatementSamples._to_active_sessions',
-        return_value=active_rows,
-    ):
-        check.check(dbm_instance)
-
-    # run a query so there is some "activity" to detect
-    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
-    try:
-        query = "SELECT city FROM persons WHERE city = 'hello'"
-        conn.autocommit = False
-        conn.cursor().execute(query)
-
-        events = aggregator.get_event_platform_events("dbm-activity")
-        assert len(events) == 1
-        activity = events[0]['postgres_activity']
-        assert len(activity) == 2
-
-        # we should have thrown out newbob's query
-        # bc it was running for the shortest amount of time
-        for a in activity:
-            assert a['usename'] != "newbob"
-
-        # veryoldbob should be first in the sorted list, bc he is VERY old
-        # or if we hit the test case where bob's tx starts are the same we should
-        # see the bob with the longer query first.
-        assert activity[0]['usename'] in {"veryoldbob", "sameoldtxboblongquery"}
-        assert activity[1]['usename'] in {"oldbob", "sameoldtxbob"}
-
-    finally:
-        conn.close()
+    # set row limit to be 2
+    truncated_rows = check.statement_samples._truncate_activity_rows(active_rows, 2)
+    assert len(truncated_rows) == 2
+    # assert what is returned is sorted in the correct order
+    assert truncated_rows[0]['usename'] == expected_users[0]
+    assert truncated_rows[1]['usename'] == expected_users[1]
 
 
 @pytest.mark.parametrize(
