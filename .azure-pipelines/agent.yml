@@ -26,6 +26,7 @@ resources:
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
+    job_name: Agent
     run_py2_tests: true
     test_e2e: true
     ddtrace_flag: '--ddtrace'
