@@ -1,5 +1,8 @@
 # CHANGELOG - nagios
 
+## 1.10.0-rc.1 / 2021-09-23
+
+
 ## 1.9.0-rc.1 / 2021-09-23
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
