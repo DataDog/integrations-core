@@ -180,7 +180,7 @@ class MetricToCheckValidator(BaseManifestValidator):
 class ImmutableAttributesValidator(BaseManifestValidator):
     """
     Ensure that immutable attributes haven't changed
-    Skip if the manifest is a new file (i.e. new integration) or if the manifest was upgraded to V2
+    Skip if the manifest is a new file (i.e. new integration) or if the manifest is being upgraded to V2
     """
 
     MANIFEST_VERSION_PATH = "manifest_version"
