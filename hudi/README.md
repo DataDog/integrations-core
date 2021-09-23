@@ -44,7 +44,7 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-Hudi does not include any metrics.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -52,7 +52,7 @@ The Hudi integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][11] for a list of service checks provided by this integration.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -68,5 +68,5 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
-[12]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#agent-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/hudi/metadata.csv
+[12]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
