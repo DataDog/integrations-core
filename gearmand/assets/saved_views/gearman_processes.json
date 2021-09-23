@@ -2,7 +2,7 @@
   "name": "Gearman",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:gearmand",
+  "query": "integration:gearmand",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:gearmand"
-      ]
+      "query_filter": "integration:gearmand",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

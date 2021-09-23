@@ -2,7 +2,7 @@
   "name": "Teamcity",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:teamcity",
+  "query": "integration:teamcity",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:teamcity"
-      ]
+      "query_filter": "integration:teamcity",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

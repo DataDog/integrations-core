@@ -2,7 +2,7 @@
   "name": "Lighttpd",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:lighttpd",
+  "query": "integration:lighttpd",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:lighttpd"
-      ]
+      "query_filter": "integration:lighttpd",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

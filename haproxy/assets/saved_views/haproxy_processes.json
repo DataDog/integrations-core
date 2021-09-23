@@ -2,7 +2,7 @@
   "name": "HAProxy",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:haproxy",
+  "query": "integration:haproxy",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:haproxy"
-      ]
+      "query_filter": "integration:haproxy",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

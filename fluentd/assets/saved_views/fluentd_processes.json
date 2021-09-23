@@ -2,7 +2,7 @@
   "name": "fluentd",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:fluentd",
+  "query": "integration:fluentd",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:fluentd"
-      ]
+      "query_filter": "integration:fluentd",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

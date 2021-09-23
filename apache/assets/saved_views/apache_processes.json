@@ -2,7 +2,7 @@
   "name": "Apache",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:apache",
+  "query": "integration:apache",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:apache"
-      ]
+      "query_filter": "integration:apache",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

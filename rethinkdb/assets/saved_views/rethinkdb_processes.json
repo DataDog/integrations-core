@@ -2,7 +2,7 @@
   "name": "RethinkDB",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:rethinkdb",
+  "query": "integration:rethinkdb",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:rethinkdb"
-      ]
+      "query_filter": "integration:rethinkdb",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

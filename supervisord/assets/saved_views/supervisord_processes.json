@@ -2,7 +2,7 @@
   "name": "Supervisord",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:supervisord",
+  "query": "integration:supervisord",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:supervisord"
-      ]
+      "query_filter": "integration:supervisord",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

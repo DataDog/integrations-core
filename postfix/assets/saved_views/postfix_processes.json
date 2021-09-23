@@ -2,7 +2,7 @@
   "name": "Postfix",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:postfix",
+  "query": "integration:postfix",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:postfix"
-      ]
+      "query_filter": "integration:postfix",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

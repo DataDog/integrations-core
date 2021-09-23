@@ -2,7 +2,7 @@
   "name": "Gunicorn",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:gunicorn",
+  "query": "integration:gunicorn",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:gunicorn"
-      ]
+      "query_filter": "integration:gunicorn",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

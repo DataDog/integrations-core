@@ -2,7 +2,7 @@
   "name": "etcd",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:etcd",
+  "query": "integration:etcd",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:etcd"
-      ]
+      "query_filter": "integration:etcd",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -2,7 +2,7 @@
   "name": "Tomcat",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:tomcat",
+  "query": "integration:tomcat",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:tomcat"
-      ]
+      "query_filter": "integration:tomcat",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

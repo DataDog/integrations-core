@@ -2,7 +2,7 @@
   "name": "Solr",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:solr",
+  "query": "integration:solr",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:solr"
-      ]
+      "query_filter": "integration:solr",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

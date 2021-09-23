@@ -2,7 +2,7 @@
   "name": "VoltDB",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:voltdb",
+  "query": "integration:voltdb",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:voltdb"
-      ]
+      "query_filter": "integration:voltdb",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -2,7 +2,7 @@
   "name": "ZooKeeper",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:zk",
+  "query": "integration:zk",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:zk"
-      ]
+      "query_filter": "integration:zk",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

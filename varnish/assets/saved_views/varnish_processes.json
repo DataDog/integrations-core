@@ -2,7 +2,7 @@
   "name": "Varnish",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:varnish",
+  "query": "integration:varnish",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:varnish"
-      ]
+      "query_filter": "integration:varnish",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

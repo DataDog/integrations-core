@@ -2,7 +2,7 @@
   "name": "Mesos Master",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:mesos_master",
+  "query": "integration:mesos_master",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:mesos_master"
-      ]
+      "query_filter": "integration:mesos_master",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

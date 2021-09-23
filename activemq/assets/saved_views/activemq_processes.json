@@ -2,7 +2,7 @@
   "name": "ActiveMQ",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:activemq",
+  "query": "integration:activemq",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:activemq"
-      ]
+      "query_filter": "integration:activemq",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -2,7 +2,7 @@
   "name": "PowerDNS Recursor",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:powerdns_recursor",
+  "query": "integration:powerdns_recursor",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:powerdns_recursor"
-      ]
+      "query_filter": "integration:powerdns_recursor",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -2,7 +2,7 @@
   "name": "CouchDB",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:couch",
+  "query": "integration:couch",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:couch"
-      ]
+      "query_filter": "integration:couch",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

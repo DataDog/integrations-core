@@ -2,7 +2,7 @@
   "name": "Kafka",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:kafka",
+  "query": "integration:kafka",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:kafka"
-      ]
+      "query_filter": "integration:kafka",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

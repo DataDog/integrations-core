@@ -2,7 +2,7 @@
   "name": "Consul",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:consul",
+  "query": "integration:consul",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:consul"
-      ]
+      "query_filter": "integration:consul",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

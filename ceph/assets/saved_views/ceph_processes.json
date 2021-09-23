@@ -2,7 +2,7 @@
   "name": "Ceph",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:ceph",
+  "query": "integration:ceph",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:ceph"
-      ]
+      "query_filter": "integration:ceph",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

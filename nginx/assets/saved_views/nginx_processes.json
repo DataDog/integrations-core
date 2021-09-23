@@ -2,7 +2,7 @@
   "name": "Nginx",
   "type": "process",
   "page": "process_overview",
-  "query": "Filter by: integration:nginx",
+  "query": "integration:nginx",
   "options": {
     "sort": {
       "order": "DESC",
@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:nginx"
-      ]
+      "query_filter": "integration:nginx",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [
