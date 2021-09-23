@@ -19,7 +19,8 @@
   ],
   "public_title": "Citrix Hypervisor",
   "categories": [
-    "cloud"
+    "cloud",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
