@@ -15,12 +15,14 @@ HAPROXY_VERSION_RAW = os.getenv('HAPROXY_VERSION', 'latest')
 
 HAPROXY_VERSION_IS_LATEST = HAPROXY_VERSION_RAW.endswith('latest')
 if HAPROXY_VERSION_IS_LATEST:
-     HAPROXY_VERSION = version.parse('latest')
+    HAPROXY_VERSION = version.parse('latest')
 else:
-     HAPROXY_VERSION = version.parse(HAPROXY_VERSION_RAW)
+    HAPROXY_VERSION = version.parse(HAPROXY_VERSION_RAW)
 ENDPOINT_PROMETHEUS = 'http://{}:8404/metrics'.format(HOST)
 
 INSTANCE = {'use_prometheus': True, 'prometheus_url': ENDPOINT_PROMETHEUS}
 
 requires_new_environment = pytest.mark.skipif(HAPROXY_LEGACY != 'false', reason='Requires prometheus environment')
-requires_static_version = pytest.mark.skipif(HAPROXY_VERSION_IS_LATEST , reason='Version `latest` is ever-changing, skipping')
+requires_static_version = pytest.mark.skipif(
+    HAPROXY_VERSION_IS_LATEST, reason='Version `latest` is ever-changing, skipping'
+)
