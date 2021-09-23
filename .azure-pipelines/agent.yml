@@ -1,3 +1,10 @@
+trigger: none
+
+pr:
+  branches:
+    include:
+    - master
+
 parameters:
 - name: agent_image
   displayName: Agent Docker Image
@@ -8,7 +15,6 @@ parameters:
   type: string
   default: datadog/agent-dev:master-py2-win-servercore
 
-trigger: none
 
 variables:
   DDEV_E2E_AGENT: ${{ parameters.agent_image }}
