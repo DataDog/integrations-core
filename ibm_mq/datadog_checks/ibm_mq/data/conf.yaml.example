@@ -133,7 +133,10 @@ instances:
     # convert_endianness: false
 
     ## @param queue_manager_timezone - string - optional - default: UTC
-    ## Time zone of the queue manager in IANA/Olson timezone format, if it differs from the host system's time zone.
+    ## Time zone of the queue manager in IANA/Olson timezone format, if it differs from UTC. Canonical IANA time zone
+    ## names must be used for accurate time calculations during daylight saving time periods.
+    ## E.g. `America/New_York` instead of `EST`.
+    ## https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     ## Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
     #
     # queue_manager_timezone: UTC

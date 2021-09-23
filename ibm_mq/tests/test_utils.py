@@ -61,6 +61,7 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     [
         pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid TZ: Fake/Timezone'),
         pytest.param('2021-08-01', '12.00.00', 'MT', False, id='Invalid TZ: MT'),
+        pytest.param('2021-08-01', '12.00.00', 'EST', True, id='Valid TZ: EST'),
         pytest.param('2020-01-01', '10.25.13', 'America/Denver', True, id='Valid TZ: America/Denver'),
         pytest.param('2021-05-25', '18.48.20', 'Europe/Madrid', True, id='Valid TZ: Europe/Madrid'),
     ],
@@ -76,21 +77,22 @@ def test_calculate_elapsed_time_valid_tz(datestamp, timestamp, time_zone, valid)
 
 
 @pytest.mark.parametrize(
-    'datestamp,timestamp,timestamp_dst,time_zone',
+    'datestamp,timestamp,timestamp_dst,time_zone,expected',
     [
-        pytest.param('2021-11-7', '02.10.00', '01.55.00', 'America/New_York', id='DST: America/New_York'),
-        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'Pacific/Honolulu', id='DST: Pacific/Honolulu'),
-        pytest.param('2021-12-31', '18.30.30', '18.45.30', 'America/Chicago', id='Not DST: America/Chicago'),
+        pytest.param('2021-11-07', '02.10.00', '01.55.00', 'America/New_York', 4500, id='DST: America/New_York'),
+        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'Pacific/Honolulu', 900, id='DST: Pacific/Honolulu'),
+        pytest.param('2021-12-31', '18.30.30', '18.45.30', 'America/Chicago', 900, id='Not DST: America/Chicago'),
         pytest.param(
             '2021-02-15',
             '13.45.00',
             '14.00.00',
             'America/Los_Angeles',
+            900,
             id='Not DST: America/Los_Angeles',
         ),
     ],
 )
-def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, time_zone):
+def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, time_zone, expected):
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     assert (
@@ -98,5 +100,5 @@ def test_calculate_elapsed_time_valid_dst(datestamp, timestamp, timestamp_dst, t
             calculate_elapsed_time(datestamp, timestamp, time_zone)
             - calculate_elapsed_time(datestamp, timestamp_dst, time_zone)
         )
-        == 900
+        == expected
     )
