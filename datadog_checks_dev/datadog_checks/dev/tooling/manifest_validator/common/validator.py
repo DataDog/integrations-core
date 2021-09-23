@@ -212,7 +212,7 @@ class ImmutableAttributesValidator(BaseManifestValidator):
         # Check if previous version of manifest exists
         # If not, this is a new file so this validation is skipped
         try:
-            previous = git_show_file(path=f"{check_name}/manifest.json", ref="master")
+            previous = git_show_file(path=f"{check_name}/manifest.json", ref="origin/master")
             previous_manifest = JSONDict(json.loads(previous))
         except Exception:
             self.result.messages['info'].append(
