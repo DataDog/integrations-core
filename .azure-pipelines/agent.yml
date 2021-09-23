@@ -1,0 +1,37 @@
+parameters:
+- name: agent_image
+  displayName: Agent Docker Image
+  type: string
+  default: gcr.io/datadoghq/agent:latest
+
+trigger: none
+
+variables:
+  DDEV_E2E_AGENT: ${{ parameters.agent_image }}
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
+  DDEV_COLOR: 1
+  DD_TRACE_AGENT_PORT: 8127
+
+resources:
+  containers:
+    - container: dd_agent
+      image: gcr.io/datadoghq/agent:latest
+      ports:
+        - 8127:8126
+      env:
+        DD_API_KEY: $(DD_CI_API_KEY)
+        DD_HOSTNAME: "none"
+        DD_INSIDE_CI: "true"
+
+jobs:
+- template: './templates/test-all-checks.yml'
+  parameters:
+    run_py2_tests: true
+    test_e2e: true
+    ddtrace_flag: '--ddtrace'
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+      ispr: false
