@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
+from copy import deepcopy
 from pathlib import Path
 
 import mock
@@ -11,8 +13,30 @@ import tests.tooling.manifest_validator.input_constants as input_constants
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 import datadog_checks.dev.tooling.manifest_validator.v2.validator as v2_validators
 from datadog_checks.dev.tooling.constants import get_root, set_root
+from datadog_checks.dev.tooling.datastructures import JSONDict
 from datadog_checks.dev.tooling.manifest_validator import get_all_validators
 from datadog_checks.dev.tooling.manifest_validator.constants import V2
+
+
+# Helpers
+def get_changed_immutable_short_name_manifest():
+    """
+    Helper function to change immutable short names in a manifest
+    """
+    immutable_attributes_changed_short_name = JSONDict(deepcopy(input_constants.V2_VALID_MANIFEST))
+    immutable_attributes_changed_short_name['assets']['dashboards'] = {
+        "oracle-changed": "assets/dashboards/example.json"
+    }
+    return immutable_attributes_changed_short_name
+
+
+def get_changed_immutable_attribute_manifest():
+    """
+    Helper function to change other immutable attributes in a manifest
+    """
+    immutable_attributes_changed_attribute = JSONDict(deepcopy(input_constants.V2_VALID_MANIFEST))
+    immutable_attributes_changed_attribute['app_id'] = 'datadog-oracle-changed'
+    return immutable_attributes_changed_attribute
 
 
 @pytest.fixture
@@ -29,23 +53,40 @@ def setup_route():
     'datadog_checks.dev.tooling.utils.read_metadata_rows', return_value=input_constants.ORACLE_METADATA_CSV_EXAMPLE
 )
 def test_manifest_v2_all_pass(_, setup_route):
+    """
+    Run a valid manifest through all V2 validators
+    """
     validators = get_all_validators(False, "2.0.0")
     for validator in validators:
         # Currently skipping SchemaValidator because of no context object and config
         if isinstance(validator, v2_validators.SchemaValidator):
             continue
 
-        validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+        validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
         assert not validator.result.failed, validator.result
         assert not validator.result.fixed
 
 
 def test_manifest_v2_maintainer_validator_incorrect_maintainer(setup_route):
+    """
+    Ensure MaintainerValidator fails if supplied an incorrect support_email
+    """
+    incorrect_maintainer_manifest = JSONDict(
+        {
+            "author": {
+                "homepage": "https://www.datadoghq.com",
+                "name": "Datadog",
+                "sales_email": "help@datadoghq.com",
+                "support_email": "fake_email@datadoghq.com",
+            },
+        }
+    )
+
     # Use specific validator
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
-    validator.validate('active_directory', input_constants.INCORRECT_MAINTAINER_MANIFEST, False)
+    validator.validate('active_directory', incorrect_maintainer_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -53,11 +94,25 @@ def test_manifest_v2_maintainer_validator_incorrect_maintainer(setup_route):
 
 
 def test_manifest_v2_maintainer_validator_invalid_maintainer(setup_route):
+    """
+    Ensure MaintainerValidator fails if supplied a support_email with non-ASCII characters
+    """
+    invalid_maintainer_manifest = JSONDict(
+        {
+            "author": {
+                "homepage": "https://www.datadoghq.com",
+                "name": "Datadog",
+                "sales_email": "help@datadoghq.com",
+                "support_email": "Ǩ_help@datadoghq.com",
+            },
+        }
+    )
+
     # Use specific validator
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
-    validator.validate('active_directory', input_constants.INVALID_MAINTAINER_MANIFEST, False)
+    validator.validate('active_directory', invalid_maintainer_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -69,7 +124,7 @@ def test_manifest_v2_maintainer_validator_correct_maintainer(setup_route):
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
-    validator.validate('active_directory', input_constants.CORRECT_MAINTAINER_MANIFEST, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -77,9 +132,26 @@ def test_manifest_v2_maintainer_validator_correct_maintainer(setup_route):
 
 
 def test_manifest_v2_metrics_metadata_validator_file_exists_not_in_manifest(setup_route):
+    """
+    Ensure MetricsMetadataValidator fails if supplied an empty metadata_path value
+    """
+    file_exists_not_in_manifest = JSONDict(
+        {
+            "assets": {
+                "integration": {
+                    "metrics": {
+                        "auto_install": True,
+                        "check": "oracle.session_count",
+                        "metadata_path": "",
+                        "prefix": "oracle.",
+                    },
+                },
+            },
+        }
+    )
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
-    validator.validate('active_directory', input_constants.FILE_EXISTS_NOT_IN_MANIFEST, False)
+    validator.validate('active_directory', file_exists_not_in_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -88,9 +160,26 @@ def test_manifest_v2_metrics_metadata_validator_file_exists_not_in_manifest(setu
 
 @mock.patch('os.path.isfile', return_value=False)
 def test_manifest_v2_metrics_metadata_validator_file_in_manifest_not_exist(_, setup_route):
+    """
+    Ensure MetricsMetadataValidator fails if supplied a path to a non-existant metadata.csv
+    """
+    file_in_manifest_does_not_exist = JSONDict(
+        {
+            "assets": {
+                "integration": {
+                    "metrics": {
+                        "auto_install": True,
+                        "check": "oracle.session_count",
+                        "metadata_path": "metrics_metadata1.csv",
+                        "prefix": "oracle.",
+                    },
+                },
+            },
+        }
+    )
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
-    validator.validate('active_directory', input_constants.FILE_IN_MANIFEST_DOES_NOT_EXIST, False)
+    validator.validate('active_directory', file_in_manifest_does_not_exist, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -103,7 +192,7 @@ def test_manifest_v2_metrics_metadata_validator_file_in_manifest_not_exist(_, se
 def test_manifest_v2_metrics_metadata_validator_correct_metadata(_, setup_route):
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
-    validator.validate('active_directory', input_constants.CORRECT_METADATA_FILE_MANIFEST, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -111,9 +200,27 @@ def test_manifest_v2_metrics_metadata_validator_correct_metadata(_, setup_route)
 
 
 def test_manifest_v2_metrics_to_check_validator_check_not_in_metadata(setup_route):
+    """
+    Ensure MetricToCheckValidator fails if the check value is not present in
+    the metadata.csv
+    """
+    check_not_in_metadata_csv = JSONDict(
+        {
+            "assets": {
+                "integration": {
+                    "metrics": {
+                        "auto_install": True,
+                        "check": "oracle.session_count",
+                        "metadata_path": "metrics_metadata.csv",
+                        "prefix": "oracle.",
+                    },
+                },
+            },
+        }
+    )
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
-    validator.validate('active_directory', input_constants.CHECK_NOT_IN_METADATA_MANIFEST, False)
+    validator.validate('active_directory', check_not_in_metadata_csv, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -121,9 +228,27 @@ def test_manifest_v2_metrics_to_check_validator_check_not_in_metadata(setup_rout
 
 
 def test_manifest_v2_metrics_to_check_validator_check_not_in_manifest(setup_route):
+    """
+    Ensure MetricToCheckValidator fails if supplied an empty check value
+    """
+    check_not_in_manifest = JSONDict(
+        {
+            "assets": {
+                "integration": {
+                    "metrics": {
+                        "auto_install": True,
+                        "check": "",
+                        "metadata_path": "metrics_metadata.csv",
+                        "prefix": "oracle.",
+                    },
+                },
+            },
+        }
+    )
+
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
-    validator.validate('active_directory', input_constants.CHECK_NOT_IN_MANIFEST, False)
+    validator.validate('active_directory', check_not_in_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -136,7 +261,7 @@ def test_manifest_v2_metrics_to_check_validator_check_not_in_manifest(setup_rout
 def test_manifest_v2_metrics_metadata_validator_correct_check_in_metadata(_, setup_route):
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
-    validator.validate('active_directory', input_constants.CORRECT_CHECK_IN_METADATA_MANIFEST, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -145,9 +270,24 @@ def test_manifest_v2_metrics_metadata_validator_correct_check_in_metadata(_, set
 
 @mock.patch('datadog_checks.dev.tooling.utils.has_logs', return_value=True)
 def test_manifest_v2_logs_category_validator_has_logs_no_tag(_, setup_route):
+    """
+    Ensure LogsCategoryValidator fails if the integration has logs but no Log Collection tag
+    """
+    has_logs_no_tag_manifest = JSONDict(
+        {
+            "tile": {
+                "classifier_tags": [
+                    "Category::Marketplace",
+                    "Offering::Integration",
+                    "Offering::UI Extension",
+                ],
+            },
+        }
+    )
+
     # Use specific validator
     validator = common.LogsCategoryValidator(version=V2)
-    validator.validate('active_directory', input_constants.HAS_LOGS_NO_TAG_MANIFEST, False)
+    validator.validate('active_directory', has_logs_no_tag_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -158,7 +298,7 @@ def test_manifest_v2_logs_category_validator_has_logs_no_tag(_, setup_route):
 def test_manifest_v2_logs_category_validator_correct_has_logs_correct_tag(_, setup_route):
     # Use specific validator
     validator = common.LogsCategoryValidator(version=V2)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -166,9 +306,14 @@ def test_manifest_v2_logs_category_validator_correct_has_logs_correct_tag(_, set
 
 
 def test_manifest_v2_display_on_public_validator_invalid(setup_route):
+    """
+    Ensure DisplayOnPublicValidator fails if the display_on_public_website attribute is not True
+    """
+    display_on_public_invalid_manifest = JSONDict({"app_id": "datadog-oracle"})
+
     # Use specific validator
     validator = v2_validators.DisplayOnPublicValidator(version=V2)
-    validator.validate('active_directory', input_constants.DISPLAY_ON_PUBLIC_INVALID_MANIFEST, False)
+    validator.validate('active_directory', display_on_public_invalid_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -176,9 +321,11 @@ def test_manifest_v2_display_on_public_validator_invalid(setup_route):
 
 
 def test_manifest_v2_display_on_public_validator_valid(setup_route):
+    display_on_public_valid_manifest = JSONDict({"display_on_public_website": True})
+
     # Use specific validator
     validator = v2_validators.DisplayOnPublicValidator(version=V2)
-    validator.validate('active_directory', input_constants.DISPLAY_ON_PUBLIC_VALID_MANIFEST, False)
+    validator.validate('active_directory', display_on_public_valid_manifest, False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -187,9 +334,12 @@ def test_manifest_v2_display_on_public_validator_valid(setup_route):
 
 @mock.patch('requests.post', return_value=input_constants.MockedResponseInvalid())
 def test_manifest_v2_schema_validator_manifest_invalid(_, setup_route):
+    """
+    Ensure SchemaValidator fails if a 400 status_code is received from request
+    """
     # Use specific validator
     validator = v2_validators.SchemaValidator(ctx=input_constants.MockedContextObj(), version=V2, skip_if_errors=False)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -200,7 +350,7 @@ def test_manifest_v2_schema_validator_manifest_invalid(_, setup_route):
 def test_manifest_v2_schema_validator_manifest_valid(_, setup_route):
     # Use specific validator
     validator = v2_validators.SchemaValidator(ctx=input_constants.MockedContextObj(), version=V2, skip_if_errors=False)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -208,13 +358,16 @@ def test_manifest_v2_schema_validator_manifest_valid(_, setup_route):
 
 
 @mock.patch(
-    'datadog_checks.dev.tooling.manifest_validator.common.validator.content_changed',
-    return_value=input_constants.INVALID_DIFF,
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
+    return_value=json.dumps(input_constants.V2_VALID_MANIFEST),
 )
-def test_manifest_v2_immutable_attributes_validator_invalid_change(_, setup_route):
+def test_manifest_v2_immutable_attributes_validator_invalid_attribute_change(_, setup_route):
+    """
+    Ensure ImmutableAttributesValidator fails if an immutable attribute is changed
+    """
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(get_changed_immutable_attribute_manifest()), False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -222,13 +375,33 @@ def test_manifest_v2_immutable_attributes_validator_invalid_change(_, setup_rout
 
 
 @mock.patch(
-    'datadog_checks.dev.tooling.manifest_validator.common.validator.content_changed',
-    return_value=input_constants.VERSION_UPGRADE_DIFF,
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
+    return_value=json.dumps(input_constants.V2_VALID_MANIFEST),
 )
-def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_route):
+def test_manifest_v2_immutable_attributes_validator_invalid_short_name_change(_, setup_route):
+    """
+    Ensure ImmutableAttributesValidator fails if the short name of an asset is changed
+    """
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(get_changed_immutable_short_name_manifest()), False)
+
+    # Assert test case
+    assert validator.result.failed, validator.result
+    assert not validator.result.fixed
+
+
+@mock.patch(
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
+    return_value=input_constants.IMMUTABLE_ATTRIBUTES_V1_MANIFEST,
+)
+def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_route):
+    """
+    Ensure ImmutableAttributesValidator skips validations if the manifest is being upgraded from v1 to v2
+    """
+    # Use specific validator
+    validator = common.ImmutableAttributesValidator(version=V2)
+    validator.validate('active_directory', input_constants.IMMUTABLE_ATTRIBUTES_V2_MANIFEST, False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -236,13 +409,13 @@ def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_rou
 
 
 @mock.patch(
-    'datadog_checks.dev.tooling.manifest_validator.common.validator.content_changed',
-    return_value=input_constants.VALID_DIFF,
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
+    return_value=json.dumps(input_constants.V2_VALID_MANIFEST),
 )
 def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route):
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
-    validator.validate('active_directory', input_constants.V2_MANIFEST_ALL_PASS, False)
+    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result

@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import abc
+import json
 import os
-import re
 from typing import Dict
 
 import six
 
-from datadog_checks.dev.tooling.git import content_changed
+from datadog_checks.dev.tooling.datastructures import JSONDict
+from datadog_checks.dev.tooling.git import git_show_file
 from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
 from ..constants import V1, V2
@@ -177,36 +178,81 @@ class MetricToCheckValidator(BaseManifestValidator):
 
 
 class ImmutableAttributesValidator(BaseManifestValidator):
-    """Ensure attributes haven't changed
-    Skip if the manifest is a new file (i.e. new integration)
+    """
+    Ensure that immutable attributes haven't changed
+    Skip if the manifest is a new file (i.e. new integration) or if the manifest is being upgraded to V2
     """
 
-    FIELDS_NOT_ALLOWED_TO_CHANGE = {
+    MANIFEST_VERSION_PATH = "manifest_version"
+
+    IMMUTABLE_FIELD_PATHS = {
         V1: ("integration_id", "display_name", "guid"),
-        V2: ("id", "source_type_name", "app_id"),
+        V2: (
+            "app_id",
+            "app_uuid",
+            "assets/integration/id",
+            "assets/integration/source_type_name",
+        ),
+    }
+
+    SHORT_NAME_PATHS = {
+        V1: (
+            "assets/dashboards",
+            "assets/monitors",
+            "assets/saved_views",
+        ),
+        V2: (
+            "assets/dashboards",
+            "assets/monitors",
+            "assets/saved_views",
+        ),
     }
 
     def validate(self, check_name, decoded, fix):
-        manifest_fields_changed = content_changed(file_glob=f"{check_name}/manifest.json")
+        # Check if previous version of manifest exists
+        # If not, this is a new file so this validation is skipped
+        try:
+            previous = git_show_file(path=f"{check_name}/manifest.json", ref="origin/master")
+            previous_manifest = JSONDict(json.loads(previous))
+        except Exception:
+            self.result.messages['info'].append(
+                "  skipping check for changed fields: integration not on default branch"
+            )
+            return
 
-        # Skip this validation if the manifest was updated from 1.0.0 -> 2.0.0
-        manifest_upgrade_regex = re.compile(r'\+\s+"manifest_version": "2.0.0",')
-        version_upgraded = manifest_upgrade_regex.findall(manifest_fields_changed)
+        # Skip this validation if the manifest is being updated from 1.0.0 -> 2.0.0
+        current_manifest = decoded
+        if (
+            previous_manifest[self.MANIFEST_VERSION_PATH] == "1.0.0"
+            and current_manifest[self.MANIFEST_VERSION_PATH] == "2.0.0"
+        ):
+            self.result.messages['info'].append("  skipping check for changed fields: manifest version was upgraded")
+            return
 
-        if 'new file' not in manifest_fields_changed and not version_upgraded:
-            for field in self.FIELDS_NOT_ALLOWED_TO_CHANGE[self.version]:
-                if field in manifest_fields_changed:
-                    output = f'Attribute `{field}` is not allowed to be modified. Please revert to original value'
+        # Check for differences in immutable attributes
+        for key_path in self.IMMUTABLE_FIELD_PATHS[self.version]:
+            previous_value = previous_manifest.get_path(key_path)
+            current_value = current_manifest.get_path(key_path)
+
+            if previous_value != current_value:
+                output = f'Attribute `{current_value}` at `{key_path}` is not allowed to be modified. Please revert it \
+to the original value `{previous_value}`.'
+                self.fail(output)
+
+        # Check for differences in `short_name` keys
+        for key_path in self.SHORT_NAME_PATHS[self.version]:
+            previous_short_name_dict = previous_manifest.get_path(key_path) or {}
+            current_short_name_dict = current_manifest.get_path(key_path) or {}
+
+            # Every `short_name` in the prior manifest must be in the current manifest
+            # The key cannot change and it cannot be removed
+            previous_short_names = previous_short_name_dict.keys()
+            current_short_names = set(current_short_name_dict.keys())
+            for short_name in previous_short_names:
+                if short_name not in current_short_names:
+                    output = f'Short name `{short_name}` at `{key_path}` is not allowed to be modified. \
+Please revert to original value.'
                     self.fail(output)
-        else:
-            if 'new file' in manifest_fields_changed:
-                self.result.messages['info'].append(
-                    "  skipping check for changed fields: integration not on default branch"
-                )
-            elif version_upgraded:
-                self.result.messages['info'].append(
-                    "  skipping check for changed fields: manifest version was upgraded"
-                )
 
 
 class LogsCategoryValidator(BaseManifestValidator):
