@@ -15,7 +15,6 @@ HAPROXY_VERSION_RAW = os.getenv('HAPROXY_VERSION', 'latest')
 
 HAPROXY_VERSION_IS_LATEST = HAPROXY_VERSION_RAW.endswith('latest')
 if HAPROXY_VERSION_IS_LATEST:
-     #HAPROXY_VERSION = version.parse(str(float('inf')))
      HAPROXY_VERSION = version.parse('latest')
 else:
      HAPROXY_VERSION = version.parse(HAPROXY_VERSION_RAW)
