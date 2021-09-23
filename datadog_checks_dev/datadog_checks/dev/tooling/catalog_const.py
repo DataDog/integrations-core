@@ -51,6 +51,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'go-metro',  # for agent 5 only
     'go_expvar',  # its a go package
     'http_check',  # Its not a service
+    'ibm_i',  # remote connection
     'linux_proc_extras',
     'ntp',  # the integration is for a remote ntp server
     'openmetrics',  # base class
