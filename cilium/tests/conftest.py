@@ -38,9 +38,9 @@ def setup_cilium():
         ]
     )
     run_command(["tar", "xzvf", "cilium.tar.gz"])
-    run_command(["rm", "cilium.tar.gz"])
     run_command(["kubectl", "create", "ns", "cilium"])
-    run_command(["./cilium", "install", "-n", "cilium"])
+    run_command(["cilium", "install", "-n", "cilium", "--config=global.prometheus.enabled=true"])
+    run_command(["rm", "cilium.tar.gz"])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
