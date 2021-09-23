@@ -143,7 +143,7 @@ files:
           type: boolean
       - name: queue_manager_timezone
         description: |
-          Time zone of the queue manager in IANA/Olson timezone format, if it differs from the host system's time zone.
+          Time zone of the queue manager in IANA/Olson timezone format, if it differs from UTC.
           Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
         value:
           example: UTC
