@@ -79,7 +79,7 @@ METRICS_V1_2 = COMMON_METRICS + [
     NAMESPACE + '.forward_sockets_open',
 ]
 
-METRICS_V1_7 = COMMON_METRICS + [
+METRICS_V1_8 = COMMON_METRICS + [
     NAMESPACE + '.forward_max_concurrent_rejects',
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
@@ -88,4 +88,4 @@ METRICS_V1_7 = COMMON_METRICS + [
     NAMESPACE + '.plugin_enabled',
 ]
 
-METRICS = METRICS_V1_7 if COREDNS_VERSION[:2] == [1, 7] else METRICS_V1_2
+METRICS = METRICS_V1_8 if COREDNS_VERSION[:2] == [1, 8] else METRICS_V1_2
