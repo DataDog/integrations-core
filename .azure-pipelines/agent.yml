@@ -1,9 +1,6 @@
 trigger: none
 
-pr:
-  branches:
-    include:
-    - master
+pr: none
 
 parameters:
 - name: agent_image
