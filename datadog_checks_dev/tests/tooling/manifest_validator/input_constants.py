@@ -13,7 +13,7 @@ V2_MANIFEST_ALL_PASS = JSONDict(
     {
         "app_id": "datadog-oracle",
         "assets": {
-            "dashboards": {"oracle": "https://app.datadoghq.com/screen/integration/240/oracle-database---overview"},
+            "dashboards": {"oracle": "assets/dashboards/example.json"},
             "integration": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
                 "events": {"creates_events": True},
@@ -202,12 +202,12 @@ IMMUTABLE_ATTRIBUTES_V1_MANIFEST = {"manifest_version": "1.0.0"}
 
 IMMUTABLE_ATTRIBUTES_V2_MANIFEST = JSONDict({"manifest_version": "2.0.0"})
 
-IMMUTABLE_ATTRIBUTES_PREV_MANIFEST_INVALID = json.dumps(
+IMMUTABLE_ATTRIBUTES_VALID_MANIFEST = json.dumps(
     {
         "app_id": "datadog-oracle",
         "assets": {
-            "dashboards": {"oracle": "https://app.datadoghq.com/screen/integration/240/oracle-database---overview"},
-            "monitors": {"cool-monitor": "link"},
+            "dashboards": {"oracle": "assets/dashboards/example.json"},
+            "monitors": {"cool-monitor": "assets/monitors/example.json"},
             "integration": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
                 "events": {"creates_events": True},
@@ -252,12 +252,12 @@ IMMUTABLE_ATTRIBUTES_PREV_MANIFEST_INVALID = json.dumps(
     }
 )
 
-IMMUTABLE_ATTRIBUTES_CUR_MANIFEST_INVALID_SHORT_NAME = JSONDict(
+IMMUTABLE_ATTRIBUTES_INVALID_CHANGED_SHORT_NAME = JSONDict(
     {
         "app_id": "datadog-oracle",
         "assets": {
-            "dashboards": {"oracle": "https://app.datadoghq.com/screen/integration/240/oracle-dash"},
-            "monitors": {"cool-monitor-dog": "link"},
+            "dashboards": {"oracle": "assets/dashboards/example.json"},
+            "monitors": {"cool-monitor-dog": "assets/monitors/example.json"},
             "integration": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
                 "events": {"creates_events": True},
@@ -304,9 +304,9 @@ IMMUTABLE_ATTRIBUTES_CUR_MANIFEST_INVALID_SHORT_NAME = JSONDict(
 
 IMMUTABLE_ATTRIBUTES_CURRENT_MANIFEST_INVALID = JSONDict(
     {
-        "app_id": "datadog-oracle-failure",
+        "app_id": "datadog-oracle-changed-name",
         "assets": {
-            "dashboards": {"oracle": "https://app.datadoghq.com/screen/integration/240/oracle-database---overview"},
+            "dashboards": {"oracle": "assets/dashboards/example.json"},
             "integration": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
                 "events": {"creates_events": True},
@@ -355,8 +355,8 @@ IMMUTABLE_ATTRIBUTES_CURRENT_MANIFEST_VALID = JSONDict(
     {
         "app_id": "datadog-oracle",
         "assets": {
-            "dashboards": {"oracle": "https://app.datadoghq.com/screen/integration/240/oracle-database---overview"},
-            "monitors": {"cool-monitor": "link"},
+            "dashboards": {"oracle": "assets/dashboards/example.json"},
+            "monitors": {"cool-monitor": "assets/monitors/example.json"},
             "integration": {
                 "configuration": {"spec": "assets/configuration/spec.yaml"},
                 "events": {"creates_events": True},

@@ -209,7 +209,7 @@ def test_manifest_v2_schema_validator_manifest_valid(_, setup_route):
 
 @mock.patch(
     'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
-    return_value=input_constants.IMMUTABLE_ATTRIBUTES_PREV_MANIFEST_INVALID,
+    return_value=input_constants.IMMUTABLE_ATTRIBUTES_VALID_MANIFEST,
 )
 def test_manifest_v2_immutable_attributes_validator_invalid_attribute_change(_, setup_route):
     # Use specific validator
@@ -223,12 +223,12 @@ def test_manifest_v2_immutable_attributes_validator_invalid_attribute_change(_, 
 
 @mock.patch(
     'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
-    return_value=input_constants.IMMUTABLE_ATTRIBUTES_PREV_MANIFEST_INVALID,
+    return_value=input_constants.IMMUTABLE_ATTRIBUTES_VALID_MANIFEST,
 )
 def test_manifest_v2_immutable_attributes_validator_invalid_short_name_change(_, setup_route):
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
-    validator.validate('active_directory', input_constants.IMMUTABLE_ATTRIBUTES_CUR_MANIFEST_INVALID_SHORT_NAME, False)
+    validator.validate('active_directory', input_constants.IMMUTABLE_ATTRIBUTES_INVALID_CHANGED_SHORT_NAME, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -251,7 +251,7 @@ def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_rou
 
 @mock.patch(
     'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
-    return_value=input_constants.IMMUTABLE_ATTRIBUTES_PREV_MANIFEST_INVALID,
+    return_value=input_constants.IMMUTABLE_ATTRIBUTES_VALID_MANIFEST,
 )
 def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route):
     # Use specific validator
