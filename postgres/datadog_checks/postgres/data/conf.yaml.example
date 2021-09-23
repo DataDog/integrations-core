@@ -285,6 +285,12 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param max_active_rows - number - optional - default: 3500
+        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## than the maximum rows set, then the top N longest running transactions will be reported.
+        #
+        # max_active_rows: 3500
+
     ## Configure how the SQL obfuscator behaves.
     #
     obfuscator_options:

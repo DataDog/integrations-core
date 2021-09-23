@@ -336,6 +336,13 @@ files:
           value:
             type: number
             example: 10
+        - name: max_active_rows
+          description: |
+            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            than the maximum rows set, then the top N longest running transactions will be reported.
+          value:
+            type: number
+            example: 3500
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:

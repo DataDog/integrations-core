@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime
 import re
 import time
 from collections import Counter
@@ -37,6 +38,8 @@ SAMPLE_QUERIES = [
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
@@ -600,6 +603,112 @@ def test_activity_snapshot_collection(
             assert expected_conn_out[key] == bobs_conns[key]
 
         assert event['ddtags'] == expected_tags
+
+    finally:
+        conn.close()
+
+
+@pytest.mark.parametrize(
+    "active_rows",
+    [
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'xact_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 19, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+            ]
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+            ]
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxbob',
+                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 21, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxboblongquery',
+                    'xact_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                    'query_start': datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO),
+                },
+            ]
+        ),
+    ],
+)
+def test_truncate_activity_rows(aggregator, integration_check, dbm_instance, active_rows):
+    # set max active rows to truncate to the two longest running transactions
+    dbm_instance['query_activity']['max_active_rows'] = 2
+    check = integration_check(dbm_instance)
+    check._connect()
+    with mock.patch(
+        'datadog_checks.postgres.statement_samples.PostgresStatementSamples._to_active_sessions',
+        return_value=active_rows,
+    ):
+        check.check(dbm_instance)
+
+    # run a query so there is some "activity" to detect
+    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
+    try:
+        query = "SELECT city FROM persons WHERE city = 'hello'"
+        conn.autocommit = False
+        conn.cursor().execute(query)
+
+        events = aggregator.get_event_platform_events("dbm-activity")
+        assert len(events) == 1
+        activity = events[0]['postgres_activity']
+        assert len(activity) == 2
+
+        # we should have thrown out newbob's query
+        # bc it was running for the shortest amount of time
+        for a in activity:
+            assert a['usename'] != "newbob"
+
+        # veryoldbob should be first in the sorted list, bc he is VERY old
+        # or if we hit the test case where bob's tx starts are the same we should
+        # see the bob with the longer query first.
+        assert activity[0]['usename'] in {"veryoldbob", "sameoldtxboblongquery"}
+        assert activity[1]['usename'] in {"oldbob", "sameoldtxbob"}
 
     finally:
         conn.close()

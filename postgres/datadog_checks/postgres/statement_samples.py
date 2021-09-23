@@ -169,6 +169,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
         )
+        self._activity_max_rows = self._config.statement_activity_config.get('max_active_rows', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
 
@@ -346,6 +347,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
             return active_row
+
+    def _to_active_sessions(self, rows):
+        active_sessions = []
+        for row in rows:
+            active_row = self._to_active_session(row)
+            if active_row:
+                active_sessions.append(active_row)
+        return active_sessions
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
@@ -570,23 +579,40 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _create_activity_event(self, rows, active_connections):
         self._time_since_last_activity_event = time.time()
-        active_sessions = []
-        for row in rows:
-            active_row = self._to_active_session(row)
-            if active_row:
-                active_sessions.append(active_row)
+        active_sessions = self._to_active_sessions(rows)
+        if len(active_sessions) > self._activity_max_rows:
+            self._check.gauge(
+                "dd.postgres.create_activity_event.active_sessions_pre_truncate.size",
+                len(active_sessions),
+                tags=self._tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            active_sessions = self._truncate_activity_rows(active_sessions)
         event = {
             "host": self._db_hostname,
+            "ddagentversion": datadog_agent.get_version(),
             "ddsource": "postgres",
             "dbm_type": "activity",
             "collection_interval": self._activity_coll_interval,
-            "ddagentversion": datadog_agent.get_version(),
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }
         return event
+
+    def _truncate_activity_rows(self, rows):
+        # sort first one transaction age, and then second on query age
+        rows.sort(key=lambda r: (self._sort_key(r), r['query_start']))
+        return rows[0 : self._activity_max_rows]
+
+    def _sort_key(self, row):
+        # xact_start is not always set in the activity row
+        # as we filter out null values first
+        if 'xact_start' in row:
+            return row['xact_start']
+        # otherwise primarily sort on query_start, which will always be set.
+        return row['query_start']
 
     def _report_activity_event(self):
         # Only send an event if we are configured to do so, and
