@@ -1,4 +1,5 @@
 parameters:
+  agent_image_win: $(DDEV_E2E_AGENT_WIN)
   job_name: ''
   check: ''
   display: ''
@@ -29,10 +30,10 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
-    ${{ if eq($(DDEV_E2E_AGENT_WIN), '') }}:
+    ${{ if eq(parameters.agent_image_win, '') }}:
       DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
-    ${{ if ne($(DDEV_E2E_AGENT_WIN), '') }}:
-      DDEV_E2E_AGENT: $(DDEV_E2E_AGENT_WIN)
+    ${{ if ne(parameters.agent_image_win, '') }}:
+      DDEV_E2E_AGENT: ${{ parameters.agent_image_win }}
     
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
