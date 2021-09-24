@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+
 @pytest.fixture(scope="session")
 def dd_environment():
     yield {'aci_urls': []}
