@@ -47,7 +47,7 @@ V2_TO_V1_MAP = JSONDict(
         "/assets/integration": {},
         "/assets/integration/source_type_name": "/display_name",
         "/assets/integration/configuration": {},
-        "/assets/integration/configuration/spec": SKIP_IF_FOUND,
+        "/assets/integration/configuration/spec": "/assets/configuration/spec",
         "/assets/integration/events": {},
         "/assets/integration/events/creates_events": "/creates_events",
         "/assets/integration/metrics": {},
@@ -174,7 +174,6 @@ def migrate(ctx, integration, to_version):
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list
     migrated_manifest.set_path("/classifier_tags", TODO_FILL_IN)
-    migrated_manifest.set_path("/assets/integration/configuration/spec", TODO_FILL_IN)
 
     # Retrieve and map all categories from other fields
     classifier_tags = []
