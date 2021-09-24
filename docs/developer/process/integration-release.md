@@ -220,7 +220,7 @@ ddev release upload datadog_checks_[base|dev]
 ## Releasers
 
 For whom it may concern, the following is a list of GPG public key fingerprints known to correspond to developers
-who, at the time of writing (28-02-2020), can trigger a build by signing [in-toto metadata](../meta/cd.md).
+who, at the time of writing (24-09-2021), can trigger a build by signing [in-toto metadata](../meta/cd.md).
 
 ??? info "[Alexandre Yang](https://api.github.com/users/AlexandreYang/gpg_keys)"
     - `FBC6 3AE0 9D0C A9B4 584C  9D7F 4291 A11A 36EA 52CD`
