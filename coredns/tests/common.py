@@ -86,6 +86,9 @@ METRICS_V1_8 = COMMON_METRICS + [
     NAMESPACE + '.go.memstats.heap_released_bytes',
     NAMESPACE + '.cache_request_count',
     NAMESPACE + '.plugin_enabled',
+    NAMESPACE + '.forward_healthcheck_broken_count',
+    NAMESPACE + '.hosts.reload_timestamp',
+    NAMESPACE + '.reload.failed_count',
 ]
 
-METRICS = METRICS_V1_8 if COREDNS_VERSION[:2] == [1, 7] else METRICS_V1_2
+METRICS = METRICS_V1_8 if COREDNS_VERSION[:2] == [1, 8] else METRICS_V1_2
