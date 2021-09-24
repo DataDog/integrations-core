@@ -20,9 +20,32 @@ The Citrix Hypervisor integration requires a user with at least [`read-only`](ht
 
 ### Configuration
 
+#### Host
+
 1. Edit the `citrix_hypervisor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Citrix Hypervisor performance data. See the [sample citrix_hypervisor.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `citrix_hypervisor.d/conf.yaml` file to start collecting your Citrix Hypervisor logs:
+    ```yaml
+    logs:
+    - type: file
+      path: /var/log/xensource.log
+      source: citrix_hypervisor
+    ```
+    Change the `path` value and configure it for your environment. See the [sample `citrix_hypervisor.d/conf.yaml` file][3] for all available configuration options.
+
+3. [Restart the Agent][4].
 
 ### Validation
 

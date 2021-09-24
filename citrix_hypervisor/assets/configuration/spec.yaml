@@ -15,3 +15,8 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/xensource.log
+      source: citrix_hypervisor
