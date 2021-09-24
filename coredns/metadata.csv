@@ -21,6 +21,8 @@ coredns.request_duration.seconds.sum,gauge,,second,,duration to process each que
 coredns.request_duration.seconds.count,gauge,,second,,duration to process each query,-1,coredns,request duration
 coredns.proxy_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
 coredns.proxy_request_duration.seconds.count,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.forward_conn_cache_hits,count,,entry,,"counter of connection cache hits per upstream and protocol",-1,coredns,forward cache hits
+coredns.forward_conn_cache_misses,count,,entry,,"counter of connection cache misses per upstream and protocol",-1,coredns,forward cache misses
 coredns.forward_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,forward request duration
 coredns.forward_request_duration.seconds.count,gauge,,second,,duration per upstream interaction,-1,coredns,forward request duration
 coredns.forward_request_count,count,,request,,query count per upstream,1,coredns,forward request count

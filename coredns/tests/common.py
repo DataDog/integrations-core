@@ -81,6 +81,8 @@ METRICS_V1_2 = COMMON_METRICS + [
 
 METRICS_V1_7 = COMMON_METRICS + [
     NAMESPACE + '.forward_max_concurrent_rejects',
+    NAMESPACE + '.forward_conn_cache_hits',
+    NAMESPACE + '.forward_conn_cache_misses',
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',

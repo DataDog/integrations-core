@@ -80,6 +80,8 @@ NEW_METRICS = {
     'coredns_forward_healthcheck_failures_total': 'forward_healthcheck_failure_count',
     'coredns_forward_healthcheck_broken_total': 'forward_healthcheck_broken_count',
     'coredns_forward_max_concurrent_rejects_total': 'forward_max_concurrent_rejects',
+    'coredns_forward_conn_cache_hits_total': 'forward_conn_cache_hits',
+    'coredns_forward_conn_cache_misses_total': 'forward_conn_cache_misses',
     # grpc: https://github.com/coredns/coredns/tree/v1.7.0/plugin/grpc
     'coredns_grpc_requests_total': 'grpc.request_count',
     'coredns_grpc_responses_total': 'grpc.response_rcode_count',
