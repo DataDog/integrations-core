@@ -1,12 +1,15 @@
 #
-# At the time of writing (Jan 30 2020), this was the latest version of these
+# At the time of writing (Sept 24 2021), this was the latest version of these
 # libraries.
 #
-tuf==0.17.0
-in-toto==1.0.1
+tuf==0.17.0; python_version < "3.0"
+tuf==0.18.1; python_version > "3.0"
+in-toto==1.0.1; python_version < "3.0"
+in-toto==1.1.1; python_version > "3.0"
 #
 # Make sure TUF and in-toto use the same version of this library, which they
-# both use in common. At the time of writing (Jan 30 2020), this was the latest
+# both use in common. At the time of writing (Sept 24 2021), this was the latest
 # version of the library.
 #
-securesystemslib[crypto,pynacl]==0.20.1
+securesystemslib[crypto,pynacl]==0.20.1; python_version < "3.0"
+securesystemslib[crypto,pynacl]==0.21.0; python_version > "3.0"
