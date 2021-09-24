@@ -14,6 +14,7 @@ parameters:
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests
+  run_py3_tests: true  # Whether or not to run python3 tests.
   force_base_package: false
   pip_cache_config: null
   coverage: true
@@ -38,6 +39,8 @@ jobs:
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+    ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
+      TOX_SKIP_ENV: py3.*  # Don't run py2 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}

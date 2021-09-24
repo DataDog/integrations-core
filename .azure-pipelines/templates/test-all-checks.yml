@@ -2,6 +2,7 @@ parameters:
   ispr: false
   pip_cache_config: null
   run_py2_tests: true
+  run_py3_tests: true
   force_base_package: false
   test: true
   test_e2e: true
@@ -14,6 +15,7 @@ jobs:
     ispr: ${{ parameters.ispr }}
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
+    run_py2_tests: ${{ parameters.run_py3_tests }}
     force_base_package: ${{ parameters.force_base_package }}
     test: ${{ parameters.test }}
     test_e2e: ${{ parameters.test_e2e }}

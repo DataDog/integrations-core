@@ -3,23 +3,34 @@ trigger: none
 pr: none
 
 parameters:
-- name: agent_image
-  displayName: Agent Docker Image
+- name: run_py3_tests
+  displayName: Run Python 3 tests
+  type: boolean
+  default: true
+- name: agent_image_py3
+  displayName: Agent Docker Image for Python 3
   type: string
   default: datadog/agent-dev:latest
-- name: agent_windows_image
-  displayName: Windows Agent Docker Image
+- name: agent_windows_image_py3
+  displayName: Windows Agent Docker Image for Python 3
   type: string
   default: datadog/agent-dev:master-py2-win-servercore
-- name: run_py2
+- name: run_py2_tests
   displayName: Run Python 2 tests
   type: boolean
   default: true
-
+- name: agent_image_py2
+  displayName: Agent Docker Image for Python 2
+  type: string
+  default: datadog/agent-dev:latest
+- name: agent_windows_image_py2
+  displayName: Windows Agent Docker Image for Python 2
+  type: string
+  default: datadog/agent-dev:master-py2-win-servercore
 
 variables:
-  DDEV_E2E_AGENT: ${{ parameters.agent_image }}
-  DDEV_E2E_AGENT_WIN: ${{ parameters.agent_windows_image }}
+  DDEV_E2E_AGENT: ${{ parameters.agent_image_py3 }}
+  DDEV_E2E_AGENT_WIN: ${{ parameters.agent_windows_image_py3 }}
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
   DD_TRACE_AGENT_PORT: 8127
@@ -39,7 +50,8 @@ jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
     job_name: Agent
-    run_py2_tests: ${{ parameters.run_py2 }}
+    run_py2_tests: ${{ parameters.run_py2_tests }}
+    run_py3_tests: ${{ parameters.run_py3_tests }}
     test_e2e: true
     ddtrace_flag: '--ddtrace'
     pip_cache_config:
