@@ -11,6 +11,10 @@ parameters:
   displayName: Windows Agent Docker Image
   type: string
   default: datadog/agent-dev:master-py2-win-servercore
+- name: run_py2
+  displayName: Run Python 2 tests
+  type: boolean
+  default: true
 
 
 variables:
@@ -35,7 +39,7 @@ jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
     job_name: Agent
-    run_py2_tests: true
+    run_py2_tests: ${{ parameters.run_py2 }}
     test_e2e: true
     ddtrace_flag: '--ddtrace'
     pip_cache_config:
