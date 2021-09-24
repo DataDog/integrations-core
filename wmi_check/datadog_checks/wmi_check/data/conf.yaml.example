@@ -80,12 +80,12 @@ instances:
     ##     filters:
     ##       - PROP1: AA
     ##       - PROP2: BB%
-    ##     result> WHERE ( ( PROP1 = 'AA' ) ) OR ( ( PROP2 LIKE 'BB%' ) )
+    ##     result> WHERE ( PROP1 = 'AA' ) OR ( PROP2 LIKE 'BB%' )
     ##
     ##     filters:
     ##       - PROP1: AA
     ##         PROP2: BB%
-    ##     result> WHERE ( ( PROP1 = 'AA' ) AND ( PROP2 LIKE 'BB%' ) )
+    ##     result> WHERE ( PROP1 = 'AA' AND PROP2 LIKE 'BB%' )
     ##
     ##     filters:
     ##       - PROP1: 
@@ -100,7 +100,7 @@ instances:
     ##             - ['!=', 'BB']
     ##           OR:
     ##             - CC%
-    ##     result> WHERE ( PROP1 != 'AA' AND PROP1 != 'BB' OR ( PROP1 LIKE 'CC%' ) )
+    ##     result> WHERE ( ( PROP1 != 'AA' AND PROP1 != 'BB' ) OR PROP1 LIKE 'CC%' )
     ##
     ##     filters:
     ##       - PROP1: 

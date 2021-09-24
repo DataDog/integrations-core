@@ -448,9 +448,12 @@ class WMISampler(object):
                     for k, v in iteritems(value):
                         # Append if PROPERTY: { AND: ['<>', 'foo']}
                         # Extend if PROPERTY: { AND: [['<>', 'foo']]}
-                        # Extend if PROPERTY: { AND: [['foo%', '%bar']]}
+                        # Append if PROPERTY: { AND: 'foo%'}
+                        # Extend if PROPERTY: { AND: ['foo%', '%bar']]}
                         should_extend = (
-                            False if isinstance(v, (tuple, list)) and len(v) == 2 and v[0] in WQL_OPERATORS else True
+                            True
+                            if isinstance(v, (tuple, list)) and not (len(v) == 2 and v[0] in WQL_OPERATORS)
+                            else False
                         )
                         bool_op = default_bool_op
                         if k.upper() in LOGIC_OPERATORS:
@@ -487,10 +490,10 @@ class WMISampler(object):
                     op = ' {} '.format(bool_op[1:] if negate else bool_op)
                     clause = op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) for k, v in internal_filter])
 
-                    if bool_op.strip() == 'OR' and len(value) > 1:
-                        clauses.append("( {clause} )".format(clause=clause))
-                    elif negate:
+                    if negate:
                         clauses.append("NOT ( {clause} )".format(clause=clause))
+                    elif len(value) > 1:
+                        clauses.append("( {clause} )".format(clause=clause))
                     else:
                         clauses.append("{clause}".format(clause=clause))
 

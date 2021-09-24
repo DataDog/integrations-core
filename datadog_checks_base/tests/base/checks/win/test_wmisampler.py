@@ -30,11 +30,16 @@ def test_format_filter_value():
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_values():
+def test_format_filter_values_same_prop():
+    filters = [{'a': [['>=', 10], ['<', 0]]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a >= '10' OR a < '0' ) )"
+
     filters = [{'a': {'AND': [['<>', 'c'], ['<>', 'd']]}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a <> 'c' AND a <> 'd' )"
+    assert formatted_filters == " WHERE ( ( a <> 'c' AND a <> 'd' ) )"
 
     filters = [{'a': {'NOR': ['c', 'd']}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -45,6 +50,11 @@ def test_format_filter_values():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( NOT ( a LIKE 'c%' AND a LIKE '%d' ) )"
+
+    filters = [{'a': {'AND': [['!=', 'AA'], ['!=', 'BB']], 'OR': 'CC%'}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a != 'AA' AND a != 'BB' ) OR a LIKE 'CC%' )"
 
 
 @requires_windows
