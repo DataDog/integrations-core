@@ -140,7 +140,12 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    fallback = os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    # DDEV_E2E_AGENT_PY2 overrides DDEV_E2E_AGENT when starting a Python 2 environment
+    if python == 2 and os.getenv('DDEV_E2E_AGENT_PY2'):
+        fallback = os.getenv('DDEV_E2E_AGENT_PY2')
+
+    agent_ver = agent or fallback
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
         # TODO: remove this legacy fallback lookup in any future major version bump
