@@ -37,7 +37,12 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._static_tags = None
         self._service_check_tags = None
         proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
-        self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        try:
+            self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        except TypeError as e:
+            self.log.debug("Got error when constructing Config object: %s", str(e))
+            self.log.debug("Boto Config parameters: %s", self.instance.get('boto_config'))
+            self._boto_config = None
         self.check_initializations.append(self.parse_config)
 
     def refresh_scrapers(self):
