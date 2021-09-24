@@ -60,7 +60,7 @@ def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     [
         pytest.param('2020-01-01', '10.25.13', 'Fake/Timezone', False, id='Invalid TZ: Fake/Timezone'),
         pytest.param('2021-08-01', '12.00.00', 'MT', False, id='Invalid TZ: MT'),
-        pytest.param('2021-08-01', '12.00.00', 'EST', True, id='Valid TZ: EST'),
+        pytest.param('2021-08-01', '12.00.00', 'Etc/UTC', True, id='Valid TZ: Etc/UTC'),
         pytest.param('2020-01-01', '10.25.13', 'America/Denver', True, id='Valid TZ: America/Denver'),
         pytest.param('2021-05-25', '18.48.20', 'Europe/Madrid', True, id='Valid TZ: Europe/Madrid'),
     ],
