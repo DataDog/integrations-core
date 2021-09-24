@@ -61,7 +61,7 @@ def instance_port(field, value):
 
 
 def instance_queue_manager_timezone(field, value):
-    return 'UTC'
+    return 'Etc/UTC'
 
 
 def instance_queue_patterns(field, value):
