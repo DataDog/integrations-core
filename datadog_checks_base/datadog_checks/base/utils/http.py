@@ -7,7 +7,6 @@ import re
 import ssl
 from contextlib import contextmanager
 from copy import deepcopy
-from functools import partial
 from io import open
 from ipaddress import ip_address, ip_network
 
@@ -22,6 +21,7 @@ from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
+from wrapt import ObjectProxy
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -112,6 +112,29 @@ PROXY_SETTINGS_DISABLED = {
 KERBEROS_STRATEGIES = {}
 
 UDS_SCHEME = 'unix'
+
+
+class ResponseWrapper(ObjectProxy):
+    def __init__(self, response, default_chunk_size):
+        super(ResponseWrapper, self).__init__(response)
+
+        # See https://github.com/psf/requests/pull/5942
+        self.__default_chunk_size = default_chunk_size
+
+    def iter_content(self, chunk_size=None, decode_unicode=False):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+
+    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def __enter__(self):
+        return self
 
 
 class RequestsWrapper(object):
@@ -381,10 +404,7 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            response.iter_content = partial(response.iter_content, chunk_size=self.request_size)
-            response.iter_lines = partial(response.iter_lines, chunk_size=self.request_size)
-
-            return response
+            return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
