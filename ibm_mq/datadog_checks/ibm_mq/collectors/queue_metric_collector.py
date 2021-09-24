@@ -108,7 +108,7 @@ class QueueMetricCollector(object):
             else:
                 for queue_info in response:
                     queue = queue_info.get(pymqi.CMQC.MQCA_Q_NAME, None)
-                    if not queue:
+                    if queue:
                         queue_name = to_string(queue).strip()
                         self.log.debug("Discovered queue: %s", queue_name)
                         queues.append(queue_name)

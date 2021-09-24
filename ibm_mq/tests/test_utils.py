@@ -34,22 +34,21 @@ def test_sanitize_strings(input_string, expected):
 def test_calculate_elapsed_time(datestamp, timestamp, time_zone):
     from datetime import datetime
 
-    from pytz import UTC, timezone
+    from dateutil import tz
+    from dateutil.tz import UTC
 
     from datadog_checks.base.utils.time import EPOCH
     from datadog_checks.ibm_mq.utils import calculate_elapsed_time
 
     current_tz = UTC
     current_dt = datetime.strptime('2021-09-15 18:46:00', '%Y-%m-%d %H:%M:%S')
-    current_dt_loc = current_tz.localize(current_dt)
-    current_dt_norm = (UTC).normalize(current_dt_loc)
-    current_posix = (current_dt_norm - EPOCH).total_seconds()
+    current_dt_tz = current_dt.replace(tzinfo=current_tz)
+    current_posix = (current_dt_tz - EPOCH).total_seconds()
 
-    param_tz = timezone(time_zone)
+    param_tz = tz.gettz(time_zone)
     param_dt = datetime.strptime(datestamp + ' ' + timestamp, '%Y-%m-%d %H.%M.%S')
-    param_dt_loc = param_tz.localize(param_dt)
-    param_dt_norm = (UTC).normalize(param_dt_loc)
-    param_posix = (param_dt_norm - EPOCH).total_seconds()
+    param_dt_tz = param_dt.replace(tzinfo=param_tz)
+    param_posix = (param_dt_tz - EPOCH).total_seconds()
 
     expected = current_posix - param_posix
 
@@ -80,7 +79,9 @@ def test_calculate_elapsed_time_valid_tz(datestamp, timestamp, time_zone, valid)
     'datestamp,timestamp,timestamp_dst,time_zone,expected',
     [
         pytest.param('2021-11-07', '02.10.00', '01.55.00', 'America/New_York', 4500, id='DST: America/New_York'),
-        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'Pacific/Honolulu', 900, id='DST: Pacific/Honolulu'),
+        pytest.param('2021-03-14', '01.50.00', '03.05.00', 'America/Denver', 900, id='DST: America/Denver'),
+        pytest.param('2021-03-14', '01.50.00', '03.50.00', 'America/Anchorage', 3600, id='DST: America/Anchorage'),
+        pytest.param('2021-03-14', '01.50.00', '02.05.00', 'Pacific/Honolulu', 900, id='Not DST: Pacific/Honolulu'),
         pytest.param('2021-12-31', '18.30.30', '18.45.30', 'America/Chicago', 900, id='Not DST: America/Chicago'),
         pytest.param(
             '2021-02-15',
