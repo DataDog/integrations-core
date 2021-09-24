@@ -9,7 +9,6 @@ parameters:
   repo: ''
   coverage: true
   force_base_package: false
-  tox_skip_env: ''
 
 steps:
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
@@ -17,52 +16,40 @@ steps:
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-      TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (no coverage)'
-      env:
-        TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 # Nightly base package check
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
     - script: ddev test --force-base-min --force-env-rebuild --junit ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
-      env:
-        TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
   - script: ddev env test --base --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
-      TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), ne(parameters.repo, 'core'))}}:
   - script: ddev env test --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
-      TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
   - script: ddev test --bench --junit ${{ parameters.check }}
     displayName: 'Run benchmarks'
-    env:
-      TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - ${{ if eq(parameters.latest, 'true') }}:
     - script: ddev test --latest --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
       displayName: 'Run tests and verify support for the latest version'
-      env:
-        TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
     - script: ddev env test --base --new-env --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}:latest
       displayName: 'Run E2E tests for the latest version'
       env:
         DD_API_KEY: $(DD_API_KEY)
-        TOX_SKIP_ENV: ${{ parameters.tox_skip_env }}
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
   condition: succeededOrFailed()
