@@ -5,6 +5,7 @@ import os
 
 import pytest
 from packaging import version
+from sys import maxsize
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
@@ -15,7 +16,7 @@ HAPROXY_VERSION_RAW = os.getenv('HAPROXY_VERSION', 'latest')
 
 HAPROXY_VERSION_IS_LATEST = HAPROXY_VERSION_RAW.endswith('latest')
 if HAPROXY_VERSION_IS_LATEST:
-    HAPROXY_VERSION = version.parse('latest')
+    HAPROXY_VERSION = version.parse(str(maxsize))
 else:
     HAPROXY_VERSION = version.parse(HAPROXY_VERSION_RAW)
 ENDPOINT_PROMETHEUS = 'http://{}:8404/metrics'.format(HOST)
