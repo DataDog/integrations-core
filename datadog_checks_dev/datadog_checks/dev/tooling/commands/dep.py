@@ -281,7 +281,7 @@ def updates(sync, check_python_classifiers, batch_size):
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
                 deps_updated += 1
-                if deps_updated >= batch_size:
+                if batch_size is not None and deps_updated >= batch_size:
                     break
 
             write_file_lines(static_file, new_lines)
