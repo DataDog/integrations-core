@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from sys import maxsize
 
 import pytest
 from packaging import version
-from sys import maxsize
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
