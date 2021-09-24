@@ -11,7 +11,16 @@ from semver import VersionInfo
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
-from .common import COMMON_METRICS, DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
+from .common import (
+    COMMON_METRICS,
+    DB_NAME,
+    HOST,
+    PORT,
+    POSTGRES_VERSION,
+    check_bgw_metrics,
+    check_common_metrics,
+    requires_static_version,
+)
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
@@ -155,6 +164,9 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
 
     check.check(pg_instance)
     assert_state_set(check)
+
+
+requires_static_version
 
 
 def test_version_metadata(integration_check, pg_instance, datadog_agent):
