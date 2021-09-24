@@ -3,6 +3,10 @@ trigger: none
 pr: none
 
 parameters:
+- name: run_py3_tests
+  displayName: Run Python 3 tests
+  type: boolean
+  default: true
 - name: run_py2_tests
   displayName: Run Python 2 tests
   type: boolean
@@ -39,6 +43,7 @@ jobs:
   parameters:
     job_name: Agent
     run_py2_tests: ${{ parameters.run_py2_tests }}
+    run_py3_tests: ${{ parameters.run_py3_tests }}
     test_e2e: true
     ddtrace_flag: '--ddtrace'
     pip_cache_config:
