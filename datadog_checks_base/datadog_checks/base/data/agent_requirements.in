@@ -6,7 +6,8 @@ beautifulsoup4==4.10.0
 binary==1.0.0
 boto3==1.18.48
 boto==2.49.0
-botocore==1.21.48
+botocore==1.20.112; python_version < "3.0"
+botocore==1.21.48; python_version > "3.0"
 cachetools==4.2.2
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.2.1
