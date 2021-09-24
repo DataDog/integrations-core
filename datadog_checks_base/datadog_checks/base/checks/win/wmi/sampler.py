@@ -478,23 +478,16 @@ class WMISampler(object):
                         lambda x: (prop, x)
                         if isinstance(x, (tuple, list))
                         else (prop, ('LIKE', x))
-                        if isinstance(x, string_types) and '%' in v
+                        if isinstance(x, string_types) and '%' in x
                         else (prop, (default_comp_op, x)),
                         value,
                     )
 
                     negate = True if bool_op.upper() in ('NAND', 'NOR') else False
                     op = ' {} '.format(bool_op[1:] if negate else bool_op)
-                    clause = op.join(
-                        [
-                            '{0} {1} \'{2}\''.format(k, v[0], v[1])
-                            if isinstance(v, (list, tuple))
-                            else '{0} = \'{1}\''.format(k, v)
-                            for k, v in internal_filter
-                        ]
-                    )
+                    clause = op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) for k, v in internal_filter])
 
-                    if bool_op.strip() == 'OR':
+                    if bool_op.strip() == 'OR' and len(value) > 1:
                         clauses.append("( {clause} )".format(clause=clause))
                     elif negate:
                         clauses.append("NOT ( {clause} )".format(clause=clause))
