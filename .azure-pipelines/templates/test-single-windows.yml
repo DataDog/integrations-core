@@ -1,5 +1,6 @@
 parameters:
   agent_image_win: $(DDEV_E2E_AGENT_WIN)
+  agent_image_win_py2: $(DDEV_E2E_AGENT_WIN_PY2)
   job_name: ''
   check: ''
   display: ''
@@ -35,6 +36,8 @@ jobs:
       DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
     ${{ if ne(parameters.agent_image_win, '') }}:
       DDEV_E2E_AGENT: ${{ parameters.agent_image_win }}
+    ${{ if ne(parameters.agent_image_win_py2, '') }}:
+      DDEV_E2E_AGENT_PY2: ${{ parameters.agent_image_win_py2 }}
     
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
