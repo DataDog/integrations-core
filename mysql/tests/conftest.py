@@ -12,6 +12,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
+from .common import requires_static_version
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +134,7 @@ def instance_error():
     return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
+requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
@@ -303,7 +305,7 @@ def _mysql_logs_path():
     (which don't support interpolation of environment variables).
     """
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '8.0':
+        if MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return '/opt/bitnami/mysql/logs'
         else:
             return '/var/log/mysql'
@@ -320,7 +322,7 @@ def _mysql_docker_repo():
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
-        elif MYSQL_VERSION == '8.0':
+        elif MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
