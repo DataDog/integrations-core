@@ -110,9 +110,12 @@ class Ceph(AgentCheck):
         try:
             raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
             store_type = { metadata['id']: metadata['osd_objectstore'] for metadata in raw.get('osd_metadata', []) }
+            devices = { metadata['id']: metadata['devices'] for metadata in raw.get('osd_metadata', []) }
+            device_ids = { metadata['id']: metadata['device_ids'] for metadata in raw.get('osd_metadata', []) }
+            device_class = { metadata['id']: metadata['default_device_class'] for metadata in raw.get('osd_metadata', []) }
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id'], f'ceph_osd_objectstore:{store_type[osdperf["id"]]}']
+                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id'], f'ceph_osd_objectstore:{store_type[osdperf["id"]]}', f'ceph_osd_device:{devices[osdperf["id"]]}', f'ceph_osd_device_id:{device_ids[osdperf["id"]]}', f'ceph_osd_device_class:{device_class[osdperf["id"]]}']
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
         except (KeyError, TypeError):
