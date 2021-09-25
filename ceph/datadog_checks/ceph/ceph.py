@@ -59,7 +59,7 @@ class Ceph(AgentCheck):
         ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
-        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
+        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
                 output, _, _ = get_subprocess_output(args.split(), self.log)
@@ -109,9 +109,10 @@ class Ceph(AgentCheck):
     def _extract_metrics(self, raw, tags):
         try:
             raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
+            store_type = { metadata['id']: metadata['osd_objectstore'] for metadata in raw.get('osd_metadata', []) }
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
+                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id'], f'ceph_osd_objectstore:{store_type[osdperf["id"]]}']
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
         except (KeyError, TypeError):
