@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Hazelcast][1].
+This check monitors [Hazelcast][1] v4.0+.
 
 ## Setup
 
@@ -158,9 +158,14 @@ Represents the state of the Hazelcast Management Center as indicated by its heal
 
 Hazelcast does not include any events.
 
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
 
 [1]: https://hazelcast.org
 [2]: https://docs.datadoghq.com/agent/
@@ -175,3 +180,4 @@ Need help? Contact [Datadog support][5].
 [11]: https://docs.datadoghq.com/agent/docker/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/assets/service_checks.json

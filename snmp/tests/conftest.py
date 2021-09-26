@@ -14,12 +14,12 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
 from .common import (
-    AUTODISCOVERY_TYPE,
     COMPOSE_DIR,
     PORT,
     SCALAR_OBJECTS,
     SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
+    SNMP_LISTENER_ENV,
     TABULAR_OBJECTS,
     TOX_ENV_NAME,
     generate_container_instance_config,
@@ -33,7 +33,6 @@ E2E_METADATA = {
     'start_commands': [
         # Ensure the Agent has access to profile definition files and auto_conf.
         'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
-        'cp -r /home/snmp/datadog_checks/snmp/data/auto_conf.yaml /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml',
     ],
 }
 
@@ -52,7 +51,7 @@ def dd_environment():
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
-            if AUTODISCOVERY_TYPE == 'agent':
+            if SNMP_LISTENER_ENV == 'true':
                 instance_config = {}
                 new_e2e_metadata['docker_volumes'] = [
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
@@ -99,6 +98,11 @@ def create_datadog_conf_file(tmp_dir):
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
+                    'tags': [
+                        "tag1:val1",
+                        "tag2:val2",
+                    ],
+                    'loader': 'core',
                 },
                 {
                     'network': '{}.0/28'.format(prefix),
@@ -119,8 +123,7 @@ def create_datadog_conf_file(tmp_dir):
                     'authentication_protocol': 'sha',
                     'privacy_key': 'doggiePRIVkey',
                     'privacy_protocol': 'des',
-                    'context_engine_id': 'my-engine-id',
-                    'context_name': 'my-context-name',
+                    'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                 },
             ],
@@ -128,7 +131,7 @@ def create_datadog_conf_file(tmp_dir):
         'listeners': [{'name': 'snmp'}],
     }
     datadog_conf_file = os.path.join(tmp_dir, 'datadog.yaml')
-    with open(datadog_conf_file, 'w') as file:
+    with open(datadog_conf_file, 'wb') as file:
         file.write(yaml.dump(datadog_conf))
     return datadog_conf_file
 

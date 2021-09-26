@@ -9,6 +9,11 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.time import get_precise_time
+
+from .utils import construct_use_statement
+
 # Queries
 ALL_INSTANCES = 'ALL'
 
@@ -403,6 +408,55 @@ class SqlOsTasks(BaseSqlServerMetric):
 
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
+class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
+    CUSTOM_QUERIES_AVAILABLE = False
+    TABLE = 'sys.master_files'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = """
+        select sys.databases.name as name, file_id, type, physical_name, size, max_size,
+        sys.master_files.state as state, sys.master_files.state_desc as state_desc from {table}
+        right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id;
+    """.format(
+        table=TABLE
+    )
+    DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        return cls._fetch_generic_values(cursor, None, logger)
+
+    def fetch_metric(self, rows, columns):
+        db_name = columns.index("name")
+        file_id = columns.index("file_id")
+        file_type = columns.index("type")
+        file_location = columns.index("physical_name")
+        db_files_state_desc_index = columns.index("state_desc")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            column_val = row[value_column_index]
+            if self.column in ('size', 'max_size'):
+                column_val *= 8  # size reported in 8 KB pages
+
+            fileid = row[file_id]
+            filetype = self.DB_TYPE_MAP[row[file_type]]
+            location = row[file_location]
+            db_files_state_desc = row[db_files_state_desc_index]
+            dbname = row[db_name]
+
+            metric_tags = [
+                'database:{}'.format(str(dbname)),
+                'file_id:{}'.format(str(fileid)),
+                'file_type:{}'.format(str(filetype)),
+                'file_location:{}'.format(str(location)),
+                'database_files_state_desc:{}'.format(str(db_files_state_desc)),
+            ]
+            metric_tags.extend(self.tags)
+            metric_name = '{}'.format(self.datadog_name)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-files-transact-sql
 class SqlDatabaseFileStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.database_files'
@@ -422,23 +476,28 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         rows = []
         columns = []
 
-        cursor.execute('select DB_NAME()')
+        cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
         data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
 
         for db in cls._DATABASES:
             # use statements need to be executed separate from select queries
-            ctx = 'use {}'.format(db)
-            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-            cursor.execute(ctx)
-            logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-            cursor.execute(cls.QUERY_BASE)
+            ctx = construct_use_statement(db)
+            try:
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
+                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
+                cursor.execute(cls.QUERY_BASE)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
 
-            data = cursor.fetchall()
             query_columns = ['database'] + [i[0] for i in cursor.description]
             if columns:
-                assert columns == query_columns
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
             else:
                 columns = query_columns
 
@@ -455,17 +514,22 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
         # reset back to previous db
         logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute('use {}'.format(str(current_db)))
+        cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
     def fetch_metric(self, rows, columns):
-        db_name = columns.index('database')
-        file_id = columns.index("file_id")
-        file_type = columns.index("type")
-        file_location = columns.index("physical_name")
-        db_files_state_desc_index = columns.index("state_desc")
-        value_column_index = columns.index(self.column)
+        try:
+            db_name = columns.index('database')
+            file_id = columns.index("file_id")
+            file_type = columns.index("type")
+            file_location = columns.index("physical_name")
+            db_files_state_desc_index = columns.index("state_desc")
+            value_column_index = columns.index(self.column)
+        except ValueError as e:
+            raise CheckException(
+                "Could not fetch all required information from columns {}:\n\t{}".format(str(columns), str(e))
+            )
 
         for row in rows:
             if row[db_name] != self.instance:
@@ -598,23 +662,62 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
 #
 # Returns size and fragmentation information for the data and
 # indexes of the specified table or view in SQL Server.
+#
+# There are reports of this query being very slow for large datasets,
+# so debug query timing are included to help monitor it.
+# https://dba.stackexchange.com/q/76374
+#
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
 class SqlDbFragmentation(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_index_physical_stats'
     DEFAULT_METRIC_TYPE = 'gauge'
 
+    _DATABASES = set()
+
     QUERY_BASE = (
         "select DB_NAME(database_id) as database_name, OBJECT_NAME(object_id) as object_name, "
         "index_id, partition_number, fragment_count, avg_fragment_size_in_pages, "
         "avg_fragmentation_in_percent "
-        "from {table} (null,null,null,null,null) "
+        "from {table} (DB_ID('{{db}}'),null,null,null,null) "
         "where fragment_count is not null".format(table=TABLE)
     )
 
+    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+        super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
+        self._DATABASES.add(self.instance)
+
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
-        return cls._fetch_generic_values(cursor, None, logger)
+        # special case to limit this query to specific databases and monitor performance
+        rows = []
+        columns = []
+
+        logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, cls._DATABASES)
+
+        for db in cls._DATABASES:
+            query = cls.QUERY_BASE.format(db=db)
+            logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
+            start = get_precise_time()
+            try:
+                cursor.execute(query)
+                data = cursor.fetchall()
+            except Exception as e:
+                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
+                continue
+            elapsed = get_precise_time() - start
+
+            query_columns = [i[0] for i in cursor.description]
+            if columns:
+                if columns != query_columns:
+                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
+            else:
+                columns = query_columns
+
+            rows.extend(data)
+            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
+
+        return rows, columns
 
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
@@ -666,12 +769,14 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         sync_state_desc_index = columns.index('synchronization_state_desc')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         replica_server_name_index = columns.index('replica_server_name')
         is_local_index = columns.index('is_local')
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if self.cfg_instance.get('only_emit_local') and not is_local:
@@ -688,6 +793,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
                 'synchronization_state_desc:{}'.format(str(sync_state_desc)),
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
             ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
@@ -717,10 +823,12 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         sync_health_desc_index = columns.index('synchronization_health_desc')
 
         for row in rows:
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
 
             if selected_ag and selected_ag != resource_group_id:
@@ -730,6 +838,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
             sync_health_desc = row[sync_health_desc_index]
             metric_tags = [
                 'availability_group:{}'.format(str(resource_group_id)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'synchronization_health_desc:{}'.format(str(sync_health_desc)),
             ]
             metric_tags.extend(self.tags)
@@ -766,16 +875,22 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     def fetch_metric(self, rows, columns):
         value_column_index = columns.index(self.column)
 
-        is_primary_replica_index = columns.index('is_primary_replica')
         failover_mode_desc_index = columns.index('failover_mode_desc')
         replica_server_name_index = columns.index('replica_server_name')
         resource_group_id_index = columns.index('resource_group_id')
+        resource_group_name_index = columns.index('name')
         is_local_index = columns.index('is_local')
         database_name_index = columns.index('database_name')
+        try:
+            is_primary_replica_index = columns.index('is_primary_replica')
+        except ValueError:
+            # This column only supported in SQL Server 2014 and later
+            is_primary_replica_index = None
 
         for row in rows:
             is_local = row[is_local_index]
             resource_group_id = row[resource_group_id_index]
+            resource_group_name = row[resource_group_name_index]
             database_name = row[database_name_index]
             selected_ag = self.cfg_instance.get('availability_group')
             selected_database = self.cfg_instance.get('ao_database')
@@ -790,16 +905,21 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
             column_val = row[value_column_index]
             failover_mode_desc = row[failover_mode_desc_index]
-            is_primary_replica = row[is_primary_replica_index]
             replica_server_name = row[replica_server_name_index]
             resource_group_id = row[resource_group_id_index]
 
             metric_tags = [
                 'replica_server_name:{}'.format(str(replica_server_name)),
                 'availability_group:{}'.format(str(resource_group_id)),
-                'is_primary_replica:{}'.format(str(is_primary_replica)),
+                'availability_group_name:{}'.format(str(resource_group_name)),
                 'failover_mode_desc:{}'.format(str(failover_mode_desc)),
             ]
+            if is_primary_replica_index is not None:
+                is_primary_replica = row[is_primary_replica_index]
+                metric_tags.append('is_primary_replica:{}'.format(str(is_primary_replica)))
+            else:
+                metric_tags.append('is_primary_replica:unknown')
+
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
 

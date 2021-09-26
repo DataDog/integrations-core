@@ -4,8 +4,6 @@
 
 import pytest
 
-from datadog_checks.ibm_mq.utils import sanitize_strings
-
 pytestmark = pytest.mark.unit
 
 
@@ -20,4 +18,6 @@ pytestmark = pytest.mark.unit
     ],
 )
 def test_sanitize_strings(input_string, expected):
+    from datadog_checks.ibm_mq.utils import sanitize_strings
+
     assert expected == sanitize_strings(input_string)

@@ -1,6 +1,15 @@
 # CHANGELOG - ProxySQL
 
-## 3.0.0 / 2021-01-25
+## 3.1.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add runtime configuration validation. See [#8975](https://github.com/DataDog/integrations-core/pull/8975).
+* [Added] Support `SHUNNED_REPLICATION_LAG` status for `proxysql.backend.status` service check. See [#9738](https://github.com/DataDog/integrations-core/pull/9738).
+
+## 3.0.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 3.0.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
 * [Changed] Update ProxySQL check to use TLS context wrapper. See [#8243](https://github.com/DataDog/integrations-core/pull/8243).

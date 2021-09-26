@@ -118,6 +118,11 @@ instances:
     #
     # ao_database: <AO_DATABASE>
 
+    ## @param include_master_files_metrics - boolean - optional - default: false
+    ## Include database file size and state from `sys.master_files`.
+    #
+    # include_master_files_metrics: false
+
     ## @param include_fci_metrics - boolean - optional - default: false
     ## Include Failover Cluster Instance metrics. Note that these metrics
     ## requires a SQLServer set up with Failover Clustering enabled.
@@ -136,7 +141,8 @@ instances:
     # include_task_scheduler_metrics: false
 
     ## @param include_db_fragmentation_metrics - boolean - optional - default: false
-    ## Include database fragmentation metrics.
+    ## Include database fragmentation metrics. Note these queries can be resource intensive on large datasets.
+    ## Recommend to limit these via autodiscovery or specific database instances.
     #
     # include_db_fragmentation_metrics: false
 
@@ -284,7 +290,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

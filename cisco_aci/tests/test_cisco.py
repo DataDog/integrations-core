@@ -15,12 +15,12 @@ from . import common
 
 
 def test_cisco(aggregator):
-    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG])
     api = Api(common.ACI_URLS, cisco_aci_check.http, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log)
     api.wrapper_factory = common.FakeSessionWrapper
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
 
-    cisco_aci_check.check(common.CONFIG)
+    cisco_aci_check.check({})
 
 
 @pytest.mark.parametrize(

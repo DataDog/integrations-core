@@ -1,5 +1,17 @@
 # CHANGELOG - apache
 
+## 1.17.0 / 2021-06-09 / Agent 7.30.0
+
+* [Added] Added metrics from the apache scoreboard. See [#9355](https://github.com/DataDog/integrations-core/pull/9355). Thanks [daanleenders](https://github.com/daanleenders).
+
+## 1.16.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8885](https://github.com/DataDog/integrations-core/pull/8885).
+
+## 1.15.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.15.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

@@ -1,0 +1,35 @@
+{
+	"name": "[Postgres] Number of connections is approaching connection limit on {{host.name}}",
+	"type": "query alert",
+	"query": "avg(last_15m):avg:postgresql.percent_usage_connections{*} > 0.9",
+	"message": "Please check host {{host.name}}, as the Postgres connection pool is approaching saturation.",
+	"tags": [
+		"integration:postgres"
+	  ],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 0.9,
+			"warning": 0.8,
+			"critical_recovery": 0.9,
+			"warning_recovery": 0.8
+		},
+		"threshold_windows": {
+			"trigger_window": "last_15m",
+			"recovery_window": "last_15m"
+		}
+	},
+	"priority": null,
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when a host's connection pool approaches saturation."
+	}
+}

@@ -2,7 +2,8 @@
   "categories": [
     "configuration & deployment",
     "containers",
-    "orchestration"
+    "orchestration",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Mesos Slave",
@@ -29,7 +30,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "mesos"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

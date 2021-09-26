@@ -1,0 +1,28 @@
+{
+	"name": "[ElasticSearch] Time spent on queries is high on {{host.name}}",
+	"type": "query alert",
+	"query": "avg(last_5m):monotonic_diff( avg:elasticsearch.search.query.time{*} by {host} ) / monotonic_diff( avg:elasticsearch.search.query.total{*} by {host} ) > 3",
+	"message": "The time spent on processing queries is increasing ({{value}} s/query).\nYou may want to look for potential resource bottlenecks, or investigate whether you need to [optimize your queries.](https://www.datadoghq.com/blog/elasticsearch-performance-scaling-problems/)",
+	"tags": [
+		"integration:elastic"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 3,
+			"warning": 2
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Get notified when the query latency is high."
+	}
+}

@@ -1,5 +1,23 @@
 # CHANGELOG - yarn
 
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.19.1 / 2021-06-07 / Agent 7.29.0
+
+* [Fixed] Remove required when there are default values. See [#9475](https://github.com/DataDog/integrations-core/pull/9475).
+
+## 1.19.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9009](https://github.com/DataDog/integrations-core/pull/9009).
+
+## 1.18.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Rename cluster_name tag to yarn_cluster. See [#8579](https://github.com/DataDog/integrations-core/pull/8579).
+* [Added] Yarn config option to disable node metrics collection. See [#8591](https://github.com/DataDog/integrations-core/pull/8591).
+
 ## 1.17.1 / 2021-02-09
 
 * [Fixed] Avoid failing on KeyError. See [#8563](https://github.com/DataDog/integrations-core/pull/8563).

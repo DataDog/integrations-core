@@ -28,10 +28,16 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
         GRANT VIEW SERVER STATE to datadog;
     ```
+   
+   To collect file size metrics per database, ensure the user you created (`datadog`) has [connect permission access][26] to your databases by running:
+   
+   ```text
+       GRANT CONNECT ANY DATABASE to datadog; 
+   ```
 
 2. Make sure your SQL Server instance is listening on a specific fixed port. By default, named instances and SQL Server Express are configured for dynamic ports. See [Microsoft's documentation][15] for more details.
 
-3. (Required for AlwaysOn metrics)  An additional permission needs to be granted to gather AlwaysOn metrics:
+3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
     ```text
         GRANT VIEW ANY DEFINITION to datadog;
@@ -153,16 +159,11 @@ The SQL server check does not include any events.
 
 ### Service Checks
 
-**sqlserver.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to SQL Server to collect metrics, otherwise `OK`.
+See [service_checks.json][25] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][13].
-
-## Development
-
-See the [main documentation][14] for more details about how to test and develop Agent based integrations.
 
 ## Further Reading
 
@@ -185,7 +186,6 @@ See the [main documentation][14] for more details about how to test and develop 
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
 [13]: https://docs.datadoghq.com/help/
-[14]: https://docs.datadoghq.com/developers/integrations/
 [15]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [17]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
 [18]: https://www.datadoghq.com/blog/sql-server-monitoring
@@ -194,3 +194,5 @@ See the [main documentation][14] for more details about how to test and develop 
 [21]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://docs.datadoghq.com/agent/faq/template_variables/
 [24]: https://docs.datadoghq.com/agent/kubernetes/log/
+[25]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json
+[26]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15

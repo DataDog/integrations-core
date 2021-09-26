@@ -43,7 +43,7 @@ _Available for Agent versions >6.0_
    Change the `path` and `service` parameter values and configure them for your environment.
    See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
 
-3. This integration is intended for the [Active Directory Module for Ruby][5]. If you are not using the Ruby module, change the below source value to `active_directory` and configure the `path` for your environment.
+3. This integration is intended for the [Active Directory Module for Ruby][5]. If you are not using the Ruby module, change the `source` value to `active_directory` and configure the `path` for your environment.
 
 4. [Restart the Agent][4].
 

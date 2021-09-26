@@ -17,7 +17,15 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
-from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, HAPROXY_VERSION, HAPROXY_VERSION_RAW, HERE, INSTANCE
+from .common import (
+    ENDPOINT_PROMETHEUS,
+    HAPROXY_LEGACY,
+    HAPROXY_VERSION,
+    HAPROXY_VERSION_RAW,
+    HERE,
+    INSTANCE,
+    requires_static_version,
+)
 from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
@@ -72,17 +80,21 @@ def prometheus_metrics():
         metrics.pop('haproxy_server_idle_connections_limit')
 
     # default NaN starting from 2.4 if not configured
-    if HAPROXY_VERSION >= version.parse('2.4.dev8'):
+    if HAPROXY_VERSION >= version.parse('2.4.dev10'):
         metrics.pop('haproxy_server_current_throttle')
 
     # metrics added in 2.4
-    if HAPROXY_VERSION < version.parse('2.4.dev8'):
+    if HAPROXY_VERSION < version.parse('2.4.dev10'):
         metrics.pop('haproxy_backend_uweight')
         metrics.pop('haproxy_server_uweight')
         metrics.pop('haproxy_process_recv_logs_total')
         metrics.pop('haproxy_process_uptime_seconds')
         metrics.pop('haproxy_sticktable_size')
         metrics.pop('haproxy_sticktable_used')
+        metrics_cpy = metrics.copy()
+        for metric in metrics_cpy:
+            if metric.startswith('haproxy_listener'):
+                metrics.pop(metric)
 
     metrics = list(metrics.values())
     return metrics
@@ -193,6 +205,7 @@ def haproxy_mock_enterprise_version_info():
         yield p
 
 
+@requires_static_version
 @pytest.fixture(scope="session")
 def version_metadata():
     # some version has release info

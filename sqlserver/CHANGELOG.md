@@ -1,6 +1,46 @@
 # CHANGELOG - sqlserver
 
-## 2.3.6 / 2021-01-27
+## 4.1.0 / 2021-08-31
+
+* [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).
+
+## 4.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.2.0 / 2021-08-12
+
+* [Added] Add database file metrics from sys.master_files. See [#9812](https://github.com/DataDog/integrations-core/pull/9812).
+* [Fixed] Capture value error. See [#9852](https://github.com/DataDog/integrations-core/pull/9852).
+
+## 3.1.1 / 2021-07-07 / Agent 7.30.0
+
+* [Fixed] Do not throw key errors. See [#9460](https://github.com/DataDog/integrations-core/pull/9460).
+
+## 3.1.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8987](https://github.com/DataDog/integrations-core/pull/8987).
+* [Fixed] Fix misleading WARN message regarding adoprovider being ignored when using adodbapi connector. See [#9412](https://github.com/DataDog/integrations-core/pull/9412).
+
+## 3.0.0 / 2021-03-30 / Agent 7.28.0
+
+* [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
+* [Fixed] Fix autodiscovery tagging. See [#9055](https://github.com/DataDog/integrations-core/pull/9055).
+* [Changed] Utilize time precision function from datadog_checks_base. See [#8841](https://github.com/DataDog/integrations-core/pull/8841).
+
+## 2.3.8 / 2021-03-16
+
+* [Fixed] Improve exception handling for database queries. See [#8837](https://github.com/DataDog/integrations-core/pull/8837).
+* [Fixed] Ensure delimited identifiers in USE statements. See [#8832](https://github.com/DataDog/integrations-core/pull/8832).
+* [Fixed] Handle availability replica metrics on earlier versions. See [#8830](https://github.com/DataDog/integrations-core/pull/8830).
+
+## 2.3.7 / 2021-03-01 / Agent 7.27.0
+
+* [Fixed] Add availability group name tag. See [#8658](https://github.com/DataDog/integrations-core/pull/8658).
+* [Fixed] Clarify windows user and validate connection options. See [#8582](https://github.com/DataDog/integrations-core/pull/8582).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.3.6 / 2021-01-27 / Agent 7.26.0
 
 * [Fixed] Fix cursor execution returning None. See [#8481](https://github.com/DataDog/integrations-core/pull/8481).
 

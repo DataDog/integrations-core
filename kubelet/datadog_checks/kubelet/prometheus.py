@@ -270,7 +270,7 @@ class CadvisorPrometheusScraperMixin(object):
                 # TODO
                 # metric.Clear()  # Ignore this metric message
                 continue
-            # Sum the counter value accross all contexts
+            # Sum the counter value across all contexts
             if uid not in seen:
                 seen[uid] = sample
             else:

@@ -1,6 +1,22 @@
 # CHANGELOG - postfix
 
-## 1.8.1 / 2021-01-06
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Add runtime configuration validation. See [#8970](https://github.com/DataDog/integrations-core/pull/8970).
+
+## 1.8.4 / 2021-04-19 / Agent 7.28.0
+
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+
+## 1.8.3 / 2021-03-18 / Agent 7.27.0
+
+* [Fixed] Fix empty queue parsing. See [#8852](https://github.com/DataDog/integrations-core/pull/8852).
+
+## 1.8.2 / 2021-03-07
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.8.1 / 2021-01-06 / Agent 7.26.0
 
 * [Fixed] Fix postqueue defer counting. See [#8296](https://github.com/DataDog/integrations-core/pull/8296).
 

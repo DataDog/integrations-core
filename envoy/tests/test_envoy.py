@@ -10,7 +10,7 @@ import requests
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, HOST, INSTANCES, response
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -32,7 +32,6 @@ def test_success(aggregator):
                     all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
                 ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
         metrics_collected += len(collected_metrics)
-
     assert metrics_collected >= 445
 
 
@@ -144,7 +143,13 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         check.check(instance)
 
         http_wargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
@@ -183,7 +188,7 @@ def test_metadata(datadog_agent):
         )
 
     datadog_agent.reset()
-    with mock.patch('requests.get', return_value=response('server_info')):
+    with mock.patch('requests.get', return_value=response('server_info_' + FLAVOR)):
         check._collect_metadata()
 
         major, minor, patch = ENVOY_VERSION.split('.')
@@ -222,6 +227,18 @@ def test_metadata(datadog_agent):
         datadog_agent.assert_metadata('test:123', {})
         datadog_agent.assert_metadata_count(0)
         check.log.debug.assert_called_with('Version not matched.')
+
+
+@pytest.mark.unit
+def test_metadata_not_collected(datadog_agent):
+    instance = INSTANCES['collect_server_info']
+    check = Envoy(CHECK_NAME, {}, [instance])
+    check.check_id = 'test:123'
+    check.log = mock.MagicMock()
+
+    datadog_agent.assert_metadata('test:123', {})
+    datadog_agent.assert_metadata_count(0)
+    check.log.assert_not_called()
 
 
 @pytest.mark.integration

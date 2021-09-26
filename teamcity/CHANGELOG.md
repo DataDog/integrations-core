@@ -1,6 +1,14 @@
 # CHANGELOG - teamcity
 
-## 1.12.0 / 2021-01-25
+## 1.13.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8995](https://github.com/DataDog/integrations-core/pull/8995).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.12.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Document logs support. See [#7702](https://github.com/DataDog/integrations-core/pull/7702).
 

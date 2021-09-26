@@ -24,11 +24,19 @@
   "is_public": true,
   "integration_id": "databricks",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"
-  }
+  },
+  "further_reading": [
+    {"link": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/",
+      "tag": "Blog",
+      "text": "Monitor Databricks with Datadog"
+    }
+  ]
 }

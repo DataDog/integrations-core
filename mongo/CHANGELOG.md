@@ -1,6 +1,34 @@
 # CHANGELOG - mongo
 
-## 2.2.0 / 2021-01-25
+## 2.6.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Support collection-agnostic aggregations for custom queries. See [#9857](https://github.com/DataDog/integrations-core/pull/9857).
+
+## 2.5.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Bump pymongo to 3.8. See [#9557](https://github.com/DataDog/integrations-core/pull/9557).
+* [Fixed] Update description of the `hosts` config parameter. See [#9542](https://github.com/DataDog/integrations-core/pull/9542).
+
+## 2.4.0 / 2021-04-19 / Agent 7.28.0
+
+* [Fixed] Fix authSource config option.. See [#9139](https://github.com/DataDog/integrations-core/pull/9139).
+* [Deprecated] Deprecate connection_scheme. See [#9142](https://github.com/DataDog/integrations-core/pull/9142).
+
+## 2.3.1 / 2021-04-06
+
+* [Fixed] Fix no_auth support. See [#9094](https://github.com/DataDog/integrations-core/pull/9094).
+
+## 2.3.0 / 2021-03-11 / Agent 7.27.0
+
+* [Added] Cache API client connection. See [#8808](https://github.com/DataDog/integrations-core/pull/8808).
+
+## 2.2.1 / 2021-03-07
+
+* [Fixed] Support Alibaba ApsaraDB. See [#8316](https://github.com/DataDog/integrations-core/pull/8316).
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.2.0 / 2021-01-25 / Agent 7.26.0
 
 * [Added] Better arbiter support. See [#8294](https://github.com/DataDog/integrations-core/pull/8294).
 * [Fixed] Refactor connection and api. See [#8283](https://github.com/DataDog/integrations-core/pull/8283).

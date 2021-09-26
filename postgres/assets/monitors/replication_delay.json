@@ -1,0 +1,33 @@
+{
+	"name": "[Postgres] Replication delay is abnormally high on {{host.name}}",
+	"type": "query alert",
+	"query": "avg(last_1h):anomalies(avg:postgresql.replication_delay{*}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
+	"message": "Please check host {{host.name}}, as replication delay has been abnormally high.",
+	"tags": [
+		"integration:postgres"
+	  ],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"threshold_windows": {
+			"trigger_window": "last_15m",
+			"recovery_window": "last_15m"
+		}
+	},
+	"priority": null,
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when Postgres replication delay is unusually high."
+	}
+}

@@ -33,7 +33,10 @@
       "SQLServer db not online": "assets/recommended_monitors/sqlserver_db_not_online.json",
       "SQLServer db not in sync": "assets/recommended_monitors/sqlserver_db_not_sync.json"
     },
-    "dashboards": {},
+    "dashboards": {
+      "SQLServer-Overview": "assets/dashboards/SQLServer-Overview_dashboard.json",
+      "sqlserver": "assets/dashboards/sqlserver_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sqlserver"

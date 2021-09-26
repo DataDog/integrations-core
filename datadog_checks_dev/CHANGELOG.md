@@ -1,5 +1,226 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.1.0 / 2021-09-23
+
+* [Added] Strengthen ImmutableAttributesValidator to check for manifest changes in asset short names. See [#10199](https://github.com/DataDog/integrations-core/pull/10199).
+* [Added] Add app_uuid to manifest migrator. See [#10200](https://github.com/DataDog/integrations-core/pull/10200).
+* [Added] Add more functionality to `MockResponse` testing utility. See [#10194](https://github.com/DataDog/integrations-core/pull/10194).
+* [Fixed] Update JMX integration template. See [#10193](https://github.com/DataDog/integrations-core/pull/10193).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+* [Fixed] Catch exception for malformed requirement syntax. See [#10189](https://github.com/DataDog/integrations-core/pull/10189).
+
+## 14.0.0 / 2021-09-21
+
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Annotate imports validation. See [#10112](https://github.com/DataDog/integrations-core/pull/10112).
+* [Added] Annotate models validations. See [#10131](https://github.com/DataDog/integrations-core/pull/10131).
+* [Added] Meta command to migrate manifest to V2. See [#10088](https://github.com/DataDog/integrations-core/pull/10088).
+* [Added] Allow Kubernetes port forwarding to support any resource. See [#10127](https://github.com/DataDog/integrations-core/pull/10127).
+* [Added] Annotate saved views validation. See [#10130](https://github.com/DataDog/integrations-core/pull/10130).
+* [Added] Annotate metadata validation. See [#10128](https://github.com/DataDog/integrations-core/pull/10128).
+* [Added] Annotate package validation. See [#10115](https://github.com/DataDog/integrations-core/pull/10115).
+* [Added] Annotate licenses. See [#10114](https://github.com/DataDog/integrations-core/pull/10114).
+* [Added] Annotate readme validations. See [#10116](https://github.com/DataDog/integrations-core/pull/10116).
+* [Added] Allow exclusion of specific branch for changelog generation. See [#10106](https://github.com/DataDog/integrations-core/pull/10106).
+* [Added] Annotate JMX metric validation. See [#10113](https://github.com/DataDog/integrations-core/pull/10113).
+* [Added] Annotate EULA and agent requirements validation. See [#10108](https://github.com/DataDog/integrations-core/pull/10108).
+* [Added] Annotate codeowners. See [#10107](https://github.com/DataDog/integrations-core/pull/10107).
+* [Added] Echo warning for unnecessary params used. See [#10053](https://github.com/DataDog/integrations-core/pull/10053).
+* [Added] Add borrower and PySMI logs to MIB compiler. See [#10074](https://github.com/DataDog/integrations-core/pull/10074).
+* [Added] Allow the use of ddtrace for E2E tests. See [#10082](https://github.com/DataDog/integrations-core/pull/10082).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Add support for manifest V2 validations. See [#9968](https://github.com/DataDog/integrations-core/pull/9968).
+* [Added] Add critical service check test to integration template. See [#10063](https://github.com/DataDog/integrations-core/pull/10063).
+* [Added] Add support for testing new versions of products. See [#9945](https://github.com/DataDog/integrations-core/pull/9945).
+* [Added] Update release tooling to support `datadog_checks_dependency_provider`. See [#10046](https://github.com/DataDog/integrations-core/pull/10046).
+* [Added] Add Pytest plugin dependency to handle flakes. See [#10043](https://github.com/DataDog/integrations-core/pull/10043).
+* [Added] Annotate dashboard and recommended monitors validation. See [#9899](https://github.com/DataDog/integrations-core/pull/9899).
+* [Added] Annotate display_queue. See [#9944](https://github.com/DataDog/integrations-core/pull/9944).
+* [Fixed] Add Avi Vantage to INTEGRATION_LOGS_NOT_POSSIBLE. See [#9667](https://github.com/DataDog/integrations-core/pull/9667).
+* [Fixed] Remove annotation for unnecessary warning. See [#10124](https://github.com/DataDog/integrations-core/pull/10124).
+* [Fixed] Fix Mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+* [Fixed] Bump Mypy. See [#10119](https://github.com/DataDog/integrations-core/pull/10119).
+* [Fixed] Use Regex to parse for HTTP wrapper instead of reading by line. See [#10055](https://github.com/DataDog/integrations-core/pull/10055).
+* [Fixed] Instantiate borrowers in snmp profile generator. See [#10086](https://github.com/DataDog/integrations-core/pull/10086).
+* [Fixed] Fix warning for snmp generate profile command. See [#9967](https://github.com/DataDog/integrations-core/pull/9967).
+* [Fixed] Allow double quote on requirement. See [#10028](https://github.com/DataDog/integrations-core/pull/10028).
+* [Fixed] Don't read from nonexistent manifest files. See [#10041](https://github.com/DataDog/integrations-core/pull/10041).
+* [Fixed] Prevent creation of datadog named integrations. See [#10014](https://github.com/DataDog/integrations-core/pull/10014).
+* [Fixed] Fix bug when PR body is empty and includes DBM team to selector. See [#9951](https://github.com/DataDog/integrations-core/pull/9951).
+* [Changed] Update immutable attributes validator for manifest upgrades v2. See [#10175](https://github.com/DataDog/integrations-core/pull/10175).
+* [Changed] Update mib_source_url to a Datadog fork of mibs.snmplabs.com. See [#9952](https://github.com/DataDog/integrations-core/pull/9952).
+
+## 13.0.1 / 2021-08-27
+
+* [Fixed] Pin regex. See [#10005](https://github.com/DataDog/integrations-core/pull/10005).
+
+## 13.0.0 / 2021-08-22
+
+* [Added] Add support for specifying a config path to `kind_run` utility. See [#9930](https://github.com/DataDog/integrations-core/pull/9930).
+* [Added] Ignore `cluster-agent` trello cards. See [#9933](https://github.com/DataDog/integrations-core/pull/9933).
+* [Added] Add typos validation. See [#9902](https://github.com/DataDog/integrations-core/pull/9902).
+* [Added] Add annotations to legacy agent signature. See [#9873](https://github.com/DataDog/integrations-core/pull/9873).
+* [Added] Add annotations to http validation. See [#9870](https://github.com/DataDog/integrations-core/pull/9870).
+* [Added] Add commands to automatically update and sync dependencies. See [#9811](https://github.com/DataDog/integrations-core/pull/9811).
+* [Added] Add manifest validator for `supported_os` field. See [#9871](https://github.com/DataDog/integrations-core/pull/9871).
+* [Added] Add annotation utils and config spec annotation. See [#9868](https://github.com/DataDog/integrations-core/pull/9868).
+* [Added] [NDM] Validate SysObjectID Consistency. See [#9806](https://github.com/DataDog/integrations-core/pull/9806).
+* [Added] Add option to generate profile using custom MIB source. See [#9761](https://github.com/DataDog/integrations-core/pull/9761).
+* [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
+* [Added] Allow extra 3rd party licenses . See [#9796](https://github.com/DataDog/integrations-core/pull/9796).
+* [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Fixed] Update `metrics` option in legacy OpenMetrics example config. See [#9891](https://github.com/DataDog/integrations-core/pull/9891).
+* [Fixed] Update GitHub `agent-network` team name. See [#9678](https://github.com/DataDog/integrations-core/pull/9678).
+* [Fixed] Better 'Invalid url' error message in dash export. See [#9837](https://github.com/DataDog/integrations-core/pull/9837).
+* [Fixed] Wait for E2E Agent to be started when running Python 2. See [#9828](https://github.com/DataDog/integrations-core/pull/9828).
+* [Fixed] Re-attempt to pull docker images. See [#9823](https://github.com/DataDog/integrations-core/pull/9823).
+* [Fixed] Validate all integrations for base and dev updates. See [#9787](https://github.com/DataDog/integrations-core/pull/9787).
+* [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
+
+## 12.4.1 / 2021-07-20
+
+* [Fixed] Support empty config options for job or codecov. See [#9736](https://github.com/DataDog/integrations-core/pull/9736).
+
+## 12.4.0 / 2021-07-20
+
+* [Added] Upgrade `virtualenv`. See [#9691](https://github.com/DataDog/integrations-core/pull/9691).
+* [Added] Add database integrations team to tooling trello. See [#9671](https://github.com/DataDog/integrations-core/pull/9671).
+* [Added] Add marketplace section to CI validation. See [#9679](https://github.com/DataDog/integrations-core/pull/9679).
+* [Fixed] Validate changed check in ci. See [#9638](https://github.com/DataDog/integrations-core/pull/9638).
+* [Fixed] Use pattern for enforcing a URL structure for author->homepage in manifest. See [#9697](https://github.com/DataDog/integrations-core/pull/9697).
+
+## 12.3.0 / 2021-07-14
+
+* [Added] Add command for validating SNMP profiles. See [#9587](https://github.com/DataDog/integrations-core/pull/9587).
+
+## 12.2.0 / 2021-07-12
+
+* [Added] Support multiple instances in config specs. See [#9615](https://github.com/DataDog/integrations-core/pull/9615).
+* [Fixed] Fix `meta dash export`. See [#9652](https://github.com/DataDog/integrations-core/pull/9652).
+
+## 12.1.0 / 2021-06-29
+
+* [Added] log collection category validation. See [#9514](https://github.com/DataDog/integrations-core/pull/9514).
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+* [Added] Add metric_to_check validation in pricing. See [#9289](https://github.com/DataDog/integrations-core/pull/9289).
+* [Added] Update 3rd party license validation. See [#9450](https://github.com/DataDog/integrations-core/pull/9450).
+* [Fixed] Allow example for anyOf configuration option. See [#9474](https://github.com/DataDog/integrations-core/pull/9474).
+
+## 12.0.0 / 2021-05-28
+
+* [Added] Add validation for third-party licenses. See [#9436](https://github.com/DataDog/integrations-core/pull/9436).
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Support running post-install commands for E2E. See [#9399](https://github.com/DataDog/integrations-core/pull/9399).
+* [Added] Support hidden duplicate options from templates. See [#9347](https://github.com/DataDog/integrations-core/pull/9347).
+* [Added] Replace CLI dependency `appdirs` with `platformdirs`. See [#9356](https://github.com/DataDog/integrations-core/pull/9356).
+* [Added] Upgrade click. See [#9342](https://github.com/DataDog/integrations-core/pull/9342).
+* [Added] Upgrade datamodel-code-generator. See [#9335](https://github.com/DataDog/integrations-core/pull/9335).
+* [Added] [OpenMetricsV2] Add an option to send sum and count information when using distribution metrics. See [#9301](https://github.com/DataDog/integrations-core/pull/9301).
+* [Added] Upgrade virtualenv. See [#9330](https://github.com/DataDog/integrations-core/pull/9330).
+* [Added] Allow skipping of E2E tests based on environment markers. See [#9327](https://github.com/DataDog/integrations-core/pull/9327).
+* [Added] Support new Synthetics `run` metric unit for validation. See [#9313](https://github.com/DataDog/integrations-core/pull/9313).
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Sign `requirements.in` for releases. See [#9419](https://github.com/DataDog/integrations-core/pull/9419).
+* [Fixed] Fix detection of E2E environments. See [#9373](https://github.com/DataDog/integrations-core/pull/9373).
+* [Fixed] Fix `load_jmx_config` utility. See [#9369](https://github.com/DataDog/integrations-core/pull/9369).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+* [Fixed] Fix typing. See [#9338](https://github.com/DataDog/integrations-core/pull/9338).
+* [Fixed] Update validate all log line to use validation name. See [#9319](https://github.com/DataDog/integrations-core/pull/9319).
+* [Fixed] Stop collecting empty coverage reports for non-Python checks. See [#9297](https://github.com/DataDog/integrations-core/pull/9297).
+* [Changed] Add common check parsing for validations. See [#9229](https://github.com/DataDog/integrations-core/pull/9229).
+
+## 11.2.0 / 2021-05-05
+
+* [Added] Avoid double periods at the end of PR titles. See [#8442](https://github.com/DataDog/integrations-core/pull/8442).
+* [Added] Bump mypy. See [#9285](https://github.com/DataDog/integrations-core/pull/9285).
+* [Fixed] Fix validator bugs. See [#9290](https://github.com/DataDog/integrations-core/pull/9290).
+
+## 11.1.0 / 2021-05-03
+
+* [Added] [snmp] Add interactive option to generate profile tool. See [#9259](https://github.com/DataDog/integrations-core/pull/9259).
+* [Added] [SNMP] Invert interactive logic in validate mib files. See [#9258](https://github.com/DataDog/integrations-core/pull/9258).
+* [Added] Add `ddev env edit` command. See [#9196](https://github.com/DataDog/integrations-core/pull/9196).
+* [Added] [SNMP] Validate mib filenames in snmp tooling. See [#9228](https://github.com/DataDog/integrations-core/pull/9228).
+* [Fixed] Refactor manifest validation into a class system. See [#9111](https://github.com/DataDog/integrations-core/pull/9111).
+
+## 11.0.1 / 2021-04-21
+
+* [Fixed] Reduce ascii validation for assets. See [#9208](https://github.com/DataDog/integrations-core/pull/9208).
+* [Fixed] Fix QA card assignment to be distributed randomly and equally. See [#9190](https://github.com/DataDog/integrations-core/pull/9190).
+
+## 11.0.0 / 2021-04-19
+
+* [Added] Include ascii validation in asset files. See [#9169](https://github.com/DataDog/integrations-core/pull/9169).
+* [Fixed] Upgrade flake8. See [#9177](https://github.com/DataDog/integrations-core/pull/9177).
+* [Fixed] Upgrade isort. See [#9176](https://github.com/DataDog/integrations-core/pull/9176).
+* [Fixed] Allow the use of relative images and refactor readme validate to use …. See [#9160](https://github.com/DataDog/integrations-core/pull/9160).
+* [Fixed] [ddev] Skip cherry-pick commits in `ddev release trello testable`. See [#9134](https://github.com/DataDog/integrations-core/pull/9134).
+* [Changed] [SNMP] Remove metric_prefix from snmp_tile integrations. See [#9172](https://github.com/DataDog/integrations-core/pull/9172).
+
+## 10.0.0 / 2021-04-13
+
+* [Added] Add --ddtrace flag. See [#9124](https://github.com/DataDog/integrations-core/pull/9124).
+* [Added] Move function to utils. See [#9145](https://github.com/DataDog/integrations-core/pull/9145).
+* [Added] Support the `--changed` flag for E2E testing. See [#9141](https://github.com/DataDog/integrations-core/pull/9141).
+* [Added] Support running Windows containers for E2E. See [#9119](https://github.com/DataDog/integrations-core/pull/9119).
+* [Fixed] Fix default config validation to include openmetrics template. See [#9151](https://github.com/DataDog/integrations-core/pull/9151).
+* [Fixed] Enable metric to check validation on the marketplace. See [#9146](https://github.com/DataDog/integrations-core/pull/9146).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+* [Fixed] Fix open import for fs util. See [#9135](https://github.com/DataDog/integrations-core/pull/9135).
+* [Fixed] Fix integration log checking. See [#9118](https://github.com/DataDog/integrations-core/pull/9118).
+* [Changed] Split utils into fileutils and ci. See [#9023](https://github.com/DataDog/integrations-core/pull/9023).
+
+## 9.4.1 / 2021-04-06
+
+* [Fixed] Ignore validation for marketplace. See [#9100](https://github.com/DataDog/integrations-core/pull/9100).
+
+## 9.4.0 / 2021-04-06
+
+* [Added] Add testing module for frequently used `pytest`-related utilities. See [#9081](https://github.com/DataDog/integrations-core/pull/9081).
+* [Added] Upgrade virtualenv to 20.4.3. See [#9086](https://github.com/DataDog/integrations-core/pull/9086).
+* [Fixed] Ignore metric_to_check validation for extras. See [#9098](https://github.com/DataDog/integrations-core/pull/9098).
+* [Fixed] Update dashboards status. See [#9083](https://github.com/DataDog/integrations-core/pull/9083).
+* [Fixed] Better support for dashboard filename. See [#9087](https://github.com/DataDog/integrations-core/pull/9087).
+
+## 9.3.0 / 2021-04-05
+
+* [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
+* [Added] Add "exception" unit to metadata. See [#9063](https://github.com/DataDog/integrations-core/pull/9063). Thanks [kevingosse](https://github.com/kevingosse).
+* [Added] Add command to run all validations at once. See [#9040](https://github.com/DataDog/integrations-core/pull/9040).
+* [Fixed] Raise validation error if metadata.csv but no metric_to_check. See [#9042](https://github.com/DataDog/integrations-core/pull/9042).
+* [Fixed] Ignore secondary dashboards. See [#9037](https://github.com/DataDog/integrations-core/pull/9037).
+* [Fixed] Include new and legacy openmetrics template in http validation. See [#9034](https://github.com/DataDog/integrations-core/pull/9034).
+
+## 9.2.1 / 2021-03-22
+
+* [Fixed] Fix models validation. See [#8871](https://github.com/DataDog/integrations-core/pull/8871).
+
+## 9.2.0 / 2021-03-22
+
+* [Added] Add config spec data model consumer. See [#8675](https://github.com/DataDog/integrations-core/pull/8675).
+
+## 9.1.1 / 2021-03-18
+
+* [Fixed] Improve error message. See [#8788](https://github.com/DataDog/integrations-core/pull/8788).
+* [Fixed] Fix infra-integrations team for testable. See [#8784](https://github.com/DataDog/integrations-core/pull/8784).
+
+## 9.1.0 / 2021-03-07
+
+* [Added] Check if integrations are logs only. See [#8699](https://github.com/DataDog/integrations-core/pull/8699).
+* [Fixed] Do not append -pyx for agent7 images. See [#8746](https://github.com/DataDog/integrations-core/pull/8746).
+* [Fixed] Avoid mounting check confd volume if there is no config. See [#8722](https://github.com/DataDog/integrations-core/pull/8722).
+* [Security] Upgrade pyyaml python package. See [#8707](https://github.com/DataDog/integrations-core/pull/8707).
+
+## 9.0.0 / 2021-03-01
+
+* [Added] Add ddev example committer tool. See [#8697](https://github.com/DataDog/integrations-core/pull/8697).
+* [Fixed] Validate metric prefixes for all metric metadata. See [#8672](https://github.com/DataDog/integrations-core/pull/8672).
+* [Fixed] Remove marketplace option for ddev create. See [#8649](https://github.com/DataDog/integrations-core/pull/8649).
+* [Changed] Create missing cards when using `--move-cards`. See [#8595](https://github.com/DataDog/integrations-core/pull/8595).
+
 ## 8.0.1 / 2021-02-19
 
 * [Fixed] Fix error printing json errors when error on list object. See [#8650](https://github.com/DataDog/integrations-core/pull/8650).

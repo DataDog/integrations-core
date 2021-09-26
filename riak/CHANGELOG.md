@@ -1,5 +1,13 @@
 # CHANGELOG - riak
 
+## 2.3.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Add runtime configuration validation. See [#8979](https://github.com/DataDog/integrations-core/pull/8979).
+
+## 2.2.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 2.2.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).

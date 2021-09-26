@@ -17,14 +17,21 @@ def test_e2e(dd_agent_check):
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric)
 
-    jmx_instance = CHECK_CONFIG['instances'][0]
+    jmx_web_instance = CHECK_CONFIG['instances'][0]
     tags = [
-        'instance:sonarqube-{}-{}'.format(jmx_instance['host'], jmx_instance['port']),
-        'jmx_server:{}'.format(jmx_instance['host']),
+        'instance:sonarqube-{}-{}'.format(jmx_web_instance['host'], jmx_web_instance['port']),
+        'jmx_server:{}'.format(jmx_web_instance['host']),
     ]
     aggregator.assert_service_check('sonarqube.can_connect', status=ServiceCheck.OK, tags=tags)
 
-    web_instance = CHECK_CONFIG['instances'][1]
+    jmx_ce_instance = CHECK_CONFIG['instances'][1]
+    tags = [
+        'instance:sonarqube-{}-{}'.format(jmx_ce_instance['host'], jmx_ce_instance['port']),
+        'jmx_server:{}'.format(jmx_ce_instance['host']),
+    ]
+    aggregator.assert_service_check('sonarqube.can_connect', status=ServiceCheck.OK, tags=tags)
+
+    web_instance = CHECK_CONFIG['instances'][2]
     tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
     tags.extend(web_instance['tags'])
     aggregator.assert_service_check('sonarqube.api_access', status=ServiceCheck.OK, tags=tags)

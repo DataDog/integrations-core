@@ -25,4 +25,5 @@ instances:
     #
     new_leader_checks: true
 
-    ## service_whitelist:
+    ## services_include:
+    ## services_exclude:

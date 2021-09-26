@@ -22,7 +22,6 @@ files:
         for more details
       value:
         type: boolean
-        default: false
         example: false
     - name: ssl_keyfile
       description: Path to the private key file used to identify the local connection against Mongodb.

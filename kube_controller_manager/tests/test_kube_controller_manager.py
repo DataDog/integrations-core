@@ -6,8 +6,10 @@ import os
 
 import mock
 import pytest
+import requests
 
-from datadog_checks.base.checks.kube_leader import ElectionRecord
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
 
 instance = {
@@ -48,9 +50,10 @@ def mock_leader():
     # Inject a fake object in the leader-election monitoring logic
     with mock.patch(
         'datadog_checks.kube_controller_manager.KubeControllerManagerCheck._get_record',
-        return_value=ElectionRecord(
+        return_value=ElectionRecordAnnotation(
+            "endpoints",
             '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,'
-            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
+            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}',
         ),
     ):
         yield
@@ -122,3 +125,29 @@ def generic_check_metrics(aggregator, check_deprecated):
     aggregator.assert_service_check(NAMESPACE + ".leader_election.status", tags=expected_le_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_service_check_ok(monkeypatch):
+    instance = {'prometheus_url': 'http://localhost:10252/metrics'}
+    instance_tags = []
+
+    check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
+
+    monkeypatch.setattr(check, 'service_check', mock.Mock())
+
+    calls = [
+        mock.call('kube_controller_manager.up', AgentCheck.OK, tags=instance_tags),
+        mock.call('kube_controller_manager.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
+    ]
+
+    # successful health check
+    with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+        check._perform_service_check(instance)
+
+    # failed health check
+    raise_error = mock.Mock()
+    raise_error.side_effect = requests.HTTPError('health check failed')
+    with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+        check._perform_service_check(instance)
+
+    check.service_check.assert_has_calls(calls)

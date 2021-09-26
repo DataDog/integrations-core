@@ -5,6 +5,13 @@ files:
   - template: init_config
     options:
     - template: init_config/default
+    - name: rest_api_options
+      description: |
+        REST API options
+        Those options are used when making vSphere REST API calls to retrieve vSphere tags
+        when `collect_tags` instance config is enabled.
+      options:
+        - template: init_config/http
   - template: instances
     options:
       - name: host
@@ -73,7 +80,7 @@ files:
           If `collect_events_only: true`, this option has no effect and events will be collected.
         value:
           type: boolean
-          display_default: depends on collection_type value
+          display_default: null
           example: true
       - name: use_collect_events_fallback
         description: |
@@ -140,7 +147,6 @@ files:
                   historical metrics
 
         value:
-          display_default: no filter
           example:
             - resource: vm
               property: name
@@ -195,7 +201,6 @@ files:
           Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
                   have historical metrics. They will work only with "collection_type: realtime".
         value:
-          display_default: all metrics
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -240,7 +245,6 @@ files:
           Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
-          display_default: none
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -277,6 +281,9 @@ files:
           Examples:
           - os_type:windows
           - application_name:my_app
+          Note: Tag collection works only for vSphere 6.5 and above.
+                Tag collection needs vSphere REST API Tagging and an endpoint (tagging.tag_association.object_to_tags)
+                only available from vSphere 6.5.
         value:
           type: boolean
           example: false
@@ -330,6 +337,8 @@ files:
           not available, it will fallback to the VM name.
           Use this if you install the agent in VMs so that the hosts are not duplicated
           in the web application UI.
+          Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+                https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
         value:
           type: boolean
           example: false
@@ -418,6 +427,13 @@ files:
         value:
           type: boolean
           example: true
+      - name: rest_api_options
+        description: |
+          REST API options
+          The options are used when making vSphere REST API calls to retrieve vSphere tags
+          when `collect_tags` instance config is enabled.
+        options:
+          - template: instances/http
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

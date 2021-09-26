@@ -35,7 +35,9 @@
       "[Kafka] High producer request rate": "assets/recommended_monitors/kafka_high_producer_request_rate.json",
       "[Kafka] Offline partition": "assets/recommended_monitors/kafka_offline_partition.json"
     },
-    "dashboards": {},
+    "dashboards": {
+      "kafka": "assets/dashboards/kafka_dashboard.json"
+    },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "kafka_patterns": "assets/saved_views/kafka_patterns.json",

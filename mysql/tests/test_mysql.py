@@ -3,17 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import subprocess
-from contextlib import closing
 from os import environ
 
 import mock
 import psutil
+import pymysql
 import pytest
 from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.mysql import MySql, statements
+from datadog_checks.mysql import MySql
 from datadog_checks.mysql.version_utils import get_version
 
 from . import common, tags, variables
@@ -22,34 +22,42 @@ from .common import MYSQL_VERSION_PARSED
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_minimal_config(aggregator, instance_basic):
+def test_minimal_config(aggregator, dd_run_check, instance_basic):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
-    mysql_check.check(instance_basic)
+    dd_run_check(mysql_check)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = (
-        variables.STATUS_VARS
-        + variables.VARIABLES_VARS
-        + variables.INNODB_VARS
-        + variables.BINLOG_VARS
+    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+
+    for mname in testable_metrics:
+        aggregator.assert_metric(mname, at_least=1)
+
+    optional_metrics = (
+        variables.COMPLEX_STATUS_VARS
+        + variables.COMPLEX_VARIABLES_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.SYSTEM_METRICS
         + variables.SYNTHETIC_VARS
     )
 
-    for mname in testable_metrics:
-        aggregator.assert_metric(mname, at_least=0)
+    _test_optional_metrics(aggregator, optional_metrics)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_complex_config(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
-    mysql_check.check(instance_complex)
+def test_complex_config(aggregator, dd_run_check, instance_complex):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    dd_run_check(mysql_check)
 
     _assert_complex_config(aggregator)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
 @pytest.mark.e2e
@@ -65,11 +73,16 @@ def test_e2e(dd_agent_check, instance_complex):
 def _assert_complex_config(aggregator):
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
-    aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS + ['replication_mode:source'], at_least=1
+    )
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -82,7 +95,7 @@ def _assert_complex_config(aggregator):
 
     # Test metrics
     for mname in testable_metrics:
-        # These two are currently not guaranteed outside of a Linux
+        # These three are currently not guaranteed outside of a Linux
         # environment.
         if mname == 'mysql.performance.user_time' and not Platform.is_linux():
             continue
@@ -117,7 +130,9 @@ def _assert_complex_config(aggregator):
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
-    _test_optional_metrics(aggregator, optional_metrics, 1)
+    # Note, this assertion will pass even if some metrics are not present.
+    # Manual testing is required for optional metrics
+    _test_optional_metrics(aggregator, optional_metrics)
 
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
@@ -125,43 +140,48 @@ def _assert_complex_config(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_connection_failure(aggregator, instance_error):
+def test_connection_failure(aggregator, dd_run_check, instance_error):
     """
     Service check reports connection failure
     """
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_error])
 
     with pytest.raises(Exception):
-        mysql_check.check(instance_error)
+        dd_run_check(mysql_check)
 
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_complex_config_replica(aggregator, instance_complex):
+def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
 
-    mysql_check.check(config)
-
-    # self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
+    dd_run_check(mysql_check)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
 
     # Travis MySQL not running replication - FIX in flavored test.
     aggregator.assert_service_check(
-        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, at_least=1
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=tags.SC_TAGS_REPLICA + ['replication_mode:replica'],
+        at_least=1,
     )
 
     testable_metrics = (
         variables.STATUS_VARS
+        + variables.COMPLEX_STATUS_VARS
         + variables.VARIABLES_VARS
+        + variables.COMPLEX_VARIABLES_VARS
         + variables.INNODB_VARS
+        + variables.COMPLEX_INNODB_VARS
         + variables.BINLOG_VARS
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
@@ -202,127 +222,48 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.OPTIONAL_STATUS_VARS
         + variables.OPTIONAL_STATUS_VARS_5_6_6
     )
-    _test_optional_metrics(aggregator, optional_metrics, 1)
+    # Note, this assertion will pass even if some metrics are not present.
+    # Manual testing is required for optional metrics
+    _test_optional_metrics(aggregator, optional_metrics)
 
     # Raises when coverage < 100%
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
+    )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_statement_metrics(aggregator, instance_complex):
-    QUERY = 'select * from information_schema.processlist'
-    QUERY_DIGEST_TEXT = 'SELECT * FROM `information_schema` . `processlist`'
-    # The query signature should match the query and consistency of this tag has product impact. Do not change
-    # the query signature for this test unless you know what you're doing. The query digest is determined by
-    # mysql and varies across versions.
-    QUERY_SIGNATURE = '8cd0f2b4343decc'
-    if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        QUERY_DIGEST = '5d343195f2d7adf4388d42755311c3e3'
-    elif environ.get('MYSQL_VERSION') == '5.6':
-        QUERY_DIGEST = 'acfa199773950cd8cf912f3a19219492'
-    elif environ.get('MYSQL_VERSION') == '5.7':
-        QUERY_DIGEST = '0737e429dc883ba8c86c15ae76e59dda'
-    else:
-        # 8.0+
-        QUERY_DIGEST = '6817a67871eb7edddad5b7836c93330aa3c98801ac759eed1bea6db1a34579c4'
-        QUERY_SIGNATURE = '9d73cb71644af0a2'
+@pytest.mark.parametrize('dbm_enabled', (True, False))
+def test_correct_hostname(dbm_enabled, aggregator, dd_run_check, instance_basic):
+    instance_basic['dbm'] = dbm_enabled
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
 
-    config = copy.deepcopy(instance_complex)
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
+    expected_hostname = 'stubbed.hostname' if dbm_enabled else None
 
-    def run_query(q):
-        with mysql_check._connect() as db:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(q)
+    aggregator.assert_service_check(
+        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1, hostname=expected_hostname
+    )
 
-    # Run a query
-    run_query(QUERY)
-    mysql_check.check(config)
+    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+    for metric_name in testable_metrics:
+        aggregator.assert_metric(metric_name, hostname=expected_hostname)
 
-    # Run the query and check a second time so statement metrics are computed from the previous run
-    run_query(QUERY)
-    mysql_check.check(config)
-    for name in statements.STATEMENT_METRICS.values():
-        aggregator.assert_metric(
-            name,
-            tags=tags.SC_TAGS
-            + [
-                'query:{}'.format(QUERY_DIGEST_TEXT),
-                'query_signature:{}'.format(QUERY_SIGNATURE),
-                'digest:{}'.format(QUERY_DIGEST),
-            ],
-            count=1,
-        )
+    optional_metrics = (
+        variables.COMPLEX_STATUS_VARS
+        + variables.COMPLEX_VARIABLES_VARS
+        + variables.COMPLEX_INNODB_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SYNTHETIC_VARS
+    )
+
+    for metric_name in optional_metrics:
+        aggregator.assert_metric(metric_name, hostname=expected_hostname, at_least=0)
 
 
-def test_generate_synthetic_rows():
-    rows = [
-        {
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_examined': 50,
-        },
-        {
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_examined': 0,
-        },
-    ]
-    result = statements.generate_synthetic_rows(rows)
-    assert result == [
-        {
-            'avg_time': 25.2,
-            'count': 45,
-            'errors': 1,
-            'time': 1134,
-            'select_scan': 100,
-            'select_full_join': 98,
-            'no_index_used': 54,
-            'no_good_index_used': 12,
-            'lock_time': 1500,
-            'rows_affected': 10,
-            'rows_sent': 20,
-            'rows_sent_ratio': 0.4,
-            'rows_examined': 50,
-        },
-        {
-            'avg_time': 0,
-            'count': 0,
-            'errors': 0,
-            'time': 0,
-            'select_scan': 0,
-            'select_full_join': 0,
-            'no_index_used': 0,
-            'no_good_index_used': 0,
-            'lock_time': 0,
-            'rows_affected': 0,
-            'rows_sent': 0,
-            'rows_sent_ratio': 0,
-            'rows_examined': 0,
-        },
-    ]
-
-
-def _test_optional_metrics(aggregator, optional_metrics, at_least):
+def _test_optional_metrics(aggregator, optional_metrics):
     """
-    Check optional metrics - there should be at least `at_least` matches
+    Check optional metrics - They can either be present or not
     """
 
     before = len(aggregator.not_asserted())
@@ -333,7 +274,7 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
     # Compute match rate
     after = len(aggregator.not_asserted())
 
-    assert before - after > at_least
+    assert before > after
 
 
 @pytest.mark.unit
@@ -398,44 +339,230 @@ def test_parse_get_version():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'replica_io_running, replica_sql_running, check_status',
+    'replica_io_running, replica_sql_running, source_host, slaves_connected, check_status_repl, check_status_source',
     [
-        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), MySql.CRITICAL),
-        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), MySql.CRITICAL),
-        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), MySql.OK),
-        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {}), MySql.WARNING),
-        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {}), MySql.WARNING),
-        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
-        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.WARNING),
-        pytest.param(('Slave_IO_Running', {'stuff': 'yes'}), ('Slave_SQL_Running', {'stuff': 'yes'}), MySql.OK),
-        pytest.param(('Replica_IO_Running', {'stuff': 'yes'}), ('Replica_SQL_Running', {'stuff': 'yes'}), MySql.OK),
+        # Replica host only
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {}), 'source', 0, MySql.CRITICAL, None),
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), 'source', 0, MySql.CRITICAL, None),
+        pytest.param(('Slave_IO_Running', {'a': 'yes'}), ('Slave_SQL_Running', {}), 'source', 0, MySql.WARNING, None),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}), ('Replica_SQL_Running', {}), 'source', 0, MySql.WARNING, None
+        ),
+        pytest.param(('Slave_IO_Running', {}), ('Slave_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.WARNING, None),
+        pytest.param(
+            ('Replica_IO_Running', {}), ('Replica_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.WARNING, None
+        ),
+        pytest.param(
+            ('Slave_IO_Running', {'a': 'yes'}), ('Slave_SQL_Running', {'a': 'yes'}), 'source', 0, MySql.OK, None
+        ),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}),
+            ('Replica_SQL_Running', {'a': 'yes'}),
+            'source',
+            0,
+            MySql.OK,
+            None,
+        ),
+        # Source host only
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), None, 1, None, MySql.OK),
+        pytest.param(('Replica_IO_Running', None), ('Replica_SQL_Running', None), None, 0, None, MySql.WARNING),
+        # Source and replica host
+        pytest.param(('Replica_IO_Running', {}), ('Replica_SQL_Running', {}), 'source', 1, MySql.CRITICAL, MySql.OK),
+        pytest.param(
+            ('Replica_IO_Running', {'a': 'yes'}), ('Replica_SQL_Running', {}), 'source', 1, MySql.WARNING, MySql.OK
+        ),
+        pytest.param(
+            ('Slave_IO_Running', {'a': 'yes'}),
+            ('Slave_SQL_Running', {'a': 'yes'}),
+            'source',
+            1,
+            MySql.OK,
+            MySql.OK,
+        ),
     ],
 )
-def test_replication_check_status(replica_io_running, replica_sql_running, check_status, instance_basic, aggregator):
+def test_replication_check_status(
+    replica_io_running,
+    replica_sql_running,
+    source_host,
+    slaves_connected,
+    check_status_repl,
+    check_status_source,
+    instance_basic,
+    aggregator,
+):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.service_check_tags = ['foo:bar']
     mocked_results = {
-        'Slaves_connected': 1,
+        'Slaves_connected': slaves_connected,
         'Binlog_enabled': True,
     }
     if replica_io_running[1] is not None:
         mocked_results[replica_io_running[0]] = replica_io_running[1]
     if replica_sql_running[1] is not None:
         mocked_results[replica_sql_running[0]] = replica_sql_running[1]
+    if source_host:
+        mocked_results['Master_Host'] = source_host
 
     mysql_check._check_replication_status(mocked_results)
+    expected_service_check_len = 0
 
-    aggregator.assert_service_check('mysql.replication.slave_running', check_status, tags=['foo:bar'], count=1)
-    aggregator.assert_service_check('mysql.replication.replica_running', check_status, tags=['foo:bar'], count=1)
+    if check_status_repl is not None:
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running', check_status_repl, tags=['foo:bar', 'replication_mode:replica'], count=1
+        )
+        aggregator.assert_service_check(
+            'mysql.replication.replica_running',
+            check_status_repl,
+            tags=['foo:bar', 'replication_mode:replica'],
+            count=1,
+        )
+        expected_service_check_len += 1
+
+    if check_status_source is not None:
+        aggregator.assert_service_check(
+            'mysql.replication.slave_running', check_status_source, tags=['foo:bar', 'replication_mode:source'], count=1
+        )
+        aggregator.assert_service_check(
+            'mysql.replication.replica_running',
+            check_status_source,
+            tags=['foo:bar', 'replication_mode:source'],
+            count=1,
+        )
+        expected_service_check_len += 1
+
+    assert len(aggregator.service_checks('mysql.replication.slave_running')) == expected_service_check_len
+
+
+def test__get_is_aurora():
+    def new_check():
+        return MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    class MockCursor:
+        def __init__(self, rows, side_effect=None):
+            self.rows = rows
+            self.side_effect = side_effect
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def execute(self, command):
+            if self.side_effect:
+                raise self.side_effect
+
+        def close(self):
+            return MockCursor([])
+
+        def fetchall(self):
+            return self.rows
+
+    class MockDatabase:
+        def __init__(self, cursor):
+            self.cursor = cursor
+
+        def cursor(self):
+            return self.cursor
+
+    check = new_check()
+    assert True is check._get_is_aurora(MockDatabase(MockCursor(rows=[('1.72.1',)])))
+    assert True is check._get_is_aurora(None)
+    assert True is check._is_aurora
+
+    check = new_check()
+    assert True is check._get_is_aurora(
+        MockDatabase(
+            MockCursor(
+                rows=[
+                    ('1.72.1',),
+                    ('1.72.1',),
+                ]
+            )
+        )
+    )
+    assert True is check._get_is_aurora(None)
+    assert True is check._is_aurora
+
+    check = new_check()
+    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=[])))
+    assert False is check._get_is_aurora(None)
+    assert False is check._is_aurora
+
+    check = new_check()
+    assert False is check._get_is_aurora(MockDatabase(MockCursor(rows=None, side_effect=ValueError())))
+    assert None is check._is_aurora
+    assert False is check._get_is_aurora(None)
+
+
+@pytest.mark.unit
+def test__get_runtime_aurora_tags():
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+
+    class MockCursor:
+        def __init__(self, rows, side_effect=None):
+            self.rows = rows
+            self.side_effect = side_effect
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def execute(self, command):
+            if self.side_effect:
+                raise self.side_effect
+
+        def close(self):
+            return MockCursor(None)
+
+        def fetchone(self):
+            return self.rows.pop(0)
+
+    class MockDatabase:
+        def __init__(self, cursor):
+            self.cursor = cursor
+
+        def cursor(self):
+            return self.cursor
+
+    reader_row = ('reader',)
+    writer_row = ('writer',)
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[reader_row])))
+    assert tags == ['replication_role:reader']
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[writer_row])))
+    assert tags == ['replication_role:writer']
+
+    tags = mysql_check._get_runtime_aurora_tags(MockDatabase(MockCursor(rows=[(1, 'reader')])))
+    assert tags == []
+
+    # Error cases for non-aurora databases; any error should be caught and not fail the check
+
+    tags = mysql_check._get_runtime_aurora_tags(
+        MockDatabase(
+            MockCursor(
+                rows=[], side_effect=pymysql.err.InternalError(pymysql.constants.ER.UNKNOWN_TABLE, 'Unknown Table')
+            )
+        )
+    )
+    assert tags == []
+
+    tags = mysql_check._get_runtime_aurora_tags(
+        MockDatabase(
+            MockCursor(
+                rows=[],
+                side_effect=pymysql.err.ProgrammingError(pymysql.constants.ER.DBACCESS_DENIED_ERROR, 'Access Denied'),
+            )
+        )
+    )
+    assert tags == []
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(instance_basic, datadog_agent, version_metadata):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+def test_version_metadata(dd_run_check, instance_basic, datadog_agent, version_metadata):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
     mysql_check.check_id = 'test:123'
 
-    mysql_check.check(instance_basic)
+    dd_run_check(mysql_check)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
 
@@ -443,7 +570,7 @@ def test_version_metadata(instance_basic, datadog_agent, version_metadata):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_custom_queries])
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_custom_queries])
     dd_run_check(mysql_check)
 
     aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)

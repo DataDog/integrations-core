@@ -41,6 +41,7 @@ from .utils import (
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
+LOADER_TAG = 'loader:python'
 
 _MAX_FETCH_NUMBER = 10 ** 6
 
@@ -217,12 +218,15 @@ class SnmpCheck(AgentCheck):
         )
         for oid in config.oid_config.bulk_oids:
             try:
+                oid_object_type = oid.as_object_type()
                 self.log.debug(
-                    '[%s] Running SNMP command getBulk on OID %s', fetch_id, OIDPrinter((oid,), with_values=False)
+                    '[%s] Running SNMP command getBulk on OID %s',
+                    fetch_id,
+                    OIDPrinter((oid_object_type,), with_values=False),
                 )
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    oid_object_type,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -387,19 +391,24 @@ class SnmpCheck(AgentCheck):
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
-            tags = ['network:{}'.format(config.ip_network)]
+            tags = ['network:{}'.format(config.ip_network), 'autodiscovery_subnet:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             _, tags = self._check_device(config)
 
+        self.submit_telemetry_metrics(start_time, tags)
+
+    def submit_telemetry_metrics(self, start_time, tags):
+        # type: (float, List[str]) -> None
+        telemetry_tags = tags + [LOADER_TAG]
         # Performance Metrics
         # - for single device, tags contain device specific tags
         # - for network, tags contain network tags, but won't contain individual device tags
         check_duration = time.time() - start_time
-        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=tags)
-        self.gauge('datadog.snmp.check_duration', check_duration, tags=tags)
-        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=tags)
+        self.monotonic_count('datadog.snmp.check_interval', time.time(), tags=telemetry_tags)
+        self.gauge('datadog.snmp.check_duration', check_duration, tags=telemetry_tags)
+        self.gauge('datadog.snmp.submitted_metrics', self._submitted_metrics, tags=telemetry_tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
@@ -455,7 +464,7 @@ class SnmpCheck(AgentCheck):
 
             # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
             # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
-            self.gauge('snmp.devices_monitored', 1, tags=tags)
+            self.gauge('snmp.devices_monitored', 1, tags=tags + [LOADER_TAG])
 
             # Report service checks
             status = self.OK
@@ -642,7 +651,7 @@ class SnmpCheck(AgentCheck):
            index of the value we want to extract from the index tuple.
            cf. 1 for ipVersion in the IP-MIB::ipSystemStatsTable for example
          - Those specified in column_tags contain the name of a column, which
-           could be a potential result, to use as a tage
+           could be a potential result, to use as a tag
            cf. ifDescr in the IF-MIB::ifTable for example
         """
         tags = []  # type: List[str]
@@ -684,7 +693,7 @@ class SnmpCheck(AgentCheck):
 
     def monotonic_count_and_rate(self, metric, value, tags):
         # type: (str, Any, List[str]) -> None
-        """Specific submission method which sends a metric both as a monotonic cound and a rate."""
+        """Specific submission method which sends a metric both as a monotonic count and a rate."""
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
 

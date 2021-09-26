@@ -1,6 +1,23 @@
 # CHANGELOG - Harbor
 
-## 1.8.0 / 2021-01-04
+## 1.10.0 / 2021-09-17
+
+* [Added] Support v2 system volumes api . See [#10133](https://github.com/DataDog/integrations-core/pull/10133).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.9.1 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+
+## 1.9.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8925](https://github.com/DataDog/integrations-core/pull/8925).
+
+## 1.8.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.8.0 / 2021-01-04 / Agent 7.26.0
 
 * [Added] Support v2. See [#8269](https://github.com/DataDog/integrations-core/pull/8269).
 

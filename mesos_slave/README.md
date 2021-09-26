@@ -1,4 +1,4 @@
-# Mesos_slave Integration
+# Mesos Slave Integration
 
 ![Mesos Slave Dashboard][101]
 
@@ -102,6 +102,37 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
 
 Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need to set `disable_ssl_validation: true`-you don't need to do anything after installing the Agent.
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `mesos_slave.d/conf.yaml` file to start collecting your Mesos logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /var/log/mesos/*
+        source: mesos
+    ```
+
+    Change the `path` parameter value based on your environment, or use the default docker stdout:
+
+    ```yaml
+    logs:
+      - type: docker
+        source: mesos
+    ```
+
+    See the [sample mesos_slave.d/conf.yaml][106] for all available configuration options.
+
+3. [Restart the Agent][107].
+
+See [Datadog's documentation][108] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 #### DC/OS
@@ -122,25 +153,9 @@ See [metadata.csv][104] for a list of metrics provided by this integration.
 
 The Mesos-slave check does not include any events.
 
-### Service Check
+### Service Checks
 
-**mesos_slave.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Mesos slave metrics endpoint, otherwise `OK`.
-
-**<executor_task_name>.ok**:<br>
-The mesos_slave check creates a service check for each executor task, giving it one of the following statuses:
-
-|               |                                |
-| ------------- | ------------------------------ |
-| Task status   | resultant service check status |
-| TASK_STARTING | AgentCheck.OK                  |
-| TASK_RUNNING  | AgentCheck.OK                  |
-| TASK_FINISHED | AgentCheck.OK                  |
-| TASK_FAILED   | AgentCheck.CRITICAL            |
-| TASK_KILLED   | AgentCheck.WARNING             |
-| TASK_LOST     | AgentCheck.CRITICAL            |
-| TASK_STAGING  | AgentCheck.OK                  |
-| TASK_ERROR    | AgentCheck.CRITICAL            |
+See [service_checks.json][109] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -155,3 +170,7 @@ Need help? Contact [Datadog support][105].
 [103]: https://hub.docker.com/r/datadog/agent/tags
 [104]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
 [105]: https://docs.datadoghq.com/help/
+[106]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/datadog_checks/mesos_slave/data/conf.yaml.example
+[107]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[108]: https://docs.datadoghq.com/agent/kubernetes/log/
+[109]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/assets/service_checks.json

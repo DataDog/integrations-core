@@ -1,5 +1,17 @@
 # CHANGELOG - statsd
 
+## 1.7.1 / 2021-07-15 / Agent 7.30.0
+
+* [Fixed] Allow float value for timeout. See [#9711](https://github.com/DataDog/integrations-core/pull/9711).
+
+## 1.7.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8990](https://github.com/DataDog/integrations-core/pull/8990).
+
+## 1.6.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.6.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add statsd logs. See [#7773](https://github.com/DataDog/integrations-core/pull/7773).

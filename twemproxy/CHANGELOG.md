@@ -1,5 +1,18 @@
 # CHANGELOG - twemproxy
 
+## 1.10.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add log support for Twemproxy. See [#9066](https://github.com/DataDog/integrations-core/pull/9066).
+* [Fixed] Reflect default port in config. See [#9217](https://github.com/DataDog/integrations-core/pull/9217).
+
+## 1.9.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8999](https://github.com/DataDog/integrations-core/pull/8999).
+
+## 1.8.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.8.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] Add config spec. See [#7709](https://github.com/DataDog/integrations-core/pull/7709).

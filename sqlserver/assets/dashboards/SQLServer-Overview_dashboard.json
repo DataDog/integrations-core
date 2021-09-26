@@ -1,0 +1,554 @@
+{
+    "title": "SQLServer - Overview",
+    "description": "This dashboard gives you a high-level view of SQL Server's health and performance, plus more specific views of SQL Server metrics over time. Further reading on SQL Server monitoring:\n\n- [Datadog's SQL Server integration docs](https://docs.datadoghq.com/integrations/sqlserver/)\n\n- [Key metrics for SQL Server monitoring](https://www.datadoghq.com/blog/sql-server-monitoring/)\n\n- [SQL Server monitoring tools](https://www.datadoghq.com/blog/sql-server-monitoring-tools/)\n\n- [Monitor SQL Server performance with Datadog](https://www.datadoghq.com/blog/sql-server-performance/)\n\n- [Custom SQL Server metrics for detailed monitoring](https://www.datadoghq.com/blog/sql-server-metrics/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/sql-server_large.svg",
+                "sizing": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 16,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.buffer.cache_hit_ratio{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Buffer cache hit ratio",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 40,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.buffer.page_life_expectancy{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Page life expectancy",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 56,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "note",
+                "content": "Buffer pool metrics",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.connections{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "User Connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.batch_requests{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Batch Requests (per sec)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.sql_compilations{$scope} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "SQL compilations (per sec)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 29,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.lock_waits{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Lock waits",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 40,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.procs_blocked{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Processes blocked",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 49,
+                "y": 56,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.connections{$scope}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "User connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 18,
+                "y": 0,
+                "width": 16,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.buffer.checkpoint_pages{$scope} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Checkpoint pages",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 0,
+                "y": 72,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "note",
+                "content": "Blocking metrics",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 49,
+                "y": 34,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.batch_requests{$scope}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Batch requests",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 18,
+                "y": 17,
+                "width": 16,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.stats.sql_recompilations{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "SQL re-compilations (per sec)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 45,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "note",
+                "content": "Query plan metrics",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 98,
+                "y": 23,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.buffer.cache_hit_ratio{$scope}*100",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0.9,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 0.9,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Buffer cache hit ratio",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "autoscale": false,
+                "custom_unit": "%",
+                "precision": 1
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 16,
+                "height": 15
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:sqlserver.access.page_splits{$scope} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "orange",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Page splits (per sec)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 98,
+                "y": 6,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "note",
+                "content": "Page splits",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 98,
+                "y": 0,
+                "width": 47,
+                "height": 5
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "note",
+                "content": "Usage",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 36,
+                "y": 0,
+                "width": 12,
+                "height": 32
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 236
+}

@@ -1,6 +1,14 @@
 # CHANGELOG - gitlab
 
-## 4.4.1 / 2021-01-25
+## 4.5.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
+## 4.4.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 4.4.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
 * [Fixed] Update check signature. See [#8248](https://github.com/DataDog/integrations-core/pull/8248).

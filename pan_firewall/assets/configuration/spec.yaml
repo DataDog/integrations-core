@@ -1,0 +1,11 @@
+name: Palo Alto Networks Firewall
+files:
+- name: pan_firewall.yaml
+  options:
+  - template: logs
+    required: true
+    example:
+    - type: tcp
+      port: 10518
+      service: "firewall"
+      source: "pan.firewall"

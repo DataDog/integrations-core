@@ -30,7 +30,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "kyototycoon": "assets/dashboards/kyototycoon_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "kyototycoon"

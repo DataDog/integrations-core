@@ -1,0 +1,30 @@
+{
+  "name": "[Tomcat] Increase of the errors/second rate for host: {{host.name}}",
+  "type": "query alert",
+  "query": "avg(last_4h):anomalies(avg:tomcat.error_count{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+  "message": "There is an increase of the number of errors per second on all request processors for host: {{host.name}}\n\nErrors indicate an issue with the Tomcat server itself, a host, a deployed application, or an application servlet. This includes errors generated when the Tomcat server runs out of memory, can’t find a requested file or servlet, or is unable to serve a JSP due to syntax errors in the servlet codebase.",
+  "tags": ["integration:tomcat"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": true,
+    "notify_no_data": false,
+    "renotify_interval": 0,
+    "escalation_message": "",
+    "no_data_timeframe": null,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 1,
+      "critical_recovery": 0
+    },
+    "threshold_windows": {
+      "trigger_window": "last_15m",
+      "recovery_window": "last_15m"
+    }
+  },
+  "recommended_monitor_metadata": {
+    "description": "Notifies when Tomcat experiences an increase of error rate for a specific host."
+  }
+}

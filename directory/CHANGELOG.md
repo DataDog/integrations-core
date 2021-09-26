@@ -1,5 +1,14 @@
 # CHANGELOG - directory
 
+## 1.10.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8904](https://github.com/DataDog/integrations-core/pull/8904).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+
+## 1.9.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 1.9.1 / 2020-11-04 / Agent 7.24.0
 
 * [Fixed] Add tags to the new `system.disk.directory.exists` service check. See [#7929](https://github.com/DataDog/integrations-core/pull/7929).

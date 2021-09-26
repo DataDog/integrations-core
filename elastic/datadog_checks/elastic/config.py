@@ -21,6 +21,7 @@ ESInstanceConfig = namedtuple(
         'tags',
         'url',
         'pending_task_stats',
+        'cat_allocation_stats',
     ],
 )
 
@@ -43,6 +44,7 @@ def from_instance(instance):
         cluster_stats = is_affirmative(instance.get('is_external', False))
     pending_task_stats = is_affirmative(instance.get('pending_task_stats', True))
     admin_forwarder = is_affirmative(instance.get('admin_forwarder', False))
+    cat_allocation_stats = is_affirmative(instance.get('cat_allocation_stats', False))
 
     # Support URLs that have a path in them from the config, for
     # backwards-compatibility.
@@ -73,5 +75,6 @@ def from_instance(instance):
         tags=tags,
         url=url,
         pending_task_stats=pending_task_stats,
+        cat_allocation_stats=cat_allocation_stats,
     )
     return config

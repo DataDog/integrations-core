@@ -14,3 +14,7 @@ def set_default_driver_conf():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
         # `freetds` is shipped with the Docker Agent.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+
+
+def construct_use_statement(database):
+    return 'use [{}]'.format(database)

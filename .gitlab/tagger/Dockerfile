@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM registry.ddbuild.io/images/mirror/ubuntu:20.04
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -36,7 +36,7 @@ ENV LANG=C.UTF-8
 COPY . ${DDEV_ROOT}
 
 # Install pip
-RUN curl -sSL https://raw.githubusercontent.com/pypa/get-pip/master/get-pip.py | python3 \
+RUN curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 \
  # Install ddev for release tagging
  && pip3 install --no-cache-dir ${DDEV_ROOT}[cli] \
  # Install awscli for access to GitHub deploy key stored in SSM

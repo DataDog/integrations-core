@@ -4,7 +4,7 @@
 
 ## Title
 
-The [release command](../ddev/cli.md#make) uses the title of pull requests as-is to generate changelog entries.
+The [release command](../ddev/cli.md#ddev-release-make) uses the title of pull requests as-is to generate changelog entries.
 Therefore, be as explicit and concise as possible when describing code changes. For example, do not say `Fix typo`,
 but rather something like `Fix typo in debug log messages`.
 
@@ -37,7 +37,7 @@ Every pull request should do one thing only, for many reasons:
 
 1. **Easy Git management** - For example, if you are editing documentation and notice an error in the shipped example configuration, you
    should fix the error in a separate pull request. Doing so will enable a clean cherry-pick or revert of the bug fix should the need arise.
-1. **Easier release management** - Let's consider how the [release command](../ddev/cli.md#make) would handle the case of
+1. **Easier release management** - Let's consider how the [release command](../ddev/cli.md#ddev-release-make) would handle the case of
    making a code change to multiple integrations.
 
     - If one of the changes only fixes a typo in a code comment, that integration will still be released as indicated by the label.

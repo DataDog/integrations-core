@@ -1,5 +1,18 @@
 # CHANGELOG - couch
 
+## 4.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.13.3 / 2021-07-12 / Agent 7.30.0
+
+* [Fixed] Use Agent 8 signature. See [#9522](https://github.com/DataDog/integrations-core/pull/9522).
+
+## 3.13.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
 ## 3.13.1 / 2020-11-13 / Agent 7.24.0
 
 * [Fixed] Fix exception message. See [#7912](https://github.com/DataDog/integrations-core/pull/7912).

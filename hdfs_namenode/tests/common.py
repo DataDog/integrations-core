@@ -24,7 +24,7 @@ NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesy
 # Namesystem metadata url
 NAME_SYSTEM_METADATA_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=NameNodeInfo'
 
-CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
+CUSTOM_TAGS = ["hdfs_cluster:hdfs_dev", "instance:level_tags"]
 
 # Authentication Parameters
 TEST_USERNAME = 'Picard'

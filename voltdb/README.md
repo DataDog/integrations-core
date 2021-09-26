@@ -8,7 +8,7 @@ This check monitors [VoltDB][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
-**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host — but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
+**Note**: This check should only be configured on one Agent per cluster. If you are monitoring a cluster spread across several hosts, you can install an Agent on each host - but do not enable the VoltDB integration on more than one host, as this results in duplicate metrics.
 
 ### Installation
 
@@ -78,7 +78,7 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 3. [Restart the Agent][4].
 
-#### Log Collection
+#### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -111,18 +111,21 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-### Service Checks
-
-**voltdb.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot reach the configured VoltDB URL, `OK` otherwise.
-
 ### Events
 
 This check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://voltdb.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -133,3 +136,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
+[10]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json

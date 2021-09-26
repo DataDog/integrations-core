@@ -24,7 +24,9 @@ from .const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
+    DATABASE_SERVICE_CHECK_NAME,
     DEFAULT_AUTODISCOVERY_INTERVAL,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -133,15 +135,22 @@ class SQLServer(AgentCheck):
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
 
-    def handle_service_check(self, status, host, database, message=None):
+    def handle_service_check(self, status, host, database, message=None, is_default=True):
         custom_tags = self.instance.get("tags", [])
         if custom_tags is None:
             custom_tags = []
+
         service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
-        self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        if status is AgentCheck.OK:
+            message = None
+
+        if is_default:
+            self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+        if self.autodiscovery:
+            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
@@ -259,6 +268,12 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
+        # Load sys.master_files metrics
+        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
+            for name, table, column in DATABASE_MASTER_FILES:
+                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
@@ -345,6 +360,8 @@ class SQLServer(AgentCheck):
                 self.instance_per_type_metrics[cls].append(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None):
+        if db is not None:
+            tags = tags + ['database:{}'.format(db)]
         for name, counter_name, instance_name in metrics:
             try:
                 sql_type, base_name = self.get_sql_type(counter_name)
@@ -434,6 +451,10 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
+            if self.autodiscovery:
+                for db_name in self.databases:
+                    if db_name != self.connection.DEFAULT_DATABASE:
+                        self.connection.check_database_conns(db_name)
         else:
             self.log.debug("Skipping check")
 
@@ -457,7 +478,7 @@ class SQLServer(AgentCheck):
                             rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
-                            continue
+                            rows, cols = None, None
 
                         instance_results[cls] = rows, cols
 
@@ -465,11 +486,16 @@ class SQLServer(AgentCheck):
                 for metric in self.instance_metrics:
                     if type(metric) is metrics.SqlIncrFractionMetric:
                         # special case, since it uses the same results as SqlFractionMetric
-                        rows, cols = instance_results['SqlFractionMetric']
-                        metric.fetch_metric(rows, cols)
+                        key = 'SqlFractionMetric'
                     else:
-                        rows, cols = instance_results[metric.__class__.__name__]
-                        metric.fetch_metric(rows, cols)
+                        key = metric.__class__.__name__
+
+                    if key not in instance_results:
+                        self.log.warning("No %s metrics found, skipping", str(key))
+                    else:
+                        rows, cols = instance_results[key]
+                        if rows is not None:
+                            metric.fetch_metric(rows, cols)
 
             # reuse connection for any custom queries
             self._query_manager.execute()

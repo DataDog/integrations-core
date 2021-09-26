@@ -1,6 +1,37 @@
 # CHANGELOG - oracle
 
-## 3.1.1 / 2021-01-25
+## 3.4.0 / 2021-09-02
+
+* [Added] Add new service check `oracle.can_query`. See [#10004](https://github.com/DataDog/integrations-core/pull/10004).
+
+## 3.3.4 / 2021-08-04 / Agent 7.31.0
+
+* [Fixed] Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
+
+## 3.3.3 / 2021-07-30
+
+* [Fixed] Explicitly close connection after query error. See [#9800](https://github.com/DataDog/integrations-core/pull/9800).
+
+## 3.3.2 / 2021-07-22 / Agent 7.30.0
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+
+## 3.3.1 / 2021-07-12
+
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* [Fixed] Dont use connection string for client. See [#9219](https://github.com/DataDog/integrations-core/pull/9219).
+
+## 3.3.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
+
+## 3.2.0 / 2021-03-07 / Agent 7.27.0
+
+* [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 3.1.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Make more explicit which connection was established. See [#8416](https://github.com/DataDog/integrations-core/pull/8416).
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).

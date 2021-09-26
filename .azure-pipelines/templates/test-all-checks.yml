@@ -3,6 +3,11 @@ parameters:
   pip_cache_config: null
   run_py2_tests: true
   force_base_package: false
+  test: true
+  test_e2e: true
+  benchmark: true
+  latest: false
+  ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -10,7 +15,11 @@ jobs:
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
     force_base_package: ${{ parameters.force_base_package }}
+    test: ${{ parameters.test }}
     test_e2e: ${{ parameters.test_e2e }}
+    benchmark: ${{ parameters.benchmark }}
+    latest: ${{ parameters.latest }}
+    ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -54,12 +63,12 @@ jobs:
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
-    - checkName: azure_iot_edge
-      displayName: Azure IoT Edge
+    - checkName: avi_vantage
+      displayName: Avi Vantage
       os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
-      os: windows
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
@@ -80,6 +89,9 @@ jobs:
       os: linux
     - checkName: cisco_aci
       displayName: Cisco ACI
+      os: linux
+    - checkName: citrix_hypervisor
+      displayName: Citrix Hypervisor
       os: linux
     - checkName: clickhouse
       displayName: ClickHouse
@@ -107,6 +119,9 @@ jobs:
       os: linux
     - checkName: crio
       displayName: CRI-O
+      os: linux
+    - checkName: datadog_cluster_agent
+      displayName: Datadog Cluster Agent
       os: linux
     - checkName: directory
       displayName: Directory
@@ -197,6 +212,9 @@ jobs:
       os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
+      os: linux
+    - checkName: ibm_i
+      displayName: IBM i
       os: linux
     - checkName: ibm_mq
       displayName: IBM MQ
@@ -322,7 +340,7 @@ jobs:
       displayName: Oracle Database
       os: linux
     - checkName: pdh_check
-      displayName: PDH
+      displayName: PDH (Windows)
       os: windows
     - checkName: pgbouncer
       displayName: PGBouncer
@@ -364,7 +382,7 @@ jobs:
       displayName: Riak
       os: linux
     - checkName: riakcs
-      displayName: Riak CS
+      displayName: RiakCS
       os: linux
     - checkName: sap_hana
       displayName: SAP HANA

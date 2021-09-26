@@ -1,6 +1,14 @@
 # CHANGELOG - cacti
 
-## 1.8.1 / 2021-01-25
+## 1.8.3 / 2021-07-15 / Agent 7.30.0
+
+* [Fixed] Fix example config. See [#9705](https://github.com/DataDog/integrations-core/pull/9705).
+
+## 1.8.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.8.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
 

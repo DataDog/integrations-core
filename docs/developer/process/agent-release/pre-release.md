@@ -21,8 +21,19 @@ Ensure that you have configured the following:
 
 ## Before Freeze
 
-1. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
-2. Check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green.
+1. Make a dependency update PR 1 week before freeze:
+    * Create a new branch
+    * Run `ddev dep updates --sync`
+    * Run `ddev dep sync`
+    * Create a PR with the updated dependencies
+    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that change.
+    
+    !!! tip
+        Revert the changes and rerun `ddev dep updates --sync` with the `--check-python-classifiers` flag if there are many CI failures on your PR. Running it with the flag will not update a dependency to the newest version if the python classifiers do not match the marker. Although sometimes classifiers are inaccurate on PyPI and could miss a version update, using the flag does reduce errors overall.
+
+2. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+3. Check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green.
+
 
 ## Freeze
 
@@ -61,12 +72,16 @@ We test all changes to integrations that were introduced since the last release.
 ### Create items
 
 Create an item for every change in [our board](https://trello.com/b/ICjijxr4/agent-release-sprint) using
-the Trello subcommand called [testable](../../ddev/cli.md#testable).
+the Trello subcommand called [testable](../../ddev/cli.md#ddev-release-trello-testable).
 
 For example:
 
 ```
 ddev release trello testable 7.17.1 7.18.0-rc.1
+```
+or if the tag is not ready yet:
+```
+ddev release trello testable 7.17.1 origin/master
 ```
 
 would select all commits that were merged between the Git references.
@@ -96,7 +111,7 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle. 
+The Agent Release Manager will post a [daily status](../../ddev/cli.md#ddev-release-trello-status) for the entire release cycle.
 Reply in the thread with any pending PRs meant for the next RC and update the spreadsheet `PRs included in Agent RCs`.
 
 ### Logs
@@ -104,8 +119,8 @@ Reply in the thread with any pending PRs meant for the next RC and update the sp
 Each release candidate is deployed in a staging environment. We observe the `WARN` or `ERROR` level logs filtered with the facets
  `Service:datadog-agent` and `index:main` and `LogMessage` to see if any unexpected or frequent errors start occurring that was not caught
  during QA.
- 
- 
+
+
 ## Release week
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
