@@ -55,9 +55,9 @@ steps:
   - script: pip install datadog-checks-dev[cli]
     displayName: 'Install ddev from PyPI'
 
-- script:
-    - ddev config set repos.${{ parameters.repo }} .
-    - ddev config set repo ${{ parameters.repo }}
-    - ddev config set orgs.ci.dd_url ${{ parameters.dd_url}}
-    - ddev config set org ci
+- script: |
+    ddev config set repos.${{ parameters.repo }} .
+    ddev config set repo ${{ parameters.repo }}
+    ddev config set orgs.ci.dd_url ${{ parameters.dd_url}}
+    ddev config set org ci
   displayName: 'Configure ddev'
