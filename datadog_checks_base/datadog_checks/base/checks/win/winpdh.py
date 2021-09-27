@@ -15,7 +15,7 @@ SINGLE_INSTANCE_KEY = "__single_instance"
 
 
 class WinPDHCounter(object):
-    # store the dictionary of pdh counter names
+    # store the dictionary of pdh  counter names
     pdh_counter_dict = defaultdict(list)
     _use_en_counter_names = False
 
