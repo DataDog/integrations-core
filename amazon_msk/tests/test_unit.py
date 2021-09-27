@@ -180,12 +180,13 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
 
     aggregator.assert_all_metrics_covered()
 
+
 @pytest.mark.parametrize(
     'instance',
     [
         pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
         pytest.param(INSTANCE, id='new config proxy'),
-    ]
+    ],
 )
 def test_proxy_config(instance):
     HTTP_PROXY = {"http": "example.com"}
