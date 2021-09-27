@@ -9,6 +9,7 @@ from datadog_checks.base.utils.timeout import TimeoutException
 
 
 class WMICheck(WinWMICheck):
+    
     """
     WMI check.
 
