@@ -66,7 +66,6 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     queue_blacklist: Optional[Sequence[str]]
     read_timeout: Optional[float]
-    request_size: Optional[float]
     resourcemanager_uri: Optional[str]
     service: Optional[str]
     skip_proxy: Optional[bool]
