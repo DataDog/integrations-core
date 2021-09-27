@@ -67,9 +67,15 @@ def test_e2e(dd_agent_check, instance_complex):
 
 def _assert_complex_config(aggregator):
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
     aggregator.assert_service_check(
-        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS + ['replication_mode:source'], at_least=1
+        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname='stubbed.hostname', count=1
+    )
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=tags.SC_TAGS + ['replication_mode:source'],
+        hostname='stubbed.hostname',
+        at_least=1,
     )
     testable_metrics = (
         variables.STATUS_VARS
