@@ -166,9 +166,7 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_set(check)
 
 
-requires_static_version
-
-
+@requires_static_version
 def test_version_metadata(integration_check, pg_instance, datadog_agent):
     check = integration_check(pg_instance)
     check.check_id = 'test:123'
