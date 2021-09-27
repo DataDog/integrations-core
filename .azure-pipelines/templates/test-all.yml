@@ -11,6 +11,7 @@ parameters:
   benchmark: true
   latest: false
   ddtrace_flag: ''
+  dd_url: https://app.datadoghq.com
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -30,6 +31,7 @@ jobs:
       latest: ${{ parameters.latest }}
       ddtrace_flag: ${{ parameters.ddtrace_flag }}
       validate_codeowners: ${{ parameters.validate_codeowners }}
+      dd_url: ${{ parameters.dd_url }}
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:

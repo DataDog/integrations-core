@@ -16,6 +16,7 @@ parameters:
   force_base_package: false
   pip_cache_config: null
   coverage: true
+  dd_url: https://app.datadoghq.com
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
