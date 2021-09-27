@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.16.0 / 2021-09-27
+
+* [Added] Add support for queue status  last put/get time  metrics. See [#10129](https://github.com/DataDog/integrations-core/pull/10129).
+
 ## 3.15.0 / 2021-09-20
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
