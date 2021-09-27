@@ -8,7 +8,8 @@ def construct_boto_config(boto_config, proxies=None):
     if boto_config.get('proxies'):
         # Proxy settings configured in the boto_config config option takes precedence
         return Config(**boto_config)
-
-    if proxies:
+    elif proxies:
         boto_config["proxies"] = proxies
         return Config(**boto_config)
+
+    return Config(**boto_config)
