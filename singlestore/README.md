@@ -25,6 +25,7 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
+**Note**: By default, the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS`, and `LEAVES` tables. To collect additional system level metrics (CPU, disk, network IO, and memory), set `collect_system_metrics: true`  in your `singlestore.d/conf.yaml` file.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
