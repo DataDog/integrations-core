@@ -134,9 +134,7 @@ def instance_error():
     return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
-requires_static_version
-
-
+@requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
