@@ -45,7 +45,6 @@ CounterMetric = Tuple[
 ]
 
 
-
 class PDHBaseCheck(AgentCheck):
     """
     PDH based check.  check.
