@@ -21,20 +21,12 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e():
+def config_e2e(instance_basic):
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [
-            {
-                'host': common.HOST,
-                'user': common.USER,
-                'pass': common.PASS,
-                'port': common.PORT,
-                'disable_generic_tags': 'true',
-            }
-        ],
+        'instances': [instance_basic],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -79,8 +71,14 @@ def dd_environment(config_e2e):
 
 
 @pytest.fixture(scope='session')
-def instance_basic(config_e2e):
-    return config_e2e['instances'][0]
+def instance_basic():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'disable_generic_tags': 'true',
+    }
 
 
 @pytest.fixture
