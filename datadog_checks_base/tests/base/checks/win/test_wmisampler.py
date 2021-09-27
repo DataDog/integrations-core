@@ -30,8 +30,41 @@ def test_format_filter_value():
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_values_same_prop():
-    filters = [{'a': [['>=', 10], ['<', 0]]}]
+def test_format_filter_like():
+    filters = [{'a': '%foo'}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( a LIKE '%foo' )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_list_expected():
+    filters = [{'a': ['<', 3]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( a < '3' )"
+
+    filters = [{'a': ['three', 3]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a = 'three' OR a = '3' ) )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_tuple():
+    # needed for backwards compatibility and hardcoded filters
+    filters = [{'a': ('<', 3)}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( a < '3' )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_bool_op_alt():
+    filters = [{'a': {'OR': [['>=', 10], ['<', 0]]}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( ( a >= '10' OR a < '0' ) )"
@@ -59,35 +92,43 @@ def test_format_filter_values_same_prop():
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_like():
-    filters = [{'a': '%foo'}]
+def test_format_filter_bool_op_not():
+    filters = [{'my.prop': {'NOT': ['c', 'd']}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a LIKE '%foo' )"
+    assert formatted_filters == " WHERE ( NOT ( my.prop = 'c' OR my.prop = 'd' ) )"
+
+    sampler = WMISampler(
+        logger=None, class_name='MyClass', property_names='my.prop', filters=filters, and_props=['my.prop']
+    )
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( my.prop = 'c' AND my.prop = 'd' ) )"
 
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_list_expected():
-    filters = [{'a': ['<', 3]}]
+def test_format_filter_bool_op_invalid():
+    # Falls back to default_bool_op
+    filters = [{'my.prop': {'XXX': ['c', 'd']}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a < '3' )"
+    assert formatted_filters == " WHERE ( ( my.prop = 'c' OR my.prop = 'd' ) )"
 
-    filters = [{'a': [1, 3]}]
-    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    sampler = WMISampler(
+        logger=None, class_name='MyClass', property_names='my.prop', filters=filters, and_props=['my.prop']
+    )
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( ( a = '1' OR a = '3' ) )"
+    assert formatted_filters == " WHERE ( ( my.prop = 'c' AND my.prop = 'd' ) )"
 
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_tuple():
-    # needed for backwards compatibility and hardcoded filters
-    filters = [{'a': ('<', 3)}]
+def test_format_filter_wql_op_invalid():
+    # Falls back to default_wql_op
+    filters = [{'a': [['XXX', 3]]}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a < '3' )"
+    assert formatted_filters == " WHERE ( a = '3' )"
 
 
 @requires_windows

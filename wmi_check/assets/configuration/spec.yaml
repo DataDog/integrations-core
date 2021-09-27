@@ -69,18 +69,15 @@ files:
         A list of filters on the WMI query you may want.
         Filters can be in one of these forms:
           [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
-          [{<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
-          [{<FILTER_PROPERTY>: {<LOGIC_OPERATOR>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...}]
+          [{<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]},...]
+          [{<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>],...]},...]
+          [{<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]},...}]
 
-        All metrics are filtered out if any given property:
-          1. Has one or more filter(s) applied to it, AND
-          2. None of its filters evaluate to 'True'
-
-        Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
+        Providing just a <FILTER_VALUE> defaults to the '=' WQL operator.
 
           * <FILTER_PROPERTY> the name of the filter, for example 'PercentProcessorTime'.
-
-        Supported Logic Operators: OR (default), AND, NOR, NAND
+          * <WQL_OPERATOR>: '=' (default), '<', '>', '<=', '>=', '!=', '<>', 'LIKE'
+          * <BOOL_OPERATOR>: OR (default), AND, NOR, NAND, NOT
 
         Examples:
             filters:
@@ -98,6 +95,13 @@ files:
                   - AA
                   - BB%
             result> WHERE ( ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
+
+            filters:
+              - PROP1: 
+                 NOT:
+                  - AA
+                  - BB%
+            result> WHERE ( NOT ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
 
             filters:
               - PROP1: 
@@ -122,9 +126,9 @@ files:
         example:
           - {<FILTER_PROPERTY>: <FILTER_VALUE>}
           - {<FILTER_PROPERTY>: [<FILTER_VALUE>]}
-          - {<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]}
-          - {<FILTER_PROPERTY>: [[<FILTER_OPERATOR>, <FILTER_VALUE>]]}
-          - {<FILTER_PROPERTY>: {<LOGIC_OPERATOR>: [[<FILTER_OPERATOR>, <FILTER_VALUE>]]}}
+          - {<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]}
+          - {<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}
+          - {<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}}
     - name: provider
       description: |
         The WMI provider.

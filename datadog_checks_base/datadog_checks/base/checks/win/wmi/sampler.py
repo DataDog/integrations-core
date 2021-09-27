@@ -390,9 +390,20 @@ class WMISampler(object):
         """
         Transform filters to a comprehensive WQL `WHERE` clause.
 
-        Specifying more than 1 filter defaults to an `OR` logic operator in the `WHERE` clause.
-
-        Specifying more than 1 condition defaults to an `OR` logic operator in the unless specified otherwise.
+        In the resulting `WHERE` clause:
+         * Specifying multiple filters defaults to an `OR` bool operator.
+            E.g.  - foo: x
+                  - bar: x
+                  result> foo OR bar
+         * Specifying multiple properties in a given filter defaults to an `AND` bool operator.
+            E.g.  - foo: x
+                    bar: x
+                  result> foo AND bar
+         * Specifying multiple conditions for a given property defaults to an `OR` bool operator unless specified otherwise.
+            E.g.  - foo: [x, y, z]
+                  result> foo = x OR  y OR  z
+                  - bar: {AND: [x, y, z]}
+                  result> foo = x AND y AND z
 
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
@@ -407,10 +418,13 @@ class WMISampler(object):
         """
 
         # https://docs.microsoft.com/en-us/windows/win32/wmisdk/wql-operators
-        WQL_OPERATORS = ('=', '<', '>', '<=', '>=', '!=', '<>')
+        # Not supported: ISA, IS and IS NOT
+        # Supported SQL operators.
+        WQL_OPERATORS = ('=', '<', '>', '<=', '>=', '!=', '<>', 'LIKE')
 
-        # Supported logical/bool operators
-        LOGIC_OPERATORS = ('AND', 'OR', 'NAND', 'NOR')
+        # Supported logic/bool operators
+        # Also takes NOT which maps to NAND or NOR depending on default_bool_op
+        BOOL_OPERATORS = ('AND', 'OR', 'NAND', 'NOR')
 
         def build_where_clause(fltr):
             def add_to_bool_ops(k, v, should_extend=False):
@@ -422,9 +436,9 @@ class WMISampler(object):
             f = fltr.pop()
             wql = ""
             while f:
-                bool_ops = dict((op, []) for op in LOGIC_OPERATORS)
+                bool_ops = dict((op, []) for op in BOOL_OPERATORS)
                 default_bool_op = 'OR'
-                default_comp_op = '='
+                default_wql_op = '='
                 clauses = []
                 prop, value = f.popitem()
                 for p in and_props:
@@ -436,7 +450,7 @@ class WMISampler(object):
                     # Append if PROPERTY: ['<>', 'foo']
                     # Extend if PROPERTY: [['<>', 'foo']]
                     # Extend if PROPERTY: ['foo%', '%bar']
-                    should_extend = False if len(value) == 2 and value[0] in WQL_OPERATORS else True
+                    should_extend = False if len(value) == 2 and value[0].upper() in WQL_OPERATORS else True
                     add_to_bool_ops(default_bool_op, value, should_extend)
                 elif isinstance(value, dict):
                     # e.g.
@@ -452,11 +466,11 @@ class WMISampler(object):
                         # Extend if PROPERTY: { AND: ['foo%', '%bar']]}
                         should_extend = (
                             True
-                            if isinstance(v, (tuple, list)) and not (len(v) == 2 and v[0] in WQL_OPERATORS)
+                            if isinstance(v, (tuple, list)) and not (len(v) == 2 and v[0].upper() in WQL_OPERATORS)
                             else False
                         )
                         bool_op = default_bool_op
-                        if k.upper() in LOGIC_OPERATORS:
+                        if k.upper() in BOOL_OPERATORS:
                             bool_op = k.upper()
                         elif k.upper() == 'NOT':
                             # map NOT to NOR or NAND
@@ -471,7 +485,7 @@ class WMISampler(object):
                     # Use default comparison operator
                     # e.g.
                     # PROPERTY: 'bar'  -> PROPERTY = 'foo'
-                    add_to_bool_ops(default_bool_op, [default_comp_op, value])
+                    add_to_bool_ops(default_bool_op, [default_wql_op, value])
 
                 for bool_op, value in iteritems(bool_ops):
                     if not len(value):
@@ -482,13 +496,18 @@ class WMISampler(object):
                         if isinstance(x, (tuple, list))
                         else (prop, ('LIKE', x))
                         if isinstance(x, string_types) and '%' in x
-                        else (prop, (default_comp_op, x)),
+                        else (prop, (default_wql_op, x)),
                         value,
                     )
 
                     negate = True if bool_op.upper() in ('NAND', 'NOR') else False
                     op = ' {} '.format(bool_op[1:] if negate else bool_op)
-                    clause = op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) for k, v in internal_filter])
+                    clause = op.join(
+                        [
+                            '{0} {1} \'{2}\''.format(k, v[0] if v[0].upper() in WQL_OPERATORS else default_wql_op, v[1])
+                            for k, v in internal_filter
+                        ]
+                    )
 
                     if negate:
                         clauses.append("NOT ( {clause} )".format(clause=clause))
