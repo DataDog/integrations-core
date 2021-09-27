@@ -129,6 +129,7 @@ EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
 ]
 
 COMMON_TAGS = {
+    "kubernetes_pod_uid://c2319815-10d0-11e8-bd5a-42010af00137": ["pod_name:datadog-agent-jbm2k"],
     "kubernetes_pod_uid://2edfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-9q9t4"],
     "kubernetes_pod_uid://2fdfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-p13r3"],
     'container_id://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
@@ -831,6 +832,7 @@ def test_perform_kubelet_check(monkeypatch):
                 stream=False,
                 timeout=(10.0, 10.0),
                 verify=None,
+                allow_redirects=True,
             )
         ]
     )
@@ -943,10 +945,10 @@ def test_process_stats_summary_not_source_linux(monkeypatch, aggregator, tagger)
     # As we did not activate `use_stats_summary_as_source`,
     # we only have ephemeral storage metrics and kubelet stats
     aggregator.assert_metric(
-        'kubernetes.ephemeral_storage.usage', 69406720.0, ['instance:tag', 'pod_name:dd-agent-ntepl']
+        'kubernetes.ephemeral_storage.usage', 69406720.0, ['instance:tag', 'pod_name:fluentd-gcp-v2.0.10-9q9t4']
     )
     aggregator.assert_metric(
-        'kubernetes.ephemeral_storage.usage', 49152.0, ['instance:tag', 'pod_name:demo-app-success-c485bc67b-klj45']
+        'kubernetes.ephemeral_storage.usage', 49152.0, ['instance:tag', 'pod_name:datadog-agent-jbm2k']
     )
     aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, ['instance:tag'])
     aggregator.assert_metric('kubernetes.kubelet.cpu.usage', 36755862.0, ['instance:tag'])

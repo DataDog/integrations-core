@@ -1,4 +1,4 @@
-FROM apache/airflow:2.0.0-python3.7
+FROM apache/airflow:2.1.4-python3.8
 USER root
 # INSTALL TOOLS
 RUN apt-get update \

@@ -221,10 +221,6 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 
 ### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 You can monitor Fargate logs by using the AWS FireLens integration built on Datadogs Fluentbit output plugin to send logs to Datadog, or by using the `awslogs` log driver and a Lambda function to route logs to Datadog. Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
 
 <!-- xxx tabs xxx -->

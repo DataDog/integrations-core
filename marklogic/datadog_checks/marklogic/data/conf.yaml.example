@@ -352,6 +352,11 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

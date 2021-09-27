@@ -60,6 +60,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     avi_controller_url: str

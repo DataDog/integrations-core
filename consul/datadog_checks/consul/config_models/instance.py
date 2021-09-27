@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     acl_token: Optional[str]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]

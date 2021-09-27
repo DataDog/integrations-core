@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_application_status_mapping(field, value):
     return get_default_field_value(field, value)
 

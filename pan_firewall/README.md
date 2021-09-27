@@ -16,11 +16,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ## Setup
 
-### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}} 
+### Log collection 
 
  1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet.
  2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps][2]. Same steps listed below.

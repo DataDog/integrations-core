@@ -25,10 +25,6 @@ See the [Autodiscovery Integration Templates][9] for guidance on applying the pa
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                     |

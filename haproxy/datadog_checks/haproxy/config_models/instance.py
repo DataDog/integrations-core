@@ -58,6 +58,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     active_tag: Optional[bool]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]

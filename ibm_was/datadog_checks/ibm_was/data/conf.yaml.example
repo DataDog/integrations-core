@@ -329,6 +329,11 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
     ## @param collect_jdbc_stats - boolean - optional - default: true
     ## Whether or not to collect JDBC Connection Pool stats
     #

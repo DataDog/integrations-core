@@ -13,6 +13,7 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
+from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
@@ -48,8 +49,7 @@ def models(ctx, check, sync, verbose):
     code_formatter = ModelConsumer.create_code_formatter()
 
     for check in checks:
-        check_display_queue = []
-
+        display_queue = {}
         if check == 'datadog_checks_base':
             spec_path = path_join(root, 'datadog_checks_base', 'tests', 'models', 'data', 'spec.yaml')
             source = 'test'
@@ -67,6 +67,7 @@ def models(ctx, check, sync, verbose):
         spec.load()
 
         if spec.errors:
+            annotate_error(spec_path, '\n'.join(spec.errors))
             specs_failed[spec_path] = True
             echo_info(f'{check}:')
             for error in spec.errors:
@@ -93,13 +94,14 @@ def models(ctx, check, sync, verbose):
             continue
 
         for model_file, (contents, errors) in model_files.items():
+            check_display_queue = []
             num_files += 1
 
             model_file_path = path_join(models_location, model_file)
             if errors:
                 files_failed[model_file_path] = True
                 for error in errors:
-                    check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
+                    check_display_queue.append((echo_failure, error))
                 continue
 
             model_file_lines = contents.splitlines(True)
@@ -133,17 +135,23 @@ def models(ctx, check, sync, verbose):
                 else:
                     files_failed[model_file_path] = True
                     check_display_queue.append(
-                        lambda model_file=model_file, **kwargs: echo_failure(
-                            f'File `{model_file}` is not in sync, run "ddev validate models -s"', **kwargs
+                        (
+                            echo_failure,
+                            f'File `{model_file}` is not in sync, run "ddev validate models {check} -s"',
                         )
                     )
 
-        if check_display_queue or verbose:
+            if not check_display_queue and verbose:
+                check_display_queue.append((echo_info, f"Valid spec: {model_file}"))
+
+            display_queue[model_file_path] = check_display_queue
+
+        if display_queue:
             echo_info(f'{check}:')
-            if verbose:
-                check_display_queue.append(lambda **kwargs: echo_info('Valid spec', **kwargs))
-            for display in check_display_queue:
-                display(indent=True)
+            for model_path, queue in display_queue.items():
+                annotate_display_queue(model_path, queue)
+                for func, message in queue:
+                    func(message, indent=True)
 
     specs_failed = len(specs_failed)
     files_failed = len(files_failed)

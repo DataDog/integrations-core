@@ -143,11 +143,6 @@ files:
         override the hostname to match with ssl_server_name.
       value:
         type: string
-    - name: allow_redirects
-      description: The allow_redirects parameter can enable redirection for the HTTP check.
-      value:
-        type: boolean
-        example: true
     - name: stream
       description: |
         The stream parameter can be used to check the status code and/or
