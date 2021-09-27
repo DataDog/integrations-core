@@ -112,7 +112,7 @@ After all fixes have been cherry-picked:
 After the RC build is done, manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the release branch, and the latest RC built. It will run all the e2e tests using a specific agent.
 
 !!! note
-    Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [Gitlab pipeline](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61).
+    Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
 
 
 ### Communication
