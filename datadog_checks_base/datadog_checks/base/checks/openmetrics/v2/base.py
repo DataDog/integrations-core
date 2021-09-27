@@ -15,7 +15,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
     def __init__(self, name, init_config, instances):
-        super(OpenMetricsBaseCheckV2, self).__init__(name, init_config,  instances)
+        super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
