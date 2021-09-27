@@ -26,6 +26,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.dev.fs import read_file, write_file
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = pytest.mark.http
@@ -376,8 +377,11 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
-            assert http.get('https://www.google.com') == '/test/file'
+        with mock.patch(
+            'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', ''))
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
@@ -389,8 +393,11 @@ class TestAuth:
 
         assert os.environ.get('KRB5CCNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
-            assert http.get('https://www.google.com') == '/test/file'
+        with mock.patch(
+            'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
         assert os.environ.get('KRB5CCNAME') is None
 
@@ -401,8 +408,11 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         with EnvVars({'KRB5CCNAME': 'old'}):
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
-                assert http.get('https://www.google.com') == '/test/file'
+            with mock.patch(
+                'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+            ):
+                response = http.get('https://www.google.com')
+                assert response.text == '/test/file'
 
             assert os.environ.get('KRB5CCNAME') == 'old'
 
@@ -415,8 +425,12 @@ class TestAuth:
         with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
-                assert http.get('https://www.google.com') == '/test/file'
+            with mock.patch(
+                'requests.get',
+                side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
+            ):
+                response = http.get('https://www.google.com')
+                assert response.text == '/test/file'
 
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
@@ -959,17 +973,6 @@ class TestAuthTokenReadFile:
 
 class TestAuthTokenDCOS:
     def test_token_auth(self):
-        class MockResponse:
-            def __init__(self, json_data, status_code):
-                self.json_data = json_data
-                self.status_code = status_code
-
-            def json(self):
-                return self.json_data
-
-            def raise_for_status(self):
-                return True
-
         priv_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'private-key.pem')
         pub_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'public-key.pem')
 
@@ -999,14 +1002,14 @@ class TestAuthTokenDCOS:
                 assert isinstance(decoded['exp'], int)
                 assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
-                return MockResponse({'token': 'auth-token'}, 200)
-            return MockResponse(None, 404)
+                return MockResponse(json_data={'token': 'auth-token'})
+            return MockResponse(status_code=404)
 
         def auth(*args, **kwargs):
             if args[0] == 'https://leader.mesos/service/some-service':
                 assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockResponse({}, 200)
-            return MockResponse(None, 404)
+                return MockResponse(json_data={})
+            return MockResponse(status_code=404)
 
         http = RequestsWrapper(instance, init_config)
         with mock.patch('requests.post', side_effect=login), mock.patch('requests.get', side_effect=auth):
@@ -1118,6 +1121,8 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 counter['errors'] += 1
                 if counter['errors'] <= 1:
                     raise Exception
+
+                return MockResponse()
 
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
