@@ -13,37 +13,67 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class AuthToken(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    reader: Optional[Mapping[str, Any]]
+    writer: Optional[Mapping[str, Any]]
+
+
+class Proxy(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    http: Optional[str]
+    https: Optional[str]
+    no_proxy: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    auto_discover_queues: Optional[bool]
-    channel: str
-    channel_status_mapping: Optional[Mapping[str, Any]]
-    channels: Optional[Sequence[str]]
-    collect_statistics_metrics: Optional[bool]
-    connection_name: Optional[str]
-    convert_endianness: Optional[bool]
+    acs_url: Optional[str]
+    allow_redirects: Optional[bool]
+    auth_token: Optional[AuthToken]
+    auth_type: Optional[str]
+    aws_host: Optional[str]
+    aws_region: Optional[str]
+    aws_service: Optional[str]
+    connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    host: Optional[str]
+    extra_headers: Optional[Mapping[str, Any]]
+    group: Optional[str]
+    headers: Optional[Mapping[str, Any]]
+    kerberos_auth: Optional[str]
+    kerberos_cache: Optional[str]
+    kerberos_delegate: Optional[bool]
+    kerberos_force_initiate: Optional[bool]
+    kerberos_hostname: Optional[str]
+    kerberos_keytab: Optional[str]
+    kerberos_principal: Optional[str]
+    label_tags: Optional[Sequence[str]]
+    log_requests: Optional[bool]
     min_collection_interval: Optional[float]
-    mqcd_version: Optional[float]
+    ntlm_domain: Optional[str]
     password: Optional[str]
-    port: Optional[int]
-    queue_manager: str
-    queue_manager_timezone: Optional[str]
-    queue_patterns: Optional[Sequence[str]]
-    queue_regex: Optional[Sequence[str]]
-    queue_tag_re: Optional[Mapping[str, Any]]
-    queues: Optional[Sequence[str]]
+    persist_connections: Optional[bool]
+    proxy: Optional[Proxy]
+    read_timeout: Optional[float]
     service: Optional[str]
-    ssl_auth: Optional[bool]
-    ssl_certificate_label: Optional[str]
-    ssl_cipher_spec: Optional[str]
-    ssl_key_repository_location: Optional[str]
+    skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
+    tls_ca_cert: Optional[str]
+    tls_cert: Optional[str]
+    tls_ignore_warning: Optional[bool]
+    tls_private_key: Optional[str]
+    tls_use_host_header: Optional[bool]
+    tls_verify: Optional[bool]
+    url: str
+    use_legacy_auth_encoding: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)
