@@ -220,7 +220,7 @@ ddev release upload datadog_checks_[base|dev]
 ## Releasers
 
 For whom it may concern, the following is a list of GPG public key fingerprints known to correspond to developers
-who, at the time of writing (24-09-2021), can trigger a build by signing [in-toto metadata](../meta/cd.md).
+who, at the time of writing (27-09-2021), can trigger a build by signing [in-toto metadata](../meta/cd.md).
 
 ??? info "[Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)"
     - `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
@@ -233,14 +233,6 @@ who, at the time of writing (24-09-2021), can trigger a build by signing [in-tot
 ??? info "[Dave Coleman](https://api.github.com/users/dcoleman17/gpg_keys)"
     - `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
     - `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
-
-??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
-    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
-    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
-
-??? info "[Paola Ducolin](https://api.github.com/users/pducolin/gpg_keys)"
-    - `EAC5 F27E C6B1 A814 1222  1942 C4E1 549E 937E F5A2`
-    - `A40A DD71 41EB C767 BBFB  E0B8 9128 2E2F E536 C858`
 
 ??? info "[Fanny Jiang](https://api.github.com/users/fanny-jiang/gpg_keys)"
     - `BB47 F8E8 8908 168B CAE4  324A D9C3 43B4 D73F BE12`
@@ -261,10 +253,6 @@ who, at the time of writing (24-09-2021), can trigger a build by signing [in-tot
 ??? info "[Sarah Witt](https://api.github.com/users/sarah-witt/gpg_keys)"
     - `47C5 A022 73F1 CF81 04EE  8D1A 7A67 DC43 B24C 1542`
     - `0620 14C0 3FC0 44E5 F029  32A2 E50E CC57 6463 4BC1`
-
-??? info "[Alexandre Yang](https://api.github.com/users/AlexandreYang/gpg_keys)"
-    - `FBC6 3AE0 9D0C A9B4 584C  9D7F 4291 A11A 36EA 52CD`
-    - `F8D9 181D 9309 F8A4 957D  636A 27F8 F48B 18AE 91AA`
 
 ??? info "[Andrew Zhang](https://api.github.com/users/yzhan289/gpg_keys)"
     - `EABC A4AC 14AC BAF0 06CC  0384 7C67 39CB 3A79 9F86`
