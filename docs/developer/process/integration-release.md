@@ -220,7 +220,7 @@ ddev release upload datadog_checks_[base|dev]
 ## Releasers
 
 For whom it may concern, the following is a list of GPG public key fingerprints known to correspond to developers
-who, at the time of writing (28-02-2020), can trigger a build by signing [in-toto metadata](../meta/cd.md).
+who, at the time of writing (27-09-2021), can trigger a build by signing [in-toto metadata](../meta/cd.md).
 
 ??? info "[Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)"
     - `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
@@ -234,34 +234,38 @@ who, at the time of writing (28-02-2020), can trigger a build by signing [in-tot
     - `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
     - `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
 
+??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
+    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
+    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
+
 ??? info "[Paola Ducolin](https://api.github.com/users/pducolin/gpg_keys)"
     - `EAC5 F27E C6B1 A814 1222  1942 C4E1 549E 937E F5A2`
     - `A40A DD71 41EB C767 BBFB  E0B8 9128 2E2F E536 C858`
 
-??? info "[Mike Garabedian](https://api.github.com/users/mgarabed/gpg_keys)"
-    - `F90C 0097 67F2 4B27 9DC2  C83D A227 6601 6CB4 CF1D`
-    - `2669 6E67 28D2 0CB0 C1E0  D2BE 6643 5756 8398 9306`
-
-??? info "[Thomas Hervé](https://api.github.com/users/therve/gpg_keys)"
-    - `59DB 2532 75A5 BD4E 55C7  C5AA 0678 55A2 8E90 3B3B`
-    - `E2BD 994F 95C0 BC0B B923  1D21 F752 1EC8 F485 90D0`
+??? info "[Fanny Jiang](https://api.github.com/users/fanny-jiang/gpg_keys)"
+    - `BB47 F8E8 8908 168B CAE4  324A D9C3 43B4 D73F BE12`
+    - `800C 2BA9 A7AA 4F84 DD39  A558 4306 7845 F282 FB96`
 
 ??? info "[Ofek Lev](https://api.github.com/users/ofek/gpg_keys)"
     - `C295 CF63 B355 DFEB 3316  02F7 F426 A944 35BE 6F99`
     - `D009 8861 8057 D2F4 D855  5A62 B472 442C B7D3 AF42`
 
-??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
-    - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
-    - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
-
 ??? info "[Julia Simon](https://api.github.com/users/hithwen/gpg_keys)"
-    - `4A54 09A2 3361 109C 047C  C76A DC8A 42C2 8B95 0123`
+    - `0244 AAA8 DD1E FE47 30A4  F1CA 392C 882E 0DA0 C6C8`
     - `129A 26CF A726 3C85 98A6  94B0 8659 1366 CBA1 BF3C`
 
 ??? info "[Florian Veaux](https://api.github.com/users/FlorianVeaux/gpg_keys)"
     - `3109 1C85 5D78 7789 93E5  0348 9BFE 5299 D02F 83E9`
     - `7A73 0C5E 48B0 6986 1045  CF8B 8B2D 16D6 5DE4 C95E`
 
+??? info "[Sarah Witt](https://api.github.com/users/sarah-witt/gpg_keys)"
+    - `47C5 A022 73F1 CF81 04EE  8D1A 7A67 DC43 B24C 1542`
+    - `0620 14C0 3FC0 44E5 F029  32A2 E50E CC57 6463 4BC1`
+
 ??? info "[Alexandre Yang](https://api.github.com/users/AlexandreYang/gpg_keys)"
     - `FBC6 3AE0 9D0C A9B4 584C  9D7F 4291 A11A 36EA 52CD`
     - `F8D9 181D 9309 F8A4 957D  636A 27F8 F48B 18AE 91AA`
+
+??? info "[Andrew Zhang](https://api.github.com/users/yzhan289/gpg_keys)"
+    - `EABC A4AC 14AC BAF0 06CC  0384 7C67 39CB 3A79 9F86`
+    - `0149 2127 FC6E 1A4C 900B  78DA ED58 C98E BC9C C677`
