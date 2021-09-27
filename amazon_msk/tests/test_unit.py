@@ -184,8 +184,10 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
 @pytest.mark.parametrize(
     'instance',
     [
-        pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
-        pytest.param(INSTANCE, id='new config proxy'),
+        pytest.param(INSTANCE_LEGACY, None, id='legacy config proxy'),
+        pytest.param(
+            INSTANCE, id='new config proxy', marks=pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+        ),
     ],
 )
 def test_proxy_config(instance):
