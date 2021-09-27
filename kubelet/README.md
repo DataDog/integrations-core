@@ -56,6 +56,21 @@ The check will still be able to collect:
 
 See [service_checks.json][6] for a list of service checks provided by this integration.
 
+### Excluded containers
+
+It is possible to restrict the data collected to a subset of the containers
+deployed. This is done setting the [`DD_CONTAINER_EXCLUDE` environment
+variable][7]. This integration does not report metrics from the containers
+specified in that environment variable.
+
+This integration also reports network metrics that apply to a pod instead of a
+single container. In that case, if `DD_CONTAINER_EXCLUDE` applies to a
+namespace, the pod-level metrics will not be reported if the pod is in that
+namespace. However, if `DD_CONTAINER_EXCLUDE` refers to a container name or an
+image name, the pod-level metrics will be reported even if the exclusion rules
+defined apply to some containers included in the pod.
+
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
@@ -67,3 +82,4 @@ Need help? Contact [Datadog support][5].
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
 [5]: https://docs.datadoghq.com/help/
 [6]: https://github.com/DataDog/integrations-core/blob/master/kubelet/assets/service_checks.json
+[7]: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent
