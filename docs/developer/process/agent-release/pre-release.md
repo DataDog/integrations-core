@@ -109,6 +109,12 @@ After all fixes have been cherry-picked:
 1. Push the changes to GitHub
 1. [Tag](#tag) with the appropriate `rc` number even if there were no changes
 
+After the RC build is done, manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the release branch, and the latest RC built. It will run all the e2e tests using a specific agent.
+
+!!! note
+    Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [Gitlab pipeline](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61).
+
+
 ### Communication
 
 The Agent Release Manager will post a [daily status](../../ddev/cli.md#ddev-release-trello-status) for the entire release cycle.
