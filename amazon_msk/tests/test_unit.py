@@ -13,7 +13,7 @@ from datadog_checks.amazon_msk.metrics import (
     NODE_METRICS_OVERRIDES,
 )
 
-from .common import METRICS_FROM_LABELS
+from .common import INSTANCE, INSTANCE_LEGACY, METRICS_FROM_LABELS
 
 
 @pytest.mark.usefixtures('mock_data')
@@ -179,3 +179,16 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
                 aggregator.assert_service_check('aws.msk.prometheus.health', c.OK, tags=service_check_tags)
 
     aggregator.assert_all_metrics_covered()
+
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
+        pytest.param(INSTANCE, id='new config proxy'),
+    ]
+)
+def test_proxy_config(instance):
+    HTTP_PROXY = {"http": "example.com"}
+    init_config = {"proxy": HTTP_PROXY}
+    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    assert c._boto_config.proxies == HTTP_PROXY
