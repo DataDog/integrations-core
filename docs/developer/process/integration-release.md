@@ -230,6 +230,10 @@ who, at the time of writing (24-09-2021), can trigger a build by signing [in-tot
     - `024E 42FE 76AD F19F 5D57  7503 07E5 2EA3 88E4 08FD`
     - `1286 0553 D1DC 93A7 2CD1  6956 2D98 DCE7 FBFF C9C2`
 
+??? info "[Dave Coleman](https://api.github.com/users/dcoleman17/gpg_keys)"
+    - `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
+    - `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
+
 ??? info "[Greg Marabout Demazure](https://api.github.com/users/gmarabout/gpg_keys)"
     - `01CC 90D7 F047 93D4 30DF  9C7B 825B 84BD 1EE8 E57C`
     - `C719 8925 CAE5 11DE 7FC2  EB15 A9B3 5A96 7570 B459`
