@@ -4,7 +4,7 @@
 from . import common
 
 METRIC_TAGS = ['tag1:value1', 'tag2:value2']
-SC_TAGS = ['mysql_server:' + common.HOST, 'port:' + str(common.PORT), 'tag1:value1', 'tag2:value2']
-SC_TAGS_MIN = ['mysql_server:' + common.HOST, 'port:' + str(common.PORT)]
-SC_TAGS_REPLICA = ['mysql_server:' + common.HOST, 'port:' + str(common.SLAVE_PORT), 'tag1:value1', 'tag2:value2']
-SC_FAILURE_TAGS = ['mysql_server:' + common.HOST, 'port:unix_socket']
+SC_TAGS = ['port:' + str(common.PORT), 'tag1:value1', 'tag2:value2']
+SC_TAGS_MIN = ['port:' + str(common.PORT)]
+SC_TAGS_REPLICA = ['port:' + str(common.SLAVE_PORT), 'tag1:value1', 'tag2:value2']
+SC_FAILURE_TAGS = ['port:unix_socket']
