@@ -310,4 +310,4 @@
   value:
     example: true
     type: boolean
-  description: Whether or not to allow URL redirection.
+  description: Whether or not to allow URL redirection. 
