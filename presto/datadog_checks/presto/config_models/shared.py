@@ -17,7 +17,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    collect_default_metrics: bool
+    collect_default_metrics: Optional[bool]
     conf: Optional[Sequence[Mapping[str, Any]]]
     is_jmx: bool
     new_gc_metrics: Optional[bool]
