@@ -73,6 +73,7 @@ def test_metadata_plus(_, aggregator, check, datadog_agent):
     instance = {
         'nginx_status_url': 'dummy_url',
         'use_plus_api': True,
+        'disable_generic_tags': True,
     }
 
     nginx_check = check(instance)
