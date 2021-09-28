@@ -1,6 +1,22 @@
 # CHANGELOG - Vertica
 
-## 2.0.1 / 2021-03-07
+## 3.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.1.1 / 2021-06-07 / Agent 7.29.0
+
+* [Fixed] Fix required values in vertica. See [#9479](https://github.com/DataDog/integrations-core/pull/9479).
+
+## 2.1.0 / 2021-05-28
+
+* [Added] Add runtime configuration validation. See [#9003](https://github.com/DataDog/integrations-core/pull/9003).
+
+## 2.0.2 / 2021-04-19 / Agent 7.28.0
+
+* [Fixed] Fix logs section in example config file. See [#8876](https://github.com/DataDog/integrations-core/pull/8876).
+
+## 2.0.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

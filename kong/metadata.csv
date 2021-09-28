@@ -1,4 +1,16 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kong.bandwidth.count,count,,byte,,The total bandwidth in bytes consumed per service/route in Kong,0,kong,
+kong.http.consumer.status.count,count,,request,,HTTP status codes for customer per service/route in Kong,0,kong,
+kong.http.status.count,count,,request,,HTTP status codes per service/route in Kong,0,kong,
+kong.latency.bucket,count,,millisecond,,"The latency added by Kong, total request time and upstream latency for each service/route in Kong",0,kong,
+kong.latency.count,count,,millisecond,,"The latency added by Kong, total request time and upstream latency for each service/route in Kong",0,kong,
+kong.latency.sum,count,,millisecond,,"The latency added by Kong, total request time and upstream latency for each service/route in Kong",0,kong,
+kong.memory.lua.shared_dict.bytes,gauge,,byte,,The allocated slabs in bytes in a shared_dict,0,kong,
+kong.memory.lua.shared_dict.total_bytes,gauge,,byte,,The total capacity in bytes of a shared_dict,0,kong,
+kong.memory.workers.lua.vms.bytes,gauge,,byte,,The allocated bytes in worker Lua VM,0,kong,
+kong.nginx.http.current_connections,gauge,,connection,,The number of HTTP connections,0,kong,
+kong.nginx.stream.current_connections,gauge,,connection,,The number of stream connections,0,kong,
+kong.stream.status.count,count,,request,,The stream status codes per service/route in Kong,0,kong,
 kong.table.count,gauge,,table,,Total number of tables in the database.,0,kong,table count
 kong.table.items,gauge,,row,,Number of items in each table of the database.,0,kong,items count
 kong.connections_accepted,gauge,,connection,,Total number of accepted client connections.,-1,kong,srvr conn accepted

@@ -27,7 +27,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Sonarqube Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {
       "SonarQube vulnerabilities": "assets/recommended_monitors/vulnerabilities.json"
     },
@@ -39,5 +41,12 @@
       "source": "sonarqube"
     },
     "metrics_metadata": "metadata.csv"
-  }
+  },
+  "further_reading": [
+    {
+      "link": "https://www.datadoghq.com/blog/datadog-sonarqube-integration/",
+      "tag": "Blog",
+      "text": "Monitor code quality in Datadog with SonarQube"
+    }
+  ]
 }

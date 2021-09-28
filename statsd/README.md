@@ -87,11 +87,7 @@ The StatsD check does not include any events.
 
 ### Service Checks
 
-**statsd.is_up**:<br>
-Returns `CRITICAL` if the StatsD server does not respond to the Agent's health status request, otherwise `OK`.
-
-**statsd.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot collect metrics about StatsD, otherwise `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -113,3 +109,4 @@ To get a better idea of how (or why) to visualize StatsD metrics with Counts Gra
 [8]: https://www.datadoghq.com/blog/statsd
 [9]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing
 [10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[11]: https://github.com/DataDog/integrations-core/blob/master/statsd/assets/service_checks.json
