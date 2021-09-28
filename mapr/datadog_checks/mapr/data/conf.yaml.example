@@ -47,6 +47,12 @@ instances:
     #
     # streams_count: 1
 
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `clustername`, which has been renamed to `mapr_cluster` and `clusterid`
+    ## which has been renamed to `mapr_cluster_id`
+    #
+    disable_legacy_cluster_tag: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

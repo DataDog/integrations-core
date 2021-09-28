@@ -20,7 +20,7 @@ def test_ssl_verify_false(realtime_instance):
     ) as load_verify_locations:
         smart_connect = connect.SmartConnect
 
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         VSphereAPI(config, MagicMock())
 
         actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
@@ -38,7 +38,7 @@ def test_ssl_cert(realtime_instance):
     ) as load_verify_locations:
         smart_connect = connect.SmartConnect
 
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         VSphereAPI(config, MagicMock())
 
         actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
@@ -55,7 +55,7 @@ def test_connect_success(realtime_instance):
         smart_connect.return_value = connection
         get_about_info = connection.content.about.version.__str__
 
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
         smart_connect.assert_called_once_with(
             host=realtime_instance['host'],
@@ -76,7 +76,7 @@ def test_connect_failure(realtime_instance):
         version_info = connection.content.about.version.__str__
         version_info.side_effect = Exception('foo')
 
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         with pytest.raises(APIConnectionError):
             VSphereAPI(config, MagicMock())
 
@@ -91,7 +91,7 @@ def test_connect_failure(realtime_instance):
 
 def test_get_infrastructure(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         container_view = api._conn.content.viewManager.CreateContainerView.return_value
@@ -134,7 +134,7 @@ def test_get_infrastructure(realtime_instance):
 )
 def test_smart_retry(realtime_instance, exception, expected_calls):
     with patch('datadog_checks.vsphere.api.connect') as connect:
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         smart_connect = connect.SmartConnect
@@ -152,7 +152,7 @@ def test_smart_retry(realtime_instance, exception, expected_calls):
 
 def test_get_max_query_metrics(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
         values = [12, -1]
         expected = [12, float('inf')]
@@ -168,7 +168,7 @@ def test_get_max_query_metrics(realtime_instance):
 
 def test_get_new_events_success_without_fallback(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         returned_events = [vim.event.Event(), vim.event.Event(), vim.event.Event()]
@@ -180,7 +180,7 @@ def test_get_new_events_success_without_fallback(realtime_instance):
 
 def test_get_new_events_failure_without_fallback(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         api._conn.content.eventManager.QueryEvents.side_effect = SoapAdapter.ParserError("some parse error")
@@ -193,7 +193,7 @@ def test_get_new_events_with_fallback(realtime_instance):
     realtime_instance['use_collect_events_fallback'] = True
 
     with patch('datadog_checks.vsphere.api.connect'):
-        config = VSphereConfig(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         event1 = vim.event.Event(key=1)
