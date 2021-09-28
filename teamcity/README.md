@@ -4,7 +4,7 @@
 
 This check watches for successful build-related events and sends them to Datadog.
 
-Unlike most Agent checks, this one doesn't collect any metrics—just events.
+Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
 ## Setup
 

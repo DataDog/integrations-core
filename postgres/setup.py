@@ -28,7 +28,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=16.6.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=21.2.0'
 
 setup(
     name='datadog-postgres',
@@ -50,6 +50,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=['datadog_checks.postgres'],
     # Run-time dependencies

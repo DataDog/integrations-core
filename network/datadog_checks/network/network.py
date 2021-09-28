@@ -357,7 +357,7 @@ class Network(AgentCheck):
                 # Try using `ss` for increased performance over `netstat`
                 ss_env = {"PROC_ROOT": net_proc_base_location}
 
-                # By providing the environment variables in ss_env, the PATH will be overriden. In CentOS,
+                # By providing the environment variables in ss_env, the PATH will be overridden. In CentOS,
                 # datadog-agent PATH is "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", while sh PATH
                 # will be '/usr/local/bin:/usr/bin'. In CentOS, ss is located in /sbin and /usr/sbin, not
                 # in the sh PATH, which will result in network metric collection failure.
@@ -524,7 +524,7 @@ class Network(AgentCheck):
         # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
         # By default, only max and count are reported. However if the blacklist is set,
-        # the whitelist is loosing its default value
+        # the whitelist is losing its default value
         blacklisted_files = instance.get('blacklist_conntrack_metrics')
         whitelisted_files = instance.get('whitelist_conntrack_metrics')
         if blacklisted_files is None and whitelisted_files is None:
