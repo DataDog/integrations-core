@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
+import requests
 from six import PY2
 
 from ...errors import CheckException
@@ -97,7 +100,27 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         if instances is not None:
             for instance in instances:
-                self.get_scraper_config(instance)
+                possible_urls = instance.get('possible_prometheus_urls')
+                if possible_urls is not None:
+                    for url in possible_urls:
+                        try:
+                            new_instance = deepcopy(instance)
+                            new_instance.update({'prometheus_url': url})
+                            scraper_config = self.get_scraper_config(new_instance)
+                            response = self.send_request(url, scraper_config)
+                            response.raise_for_status()
+                            instance['prometheus_url'] = url
+                            self.get_scraper_config(instance)
+                            break
+                        except (IOError, requests.HTTPError, requests.exceptions.SSLError) as e:
+                            self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
+                    else:
+                        self.log.error(
+                            "The agent could connect to none of the following URL: %s.",
+                            possible_urls,
+                        )
+                else:
+                    self.get_scraper_config(instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance
@@ -142,7 +165,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     def _filter_metric(self, metric, scraper_config):
         """
-        Used to filter metrics at the begining of the processing, by default no metric is filtered
+        Used to filter metrics at the beginning of the processing, by default no metric is filtered
         """
         return False
 
