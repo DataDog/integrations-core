@@ -9,7 +9,7 @@ import simplejson as json
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 
 from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
@@ -350,3 +350,20 @@ class Nginx(AgentCheck):
                     output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
+        
+    # override
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+        if self.disable_generic_tags:
+            return super(Nginx, self)._normalize_tags_type(tags, device_name, metric_name)
+        # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
+        # version to ease transition.
+        normalized_tags = []
+        for tag in tags:
+            if tag is not None:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+                normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
+        return normalized_tags

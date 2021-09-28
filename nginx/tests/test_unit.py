@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.nginx import Nginx
 import os
 from copy import deepcopy
 
 import mock
 import pytest
 
-from .common import FIXTURES_PATH
+from .common import FIXTURES_PATH, TAGS, CHECK_NAME
 from .utils import mocked_perform_request
 
 
@@ -141,3 +142,22 @@ def test_no_version(check, instance, caplog):
 
     errors = [record for record in caplog.records if record.levelname == "ERROR"]
     assert not errors
+
+def test_emit_generic_and_non_generic_tags_by_default(instance):
+    instance = deepcopy(instance)
+    instance['disable_generic_tags'] = False
+    check = Nginx(CHECK_NAME, {}, [instance])
+    extra_tags = ['host:localhost', 'port:8080']
+    tags = TAGS + extra_tags
+    normalised_tags = TAGS + ['nginx_host:localhost']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))
+
+
+def test_emit_non_generic_tags_when_disabled(instance):
+    instance = deepcopy(instance)
+    instance['disable_generic_tags'] = True
+    check = Nginx(CHECK_NAME, {}, [instance])
+    extra_tags = ['host:localhost', 'port:8080']
+    tags = TAGS + extra_tags
+    normalised_tags = TAGS + ['nginx_host:localhost', 'port:8080']
+    assert set(normalised_tags) == set(check._normalize_tags_type(tags))
