@@ -196,6 +196,6 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /var/lib/memsql/<ID>/tracelogs/memsql.log
+#     path: /var/lib/memsql/<NODE_ID>/tracelogs/memsql.log
 #     source: singlestore
 #     service: <SERVICE>
