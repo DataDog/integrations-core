@@ -294,12 +294,12 @@ def test__get_is_aurora():
 @pytest.mark.parametrize(
     'hostname, expected_tags',
     [
-        (None, ['port:unix_socket', 'server:localhost']),
-        ('foo', ['port:unix_socket', 'server:foo']),
+        (None, {'port:unix_socket', 'server:localhost'}),
+        ('foo', {'port:unix_socket', 'server:foo'}),
     ],
 )
 def test_service_check(expected_tags, hostname):
     config = {'server': 'localhost', 'user': 'datadog'}
     check = MySql(common.CHECK_NAME, {}, instances=[config])
 
-    assert check._service_check_tags(hostname) == expected_tags
+    assert set(check._service_check_tags(hostname)) == expected_tags
