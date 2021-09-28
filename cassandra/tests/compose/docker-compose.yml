@@ -5,10 +5,12 @@ services:
     build: .
     ports:
       - '7199:7199' # JMX
-    environment: 
+    environment:
       - LOCAL_JMX=no
       - JVM_EXTRA_OPTS=-Djava.rmi.server.hostname=127.0.0.1
-      - MAX_HEAP_SIZE=512M 
+      - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=128M
     command: >
          /bin/sh -c "sh /cassandra-init.sh"
+    volumes:
+      - ${DD_LOG_1}:/var/log/cassandra/system.log

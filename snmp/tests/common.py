@@ -3,13 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import ipaddress
 import logging
 import os
+import socket
 
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
 
@@ -19,7 +21,7 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
-AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
+SNMP_LISTENER_ENV = os.environ['SNMP_LISTENER_ENV']
 TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
@@ -189,8 +191,8 @@ RESOLVED_TABULAR_OBJECTS = [
     }
 ]
 
-agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
-python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Python discovery only')
+snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
+snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
 
 
 def generate_instance_config(metrics, template=None):
@@ -213,6 +215,27 @@ def generate_container_instance_config(metrics):
 def generate_container_profile_config(profile):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
+
+    init_config = {}
+
+    instance = generate_instance_config([], template=conf)
+    instance['community_string'] = profile
+    instance['enforce_mib_constraints'] = False
+    return {
+        'init_config': init_config,
+        'instances': [instance],
+    }
+
+
+def generate_container_profile_config_with_ad(profile):
+    host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    conf = {
+        # Make sure the check handles bytes
+        'network_address': to_native_string(network),
+        'port': PORT,
+        'community_string': 'apc_ups',
+    }
 
     init_config = {}
 
@@ -248,19 +271,29 @@ def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
 
 
-def assert_common_metrics(aggregator, tags=None, is_e2e=False):
-    assert_common_check_run_metrics(aggregator, tags, is_e2e)
-    assert_common_device_metrics(aggregator, tags, is_e2e)
+def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    assert_common_check_run_metrics(aggregator, tags, is_e2e, loader=loader)
+    assert_common_device_metrics(aggregator, tags, is_e2e, loader=loader)
 
 
-def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False):
+def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT
+    loader = loader or 'python'
+    if tags is not None:
+        tags = tags + ['loader:' + loader]
     aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
 
 
-def assert_common_device_metrics(aggregator, tags=None, is_e2e=False):
-    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)
+def assert_common_device_metrics(
+    aggregator, tags=None, is_e2e=False, count=None, devices_monitored_value=None, loader=None
+):
+    loader = loader or 'python'
+    if tags is not None:
+        tags = tags + ['loader:' + loader]
+    aggregator.assert_metric(
+        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
+    )

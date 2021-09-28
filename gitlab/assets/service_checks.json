@@ -57,6 +57,6 @@
             "endpoint"
         ],
         "name": "Gitlab readiness",
-        "description": "Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers."
+        "description": "Returns `CRITICAL` if the Gitlab instance is unable to accept traffic via Rails Controllers."
     }
 ]

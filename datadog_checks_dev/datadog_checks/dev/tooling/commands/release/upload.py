@@ -5,8 +5,8 @@ import os
 
 import click
 
+from ....fs import basepath, chdir, dir_exists, resolve_path
 from ....subprocess import run_command
-from ....utils import basepath, chdir, dir_exists, resolve_path
 from ...constants import get_root
 from ...release import build_package
 from ...utils import complete_valid_checks, get_valid_checks
