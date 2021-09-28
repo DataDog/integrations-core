@@ -8,8 +8,6 @@ import random
 import pytest
 import redis
 
-from datadog_checks.redisdb import Redis
-
 from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
@@ -17,7 +15,7 @@ TEST_KEY = "testkey"
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("redis_auth")]
 
 
-def test_slowlog(aggregator, redis_instance):
+def test_slowlog(aggregator, dd_run_check, check, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
 
     # Tweaking Redis's config to have the test run faster
@@ -31,14 +29,14 @@ def test_slowlog(aggregator, redis_instance):
 
     assert db.slowlog_len() > 0
 
-    redis_check = Redis('redisdb', {}, [redis_instance])
-    redis_check.check(redis_instance)
+    redis_check = check(redis_instance)
+    dd_run_check(redis_check)
 
     expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
 
 
-def test_custom_slowlog(aggregator, redis_instance):
+def test_custom_slowlog(aggregator, dd_run_check, check, redis_instance):
     redis_instance['slowlog-max-len'] = 1
 
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
@@ -54,8 +52,8 @@ def test_custom_slowlog(aggregator, redis_instance):
 
     assert db.slowlog_len() > 0
 
-    redis_check = Redis('redisdb', {}, [redis_instance])
-    redis_check.check(redis_instance)
+    redis_check = check(redis_instance)
+    dd_run_check(redis_check)
 
     # Let's check that we didn't put more than one slowlog entry in the
     # payload, as specified in the above agent configuration

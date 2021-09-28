@@ -98,6 +98,24 @@ To do so, use the following fixtures:
     my_data = dd_get_state('my_data', default={})
     ```
 
+#### Mock HTTP response
+
+The `mock_http_response` fixture mocks HTTP requests for the lifetime of a test.
+
+The fixture can be used to mock the response of an endpoint. In the following example, we can mock the Prometheus output.
+
+```python
+def test(mock_http_response):
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes 6.396288e+06
+        """
+    )
+    ...
+```
+
 ### Environment manager
 
 The fixture `dd_environment_runner` manages communication between environments and the `ddev env` command group. You will
@@ -127,4 +145,5 @@ is desired. This fixture is responsible for starting and stopping environments a
 - `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default) and `local`.
 - `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
 - `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
+- `docker_platform` - The container architecture to use if `env_type` is `docker`. Currently, we support `linux` (default) and `windows`.
 - `logs_config` - A `list` of configs that will be used by the Logs Agent. You will never need to use this directly, but rather via [higher level abstractions](test.md#logs).

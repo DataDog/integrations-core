@@ -153,7 +153,13 @@ def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_k
         check.check(legacy_instance)
 
         http_kwargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.get.assert_has_calls([mock.call(URL + '/v2/stats/store', **http_kwargs)])
@@ -187,6 +193,7 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
             proxies=mock.ANY,
             timeout=mock.ANY,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)
