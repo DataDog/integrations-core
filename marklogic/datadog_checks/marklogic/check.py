@@ -217,9 +217,8 @@ class MarklogicCheck(AgentCheck):
                     res_tags = self._config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
                     res_detailed = health_report[res['type']].get(res['name'])
                     if res_detailed:
-                        self.service_check(
-                            service_check_name, res_detailed['code'], tags=res_tags, message=res_detailed['message']
-                        )
+                        message = res_detailed['message'] if res_detailed['code'] is not AgentCheck.OK else None
+                        self.service_check(service_check_name, res_detailed['code'], tags=res_tags, message=message)
                     else:
                         self.service_check(service_check_name, self.OK, res_tags)
 

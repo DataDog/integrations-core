@@ -1,6 +1,37 @@
 # CHANGELOG - elastic
 
-## 1.24.0 / 2021-02-10
+## 3.2.0 / 2021-09-10
+
+* [Added] Support opensearch. See [#10093](https://github.com/DataDog/integrations-core/pull/10093).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 3.1.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 3.0.1 / 2021-07-20
+
+* [Fixed] Fix log line . See [#9621](https://github.com/DataDog/integrations-core/pull/9621).
+
+## 3.0.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
+
+## 2.2.0 / 2021-05-17
+
+* [Added] Update version supported for Cat Allocation metrics. See [#9339](https://github.com/DataDog/integrations-core/pull/9339).
+
+## 2.1.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8911](https://github.com/DataDog/integrations-core/pull/8911).
+* [Fixed] Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).
+
+## 2.0.0 / 2021-04-09
+
+* [Added] Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
+* [Changed] Normalize memory stats to mebibytes. See [#9128](https://github.com/DataDog/integrations-core/pull/9128).
+
+## 1.24.0 / 2021-02-10 / Agent 7.27.0
 
 * [Added] Rename cluster_name tag to elastic_cluster. See [#8526](https://github.com/DataDog/integrations-core/pull/8526).
 * [Fixed] Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).

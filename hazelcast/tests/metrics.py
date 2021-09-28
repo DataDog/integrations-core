@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 METRICS = [
     'hazelcast.imap.local_backup_count',
@@ -225,4 +225,4 @@ METRICS = [
     'hazelcast.member.used_metadata',
     'hazelcast.member.used_native',
     'hazelcast.member.write_queue_size',
-] + JVM_E2E_METRICS
+] + JVM_E2E_METRICS_NEW

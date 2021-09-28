@@ -14,10 +14,9 @@ from tests.legacy.utils import mock_alarm_event
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
-from .common import HERE
+from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
 
 
@@ -98,9 +97,9 @@ def test_events_only(aggregator, events_only_instance):
 def test_external_host_tags(aggregator, realtime_instance):
     realtime_instance['collect_tags'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    config = VSphereConfig(realtime_instance, MagicMock())
+    config = VSphereConfig(realtime_instance, {}, MagicMock())
     check.api = MockedAPI(config)
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
 
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
@@ -302,8 +301,8 @@ def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check,
 def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_instance):
     realtime_instance.update({'collect_tags': True})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    config = VSphereConfig(realtime_instance, MagicMock())
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    config = VSphereConfig(realtime_instance, {}, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
     check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
     check.api_rest.smart_connect = MagicMock()
 
@@ -401,13 +400,15 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.check_id = 'test:123'
     dd_run_check(check)
+
+    major, minor, patch = VSPHERE_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '6',
-        'version.minor': '7',
-        'version.patch': '0',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
         'version.build': '123456789',
-        'version.raw': '6.7.0+123456789',
+        'version.raw': '{}+123456789'.format(VSPHERE_VERSION),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
