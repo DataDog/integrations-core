@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 4.2.0-beta.1 / 2021-09-28
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 4.1.0 / 2021-08-31
 
 * [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).

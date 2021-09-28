@@ -125,7 +125,7 @@ datadog-snowflake==3.1.0
 datadog-solr==1.9.0
 datadog-sonarqube==1.4.0
 datadog-spark==2.0.0
-datadog-sqlserver==4.1.0
+datadog-sqlserver==4.2.0-beta.1
 datadog-squid==1.10.0
 datadog-ssh-check==2.0.0
 datadog-statsd==1.7.1
