@@ -1,6 +1,19 @@
 # CHANGELOG - mesos_master
 
-## 1.12.1 / 2021-03-07
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.13.1 / 2021-06-11 / Agent 7.30.0
+
+* [Fixed] Fix master leader detection after 307. See [#9500](https://github.com/DataDog/integrations-core/pull/9500).
+* [Added] Add runtime configuration validation. See [#8955](https://github.com/DataDog/integrations-core/pull/8955).
+
+## 1.13.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add log support. See [#8717](https://github.com/DataDog/integrations-core/pull/8717).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

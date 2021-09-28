@@ -15,12 +15,12 @@ from . import common
 
 
 def test_cisco(aggregator):
-    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG])
     api = Api(common.ACI_URLS, cisco_aci_check.http, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log)
     api.wrapper_factory = common.FakeSessionWrapper
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
 
-    cisco_aci_check.check(common.CONFIG)
+    cisco_aci_check.check({})
 
 
 @pytest.mark.parametrize(
@@ -93,3 +93,9 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
 
     actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
     assert expected_http_kwargs == actual_options
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, dd_environment):
+    with pytest.raises(Exception):
+        dd_agent_check(dd_environment)

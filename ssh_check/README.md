@@ -69,15 +69,12 @@ The SSH Check does not include any events.
 
 ### Service Checks
 
-**ssh.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot open an SSH session, otherwise `OK`.
-
-**sftp.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot open an SFTP session, otherwise `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -87,3 +84,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[9]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/assets/service_checks.json
