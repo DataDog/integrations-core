@@ -34,12 +34,14 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     hdfs_datanode_jmx_uri: str
