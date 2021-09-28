@@ -1,6 +1,15 @@
 # CHANGELOG - activemq
 
-## 2.0.0 / 2021-03-07
+## 2.1.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
+## 2.0.1 / 2021-05-28 / Agent 7.29.0
+
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+
+## 2.0.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 * [Changed] Add support for ActiveMQ Artemis. See [#8527](https://github.com/DataDog/integrations-core/pull/8527).

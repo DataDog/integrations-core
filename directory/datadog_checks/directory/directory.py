@@ -72,6 +72,7 @@ class DirectoryCheck(AgentCheck):
         directory_bytes = 0
         directory_files = 0
         max_filegauge_balance = self._config.max_filegauge_count
+        submit_histograms = self._config.submit_histograms
 
         # If we do not want to recursively search sub-directories only get the root.
         walker = walk(self._config.abs_directory, self._config.follow_symlinks)
@@ -133,7 +134,7 @@ class DirectoryCheck(AgentCheck):
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
                         )
                         adjust_max_filegauge = True
-                    else:
+                    elif submit_histograms:
                         self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
                         self.histogram(
                             'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=dirtags

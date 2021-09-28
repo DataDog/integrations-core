@@ -1,6 +1,10 @@
 # CHANGELOG - IBM Db2
 
-## 1.6.1 / 2021-03-07
+## 1.7.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Log message for invalid queries. See [#9797](https://github.com/DataDog/integrations-core/pull/9797).
+
+## 1.6.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

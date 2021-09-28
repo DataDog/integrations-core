@@ -244,8 +244,17 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
+
+# Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
+    'Seconds_Behind_Source': [  # for 8 onwards
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),  # for retrocompatibility
+    ],
+    'Seconds_Behind_Master': [  # before 8
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),
+    ],
     'Replicas_connected': [
         ('mysql.replication.slaves_connected', GAUGE),
         ('mysql.replication.replicas_connected', GAUGE),

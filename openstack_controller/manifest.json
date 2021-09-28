@@ -14,18 +14,24 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Openstack_controller Integration",
+  "public_title": "Openstack Controller",
   "categories": [
-    "cloud"
+    "cloud",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
   "integration_id": "openstack-controller",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "openstack"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

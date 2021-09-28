@@ -17,12 +17,14 @@ from .common import (
     CONFIG_DATA_METHOD,
     CONFIG_DONT_CHECK_EXP,
     CONFIG_EXPIRED_SSL,
-    CONFIG_HTTP_REDIRECTS,
+    CONFIG_HTTP_ALLOW_REDIRECTS,
+    CONFIG_HTTP_NO_REDIRECTS,
     CONFIG_SSL_ONLY,
     CONFIG_UNORMALIZED_INSTANCE_NAME,
     FAKE_CERT,
     HERE,
 )
+from .conftest import mock_get_ca_certs_path
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -185,13 +187,19 @@ def test_check_hostname_override(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_allow_redirects(aggregator, http_check):
+def test_check_allow_redirects(aggregator):
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
+        http_check = HTTPCheck('http_check', {}, CONFIG_HTTP_NO_REDIRECTS["instances"])
+        # Run the check for the one instance
+        http_check.check(CONFIG_HTTP_NO_REDIRECTS['instances'][0])
+        redirect_service_tags = ['url:https://valid.mock/301', 'instance:no_allow_redirect_service']
+        aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=redirect_service_tags, count=1)
 
-    # Run the check for the one instance
-    http_check.check(CONFIG_HTTP_REDIRECTS['instances'][0])
-
-    redirect_service_tags = ['url:https://valid.mock/301', 'instance:redirect_service']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=redirect_service_tags, count=1)
+        redirect_service_tags = ['url:https://valid.mock/301', 'instance:allow_redirect_service']
+        http_check.check(CONFIG_HTTP_ALLOW_REDIRECTS['instances'][0])
+        aggregator.assert_service_check(
+            HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=redirect_service_tags, count=1
+        )
 
 
 @pytest.mark.usefixtures("dd_environment")

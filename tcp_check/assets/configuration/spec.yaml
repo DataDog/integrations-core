@@ -37,4 +37,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: ip_cache_duration
+      value:
+        display_default: null
+        example: 120
+        type: number
+      description: |
+        Time in seconds to cache the IP address of the given host. If duration is not set,
+        the cache will expire only upon error.
     - template: instances/default
