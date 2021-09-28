@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
     device_exclude: Optional[Sequence[str]]
     device_include: Optional[Sequence[str]]
     device_tag_re: Optional[Mapping[str, Any]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     file_system_exclude: Optional[Sequence[str]]
     file_system_include: Optional[Sequence[str]]
@@ -49,6 +50,7 @@ class InstanceConfig(BaseModel):
     tag_by_label: Optional[bool]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
+    use_lsblk: Optional[bool]
     use_mount: bool
 
     @root_validator(pre=True)

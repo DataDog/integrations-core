@@ -25,7 +25,7 @@ def instance_all_partitions(field, value):
 
 
 def instance_blkid_cache_file(field, value):
-    return '/run/blkid/blkid.tab'
+    return get_default_field_value(field, value)
 
 
 def instance_create_mounts(field, value):
@@ -42,6 +42,10 @@ def instance_device_include(field, value):
 
 def instance_device_tag_re(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -98,3 +102,7 @@ def instance_tags(field, value):
 
 def instance_timeout(field, value):
     return 5
+
+
+def instance_use_lsblk(field, value):
+    return False
