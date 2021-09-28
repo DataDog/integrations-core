@@ -114,7 +114,7 @@ Need help? Contact [Datadog support][8].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/hudi/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
-[13]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
-[14]: https://github.com/apache/spark/tree/master/conf
+[13]: https://github.com/apache/flink/tree/release-1.11.4/flink-dist/src/main/flink-bin/conf
+[14]: https://github.com/apache/spark/tree/v3.1.2/conf
 [15]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 
