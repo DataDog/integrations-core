@@ -9,7 +9,6 @@ from six import raise_from
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
-from . import queries
 from .client import Client
 from .config import Config
 from .types import Instance
@@ -35,18 +34,7 @@ class VoltDBCheck(AgentCheck):
         self._query_manager = QueryManager(
             self,
             self._execute_query_raw,
-            queries=[
-                queries.CPUMetrics,
-                queries.MemoryMetrics,
-                queries.SnapshotStatusMetrics,
-                queries.CommandLogMetrics,
-                queries.ProcedureMetrics,
-                queries.LatencyMetrics,
-                queries.GCMetrics,
-                queries.IOStatsMetrics,
-                queries.TableMetrics,
-                queries.IndexMetrics,
-            ],
+            queries=self._config.queries,
             tags=self._config.tags,
         )
         self.check_initializations.append(self._query_manager.compile_queries)

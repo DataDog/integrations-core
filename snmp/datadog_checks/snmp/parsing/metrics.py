@@ -380,7 +380,7 @@ ParsedColumnMetricTag = NamedTuple(
 )
 
 ParsedIndexMetricTag = NamedTuple(
-    'ParsedTableMetricTag', [('index_tags', List[IndexTag]), ('index_mappings', Dict[int, dict])]
+    'ParsedIndexMetricTag', [('index_tags', List[IndexTag]), ('index_mappings', Dict[int, dict])]
 )
 
 ParsedTableMetricTag = Union[ParsedColumnMetricTag, ParsedIndexMetricTag]

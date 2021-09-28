@@ -1,0 +1,764 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "Root profile schema",
+    "description": "Root schema for validating SNMP profiles",
+    "default": {},
+    "examples": [
+        {
+            "extends": [
+                "_base.yaml",
+                "_generic-ip.yaml"
+            ],
+            "device": {
+                "vendor": "f5"
+            },
+            "sysobjectid": "1.3.6.1.4.1.3375.2.1.3.4.*",
+            "metrics": [
+                {
+                    "MIB": "F5-BIGIP-SYSTEM-MIB",
+                    "forced_type": "gauge",
+                    "symbol": {
+                        "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
+                        "name": "sysStatMemoryTotal"
+                    }
+                },
+                {
+                    "MIB": "F5-BIGIP-LOCAL-MIB",
+                    "table": {
+                        "OID": "1.3.6.1.4.1.3375.2.2.10.1.2",
+                        "name": "ltmVirtualServTable"
+                    },
+                    "symbols": [
+                        {
+                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.9",
+                            "name": "ltmVirtualServEnabled"
+                        },
+                        {
+                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.10",
+                            "name": "ltmVirtualServConnLimit"
+                        }
+                    ],
+                    "metric_tags": [
+                        {
+                            "tag": "server",
+                            "column": {
+                                "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                "name": "ltmVirtualServName"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "metric_tags": [
+                {
+                    "OID": "1.3.6.1.2.1.1.5.0",
+                    "symbol": "sysName",
+                    "tag": "snmp_host"
+                }
+            ]
+        }
+    ],
+    "required": [],
+    "properties": {
+        "extends": {
+            "$id": "#/properties/extends",
+            "type": "array",
+            "title": "The extends schema",
+            "description": "Optional list of base profiles to extend the current profile",
+            "default": [],
+            "examples": [
+                [
+                    "_base.yaml",
+                    "_generic-ip.yaml"
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/extends/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/extends/items/anyOf/0",
+                        "type": "string",
+                        "title": "Base profile name",
+                        "description": "Base profiles to extend from",
+                        "default": "",
+                        "examples": "_base.yaml"
+                    }
+                ]
+            }
+        },
+        "device": {
+            "$id": "#/properties/device",
+            "type": "object",
+            "title": "Device-specific tag",
+            "description": "Adds tag for the device vendor",
+            "default": {},
+            "examples": [
+                {
+                    "vendor": "f5"
+                }
+            ],
+            "required": [
+                "vendor"
+            ],
+            "properties": {
+                "vendor": {
+                    "$id": "#/properties/device/properties/vendor",
+                    "type": "string",
+                    "title": "Vendor tag",
+                    "description": "Tag device by vendor",
+                    "default": "",
+                    "examples": [
+                        "f5"
+                    ]
+                }
+            },
+            "additionalProperties": true
+        },
+        "sysobjectid": {
+            "$id": "#/properties/sysobjectid",
+            "type": [
+                "array",
+                "string"
+            ],
+            "title": "The sysobjectid schema",
+            "description": "List of sysobjectids to collect metrics from",
+            "default": "",
+            "examples": [
+                "1.3.6.1.4.1.3375.2.1.3.4.*"
+            ]
+        },
+        "metrics": {
+            "$id": "#/properties/metrics",
+            "type": "array",
+            "title": "Metrics",
+            "description": "List of metrics to collect",
+            "default": [],
+            "examples": [
+                [
+                    {
+                        "MIB": "F5-BIGIP-SYSTEM-MIB",
+                        "forced_type": "gauge",
+                        "symbol": {
+                            "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
+                            "name": "sysStatMemoryTotal"
+                        }
+                    },
+                    {
+                        "MIB": "F5-BIGIP-LOCAL-MIB",
+                        "table": {
+                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2",
+                            "name": "ltmVirtualServTable"
+                        },
+                        "symbols": [
+                            {
+                                "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.9",
+                                "name": "ltmVirtualServEnabled"
+                            },
+                            {
+                                "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.10",
+                                "name": "ltmVirtualServConnLimit"
+                            }
+                        ],
+                        "metric_tags": [
+                            {
+                                "tag": "server",
+                                "column": {
+                                    "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                    "name": "ltmVirtualServName"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/metrics/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/metrics/items/anyOf/0",
+                        "type": "object",
+                        "title": "Scalar metric",
+                        "description": "Legacy configuration for scalar metric",
+                        "default": {},
+                        "examples": [
+                            {
+                                "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
+                                "name": "sysStatMemoryTotal"
+                            }
+                        ],
+                        "required": [
+                            "OID",
+                            "name"
+                        ],
+                        "properties": {
+                            "OID": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/OID",
+                                "type": "string",
+                                "title": "OID",
+                                "description": "OID to collect metrics from",
+                                "default": "",
+                                "examples": [
+                                    "1.3.6.1.4.1.3375.2.1.1.2.1.44.0"
+                                ]
+                            },
+                            "MIB": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/MIB",
+                                "type": "string",
+                                "title": "MIB",
+                                "description": "MIB to collect metrics from",
+                                "default": "",
+                                "examples": [
+                                    "MIB: NETAPP-MIB"
+                                ]
+                            },
+                            "name": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/symbol/properties/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Name of the metric",
+                                "default": "",
+                                "examples": [
+                                    "sysStatMemoryTotal"
+                                ]
+                            },
+                            "forced_type": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/forced_type",
+                                "type": "string",
+                                "title": "Forced type",
+                                "description": "Force the metric to be a given type",
+                                "default": "",
+                                "examples": [
+                                    "gauge"
+                                ]
+                            },
+                            "options": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/options",
+                                "type": "object",
+                                "title": "Options",
+                                "description": "Options for placement and metric suffix",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "placement": "8",
+                                        "metric_suffix": "AVRTrimActive"
+                                    }
+                                ],
+                                "required": [
+                                    "placement",
+                                    "metric_suffix"
+                                ]
+                            },
+                            "properties": {
+                                "placement": {
+                                    "$id": "#/properties/metrics/items/anyOf/0/properties/options/placement",
+                                    "type": "string",
+                                    "title": "Placement",
+                                    "description": "placement",
+                                    "default": "",
+                                    "examples": [
+                                        "8"
+                                    ]
+                                }
+                            },
+                            "metric suffix": {
+                                "$id": "#/properties/metrics/items/anyOf/0/properties/options/metric_suffix",
+                                "type": "string",
+                                "title": "metric suffix",
+                                "description": "suffix to be added to metric",
+                                "default": "",
+                                "examples": [
+                                    "AVRTrimActive"
+                                ]
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$id": "#/properties/metrics/items/anyOf/1",
+                        "type": "object",
+                        "title": "Scalar metric",
+                        "description": "Collect a scalar metric",
+                        "default": {},
+                        "examples": [
+                            {
+                                "MIB": "EXAMPLE-MIB",
+                                "symbol": {
+                                    "OID": "1.3.5.1.2.1.7.1",
+                                    "name": "exampleSymbol"
+                                }
+                            }
+                        ],
+                        "required": [
+                            "symbol"
+                        ],
+                        "properties": {
+                            "MIB": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/MIB",
+                                "type": "string",
+                                "title": "MIB",
+                                "description": "Name of the MIB where the OID is defined",
+                                "default": "",
+                                "examples": [
+                                    "F5-BIGIP-SYSTEM-MIB"
+                                ]
+                            },
+                            "forced_type": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/forced_type",
+                                "type": "string",
+                                "title": "Forced type",
+                                "description": "Force the metric to have a certain type",
+                                "default": "",
+                                "examples": [
+                                    "gauge"
+                                ]
+                            },
+                            "options": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/options",
+                                "type": "object",
+                                "title": "Options",
+                                "description": "Options for placement and metric suffix",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "placement": "8",
+                                        "metric_suffix": "AVRTrimActive"
+                                    }
+                                ],
+                                "required": [
+                                    "placement",
+                                    "metric_suffix"
+                                ]
+                            },
+                            "symbol": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/symbol",
+                                "type": "object",
+                                "title": "Symbol",
+                                "description": "Scalar symbol",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "OID": "1.3.6.1.4.1.3375.2.1.1.2.1.44.0",
+                                        "name": "sysStatMemoryTotal"
+                                    }
+                                ],
+                                "required": [
+                                    "OID",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "OID": {
+                                        "$id": "#/properties/metrics/items/anyOf/1/properties/symbol/properties/OID",
+                                        "type": "string",
+                                        "title": "OID",
+                                        "description": "OID to collect metrics from",
+                                        "default": "",
+                                        "examples": [
+                                            "1.3.6.1.4.1.3375.2.1.1.2.1.44.0"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$id": "#/properties/metrics/items/anyOf/1/properties/symbol/properties/name",
+                                        "type": "string",
+                                        "title": "Name",
+                                        "description": "Name to be used for the metric",
+                                        "default": "",
+                                        "examples": [
+                                            "sysStatMemoryTotal"
+                                        ]
+                                    },
+                                    "extract_value": {
+                                        "$id": "#/properties/metrics/items/anyOf/1/properties/symbol/properties/extract_value",
+                                        "type": "string",
+                                        "title": "Extract Value",
+                                        "description": "Regex to extract a metric value",
+                                        "default": "",
+                                        "examples": "'(\\d+)C'"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$id": "#/properties/metrics/items/anyOf/1",
+                        "type": "object",
+                        "title": "Table metrics",
+                        "description": "Collect metrics from a table.",
+                        "default": {},
+                        "examples": [
+                            {
+                                "MIB": "F5-BIGIP-LOCAL-MIB",
+                                "table": {
+                                    "OID": "1.3.6.1.4.1.3375.2.2.10.1.2",
+                                    "name": "ltmVirtualServTable"
+                                },
+                                "symbols": [
+                                    {
+                                        "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.9",
+                                        "name": "ltmVirtualServEnabled"
+                                    },
+                                    {
+                                        "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.10",
+                                        "name": "ltmVirtualServConnLimit"
+                                    }
+                                ],
+                                "metric_tags": [
+                                    {
+                                        "tag": "server",
+                                        "column": {
+                                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                            "name": "ltmVirtualServName"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "required": [
+                            "MIB",
+                            "table",
+                            "symbols",
+                            "metric_tags"
+                        ],
+                        "properties": {
+                            "MIB": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/MIB",
+                                "type": "string",
+                                "title": "MIB",
+                                "description": "MIB to collect metrics from",
+                                "default": "",
+                                "examples": [
+                                    "F5-BIGIP-LOCAL-MIB"
+                                ]
+                            },
+                            "table": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/table",
+                                "type": "object",
+                                "title": "Table",
+                                "description": "Table to collect metrics from.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "OID": "1.3.6.1.4.1.3375.2.2.10.1.2",
+                                        "name": "ltmVirtualServTable"
+                                    }
+                                ],
+                                "required": [
+                                    "OID",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "OID": {
+                                        "$id": "#/properties/metrics/items/anyOf/1/properties/table/properties/OID",
+                                        "type": "string",
+                                        "title": "OID",
+                                        "description": "OID to collect metrics from",
+                                        "default": "",
+                                        "examples": [
+                                            "1.3.6.1.4.1.3375.2.2.10.1.2"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$id": "#/properties/metrics/items/anyOf/1/properties/table/properties/name",
+                                        "type": "string",
+                                        "title": "Name",
+                                        "description": "Human-readable name",
+                                        "default": "",
+                                        "examples": [
+                                            "ltmVirtualServTable"
+                                        ]
+                                    }
+                                },
+                                "additionalProperties": true
+                            },
+                            "symbols": {
+                                "$id": "#/properties/metrics/items/anyOf/1/properties/symbols",
+                                "type": "array",
+                                "title": "Symbols",
+                                "description": "Symbols in the table",
+                                "default": [],
+                                "examples": [
+                                    [
+                                        {
+                                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.9",
+                                            "name": "ltmVirtualServEnabled"
+                                        },
+                                        {
+                                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.10",
+                                            "name": "ltmVirtualServConnLimit"
+                                        }
+                                    ]
+                                ],
+                                "additionalItems": true,
+                                "items": {
+                                    "$id": "#/properties/metrics/items/anyOf/1/properties/symbols/items",
+                                    "anyOf": [
+                                        {
+                                            "$id": "#/properties/metrics/items/anyOf/1/properties/symbols/items/anyOf/0",
+                                            "type": "object",
+                                            "title": "Items",
+                                            "description": "Table elements to collect metrics from",
+                                            "default": {},
+                                            "examples": [
+                                                {
+                                                    "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.9",
+                                                    "name": "ltmVirtualServEnabled"
+                                                }
+                                            ],
+                                            "required": [
+                                                "OID",
+                                                "name"
+                                            ],
+                                            "properties": {
+                                                "OID": {
+                                                    "$id": "#/properties/metrics/items/anyOf/1/properties/symbols/items/anyOf/0/properties/OID",
+                                                    "type": "string",
+                                                    "title": "OID",
+                                                    "description": "OID to collect metrics from",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "1.3.6.1.4.1.3375.2.2.10.1.2.1.9"
+                                                    ]
+                                                },
+                                                "name": {
+                                                    "$id": "#/properties/metrics/items/anyOf/1/properties/symbols/items/anyOf/0/properties/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Human-readable name",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "ltmVirtualServEnabled"
+                                                    ]
+                                                }
+                                            },
+                                            "additionalProperties": true
+                                        }
+                                    ]
+                                }
+                            },
+                            "metric_tags": {
+                                "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags",
+                                "type": "array",
+                                "title": "Metric tags",
+                                "description": "Tags to be applied to the metrics.",
+                                "default": [],
+                                "examples": [
+                                    [
+                                        {
+                                            "tag": "server",
+                                            "column": {
+                                                "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                                "name": "ltmVirtualServName"
+                                            }
+                                        }
+                                    ]
+                                ],
+                                "additionalItems": true,
+                                "items": {
+                                    "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags/items",
+                                    "anyOf": [
+                                        {
+                                            "$id": "#/properties/metrics/items/anyOf/1/properties/metric_tags/items/anyOf/0",
+                                            "type": "object",
+                                            "title": "The first anyOf schema",
+                                            "description": "An explanation about the purpose of this instance.",
+                                            "default": {},
+                                            "examples": [
+                                                {
+                                                    "tag": "server",
+                                                    "column": {
+                                                        "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                                        "name": "ltmVirtualServName"
+                                                    }
+                                                }
+                                            ],
+                                            "required": [
+                                                "tag"
+                                            ],
+                                            "properties": {
+                                                "tag": {
+                                                    "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags/items/anyOf/0/properties/tag",
+                                                    "type": "string",
+                                                    "title": "Tag",
+                                                    "description": "Tag to be applied to the metrics in the table",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "server"
+                                                    ]
+                                                },
+                                                "column": {
+                                                    "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags/items/anyOf/0/properties/column",
+                                                    "type": "object",
+                                                    "title": "Column",
+                                                    "description": "Column to collect metrics from",
+                                                    "default": {},
+                                                    "examples": [
+                                                        {
+                                                            "OID": "1.3.6.1.4.1.3375.2.2.10.1.2.1.1",
+                                                            "name": "ltmVirtualServName"
+                                                        }
+                                                    ],
+                                                    "required": [
+                                                        "OID",
+                                                        "name"
+                                                    ],
+                                                    "properties": {
+                                                        "OID": {
+                                                            "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags/items/anyOf/0/properties/column/properties/OID",
+                                                            "type": "string",
+                                                            "title": "OID",
+                                                            "description": "OID to collect metrics from",
+                                                            "default": "",
+                                                            "examples": [
+                                                                "1.3.6.1.4.1.3375.2.2.10.1.2.1.1"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "$id": "#/properties/metrics/items/anyOf/2/properties/metric_tags/items/anyOf/0/properties/column/properties/name",
+                                                            "type": "string",
+                                                            "title": "Name",
+                                                            "description": "Human-readable name",
+                                                            "default": "",
+                                                            "examples": [
+                                                                "ltmVirtualServName"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "additionalProperties": true
+                                                }
+                                            },
+                                            "additionalProperties": true
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": true
+                    }
+                ]
+            }
+        },
+        "metric_tags": {
+            "$id": "#/properties/metric_tags",
+            "type": "array",
+            "title": "Metric tags",
+            "description": "Tags to apply to metrics",
+            "default": [],
+            "examples": [
+                [
+                    {
+                        "OID": "1.3.6.1.2.1.1.5.0",
+                        "symbol": "sysName",
+                        "tag": "snmp_host"
+                    }
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/metric_tags/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/metric_tags/items/anyOf/3",
+                        "type": "object",
+                        "title": "Items",
+                        "description": "Correlate tags with metrics",
+                        "default": {},
+                        "examples": [
+                            {
+                                "OID": "1.3.6.1.2.1.1.5.0",
+                                "symbol": "sysName",
+                                "tag": "snmp_host"
+                            },
+                            {
+                                "OID": "1.3.6.1.2.1.1.5.0",
+                                "symbol": "sysName",
+                                "match": "(.*)-(.*)",
+                                "tags": {
+                                    "device_type": "\\1",
+                                    "host": "\\2"
+                                }
+                            }
+                        ],
+                        "required": [],
+                        "properties": {
+                            "OID": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/OID",
+                                "type": "string",
+                                "title": "OID",
+                                "description": "OID to collect metrics from",
+                                "default": "",
+                                "examples": [
+                                    "1.3.6.1.2.1.1.5.0"
+                                ]
+                            },
+                            "name": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Human-readable name",
+                                "default": "",
+                                "examples": [
+                                    "ipIfStatsHCOutMcastOctets"
+                                ]
+                            },
+                            "symbol": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/symbol",
+                                "type": "string",
+                                "title": "Symbol",
+                                "description": "Symbol of the table",
+                                "default": "",
+                                "examples": [
+                                    "sysName"
+                                ]
+                            },
+                            "tag": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/tag",
+                                "type": "string",
+                                "title": "Tag",
+                                "description": "Tag to apply to metrics",
+                                "default": "",
+                                "examples": [
+                                    "snmp_host"
+                                ]
+                            },
+                            "match": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/match",
+                                "type": "string",
+                                "title": "Match",
+                                "description": "Regex matching values to extract",
+                                "default": "",
+                                "examples": [
+                                    "(.*)-(.*)"
+                                ]
+                            },
+                            "index": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/index",
+                                "type": "string",
+                                "title": "Index",
+                                "description": "Index",
+                                "default": "",
+                                "examples": [
+                                    "1"
+                                ]
+                            },
+                            "symbols": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/symbols",
+                                "type": "array"
+                            },
+                            "table": {
+                                "$id": "#/properties/metric_tags/items/anyOf/3/properties/table",
+                                "type": "array"
+                            }
+                        },
+                        "additionalProperties": true
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": true
+}

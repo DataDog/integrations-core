@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.dev.docker import using_windows_containers
 from datadog_checks.tcp_check import TCPCheck
 
 CHECK_NAME = "tcp_check"
@@ -8,6 +9,8 @@ CHECK_NAME = "tcp_check"
 INSTANCE = {'host': 'datadoghq.com', 'port': 80, 'timeout': 1.5, 'name': 'UpService', 'tags': ["foo:bar"]}
 
 INSTANCE_KO = {'host': '127.0.0.1', 'port': 65530, 'timeout': 1.5, 'name': 'DownService', 'tags': ["foo:bar"]}
+
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
 
 
 def _test_check(aggregator):
