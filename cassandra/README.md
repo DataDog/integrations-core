@@ -28,13 +28,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -105,8 +105,7 @@ The Cassandra check does not include any events.
 
 ### Service Checks
 
-**cassandra.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance, otherwise returns `OK`.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -133,3 +132,4 @@ Need help? Contact [Datadog support][4].
 [13]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [14]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [15]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[16]: https://github.com/DataDog/integrations-core/blob/master/cassandra/assets/service_checks.json

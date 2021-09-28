@@ -6,10 +6,11 @@ import os
 import re
 
 import mock
+import pytest
 
 from datadog_checks.dev.utils import read_file
 
-from .common import FIXTURES_PATH
+from .common import FIXTURES_PATH, USING_LATEST
 
 
 def mocked_perform_request(*args, **kwargs):
@@ -59,3 +60,6 @@ def mocked_perform_request(*args, **kwargs):
         response.json.return_value = ''
 
     return response
+
+
+requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')

@@ -1,0 +1,208 @@
+name: Openstack_controller
+
+files:
+- name: openstack_controller.yaml
+
+  options:
+    - template: init_config
+      options:
+        - template: init_config/http
+          overrides:
+            timeout.hidden: true
+        - template: init_config/default
+          overrides:
+            service.hidden: true
+    - template: instances
+      options:
+        - name: name
+          required: true
+          description: |
+            Unique identifier for this instance.
+          value:
+            example: <INSTANCE_NAME>
+            type: string
+        - name: user
+          required: true
+          description: |
+           Password authentication is the only auth method supported
+           User expects username, password, and user domain id
+           `user` should resolve to a structure like
+           {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+           The check uses the Unscoped token method to collect information about all available projects to the user.
+          value:
+            example:
+              password: <PASSWORD>
+              name: <USER_NAME>
+              domain:
+                id: <DOMAIN_ID>
+            type: object
+        - name: whitelist_project_names
+          description: |
+           IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
+           Regex expressions for the project names are supported.
+           Blacklist takes precedence over whitelist in case of overlap.
+          value:
+            example:
+              - <PROJECT_NAME>
+              - <PROJECT_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
+        - name: blacklist_project_names
+          description: |
+           IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
+           Regex expressions for the project names are supported.
+           Blacklist takes precedence over whitelist in case of overlap.
+          value:
+            example:
+              - <PROJECT_NAME>
+              - <PROJECT_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
+        - name: exclude_server_ids
+          description: |
+           IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
+           Regex expressions for the server IDs are supported.
+          value:
+            example:
+              - <SERVER_ID>
+              - <SERVER_ID_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
+        - name: exclude_network_ids
+          description: |
+           IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
+           neutron:get_networks operation)
+           Regex expressions for the network IDs to exclude are supported.
+          value:
+            example:
+             - <NETWORK_ID>
+             - <NETWORK_ID_PREFIX>*
+            display_default: []
+            type: array
+            items:
+              type: string
+        - name: use_agent_proxy
+          description: |
+            Whether the dd-agent proxy should also be used for openstack API requests (if set).
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: paginated_limit
+          description: |
+            paginated_limit sets the number of items some api calls should return.
+          value:
+            example: 1000
+            display_default: 1000
+            type: integer
+        - name: openstack_config_file_path
+          description: |
+            Absolute path of the configuration file for the connection to openstack with openstacksdk.
+          value:
+            example: <PATH_TO_YAML_FILE>
+            type: string
+        - name: openstack_cloud_name
+          description: |
+           Name of the cloud configuration to use.
+           If this parameter is specified, the connection to Openstack only uses the configuration file specified in
+           openstack_config_file_path, or at the default location:
+           ~/.config/openstack or /etc/openstack
+          value:
+            example: <CLOUD_NAME>
+            type: string
+        - name: keystone_server_url
+          description: |
+           URL of your identity server. NOTE: The server must support Identity API v3.
+           This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
+          value:
+            example: https://<KEYSTONE_ENDPOINT>:<PORT>/
+            type: string
+            display_default: null
+        - name: collect_hypervisor_load
+          description: |
+           Collects hypervisor_load.1/5/15 for each hypervisor
+           Disabled by default to increase performance of the check.
+           With this enabled there is an extra N requests per check run (N = # of hypervisors)
+           If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: collect_hypervisor_metrics
+          description: |
+           Collects hypervisor metrics (including hypervisor_load).
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: collect_project_metrics
+          description: |
+           The admin user defined for Datadog starts with a "default" project.
+           If this option is disabled, project limits metrics are only collected from projects the
+           datadog defined user has access to view.
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: collect_network_metrics
+          description: |
+           Collects network metrics.
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: collect_server_flavor_metrics
+          description: |
+           Collect server flavor metrics.
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: collect_server_diagnostic_metrics
+          description: |
+           Collect server diagnostic metrics. Enabling this may result in performance decrease.
+           This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
+          value:
+            example: true
+            display_default: true
+            type: boolean
+        - name: use_shortname
+          description: |
+           In some OpenStack environments, the hostname registered to Nova is the shortname.
+           Enabling this enforces the check to split the hostname up to the first period when
+           comparing against nova responses. Only affects aggregate tagging.
+          value:
+            example: false
+            display_default: false
+            type: boolean
+        - template: instances/default
+          overrides:
+            service.hidden: true
+            min_collection_interval.hidden: true
+            empty_default_hostname.hidden: true
+        - template: instances/http
+          overrides:
+            tls_use_host_header.hidden: true
+            auth_type.hidden: true
+            use_legacy_auth_encoding.hidden: true
+            auth_token.hidden: true
+            aws_region.hidden: true
+            aws_host.hidden: true
+            aws_service.hidden: true
+            extra_headers.hidden: true
+    - template: logs
+      example:
+      - type: file
+        path: /var/log/apache2/*.log
+        source: openstack
+      - type: file
+        path: /var/log/libvirt/*.log
+        source: openstack
+
+

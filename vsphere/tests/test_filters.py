@@ -90,7 +90,7 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
 
     formatted_filters = check._config.resource_filters
 
-    config = VSphereConfig(realtime_instance, MagicMock())
+    config = VSphereConfig(realtime_instance, {}, MagicMock())
     infra = MockedAPI(config).get_infrastructure()
     resources = [m for m in infra if m.__class__ in (vim.VirtualMachine, vim.HostSystem)]
     VM2_1 = next(r for r in resources if infra.get(r).get('name') == 'VM2-1')

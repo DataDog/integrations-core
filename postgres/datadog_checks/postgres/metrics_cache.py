@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
-    """ Mantains a cache of metrics to collect """
+    """ Maintains a cache of metrics to collect """
 
     def __init__(self, config):
         self.config = config
@@ -82,17 +82,16 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname "
-            "WHERE psd.datname not ilike 'template%%' "
-            "  AND psd.datname not ilike 'rdsadmin' "
-            "  AND psd.datname not ilike 'azure_maintenance' ",
+            "JOIN pg_database pd ON psd.datname = pd.datname",
             'relation': False,
         }
 
-        if not self.config.collect_default_db:
-            res["query"] += "  AND psd.datname not ilike 'postgres'"
+        res["query"] += " WHERE " + " AND ".join(
+            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+        )
+
         if self.config.dbstrict:
-            res["query"] += "  AND psd.datname in('{}')".format(self.config.dbname)
+            res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
 
         return res
 
@@ -160,7 +159,7 @@ class PostgresMetricsCache:
             return self.replication_metrics
 
         if is_aurora:
-            logger.debug("Detected Aurora {}. Won't collect replication metrics", version)
+            logger.debug("Detected Aurora %s. Won't collect replication metrics", version)
             self.replication_metrics = {}
         elif version >= V10:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
@@ -178,7 +177,7 @@ class PostgresMetricsCache:
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         metrics_data = self.activity_metrics
 
