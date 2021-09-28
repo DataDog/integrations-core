@@ -51,6 +51,8 @@ resources:
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
+    agent_image_win: ${{ parameters.agent_windows_image }}
+    agent_image_win_py2: ${{ parameters.agent_windows_image_py2 }}
     job_name: Agent
     run_py2_tests: ${{ parameters.run_py2_tests }}
     run_py3_tests: ${{ parameters.run_py3_tests }}
