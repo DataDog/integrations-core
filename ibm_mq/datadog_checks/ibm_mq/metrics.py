@@ -4,6 +4,10 @@
 
 from __future__ import division
 
+from datadog_checks.base.utils.common import ensure_unicode
+
+from .utils import calculate_elapsed_time
+
 try:
     import pymqi
 except ImportError:
@@ -54,6 +58,8 @@ def pcf_metrics():
     return {
         'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
         'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+        'last_put_time': get_last_put_time,
+        'last_get_time': get_last_get_time,
     }
 
 
@@ -158,3 +164,23 @@ def depth_percent(queue_info):
     depth_as_percent = depth_fraction * 100
 
     return depth_as_percent
+
+
+def get_last_put_time(qm_timezone, queue_info):
+    last_put_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_DATE)
+    last_put_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_TIME)
+
+    if not last_put_datestamp or not last_put_timestamp:
+        return
+
+    return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp), qm_timezone)
+
+
+def get_last_get_time(qm_timezone, queue_info):
+    last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE)
+    last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME)
+
+    if not last_get_datestamp or not last_get_timestamp:
+        return
+
+    return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp), qm_timezone)

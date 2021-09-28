@@ -2,16 +2,18 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import logging
 from copy import deepcopy
 
 import mock
 import pytest
 from mock import ANY
+from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.api import AbstractApi
-from datadog_checks.openstack_controller.exceptions import IncompleteConfig
+from datadog_checks.openstack_controller.api import AbstractApi, Authenticator, SimpleApi
+from datadog_checks.openstack_controller.exceptions import IncompleteConfig, KeystoneUnreachable
 
 from . import common
 
@@ -26,6 +28,28 @@ def test_parse_uptime_string(aggregator):
     response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     uptime_parsed = check._parse_uptime_string(response)
     assert uptime_parsed == [0.04, 0.14, 0.19]
+
+
+def test_api_error_log_no_password(check, instance, caplog):
+
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(KeystoneUnreachable):
+            with mock.patch('datadog_checks.base.utils.http.requests.post') as req:
+                req.side_effect = HTTPError(mock.Mock(status=404), 'not found')
+                check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
+                identity = Authenticator._get_user_identity(instance.get("user"))
+                Authenticator._post_auth_token(
+                    check._api.logger, instance.get("keystone_server_url"), identity, check.http
+                )
+
+    expected_pass = "'password': '********'"
+
+    for _, level, message in caplog.record_tuples:
+        # make sure password is hidden and actual password is not in the log
+        if level == logging.DEBUG and expected_pass in message and instance.get("user").get("password") not in message:
+            break
+    else:
+        raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_pass))
 
 
 @mock.patch(

@@ -5,12 +5,14 @@ import mock
 from six import iteritems
 
 
-def test_init(check):
+def test_init(check, redis_instance):
+    check = check(redis_instance)
     assert check.connections == {}
     assert check.last_timestamp_seen == 0
 
 
-def test__get_conn(check):
+def test__get_conn(check, redis_instance):
+    check = check(redis_instance)
     instance = {}
 
     # create a connection
@@ -31,7 +33,8 @@ def test__get_conn(check):
     assert conn2 != conn1
 
 
-def test__check_command_stats_host(check, aggregator):
+def test__check_command_stats_host(check, aggregator, redis_instance):
+    check = check(redis_instance)
     conn = mock.MagicMock()
     conn.info.return_value = {
         # this is from a real use case in Redis >5.0 where this line can be
