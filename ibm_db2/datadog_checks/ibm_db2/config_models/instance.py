@@ -29,6 +29,7 @@ class InstanceConfig(BaseModel):
 
     custom_queries: Optional[Sequence[CustomQuery]]
     db: str
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     min_collection_interval: Optional[float]
