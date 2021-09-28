@@ -20,6 +20,9 @@ MAX_CONFIG_TTL = 300
 # cap on distinct Consul ServiceIDs to interrogate
 MAX_SERVICES = 50
 
+# Increase the number of threads to collect consul services checks
+THREADS_COUNT = 1
+
 STATUS_SC = {
     'up': AgentCheck.OK,
     'passing': AgentCheck.OK,
