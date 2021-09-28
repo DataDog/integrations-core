@@ -25,7 +25,11 @@ def instance_custom_queries(field, value):
 
 
 def instance_db(field, value):
-    return get_default_field_value(field, value)
+    return 'default'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -64,5 +68,5 @@ def instance_use_global_custom_queries(field, value):
     return 'true'
 
 
-def instance_user(field, value):
+def instance_username(field, value):
     return 'default'

@@ -30,6 +30,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[int]
     custom_queries: Optional[Sequence[CustomQuery]]
     db: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     password: Optional[str]
@@ -40,7 +41,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     tls_verify: Optional[bool]
     use_global_custom_queries: Optional[str]
-    user: Optional[str]
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
