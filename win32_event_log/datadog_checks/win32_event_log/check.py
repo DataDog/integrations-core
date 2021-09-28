@@ -11,23 +11,35 @@ import win32security
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
 
 from .filters import construct_xpath_query
 from .legacy import Win32EventLogWMI
 
+if PY2:
+    ConfigMixin = object
+else:
+    from .config_models import ConfigMixin
 
-class Win32EventLogCheck(AgentCheck):
+
+class Win32EventLogCheck(AgentCheck, ConfigMixin):
     # The lower cased version of the `API SOURCE ATTRIBUTE` column from the table located here:
     # https://docs.datadoghq.com/integrations/faq/list-of-api-source-attribute-value/
     SOURCE_TYPE_NAME = 'event viewer'
 
+    # NOTE: Keep this in sync with config spec:
+    # instances.start.value.enum
+    #
     # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_subscribe_flags
     START_OPTIONS = {
         'now': win32evtlog.EvtSubscribeToFutureEvents,
         'oldest': win32evtlog.EvtSubscribeStartAtOldestRecord,
     }
 
+    # NOTE: Keep this in sync with config spec:
+    # instances.auth_type.value.enum
+    #
     # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_rpc_login_flags
     LOGIN_FLAGS = {
         'default': win32evtlog.EvtRpcLoginAuthDefault,
@@ -65,12 +77,6 @@ class Win32EventLogCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Win32EventLogCheck, self).__init__(name, init_config, instances)
 
-        # Event channel or log file with which to subscribe
-        self._path = self.instance.get('path', '')
-
-        # The point at which to start the event subscription
-        self._subscription_start = self.instance.get('start', 'now')
-
         # Raw user-defined query or one we construct based on filters
         self._query = None
 
@@ -89,16 +95,6 @@ class Win32EventLogCheck(AgentCheck):
 
         # Session used for remote connections, or None if local connection
         self._session = None
-
-        # Connection options
-        self._timeout = int(float(self.instance.get('timeout', 5)) * 1000)
-        self._payload_size = int(self.instance.get('payload_size', 10))
-
-        # How often to update the cached bookmark
-        self._bookmark_frequency = int(self.instance.get('bookmark_frequency', self._payload_size))
-
-        # Custom tags to add to all events
-        self._tags = list(self.instance.get('tags', []))
 
         # Whether or not to interpret messages for unknown sources
         self._interpret_messages = is_affirmative(
@@ -143,7 +139,7 @@ class Win32EventLogCheck(AgentCheck):
             event_payload = {
                 'source_type_name': self.SOURCE_TYPE_NAME,
                 'priority': self._event_priority,
-                'tags': list(self._tags),
+                'tags': list(self.config.tags),
             }
 
             # As seen in every collector, before using members of the enum you need to check for existence. See:
@@ -185,7 +181,7 @@ class Win32EventLogCheck(AgentCheck):
             return
 
         event_payload['aggregation_key'] = value
-        event_payload['msg_title'] = '{}/{}'.format(self._path, value)
+        event_payload['msg_title'] = '{}/{}'.format(self.config.path, value)
 
         message = None
 
@@ -272,7 +268,7 @@ class Win32EventLogCheck(AgentCheck):
         for event in self.poll_events():
             events_since_last_bookmark += 1
 
-            if events_since_last_bookmark >= self._bookmark_frequency:
+            if events_since_last_bookmark >= self.config.bookmark_frequency:
                 events_since_last_bookmark = 0
                 self.update_bookmark(event)
 
@@ -295,7 +291,7 @@ class Win32EventLogCheck(AgentCheck):
                 # an empty tuple instead https://github.com/mhammond/pywin32/pull/1648
                 # For the moment is logged as a debug line.
                 try:
-                    events = win32evtlog.EvtNext(self._subscription, self._payload_size)
+                    events = win32evtlog.EvtNext(self._subscription, self.config.payload_size)
                 except pywintypes.error as e:
                     self.log_windows_error(e)
                     break
@@ -308,7 +304,7 @@ class Win32EventLogCheck(AgentCheck):
 
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobjectex
             # http://timgolden.me.uk/pywin32-docs/win32event__WaitForSingleObjectEx_meth.html
-            wait_signal = win32event.WaitForSingleObjectEx(self._event_handle, self._timeout, True)
+            wait_signal = win32event.WaitForSingleObjectEx(self._event_handle, self.config.timeout, True)
 
             # No more events, end check run
             if wait_signal != win32con.WAIT_OBJECT_0:
@@ -328,15 +324,6 @@ class Win32EventLogCheck(AgentCheck):
         self.write_persistent_cache('bookmark', bookmark_xml)
 
     def parse_config(self):
-        if not self._path:
-            raise ConfigurationError('You must select a `path`.')
-
-        if self._subscription_start not in self.START_OPTIONS:
-            raise ConfigurationError('Option `start` must be one of: {}'.format(', '.join(sorted(self.START_OPTIONS))))
-
-        if self._event_priority not in ('normal', 'low'):
-            raise ConfigurationError('Option `event_priority` can only be either `normal` or `low`.')
-
         for option in ('included_messages', 'excluded_messages'):
             if option not in self.instance:
                 continue
@@ -347,25 +334,17 @@ class Win32EventLogCheck(AgentCheck):
 
             setattr(self, '_{}'.format(option), pattern)
 
-        password = self.instance.get('password')
+        password = self.config.password
         if password:
             self.register_secret(password)
 
     def construct_query(self):
-        query = self.instance.get('query')
+        query = self.config.query
         if query:
             self._query = query
             return
 
-        filters = self.instance.get('filters', {})
-        if not isinstance(filters, dict):
-            raise ConfigurationError('The `filters` option must be a mapping.')
-
-        for key, value in filters.items():
-            if not isinstance(value, list):
-                raise ConfigurationError('Value for event filter `{}` must be an array.'.format(key))
-
-        self._query = construct_xpath_query(filters)
+        self._query = construct_xpath_query(exclude_undefined_keys(self.config.filters.dict()))
         self.log.debug('Using constructed query: %s', self._query)
 
     def create_session(self):
@@ -388,7 +367,7 @@ class Win32EventLogCheck(AgentCheck):
         if bookmark:
             flags = win32evtlog.EvtSubscribeStartAfterBookmark
         else:
-            flags = self.START_OPTIONS[self._subscription_start]
+            flags = self.START_OPTIONS[self.config.start]
 
             # Set explicitly to None rather than a potentially empty string
             bookmark = None
@@ -400,7 +379,7 @@ class Win32EventLogCheck(AgentCheck):
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtsubscribe
         # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtSubscribe_meth.html
         self._subscription = win32evtlog.EvtSubscribe(
-            self._path,
+            self.config.path,
             flags,
             SignalEvent=self._event_handle,
             Query=self._query,

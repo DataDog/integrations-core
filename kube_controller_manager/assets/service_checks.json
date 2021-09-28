@@ -28,5 +28,17 @@
         ],
         "name": "Kube Controller Manager leader election health",
         "description": "Returns `CRITICAL` if no replica is currently set as leader."
+    },
+    {
+        "agent_version": "6.0.0",
+        "integration": "Kubernetes Controller Manager",
+        "check": "kube_controller_manager.up",
+        "groups": [],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Kube Controller Manager health",
+        "description": "Returns `CRITICAL` if Kube Controller Manager is not healthy."
     }
 ]

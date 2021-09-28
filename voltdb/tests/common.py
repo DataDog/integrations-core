@@ -6,6 +6,7 @@ from typing import List, Set, Tuple
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.voltdb.types import Instance
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -172,3 +173,10 @@ SERVICE_CHECK_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(VOLTDB_CLIENT_POR
 
 VOLTDB_VERSION = os.environ['VOLTDB_VERSION']
 VOLTDB_IMAGE = os.environ['VOLTDB_IMAGE']
+
+BASE_INSTANCE = {
+    'url': VOLTDB_URL,
+    'username': 'doggo',
+    'password': 'doggopass',  # SHA256: e81255cee7bd2c4fbb4c8d6e9d6ba1d33a912bdfa9901dc9acfb2bd7f3e8eeb1
+    'tags': ['test:voltdb'],
+}  # type: Instance
