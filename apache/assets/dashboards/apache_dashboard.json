@@ -132,9 +132,55 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "sum:apache.performance.idle_workers{$host,$scope}, sum:apache.performance.busy_workers{$host,$scope}",
+                        "q": "sum:apache.scoreboard.disabled{$host,$scope}, sum:apache.scoreboard.starting_up{$host,$scope}, sum:apache.scoreboard.reading_request{$host,$scope}, sum:apache.scoreboard.sending_reply{$host,$scope}, sum:apache.scoreboard.keepalive{$host,$scope}, sum:apache.scoreboard.dns_lookup{$host,$scope}, sum:apache.scoreboard.closing_connection{$host,$scope}, sum:apache.scoreboard.logging{$host,$scope}, sum:apache.scoreboard.gracefully_finishing{$host,$scope}, sum:apache.scoreboard.waiting_for_connection{$host,$scope}, sum:apache.scoreboard.idle_cleanup{$host,$scope}",
+                        "metadata": [
+                            {
+                                "expression": "sum:apache.scoreboard.disabled{$host,$scope}",
+                                "alias_name": "Disabled"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.starting_up{$host,$scope}",
+                                "alias_name": "Starting up"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.reading_request{$host,$scope}",
+                                "alias_name": "Reading Request"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.sending_reply{$host,$scope}",
+                                "alias_name": "Sending Reply"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.keepalive{$host,$scope}",
+                                "alias_name": "Keepalive (read)"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.dns_lookup{$host,$scope}",
+                                "alias_name": "DNS Lookup"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.closing_connection{$host,$scope}",
+                                "alias_name": "Closing connection"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.logging{$host,$scope}",
+                                "alias_name": "Logging"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.gracefully_finishing{$host,$scope}",
+                                "alias_name": "Gracefully finishing"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.waiting_for_connection{$host,$scope}",
+                                "alias_name": "Waiting for Connection"
+                            },
+                            {
+                                "expression": "sum:apache.scoreboard.idle_cleanup{$host,$scope}",
+                                "alias_name": "Idle cleanup of worker"
+                            }
+                        ],
                         "style": {
-                            "palette": "cool"
+                            "palette": "dog_classic"
                         }
                     }
                 ],
@@ -142,7 +188,7 @@
                 "time": {
                     "live_span": "4h"
                 },
-                "title": "Busy vs. idle worker threads",
+                "title": "Status of worker threads",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries"
@@ -451,7 +497,7 @@
         {
             "definition": {
                 "background_color": "gray",
-                "content": "A worker is considered \u201cbusy\u201d if it is in any of the following states: reading, writing, keep-alive, logging, closing, or gracefully finishing.\n\nAn \u201cidle\u201d worker is not in any of the busy states; the number of idle workers is shown on Apache\u2019s mod_status page.",
+                "content": "A worker is considered \u201cbusy\u201d if it is in any of the following states: Reading request, Sending reply, Keep-alive, Logging, Closing connection, or DNS lookup.\n\nA worker in the \u2019Waiting for connection\u2019 state is considered \u201cidle\u201d.\n\n; The \u2019Gracefully finishing\u2019 state counts as \u201cidle\u201d when you are in async mode (you see the async metrics) but as \u201cbusy\u201d in any other mode.\n\n Workers in the \u2019Idle cleanup\u2109 state are moving from an idle state to an open/unused slot. \n\n A \u2109Disabled\u2109 worker can never be used in any of the other states, check your mpm worker config to allow them to be used.",
                 "font_size": "14",
                 "show_tick": true,
                 "text_align": "left",

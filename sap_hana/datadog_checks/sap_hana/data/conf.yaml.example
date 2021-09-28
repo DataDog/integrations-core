@@ -2,6 +2,11 @@
 #
 init_config:
 
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -99,6 +104,11 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:<INTEGRATION>
+
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
 
     ## @param use_tls - boolean - optional - default: false
     ## Instructs the SAP HANA integration to connect using TLS.

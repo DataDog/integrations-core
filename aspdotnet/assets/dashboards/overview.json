@@ -1,0 +1,413 @@
+{
+    "author_name": "Datadog",
+    "description": "Monitor performance and identify failovers in your ASP.NET application. \n\nTo learn more about our ASP.NET integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/aspdotnet/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "ASP.NET - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Monitor performance and identify failovers in your ASP.NET application. \n\nTo learn more about our ASP.NET integration, see:\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/aspdotnet/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6862175229932376,
+            "layout": {
+                "height": 3,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "title": "Summary",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "max",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "avg:aspdotnet.applications.forms_authentication.successes{$scope}"
+                                }
+                            ],
+                            "text_align": "center",
+                            "title": "Access Requests - Success",
+                            "type": "query_value"
+                        },
+                        "id": 6652641363087018,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_red",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "q": "sum:aspdotnet.applications.forms_authentication.failure{$scope}"
+                                }
+                            ],
+                            "text_align": "left",
+                            "title": "Access Requests - Failed",
+                            "type": "query_value"
+                        },
+                        "id": 7650690032884040,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:aspdotnet.applications.requests.persec{$scope}"
+                                }
+                            ],
+                            "title": "Requests - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 8921712561928178,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "ms",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:aspdotnet.request.wait_time{$scope}"
+                                }
+                            ],
+                            "text_align": "left",
+                            "title": "Request Wait Time",
+                            "type": "query_value"
+                        },
+                        "id": 2269853265190918,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 6,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 659253694954754,
+            "layout": {
+                "height": 3,
+                "width": 8,
+                "x": 4,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Application Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:aspdotnet.application_restarts{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Application Restarts",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7166109503781670,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:aspdotnet.worker_process_restarts{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Worker Process Restarts",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5522005012480906,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 5351514266789538,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Requests Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:aspdotnet.applications.requests.executing{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Requests Executing",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8021842417341726,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:aspdotnet.applications.requests.in_queue{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Requests in Queue",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1845481312006394,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 4967255299270908,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "columns": [],
+                            "indexes": [],
+                            "message_display": "expanded-md",
+                            "query": "source:iis $scope",
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "title": "ASP.NET Logs",
+                            "title_size": "16",
+                            "type": "log_stream"
+                        },
+                        "id": 2059170654603224,
+                        "layout": {
+                            "height": 6,
+                            "width": 9,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "ASP.NET uses IIS logging. Follow the [setup instructions for IIS][1] in order to view logs related to ASP.NET requests and failures. \n\n[1]: https://docs.datadoghq.com/integrations/iis/?tab=host#setup",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5353109690720004,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 9,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 6571691838555790
+        }
+    ]
+}

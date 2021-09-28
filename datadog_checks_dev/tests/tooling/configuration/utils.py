@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from textwrap import dedent
 
-from datadog_checks.dev.tooling.specs.configuration import ConfigSpec
-from datadog_checks.dev.tooling.specs.configuration.consumers import ExampleConsumer, ModelConsumer
+from datadog_checks.dev.tooling.configuration import ConfigSpec
+from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer, ModelConsumer
 
 
 def get_spec(text, **kwargs):
