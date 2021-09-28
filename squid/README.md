@@ -97,12 +97,12 @@ The Squid check does not include any events.
 
 ### Service Checks
 
-**squid.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Squid to collect metrics, otherwise returns `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -114,3 +114,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [9]: http://www.squid-cache.org/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[11]: https://github.com/DataDog/integrations-core/blob/master/squid/assets/service_checks.json
