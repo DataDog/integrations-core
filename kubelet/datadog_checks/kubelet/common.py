@@ -105,6 +105,7 @@ class PodListUtils(object):
 
     def __init__(self, podlist):
         self.containers = {}
+        self.pods = {}
         self.static_pod_uids = set()
         self.cache = {}
         self.pod_uid_by_name_tuple = {}
@@ -119,6 +120,7 @@ class PodListUtils(object):
             namespace = metadata.get("namespace")
             pod_name = metadata.get("name")
             self.pod_uid_by_name_tuple[(namespace, pod_name)] = uid
+            self.pods[uid] = pod
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948

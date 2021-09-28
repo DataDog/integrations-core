@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
+import uuid
 
 import click
 
@@ -154,6 +155,10 @@ def migrate(ctx, integration, to_version):
     # Explicitly set the manifest_version first so it appears at the top of the manifest
     migrated_manifest.set_path("/manifest_version", "2.0.0")
 
+    # Generate and introduce a uuid
+    app_uuid = str(uuid.uuid4())
+    migrated_manifest.set_path("/app_uuid", app_uuid)
+
     for key, val in V2_TO_V1_MAP.items():
         if val == SKIP_IF_FOUND:
             continue
@@ -162,6 +167,10 @@ def migrate(ctx, integration, to_version):
             final_value = loaded_manifest.get_path(val)
         else:
             final_value = val
+
+        # We need to remove any of the underlying "assets" that are just an empty dictionary
+        if key in ["/assets/dashboards", "/assets/monitors", "/assets/saved_views"] and not final_value:
+            continue
 
         if final_value is not None:
             migrated_manifest.set_path(key, final_value)

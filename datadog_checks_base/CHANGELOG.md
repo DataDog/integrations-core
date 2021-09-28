@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 22.0.0 / 2021-09-24
+
+* [Added] Upgrade python-dateutil to 2.8.2. See [#10206](https://github.com/DataDog/integrations-core/pull/10206).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Removed] Drop snowflake support from py2, bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
+
 ## 21.3.0 / 2021-09-21
 
 * [Added] Add force yaml loader utils. See [#10163](https://github.com/DataDog/integrations-core/pull/10163).

@@ -64,7 +64,7 @@ pysnmp==4.4.9
 pysocks==1.7.0
 python-binary-memcached==0.26.1; sys_platform != "win32" and python_version < "3.0"
 python-binary-memcached==0.30.1; sys_platform != "win32" and python_version > "3.0"
-python-dateutil==2.8.1
+python-dateutil==2.8.2
 python3-gearman==0.1.0; sys_platform != "win32" and python_version > "3.0"
 pyvmomi==v7.0.2
 pywin32==228; sys_platform == "win32" and python_version < "3.0"
@@ -73,8 +73,7 @@ pyyaml==5.4.1
 redis==3.5.3
 requests-kerberos==0.12.0
 requests-unixsocket==0.2.0
-requests==2.22.0; python_version < '3.0'
-requests==2.25.0; python_version > '3.0'
+requests==2.25.0
 requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
 rethinkdb==2.4.4
@@ -86,11 +85,11 @@ serpent==1.27; sys_platform == "win32"
 service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.16.0
-snowflake-connector-python==2.1.3; python_version < '3.0'
-snowflake-connector-python==2.6.0; python_version > '3.0'
+snowflake-connector-python==2.6.0; python_version > "3.0"
 supervisor==4.1.0
 tuf==0.17.0
 typing==3.7.4.1; python_version < "3.0"
 uptime==3.0.1
 vertica-python==0.10.1
 win-inet-pton==1.1.0; sys_platform == "win32" and python_version < "3.0"
+wrapt==1.12.1

@@ -20,10 +20,6 @@ The ASP.NET check is included in the [Datadog Agent][2] package, so you don't ne
 2. [Restart the Agent][5]
 
 #### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 ASP.NET uses IIS logging. Follow the [setup instructions for IIS][9] in order to view logs related to ASP.NET requests and failures. 
 
 Unhandled 500 level exceptions and events related to your ASP.NET application can be viewed via the Windows Application EventLog. 

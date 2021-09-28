@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import os
 from collections import defaultdict
 
 import click
@@ -237,9 +238,15 @@ def licenses(ctx, sync):
         abort('Out of sync, run again with the --sync flag')
 
     packages = defaultdict(set)
-    for line in read_file_lines(agent_requirements_file):
-        requirement = Requirement(line.strip())
-        packages[requirement.name].add(str(requirement.specifier)[2:])
+    for i, line in enumerate(read_file_lines(agent_requirements_file)):
+        try:
+            requirement = Requirement(line.strip())
+            packages[requirement.name].add(str(requirement.specifier)[2:])
+        except Exception as e:
+            rel_file = os.path.basename(agent_requirements_file)
+            line = i + 1
+            annotate_error(agent_requirements_file, str(e).split(":")[1], line=line)
+            echo_failure(f"Detected error in {rel_file}:{line} {e}")
 
     api_urls = []
     for package, versions in packages.items():

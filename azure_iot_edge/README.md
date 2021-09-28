@@ -79,10 +79,6 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it by configuring your Datadog Agent custom module:
     - Under "Environment Variables", set the `DD_LOGS_ENABLED` environment variable:
 

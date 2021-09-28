@@ -55,7 +55,7 @@ jobs:
       run: |
         ddev validate jmx-metrics
 
-    - name: Run legacy metadata validation
+    - name: Run metadata validation
       run: |
         ddev validate metadata
 

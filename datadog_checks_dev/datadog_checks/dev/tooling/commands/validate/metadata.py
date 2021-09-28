@@ -45,6 +45,17 @@ EXCLUDE_INTEGRATIONS = [
     'tcp',
 ]
 
+VALID_TIME_UNIT_NAMES = {
+    'nanosecond',
+    'microsecond',
+    'millisecond',
+    'second',
+    'minute',
+    'hour',
+    'day',
+    'week',
+}
+
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
 # pyperclip.copy('\n'.join("    '{}',".format(line.split(',')[2]) for line in pyperclip.paste().splitlines()))
@@ -371,6 +382,18 @@ def metadata(check, check_duplicates, show_warnings):
                 errors = True
                 display_queue.append(
                     (echo_failure, f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
+                )
+
+            # Check if unit/per_unit is valid
+            if row['unit_name'] in VALID_TIME_UNIT_NAMES and row['per_unit_name'] in VALID_TIME_UNIT_NAMES:
+                errors = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"{current_check}:{line} `{row['unit_name']}/{row['per_unit_name']}` unit is invalid, "
+                        f"use the fraction unit instead. If `{row['unit_name']}` and `{row['per_unit_name']}` "
+                        "are not the same unit, eg ms/s, note that in the description.",
+                    )
                 )
 
             # integration header

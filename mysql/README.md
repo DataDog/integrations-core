@@ -136,10 +136,6 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. To make the logs more accessible, follow these steps:
@@ -248,10 +244,6 @@ See the [Autodiscovery template variables documentation][28] to learn how to pas
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][29].
 
@@ -299,10 +291,6 @@ See the [Autodiscovery template variables documentation][28] to learn how to pas
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][33].
 
@@ -347,10 +335,6 @@ Set [Autodiscovery Integrations Templates][36] as Docker labels on your applicat
 See the [Autodiscovery template variables documentation][28] to learn how to pass `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 
