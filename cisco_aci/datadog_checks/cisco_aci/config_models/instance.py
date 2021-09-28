@@ -66,6 +66,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     pwd: str
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
