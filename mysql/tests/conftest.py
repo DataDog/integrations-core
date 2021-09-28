@@ -21,12 +21,12 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e():
+def config_e2e(instance_basic):
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [instance_basic],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
