@@ -15,7 +15,7 @@ powerdns.recursor.cache_hits,gauge,,hit,second,The number of cache hits per seco
 powerdns.recursor.cache_misses,gauge,,miss,second,The number of cache misses per second,0,powerdns_recursor,cache misses
 powerdns.recursor.chain_resends,gauge,,query,second,The number of queries per second chained to existing outstanding query,0,powerdns_recursor,chain resends
 powerdns.recursor.case_mismatches,gauge,,error,second,The number of mismatches in character case per second,0,powerdns_recursor,case mismatches
-powerdns.recursor.client_parse_errors,gauge,,error,second,The number of unparseable packets per second,0,powerdns_recursor,unparseable pkts
+powerdns.recursor.client_parse_errors,gauge,,error,second,The number of unparsable packets per second,0,powerdns_recursor,unparsable pkts
 powerdns.recursor.dont_outqueries,gauge,,query,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,dont outqueries
 powerdns.recursor.ipv6_outqueries,gauge,,,second,The number of outgoing queries per second over IPv6,0,powerdns_recursor,ipv6 outqueries
 powerdns.recursor.ipv6_questions,gauge,,query,second,The number of end-user-initiated IPv6 UDP queries with the RD bit set,0,powerdns_recursor,ipv6 questions

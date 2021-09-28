@@ -1,6 +1,14 @@
 # CHANGELOG - dns_check
 
-## 1.7.1 / 2021-03-07
+## 2.0.1 / 2021-07-12 / Agent 7.30.0
+
+* [Fixed] Use agent 8 signature. See [#9544](https://github.com/DataDog/integrations-core/pull/9544).
+
+## 2.0.0 / 2021-04-19 / Agent 7.28.0
+
+* [Changed] Utilize time precision function from datadog_checks_base. See [#8841](https://github.com/DataDog/integrations-core/pull/8841).
+
+## 1.7.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
