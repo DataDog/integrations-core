@@ -16,7 +16,7 @@ metrics:
   # <List of metrics to collect...>
 
 # metric_tags:
-#   <Optional list of tags to apply to collected metrics>
+#   <List of tags to apply to collected metrics. Required for table metrics, optional otherwise>
 ```
 
 ## Fields
@@ -187,6 +187,7 @@ metrics:
 
 #### Table metrics tagging
 
+Table metrics require `metric_tags` to identify each row's metric. 
 It is possible to add tags to metrics retrieved from a table in three ways:
 
 ##### Using a column within the same table

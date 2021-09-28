@@ -4,7 +4,6 @@
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
@@ -26,19 +25,6 @@ INSTANCES = {
 HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
 
 AUTH_TYPE = os.environ['AUTH_TYPE']
-
-
-class MockResponse:
-    def __init__(self, j, status_code=200):
-        self.j = j
-        self.status_code = status_code
-
-    def json(self):
-        return self.j
-
-    def raise_for_status(self):
-        if self.status_code >= 300:
-            raise requests.exceptions.HTTPError
 
 
 def get_vault_server_config_file():

@@ -34,12 +34,12 @@ files:
           value:
             type: string
             example: <SOCKETFILE_PATH>
-        - name: user
+        - name: username
           description: Required only if a username is configured.
           value:
             type: string
             example: <USERNAME>
-        - name: pass
+        - name: password
           description: Required only if a password is configured.
           value:
             type: string

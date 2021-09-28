@@ -93,7 +93,6 @@ V_20_METRICS = [
 # This is not tested by our current envs.
 V_21_METRICS = [
     'clickhouse.ddl.max_processed',
-    'clickhouse.background_pool.schedule.memory',
     'clickhouse.parts.committed',
     'clickhouse.parts.compact',
     'clickhouse.parts.delete_on_destroy',
@@ -104,7 +103,7 @@ V_21_METRICS = [
     'clickhouse.parts.temporary',
 ]
 
-version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, 21: V_21_METRICS}
+version_mapper = {'18': V_18_19_METRICS, '19': V_18_19_METRICS, '20': V_20_METRICS, '21': V_21_METRICS}
 
 
 def get_metrics(version):

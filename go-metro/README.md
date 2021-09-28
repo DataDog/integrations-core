@@ -87,18 +87,18 @@ unavailable with the source install or the 32-bit packages).
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][4], you should see something similar to the following:
 
 ```text
-● datadog-agent.service - "Datadog Agent"
+ datadog-agent.service - "Datadog Agent"
     Loaded: loaded (/lib/...datadog-agent.service; enabled; vendor preset: enabled)
     Active: active (running) since Thu 2016-03-31 20:35:27 UTC; 42min ago
   Process: 10016 ExecStop=/opt/.../supervisorctl -c /etc/dd-....conf shutdown (code=exited, status=0/SUCCESS)
   Process: 10021 ExecStart=/opt/.../start_agent.sh (code=exited, status=0/SUCCESS)
   Main PID: 10025 (supervisord)
     CGroup: /system.slice/datadog-agent.service
-            ├─10025 /opt/datadog-...python /opt/datadog-agent/bin/supervisord -c /etc/dd-agent/supervisor.conf
-            ├─10043 /opt/datadog-...python /opt/datadog-agent/agent/dogstatsd.py --use-local-forwarder
-            ├─10044 /opt/datadog-agent/bin/go-metro -cfg=/etc/dd-agent/conf.d/go-metro.yaml
-            ├─10046 /opt/datadog-.../python /opt/datadog-agent/agent/ddagent.py
-            └─10047 /opt/datadog-.../python /opt/datadog-agent/agent/agent.py foreground --use-local-forwarder
+            |_10025 /opt/datadog-...python /opt/datadog-agent/bin/supervisord -c /etc/dd-agent/supervisor.conf
+            |_10043 /opt/datadog-...python /opt/datadog-agent/agent/dogstatsd.py --use-local-forwarder
+            |_10044 /opt/datadog-agent/bin/go-metro -cfg=/etc/dd-agent/conf.d/go-metro.yaml
+            |_10046 /opt/datadog-.../python /opt/datadog-agent/agent/ddagent.py
+            |_10047 /opt/datadog-.../python /opt/datadog-agent/agent/agent.py foreground --use-local-forwarder
 ```
 
 If the TCP RTT check has started you should see something similar to the go-metro line above.

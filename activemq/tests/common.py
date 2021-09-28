@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 CHECK_NAME = 'activemq'
 
@@ -75,3 +76,7 @@ ARTEMIS_E2E_METRICS = [
     "activemq.artemis.total_messages_acknowledged",
     "activemq.artemis.total_messages_added",
 ]
+
+ACTIVEMQ_E2E_JVM_METRICS = list(JVM_E2E_METRICS)
+ACTIVEMQ_E2E_JVM_METRICS.remove('jvm.gc.cms.count')
+ACTIVEMQ_E2E_JVM_METRICS.remove('jvm.gc.parnew.time')
