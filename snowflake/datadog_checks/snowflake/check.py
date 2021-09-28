@@ -5,7 +5,7 @@ from contextlib import closing
 
 import snowflake.connector as sf
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -32,7 +32,7 @@ class SnowflakeCheck(AgentCheck):
 
     __NAMESPACE__ = 'snowflake'
 
-    SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
@@ -73,6 +73,9 @@ class SnowflakeCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+
         self.connect()
 
         if self._conn is not None:
@@ -153,3 +156,21 @@ class SnowflakeCheck(AgentCheck):
         else:
             if version:
                 self.set_metadata('version', version)
+
+    # override
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+        if self.disable_generic_tags:
+            return super(SnowflakeCheck, self)._normalize_tags_type(tags, device_name, metric_name)
+
+        # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
+        # version to ease transition.
+        normalized_tags = []
+        for tag in tags:
+            if tag is not None:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+                normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
+        return normalized_tags

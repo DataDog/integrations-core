@@ -1,6 +1,20 @@
 # CHANGELOG - haproxy
 
-## 2.17.0 / 2021-03-07
+## 3.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.18.1 / 2021-06-07 / Agent 7.29.0
+
+* [Fixed] Fix `collect_aggregates_only` option type in example config. See [#9473](https://github.com/DataDog/integrations-core/pull/9473).
+
+## 2.18.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Add runtime configuration validation. See [#8924](https://github.com/DataDog/integrations-core/pull/8924).
+
+## 2.17.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add listener stats. See [#8723](https://github.com/DataDog/integrations-core/pull/8723). Thanks [wdauchy](https://github.com/wdauchy).
 * [Added] Add metrics for sticktable. See [#8642](https://github.com/DataDog/integrations-core/pull/8642). Thanks [wdauchy](https://github.com/wdauchy).
