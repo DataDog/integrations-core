@@ -1,0 +1,10 @@
+1,"node-memsql-cluster-master-0.svc-memsql-cluster",3306,"MA","eth0",1160728672,2138338090
+1,"node-memsql-cluster-master-0.svc-memsql-cluster",3306,"MA","lo",60076418,60076418
+2,"node-memsql-cluster-aggregator-0.svc-memsql-cluster",3306,"CA","lo",57520492,57520492
+2,"node-memsql-cluster-aggregator-0.svc-memsql-cluster",3306,"CA","eth0",584031188,358899313
+3,"node-memsql-cluster-aggregator-1.svc-memsql-cluster",3306,"CA","lo",58075611,58075611
+3,"node-memsql-cluster-aggregator-1.svc-memsql-cluster",3306,"CA","eth0",588931505,361404763
+4,"node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",3306,"LEAF","lo",40808237,40808237
+4,"node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",3306,"LEAF","eth0",978287586,716505115
+5,"node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",3306,"LEAF","eth0",971954487,712119621
+5,"node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",3306,"LEAF","lo",40557063,40557063
