@@ -215,11 +215,6 @@ instances:
     #
     # cache_shared_labels: true
 
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-    #
-    # request_size: 16
-
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
     ## from being parsed.
@@ -517,6 +512,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
