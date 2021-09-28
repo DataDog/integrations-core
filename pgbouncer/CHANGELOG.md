@@ -1,6 +1,18 @@
 # CHANGELOG - pgbouncer
 
-## 1.12.2 / 2021-03-07
+## 3.1.0 / 2021-09-06
+
+* [Added] Add max_client_conn metric. See [#10033](https://github.com/DataDog/integrations-core/pull/10033). Thanks [JordanP](https://github.com/JordanP).
+
+## 3.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.0.0 / 2021-07-12 / Agent 7.30.0
+
+* [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
+
+## 1.12.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

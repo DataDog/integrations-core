@@ -23,8 +23,9 @@ class DbManager(object):
     def initialize(self):
         run_command(
             (
-                'docker exec ibm_db2 su - db2inst1 -c '
-                '"db2 -c create db {} using codeset utf-8 territory us"'.format(self.db_name)
+                'docker exec ibm_db2 su - db2inst1 -c "db2 -c create db {} using codeset utf-8 territory us"'.format(
+                    self.db_name
+                )
             ),
             check=True,
         )
