@@ -239,7 +239,8 @@ def is_version_compatible(marker, supported_versions):
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
 )
-def updates(sync, check_python_classifiers):
+@click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
+def updates(sync, check_python_classifiers, batch_size):
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -271,6 +272,7 @@ def updates(sync, check_python_classifiers):
     if sync:
         static_file = get_agent_requirements()
         if deps_to_update:
+            deps_updated = 0
             old_lines = read_file_lines(static_file)
             new_lines = old_lines.copy()
 
@@ -278,8 +280,12 @@ def updates(sync, check_python_classifiers):
                 dependency_definition.requirement.specifier = f'=={new_version}'
                 new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
 
+                deps_updated += 1
+                if batch_size is not None and deps_updated >= batch_size:
+                    break
+
             write_file_lines(static_file, new_lines)
-            echo_info(f'Updated {len(deps_to_update.keys())} dependencies in `agent_requirements.in`')
+            echo_info(f'Updated {deps_updated} dependencies in `agent_requirements.in`')
     else:
         if deps_to_update:
             echo_failure(f"{len(deps_to_update.keys())} Dependencies are out of sync:")

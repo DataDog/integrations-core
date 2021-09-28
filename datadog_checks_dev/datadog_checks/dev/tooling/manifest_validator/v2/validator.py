@@ -37,26 +37,21 @@ class SchemaValidator(BaseManifestValidator):
             return
 
         # Get API and APP keys which are needed to call Datadog API
-        org_name = self.ctx.obj['org']
+        org_name = self.ctx.obj.get('org')
         if not org_name:
             self.fail('No `org` has been set')
+            return
 
-        if org_name not in self.ctx.obj['orgs']:
+        if org_name not in self.ctx.obj.get('orgs'):
             self.fail(f'Selected org {org_name} is not in `orgs`')
+            return
 
         org = self.ctx.obj['orgs'][org_name]
-
-        api_key = org.get('api_key')
-        if not api_key:
-            self.fail(f'No `api_key` has been set for org `{org_name}`')
-
-        app_key = org.get('app_key')
-        if not app_key:
-            self.fail(f'No `app_key` has been set for org `{org_name}`')
 
         dd_url = org.get('dd_url')
         if not dd_url:
             self.fail(f'No `dd_url` has been set for org `{org_name}`')
+            return
 
         url = f"{dd_url}/api/beta/apps/manifest/validate"
 
@@ -65,7 +60,7 @@ class SchemaValidator(BaseManifestValidator):
 
         try:
             payload_json = json.dumps(payload)
-            r = requests.post(url, data=payload_json, headers={'DD-API-KEY': api_key, 'DD-APPLICATION-KEY': app_key})
+            r = requests.post(url, data=payload_json)
 
             if r.status_code == 400:
                 # parse the errors
@@ -75,7 +70,7 @@ class SchemaValidator(BaseManifestValidator):
             else:
                 r.raise_for_status()
         except Exception as e:
-            self.fail(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
+            self.fail(str(e))
 
 
 def get_v2_validators(ctx, is_extras, is_marketplace):

@@ -10,16 +10,15 @@ from datadog_checks.vault import Vault
 
 from .common import auth_required, noauth_required
 from .metrics import METRICS
-from .utils import run_check
 
 
 @auth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_integration(aggregator, check, instance, global_tags):
+def test_integration(aggregator, dd_run_check, check, instance, global_tags):
     instance = instance()
     check = check(instance)
-    run_check(check)
+    dd_run_check(check)
 
     assert_collection(aggregator, global_tags)
 
@@ -27,9 +26,9 @@ def test_integration(aggregator, check, instance, global_tags):
 @noauth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_integration_noauth(aggregator, check, no_token_instance, global_tags):
+def test_integration_noauth(aggregator, dd_run_check, check, no_token_instance, global_tags):
     check = check(no_token_instance)
-    run_check(check)
+    dd_run_check(check)
 
     assert_collection(aggregator, global_tags)
 
