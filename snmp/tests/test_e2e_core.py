@@ -79,6 +79,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         'serial_num:test_serial',
         'ups_name:testIdentName',
         'device_vendor:apc',
+        'device_namespace:default',
     ]
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
@@ -144,6 +145,7 @@ def test_e2e_core_discovery(dd_agent_check):
         'serial_num:test_serial',
         'ups_name:testIdentName',
         'device_vendor:apc',
+        'device_namespace:default',
         # autodiscovery
         'autodiscovery_subnet:' + network,
         'snmp_device:' + ip_address,
@@ -157,3 +159,81 @@ def test_e2e_core_discovery(dd_agent_check):
         'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags_with_loader, at_least=4, value=1
     )
     aggregator.assert_metric('snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=tags, at_least=4)
+
+
+def test_e2e_regex_match(dd_agent_check):
+    metrics = [
+        {
+            'MIB': "IF-MIB",
+            'table': {
+                "name": "ifTable",
+                "OID": "1.3.6.1.2.1.2.2",
+            },
+            'symbols': [
+                {
+                    "name": "ifInOctets",
+                    "OID": "1.3.6.1.2.1.2.2.1.10",
+                },
+                {
+                    "name": "ifOutOctets",
+                    "OID": "1.3.6.1.2.1.2.2.1.16",
+                },
+            ],
+            'metric_tags': [
+                {
+                    'tag': "interface",
+                    'column': {
+                        "name": "ifDescr",
+                        "OID": "1.3.6.1.2.1.2.2.1.2",
+                    },
+                },
+                {
+                    'column': {
+                        "name": "ifDescr",
+                        "OID": "1.3.6.1.2.1.2.2.1.2",
+                    },
+                    'match': '(\\w)(\\w+)',
+                    'tags': {'prefix': '\\1', 'suffix': '\\2'},
+                },
+            ],
+        }
+    ]
+    config = common.generate_container_instance_config(metrics)
+    instance = config['instances'][0]
+    instance['metric_tags'] = [
+        {
+            "OID": "1.3.6.1.2.1.1.5.0",
+            "symbol": "sysName",
+            "match": "(\\d+)(\\w+)",
+            "tags": {
+                "digits": "\\1",
+                "remainder": "\\2",
+            },
+        },
+        {
+            "OID": "1.3.6.1.2.1.1.5.0",
+            "symbol": "sysName",
+            "match": "(\\w)(\\w)",
+            "tags": {
+                "letter1": "\\1",
+                "letter2": "\\2",
+            },
+        },
+    ]
+    aggregator = dd_agent_check(config, rate=True)
+    config['init_config']['loader'] = 'core'
+    aggregator = dd_agent_check(config, rate=True)
+
+    # raw sysName: 41ba948911b9
+    aggregator.assert_metric(
+        'snmp.devices_monitored',
+        tags=[
+            'digits:41',
+            'remainder:ba948911b9',
+            'letter1:4',
+            'letter2:1',
+            'loader:core',
+            'snmp_device:' + instance['ip_address'],
+            'device_namespace:default',
+        ],
+    )
