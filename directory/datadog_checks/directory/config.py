@@ -29,5 +29,6 @@ class DirectoryConfig(object):
         self.ignore_missing = is_affirmative(instance.get('ignore_missing', False))
         self.follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         self.stat_follow_symlinks = is_affirmative(instance.get('stat_follow_symlinks', True))
+        self.submit_histograms = is_affirmative(instance.get('submit_histograms', True))
         self.tags = instance.get('tags', [])
         self.max_filegauge_count = instance.get('max_filegauge_count', MAX_FILEGAUGE_COUNT)

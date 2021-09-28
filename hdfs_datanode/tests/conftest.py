@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 from copy import deepcopy
 
@@ -10,9 +9,10 @@ import pytest
 from mock import patch
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
-from .common import HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
+from .common import FIXTURE_DIR, HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture(scope="session")
@@ -52,31 +52,12 @@ def mocked_auth_request():
         yield
 
 
-def _requests_mock(fixture, *args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-
-        def json(self):
-            return json.loads(self.json_data)
-
-        def raise_for_status(self):
-            return True
-
-    with open(fixture, 'r') as f:
-        body = f.read()
-        return MockResponse(body, 200)
-
-
 def requests_get_mock(*args, **kwargs):
-    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_jmx.json')
-    return _requests_mock(fixture, *args, **kwargs)
+    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_jmx.json'))
 
 
 def requests_metadata_mock(*args, **kwargs):
-    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_info_jmx.json')
-    return _requests_mock(fixture, *args, **kwargs)
+    return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_datanode_info_jmx.json'))
 
 
 def requests_auth_mock(*args, **kwargs):

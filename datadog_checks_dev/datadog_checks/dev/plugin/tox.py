@@ -13,17 +13,18 @@ STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
 TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
+MYPY_ADDITIONAL_DEPS = 'dd_mypy_deps'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort[pyproject]==5.5.1'
+ISORT_DEP = 'isort==5.8.0'
 BLACK_DEP = 'black==20.8b1'
-FLAKE8_DEP = 'flake8==3.8.3'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==20.1.4'
+FLAKE8_DEP = 'flake8==3.9.1'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
-MYPY_DEP = 'mypy==0.770'
+MYPY_DEP = 'mypy==0.910'
 PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
@@ -59,17 +60,28 @@ def tox_configure(config):
                 env_config.envlogdir = env_config.envdir / 'log'
                 env_config.envtmpdir = env_config.envdir / 'tmp'
 
-    # Conditionally set 'e2e ready' depending on env variables
-    description = base_testenv.get('description')
-    if description and E2E_READY_CONDITION in description:
-        data, var = description.split(' if ')
+    # Conditionally set 'e2e ready' depending on env variables or environment markers
+    for cfg in config.envconfigs.values():
+        if E2E_READY_CONDITION not in cfg.description:
+            continue
+
+        data, var = cfg.description.split(' if ')
+        var = var.strip()
+
         if var in os.environ:
-            description = data
+            cfg.description = data
         else:
-            description = '{} is missing'.format(var)
-        for cfg in config.envconfigs.values():
-            if E2E_READY_CONDITION in cfg.description:
-                cfg.description = description
+            from packaging.markers import InvalidMarker, Marker
+
+            try:
+                marker = Marker(var)
+            except InvalidMarker:
+                cfg.description = '{} is missing'.format(var)
+            else:
+                if marker.evaluate():
+                    cfg.description = data
+                else:
+                    cfg.description = 'environment does not match: {}'.format(var)
 
     # Next two sections hack the sequencing of Tox's package installation.
     #
@@ -131,11 +143,15 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # Each integration should explicitly specify its options and which files it'd like to type check, which is
         # why we're defaulting to 'no arguments' by default.
         mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
+        mypy_deps = sections['testenv'].get(MYPY_ADDITIONAL_DEPS, "").splitlines()
 
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
         dependencies.append(MYPY_DEP)
+        for mypy_dep in mypy_deps:
+            dependencies.append(mypy_dep)
+
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {
