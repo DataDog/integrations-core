@@ -19,3 +19,10 @@ PASSWORD = 'Oracle123'
 
 CHECK_NAME = 'oracle'
 CONTAINER_NAME = 'oracle-database'
+
+
+def mock_bad_executor():
+    def executor(_):
+        raise
+
+    return executor

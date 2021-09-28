@@ -5,6 +5,8 @@
 import os
 
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -67,3 +69,26 @@ BAD_CONFIG = {
         }
     ],
 }
+
+
+def assert_check(aggregator):
+    """
+    Basic Test for gitlab integration.
+    """
+    aggregator.assert_service_check(
+        GitlabRunnerCheck.MASTER_SERVICE_CHECK_NAME,
+        status=GitlabRunnerCheck.OK,
+        tags=GITLAB_RUNNER_TAGS + CUSTOM_TAGS,
+        count=2,
+    )
+    aggregator.assert_service_check(
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.OK, tags=CUSTOM_TAGS, count=2
+    )
+    for metric in ALLOWED_METRICS:
+        metric_name = "gitlab_runner.{}".format(metric)
+        if metric.startswith('ci_runner'):
+            aggregator.assert_metric(metric_name)
+        else:
+            aggregator.assert_metric(metric_name, tags=CUSTOM_TAGS, count=2)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
