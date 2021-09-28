@@ -20,7 +20,7 @@ def test_check(aggregator, check, instance):
         metrics_to_check = common.COMMON_METRICS + common.METRICS_6
 
     for mname in metrics_to_check:
-        aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+        aggregator.assert_metric(mname, count=1, tags=['varnish_cluster:webs', 'varnish_name:default'])
 
     aggregator.assert_all_metrics_covered()
     metadata_metrics = get_metadata_metrics()
@@ -33,9 +33,9 @@ def test_inclusion_filter(aggregator, check, instance):
     check.check(instance)
     for mname in common.COMMON_METRICS:
         if 'SMA.' in mname:
-            aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+            aggregator.assert_metric(mname, count=1, tags=['varnish_cluster:webs', 'varnish_name:default'])
         else:
-            aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            aggregator.assert_metric(mname, count=0, tags=['varnish_cluster:webs', 'varnish_name:default'])
 
 
 def test_exclusion_filter(aggregator, check, instance):
@@ -44,9 +44,9 @@ def test_exclusion_filter(aggregator, check, instance):
     check.check(instance)
     for mname in common.COMMON_METRICS:
         if 'SMA.Transient.c_req' in mname:
-            aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            aggregator.assert_metric(mname, count=0, tags=['varnish_cluster:webs', 'varnish_name:default'])
         elif 'varnish.uptime' not in mname:
-            aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+            aggregator.assert_metric(mname, count=1, tags=['varnish_cluster:webs', 'varnish_name:default'])
 
 
 def test_version_metadata(aggregator, check, instance, datadog_agent):

@@ -19,7 +19,7 @@ def test_bad_ping_reply(check, instance, aggregator, ping_url_tag):
 
 
 def test_status(check, instance, aggregator, ping_url_tag):
-    instance['tags'] = ['cluster:forums']
+    instance['tags'] = ['fpm_cluster:forums']
     check.check(instance)
 
     metrics = [
@@ -32,16 +32,16 @@ def test_status(check, instance, aggregator, ping_url_tag):
         'php_fpm.processes.max_reached',
     ]
 
-    expected_tags = ['cluster:forums', 'pool:www']
+    expected_tags = ['fpm_cluster:forums', 'pool:www']
     for metric in metrics:
         aggregator.assert_metric(metric, tags=expected_tags)
 
-    expected_tags = [ping_url_tag, 'cluster:forums']
+    expected_tags = [ping_url_tag, 'fpm_cluster:forums']
     aggregator.assert_service_check('php_fpm.can_ping', status=check.OK, tags=expected_tags)
 
 
 def test_status_fastcgi(check, instance_fastcgi, aggregator, ping_url_tag_fastcgi):
-    instance_fastcgi['tags'] = ['cluster:forums']
+    instance_fastcgi['tags'] = ['fpm_cluster:forums']
     check.check(instance_fastcgi)
 
     metrics = [
@@ -54,9 +54,9 @@ def test_status_fastcgi(check, instance_fastcgi, aggregator, ping_url_tag_fastcg
         'php_fpm.processes.max_reached',
     ]
 
-    expected_tags = ['cluster:forums', 'pool:www']
+    expected_tags = ['fpm_cluster:forums', 'pool:www']
     for metric in metrics:
         aggregator.assert_metric(metric, tags=expected_tags)
 
-    expected_tags = [ping_url_tag_fastcgi, 'cluster:forums']
+    expected_tags = [ping_url_tag_fastcgi, 'fpm_cluster:forums']
     aggregator.assert_service_check('php_fpm.can_ping', status=check.OK, tags=expected_tags)
