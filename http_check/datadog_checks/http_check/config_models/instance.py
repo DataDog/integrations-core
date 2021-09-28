@@ -71,6 +71,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     reverse_content_match: Optional[bool]
     seconds_critical: Optional[int]
     seconds_warning: Optional[int]
