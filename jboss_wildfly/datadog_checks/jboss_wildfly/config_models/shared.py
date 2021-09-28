@@ -17,7 +17,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    collect_default_metrics: bool
+    collect_default_metrics: Optional[bool]
     conf: Optional[Sequence[Mapping[str, Any]]]
     custom_jar_paths: Optional[Sequence[str]]
     is_jmx: bool
