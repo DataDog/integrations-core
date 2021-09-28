@@ -12,6 +12,7 @@ from ipaddress import ip_address, ip_network
 
 import requests
 import requests_unixsocket
+from binary import KIBIBYTE
 from cryptography.x509 import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
@@ -20,6 +21,7 @@ from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
+from wrapt import ObjectProxy
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -53,6 +55,10 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+# 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
+# https://www.bittorrent.org/beps/bep_0003.html
+DEFAULT_CHUNK_SIZE = 16
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'auth_token': None,
@@ -76,6 +82,7 @@ STANDARD_FIELDS = {
     'persist_connections': False,
     'proxy': None,
     'read_timeout': None,
+    'request_size': DEFAULT_CHUNK_SIZE,
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
@@ -107,6 +114,29 @@ KERBEROS_STRATEGIES = {}
 UDS_SCHEME = 'unix'
 
 
+class ResponseWrapper(ObjectProxy):
+    def __init__(self, response, default_chunk_size):
+        super(ResponseWrapper, self).__init__(response)
+
+        # See https://github.com/psf/requests/pull/5942
+        self.__default_chunk_size = default_chunk_size
+
+    def iter_content(self, chunk_size=None, decode_unicode=False):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+
+    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def __enter__(self):
+        return self
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -119,6 +149,7 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
         'auth_token_handler',
+        'request_size',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -280,6 +311,8 @@ class RequestsWrapper(object):
         # Ignore warnings for lack of SSL validation
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
+        self.request_size = int(float(config['request_size']) * KIBIBYTE)
+
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
         # http://docs.python-requests.org/en/master/user/advanced/#session-objects
@@ -370,7 +403,8 @@ class RequestsWrapper(object):
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
-            return response
+
+            return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
