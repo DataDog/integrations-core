@@ -24,12 +24,12 @@ def _assert_metrics(aggregator, metrics_categories, additional_tags=None):
                 )
 
 
-def test_integration_mongos(instance_integration, aggregator, check):
+def test_integration_mongos(instance_integration, aggregator, check, dd_run_check):
     mongos_check = check(instance_integration)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
     with mock_pymongo("mongos"):
-        mongos_check.check(None)
+        dd_run_check(mongos_check)
 
     _assert_metrics(
         aggregator,
@@ -61,12 +61,12 @@ def test_integration_mongos(instance_integration, aggregator, check):
     assert len(aggregator._events) == 0
 
 
-def test_integration_replicaset_primary_in_shard(instance_integration, aggregator, check):
+def test_integration_replicaset_primary_in_shard(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-primary-in-shard"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
@@ -137,12 +137,12 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
     )
 
 
-def test_integration_replicaset_secondary_in_shard(instance_integration, aggregator, check):
+def test_integration_replicaset_secondary_in_shard(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-secondary-in-shard"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
@@ -175,7 +175,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     assert len(aggregator._events) == 0
 
 
-def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregator, check):
+def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregator, check, dd_run_check):
     for query in instance_integration['custom_queries']:
         query['run_on_secondary'] = True
     instance_integration['is_arbiter'] = True
@@ -183,7 +183,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-arbiter-in-shard"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
@@ -208,12 +208,12 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     assert len(aggregator._events) == 0
 
 
-def test_integration_configsvr_primary(instance_integration, aggregator, check):
+def test_integration_configsvr_primary(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("configsvr-primary"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
@@ -284,12 +284,12 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check):
     )
 
 
-def test_integration_configsvr_secondary(instance_integration, aggregator, check):
+def test_integration_configsvr_secondary(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("configsvr-secondary"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
@@ -322,12 +322,12 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
     assert len(aggregator._events) == 0
 
 
-def test_integration_replicaset_primary(instance_integration, aggregator, check):
+def test_integration_replicaset_primary(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-primary"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = ['replset_name:replset', 'replset_state:primary']
     metrics_categories = [
@@ -398,7 +398,9 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check)
 
 
 @pytest.mark.parametrize('collect_custom_queries', [True, False])
-def test_integration_replicaset_secondary(instance_integration, aggregator, check, collect_custom_queries):
+def test_integration_replicaset_secondary(
+    instance_integration, aggregator, check, collect_custom_queries, dd_run_check
+):
     if collect_custom_queries:
         for query in instance_integration['custom_queries']:
             query['run_on_secondary'] = True
@@ -406,7 +408,7 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-secondary"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = ['replset_name:replset', 'replset_state:secondary']
     metrics_categories = [
@@ -437,7 +439,7 @@ def test_integration_replicaset_secondary(instance_integration, aggregator, chec
     assert len(aggregator._events) == 0
 
 
-def test_integration_replicaset_arbiter(instance_integration, aggregator, check):
+def test_integration_replicaset_arbiter(instance_integration, aggregator, check, dd_run_check):
     for query in instance_integration['custom_queries']:
         query['run_on_secondary'] = True
     instance_integration['is_arbiter'] = True
@@ -445,7 +447,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("replica-arbiter"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     replica_tags = ['replset_name:replset', 'replset_state:arbiter']
     metrics_categories = ['serverStatus', 'replset-arbiter']
@@ -466,12 +468,12 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check)
     assert len(aggregator._events) == 0
 
 
-def test_standalone(instance_integration, aggregator, check):
+def test_standalone(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
     mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
 
     with mock_pymongo("standalone"):
-        mongo_check.check(None)
+        dd_run_check(mongo_check)
 
     metrics_categories = [
         'count-dbs',

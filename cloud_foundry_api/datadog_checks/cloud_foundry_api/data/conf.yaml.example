@@ -213,6 +213,11 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
 ## All options defined here are available to all instances.
 #
 init_config:
