@@ -154,7 +154,7 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     assert not c.run()
 
     caller, client = mock_client
-    cluster_arn = instance_legacy['cluster_arn']test_node_check_legacy
+    cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
     caller.assert_called_once_with('kafka', region_name=region_name, config=ANY)
