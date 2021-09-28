@@ -5,7 +5,7 @@ import json
 
 import click
 
-from ....utils import read_file
+from ....fs import read_file
 from ...e2e import create_interface, get_configured_envs
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 

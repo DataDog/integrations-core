@@ -62,6 +62,11 @@ SUPERVISORD_VERSION_PATTERN = re.compile(
 
 class SupervisordCheck(AgentCheck):
     def check(self, instance):
+        if instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+        if instance.get('pass'):
+            self._log_deprecation('_config_renamed', 'pass', 'password')
+
         server_name = instance.get('name')
 
         if not server_name or not server_name.strip():
@@ -143,7 +148,7 @@ class SupervisordCheck(AgentCheck):
 
             # Report Service Check
             status = DD_STATUS[proc['statename']]
-            msg = self._build_message(proc)
+            msg = self._build_message(proc) if status is not AgentCheck.OK else None
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
             # Report Uptime
@@ -163,8 +168,8 @@ class SupervisordCheck(AgentCheck):
     @staticmethod
     def _connect(instance):
         sock = instance.get('socket')
-        user = instance.get('user')
-        password = instance.get('pass')
+        user = instance.get('user') or instance.get('username')
+        password = instance.get('pass') or instance.get('password')
         if sock is not None:
             host = instance.get('host', DEFAULT_SOCKET_IP)
             transport = supervisor.xmlrpc.SupervisorTransport(user, password, sock)

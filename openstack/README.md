@@ -78,7 +78,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 **Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
 
-#### Agent Configuration
+#### Agent configuration
 
 1. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] with the configuration below. See the [sample openstack.d/conf.yaml][4] for all available configuration options:
 
@@ -115,6 +115,26 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 2. [Restart the Agent][5].
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `openstack.d/conf.yaml` file to start collecting your Openstack logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: "<LOG_FILE_PATH>"
+       source: openstack
+   ```
+
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
+   
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `openstack` under the Checks section.
@@ -131,20 +151,7 @@ The OpenStack check does not include any events.
 
 ### Service Checks
 
-**openstack.neutron.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.keystone.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.hypervisor.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
-
-**openstack.neutron.network.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -170,3 +177,4 @@ See also these other Datadog blog posts:
 [9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
+[12]: https://github.com/DataDog/integrations-core/blob/master/openstack/assets/service_checks.json

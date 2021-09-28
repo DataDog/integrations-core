@@ -26,7 +26,7 @@ def dd_environment():
     up.
     """
     with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data]):
-        with docker_run(common.COMPOSE_FILE, log_patterns="twemproxy entered RUNNING state"):
+        with docker_run(common.COMPOSE_FILE, log_patterns="twemproxy entered RUNNING state", mount_logs=True):
             yield common.INSTANCE
 
 

@@ -92,7 +92,6 @@ class HDFSNameNode(AgentCheck):
             self.JMX_SERVICE_CHECK,
             AgentCheck.OK,
             tags=tags,
-            message="Connection to {} was successful".format(jmx_address),
         )
 
     def _get_jmx_data(self, jmx_address, bean_name, tags):
