@@ -59,6 +59,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     services: Optional[Mapping[str, Any]]
     skip_proxy: Optional[bool]
