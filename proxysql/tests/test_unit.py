@@ -5,9 +5,11 @@
 import mock
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.proxysql import ProxysqlCheck
 
+from .common import create_query_manager, mock_executor
 from .conftest import get_check
 
 
@@ -37,6 +39,50 @@ def test_wrong_additional_metrics_group(dd_run_check, instance_basic):
     ):
         instance_basic['additional_metrics'].append('foo')
         dd_run_check(get_check(instance_basic))
+
+
+@pytest.mark.parametrize(
+    'executor_value, expected_status',
+    [
+        pytest.param('ONLINE', AgentCheck.OK, id='ONLINE'),
+        pytest.param('SHUNNED', AgentCheck.CRITICAL, id='SHUNNED'),
+        pytest.param('OFFLINE_SOFT', AgentCheck.WARNING, id='OFFLINE_SOFT'),
+        pytest.param('OFFLINE_HARD', AgentCheck.CRITICAL, id='OFFLINE_HARD'),
+        pytest.param('SHUNNED_REPLICATION_LAG', AgentCheck.CRITICAL, id='SHUNNED_REPLICATION_LAG'),
+    ],
+)
+@pytest.mark.unit
+def test_service_checks_mapping(aggregator, instance_basic, dd_run_check, executor_value, expected_status):
+    check = get_check(instance_basic)
+    con = mock.MagicMock()
+    cursor = mock.MagicMock()
+    con.cursor.return_value = cursor
+    check.connect = con
+
+    check._query_manager = create_query_manager(
+        {
+            'name': 'test query',
+            'query': 'foo',
+            'columns': [
+                {
+                    'name': 'proxysql.backend.status',
+                    'type': 'service_check',
+                    'status_map': {
+                        'ONLINE': 'OK',
+                        'SHUNNED': 'CRITICAL',
+                        'OFFLINE_SOFT': 'WARNING',
+                        'OFFLINE_HARD': 'CRITICAL',
+                        'SHUNNED_REPLICATION_LAG': 'CRITICAL',
+                    },
+                },
+            ],
+        },
+        executor=mock_executor([[executor_value]]),
+    )
+    check._query_manager.compile_queries()
+
+    dd_run_check(check)
+    aggregator.assert_service_check("proxysql.backend.status", expected_status)
 
 
 @pytest.mark.unit

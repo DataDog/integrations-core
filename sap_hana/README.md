@@ -88,21 +88,18 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**sap_hana.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored SAP HANA system, or `OK` otherwise.
-
-**sap_hana.status**:<br>
-Returns `OK` if the monitored SAP HANA database is up, or `CRITICAL` otherwise.
-
 ### Events
 
 SAP HANA does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://www.sap.com/products/hana.html
 [2]: https://docs.datadoghq.com/agent/
@@ -112,3 +109,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html
+[9]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/assets/service_checks.json

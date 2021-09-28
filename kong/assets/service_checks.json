@@ -12,5 +12,53 @@
         ],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the Kong instance. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.29.0",
+        "integration": "Kong",
+        "check": "kong.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.29.0",
+        "integration": "Kong",
+        "check": "kong.datastore.reachable",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Datastore reachable",
+        "description": "Returns `CRITICAL` if Kong is unable to connect to the datastore, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.29.0",
+        "integration": "Kong",
+        "check": "kong.upstream.target.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint",
+            "address",
+            "target",
+            "upstream"
+        ],
+        "name": "Upstream target health status",
+        "description": "Returns `CRITICAL` if the target is unhealthy, otherwise returns `OK`."
     }
 ]

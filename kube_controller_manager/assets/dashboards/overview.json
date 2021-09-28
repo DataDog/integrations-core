@@ -323,7 +323,7 @@
     {
       "name": "cluster_name",
       "default": "*",
-      "prefix": "cluster_name"
+      "prefix": "kube_cluster_name"
     },
     {
       "name": "quantile",

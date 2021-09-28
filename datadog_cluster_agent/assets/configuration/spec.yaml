@@ -1,0 +1,26 @@
+name: Datadog Cluster Agent
+files:
+- name: datadog_cluster_agent.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+      - template: instances/openmetrics_legacy
+        overrides:
+          prometheus_url.value.example: http://localhost:5000/metrics
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - cluster-agent
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+      - template: instances/openmetrics_legacy
+        overrides:
+          prometheus_url.value.example: http://%%host%%:5000/metrics
