@@ -24,7 +24,6 @@ class DNSCheck(AgentCheck):
 
     def _load_conf(self):
         # Fetches the conf
-
         hostname = self.instance.get('hostname')
         if not hostname:
             raise ConfigurationError('A valid "hostname" must be specified')
