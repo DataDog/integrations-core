@@ -69,6 +69,7 @@ class InstanceConfig(BaseModel):
     pshard_graceful_timeout: Optional[bool]
     pshard_stats: Optional[bool]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     slm_stats: Optional[bool]
