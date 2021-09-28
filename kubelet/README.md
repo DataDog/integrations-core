@@ -63,12 +63,13 @@ deployed by setting the [`DD_CONTAINER_EXCLUDE` environment
 variable][7]. This integration does not report metrics from the containers
 specified in that environment variable.
 
-This integration reports network metrics that apply to a pod instead of a
-single container. So, if `DD_CONTAINER_EXCLUDE` applies to a
-namespace, the pod-level metrics will not be reported if the pod is in that
-namespace. However, if `DD_CONTAINER_EXCLUDE` refers to a container name or an
-image name, the pod-level metrics will be reported even if the exclusion rules
-defined apply to some containers included in the pod.
+For network metrics reported at the pod level, excluding containers based on
+"name" or "image name" will not work since other containers can be part of the
+same pod. So, if `DD_CONTAINER_EXCLUDE` applies to a namespace, the pod-level
+metrics will not be reported if the pod is in that namespace. However, if
+`DD_CONTAINER_EXCLUDE` refers to a container name or an image name, the
+pod-level metrics will be reported even if the exclusion rules defined apply to
+some containers included in the pod.
 
 
 ## Troubleshooting
