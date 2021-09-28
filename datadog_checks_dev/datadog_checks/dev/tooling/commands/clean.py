@@ -5,7 +5,7 @@ import os
 
 import click
 
-from ...utils import basepath, dir_exists, resolve_path
+from ...fs import basepath, dir_exists, resolve_path
 from ..clean import DELETE_EVERYWHERE, DELETE_IN_ROOT, clean_package, remove_compiled_scripts
 from ..constants import get_root
 from ..utils import complete_testable_checks

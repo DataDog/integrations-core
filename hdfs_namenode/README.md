@@ -18,7 +18,7 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 ### Configuration
 
-#### Prepare the NameNode
+#### Prepare the node
 
 1. The Agent collects metrics from the NameNode's JMX remote interface. The interface is disabled by default, so enable it by setting the following option in `hadoop-env.sh` (usually found in \$HADOOP_HOME/conf):
 
@@ -33,7 +33,7 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 
 #### Connect the Agent
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -116,8 +116,7 @@ The HDFS-namenode check does not include any events.
 
 ### Service Checks
 
-**hdfs.namenode.jmx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+See [service_checks.json][120] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -139,6 +138,7 @@ Need help? Contact [Datadog support][119].
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [118]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
 [119]: https://docs.datadoghq.com/help/
+[120]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/assets/service_checks.json
 [1110]: https://www.datadoghq.com/blog/hadoop-architecture-overview
 [1111]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [1112]: https://www.datadoghq.com/blog/collecting-hadoop-metrics

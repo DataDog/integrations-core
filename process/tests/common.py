@@ -96,7 +96,7 @@ def get_config_stubs():
                 'name': 'test_tags',
                 # index in the array for our find_pids mock
                 'search_string': ['test_5'],
-                'tags': ['onetag', 'env:prod'],
+                'tags': ['onetag', 'environment:prod'],
             },
             'mocked_processes': set([2]),
         },
