@@ -408,29 +408,44 @@ class WMISampler(object):
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
                 - [{'Property': value},...] or
-                - [{'Property': [comparison_op, value]},...] or
-                - [{'Property': {logic_op: [comparison_op, value]},...}]
+                - [{'Property': [WQL_OP, value]},...] or
+                - [{'Property': {BOOL_OP: [WQL_OP, value]},...}]
 
-                NOTE: If we just provide a value we default to '=' comparison operator.
-                Otherwise, specify the operator in a list as above: [comp_op, value]
-                If we detect a wildcard character ('%') we will override the operator
+                NOTE: If we just provide a value we default to '=' WQL operator.
+                Otherwise, specify the operator in a list as above: [WQL_OP, value]
+                If we detect a wildcard character ('%') we will override the WQL operator
                 to use LIKE
         """
 
         # https://docs.microsoft.com/en-us/windows/win32/wmisdk/wql-operators
         # Not supported: ISA, IS and IS NOT
-        # Supported SQL operators.
+        # Supported WQL operators.
         WQL_OPERATORS = ('=', '<', '>', '<=', '>=', '!=', '<>', 'LIKE')
 
-        # Supported logic/bool operators
+        # Supported bool operators
         # Also takes NOT which maps to NAND or NOR depending on default_bool_op
         BOOL_OPERATORS = ('AND', 'OR', 'NAND', 'NOR')
 
         def build_where_clause(fltr):
-            def add_to_bool_ops(k, v, should_extend=False):
-                if should_extend:
-                    bool_ops[k].extend(v)
+            def add_to_bool_ops(k, v):
+                if isinstance(v, (tuple, list)):
+                    if len(v) == 2 and isinstance(v[0], string_types) and v[0].upper() in WQL_OPERATORS:
+                        # Append if: [WQL_OP, value]
+                        #     PROPERTY: ['<WQL_OP>', '%bar']
+                        #     PROPERTY: { <BOOL_OP>: ['<WQL_OP>', 'foo']}
+                        bool_ops[k].append(v)
+                    else:
+                        # Extend if: list of string value/s, or list of [WQL_OP, value]
+                        #     PROPERTY: [foo%]
+                        #     PROPERTY: [['<WQL_OP>', '%bar']]
+                        #     PROPERTY: ['foo%', '%bar']
+                        #     PROPERTY: { <BOOL_OP>: [['<WQL_OP>', 'foo']]}
+                        #     PROPERTY: { <BOOL_OP>: ['foo%', '%bar']]}
+                        bool_ops[k].extend(v)
                 else:
+                    # Append if: string value
+                    #     PROPERTY: foo%
+                    #     PROPERTY: { <BOOL_OP>: foo%]}
                     bool_ops[k].append(v)
 
             f = fltr.pop()
@@ -447,35 +462,25 @@ class WMISampler(object):
                         break
 
                 if isinstance(value, (tuple, list)):
-                    # Append if PROPERTY: ['<>', 'foo']
-                    # Extend if PROPERTY: [['<>', 'foo']]
-                    # Extend if PROPERTY: ['foo%', '%bar']
-                    should_extend = False if len(value) == 2 and value[0].upper() in WQL_OPERATORS else True
-                    add_to_bool_ops(default_bool_op, value, should_extend)
+                    # e.g.
+                    # PROPERTY: [WQL_OP, val]
+                    # PROPERTY: [foo, bar]
+                    add_to_bool_ops(default_bool_op, value)
                 elif isinstance(value, dict):
                     # e.g.
                     # PROPERTY:
-                    #   AND:
-                    #     - ['<>', 'foo']
-                    #     - ['<>', 'bar']
-                    #     - baz
+                    #   BOOL_OP:
+                    #     - [WQL_OP, val]
+                    #     - foo
+                    #     - bar
                     for k, v in iteritems(value):
-                        # Append if PROPERTY: { AND: ['<>', 'foo']}
-                        # Extend if PROPERTY: { AND: [['<>', 'foo']]}
-                        # Append if PROPERTY: { AND: 'foo%'}
-                        # Extend if PROPERTY: { AND: ['foo%', '%bar']]}
-                        should_extend = (
-                            True
-                            if isinstance(v, (tuple, list)) and not (len(v) == 2 and v[0].upper() in WQL_OPERATORS)
-                            else False
-                        )
                         bool_op = default_bool_op
                         if k.upper() in BOOL_OPERATORS:
                             bool_op = k.upper()
                         elif k.upper() == 'NOT':
                             # map NOT to NOR or NAND
                             bool_op = 'N{}'.format(default_bool_op)
-                        add_to_bool_ops(bool_op, v, should_extend)
+                        add_to_bool_ops(bool_op, v)
                 elif isinstance(value, string_types) and '%' in value:
                     # Override operator to LIKE if wildcard detected
                     # e.g.
@@ -484,7 +489,7 @@ class WMISampler(object):
                 else:
                     # Use default comparison operator
                     # e.g.
-                    # PROPERTY: 'bar'  -> PROPERTY = 'foo'
+                    # PROPERTY: 'bar'   -> PROPERTY = 'foo'
                     add_to_bool_ops(default_bool_op, [default_wql_op, value])
 
                 for bool_op, value in iteritems(bool_ops):

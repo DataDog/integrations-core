@@ -87,7 +87,11 @@ def test_format_filter_bool_op_alt():
     filters = [{'a': {'AND': [['!=', 'AA'], ['!=', 'BB']], 'OR': 'CC%'}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( ( a != 'AA' AND a != 'BB' ) OR a LIKE 'CC%' )"
+    # python2 sometimes return the other set of conditions first.
+    assert (
+        formatted_filters == " WHERE ( ( a != 'AA' AND a != 'BB' ) OR a LIKE 'CC%' )"
+        or formatted_filters == " WHERE ( a LIKE 'CC%' OR ( a != 'AA' AND a != 'BB' ) )"
+    )
 
 
 @requires_windows
