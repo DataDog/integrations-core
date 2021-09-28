@@ -17,11 +17,12 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     field_names: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     mysql_host: str
-    mysql_password: str
+    mysql_password: Optional[str]
     mysql_port: Optional[int]
     mysql_user: str
     rrd_path: str
