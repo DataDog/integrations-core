@@ -21,7 +21,7 @@ files:
       required: true
       value:
         type: string
-    - name: user
+    - name: username
       description: The username for the Datadog user account.
       required: true
       value:

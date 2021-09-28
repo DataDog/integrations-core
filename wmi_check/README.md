@@ -17,7 +17,7 @@ Get metrics from your Windows applications and servers with Windows Management I
 
 If you are only collecting standard metrics from Microsoft Windows and other packaged applications, there are no installation steps. If you need to define new metrics to collect from your application, then you have a few options:
 
-1. Submit perfomance counters using System.Diagnostics in .NET, then access them via WMI.
+1. Submit performance counters using System.Diagnostics in .NET, then access them via WMI.
 2. Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
 To learn more about using System.Diagnostics, see [the MSDN documentation][2]. After adding your metric you should be able to find it in WMI. To browse the WMI namespaces you may find this tool useful: [WMI Explorer][3]. You can find the same information with Powershell [here][4]. Also review the information in the [Datadog Knowledge Base article][5].
@@ -64,7 +64,72 @@ The metrics definitions include three components:
 - Metric name as it appears in Datadog.
 - The metric type.
 
-#### Configuration Options
+The following sample configuration populates many more metrics on a Windows 2012 server.
+```yaml
+init_config:
+
+instances:
+  # Fetch the number of processes and users.
+  - class: Win32_OperatingSystem
+    metrics:
+      - [NumberOfProcesses, system.proc.count, gauge]
+      - [NumberOfUsers, system.users.count, gauge]
+
+# Paging info
+  - class: Win32_PerfFormattedData_PerfOS_Memory
+    metrics:
+      - [PageFaultsPersec, system.mem.page.faults, gauge]
+      - [PageReadsPersec, system.mem.page.reads, gauge]
+      - [PagesInputPersec, system.mem.page.input, gauge]
+      - [AvailableMBytes, system.mem.avail, gauge]
+      - [CommitLimit, system.mem.limit, gauge]
+      # Cache bytes metric for disk info
+      - [CacheBytes, system.mem.fs_cache, gauge]
+
+# Paging file
+  - class: Win32_PerfFormattedData_PerfOS_PagingFile
+    metrics:
+      - [PercentUsage, system.mem.page.pct, gauge]
+    tag_by: Name
+  # Fetch the number of processes
+  - class: Win32_PerfFormattedData_PerfOS_System
+    metrics:
+      - [ProcessorQueueLength, system.proc.queue, gauge]
+
+  - class: Win32_PerfFormattedData_PerfOS_Processor
+    metrics:
+      - [PercentProcessorTime, system.cpu.pct, gauge]
+      - [PercentPrivilegedTime, system.cpu.priv.pct, gauge]
+      - [PercentDPCTime, system.cpu.dpc.pct, gauge]
+      - [PercentInterruptTime, system.cpu.interrupt.pct, gauge]
+      - [DPCsQueuedPersec, system.cpu.dpc.queue, gauge]
+    tag_by: Name
+
+# Context switches
+  - class: Win32_PerfFormattedData_PerfProc_Thread
+    metrics:
+      - [ContextSwitchesPersec, system.proc.context_switches, gauge]
+    filters:
+      - Name: _total/_total
+
+# Disk info
+  - class: Win32_PerfFormattedData_PerfDisk_LogicalDisk
+    metrics:
+      - [PercentFreeSpace, system.disk.free.pct, gauge]
+      - [PercentIdleTime, system.disk.idle, gauge]
+      - [AvgDisksecPerRead, system.disk.read_sec, gauge]
+      - [AvgDisksecPerWrite, system.disk.write_sec, gauge]
+      - [DiskWritesPersec, system.disk.writes, gauge]
+      - [DiskReadsPersec, system.disk.reads, gauge]
+      - [AvgDiskQueueLength, system.disk.queue, gauge]
+    tag_by: Name
+
+  - class: Win32_PerfFormattedData_Tcpip_TCPv4
+    metrics:
+      - [SegmentsRetransmittedPersec, system.net.tcp.retrans_seg, gauge]
+    tag_by: Name
+```
+#### Configuration options
 
 _This feature is available starting with version 5.3 of the agent_
 
