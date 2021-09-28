@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....utils import write_file_lines
+from ....fs import write_file_lines
 from ...constants import AGENT_V5_ONLY, get_agent_release_requirements
 from ...release import get_agent_requirement_line
 from ...utils import get_valid_checks, get_version_string

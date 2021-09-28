@@ -1,0 +1,857 @@
+{
+    "author_name": "Datadog",
+    "description": "Using this dashboard, you can get a high-level view of your Twemproxy servers, including:\n\n- client and server connections and errors\n- request and response rates\n- bytes in and out of the proxy, and more.\n\nTo learn more about our Twemproxy integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/twemproxy/?tab=host)\n\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "scope",
+            "prefix": null
+        }
+    ],
+    "title": "Twemproxy - Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Using this dashboard, you can get a high-level view of your Twemproxy servers, including:\n\n- client and server connections and errors\n- request and response rates\n- bytes in and out of the proxy, and more.\n\nTo learn more about our Twemproxy integration, see:\n\n- Our official [integration documentation](https://docs.datadoghq.com/integrations/twemproxy/?tab=host)\n\n\nClone this template dashboard to make changes and add your own graph widgets.",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6862175229932376,
+            "layout": {
+                "height": 3,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "title": "Summary",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "sum:twemproxy.client_connections{$scope}"
+                                }
+                            ],
+                            "title": "Client Connections",
+                            "type": "query_value"
+                        },
+                        "id": 8921712561928178,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "max",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_red",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "black_on_light_green",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "q": "avg:twemproxy.client_err{$scope}"
+                                }
+                            ],
+                            "text_align": "center",
+                            "title": "Client Connection Errors - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 6652641363087018,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "sum:twemproxy.server_connections{$scope}"
+                                }
+                            ],
+                            "text_align": "left",
+                            "title": "Server Connections",
+                            "type": "query_value"
+                        },
+                        "id": 7650690032884040,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "max",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_red",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "black_on_light_green",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "q": "avg:twemproxy.server_err{$scope}"
+                                }
+                            ],
+                            "text_align": "left",
+                            "title": "Server Connection Errors - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 2269853265190918,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 6,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 659253694954754,
+            "layout": {
+                "height": 3,
+                "width": 8,
+                "x": 4,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Performance Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:twemproxy.request_bytes{$scope}"
+                                }
+                            ],
+                            "title": "Request Bytes - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 2708054439665528,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.responses{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Responses",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7166109503781670,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:twemproxy.response_bytes{$scope}"
+                                }
+                            ],
+                            "title": "Response Bytes - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 4561219238232780,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.requests{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Requests",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5522005012480906,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 5351514266789538,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Queue Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:twemproxy.in_queue_bytes{$scope}"
+                                }
+                            ],
+                            "title": "Incoming Queue Bytes - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 3405432437877102,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.in_queue{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Requests in Incoming Queue",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8021842417341726,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "aggregator": "avg",
+                                    "q": "avg:twemproxy.out_queue_bytes{$scope}"
+                                }
+                            ],
+                            "title": "Outgoing Queue Bytes - Rate",
+                            "type": "query_value"
+                        },
+                        "id": 1534629177815832,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.out_queue{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Requests in Outgoing Queue",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1845481312006394,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 4967255299270908,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Client Activity Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.client_connections{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Active Connections",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 17312603462356,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.client_err{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Connection Error - Rate",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4151551777810114,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.client_eof{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "EOF Errors - Rate",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 909357337542138,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.forward_error{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Forward Errors - Rate",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1075218095360812,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    }
+                ]
+            },
+            "id": 4000545048939232,
+            "layout": {
+                "height": 9,
+                "is_column_break": true,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "title": "Server Activity Metrics",
+                "title_align": "center",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.server_connections{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Active Connections",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3255291682421004,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "q": "avg:twemproxy.server_err{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Connection Error - Rate",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 378148184233084,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.server_eof{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "EOF Errors - Rate",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3178759285842350,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "legend_size": "0",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "on_right_yaxis": false,
+                                    "q": "avg:twemproxy.server_timedout{$scope}",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Server Timeouts",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5034492985161988,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    }
+                ]
+            },
+            "id": 8599339219070536,
+            "layout": {
+                "height": 9,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "columns": [],
+                            "indexes": [],
+                            "message_display": "expanded-md",
+                            "query": "source:twemproxy $scope",
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "title": "Twemproxy Logs",
+                            "title_size": "16",
+                            "type": "log_stream"
+                        },
+                        "id": 2059170654603224,
+                        "layout": {
+                            "height": 6,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 6571691838555790
+        }
+    ]
+}

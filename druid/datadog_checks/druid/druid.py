@@ -8,10 +8,10 @@ from datadog_checks.base.errors import CheckException
 
 
 class DruidCheck(AgentCheck):
-    def check(self, instance):
-        custom_tags = instance.get('tags', [])
+    def check(self, _):
+        custom_tags = self.instance.get('tags', [])
 
-        base_url = instance.get('url')
+        base_url = self.instance.get('url')
         if not base_url:
             raise ConfigurationError('Missing configuration: url')
 

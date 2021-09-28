@@ -243,12 +243,12 @@ def test_get_apic_capacity_metrics(aggregator):
 
 
 def test_capacity_mocked(aggregator):
-    check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = common.FakeCapacitySessionWrapper
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
-    check.check(common.CONFIG_WITH_TAGS)
+    check.check({})
 
     tags = ['cisco', 'project:cisco_aci']
     aggregator.assert_metric(

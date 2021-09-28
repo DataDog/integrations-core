@@ -1,0 +1,34 @@
+{
+  "display_name": "Consul Connect",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "consul_connect",
+  "metric_prefix": "consul_connect.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Monitor Consul Connect Envoy sidecar proxies.",
+  "guid": "9eb2d74b-32df-41f3-9248-bc87ccdda983",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Consul Connect",
+  "categories": [
+    "network",
+    "log collection",
+    "containers"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "consul-connect",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
