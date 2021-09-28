@@ -8,3 +8,8 @@ files:
   - template: instances
     options:
     - template: instances/jmx
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/hudi.log
+      source: hudi

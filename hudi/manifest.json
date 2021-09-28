@@ -18,12 +18,18 @@
   "type": "check",
   "is_public": false,
   "integration_id": "hudi",
-  "categories": ["processing"],
+  "categories": [
+    "log collection",
+    "processing"
+  ],
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {},
+    "logs": {
+      "source": "hudi"
+    },
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
