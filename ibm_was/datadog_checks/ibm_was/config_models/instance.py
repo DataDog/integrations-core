@@ -43,6 +43,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -55,6 +56,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
     custom_queries_units_gauge: Optional[Sequence[str]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
