@@ -1,6 +1,6 @@
 parameters:
-  agent_image_win: $(DDEV_E2E_AGENT_WIN)
-  agent_image_win_py2: $(DDEV_E2E_AGENT_WIN_PY2)
+  agent_image_win: $[variables.DDEV_E2E_AGENT_WIN]
+  agent_image_win_py2: $[variables.DDEV_E2E_AGENT_WIN_PY2]
   job_name: ''
   check: ''
   display: ''
@@ -33,13 +33,13 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
-    ${{ if eq(parameters.agent_image_win, '$(DDEV_E2E_AGENT_WIN)') }}:
+    ${{ if eq(parameters.agent_image_win, '') }}:
       DDEV_E2E_AGENT: WRONG_AGENT
-    ${{ if ne(parameters.agent_image_win, '$(DDEV_E2E_AGENT_WIN)') }}:
+    ${{ if ne(parameters.agent_image_win, '') }}:
       DDEV_E2E_AGENT: ${{ parameters.agent_image_win }}
-    ${{ if eq(parameters.agent_image_win_py2, '$(DDEV_E2E_AGENT_WIN_PY2)') }}:
+    ${{ if eq(parameters.agent_image_win_py2, '') }}:
       DDEV_E2E_AGENT_PY2: WRONG_AGENT
-    ${{ if ne(parameters.agent_image_win_py2, '$(DDEV_E2E_AGENT_WIN_PY2)') }}:
+    ${{ if ne(parameters.agent_image_win_py2, '') }}:
       DDEV_E2E_AGENT_PY2: ${{ parameters.agent_image_win_py2 }}
     
     # Generic tag check disabled on non-core repo
