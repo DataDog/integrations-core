@@ -29,17 +29,18 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-See [service_checks.json][8] for a list of service checks provided by this check.
-
 ### Events
 
 The Cloud Foundry API integration collects the configured audit events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: http://v3-apidocs.cloudfoundry.org
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations

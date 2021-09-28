@@ -112,7 +112,6 @@ class Gearman(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
-                message="Connection to %s:%s succeeded." % (host, port),
                 tags=tags,
             )
         except Exception as e:

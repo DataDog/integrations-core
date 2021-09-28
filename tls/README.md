@@ -42,6 +42,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port":"443"}` |
 
+**Note**: If you are using internal certificates that are not from a well-known, trusted CA, certain metrics may not report to Datadog. Use `tls_verify: false` in your integration template to report all metrics in this instance.
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -61,23 +63,12 @@ TLS does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration:
-
-**tls.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, otherwise returns `OK`.
-
-**tls.version**:<br>
-Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
-
-**tls.cert_validation**:<br>
-Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`.
-
-**tls.cert_expiration**:<br>
-Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://en.wikipedia.org/wiki/Transport_Layer_Security
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -88,3 +79,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json

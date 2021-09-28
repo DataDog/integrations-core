@@ -14,7 +14,7 @@ from datadog_checks.disk import Disk
 from datadog_checks.disk.disk import IGNORE_CASE
 
 from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
+from .mocks import MockDiskMetrics, MockPart, mock_blkid_output, mock_lsblk_output
 
 
 def test_default_options():
@@ -182,6 +182,53 @@ def test_get_devices_label():
     ):
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == ["label:DATA", "device_label:DATA"]
+
+
+def test_lsblk_blkid_cache_incompatible():
+    """
+    Verify that `use_lsblk` and `blkid_cache_file` can't be used at the same time.
+    """
+    with pytest.raises(Exception, match="Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time."):
+        Disk('disk', {}, [{'use_lsblk': True, 'blkid_cache_file': 'filepath'}])
+
+
+def test_get_devices_label_options():
+    """
+    Verify that
+       - use_lsblk uses lsblk for labels,
+       - blkid_cache_file not null makes it use the blkid_cache and
+       - by default we use the blkid command.
+    """
+    c_lsblk = Disk('disk', {}, [{'use_lsblk': True}])
+    c_blkid = Disk('disk', {}, [{}])
+    c_blkid_cache = Disk('disk', {}, [{'blkid_cache_file': 'filepath'}])
+
+    prefix_fun = "datadog_checks.disk.disk.Disk._get_devices_label_from_"
+    with mock.patch(prefix_fun + "lsblk", return_value="lsblk"), mock.patch(
+        prefix_fun + "blkid", return_value="blkid"
+    ), mock.patch(prefix_fun + "blkid_cache", return_value="blkid_cache"):
+        assert c_lsblk._get_devices_label() == "lsblk"
+        assert c_blkid._get_devices_label() == "blkid"
+        assert c_blkid_cache._get_devices_label() == "blkid_cache"
+
+
+def test_get_devices_label_from_lsblk():
+    """
+    Test lsblk output parsing.
+    """
+    c = Disk('disk', {}, [{}])
+
+    with mock.patch(
+        "datadog_checks.disk.disk.get_subprocess_output",
+        return_value=mock_lsblk_output(),
+        __name__='get_subprocess_output',
+    ):
+        labels = c._get_devices_label_from_lsblk()
+
+    assert labels == {
+        "/dev/sda1": ["label:MYLABEL", "device_label:MYLABEL"],
+        "/dev/sda15": ["label: WITH SPACES ", "device_label: WITH SPACES "],
+    }
 
 
 @pytest.mark.usefixtures('psutil_mocks')

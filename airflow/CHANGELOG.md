@@ -1,6 +1,14 @@
 # CHANGELOG - Airflow
 
-## 1.7.2 / 2021-03-07
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.8.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add support for Airflow 2. See [#9064](https://github.com/DataDog/integrations-core/pull/9064).
+
+## 1.7.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
