@@ -8,7 +8,7 @@ this check will report three other states:
 
     `down`: the check cannot connect to zookeeper
     `inactive`: the zookeeper instance has lost connection to the cluster
-    `unknown`: an unexpected error has occured in this check
+    `unknown`: an unexpected error has occurred in this check
 
 States can be accessed through the gauge `zookeeper.instances.<state>,
 through the set `zookeeper.instances`, or through the `mode:<state>` tag.
@@ -143,9 +143,10 @@ class ZookeeperCheck(AgentCheck):
             ruok = ruok_out.readline()
             if ruok == 'imok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.WARNING
-            message = u'Response from the server: %s' % ruok
+                message = u'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -179,7 +180,7 @@ class ZookeeperCheck(AgentCheck):
             if self.expected_mode:
                 if mode == self.expected_mode:
                     status = AgentCheck.OK
-                    message = u"Server is in %s mode" % mode
+                    message = None
                 else:
                     status = AgentCheck.CRITICAL
                     message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
@@ -221,7 +222,7 @@ class ZookeeperCheck(AgentCheck):
         gauges[mode] = 1
         for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
-            self.gauge(gauge_name, v)
+            self.gauge(gauge_name, v, tags=self.base_tags)
 
     @staticmethod
     def _get_data(sock, command):
@@ -316,7 +317,7 @@ class ZookeeperCheck(AgentCheck):
             _, value = buf.readline().split(':')
             metrics.append(ZKMetric('zookeeper.connections', int(value.strip())))
         else:
-            # If the zk version doesnt explicitly give the Connections val,
+            # If the zk version doesn't explicitly give the Connections val,
             # use the value we computed from the client list.
             metrics.append(ZKMetric('zookeeper.connections', connections))
 
