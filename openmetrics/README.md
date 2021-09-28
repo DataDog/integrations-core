@@ -28,7 +28,7 @@ For each instance the following parameters are required:
 
 **Note**: This is a new default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][11].
 
-**Note**: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration. To learn how to customize the metrics to collect, visit the [Prometheus and OpenMetrics Metrics Collection][10] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][12].
+**Note**: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. To learn how to customize the metrics to collect, visit the [Prometheus and OpenMetrics Metrics Collection][10] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][7].
 
 For more configurations, see [Prometheus and OpenMetrics Metrics Collection][10].
 
@@ -69,4 +69,3 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.datadoghq.com/developers/openmetrics/
 [10]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [11]: https://github.com/DataDog/integrations-core/blob/7.30.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
-[12]: https://docs.datadoghq.com/help/
