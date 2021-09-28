@@ -9,8 +9,9 @@ import click
 from ....fs import file_exists, read_file, write_file
 from ...annotations import annotate_display_queue, annotate_error
 from ...constants import get_root
+from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_manifest_file, load_manifest, parse_version_parts
+from ...utils import complete_valid_checks, get_manifest_file, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
@@ -58,9 +59,9 @@ def service_checks(check, sync):
     for check_name in checks:
         display_queue = []
         file_failed = False
-        manifest = load_manifest(check_name)
+        manifest = ManifestGateway.load_manifest(check_name)
         manifest_file = get_manifest_file(check_name)
-        service_check_relative = manifest.get('assets', {}).get('service_checks', '')
+        service_check_relative = manifest.get_service_checks_path()
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))
 
         if not file_exists(service_checks_file):
@@ -82,7 +83,8 @@ def service_checks(check, sync):
             annotate_error(service_checks_file, f'Detected invalid json: {e}')
             continue
 
-        expected_display_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
+        manifest_display_name = manifest.get_display_name()
+        expected_display_name = CHECK_TO_NAME.get(check_name, manifest_display_name)
 
         if sync:
             for service_check in service_checks_data:

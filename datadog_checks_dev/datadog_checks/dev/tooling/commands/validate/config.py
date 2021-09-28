@@ -11,15 +11,9 @@ from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
-from ...utils import (
-    complete_valid_checks,
-    get_config_files,
-    get_config_spec,
-    get_data_directory,
-    get_version_string,
-    load_manifest,
-)
+from ...utils import complete_valid_checks, get_config_files, get_config_spec, get_data_directory, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
@@ -68,13 +62,15 @@ def config(ctx, check, sync, verbose):
 
         file_counter.append(None)
 
+        manifest = ManifestGateway.load_manifest(check)
+
         # source is the default file name
         if check == 'agent':
             display_name = 'Datadog Agent'
             source = 'datadog'
             version = None
         else:
-            display_name = load_manifest(check).get('display_name', check)
+            display_name = manifest.get_display_name()
             source = check
             version = get_version_string(check)
 

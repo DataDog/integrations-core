@@ -1,0 +1,76 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+from ..fs import file_exists
+from .constants import get_root
+from .datastructures import JSONDict
+from .utils import load_manifest
+
+
+class ManifestGateway:
+    """
+    Gateway class to retrieve a manifest class based on the check
+    """
+
+    @staticmethod
+    def load_manifest(check):
+        raw_manifest_json = load_manifest(check)
+        manifest_version = raw_manifest_json.get("manifest_version")
+        if manifest_version == "1.0.0":
+            return ManifestV1(check, raw_manifest_json)
+        elif manifest_version == "2.0.0":
+            return ManifestV2(check, raw_manifest_json)
+        else:
+            raise ValueError("Invalid manifest version")
+
+
+class ManifestV1:
+    """
+    Getters for the V1 Manifest
+    These should match whats found in the ManifestV2 class
+    """
+
+    def __init__(self, check_name, manifest_json):
+        self._check_name = check_name
+        self._manifest_json = JSONDict(manifest_json)
+
+    def get_display_name(self):
+        return self._manifest_json['display_name']
+
+    def get_metric_prefix(self):
+        return self._manifest_json['metric_prefix']
+
+    def get_eula_from_manifest(self):
+        path = self._manifest_json['terms']['eula']
+        path = os.path.join(get_root(), self._check_name, *path.split('/'))
+        return path, file_exists(path)
+
+    def get_service_checks_path(self):
+        return self._manifest_json["assets"]["service_checks"]
+
+
+class ManifestV2:
+    """
+    Getters for the V2 Manifest
+    These should match whats found in the ManifestV1 class
+    """
+
+    def __init__(self, check_name, manifest_json):
+        self._check_name = check_name
+        self._manifest_json = JSONDict(manifest_json)
+
+    def get_display_name(self):
+        return self._manifest_json.get_path("/assets/integration/source_type_name")
+
+    def get_metric_prefix(self):
+        return self._manifest_json.get_path("/assets/integration/metrics/prefix") or ''
+
+    def get_eula_from_manifest(self):
+        path = self._manifest_json['legal_terms']['eula']
+        path = os.path.join(get_root(), self._check_name, *path.split('/'))
+        return path, file_exists(path)
+
+    def get_service_checks_path(self):
+        return self._manifest_json["assets"]["integration"]["service_checks"]["metadata_path"]

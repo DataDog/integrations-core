@@ -4,8 +4,9 @@
 import click
 
 from ...annotations import annotate_error
+from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_eula_from_manifest, get_manifest_file
+from ...utils import complete_valid_checks, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
@@ -25,7 +26,7 @@ def eula(check):
     echo_info(f"Validating EULA files for {len(checks)} checks...")
 
     for check_name in checks:
-        eula_relative_location, eula_exists = get_eula_from_manifest(check_name)
+        eula_relative_location, eula_exists = ManifestGateway.load_manifest(check_name).get_eula_from_manifest()
         manifest_file = get_manifest_file(check_name)
 
         if not eula_exists:

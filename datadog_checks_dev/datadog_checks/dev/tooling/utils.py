@@ -232,12 +232,6 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, path)
 
 
-def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula', '')
-    path = os.path.join(get_root(), check_name, *path.split('/'))
-    return path, file_exists(path)
-
-
 def get_jmx_metrics_file(check_name):
     path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
     return path, file_exists(path)
