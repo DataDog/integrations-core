@@ -209,7 +209,8 @@ class FargateCheck(AgentCheck):
                     cpu_percent = round_value(cpu_percent, 2)
                     self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
                 else:
-                    # There is a bug where the system CPU usage is occasionally reported as greater than the CPU usage,
+                    # There is a bug where container CPU usage is occasionally reported as greater than system
+                    # CPU usage (which, in fact, represents the maximum available CPU time during this timeframe),
                     # leading to a non-sensical CPU percentage to be reported. To mitigate this we substitute the
                     # system_delta with (t1 - t0)*active_cpus (with a scale factor to convert to nanoseconds)
 
@@ -225,8 +226,8 @@ class FargateCheck(AgentCheck):
                     t0 = container_stats.get('preread', '')
                     try:
                         t_delta = int((parser.isoparse(t1) - parser.isoparse(t0)).total_seconds())
-                        system_delta = t_delta * active_cpus * (10 ** 9)
-                        cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                        # Simplified formula for cpu_percent where system_delta = t_delta * active_cpus * (10 ** 9)
+                        cpu_percent = (cpu_delta / t_delta * (10 ** 9)) * 100.0
                         cpu_percent = round_value(cpu_percent, 2)
                         self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
                     except ValueError:
