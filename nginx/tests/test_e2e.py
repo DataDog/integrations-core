@@ -69,5 +69,9 @@ def test_e2e_vts(dd_agent_check, instance_vts):
 
     aggregator.assert_all_metrics_covered()
 
-    tags = common.TAGS + ['port:{}'.format(common.PORT), 'host:{}'.format(common.HOST)]
+    tags = common.TAGS + [
+        'nginx_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'host:{}'.format(common.HOST),
+    ]
     aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=tags)
