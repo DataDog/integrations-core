@@ -21,12 +21,12 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e(instance_basic):
+def config_e2e():
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [instance_basic],
+        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -71,14 +71,8 @@ def dd_environment(config_e2e):
 
 
 @pytest.fixture(scope='session')
-def instance_basic():
-    return {
-        'host': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
-        'port': common.PORT,
-        'disable_generic_tags': 'true',
-    }
+def instance_basic(config_e2e):
+    return config_e2e['instances'][0]
 
 
 @pytest.fixture
@@ -88,7 +82,6 @@ def instance_complex():
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -122,7 +115,6 @@ def instance_custom_queries():
         'pass': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
         'custom_queries': [
             {
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
@@ -138,7 +130,7 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
 @pytest.fixture(scope='session')
