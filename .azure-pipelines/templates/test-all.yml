@@ -38,7 +38,7 @@ jobs:
       dd_url: ${{ parameters.dd_url }}
 
       # Setup windows images
-      ${{ if eq(check.os 'windows')}}:
+      ${{ if eq(check.os, 'windows')}}:
         agent_image_win: ${{ parameters.agent_image_win }}
         agent_image_win_py2: ${{ parameters.agent_image_win_py2 }}
 
