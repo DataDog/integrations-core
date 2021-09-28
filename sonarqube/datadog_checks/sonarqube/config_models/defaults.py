@@ -200,6 +200,10 @@ def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_request_size(field, value):
+    return 16
+
+
 def instance_rmi_client_timeout(field, value):
     return 15000
 
