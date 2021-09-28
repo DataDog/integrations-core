@@ -60,6 +60,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     query_monitoring_url: Optional[str]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     server: str
     service: Optional[str]
     skip_proxy: Optional[bool]
