@@ -34,7 +34,7 @@ else:
 
 
 class Disk(AgentCheck):
-    """ Collects metrics about the machine's disks. """
+    """Collects metrics about the machine's disks."""
 
     METRIC_DISK = 'system.disk.{}'
     METRIC_INODE = 'system.fs.inodes.{}'
