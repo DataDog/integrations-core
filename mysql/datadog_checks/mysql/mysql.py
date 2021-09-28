@@ -218,7 +218,7 @@ class MySql(AgentCheck):
         if server is None:
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
-            'server:{0}'.format(server)
+            'server:{0}'.format(server),
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
         ] + self._config.tags
         return service_check_tags
