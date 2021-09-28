@@ -113,9 +113,10 @@ files:
           properties: []
       - name: auto_discover_queues
         description: |
-          Autodiscover the queues to monitor.
-          Note: Do not use in conjunction with `queue_patterns` or `queue_regex` as it may lead to unexpected results.
-          Warning: this will lead to some warnings in your logs
+          Autodiscover the queues to monitor. This autodiscover all available queues. If you have dynamic queues
+          it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+          queues to monitor use `queue_patterns` or `queue_regex` instead.
+          Warning: this can lead to some warnings in your logs
         value:
           example: false
           type: boolean
