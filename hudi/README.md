@@ -85,7 +85,6 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/hudi.log
        source: hudi
-       service: myapp
        #To handle multi line that starts with yyyy-mm-dd use the following pattern
        #log_processing_rules:
        #  - type: multi_line
