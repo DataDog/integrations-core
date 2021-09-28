@@ -177,7 +177,7 @@ def instance_read_timeout(field, value):
 
 
 def instance_request_size(field, value):
-    return 16
+    return 10
 
 
 def instance_send_distribution_buckets(field, value):
