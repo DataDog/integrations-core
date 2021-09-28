@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -49,7 +53,11 @@ def instance_db_exclude(field, value):
 
 
 def instance_db_include(field, value):
-    return get_default_field_value(field, value)
+    return 'all'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -101,7 +109,7 @@ def instance_max_dbs_per_check(field, value):
 
 
 def instance_max_nodes_per_check(field, value):
-    return 10
+    return 20
 
 
 def instance_min_collection_interval(field, value):
