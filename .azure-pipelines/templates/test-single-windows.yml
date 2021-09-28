@@ -34,11 +34,11 @@ jobs:
 
   variables:
     ${{ if eq(parameters.agent_image_win, '') }}:
-      DDEV_E2E_AGENT: WRONG_AGENT
+      DDEV_E2E_AGENT: datadog/agent-dev:master-py2-win-servercore
     ${{ if ne(parameters.agent_image_win, '') }}:
       DDEV_E2E_AGENT: ${{ parameters.agent_image_win }}
     ${{ if eq(parameters.agent_image_win_py2, '') }}:
-      DDEV_E2E_AGENT_PY2: WRONG_AGENT
+      DDEV_E2E_AGENT_PY2: ''
     ${{ if ne(parameters.agent_image_win_py2, '') }}:
       DDEV_E2E_AGENT_PY2: ${{ parameters.agent_image_win_py2 }}
     
