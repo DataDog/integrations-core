@@ -62,7 +62,7 @@ _Available for Agent versions >6.0_
     log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
    ```
 
-2. By default, our integration pipeline supports the following conversion pattern:
+2. By default, Datadog's integration pipeline supports the following conversion pattern:
 
     ```text
     %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
