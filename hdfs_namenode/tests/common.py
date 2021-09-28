@@ -8,8 +8,8 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.docker import get_docker_hostname
 
 HERE = get_here()
-
 HOST = get_docker_hostname()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 # Namenode URI
 NAMENODE_URI = 'http://{}:50070/'.format(HOST)

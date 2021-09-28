@@ -7,8 +7,8 @@ import os
 
 import mock
 import pytest
-import simplejson as json
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -63,25 +63,13 @@ def check():
     return FargateCheck('ecs_fargate', {}, {})
 
 
-class MockResponse:
-    def __init__(self, json_data, status_code):
-        self.json_data = json_data
-        self.status_code = status_code
-
-    def json(self):
-        return self.json_data
-
-
 def mocked_requests_get(*args, **kwargs):
     if args[0].endswith("/metadata"):
-        fpath = os.path.join(HERE, 'fixtures', 'metadata.json')
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
-        fpath = os.path.join(HERE, 'fixtures', 'stats.json')
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats.json'))
     else:
-        return MockResponse(None, 404)
-
-    with open(fpath) as f:
-        return MockResponse(json.loads(f.read()), 200)
+        return MockResponse(status_code=404)
 
 
 def mocked_get_tags(entity, _):
@@ -144,7 +132,9 @@ def test_failing_check(check, instance, aggregator):
     Testing fargate metadata endpoint error.
     """
     check.instance = instance
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 500)):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=500)
+    ):
         check.check({})
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
@@ -155,7 +145,9 @@ def test_invalid_response_check(check, instance, aggregator):
     Testing invalid fargate metadata payload.
     """
     check.instance = instance
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 200)):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=200)
+    ):
         check.check({})
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
