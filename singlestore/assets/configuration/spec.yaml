@@ -1,0 +1,67 @@
+name: SingleStore
+files:
+- name: singlestore.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/db
+  - template: instances
+    options:
+    - name: host
+      description: The hostname or IP of the SingleStore database
+      required: true
+      value:
+        type: string
+    - name: port
+      description: The port of the SingleStore database.
+      required: false
+      value:
+        type: integer
+        example: 3306
+    - name: username
+      description: The username to use for connecting to the SingleStore database.
+      required: false
+      value:
+        type: string
+    - name: password
+      description: The password to use for connecting to the SingleStore database.
+      required: false
+      value:
+        type: string
+    - name: connect_timeout
+      description: Timeout in seconds before throwing an exception when connecting.
+      required: false
+      value:
+        type: integer
+        example: 10
+    - name: read_timeout
+      description: The timeout for reading from the connection in seconds. No timeout by default
+      required: false
+      value:
+        type: integer
+    - template: instances/db
+    - name: collect_system_metrics
+      description: |
+        Collect additional system metrics from the MV_SYSINFO_* tables. Disabled by default to limit
+        the number of metrics being collected.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - name: use_tls
+      description: |
+        Whether or not to open the connection on a secure TLS socket. Use in conjunction with
+        `tls_verify` for verifying the validity of the server certificate.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - template: instances/tls
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path:  /var/lib/memsql/<ID>/tracelogs/memsql.log
+      source: singlestore
+      service: <SERVICE>
