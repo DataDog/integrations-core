@@ -49,6 +49,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'autodiscovery_subnet:{}.0/29'.format(subnet_prefix),
         'tag1:val1',
         'tag2:val2',
+        'device_namespace:default',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
