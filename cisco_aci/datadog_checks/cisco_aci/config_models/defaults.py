@@ -24,6 +24,10 @@ def instance_aci_urls(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -62,6 +66,10 @@ def instance_cert_name(field, value):
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -109,7 +117,7 @@ def instance_log_requests(field, value):
 
 
 def instance_min_collection_interval(field, value):
-    return 180
+    return 15
 
 
 def instance_ntlm_domain(field, value):

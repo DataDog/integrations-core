@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
 
     aci_url: str
     aci_urls: Optional[Sequence[str]]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -46,6 +47,7 @@ class InstanceConfig(BaseModel):
     cert_key_path: Optional[str]
     cert_name: Optional[str]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
