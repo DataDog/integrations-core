@@ -17,6 +17,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     include_interrupt_metrics: Optional[bool]
     min_collection_interval: Optional[float]
