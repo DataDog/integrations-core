@@ -11,10 +11,11 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
+from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import create_file, file_exists, find_check_root
+from .utils import find_check_root
 
 try:
     from contextlib import ExitStack
@@ -56,6 +57,14 @@ def compose_file_active(compose_file):
             return len(lines[i:]) >= 1
 
     return False
+
+
+def using_windows_containers():
+    """
+    Returns a `bool` indicating whether or not Docker is configured to use Windows containers.
+    """
+    os_type = run_command(['docker', 'info', '--format', '{{.OSType}}'], capture=True, check=True).stdout.strip()
+    return os_type == 'windows'
 
 
 @contextmanager

@@ -4,9 +4,15 @@ parameters:
   ispr: false
   pip_cache_config: null
   run_py2_tests: true
+  run_py3_tests: true
   force_base_package: false
   coverage: true
+  test: true
   test_e2e: true
+  benchmark: true
+  latest: false
+  ddtrace_flag: ''
+  dd_url: https://app.datadoghq.com
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -19,9 +25,17 @@ jobs:
       ispr: ${{ parameters.ispr }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
       run_py2_tests: ${{ parameters.run_py2_tests }}
+      run_py3_tests: ${{ parameters.run_py3_tests }}
       force_base_package: ${{ parameters.force_base_package }}
-      test_e2e: ${{ and(eq(parameters.test_e2e, 'true'), eq(check.os, 'linux')) }}  # e2e tests cannot run on windows
+      test: ${{ parameters.test }}
+      test_e2e: ${{ parameters.test_e2e }}
+      benchmark: ${{ parameters.benchmark }}
+      latest: ${{ parameters.latest }}
+      ddtrace_flag: ${{ parameters.ddtrace_flag }}
+      validate_codeowners: ${{ parameters.validate_codeowners }}
+      dd_url: ${{ parameters.dd_url }}
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:
         validate: true
+        validate_changed: all

@@ -5,6 +5,7 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import CheckException
 
 from . import common
@@ -126,8 +127,14 @@ class AmbariCheck(AgentCheck):
             self.warning("No response received for service %s", service)
         else:
             state = service_resp['ServiceInfo']['state']
+            service_check_state = common.status_to_service_check(state)
+
+            message = state
+            if service_check_state is ServiceCheck.OK:
+                message = None
+
             self._submit_service_checks(
-                "state", common.status_to_service_check(state), service_tags + ['state:%s' % state], message=state
+                "state", service_check_state, service_tags + ['state:%s' % state], message=message
             )
 
     def get_component_metrics(self, cluster, service, base_tags, component_included):
@@ -187,6 +194,8 @@ class AmbariCheck(AgentCheck):
             )
         except Timeout:
             self.warning("Connection timeout when connecting to %s", url)
+        except Exception as e:
+            self.warning("Couldn't connect to URL: %s with exception: %s.", url, e)
 
     def _submit_gauge(self, name, value, tags, hostname=None):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)

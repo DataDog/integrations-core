@@ -1,0 +1,3512 @@
+[
+    {
+        "name": "voltdb.commandlog.outstanding_bytes",
+        "type": 0,
+        "value": 190565.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.outstanding_bytes",
+        "type": 0,
+        "value": 322170.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.outstanding_bytes",
+        "type": 0,
+        "value": 2857224.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.outstanding_transactions",
+        "type": 0,
+        "value": 18534.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.outstanding_transactions",
+        "type": 0,
+        "value": 2577630.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.outstanding_transactions",
+        "type": 0,
+        "value": 80086.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.in_use_segment_count",
+        "type": 0,
+        "value": 259233.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.in_use_segment_count",
+        "type": 0,
+        "value": 2468288.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.in_use_segment_count",
+        "type": 0,
+        "value": 602505.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.segment_count",
+        "type": 0,
+        "value": 70593.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.segment_count",
+        "type": 0,
+        "value": 138270.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.segment_count",
+        "type": 0,
+        "value": 111663.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.fsync_interval",
+        "type": 0,
+        "value": 410247.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.fsync_interval",
+        "type": 0,
+        "value": 1442299.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.commandlog.fsync_interval",
+        "type": 0,
+        "value": 12791253.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.cpu.percent_used",
+        "type": 0,
+        "value": 0.48573973124473147,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.cpu.percent_used",
+        "type": 0,
+        "value": 0.01516863307513272,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.cpu.percent_used",
+        "type": 0,
+        "value": 0.2817979111643427,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_queued",
+        "type": 3,
+        "value": 114818.0,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_queued",
+        "type": 3,
+        "value": 1262800.0,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_queued",
+        "type": 3,
+        "value": 1764945.0,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_pending",
+        "type": 0,
+        "value": 38355.0,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_pending",
+        "type": 0,
+        "value": 4037481.0,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.records_pending",
+        "type": 0,
+        "value": 62632.0,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.avg",
+        "type": 0,
+        "value": 39155.0,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.avg",
+        "type": 0,
+        "value": 1567165.0,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.avg",
+        "type": 0,
+        "value": 10361085.0,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.max",
+        "type": 0,
+        "value": 15861.0,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.max",
+        "type": 0,
+        "value": 3636004.0,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.latency.max",
+        "type": 0,
+        "value": 559793.0,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.queue_gap",
+        "type": 0,
+        "value": 148251.0,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.queue_gap",
+        "type": 0,
+        "value": 2516236.0,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.queue_gap",
+        "type": 0,
+        "value": 5308364.0,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_queued",
+        "type": 0,
+        "value": 88786.51664805412,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_queued",
+        "type": 0,
+        "value": 85619.4337041378,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_queued",
+        "type": 0,
+        "value": 80430.79475402832,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_acked",
+        "type": 0,
+        "value": 89580.96465682983,
+        "tags": [
+            "active:zmhlezdafqbdccu-0",
+            "export_source:laonlrrnnuyseiq-0",
+            "export_status:eqzrkodsamnozaj-0",
+            "export_target:qyxgdmbzhgblxeo-0",
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_acked",
+        "type": 0,
+        "value": 83934.67371201515,
+        "tags": [
+            "active:ugesotxbezybnxf-1",
+            "export_source:nhdaqwgssamizil-1",
+            "export_status:irrgwwudrbicaou-1",
+            "export_target:aumyezkieynfljv-1",
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.export.time_since_last_acked",
+        "type": 0,
+        "value": 81960.86976099014,
+        "tags": [
+            "active:wdmdwhkrzvbposj-2",
+            "export_source:nnjwiyvocmajsrk-2",
+            "export_status:safhggtbkjlrydt-2",
+            "export_target:mnpvzshobmrynls-2",
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_gc_count",
+        "type": 3,
+        "value": 369298.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_gc_count",
+        "type": 3,
+        "value": 465650.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_gc_count",
+        "type": 3,
+        "value": 2544043.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_avg_gc_time",
+        "type": 0,
+        "value": 21870.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_avg_gc_time",
+        "type": 0,
+        "value": 202434.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.gc.newgen_avg_gc_time",
+        "type": 0,
+        "value": 1301193.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_gc_count",
+        "type": 3,
+        "value": 192879.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_gc_count",
+        "type": 3,
+        "value": 993018.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_gc_count",
+        "type": 3,
+        "value": 3888298.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_avg_gc_time",
+        "type": 0,
+        "value": 83871.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_avg_gc_time",
+        "type": 0,
+        "value": 648444.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.gc.oldgen_avg_gc_time",
+        "type": 0,
+        "value": 11866386.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.total",
+        "type": 0,
+        "value": 69999.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.total",
+        "type": 0,
+        "value": 6791575.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.total",
+        "type": 0,
+        "value": 13089538.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.count",
+        "type": 3,
+        "value": 69999.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.count",
+        "type": 3,
+        "value": 6791575.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.count",
+        "type": 3,
+        "value": 13089538.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.pct",
+        "type": 0,
+        "value": 0.9717362812663493,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.pct",
+        "type": 0,
+        "value": 0.7642917810170974,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.wait.pct",
+        "type": 0,
+        "value": 0.8390433425434363,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.avg_wait",
+        "type": 0,
+        "value": 61126.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.avg_wait",
+        "type": 0,
+        "value": 202556.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.avg_wait",
+        "type": 0,
+        "value": 2151664.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.min_wait",
+        "type": 0,
+        "value": 18755.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.min_wait",
+        "type": 0,
+        "value": 822119.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.min_wait",
+        "type": 0,
+        "value": 20379447.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.max_wait",
+        "type": 0,
+        "value": 141773.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.max_wait",
+        "type": 0,
+        "value": 2583457.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.max_wait",
+        "type": 0,
+        "value": 1966537.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.stddev",
+        "type": 0,
+        "value": 67833.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.stddev",
+        "type": 0,
+        "value": 137394.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.idletime.stddev",
+        "type": 0,
+        "value": 1865948.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.total",
+        "type": 0,
+        "value": 91823.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.total",
+        "type": 0,
+        "value": 949959.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.total",
+        "type": 0,
+        "value": 20967.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.count",
+        "type": 3,
+        "value": 91823.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.count",
+        "type": 3,
+        "value": 949959.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.successes.count",
+        "type": 3,
+        "value": 20967.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.total",
+        "type": 0,
+        "value": 23023.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.total",
+        "type": 0,
+        "value": 3268341.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.total",
+        "type": 0,
+        "value": 3269975.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.count",
+        "type": 3,
+        "value": 23023.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.count",
+        "type": 3,
+        "value": 3268341.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.failures.count",
+        "type": 3,
+        "value": 3269975.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.outstanding_requests",
+        "type": 0,
+        "value": 134737.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.outstanding_requests",
+        "type": 0,
+        "value": 1985303.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.outstanding_requests",
+        "type": 0,
+        "value": 109560.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.total",
+        "type": 0,
+        "value": 55700.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.total",
+        "type": 0,
+        "value": 873098.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.total",
+        "type": 0,
+        "value": 1158574.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.count",
+        "type": 3,
+        "value": 55700.0,
+        "tags": [
+            "host_id:0",
+            "importer_name:hwqoyejbcemajav-0",
+            "procedure_name:sroeonjacewkjxr-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.count",
+        "type": 3,
+        "value": 873098.0,
+        "tags": [
+            "host_id:1",
+            "importer_name:zsadsbtvlaoftln-1",
+            "procedure_name:vcqqxxksynepdon-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.import.retries.count",
+        "type": 3,
+        "value": 1158574.0,
+        "tags": [
+            "host_id:2",
+            "importer_name:evxldngzsqbtquv-2",
+            "procedure_name:taafveuzrcynobw-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.index.entry_count",
+        "type": 0,
+        "value": 123279.0,
+        "tags": [
+            "host_id:0",
+            "index:lqgmiwluwbqafui-0",
+            "index_type:cdodcbjkmwcdfbw-0",
+            "is_countable:true",
+            "is_unique:true",
+            "partition_id:0",
+            "site_id:0",
+            "table:mzbybkchsjrkbgq-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.index.entry_count",
+        "type": 0,
+        "value": 2738555.0,
+        "tags": [
+            "host_id:1",
+            "index:oqubanbvumhmzqk-1",
+            "index_type:golaibdkljxebck-1",
+            "is_countable:false",
+            "is_unique:false",
+            "partition_id:1",
+            "site_id:1",
+            "table:aamjslenfujmflr-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.index.entry_count",
+        "type": 0,
+        "value": 1099466.0,
+        "tags": [
+            "host_id:2",
+            "index:wweaceqcfvtwalo-2",
+            "index_type:arnhvmpgknglvmf-2",
+            "is_countable:true",
+            "is_unique:true",
+            "partition_id:2",
+            "site_id:2",
+            "table:gfsuawmabjfzvor-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.index.memory_estimate",
+        "type": 0,
+        "value": 121984.0,
+        "tags": [
+            "host_id:0",
+            "index:lqgmiwluwbqafui-0",
+            "index_type:cdodcbjkmwcdfbw-0",
+            "is_countable:true",
+            "is_unique:true",
+            "partition_id:0",
+            "site_id:0",
+            "table:mzbybkchsjrkbgq-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.index.memory_estimate",
+        "type": 0,
+        "value": 4376218.0,
+        "tags": [
+            "host_id:1",
+            "index:oqubanbvumhmzqk-1",
+            "index_type:golaibdkljxebck-1",
+            "is_countable:false",
+            "is_unique:false",
+            "partition_id:1",
+            "site_id:1",
+            "table:aamjslenfujmflr-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.index.memory_estimate",
+        "type": 0,
+        "value": 15537638.0,
+        "tags": [
+            "host_id:2",
+            "index:wweaceqcfvtwalo-2",
+            "index_type:arnhvmpgknglvmf-2",
+            "is_countable:true",
+            "is_unique:true",
+            "partition_id:2",
+            "site_id:2",
+            "table:gfsuawmabjfzvor-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_read",
+        "type": 3,
+        "value": 22320.0,
+        "tags": [
+            "connection_hostname:auqevecrusupdlv-0",
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_read",
+        "type": 3,
+        "value": 780520.0,
+        "tags": [
+            "connection_hostname:hvvcdusvhrpkcwx-1",
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_read",
+        "type": 3,
+        "value": 355129.0,
+        "tags": [
+            "connection_hostname:liqbghcgmuixrdc-2",
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_read",
+        "type": 3,
+        "value": 201569.0,
+        "tags": [
+            "connection_hostname:auqevecrusupdlv-0",
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_read",
+        "type": 3,
+        "value": 1333108.0,
+        "tags": [
+            "connection_hostname:hvvcdusvhrpkcwx-1",
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_read",
+        "type": 3,
+        "value": 547057.0,
+        "tags": [
+            "connection_hostname:liqbghcgmuixrdc-2",
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_written",
+        "type": 3,
+        "value": 22067.0,
+        "tags": [
+            "connection_hostname:auqevecrusupdlv-0",
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_written",
+        "type": 3,
+        "value": 2339684.0,
+        "tags": [
+            "connection_hostname:hvvcdusvhrpkcwx-1",
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.io.bytes_written",
+        "type": 3,
+        "value": 2783588.0,
+        "tags": [
+            "connection_hostname:liqbghcgmuixrdc-2",
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_written",
+        "type": 3,
+        "value": 360705.0,
+        "tags": [
+            "connection_hostname:auqevecrusupdlv-0",
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_written",
+        "type": 3,
+        "value": 564643.0,
+        "tags": [
+            "connection_hostname:hvvcdusvhrpkcwx-1",
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.io.messages_written",
+        "type": 3,
+        "value": 858599.0,
+        "tags": [
+            "connection_hostname:liqbghcgmuixrdc-2",
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.interval",
+        "type": 0,
+        "value": 311530.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.interval",
+        "type": 0,
+        "value": 1404784.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.interval",
+        "type": 0,
+        "value": 2064959.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.count",
+        "type": 0,
+        "value": 173754.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.count",
+        "type": 0,
+        "value": 324803.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.count",
+        "type": 0,
+        "value": 3270371.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.transactions_per_sec",
+        "type": 0,
+        "value": 264169.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.transactions_per_sec",
+        "type": 0,
+        "value": 5017741.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.transactions_per_sec",
+        "type": 0,
+        "value": 1035310.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p50",
+        "type": 0,
+        "value": 124885.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p50",
+        "type": 0,
+        "value": 2494577.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p50",
+        "type": 0,
+        "value": 434827.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p95",
+        "type": 0,
+        "value": 75324.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p95",
+        "type": 0,
+        "value": 4496993.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p95",
+        "type": 0,
+        "value": 2023397.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99",
+        "type": 0,
+        "value": 350253.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99",
+        "type": 0,
+        "value": 1023450.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99",
+        "type": 0,
+        "value": 1580058.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p999",
+        "type": 0,
+        "value": 7590.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p999",
+        "type": 0,
+        "value": 4065244.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p999",
+        "type": 0,
+        "value": 3572415.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p9999",
+        "type": 0,
+        "value": 203150.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p9999",
+        "type": 0,
+        "value": 2143752.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p9999",
+        "type": 0,
+        "value": 2668334.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99999",
+        "type": 0,
+        "value": 83523.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99999",
+        "type": 0,
+        "value": 503858.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.p99999",
+        "type": 0,
+        "value": 195136.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.latency.max",
+        "type": 0,
+        "value": 445165.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.latency.max",
+        "type": 0,
+        "value": 3633162.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.latency.max",
+        "type": 0,
+        "value": 1267570.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.rss",
+        "type": 0,
+        "value": 196453.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.rss",
+        "type": 0,
+        "value": 4447888.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.rss",
+        "type": 0,
+        "value": 369497.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.used",
+        "type": 0,
+        "value": 80864.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.used",
+        "type": 0,
+        "value": 962251.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.used",
+        "type": 0,
+        "value": 9900818.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.unused",
+        "type": 0,
+        "value": 122524.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.unused",
+        "type": 0,
+        "value": 2215145.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.unused",
+        "type": 0,
+        "value": 1327987.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.max_heap",
+        "type": 0,
+        "value": 108862.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.max_heap",
+        "type": 0,
+        "value": 1829753.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.java.max_heap",
+        "type": 0,
+        "value": 8745779.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_data",
+        "type": 0,
+        "value": 139421.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_data",
+        "type": 0,
+        "value": 724400.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_data",
+        "type": 0,
+        "value": 1147840.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_allocated",
+        "type": 0,
+        "value": 214762.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_allocated",
+        "type": 0,
+        "value": 1356411.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_allocated",
+        "type": 0,
+        "value": 1206722.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_count",
+        "type": 0,
+        "value": 124163.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_count",
+        "type": 0,
+        "value": 530593.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.tuple_count",
+        "type": 0,
+        "value": 83590.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.index",
+        "type": 0,
+        "value": 9390.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.index",
+        "type": 0,
+        "value": 946414.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.index",
+        "type": 0,
+        "value": 2847267.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.string",
+        "type": 0,
+        "value": 19287.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.string",
+        "type": 0,
+        "value": 1773661.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.string",
+        "type": 0,
+        "value": 1921133.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.pooled",
+        "type": 0,
+        "value": 84188.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.pooled",
+        "type": 0,
+        "value": 531928.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.pooled",
+        "type": 0,
+        "value": 648472.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.memory.physical",
+        "type": 0,
+        "value": 48644.0,
+        "tags": [
+            "host_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.memory.physical",
+        "type": 0,
+        "value": 531998.0,
+        "tags": [
+            "host_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.memory.physical",
+        "type": 0,
+        "value": 48622.0,
+        "tags": [
+            "host_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.invocations",
+        "type": 3,
+        "value": 82149.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.invocations",
+        "type": 3,
+        "value": 317160.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.invocations",
+        "type": 3,
+        "value": 1223468.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.timed_invocations",
+        "type": 3,
+        "value": 42386.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.timed_invocations",
+        "type": 3,
+        "value": 1087288.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.timed_invocations",
+        "type": 3,
+        "value": 6250703.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_execution_time",
+        "type": 0,
+        "value": 26100.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_execution_time",
+        "type": 0,
+        "value": 199075.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_execution_time",
+        "type": 0,
+        "value": 7200405.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_execution_time",
+        "type": 0,
+        "value": 188396.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_execution_time",
+        "type": 0,
+        "value": 25796.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_execution_time",
+        "type": 0,
+        "value": 5386374.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_execution_time",
+        "type": 0,
+        "value": 233318.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_execution_time",
+        "type": 0,
+        "value": 1012704.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_execution_time",
+        "type": 0,
+        "value": 2274874.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_result_size",
+        "type": 0,
+        "value": 156440.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_result_size",
+        "type": 0,
+        "value": 690539.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_result_size",
+        "type": 0,
+        "value": 10790801.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_result_size",
+        "type": 0,
+        "value": 52524.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_result_size",
+        "type": 0,
+        "value": 363443.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_result_size",
+        "type": 0,
+        "value": 5353725.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_result_size",
+        "type": 0,
+        "value": 106490.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_result_size",
+        "type": 0,
+        "value": 269603.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_result_size",
+        "type": 0,
+        "value": 3301974.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_parameter_set_size",
+        "type": 0,
+        "value": 267727.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_parameter_set_size",
+        "type": 0,
+        "value": 708364.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.min_parameter_set_size",
+        "type": 0,
+        "value": 4278602.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_parameter_set_size",
+        "type": 0,
+        "value": 234798.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_parameter_set_size",
+        "type": 0,
+        "value": 1822473.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.max_parameter_set_size",
+        "type": 0,
+        "value": 6472378.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_parameter_set_size",
+        "type": 0,
+        "value": 27646.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_parameter_set_size",
+        "type": 0,
+        "value": 810089.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.avg_parameter_set_size",
+        "type": 0,
+        "value": 7569664.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.aborts",
+        "type": 3,
+        "value": 382201.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.aborts",
+        "type": 3,
+        "value": 2031358.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.aborts",
+        "type": 3,
+        "value": 2877962.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.failures",
+        "type": 3,
+        "value": 88680.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.failures",
+        "type": 3,
+        "value": 1688587.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.failures",
+        "type": 3,
+        "value": 1889031.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.successes",
+        "type": 3,
+        "value": -388732.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "procedure:klgypumzyswhcil-0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.successes",
+        "type": 3,
+        "value": -3402785.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "procedure:rxhkzjubvkolzjl-1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.procedure.successes",
+        "type": 3,
+        "value": -3543525.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "procedure:ysjhcsditbzmuqv-2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.weighted_perc",
+        "type": 0,
+        "value": 30684.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.weighted_perc",
+        "type": 0,
+        "value": 408065.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.weighted_perc",
+        "type": 0,
+        "value": 3143410.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.total",
+        "type": 0,
+        "value": 545101.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.total",
+        "type": 0,
+        "value": 102770.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.total",
+        "type": 0,
+        "value": 3233286.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.count",
+        "type": 3,
+        "value": 545101.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.count",
+        "type": 3,
+        "value": 102770.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.invocations.count",
+        "type": 3,
+        "value": 3233286.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.min_result_size",
+        "type": 0,
+        "value": 124800.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.min_result_size",
+        "type": 0,
+        "value": 475650.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.min_result_size",
+        "type": 0,
+        "value": 162454.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.max_result_size",
+        "type": 0,
+        "value": 33331.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.max_result_size",
+        "type": 0,
+        "value": 3289435.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.max_result_size",
+        "type": 0,
+        "value": 1517074.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.avg_result_size",
+        "type": 0,
+        "value": 210930.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.avg_result_size",
+        "type": 0,
+        "value": 1356225.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.avg_result_size",
+        "type": 0,
+        "value": 5567567.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.total_result_size",
+        "type": 0,
+        "value": 244934.0,
+        "tags": [
+            "procedure:gpzcreycasahqwi-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.total_result_size",
+        "type": 0,
+        "value": 1399187.0,
+        "tags": [
+            "procedure:lfmgovqjlimuarw-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureoutput.total_result_size",
+        "type": 0,
+        "value": 3638237.0,
+        "tags": [
+            "procedure:rrjaxmkuljvmfas-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.weighted_perc",
+        "type": 0,
+        "value": 133658.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.weighted_perc",
+        "type": 0,
+        "value": 3050934.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.weighted_perc",
+        "type": 0,
+        "value": 5270475.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.total",
+        "type": 0,
+        "value": 25891.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.total",
+        "type": 0,
+        "value": 879862.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.total",
+        "type": 0,
+        "value": 1933015.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.count",
+        "type": 3,
+        "value": 25891.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.count",
+        "type": 3,
+        "value": 879862.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.invocations.count",
+        "type": 3,
+        "value": 1933015.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.avg_time",
+        "type": 0,
+        "value": 209239.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.avg_time",
+        "type": 0,
+        "value": 3037025.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.avg_time",
+        "type": 0,
+        "value": 461433.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.min_time",
+        "type": 0,
+        "value": 13970.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.min_time",
+        "type": 0,
+        "value": 1103180.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.min_time",
+        "type": 0,
+        "value": 7230492.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.max_time",
+        "type": 0,
+        "value": 114382.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.max_time",
+        "type": 0,
+        "value": 3030149.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.max_time",
+        "type": 0,
+        "value": 531306.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.total",
+        "type": 0,
+        "value": 88216.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.total",
+        "type": 0,
+        "value": 79975.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.total",
+        "type": 0,
+        "value": 13364827.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.count",
+        "type": 3,
+        "value": 88216.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.count",
+        "type": 3,
+        "value": 79975.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.aborts.count",
+        "type": 3,
+        "value": 13364827.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.total",
+        "type": 0,
+        "value": 119928.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.total",
+        "type": 0,
+        "value": 661341.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.total",
+        "type": 0,
+        "value": 3635174.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.count",
+        "type": 3,
+        "value": 119928.0,
+        "tags": [
+            "procedure:agedijoyobxbluo-0",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.count",
+        "type": 3,
+        "value": 661341.0,
+        "tags": [
+            "procedure:elarchhjzeitfwt-1",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.procedureprofile.failures.count",
+        "type": 3,
+        "value": 3635174.0,
+        "tags": [
+            "procedure:maxblsfmsmysbdg-2",
+            "test:voltdb"
+        ]
+    },
+    {
+        "name": "voltdb.queue.current_depth",
+        "type": 0,
+        "value": 106418.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.queue.current_depth",
+        "type": 0,
+        "value": 2257376.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.queue.current_depth",
+        "type": 0,
+        "value": 809083.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.queue.avg_wait",
+        "type": 0,
+        "value": 14504.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.queue.avg_wait",
+        "type": 0,
+        "value": 519859.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.queue.avg_wait",
+        "type": 0,
+        "value": 417832.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.queue.max_wait",
+        "type": 0,
+        "value": 35651.0,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.queue.max_wait",
+        "type": 0,
+        "value": 2697860.0,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.queue.max_wait",
+        "type": 0,
+        "value": 696076.0,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.queue.poll_count_per_sec",
+        "type": 0,
+        "value": 39228.6,
+        "tags": [
+            "host_id:0",
+            "site_id:0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.queue.poll_count_per_sec",
+        "type": 0,
+        "value": 462784.6,
+        "tags": [
+            "host_id:1",
+            "site_id:1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.queue.poll_count_per_sec",
+        "type": 0,
+        "value": 525523.2,
+        "tags": [
+            "host_id:2",
+            "site_id:2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.size",
+        "type": 0,
+        "value": 51085.0,
+        "tags": [
+            "filename:glsxumbuurbibwr-0",
+            "host_id:0",
+            "table:ebiikdtfkkuzhbg-0",
+            "test:voltdb",
+            "type:annpkixwevpzdxn-0",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.size",
+        "type": 0,
+        "value": 1993429.0,
+        "tags": [
+            "filename:qrcisgcnqgukjbn-1",
+            "host_id:1",
+            "table:vcmgiqfnjcysydv-1",
+            "test:voltdb",
+            "type:myrrqibfmxnmutx-1",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.size",
+        "type": 0,
+        "value": 4177693.0,
+        "tags": [
+            "filename:awfljykmvjtgljd-2",
+            "host_id:2",
+            "table:dvpgsiifhwoworw-2",
+            "test:voltdb",
+            "type:xmooxzxdetadkar-2",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.duration",
+        "type": 0,
+        "value": 16830.0,
+        "tags": [
+            "filename:glsxumbuurbibwr-0",
+            "host_id:0",
+            "table:ebiikdtfkkuzhbg-0",
+            "test:voltdb",
+            "type:annpkixwevpzdxn-0",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.duration",
+        "type": 0,
+        "value": 64844.0,
+        "tags": [
+            "filename:qrcisgcnqgukjbn-1",
+            "host_id:1",
+            "table:vcmgiqfnjcysydv-1",
+            "test:voltdb",
+            "type:myrrqibfmxnmutx-1",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.duration",
+        "type": 0,
+        "value": 13628389.0,
+        "tags": [
+            "filename:awfljykmvjtgljd-2",
+            "host_id:2",
+            "table:dvpgsiifhwoworw-2",
+            "test:voltdb",
+            "type:xmooxzxdetadkar-2",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.throughput",
+        "type": 0,
+        "value": 201738.0,
+        "tags": [
+            "filename:glsxumbuurbibwr-0",
+            "host_id:0",
+            "table:ebiikdtfkkuzhbg-0",
+            "test:voltdb",
+            "type:annpkixwevpzdxn-0",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.throughput",
+        "type": 0,
+        "value": 1084001.0,
+        "tags": [
+            "filename:qrcisgcnqgukjbn-1",
+            "host_id:1",
+            "table:vcmgiqfnjcysydv-1",
+            "test:voltdb",
+            "type:myrrqibfmxnmutx-1",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.snapshot_status.throughput",
+        "type": 0,
+        "value": 383833.0,
+        "tags": [
+            "filename:awfljykmvjtgljd-2",
+            "host_id:2",
+            "table:dvpgsiifhwoworw-2",
+            "test:voltdb",
+            "type:xmooxzxdetadkar-2",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_count",
+        "type": 0,
+        "value": 37746.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_count",
+        "type": 0,
+        "value": 3941222.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_count",
+        "type": 0,
+        "value": 480360.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_allocated_memory",
+        "type": 0,
+        "value": 92610.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_allocated_memory",
+        "type": 0,
+        "value": 925053.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_allocated_memory",
+        "type": 0,
+        "value": 5400895.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_data_memory",
+        "type": 0,
+        "value": 439801.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_data_memory",
+        "type": 0,
+        "value": 1012633.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_data_memory",
+        "type": 0,
+        "value": 21762.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.string_data_memory",
+        "type": 0,
+        "value": 169221.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.string_data_memory",
+        "type": 0,
+        "value": 249298.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.string_data_memory",
+        "type": 0,
+        "value": 2207880.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_limit",
+        "type": 0,
+        "value": 317711.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_limit",
+        "type": 0,
+        "value": 1561936.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.tuple_limit",
+        "type": 0,
+        "value": 4746907.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    },
+    {
+        "name": "voltdb.table.percent_full",
+        "type": 0,
+        "value": 167327.0,
+        "tags": [
+            "host_id:0",
+            "partition_id:0",
+            "site_id:0",
+            "table:otqnghkproqzsji-0",
+            "table_type:twxievtwbpseqdt-0",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-0"
+        ]
+    },
+    {
+        "name": "voltdb.table.percent_full",
+        "type": 0,
+        "value": 1040915.0,
+        "tags": [
+            "host_id:1",
+            "partition_id:1",
+            "site_id:1",
+            "table:qysrjurqzpmfmks-1",
+            "table_type:xddypkvcjsgfazp-1",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-1"
+        ]
+    },
+    {
+        "name": "voltdb.table.percent_full",
+        "type": 0,
+        "value": 1580125.0,
+        "tags": [
+            "host_id:2",
+            "partition_id:2",
+            "site_id:2",
+            "table:ycdjcrjjllbncyj-2",
+            "table_type:rhekhdtcjzcqwqk-2",
+            "test:voltdb",
+            "voltdb_hostname:voltdb-host-2"
+        ]
+    }
+]
