@@ -24,6 +24,10 @@ ASSERT_VALUE_METRICS = [
     'datadog.snmp.submitted_metrics',
 ]
 
+SKIPPED_TAGS = ['loader']
+
+CORE_ONLY_TAGS = ['device_namespace:default']
+
 
 def test_e2e_metric_types(dd_agent_check):
     instance = common.generate_container_instance_config(SUPPORTED_METRIC_TYPES)
@@ -358,6 +362,7 @@ def assert_python_vs_core(
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
+    core_config['init_config']['collect_device_metadata'] = 'false'
     metrics_to_skip = metrics_to_skip or []
 
     # building expected metrics (python)
@@ -368,12 +373,14 @@ def assert_python_vs_core(
             if stub.name in metrics_to_skip:
                 continue
             stub = normalize_stub_metric(stub)
-            python_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+            python_metrics[(stub.name, stub.type, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)))].append(stub)
 
     python_service_checks = defaultdict(list)
     for _, service_checks in aggregator._service_checks.items():
         for stub in service_checks:
-            python_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+            python_service_checks[
+                (stub.name, stub.status, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)), stub.message)
+            ].append(stub)
 
     total_count_python = sum(len(stubs) for stubs in python_metrics.values())
 
@@ -426,7 +433,7 @@ def assert_python_vs_core(
 
 
 def normalize_stub_metric(stub):
-    tags = [t for t in stub.tags if not t.startswith('loader:')]  # Remove `loader` tag
+    tags = [t for t in stub.tags if not is_skipped_tag(t)]  # Remove skipped tag
     return MetricStub(
         stub.name,
         stub.type,
@@ -435,3 +442,10 @@ def normalize_stub_metric(stub):
         stub.hostname,
         stub.device,
     )
+
+
+def is_skipped_tag(tag):
+    for skipped_tag in SKIPPED_TAGS:
+        if tag.startswith('{}:'.format(skipped_tag)):
+            return True
+    return False

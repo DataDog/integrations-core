@@ -79,6 +79,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         'serial_num:test_serial',
         'ups_name:testIdentName',
         'device_vendor:apc',
+        'device_namespace:default',
     ]
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
@@ -144,6 +145,7 @@ def test_e2e_core_discovery(dd_agent_check):
         'serial_num:test_serial',
         'ups_name:testIdentName',
         'device_vendor:apc',
+        'device_namespace:default',
         # autodiscovery
         'autodiscovery_subnet:' + network,
         'snmp_device:' + ip_address,
