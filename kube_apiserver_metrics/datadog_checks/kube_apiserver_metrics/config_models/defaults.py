@@ -172,6 +172,10 @@ def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_request_size(field, value):
+    return 10
+
+
 def instance_scheme(field, value):
     return 'https'
 
