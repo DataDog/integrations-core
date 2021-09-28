@@ -106,8 +106,7 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 
 ### Service Checks
 
-**tokumx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to TokuMX to collect metrics, otherwise `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -127,3 +126,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications
+[11]: https://github.com/DataDog/integrations-core/blob/master/tokumx/assets/service_checks.json

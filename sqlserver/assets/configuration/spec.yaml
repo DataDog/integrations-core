@@ -117,6 +117,12 @@ files:
         AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
       value:
         type: string
+    - name: include_master_files_metrics
+      description: |
+        Include database file size and state from `sys.master_files`.
+      value:
+        type: boolean
+        example: false
     - name: include_fci_metrics
       description: |
         Include Failover Cluster Instance metrics. Note that these metrics

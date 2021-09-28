@@ -140,11 +140,12 @@ Prisma Cloud Compute Edition sends an event when a new CVE is found.
 
 ### Service Checks
 
-Prisma Cloud Compute Edition sends service checks when a scan fails.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
+
 
 [1]: https://www.paloaltonetworks.com/prisma/cloud
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -157,3 +158,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
+[12]: https://github.com/DataDog/integrations-core/blob/master/twistlock/assets/service_checks.json

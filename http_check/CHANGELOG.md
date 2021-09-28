@@ -1,6 +1,23 @@
 # CHANGELOG - http_check
 
-## 5.2.0 / 2021-03-07
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 5.3.2 / 2021-06-07 / Agent 7.29.0
+
+* [Fixed] Fix data configuration type. See [#9482](https://github.com/DataDog/integrations-core/pull/9482).
+
+## 5.3.1 / 2021-04-20 / Agent 7.28.0
+
+* [Fixed] Restore correct default value of tls_verify. See [#9197](https://github.com/DataDog/integrations-core/pull/9197).
+
+## 5.3.0 / 2021-04-19
+
+* [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
+* [Added] Add runtime configuration validation. See [#8932](https://github.com/DataDog/integrations-core/pull/8932).
+
+## 5.2.0 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 * [Security] Upgrade cryptography python package. See [#8611](https://github.com/DataDog/integrations-core/pull/8611).

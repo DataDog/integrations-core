@@ -1,9 +1,8 @@
-import mock
 import pytest
 
 from datadog_checks.envoy import Envoy
 
-from .common import INSTANCES, response
+from .common import INSTANCES
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -17,12 +16,13 @@ def test_run(benchmark):
     benchmark(c.check, instance)
 
 
-def test_fixture(benchmark):
+def test_fixture(benchmark, fixture_path, mock_http_response):
     instance = INSTANCES['main']
     c = Envoy('envoy', {}, [instance])
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
-        # Run once to get logging of unknown metrics out of the way.
-        c.check(instance)
+    mock_http_response(file_path=fixture_path('multiple_services'))
 
-        benchmark(c.check, instance)
+    # Run once to get logging of unknown metrics out of the way.
+    c.check(instance)
+
+    benchmark(c.check, instance)
