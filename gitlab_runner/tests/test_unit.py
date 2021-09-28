@@ -12,6 +12,7 @@ from datadog_checks.gitlab_runner import GitlabRunnerCheck
 from . import common
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'test_case, timeout_config, expected_timeout',
     [
@@ -40,4 +41,5 @@ def test_timeout(test_case, timeout_config, expected_timeout):
             proxies=mock.ANY,
             timeout=expected_timeout,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )

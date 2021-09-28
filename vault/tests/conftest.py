@@ -9,8 +9,10 @@ import pytest
 import requests
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import WaitFor
-from datadog_checks.dev.utils import ON_WINDOWS, create_file, running_on_ci
+from datadog_checks.dev.fs import create_file
+from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
 from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
