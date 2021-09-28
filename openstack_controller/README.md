@@ -22,7 +22,7 @@ The OpenStack Controller integration is designed to collect information from all
 
 Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` file. This user requires admin read-only permissions across your environment so that it can be run from a single node and read high level system information about all nodes and servers.
 
-#### Agent Configuration
+#### Agent configuration
 
 1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OpenStack Controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
 
@@ -52,6 +52,26 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 2. [Restart the Agent][3]
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `openstack_controller.d/conf.yaml` file to start collecting your Openstack logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: "<LOG_FILE_PATH>"
+       source: openstack
+   ```
+
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][7] for all available configuration options.
+   
+
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `openstack_controller` under the Checks section.
@@ -62,30 +82,18 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**openstack.neutron.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.keystone.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.hypervisor.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
-
-**openstack.neutron.network.up**:<br>
-Returns `CRITICAL` if the Network is down. Returns `OK` otherwise.
-
 ### Events
 
 OpenStack Controller does not include any events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://www.openstack.org
 [2]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
@@ -93,3 +101,5 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
+[8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json

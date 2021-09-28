@@ -9,6 +9,9 @@ Get metrics from Aerospike Database in real time to:
 
 ## Setup
 
+NOTE: The current aerospike integration is only compatible with Aerospike server v4.9 or above, see Aerospike's [Python Client Library Release Notes][8] for more info.
+If you use an older Aerospike server version, it is still possible to monitor it with version 7.29.0 or lower of the Datadog Agent.
+
 ### Installation
 
 The Aerospike check is included in the Datadog Agent package.
@@ -109,3 +112,4 @@ Need help? Contact [Datadog support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
+[8]: https://download.aerospike.com/download/client/python/notes.html#5.0.0

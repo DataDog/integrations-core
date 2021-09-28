@@ -1,8 +1,8 @@
 {
 	"name": "[kubernetes] Monitor Kubernetes Deployments Replica Pods",
 	"type": "query alert",
-	"query": "avg(last_15m):avg:kubernetes_state.deployment.replicas_desired{*} by {deployment} - avg:kubernetes_state.deployment.replicas_ready{*} by {deployment} >= 2",
-	"message": "More than one Deployments Replica's pods are down.",
+	"query": "avg(last_15m):avg:kubernetes_state.deployment.replicas_desired{*} by {kube_namespace,kube_deployment} - avg:kubernetes_state.deployment.replicas_available{*} by {kube_namespace,kube_deployment} >= 2",
+	"message": "More than one Deployments Replica's pods are down in Deployment {{kube_namespace.name}}/{{kube_deployment.name}}.",
 	"tags": [
 		"integration:kubernetes"
 	],
