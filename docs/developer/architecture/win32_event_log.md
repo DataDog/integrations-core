@@ -4,8 +4,8 @@
 
 ## Overview
 
-Users set a `path` with which to collect events from. It can be the name of a channel
-(like `System`, `Application`, etc.) or the full path to a log file.
+Users set a `path` with which to collect events from that is the name of a channel
+like `System`, `Application`, etc.
 
 There are 3 ways to select filter criteria rather than collecting all events:
 

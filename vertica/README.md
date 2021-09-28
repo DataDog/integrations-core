@@ -38,7 +38,7 @@ Additionally, as the metrics for current license usage use the values from the m
 
 [Restart the Agent][7] to start sending Vertica metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -70,21 +70,18 @@ _Available for Agent versions >6.0_
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**vertica.can_connect**:<br> 
-Returns `OK` if the Agent is able to connect to the monitored Vertica database, or `CRITICAL` otherwise.
-
-**vertica.node_state**:<br>
-Returns `OK` for each node that is UP, `WARNING` for nodes that are on a possible path to UP, or `CRITICAL` otherwise.
-
 ### Events
 
 Vertica does not include any events.
 
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
+
 
 [1]: https://www.vertica.com
 [2]: https://docs.datadoghq.com/agent/
@@ -97,3 +94,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/vertica/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/Glossary/vsql.htm
+[12]: https://github.com/DataDog/integrations-core/blob/master/vertica/assets/service_checks.json

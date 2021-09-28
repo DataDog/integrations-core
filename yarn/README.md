@@ -117,11 +117,7 @@ The Yarn check does not include any events.
 
 ### Service Checks
 
-**yarn.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
-
-**yarn.application.status**:<br>
-Returns per-application status according to the mapping specified in the [`conf.yaml`][5] file.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -148,3 +144,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
 [14]:  https://docs.datadoghq.com/agent/docker/log/
+[15]: https://github.com/DataDog/integrations-core/blob/master/yarn/assets/service_checks.json

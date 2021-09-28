@@ -110,6 +110,8 @@ def assert_metric_coverage(env_version, aggregator):
     aggregator.assert_metric('pgbouncer.databases.max_connections')
     aggregator.assert_metric('pgbouncer.databases.current_connections')
 
+    aggregator.assert_metric('pgbouncer.max_client_conn')
+
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']
     aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.OK, tags=sc_tags)
