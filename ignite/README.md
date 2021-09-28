@@ -96,14 +96,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ignite.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance, otherwise returns `OK`.
-
 ### Events
 
 The Ignite integration does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -122,3 +121,4 @@ Need help? Contact [Datadog support][4].
 [10]: https://docs.datadoghq.com/agent/docker/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/ignite/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/ignite/assets/service_checks.json

@@ -14,7 +14,8 @@
   "public_title": "Datadog-Pivotal Container Service Integration",
   "categories": [
     "containers",
-    "orchestration"
+    "orchestration",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,

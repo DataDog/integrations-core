@@ -4,7 +4,7 @@
 import click
 import yaml
 
-from ....utils import file_exists, path_join, read_file, write_file
+from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
 from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
@@ -45,6 +45,12 @@ REPOS = {
         'display_name_overrides': {},
         'ignored_missing_jobs': set(),
     },
+    'marketplace': {
+        'jobs_definition_relative_path': '.azure-pipelines/all.yml',
+        'display_name_overrides': {},
+        'codecov_config_relative_path': '',
+        'ignored_missing_jobs': set(),
+    },
 }
 
 
@@ -80,6 +86,10 @@ def get_attribute_from_job(job, attribute):
 
 def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     jobs_definition_relative_path = repo_data['jobs_definition_relative_path']
+    if not jobs_definition_relative_path:
+        echo_info("Skipping since jobs path isn't defined")
+        return
+
     jobs_definition_path = path_join(get_root(), *jobs_definition_relative_path.split('/'))
     if not file_exists(jobs_definition_path):
         abort('Unable to find the file defining all `master` jobs')
@@ -200,6 +210,10 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
 
 def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names):
     codecov_config_relative_path = repo_data['codecov_config_relative_path']
+    if not codecov_config_relative_path:
+        echo_info("Skipping since codecov path isn't defined")
+        return
+
     codecov_config_path = path_join(get_root(), *codecov_config_relative_path.split('/'))
     if not file_exists(codecov_config_path):
         abort('Unable to find the Codecov config file')
@@ -368,5 +382,10 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
+    echo_info("Validating CI Configuration...", nl=False)
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
+
+    echo_info("Validating Code Coverage Configuration...", nl=False)
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
