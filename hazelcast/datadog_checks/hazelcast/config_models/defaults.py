@@ -4,6 +4,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_collect_default_metrics(field, value):
+    return False
+
+
 def shared_conf(field, value):
     return get_default_field_value(field, value)
 
@@ -30,6 +34,10 @@ def shared_skip_proxy(field, value):
 
 def shared_timeout(field, value):
     return 10
+
+
+def instance_allow_redirects(field, value):
+    return True
 
 
 def instance_auth_token(field, value):
@@ -60,6 +68,10 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -70,6 +82,10 @@ def instance_extra_headers(field, value):
 
 def instance_headers(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_is_jmx(field, value):
+    return False
 
 
 def instance_java_bin_path(field, value):
@@ -141,10 +157,6 @@ def instance_name(field, value):
 
 
 def instance_ntlm_domain(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_password(field, value):
     return get_default_field_value(field, value)
 
 

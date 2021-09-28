@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -41,10 +42,12 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
     host: str
+    is_jmx: Optional[bool]
     java_bin_path: Optional[str]
     java_options: Optional[str]
     jmx_url: Optional[str]
