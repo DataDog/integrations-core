@@ -96,6 +96,39 @@ class TestTimeout:
         assert http.options['timeout'] == (16, 16)
 
 
+class TestRequestSize:
+    def test_config_default(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.request_size == 16384
+
+    def test_config_correct(self):
+        instance = {'request_size': 0.5}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert isinstance(http.request_size, int)
+        assert http.request_size == 512
+
+    def test_behavior_correct(self, mock_http_response):
+        instance = {'request_size': 0.5}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        chunk_size = 512
+        payload_size = 1000
+        mock_http_response('a' * payload_size)
+
+        with http.get('https://www.google.com', stream=True) as response:
+            chunks = list(response.iter_content())
+
+        assert len(chunks) == 2
+        assert len(chunks[0]) == chunk_size
+        assert len(chunks[1]) == payload_size - chunk_size
+
+
 class TestHeaders:
     def test_agent_headers(self):
         # This helper is not used by the RequestsWrapper, but some integrations may use it.
