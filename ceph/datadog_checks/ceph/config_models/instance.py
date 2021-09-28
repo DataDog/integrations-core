@@ -20,6 +20,7 @@ class InstanceConfig(BaseModel):
     ceph_cluster: Optional[str]
     ceph_cmd: Optional[str]
     collect_service_check_for: Optional[Sequence[str]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     service: Optional[str]
