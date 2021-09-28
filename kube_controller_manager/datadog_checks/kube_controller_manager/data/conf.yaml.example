@@ -31,6 +31,11 @@ instances:
     #
     # leader_election_kind: auto
 
+    ## @param health_url - string - optional - default: http://localhost:10252/healthz
+    ## URL for the kube-scheduler health endpoint.
+    #
+    # health_url: http://localhost:10252/healthz
+
     ## @param prometheus_timeout - integer - optional - default: 10
     ## Overrides the default timeout value in second
     #

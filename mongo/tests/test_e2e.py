@@ -41,7 +41,6 @@ MONGOS_METRICS = BASE_METRICS + [
     'mongodb.stats.filesize',
     'mongodb.stats.indexsize',
     'mongodb.stats.datasize',
-    'mongodb.stats.numextents',
     'mongodb.stats.indexes',
     'mongodb.stats.objects',
 ]

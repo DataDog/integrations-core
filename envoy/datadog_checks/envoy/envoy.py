@@ -7,7 +7,7 @@ from collections import defaultdict
 import requests
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
@@ -27,6 +27,7 @@ class Envoy(AgentCheck):
         self.custom_tags = self.instance.get('tags', [])
         self.caching_metrics = self.instance.get('cache_metrics', True)
 
+        self.collect_server_info = self.instance.get('collect_server_info', True)
         self.stats_url = self.instance.get('stats_url')
         if self.stats_url is None:
             raise ConfigurationError('Envoy configuration setting `stats_url` is required')
@@ -49,6 +50,8 @@ class Envoy(AgentCheck):
         self.excluded_metrics_cache = set()
 
         self.caching_metrics = None
+        self.parse_unknown_metrics = is_affirmative(self.instance.get('parse_unknown_metrics', False))
+        self.disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
 
     def check(self, _):
         self._collect_metadata()
@@ -86,7 +89,11 @@ class Envoy(AgentCheck):
                 continue
 
             try:
-                metric, tags, method = parse_metric(envoy_metric)
+                metric, tags, method = parse_metric(
+                    envoy_metric,
+                    retry=self.parse_unknown_metrics,
+                    disable_legacy_cluster_tag=self.disable_legacy_cluster_tag,
+                )
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `%s`', envoy_metric)
@@ -143,6 +150,9 @@ class Envoy(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self):
+        if not self.collect_server_info:
+            self.log.debug("Skipping server info collection because collect_server_info was disabled")
+            return
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(self.stats_url, 'server_info')
         raw_version = None
