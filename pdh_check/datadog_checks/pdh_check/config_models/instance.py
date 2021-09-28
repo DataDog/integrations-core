@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     admin_share: Optional[str]
     counter_data_types: Optional[Sequence[str]]
     countersetname: str
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     metrics: Sequence[Sequence[str]]
