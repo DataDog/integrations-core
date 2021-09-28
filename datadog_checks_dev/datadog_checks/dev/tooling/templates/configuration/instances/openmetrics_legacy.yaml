@@ -179,4 +179,6 @@
       - <TAG_PREFIX:.*>
       - <TAG_SUFFIX$>
 - template: instances/http
+  overrides:
+    request_size.value.example: 10
 - template: instances/default
