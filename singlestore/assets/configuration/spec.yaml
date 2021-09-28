@@ -59,3 +59,9 @@ files:
         example: false
     - template: instances/tls
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path:  /var/lib/memsql/<ID>/tracelogs/memsql.log
+      source: singlestore
+      service: <SERVICE>
