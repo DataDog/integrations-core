@@ -7,7 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 import pymysql
 from six import PY3, iteritems, itervalues
