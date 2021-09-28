@@ -145,17 +145,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ibm_db2.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored IBM Db2 database, otherwise returns `OK`.
-
-**ibm_db2.status**:<br>
-Returns `CRITICAL` if the monitored IBM Db2 database is quiesced, `WARNING` for quiesce-pending or rollforwards, otherwise returns `OK`.
-
 ### Events
 
 - `ibm_db2.tablespace_state_change` is triggered whenever the state of a tablespace changes.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -179,3 +175,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [11]: https://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
+[13]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json

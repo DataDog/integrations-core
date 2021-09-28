@@ -42,7 +42,7 @@ files:
           example: 50000
       - name: tls_cert
         description: |
-          The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
+          The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
           has to be accessible and readable by the agent user.
         value:
           type: string

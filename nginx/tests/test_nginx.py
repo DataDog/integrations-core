@@ -8,7 +8,7 @@ import pytest
 import requests
 
 from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
-from .utils import mocked_perform_request
+from .utils import mocked_perform_request, requires_static_version
 
 pytestmark = pytest.mark.skipif(USING_VTS, reason='Using VTS')
 
@@ -42,6 +42,7 @@ def test_connect_ssl(check, instance_ssl, aggregator):
         check_ssl.check(instance_ssl)
 
 
+@requires_static_version
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata(check, instance, datadog_agent):
     nginx_check = check(instance)

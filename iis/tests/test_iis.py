@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
+import logging
 import re
 
 import pytest
@@ -20,6 +22,28 @@ from .common import (
     WIN_SERVICES_CONFIG,
     WIN_SERVICES_MINIMAL_CONFIG,
 )
+
+
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_additional_metrics(aggregator, caplog):
+    instance = copy.deepcopy(MINIMAL_INSTANCE)
+    instance['additional_metrics'] = [
+        [
+            'HTTP Service Request Queues',
+            None,
+            'RejectedRequests',
+            'iis.httpd_service_request_queues.rejectedrequests',
+            'gauge',
+        ]
+    ]
+
+    c = IIS(CHECK_NAME, {}, [instance])
+
+    with caplog.at_level(logging.DEBUG):
+        c.check(None)
+
+        aggregator.assert_metric('iis.httpd_service_request_queues.rejectedrequests')
+        assert 'Unknown IIS counter: HTTP Service Request Queues. Falling back to default submission' in caplog.text
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')

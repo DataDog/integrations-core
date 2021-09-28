@@ -30,12 +30,12 @@ The Disk check does not include any events.
 
 ### Service Checks
 
-**disk.read_write**:<br>
-Returns `CRITICAL` if filesystem is in read-only mode. **Note**: This service check must be enabled under `service_check_rw` in the [disk.d/conf.yaml][3].
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -43,3 +43,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/disk/assets/service_checks.json

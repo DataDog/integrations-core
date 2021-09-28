@@ -1,5 +1,31 @@
 # CHANGELOG - Amazon MSK
 
+## 1.8.1 / 2021-07-16 / Agent 7.30.0
+
+* [Fixed] Describe py3 requirement of use_openmetrics option. See [#9714](https://github.com/DataDog/integrations-core/pull/9714).
+
+## 1.8.0 / 2021-07-12
+
+* [Added] Add metrics from label IDs. See [#9643](https://github.com/DataDog/integrations-core/pull/9643).
+* [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
+* [Fixed] Raise exception if attempting to use new style openmetrics with py2. See [#9613](https://github.com/DataDog/integrations-core/pull/9613).
+
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+
+## 1.6.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#9082](https://github.com/DataDog/integrations-core/pull/9082).
+* [Added] Add runtime configuration validation. See [#8883](https://github.com/DataDog/integrations-core/pull/8883).
+* [Fixed] Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).
+
+## 1.5.0 / 2021-03-24
+
+* [Added] Add `kafka_consumer_group_ConsumerLagMetrics_Value` metric. See [#9027](https://github.com/DataDog/integrations-core/pull/9027). Thanks [idarlington](https://github.com/idarlington).
+* [Added] Allow prometheus metrics path to be configurable. See [#9028](https://github.com/DataDog/integrations-core/pull/9028).
+
 ## 1.4.1 / 2021-01-25 / Agent 7.26.0
 
 * [Fixed] Hide auto-populated prometheus_url from config spec. See [#8330](https://github.com/DataDog/integrations-core/pull/8330).
