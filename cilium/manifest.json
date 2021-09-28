@@ -18,7 +18,8 @@
   "categories": [
     "containers",
     "network",
-    "security"
+    "security",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,

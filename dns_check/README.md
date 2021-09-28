@@ -53,19 +53,12 @@ The DNS check does not include any events.
 
 ### Service Checks
 
-This agent check tags all service checks it collects with:
-
-- `nameserver:<nameserver_in_yaml>`
-- `resolved_hostname:<hostname_in_yaml>`
-
-**dns.can_resolve**:<br>
-Returns `CRITICAL` if the Agent fails to resolve the request, otherwise returns `OK`.
-
-Tagged by `hostname` and `record_type`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -74,3 +67,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
 [7]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/dns_check/assets/service_checks.json

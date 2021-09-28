@@ -66,7 +66,7 @@ class TailFile(object):
                 pos = False
 
             # Check if file has been truncated and too much data has
-            # alrady been written (copytruncate and opened files...)
+            # already been written (copytruncate and opened files...)
             if size >= self.CRC_SIZE and self._crc is not None and crc != self._crc:
                 self._log.debug("Beginning of file modified, reopening")
                 move_end = False

@@ -45,8 +45,7 @@ The NTP check does not include any events.
 
 ### Service Checks
 
-**ntp.in_sync**:<br>
-Returns `CRITICAL` if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -60,3 +59,4 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[9]: https://github.com/DataDog/integrations-core/blob/master/ntp/assets/service_checks.json

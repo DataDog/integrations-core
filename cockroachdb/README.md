@@ -23,6 +23,33 @@ To configure this check for an Agent running on a host:
 1. Edit the `cockroachdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your CockroachDB performance data. See the [sample cockroachdb.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6]
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `cockroachdb.d/conf.yaml` file to start collecting your CockroachDB logs:
+
+   ```yaml
+   logs:
+    - type: file
+      path: /var/lib/cockroach/logs/cockroach.log
+      source: cockroachdb
+      service: cockroachdb
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_status_and_date
+        pattern: [A-Z]\d{6}\s\d+\:\d+\:\d+\.\d+
+   ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample cockroachdb.d/conf.yaml][5] for all available configuration options.
+
+3. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -36,6 +63,16 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `cockroachdb`                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                            |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:8080/_status/vars"}` |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][11].
+
+Then, set [log integrations][12] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source": "cockroachdb", "service": "<SERVICE_NAME>"}]'
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -78,3 +115,5 @@ Additional helpful documentation, links, and articles:
 [8]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[12]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

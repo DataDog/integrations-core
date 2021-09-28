@@ -158,37 +158,45 @@ class MesosMaster(AgentCheck):
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
-        msg = None
-        status = None
-        timeout = self.http.options['timeout']
-        response = None
-        try:
-            response = self.http.get(url)
-            if response.status_code != 200:
-                status = AgentCheck.CRITICAL
-                msg = "Got %s when hitting %s" % (response.status_code, url)
-            else:
-                status = AgentCheck.OK
-                msg = "Mesos master instance detected at %s " % url
-        except requests.exceptions.Timeout:
-            # If there's a timeout
-            msg = "%s seconds timeout when hitting %s" % (timeout, url)
-            status = AgentCheck.CRITICAL
-        except Exception as e:
-            msg = str(e)
-            status = AgentCheck.CRITICAL
-        finally:
-            self.log.debug('Request to url : %s, timeout: %s, message: %s', url, timeout, msg)
-            self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
+
+        response, msg, status = self._make_request(url)
+
+        self.log.debug('Request to url : %s, timeout: %s, message: %s', url, self.http.options['timeout'], msg)
+        self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if response.encoding is None:
             response.encoding = 'UTF8'
 
         return response.json()
 
+    def _make_request(self, url):
+        msg = None
+        status = None
+        response = None
+
+        try:
+            response = self.http.get(url)
+            if response.status_code != 200:
+                status = AgentCheck.CRITICAL
+                msg = "Got {} when hitting {}".format(response.status_code, url)
+            else:
+                status = AgentCheck.OK
+                msg = "Mesos master instance detected at {} ".format(url)
+        except requests.exceptions.Timeout:
+            # If there's a timeout
+            msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
+            status = AgentCheck.CRITICAL
+        except Exception as e:
+            msg = str(e)
+            status = AgentCheck.CRITICAL
+
+        return response, msg, status
+
     def _send_service_check(self, url, status, failure_expected=False, tags=None, message=None):
         skip_service_check = False
-        if status is AgentCheck.CRITICAL and failure_expected:
+        if status is AgentCheck.OK:
+            message = None
+        elif status is AgentCheck.CRITICAL and failure_expected:
             # skip service check when failure is expected
             skip_service_check = True
             message = "Error when calling {}: {}".format(url, message)
@@ -201,18 +209,50 @@ class MesosMaster(AgentCheck):
         if status is AgentCheck.CRITICAL:
             raise CheckException(message)
 
+    def _master_state_found_307(self, resp1, resp2):
+        history = []
+        if resp1 is not None:
+            history = resp1.history
+        if resp2 is not None:
+            history += resp2.history
+
+        for r in history:
+            if r is not None and r.status_code == 307:
+                return True
+        return False
+
     def _get_master_state(self, url, tags):
         # Mesos version >= 0.25
         endpoint = url + '/state'
-        try:
-            master_state = self._get_json(endpoint, failure_expected=True, tags=tags)
-        except CheckException:
+        url_tag = endpoint
+        master_state = None
+
+        response, msg, status = self._make_request(endpoint)
+        if response is None or response.status_code != 200:
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
+            url_tag = old_endpoint
             self.log.info(
                 'Unable to fetch state from %s. Retrying with the deprecated endpoint: %s.', endpoint, old_endpoint
             )
-            master_state = self._get_json(old_endpoint, tags=tags)
+
+            old_response, msg, status = self._make_request(old_endpoint)
+            if old_response is not None and old_response.status_code == 200:
+                if old_response.encoding is None:
+                    old_response.encoding = 'UTF8'
+                master_state = old_response.json()
+
+            elif self._master_state_found_307(response, old_response):
+                # If there is a 401 after a 307, the master is not a leader
+                # http://mesos.apache.org/documentation/latest/endpoints/master/state/
+                self.log.debug('Url %s is not a leader master.', url)
+                status = AgentCheck.UNKNOWN
+        else:
+            if response.encoding is None:
+                response.encoding = 'UTF8'
+            master_state = response.json()
+
+        self._send_service_check(url, status, tags=tags + ["url:{}".format(url_tag)], message=msg)
         return master_state
 
     def _get_master_stats(self, url, tags):

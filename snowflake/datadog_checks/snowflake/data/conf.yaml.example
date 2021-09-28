@@ -51,10 +51,10 @@ instances:
     #
   - account: <ACCOUNT>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## Login name for the user.
     #
-    user: <USER>
+    username: <USER>
 
     ## @param password - string - required
     ## Password for the user
@@ -218,3 +218,9 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
