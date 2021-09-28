@@ -85,11 +85,10 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/hudi.log
        source: hudi
-       #To handle multi line that starts with yyyy-mm-dd use the following pattern
-       #log_processing_rules:
-       #  - type: multi_line
-       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-       #    name: new_log_start_with_date
+       log_processing_rules:
+         - type: multi_line
+           pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           name: new_log_start_with_date
    ```
 ### Events
 
