@@ -1,4 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-__version__ = '1.0.0'
+import pytest
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    yield {'aci_urls': []}

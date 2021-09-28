@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 
 import mock
 import pytest
 
-from datadog_checks.base import ensure_bytes
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
@@ -43,28 +42,11 @@ METRICS = [
 HERE = get_here()
 
 
-class MockResponse:
-    def __init__(self, j):
-        self.text = j
-        self._json = j
-        self.status_code = 200
-
-    @property
-    def content(self):
-        return ensure_bytes(self._json)
-
-    def json(self):
-        return json.loads(self._json)
-
-
 def mock_get_factory(fixture_group):
     def mock_get(url, *args, **kwargs):
         split_url = url.split('/')
         path = split_url[-1]
-        f_name = os.path.join(HERE, 'fixtures', fixture_group, "{}.json".format(path))
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return MockResponse(text_data)
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
 
     return mock_get
 
