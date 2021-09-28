@@ -435,7 +435,6 @@ class YarnCheck(AgentCheck):
                 SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=service_check_tags,
-                message="Connection to {} was successful".format(url),
             )
 
             return response_json

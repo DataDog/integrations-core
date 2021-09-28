@@ -470,7 +470,7 @@
     },
     {
       "name": "host",
-      "default": "aws.vcenter.localdomain-synthetics",
+      "default": "*",
       "prefix": "host"
     }
   ],

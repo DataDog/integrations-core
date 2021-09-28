@@ -13,6 +13,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     FCI_METRICS,
     INSTANCE_METRICS,
@@ -59,6 +60,7 @@ EXPECTED_METRICS = (
             TASK_SCHEDULER_METRICS,
             DATABASE_FRAGMENTATION_METRICS,
             FCI_METRICS,
+            DATABASE_MASTER_FILES,
         )
     ]
     + CUSTOM_METRICS
@@ -79,6 +81,7 @@ INSTANCE_DOCKER = {
     'include_db_fragmentation_metrics': True,
     'include_fci_metrics': True,
     'include_ao_metrics': False,
+    'include_master_files_metrics': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
@@ -120,6 +123,7 @@ INSTANCE_SQL2017.update(
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
         'include_ao_metrics': False,
+        'include_master_files_metrics': True,
     }
 )
 
@@ -197,3 +201,4 @@ def assert_metrics(aggregator, expected_tags):
         aggregator.assert_metric(mname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_no_duplicate_metrics()

@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The Snowflake check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-**Note**: Snowflake check is currently not available for MacOS in Datadog Agent 6 using Python 2.
+**Note**: Snowflake check is not available in Datadog Agent 6 using Python 2. To use snowflake on Agent 6 check [this doc][15] to switch the python version of your agent or upgrade to Agent 7.
 
 <div class="alert alert-warning">For users configuring the integration with Agent <code>v7.23.0</code>, upgrade the integration version to <code>2.0.1</code> to take advantage of latest features.
 You can upgrade the integration with the following <a href=https://docs.datadoghq.com/agent/guide/integration-management/#install>command</a>:<br>
@@ -104,6 +104,11 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
         #
         min_collection_interval: 3600
+   
+        # @param disable_generic_tags - boolean - optional - default: false
+        # Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+        # getting mixed with other integraton tags.
+        # disable_generic_tags: true
     ```
 
     <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
@@ -201,18 +206,18 @@ To verify the result, search for the metrics using [Metrics Summary][11]:
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-**snowflake.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot authenticate and connect to Snowflake, `OK` otherwise.
-
 ### Events
 
 Snowflake does not include any events.
 
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://www.snowflake.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -227,3 +232,5 @@ Need help? Contact [Datadog support][7].
 [11]: https://docs.datadoghq.com/metrics/summary/
 [12]: https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-a-proxy-server
 [13]: https://github.com/snowflakedb/snowflake-connector-python/blob/d6df58f1c338b255393571a08a1f9f3a71d8f7b6/src/snowflake/connector/proxy.py#L40-L41
+[14]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
+[15]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent

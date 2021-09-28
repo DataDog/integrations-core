@@ -13,15 +13,16 @@ init_config:
 #
 instances:
 
-    ## @param access_id - string - required
+  -
+    ## @param access_id - string - optional
     ## The RiakCS access key.
     #
-  - access_id: <ACCESS_ID>
+    # access_id: <ACCESS_ID>
 
-    ## @param access_secret - string - required
+    ## @param access_secret - string - optional
     ## The corresponding RiakCS access secret.
     #
-    access_secret: <ACCESS_SECRET>
+    # access_secret: <ACCESS_SECRET>
 
     ## @param is_secure - boolean - optional - default: true
     ## Use ssl to connect to instance. Disable option if not using ssl.
