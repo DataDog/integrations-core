@@ -20,6 +20,7 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[Sequence[Sequence[str]]]
     app_pools: Optional[Sequence[str]]
     counter_data_types: Optional[Sequence[str]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     is_2008: Optional[bool]
