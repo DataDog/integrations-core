@@ -51,7 +51,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 
 _Available for Agent versions >6.0_
 
-1. Hudi uses the `log4j` logger by default. To customize the format, edit the `log4j.properties` file in either your [flink][13] or [spark][14] `conf` directory. An example `log4j.properties` file is:
+1. Hudi uses the `log4j` logger by default. To customize the format, edit the `log4j.properties` file in either your [Flink][13] or [Spark][14] `conf` directory. An example `log4j.properties` file is:
 
    ```conf
     log4j.rootCategory=INFO, file
