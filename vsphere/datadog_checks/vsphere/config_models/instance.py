@@ -87,6 +87,7 @@ class RestApiOptions(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     skip_proxy: Optional[bool]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
