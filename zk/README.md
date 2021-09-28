@@ -180,15 +180,12 @@ The ZooKeeper check does not include any events.
 
 ### Service Checks
 
-**zookeeper.ruok**:<br>
-Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
-
-**zookeeper.mode**:<br>
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when ZooKeeper's actual mode matches `expected_mode`, otherwise returns `CRITICAL`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -203,3 +200,4 @@ Need help? Contact [Datadog support][11].
 [11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZooKeeper+SSL+User+Guide
+[14]: https://github.com/DataDog/integrations-core/blob/master/zk/assets/service_checks.json

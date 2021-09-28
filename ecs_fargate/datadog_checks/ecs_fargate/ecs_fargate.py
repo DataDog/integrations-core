@@ -70,10 +70,10 @@ class FargateCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
-    def check(self, instance):
+    def check(self, _):
         metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
         stats_endpoint = API_ENDPOINT + STATS_ROUTE
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
 
         try:
             request = self.http.get(metadata_endpoint)
@@ -165,11 +165,11 @@ class FargateCheck(AgentCheck):
 
         for container_id, container_stats in iteritems(stats):
             if container_id not in exlcuded_cid:
-                self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
+                self.submit_perf_metrics(container_tags, container_id, container_stats)
 
         self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
 
-    def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
+    def submit_perf_metrics(self, container_tags, container_id, container_stats):
         try:
             if container_stats is None:
                 self.log.debug("Empty stats for container %s", container_id)
@@ -206,6 +206,21 @@ class FargateCheck(AgentCheck):
                 cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
                 cpu_percent = round_value(cpu_percent, 2)
                 self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                if cpu_percent > active_cpus * 100.0:
+                    self.log.debug(
+                        "Anomalous CPU value for container_id: %s. cpu_percent: %f, system_delta: %f, cpu_delta: %f,"
+                        " active_cpus: %f; prevalue_system: %f, value_system: %f, prevalue_total: %f, value_total: %f",
+                        container_id,
+                        cpu_percent,
+                        system_delta,
+                        cpu_delta,
+                        active_cpus,
+                        prevalue_system,
+                        value_system,
+                        prevalue_total,
+                        value_total,
+                    )
+                    self.log.debug("ECS container_stats for container_id %s: %s", container_id, container_stats)
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})
