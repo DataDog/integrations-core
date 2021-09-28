@@ -75,7 +75,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 3. [Restart the Agent][5].
 
-
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `lighttpd` under the Checks section.
@@ -92,8 +91,7 @@ The Lighttpd check does not include any events.
 
 ### Service Checks
 
-**lighttpd.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to lighttpd to collect metrics, otherwise `OK`.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -113,3 +111,4 @@ To get a better idea of how (or why) to monitor Lighttpd web server metrics with
 [8]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics
+[11]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/assets/service_checks.json

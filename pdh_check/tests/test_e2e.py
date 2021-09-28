@@ -4,13 +4,15 @@
 from copy import deepcopy
 
 import pytest
-from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
-from .common import INSTANCE
+from .common import INSTANCE, INSTANCE_METRICS
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(INSTANCE))
+
+    for metric in INSTANCE_METRICS:
+        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

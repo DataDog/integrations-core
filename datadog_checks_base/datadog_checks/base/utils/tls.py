@@ -88,9 +88,7 @@ class TlsContextWrapper(object):
 
             config[field] = value
 
-        if any(
-            (config['tls_ca_cert'], config['tls_cert'], config['tls_private_key'], config['tls_private_key_password'])
-        ):
+        if config['tls_ca_cert']:
             config['tls_verify'] = True
 
         # Populate with the higher-priority configuration options if set
