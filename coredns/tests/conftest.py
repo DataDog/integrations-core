@@ -4,7 +4,6 @@
 import os
 import subprocess
 
-import mock
 import pytest
 import requests
 
@@ -45,30 +44,6 @@ def instance():
 
 
 @pytest.fixture
-def mock_get():
+def mock_get(mock_http_response):
     mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(mesh_file_path, 'r') as f:
-        text_data = f.read()
-    with mock.patch('requests.get', return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get'):
-        yield
-
-
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-        self.encoding = 'utf-8'
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def raise_for_status(self):
-        pass
-
-    def close(self):
-        pass
+    yield mock_http_response(file_path=mesh_file_path)

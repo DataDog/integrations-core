@@ -1,6 +1,20 @@
 # CHANGELOG - SonarQube
 
-## 1.1.2 / 2021-03-12
+## 1.4.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 1.3.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
+## 1.2.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8985](https://github.com/DataDog/integrations-core/pull/8985).
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+
+## 1.1.2 / 2021-03-12 / Agent 7.27.0
 
 * [Fixed] Fix collection of PendingTime. See [#8817](https://github.com/DataDog/integrations-core/pull/8817).
 

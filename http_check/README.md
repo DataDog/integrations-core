@@ -74,29 +74,11 @@ The HTTP check does not include any events.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][10] page, not 'Integration'.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
-**http.can_connect**:<br>
-Returns `DOWN` when any of the following occur:
+To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-- the request to `uri` times out
-- the response code is 4xx/5xx, or it doesn't match the pattern provided in the `http_response_status_code`
-- the response body does _not_ contain the pattern in `content_match`
-- `reverse_content_match` is true and the response body _does_ contain the pattern in `content_match`
-- `uri` contains `https` and `tls_verify` is true, and the SSL connection cannot be validated
-
-Otherwise, returns `UP`.
-
-**http.ssl_cert**:<br>
-The check returns:
-
-- `DOWN` if the `uri`'s certificate has already expired
-- `CRITICAL` if the `uri`'s certificate expires in less than `days_critical` days
-- `WARNING` if the `uri`'s certificate expires in less than `days_warning` days
-
-Otherwise, returns `UP`.
-
-To disable this check, set `check_certificate_expiration` to false.
+**Note:** To set an alert on these service checks, create a [Network Monitor][13].
 
 ## Troubleshooting
 
@@ -113,3 +95,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [10]: https://app.datadoghq.com/monitors#/create
 [11]: https://docs.datadoghq.com/help/
+[12]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
+[13]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
