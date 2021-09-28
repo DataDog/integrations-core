@@ -1,6 +1,22 @@
 # CHANGELOG - mesos_slave
 
-## 2.7.1 / 2021-03-07
+## 2.10.1 / 2021-07-15 / Agent 7.30.0
+
+* [Fixed] Improve cluster_name config option description. See [#9704](https://github.com/DataDog/integrations-core/pull/9704).
+
+## 2.10.0 / 2021-07-12
+
+* [Added] Add runtime configuration validation. See [#8956](https://github.com/DataDog/integrations-core/pull/8956).
+
+## 2.9.0 / 2021-06-09
+
+* [Added] Add `cluster_name` config option. See [#9477](https://github.com/DataDog/integrations-core/pull/9477). Thanks [dfreilich](https://github.com/dfreilich).
+
+## 2.8.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add log support. See [#8717](https://github.com/DataDog/integrations-core/pull/8717).
+
+## 2.7.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

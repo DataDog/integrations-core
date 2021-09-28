@@ -40,6 +40,12 @@ instances:
     #
     # collect_response_time: false
 
+    ## @param ip_cache_duration - number - optional
+    ## Time in seconds to cache the IP address of the given host. If duration is not set,
+    ## the cache will expire only upon error.
+    #
+    # ip_cache_duration: 120
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

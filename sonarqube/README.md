@@ -22,8 +22,9 @@ collects all relevant SonarQube performance metrics exposed through SonarQube's 
 default metrics is available in the [sonarqube.d/metrics.yaml][12] file. Documentation on these beans is available on
 [SonarQube's website][13].
 
-SonarQube's JMX server is not enabled by default. More information on how to enable and configure JMX within SonarQube
-in available within the [SonarQube documentation][14].
+SonarQube's JMX server is not enabled by default, this means that unless it is enabled, `sonarqube.server.*` metrics 
+will not be collected. More information on how to enable and configure JMX within SonarQube is available within the 
+[SonarQube documentation][14]. 
 
 This is a basic `sonarqube.d/conf.yaml` example based on SonarQube and JMX defaults. You can use it as a starting point
 when configuring for both the host-based or container-based agent installation.
@@ -233,21 +234,22 @@ Collector
 
 See [metadata.csv][11] for a list of metrics provided by this check.
 
-### Service Checks
-
-**sonarqube.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's JMX endpoint, otherwise returns `OK`.
-
-**sonarqube.api_access**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's web endpoint, otherwise returns `OK`.
-
 ### Events
 
 SonarQube does not include any events.
 
+### Service Checks
+
+See [service_checks.json][15] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
+
 
 [1]: https://www.sonarqube.org
 [2]: https://docs.datadoghq.com/agent/
@@ -263,3 +265,4 @@ Need help? Contact [Datadog support][5].
 [12]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml
 [13]: https://docs.sonarqube.org/latest/instance-administration/monitoring/
 [14]: https://docs.sonarqube.org/latest/instance-administration/monitoring/#header-4
+[15]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/assets/service_checks.json

@@ -53,7 +53,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
   # WAIT FOR DATADOG AGENT TO BE INSTALLED
   while [ -z \$datadoginstalled ]; do
@@ -113,7 +113,7 @@ fi
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "All nodes" xxx -->
-##### Install the Datadog Agent on Driver and Worker Nodes
+##### Install the Datadog Agent on driver and worker nodes
 
 After creating the `datadog-install-driver-workers.sh` script, add the init script path in the [cluster configuration page](https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui).
 
@@ -299,6 +299,10 @@ The Databricks integration does not include any events.
 ## Troubleshooting
 
 Need help? Contact [Datadog support][3].
+
+## Further Reading
+
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://databricks.com/
 [2]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html

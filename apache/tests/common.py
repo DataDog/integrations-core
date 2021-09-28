@@ -26,6 +26,7 @@ NO_METRIC_CONFIG = {'apache_status_url': BASE_URL}
 APACHE_GAUGES = [
     'apache.performance.idle_workers',
     'apache.performance.busy_workers',
+    'apache.performance.max_workers',
     'apache.performance.cpu_load',
     'apache.performance.uptime',
     'apache.net.bytes',
@@ -34,6 +35,18 @@ APACHE_GAUGES = [
     'apache.conns_async_writing',
     'apache.conns_async_keep_alive',
     'apache.conns_async_closing',
+    'apache.scoreboard.waiting_for_connection',
+    'apache.scoreboard.starting_up',
+    'apache.scoreboard.reading_request',
+    'apache.scoreboard.sending_reply',
+    'apache.scoreboard.keepalive',
+    'apache.scoreboard.dns_lookup',
+    'apache.scoreboard.closing_connection',
+    'apache.scoreboard.logging',
+    'apache.scoreboard.gracefully_finishing',
+    'apache.scoreboard.idle_cleanup',
+    'apache.scoreboard.open_slot',
+    'apache.scoreboard.disabled',
 ]
 
 APACHE_RATES = ['apache.net.bytes_per_s', 'apache.net.request_per_s']
