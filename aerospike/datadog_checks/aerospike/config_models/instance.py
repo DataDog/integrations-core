@@ -19,6 +19,7 @@ class InstanceConfig(BaseModel):
 
     datacenter_metrics: Optional[Sequence[str]]
     datacenters: Optional[Sequence[str]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     metrics: Optional[Sequence[str]]
