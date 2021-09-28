@@ -2,10 +2,15 @@
 #
 metrics:
 - MIB: IF-MIB
+  symbol:
+    OID: 1.3.6.1.2.1.2.1.0
+    name: ifNumber
+
+- MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.2.2
     name: ifTable
-  forced_type: monotonic_count
+  forced_type: monotonic_count_and_rate
   symbols:
   - OID: 1.3.6.1.2.1.2.2.1.14
     name: ifInErrors

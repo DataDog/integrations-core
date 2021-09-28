@@ -16,10 +16,10 @@ files:
     options:
     - name: aci_url
       required: true
-      description: Url to query to gather metrics.
+      description: URL to query to gather metrics.
       value:
         type: string
-        example: localhost
+        example: http://localhost
       display_priority: 10
     - name: pwd
       required: true
@@ -30,7 +30,7 @@ files:
         type: string
     - name: tenant
       description: |
-        List of tenants to collect data from
+        List of tenants to collect metrics data from.
       value:
         type: array
         items:
