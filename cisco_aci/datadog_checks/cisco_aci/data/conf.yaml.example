@@ -49,9 +49,9 @@ init_config:
 instances:
 
     ## @param aci_url - string - required
-    ## Url to query to gather metrics.
+    ## URL to query to gather metrics.
     #
-  - aci_url: localhost
+  - aci_url: http://localhost
 
     ## @param username - string - required
     ## Authentication can use either a user auth or a certificate.
@@ -66,7 +66,7 @@ instances:
     pwd: <PWD>
 
     ## @param tenant - list of strings - optional
-    ## List of tenants to collect data from
+    ## List of tenants to collect metrics data from.
     #
     # tenant:
     #   - <TENANT_1>
@@ -268,6 +268,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

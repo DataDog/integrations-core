@@ -12,7 +12,7 @@ marklogic.databases.database_replication_receive_load,gauge,,,,"Time threads spe
 marklogic.databases.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,db replication recv rate
 marklogic.databases.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,db replication send load
 marklogic.databases.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,db replication send recv
-marklogic.databases.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrances.",0,marklogic,db deadlock rate
+marklogic.databases.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrences.",0,marklogic,db deadlock rate
 marklogic.databases.deadlock_wait_load,gauge,,,,"Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.",0,marklogic,db deadlock wait load
 marklogic.databases.device_space,gauge,,mebibyte,,The amount of space left on the device.,0,marklogic,db device space
 marklogic.databases.fast_data_size,gauge,,mebibyte,,The total size of the fast storage on disk.,0,marklogic,db fast data size
@@ -75,7 +75,7 @@ marklogic.forests.database_replication_receive_load,gauge,,,,"Time threads spent
 marklogic.forests.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,forest db replication recv rate
 marklogic.forests.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication send load
 marklogic.forests.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,forest db replication send rate
-marklogic.forests.deadlock_rate,gauge,,lock,second,The rate of deadlock occurrances.,0,marklogic,forest deadlock rate
+marklogic.forests.deadlock_rate,gauge,,lock,second,The rate of deadlock occurrences.,0,marklogic,forest deadlock rate
 marklogic.forests.deadlock_wait_load,gauge,,,,Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.,0,marklogic,forest deadlock wait
 marklogic.forests.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest device space
 marklogic.forests.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest f reserve
@@ -138,7 +138,7 @@ marklogic.hosts.backup_read_load,gauge,,,,"Disk read time threads spent for back
 marklogic.hosts.backup_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading backup data from disk.",0,marklogic,host backup r rate
 marklogic.hosts.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,host backup w load
 marklogic.hosts.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,host backup w rate
-marklogic.hosts.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrances.",0,marklogic,host deadlock rate
+marklogic.hosts.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrences.",0,marklogic,host deadlock rate
 marklogic.hosts.deadlock_wait_load,gauge,,second,,"The total time spent waiting for locks that eventually deadlocked.",0,marklogic,host deadlock wait load
 marklogic.hosts.external_binary_read_load,gauge,,,,"Disk read time threads spent on external binary documents, in proportion to the elapsed time.",0,marklogic,host ext bin r load
 marklogic.hosts.external_binary_read_rate,gauge,,mebibyte,second,"Disk read throughput of external binary documents.",0,marklogic,host ext bin r rate

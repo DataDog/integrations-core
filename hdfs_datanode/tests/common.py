@@ -8,6 +8,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 DATANODE_URI = 'http://{}:50070/'.format(HOST)
 
