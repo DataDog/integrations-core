@@ -3,7 +3,7 @@
 init_config:
 
     ## @param snaplen - integer - required
-    ## should be >=104 (to accomodate for the largest possible TCP header)
+    ## should be >=104 (to accommodate for the largest possible TCP header)
     #
     snaplen: 512
 

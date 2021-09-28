@@ -34,7 +34,7 @@ cilium.k8s_client.api_latency_time.seconds.count,count,,request,,"Count of proce
 cilium.k8s_client.api_latency_time.seconds.sum,gauge,,second,,"Sum of processed API call duration",-1,cilium,api latency sum
 cilium.kubernetes.events_received.total,count,,event,,"Number of Kubernetes received events processed",0,cilium,k8s events rcv count
 cilium.kubernetes.events.total,count,,event,,"Number of Kubernetes events processed",0,cilium,k8s events count
-cilium.nodes.all_datapath_validations.total,count,,unit,,"Number of validation calls to implement the datapath implemention of a node",0,cilium,node validations
+cilium.nodes.all_datapath_validations.total,count,,unit,,"Number of validation calls to implement the datapath implementation of a node",0,cilium,node validations
 cilium.nodes.all_events_received.total,count,,event,,"Number of node events received",0,cilium,node events rcvd
 cilium.nodes.managed.total,gauge,,node,,"Number of nodes managed",0,cilium,node managed
 cilium.policy.count,gauge,,unit,,"Number of policies currently loaded",0,cilium,policy count
