@@ -168,6 +168,10 @@ def migrate(ctx, integration, to_version):
         else:
             final_value = val
 
+        # We need to remove any of the underlying "assets" that are just an empty dictionary
+        if key in ["/assets/dashboards", "/assets/monitors", "/assets/saved_views"] and not final_value:
+            continue
+
         if final_value is not None:
             migrated_manifest.set_path(key, final_value)
 
