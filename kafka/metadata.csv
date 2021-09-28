@@ -85,3 +85,5 @@ kafka.topic.messages_in.rate,gauge,10,message,,Incoming message rate by topic,0,
 kafka.topic.net.bytes_out.rate,gauge,10,byte,second,Outgoing byte rate by topic.,0,kafka,topic bytes out
 kafka.topic.net.bytes_in.rate,gauge,10,byte,second,Incoming byte rate by topic.,0,kafka,topic bytes in
 kafka.topic.net.bytes_rejected.rate,gauge,10,byte,second,Rejected byte rate by topic.,-1,kafka,topic bytes rejected
+kafka.session.fetch.count,gauge,10,,,Number of fetch sessions.,0,kafka,fetch sessions
+kafka.session.fetch.eviction,gauge,10,event,second,Eviction rate of fetch session.,0,kafka,eviction session rate

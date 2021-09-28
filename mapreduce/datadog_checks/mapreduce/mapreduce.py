@@ -79,7 +79,6 @@ class MapReduceCheck(AgentCheck):
             self.YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:{}'.format(self.rm_address)] + self.custom_tags,
-            message='Connection to ResourceManager "{}" was successful'.format(self.rm_address),
         )
 
         # Get the applications from the application master
@@ -101,7 +100,6 @@ class MapReduceCheck(AgentCheck):
                 self.MAPREDUCE_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:{}'.format(am_address)] + self.custom_tags,
-                message='Connection to ApplicationManager "{}" was successful'.format(am_address),
             )
         self._get_hadoop_version()
 

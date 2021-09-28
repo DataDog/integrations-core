@@ -29,7 +29,7 @@ The Couchbase check is included in the [Datadog Agent][2] package, so you don't 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `couchbase.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Couchbase data. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
 
@@ -79,16 +79,7 @@ The Couchbase check emits an event to Datadog each time the cluster rebalances.
 
 ### Service Checks
 
-**couchbase.can_connect**:<br>
-Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
-
-**couchbase.by_node.cluster_membership**:<br>
-Returns `Critical` if the node failed over.
-Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
-Returns `Ok` otherwise.
-
-**couchbase.by_node.health**:<br>
-Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -109,3 +100,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog
+[12]: https://github.com/DataDog/integrations-core/blob/master/couchbase/assets/service_checks.json
