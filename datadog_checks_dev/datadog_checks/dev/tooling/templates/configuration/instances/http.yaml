@@ -306,3 +306,8 @@
     example: false
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for increased performance.
+- name: allow_redirects
+  value:
+    example: true
+    type: boolean
+  description: Whether or not to allow URL redirection. 

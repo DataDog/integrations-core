@@ -17,7 +17,7 @@ from datadog_checks.snmp.utils import transform_index
 
 from . import common
 
-pytestmark = common.python_autodiscovery_only
+pytestmark = common.snmp_integration_only
 
 
 @pytest.mark.unit

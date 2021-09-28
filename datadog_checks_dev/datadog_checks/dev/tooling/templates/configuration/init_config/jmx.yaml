@@ -5,9 +5,10 @@
     example: true
     type: boolean
 - name: collect_default_metrics
-  required: true
   description: Whether or not the check should collect all default metrics.
+  enabled: true
   value:
+    display_default: false
     example: true
     type: boolean
 - name: new_gc_metrics
@@ -18,10 +19,11 @@
     jvm.gc.parnew.time => jvm.gc.minor_collection_time
                           jvm.gc.major_collection_time
     The default value is false to ensure backward compatibility.
+  enabled: true
   value:
-    type: boolean
-    example: false
     display_default: false
+    example: true
+    type: boolean
 - name: service_check_prefix
   description: |
     Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
