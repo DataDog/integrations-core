@@ -67,7 +67,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=511 + 5)
 
 
-def test_e2e_regex_match(dd_agent_check, aggregator):
+def test_e2e_regex_match(dd_agent_check):
     metrics = [
         {
             'MIB': "IF-MIB",
@@ -127,23 +127,6 @@ def test_e2e_regex_match(dd_agent_check, aggregator):
         },
     ]
     assert_python_vs_core(dd_agent_check, config)
-
-    config['init_config']['loader'] = 'core'
-    aggregator.reset()
-    aggregator = dd_agent_check(config, rate=True)
-
-    # raw sysName: 41ba948911b9
-    aggregator.assert_metric(
-        'snmp.devices_monitored',
-        tags=[
-            'digits:41',
-            'remainder:ba948911b9',
-            'letter1:4',
-            'letter2:1',
-            'loader:core',
-            'snmp_device:' + instance['ip_address'],
-        ],
-    )
 
 
 def test_e2e_scalar_oid_retry(dd_agent_check):
