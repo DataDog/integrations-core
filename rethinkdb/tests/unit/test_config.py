@@ -32,7 +32,7 @@ def test_config(port_28016, min_collection_interval_10):
         'username': 'datadog-agent',
         'password': 's3kr3t',
         'tls_ca_cert': '/path/to/client.cert',
-        'tags': ['env:testing'],
+        'tags': ['rethinkdb_env:testing'],
     }  # type: Instance
 
     config = Config(instance)
@@ -40,7 +40,7 @@ def test_config(port_28016, min_collection_interval_10):
     assert config.port == 28016
     assert config.user == 'datadog-agent'
     assert config.tls_ca_cert == '/path/to/client.cert'
-    assert config.tags == ['env:testing']
+    assert config.tags == ['rethinkdb_env:testing']
 
 
 @pytest.mark.parametrize('value', [42, True, object()])

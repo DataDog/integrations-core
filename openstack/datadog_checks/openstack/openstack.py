@@ -966,7 +966,7 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:  # 409 response code came back fro nova
+        except InstancePowerOffFailure:  # 409 response code came back for nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             del self.server_details_by_id[server_id]
         except requests.exceptions.HTTPError as e:
