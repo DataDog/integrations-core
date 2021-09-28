@@ -379,7 +379,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
-    ## other integratons tags.
+    ## other integrations tags.
     #
     disable_generic_tags: true
 
