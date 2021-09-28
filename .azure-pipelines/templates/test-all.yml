@@ -1,4 +1,6 @@
 parameters:
+  agent_image_win: ''
+  agent_image_win_py2: ''
   checks: []
   repo: 'core'
   ispr: false
@@ -34,6 +36,11 @@ jobs:
       ddtrace_flag: ${{ parameters.ddtrace_flag }}
       validate_codeowners: ${{ parameters.validate_codeowners }}
       dd_url: ${{ parameters.dd_url }}
+
+      # Setup windows images
+      ${{ if eq(check.os, 'windows')}}:
+        agent_image_win: ${{ parameters.agent_image_win }}
+        agent_image_win_py2: ${{ parameters.agent_image_win_py2 }}
 
       # Avoid max step limits
       ${{ if eq(check.checkName, 'datadog_checks_base') }}:
