@@ -125,6 +125,26 @@ def test_instance_timeout(check, instance):
             ['my:tag', 'url:http://hello.com/state.json'],
             True,
         ),
+        (
+            'OK case with non-leader master on /state',
+            [
+                mock.MagicMock(status_code=401, history=[mock.MagicMock(status_code=307)]),
+                mock.MagicMock(content='{}', history=[], status_code=500),
+            ],
+            AgentCheck.UNKNOWN,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        (
+            'OK case with non-leader master on /state.json',
+            [
+                mock.MagicMock(status_code=500, history=[]),
+                mock.MagicMock(content='{}', history=[mock.MagicMock(status_code=307)], status_code=401),
+            ],
+            AgentCheck.UNKNOWN,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
     ],
 )
 @pytest.mark.integration

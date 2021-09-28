@@ -54,6 +54,7 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
+    'allow_redirects': True,
     'auth_token': None,
     'auth_type': 'basic',
     'aws_host': None,
@@ -217,6 +218,8 @@ class RequestsWrapper(object):
 
         auth = AUTH_TYPES[auth_type](config)
 
+        allow_redirects = is_affirmative(config['allow_redirects'])
+
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
         if isinstance(config['tls_ca_cert'], string_types):
@@ -268,6 +271,7 @@ class RequestsWrapper(object):
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
             'verify': verify,
+            'allow_redirects': allow_redirects,
         }
 
         # For manual parsing until `requests` properly handles `no_proxy`
@@ -440,7 +444,7 @@ class RequestsWrapper(object):
                 ExtensionOID.AUTHORITY_INFORMATION_ACCESS
             )
         except ExtensionNotFound:
-            self.log.debug(
+            self.logger.debug(
                 'No Authority Information Access extension found, skipping discovery of intermediate certificates'
             )
             return

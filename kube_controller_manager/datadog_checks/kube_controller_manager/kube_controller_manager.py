@@ -2,11 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
+import requests
 from six import iteritems
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
@@ -123,6 +128,16 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             default_namespace="kube_controller_manager",
         )
 
+        if instances is not None:
+            for instance in instances:
+                url = instance.get('health_url')
+                prometheus_url = instance.get('prometheus_url')
+
+                if url is None and re.search(r'/metrics$', prometheus_url):
+                    url = re.sub(r'/metrics$', '/healthz', prometheus_url)
+
+                instance['health_url'] = url
+
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
@@ -153,6 +168,8 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             leader_config["tags"] = instance.get("tags", [])
             leader_config["record_kind"] = instance.get('leader_election_kind', 'auto')
             self.check_election_status(leader_config)
+
+        self._perform_service_check(instance)
 
     def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
@@ -200,3 +217,41 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         #  rename the tag "name" to "queue" and submit this metric with the new metrics_name
         self._tag_renaming(metric, "queue", "name")
         self.submit_openmetric(new_metric_name, metric, scraper_config)
+
+    def _perform_service_check(self, instance):
+        url = instance.get('health_url')
+        if url is None:
+            return
+
+        tags = instance.get("tags", [])
+        service_check_name = 'kube_controller_manager.up'
+        http_handler = self._healthcheck_http_handler(instance, url)
+
+        try:
+            response = http_handler.get(url)
+            response.raise_for_status()
+            self.service_check(service_check_name, AgentCheck.OK, tags=tags)
+        except requests.exceptions.RequestException as e:
+            message = str(e)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
+
+    def _healthcheck_http_handler(self, instance, endpoint):
+        if endpoint in self._http_handlers:
+            return self._http_handlers[endpoint]
+
+        config = {}
+        config['tls_cert'] = instance.get('ssl_cert', None)
+        config['tls_private_key'] = instance.get('ssl_private_key', None)
+        config['tls_verify'] = instance.get('ssl_verify', True)
+        config['tls_ignore_warning'] = instance.get('ssl_ignore_warning', False)
+        config['tls_ca_cert'] = instance.get('ssl_ca_cert', None)
+
+        if config['tls_ca_cert'] is None:
+            config['tls_ignore_warning'] = True
+            config['tls_verify'] = False
+
+        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        return http_handler

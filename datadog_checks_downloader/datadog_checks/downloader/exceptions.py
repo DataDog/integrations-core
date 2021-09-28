@@ -35,7 +35,11 @@ class IncorrectRootLayoutType(Exception):
         self.expected = expected
 
     def __str__(self):
-        return 'found {}, expected {}'.format(self.found, self.expected)
+        return (
+            "Incorrect type, found {}, expected {}. "
+            "Make sure to use the -t/--third-party flag when (and only when) downloading third-party integrations."
+            "".format(self.found, self.expected)
+        )
 
 
 class SimpleIndexError(Exception):

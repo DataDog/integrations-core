@@ -1,6 +1,18 @@
 # CHANGELOG - Twistlock
 
-## 1.10.1 / 2021-03-07
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.12.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Upgrade some core dependencies. See [#9499](https://github.com/DataDog/integrations-core/pull/9499).
+
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#9000](https://github.com/DataDog/integrations-core/pull/9000).
+
+## 1.10.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 

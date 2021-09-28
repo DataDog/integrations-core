@@ -13,7 +13,7 @@ from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCo
 from .config import IBMMQConfig
 
 try:
-    from typing import Any
+    from typing import Any, Dict, List
 except ImportError:
     pass
 
@@ -46,12 +46,12 @@ class IbmMqCheck(AgentCheck):
             self.log,
         )
         self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
-        self.metadata_collector = MetadataCollector(self.log)
+        self.metadata_collector = MetadataCollector(self._config, self.log)
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
         try:
-            queue_manager = connection.get_queue_manager_connection(self._config)
+            queue_manager = connection.get_queue_manager_connection(self._config, self.log)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)
@@ -77,7 +77,7 @@ class IbmMqCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, queue_manager):
         try:
-            version = self.metadata_collector.collect_metadata(queue_manager, self._config.convert_endianness)
+            version = self.metadata_collector.collect_metadata(queue_manager)
             if version:
                 raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
                 self.set_metadata('version', raw_version, scheme='parts', part_map=version)
@@ -88,6 +88,7 @@ class IbmMqCheck(AgentCheck):
             self.log.debug('Could not retrieve ibm_mq version info: %s', e)
 
     def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
+        # type: (Dict, Dict, str, List[str]) -> None
         for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:
