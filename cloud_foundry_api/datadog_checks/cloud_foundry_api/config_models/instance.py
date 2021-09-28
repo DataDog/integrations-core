@@ -63,6 +63,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     results_per_page: Optional[int] = Field(None, le=5000.0)
     service: Optional[str]
     skip_proxy: Optional[bool]
