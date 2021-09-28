@@ -32,6 +32,7 @@ class InstanceConfig(BaseModel):
     client_session_keep_alive: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     login_timeout: Optional[int]
     metric_groups: Optional[Sequence[str]]
@@ -44,7 +45,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     token: Optional[str]
     use_global_custom_queries: Optional[str]
-    user: str
+    username: str
     warehouse: Optional[str]
 
     @root_validator(pre=True)

@@ -29,7 +29,7 @@ def shared_service(field, value):
 
 
 def instance_authenticator(field, value):
-    return get_default_field_value(field, value)
+    return 'snowflake'
 
 
 def instance_client_prefetch_threads(field, value):
@@ -46,6 +46,10 @@ def instance_custom_queries(field, value):
 
 def instance_database(field, value):
     return 'SNOWFLAKE'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
