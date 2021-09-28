@@ -52,7 +52,9 @@ files:
           type: string
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
-        description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+        description: |
+          The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+          This will be in addition to any queues discovered using autodiscovery, regex or patterns.
         value:
           example: ['<QUEUE_NAME>']
           type: array

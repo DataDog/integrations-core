@@ -58,6 +58,7 @@ instances:
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+    ## This will be in addition to any queues discovered using autodiscovery, regex or patterns.
     #
     # queues:
     #   - <QUEUE_NAME>
