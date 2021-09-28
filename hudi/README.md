@@ -70,7 +70,7 @@ _Available for Agent versions >6.0_
 
      An example of a valid timestamp is: `2020-02-03 18:43:12,251`.
 
-     Clone and edit the [integration pipeline][11] if you have a different format.
+     Clone and edit the [integration pipeline][15] if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -117,3 +117,5 @@ Need help? Contact [Datadog support][8].
 [12]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
 [13]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
 [14]: https://github.com/apache/spark/tree/master/conf
+[15]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+
