@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import click
 
-from ...utils import resolve_path
+from ...fs import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
 from ..utils import kebab_case_name, normalize_package_name
@@ -96,6 +96,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     NAME: The display name of the integration that will appear in documentation.
     """
+    if name.lower().startswith("datadog"):
+        abort("Integration names cannot start with datadog")
 
     if name.islower():
         echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')

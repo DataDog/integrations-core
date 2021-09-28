@@ -18,7 +18,7 @@ from datadog_checks.tls.tls_remote import TLSRemoteCheck
 
 def test_right_class_is_instantiated(instance_remote_no_server):
     c = TLSCheck('tls', {}, [instance_remote_no_server])
-    assert isinstance(c, TLSRemoteCheck)
+    assert isinstance(c.checker, TLSRemoteCheck)
 
 
 def test_no_server(instance_remote_no_server):
@@ -247,6 +247,22 @@ def test_fetch_intermediate_certs(aggregator, instance_remote_fetch_intermediate
 
     aggregator.assert_metric('tls.days_left', count=1)
     aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_cert_send_cert_duration(aggregator, instance_remote_send_cert_duration):
+    c = TLSCheck('tls', {}, [instance_remote_send_cert_duration])
+    c.check(None)
+
+    aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_metric('tls.issued_days', count=1)
+    aggregator.assert_metric('tls.issued_seconds', count=1)
     aggregator.assert_all_metrics_covered()
 
 

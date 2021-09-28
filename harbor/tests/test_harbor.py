@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.harbor import HarborCheck
 
-from .common import HARBOR_COMPONENTS, HARBOR_METRICS, HARBOR_VERSION, VERSION_1_5, VERSION_1_8
+from .common import HARBOR_COMPONENTS, HARBOR_METRICS, HARBOR_VERSION, VERSION_1_5, VERSION_1_8, VERSION_2_2
 
 
 @pytest.mark.integration
@@ -30,9 +30,14 @@ def test_check_e2e(dd_agent_check, e2e_instance):
 def test_check_admin(aggregator, admin_instance):
     check = HarborCheck('harbor', {}, [admin_instance])
     check.check(admin_instance)
+
+    # Return value can be empty in our env for version 2.3
+    # See https://github.com/goharbor/harbor/issues/14719
+    # and https://github.com/goharbor/harbor/issues/15503
+    at_least = 1 if HARBOR_VERSION < VERSION_2_2 else 0
     assert_service_checks(aggregator)
     for metric, _ in HARBOR_METRICS:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric, at_least=at_least)
     aggregator.assert_all_metrics_covered()
 
 

@@ -31,7 +31,7 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
+pytestmark = [pytest.mark.unit, common.snmp_integration_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
@@ -448,10 +448,10 @@ def test_profile_extends():
 
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
-            with open(os.path.join(tmp, 'base.yaml'), 'w') as f:
+            with open(os.path.join(tmp, 'base.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(base))
 
-            with open(os.path.join(tmp, 'profile1.yaml'), 'w') as f:
+            with open(os.path.join(tmp, 'profile1.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(profile1))
 
             definition = {'extends': ['profile1.yaml']}
@@ -477,7 +477,7 @@ def test_default_profiles():
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'profile.yaml')
-            with open(profile_file, 'w') as f:
+            with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()
@@ -492,7 +492,7 @@ def test_profile_override():
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'generic-router.yaml')
-            with open(profile_file, 'w') as f:
+            with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()

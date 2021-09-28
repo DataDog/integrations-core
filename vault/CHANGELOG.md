@@ -1,6 +1,31 @@
 # CHANGELOG - Vault
 
-## 2.11.0 / 2021-03-07
+## 2.16.0 / 2021-09-09
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Update vault metrics. See [#9953](https://github.com/DataDog/integrations-core/pull/9953).
+
+## 2.15.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 2.14.0 / 2021-07-20
+
+* [Added] Add new vault metrics. See [#9728](https://github.com/DataDog/integrations-core/pull/9728).
+* [Added] Add Vault route metrics to be fetched from the Prometheus endpoint. See [#9612](https://github.com/DataDog/integrations-core/pull/9612). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+* [Added] Add newer Hashicorp Vault metrics. See [#9641](https://github.com/DataDog/integrations-core/pull/9641). Thanks [mdgreenfield](https://github.com/mdgreenfield).
+
+## 2.13.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#9002](https://github.com/DataDog/integrations-core/pull/9002).
+
+## 2.12.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add Additional Vault Route Metrics. See [#8761](https://github.com/DataDog/integrations-core/pull/8761).
+* [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).
+* [Fixed] Bump minimum base package. See [#9107](https://github.com/DataDog/integrations-core/pull/9107).
+
+## 2.11.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Rename cluster_name tag to vault_cluster. See [#8577](https://github.com/DataDog/integrations-core/pull/8577).
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
