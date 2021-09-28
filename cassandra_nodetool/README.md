@@ -1,4 +1,4 @@
-# Agent Check: Cassandra Nodetool
+# Cassandra Nodetool Integration
 
 ![Cassandra default dashboard][1]
 
@@ -51,8 +51,7 @@ The Cassandra_nodetool check does not include any events.
 
 ### Service Checks
 
-**cassandra.nodetool.node_up**:<br>
-The agent sends this service check for each node of the monitored cluster. Returns `CRITICAL` if the node is down, otherwise `OK`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -77,3 +76,4 @@ Need help? Contact [Datadog support][10].
 [11]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [12]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [13]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[14]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/assets/service_checks.json

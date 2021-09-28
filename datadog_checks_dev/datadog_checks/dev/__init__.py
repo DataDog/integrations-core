@@ -6,6 +6,7 @@ from .conditions import WaitFor
 from .docker import docker_run, get_docker_hostname
 from .env import environment_run
 from .errors import RetryError
+from .fs import chdir, get_here, temp_chdir, temp_dir
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import chdir, get_here, load_jmx_config, temp_chdir, temp_dir
+from .utils import load_jmx_config

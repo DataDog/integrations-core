@@ -44,18 +44,18 @@ mongodb.indexcounters.hitsps,gauge,,hit,second,Number of times per second that a
 mongodb.indexcounters.missesps,gauge,,miss,second,Number of times per second that an operation attempted to access an index that was not in memory.,0,mongodb,indexcounters misses ps
 mongodb.indexcounters.missratio,gauge,,fraction,,Ratio of index hits to misses.,0,mongodb,indexcounters miss ratio
 mongodb.indexcounters.resetsps,gauge,,event,second,Number of times per second the index counters have been reset.,0,mongodb,indexcounters resets ps
-mongodb.locks.collection.acquirecount.exclusiveps,gauge,,lock,second,Number of times the collection lock type was aquired in the Exclusive (X) mode.,0,mongodb,locks collection acquire count exclusive
-mongodb.locks.collection.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the collection lock type was aquired in the Intent Exclusive (IX) mode.,0,mongodb,locks collection acquire count intent_exclusive
-mongodb.locks.collection.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the collection lock type was aquired in the Intent Shared (IS) mode.,0,mongodb,locks collection acquire count intent_shared
-mongodb.locks.collection.acquirecount.sharedps,gauge,,lock,second,Number of times the collection lock type was aquired in the Shared (S) mode.,0,mongodb,locks collection acquire count shared
+mongodb.locks.collection.acquirecount.exclusiveps,gauge,,lock,second,Number of times the collection lock type was acquired in the Exclusive (X) mode.,0,mongodb,locks collection acquire count exclusive
+mongodb.locks.collection.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the collection lock type was acquired in the Intent Exclusive (IX) mode.,0,mongodb,locks collection acquire count intent_exclusive
+mongodb.locks.collection.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the collection lock type was acquired in the Intent Shared (IS) mode.,0,mongodb,locks collection acquire count intent_shared
+mongodb.locks.collection.acquirecount.sharedps,gauge,,lock,second,Number of times the collection lock type was acquired in the Shared (S) mode.,0,mongodb,locks collection acquire count shared
 mongodb.locks.collection.acquirewaitcount.exclusiveps,gauge,,wait,second,Number of times the collection lock type acquisition in the Exclusive (X) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks collection wait count exclusive
 mongodb.locks.collection.acquirewaitcount.sharedps,gauge,,wait,second,Number of times the collection lock type acquisition in the Shared (S) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks collection wait count shared
 mongodb.locks.collection.timeacquiringmicros.exclusiveps,gauge,,fraction,,Wait time for the collection lock type acquisitions in the Exclusive (X) mode.,-1,mongodb,locks collection wait time exclusive
 mongodb.locks.collection.timeacquiringmicros.sharedps,gauge,,fraction,,Wait time for the collection lock type acquisitions in the Shared (S) mode.,-1,mongodb,locks collection wait time shared
-mongodb.locks.database.acquirecount.exclusiveps,gauge,,lock,second,Number of times the database lock type was aquired in the Exclusive (X) mode.,0,mongodb,locks database acquire count exclusive
-mongodb.locks.database.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the database lock type was aquired in the Intent Exclusive (IX) mode.,0,mongodb,locks database acquire count intent_exclusive
-mongodb.locks.database.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the database lock type was aquired in the Intent Shared (IS) mode.,0,mongodb,locks database acquire count intent_shared
-mongodb.locks.database.acquirecount.sharedps,gauge,,lock,second,Number of times the database lock type was aquired in the Shared (S) mode.,0,mongodb,locks database acquire count shared
+mongodb.locks.database.acquirecount.exclusiveps,gauge,,lock,second,Number of times the database lock type was acquired in the Exclusive (X) mode.,0,mongodb,locks database acquire count exclusive
+mongodb.locks.database.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the database lock type was acquired in the Intent Exclusive (IX) mode.,0,mongodb,locks database acquire count intent_exclusive
+mongodb.locks.database.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the database lock type was acquired in the Intent Shared (IS) mode.,0,mongodb,locks database acquire count intent_shared
+mongodb.locks.database.acquirecount.sharedps,gauge,,lock,second,Number of times the database lock type was acquired in the Shared (S) mode.,0,mongodb,locks database acquire count shared
 mongodb.locks.database.acquirewaitcount.exclusiveps,gauge,,wait,second,Number of times the database lock type acquisition in the Exclusive (X) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks database wait count exclusive
 mongodb.locks.database.acquirewaitcount.intent_exclusiveps,gauge,,wait,second,Number of times the database lock type acquisition in the Intent Exclusive (IX) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks database wait count intent_exclusive
 mongodb.locks.database.acquirewaitcount.intent_sharedps,gauge,,wait,second,Number of times the database lock type acquisition in the Intent Shared (IS) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks database wait count intent_shared
@@ -64,10 +64,10 @@ mongodb.locks.database.timeacquiringmicros.exclusiveps,gauge,,fraction,,Wait tim
 mongodb.locks.database.timeacquiringmicros.intent_exclusiveps,gauge,,fraction,,Wait time for the database lock type acquisitions in the Intent Exclusive (IX) mode.,-1,mongodb,locks database wait time intent_exclusive
 mongodb.locks.database.timeacquiringmicros.intent_sharedps,gauge,,fraction,,Wait time for the database lock type acquisitions in the Intent Shared (IS) mode.,-1,mongodb,locks database wait time intent_shared
 mongodb.locks.database.timeacquiringmicros.sharedps,gauge,,fraction,,Wait time for the database lock type acquisitions in the Shared (S) mode.,-1,mongodb,locks database wait time shared
-mongodb.locks.global.acquirecount.exclusiveps,gauge,,lock,second,Number of times the global lock type was aquired in the Exclusive (X) mode.,0,mongodb,locks global acquire count exclusive
-mongodb.locks.global.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the global lock type was aquired in the Intent Exclusive (IX) mode.,0,mongodb,locks global acquire count intent_exclusive
-mongodb.locks.global.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the global lock type was aquired in the Intent Shared (IS) mode.,0,mongodb,locks global acquire count intent_shared
-mongodb.locks.global.acquirecount.sharedps,gauge,,lock,second,Number of times the global lock type was aquired in the Shared (S) mode.,0,mongodb,locks global acquire count shared
+mongodb.locks.global.acquirecount.exclusiveps,gauge,,lock,second,Number of times the global lock type was acquired in the Exclusive (X) mode.,0,mongodb,locks global acquire count exclusive
+mongodb.locks.global.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the global lock type was acquired in the Intent Exclusive (IX) mode.,0,mongodb,locks global acquire count intent_exclusive
+mongodb.locks.global.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the global lock type was acquired in the Intent Shared (IS) mode.,0,mongodb,locks global acquire count intent_shared
+mongodb.locks.global.acquirecount.sharedps,gauge,,lock,second,Number of times the global lock type was acquired in the Shared (S) mode.,0,mongodb,locks global acquire count shared
 mongodb.locks.global.acquirewaitcount.exclusiveps,gauge,,wait,second,Number of times the global lock type acquisition in the Exclusive (X) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks global wait count exclusive
 mongodb.locks.global.acquirewaitcount.intent_exclusiveps,gauge,,wait,second,Number of times the global lock type acquisition in the Intent Exclusive (IX) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks global wait count intent_exclusive
 mongodb.locks.global.acquirewaitcount.intent_sharedps,gauge,,wait,second,Number of times the global lock type acquisition in the Intent Shared (IS) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks global wait count intent_shared
@@ -76,16 +76,16 @@ mongodb.locks.global.timeacquiringmicros.exclusiveps,gauge,,fraction,,Wait time 
 mongodb.locks.global.timeacquiringmicros.intent_exclusiveps,gauge,,fraction,,Wait time for the global lock type acquisitions in the Intent Exclusive (IX) mode.,-1,mongodb,locks global wait time intent_exclusive
 mongodb.locks.global.timeacquiringmicros.intent_sharedps,gauge,,fraction,,Wait time for the global lock type acquisitions in the Intent Shared (IS) mode.,-1,mongodb,locks global wait time intent_shared
 mongodb.locks.global.timeacquiringmicros.sharedps,gauge,,fraction,,Wait time for the global lock type acquisitions in the Shared (S) mode.,-1,mongodb,locks global wait time shared
-mongodb.locks.metadata.acquirecount.exclusiveps,gauge,,lock,second,Number of times the metadata lock type was aquired in the Exclusive (X) mode.,0,mongodb,locks metadata acquire count exclusive
-mongodb.locks.metadata.acquirecount.sharedps,gauge,,lock,second,Number of times the metadata lock type was aquired in the Shared (S) mode.,0,mongodb,locks metadata acquire count shared
-mongodb.locks.mmapv1journal.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the MMAPv1 storage engine lock type was aquired in the Intent Exclusive (IX) mode.,0,mongodb,locks mmapv1journal acquire count intent_exclusive
-mongodb.locks.mmapv1journal.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the MMAPv1 storage engine lock type was aquired in the Intent Shared (IS) mode.,0,mongodb,locks mmapv1journal acquire count intent_shared
+mongodb.locks.metadata.acquirecount.exclusiveps,gauge,,lock,second,Number of times the metadata lock type was acquired in the Exclusive (X) mode.,0,mongodb,locks metadata acquire count exclusive
+mongodb.locks.metadata.acquirecount.sharedps,gauge,,lock,second,Number of times the metadata lock type was acquired in the Shared (S) mode.,0,mongodb,locks metadata acquire count shared
+mongodb.locks.mmapv1journal.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the MMAPv1 storage engine lock type was acquired in the Intent Exclusive (IX) mode.,0,mongodb,locks mmapv1journal acquire count intent_exclusive
+mongodb.locks.mmapv1journal.acquirecount.intent_sharedps,gauge,,lock,second,Number of times the MMAPv1 storage engine lock type was acquired in the Intent Shared (IS) mode.,0,mongodb,locks mmapv1journal acquire count intent_shared
 mongodb.locks.mmapv1journal.acquirewaitcount.intent_exclusiveps,gauge,,wait,second,Number of times the MMAPv1 storage engine lock type acquisition in the Intent Exclusive (IX) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks mmapv1journal wait count intent_exclusive
 mongodb.locks.mmapv1journal.acquirewaitcount.intent_sharedps,gauge,,wait,second,Number of times the MMAPv1 storage engine lock type acquisition in the Intent Shared (IS) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks mmapv1journal wait count intent_shared
 mongodb.locks.mmapv1journal.timeacquiringmicros.intent_exclusiveps,gauge,,fraction,,Wait time for the MMAPv1 storage engine lock type acquisitions in the Intent Exclusive (IX) mode.,-1,mongodb,locks mmapv1journal wait time intent_exclusive
 mongodb.locks.mmapv1journal.timeacquiringmicros.intent_sharedps,gauge,,fraction,,Wait time for the MMAPv1 storage engine lock type acquisitions in the Intent Shared (IS) mode.,-1,mongodb,locks mmapv1journal wait time intent_shared
-mongodb.locks.oplog.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the oplog lock type was aquired in the Intent Exclusive (IX) mode.,0,mongodb,locks oplog acquire count intent_exclusive
-mongodb.locks.oplog.acquirecount.sharedps,gauge,,lock,second,Number of times the oplog lock type was aquired in the Shared (S) mode.,0,mongodb,locks oplog acquire count shared
+mongodb.locks.oplog.acquirecount.intent_exclusiveps,gauge,,lock,second,Number of times the oplog lock type was acquired in the Intent Exclusive (IX) mode.,0,mongodb,locks oplog acquire count intent_exclusive
+mongodb.locks.oplog.acquirecount.sharedps,gauge,,lock,second,Number of times the oplog lock type was acquired in the Shared (S) mode.,0,mongodb,locks oplog acquire count shared
 mongodb.locks.oplog.acquirewaitcount.intent_exclusiveps,gauge,,wait,second,Number of times the oplog lock type acquisition in the Intent Exclusive (IX) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks oplog wait count intent_exclusive
 mongodb.locks.oplog.acquirewaitcount.sharedps,gauge,,wait,second,Number of times the oplog lock type acquisition in the Shared (S) mode encountered waits because the locks were held in a conflicting mode.,-1,mongodb,locks oplog wait count shared
 mongodb.locks.oplog.timeacquiringmicros.intent_exclusiveps,gauge,,fraction,,Wait time for the oplog lock type acquisitions in the Intent Exclusive (IX) mode.,-1,mongodb,locks oplog wait time intent_exclusive
@@ -122,7 +122,7 @@ mongodb.metrics.getlasterror.wtime.totalmillisps,gauge,,fraction,,Fraction of ti
 mongodb.metrics.getlasterror.wtimeoutsps,gauge,,event,second,Number of times per second that write concern operations have timed out as a result of the wtimeout threshold to getLastError,0,mongodb,getlasterror wtimeouts ps
 mongodb.metrics.operation.fastmodps,gauge,,operation,second,Number of update operations per second that neither cause documents to grow nor require updates to the index.,0,mongodb,operation fastmod ps
 mongodb.metrics.operation.idhackps,gauge,,query,second,Number of queries per second that contain the _id field.,0,mongodb,operation idhack ps
-mongodb.metrics.operation.writeconflictsps,gauge,,event,second,Number of times per second that write concern operations has encounter a conflict.,0,mongodb,wite conflict
+mongodb.metrics.operation.writeconflictsps,gauge,,event,second,Number of times per second that write concern operations has encounter a conflict.,0,mongodb,write conflict
 mongodb.metrics.operation.scanandorderps,gauge,,query,second,Number of queries per second that return sorted numbers that cannot perform the sort operation using an index.,0,mongodb,operation scanandorder ps
 mongodb.metrics.queryexecutor.scannedps,gauge,,operation,second,Number of index items scanned per second during queries and query-plan evaluation.,0,mongodb,queryexecutor scanned ps
 mongodb.metrics.record.movesps,gauge,,operation,second,Number of times per second documents move within the on-disk representation of the MongoDB data set.,0,mongodb,record moves ps
@@ -242,7 +242,7 @@ mongodb.tcmalloc.tcmalloc.max_total_thread_cache_bytes,gauge,,byte,,Upper limit 
 mongodb.tcmalloc.tcmalloc.pageheap_free_bytes,gauge,,byte,,Number of bytes in free mapped pages in page heap.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.pageheap_unmapped_bytes,gauge,,byte,,Number of bytes in free unmapped pages in page heap.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.thread_cache_free_bytes,gauge,,byte,,Number of free bytes in thread caches.,0,mongodb,
-mongodb.tcmalloc.tcmalloc.transfer_cache_free_bytes,gauge,,byte,,Number of free bytes that are waiting to be transfered between the central cache and a thread cache.,0,mongodb,
+mongodb.tcmalloc.tcmalloc.transfer_cache_free_bytes,gauge,,byte,,Number of free bytes that are waiting to be transferred between the central cache and a thread cache.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.spinlock_total_delay_ns,gauge,,nanosecond,,Spinlock delay time.,-1,mongodb,
 mongodb.chunks.jumbo,gauge,,,,Total number of 'jumbo' chunks in the mongo cluster.,0,mongodb,
 mongodb.chunks.total,gauge,,,,Total number of chunks in the mongo cluster.,0,mongodb,
