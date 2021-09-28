@@ -6,7 +6,7 @@ import webbrowser
 
 import click
 
-from ....utils import chdir
+from ....fs import chdir
 from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_waiting, echo_warning
 from .utils import insert_verbosity_flag

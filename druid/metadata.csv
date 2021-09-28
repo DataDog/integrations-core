@@ -35,7 +35,7 @@ druid.query.cache.total.averageBytes,gauge,,byte,,Total average cache entry byte
 druid.query.cache.total.timeouts,gauge,,,,Total number of cache timeouts.,-1,druid,qry cache tot timeouts
 druid.query.cache.total.errors,gauge,,,,Total number of cache errors.,-1,druid,qry cache tot errors
 druid.ingest.events.thrownAway,count,,event,,Number of events rejected because they are outside the windowPeriod.,-1,druid,ing events thrown away
-druid.ingest.events.unparseable,count,,event,,Number of events rejected because the events are unparseable.,-1,druid,ing events unparseable
+druid.ingest.events.unparseable,count,,event,,Number of events rejected because the events are unparsable.,-1,druid,ing events unparsable
 druid.ingest.events.duplicate,count,,event,,Number of events rejected because the events are duplicated.,-1,druid,ing events duplicate
 druid.ingest.events.processed,count,,event,,Number of events successfully processed per emission period.,1,druid,ing events processed
 druid.ingest.events.messageGap,gauge,,millisecond,,Time gap between the data time in event and current system time.,-1,druid,ing events message gap
@@ -100,8 +100,8 @@ druid.sys.swap.pageIn,gauge,,page,,Paged in swap.,0,druid,sys swap page in
 druid.sys.swap.pageOut,gauge,,page,,Paged out swap.,0,druid,sys swap page out
 druid.sys.disk.write.count,count,,write,,Writes to disk.,0,druid,sys disk write count
 druid.sys.disk.read.count,count,,read,,Reads from disk.,0,druid,sys disk read count
-druid.sys.disk.write.size,count,,byte,,Bytes written to disk. Can we used to determine how much paging is occuring with regards to segments.,0,druid,sys disk write size
-druid.sys.disk.read.size,count,,byte,,Bytes read from disk. Can we used to determine how much paging is occuring with regards to segments.,0,druid,sys disk read size
+druid.sys.disk.write.size,count,,byte,,Bytes written to disk. Can we used to determine how much paging is occurring with regards to segments.,0,druid,sys disk write size
+druid.sys.disk.read.size,count,,byte,,Bytes read from disk. Can we used to determine how much paging is occurring with regards to segments.,0,druid,sys disk read size
 druid.sys.net.write.size,count,,byte,,Bytes written to the network.,0,druid,sys net write size
 druid.sys.net.read.size,count,,byte,,Bytes read from the network.,0,druid,sys net read size
 druid.sys.fs.used,gauge,,byte,,Filesystem bytes used.,0,druid,sys fs used

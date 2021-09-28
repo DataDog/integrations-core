@@ -36,7 +36,7 @@ def get_rate_flag(agent_version):
 def get_agent_exe(agent_version, platform=LINUX):
     if platform == WINDOWS:
         if agent_version >= 6:
-            return r"C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe"
+            return r'C:\Program Files\Datadog\Datadog Agent\bin\agent.exe'
         else:
             # [TODO] Actually get the path here
             pass
@@ -52,9 +52,16 @@ def get_agent_exe(agent_version, platform=LINUX):
             return '/opt/datadog-agent/agent/agent.py'
 
 
+def get_python_exe(platform=LINUX, python_version=DEFAULT_PYTHON_VERSION):
+    if platform == WINDOWS:
+        return r'C:\Program Files\Datadog\Datadog Agent\embedded{}\python.exe'.format(python_version)
+    else:
+        return f'/opt/datadog-agent/embedded/bin/python{python_version}'
+
+
 def get_pip_exe(python_version, platform=LINUX):
     if platform == WINDOWS:
-        return [r'C:\Program Files\Datadog\Datadog Agent\embedded{}\python.exe'.format(python_version), '-m', 'pip']
+        return [get_python_exe(platform=platform, python_version=python_version), '-m', 'pip']
     else:
         return [f'/opt/datadog-agent/embedded/bin/pip{python_version}']
 

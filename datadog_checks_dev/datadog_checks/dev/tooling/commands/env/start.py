@@ -8,7 +8,9 @@ import time
 import click
 import pyperclip
 
-from ....utils import dir_exists, file_exists, path_join, running_on_ci
+from ....ci import running_on_ci
+from ....fs import dir_exists, file_exists, path_join
+from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
@@ -138,7 +140,12 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    fallback = os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    # DDEV_E2E_AGENT_PY2 overrides DDEV_E2E_AGENT when starting a Python 2 environment
+    if python == 2 and os.getenv('DDEV_E2E_AGENT_PY2'):
+        fallback = os.getenv('DDEV_E2E_AGENT_PY2')
+
+    agent_ver = agent or fallback
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
         # TODO: remove this legacy fallback lookup in any future major version bump
@@ -241,9 +248,14 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         stop_environment(check, env, metadata=metadata)
         environment.remove_config()
         abort()
+
+    if ON_WINDOWS and python < 3:
+        time.sleep(10)
+
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
+    post_install_commands = metadata.get('post_install_commands', [])
 
     # for example, to install some tools inside container:
     # export DDEV_AGENT_START_COMMAND="bash -c 'apt update && apt install -y vim less'"
@@ -297,7 +309,25 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             environment.update_check()
             echo_success('success!')
 
-    if dev or base or start_commands:
+    if post_install_commands:
+        echo_waiting('Running extra post-install commands... ', nl=False)
+
+        for command in post_install_commands:
+            result = environment.exec_command(command, capture=True)
+            if result.code:
+                click.echo()
+                echo_info(result.stdout + result.stderr)
+                echo_failure('An error occurred.')
+                echo_waiting('Stopping the environment...')
+                stop_environment(check, env, metadata=metadata)
+                echo_waiting('Stopping the Agent...')
+                environment.stop_agent()
+                environment.remove_config()
+                abort()
+
+        echo_success('success!')
+
+    if dev or base or start_commands or post_install_commands:
         echo_waiting('Reloading the environment to reflect changes... ', nl=False)
         result = environment.restart_agent()
 
@@ -329,6 +359,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         config_message = 'Config file: '
     else:
         config_message = 'Config file (copied to your clipboard): '
+
+    echo_success('To edit config file, do: ', nl=False)
+    echo_info(f'ddev env edit {check} {env}')
 
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)
