@@ -62,6 +62,7 @@ class InstanceConfig(BaseModel):
     port: int
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     tags: Optional[Sequence[str]]
