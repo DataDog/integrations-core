@@ -83,6 +83,7 @@ class InstanceConfig(BaseModel):
     process_name_regex: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     rmi_client_timeout: Optional[float]
     rmi_connection_timeout: Optional[float]
     rmi_registry_ssl: Optional[bool]
