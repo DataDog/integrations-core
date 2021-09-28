@@ -350,7 +350,7 @@ class Nginx(AgentCheck):
                     output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
-        
+
     # override
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         if self.disable_generic_tags:
