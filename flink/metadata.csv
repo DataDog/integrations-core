@@ -83,7 +83,7 @@ flink.operator.currentInputWatermark,gauge,,millisecond,,The last watermark this
 flink.operator.currentInput1Watermark,gauge,,millisecond,,The last watermark this operator has received in its first input. Only for operators with 2 inputs,0,flink,operator input1 watermark
 flink.operator.currentInput2Watermark,gauge,,millisecond,,The last watermark this operator has received in its second input. Only for operators with 2 inputs,0,flink,operator input2 watermark
 flink.operator.currentOutputWatermark,gauge,,millisecond,,The last watermark this operator has emitted,0,flink,operator output watermark
-flink.operator.numSplitsProcessed,count,,,,The total number of InputSplits this data source has processed (if the operator is a data source),0,flink,operator splits proccessed
+flink.operator.numSplitsProcessed,count,,,,The total number of InputSplits this data source has processed (if the operator is a data source),0,flink,operator splits processed
 flink.operator.commitsSucceeded,count,,commit,,The total number of successful offset commits to Kafka if offset committing is turned on and checkpointing is enabled,1,flink,operator commits succeeded
 flink.operator.commitsFailed,count,,commit,,The total number of offset commit failures to Kafka if offset committing is turned on and checkpointing is enabled. Note that committing offsets back to Kafka is only a means to expose consumer progress so a commit failure does not affect the integrity of Flink's checkpointed partition offsets,-1,flink,operator commits failed
 

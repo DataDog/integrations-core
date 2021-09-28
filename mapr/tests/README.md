@@ -1,5 +1,13 @@
-# How to setup a test environment for MapR
+# How to run the test locally on MacOS
 
+You need to install librdkafka to be able to compile `mapr-streams-python`
+
+```
+brew install librdkafka
+pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python
+```
+
+# How to setup a test environment for MapR
 
 Create multiple VMs (on gcp in an instance group for example) running CentOS 7.
 Note: You'll need at least 32GB of memory per VM, yes 32GB.

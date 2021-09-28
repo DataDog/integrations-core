@@ -4,6 +4,11 @@ files:
   options:
   - template: init_config
     options:
+      - name: persist_db_connections
+        description: Whether or not to persist database connections.
+        value:
+          type: boolean
+          example: true
       - template: init_config/db
       - template: init_config/default
   - template: instances
@@ -46,6 +51,11 @@ files:
           type: integer
           display_default: 10
       - template: instances/db
+      - name: persist_db_connections
+        description: Whether or not to persist database connections.
+        value:
+          type: boolean
+          example: true
       - name: use_tls
         description: |
           Instructs the SAP HANA integration to connect using TLS.

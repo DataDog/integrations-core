@@ -12,7 +12,7 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield common.INSTANCE_BASIC, 'local'
+    yield common.INSTANCE_BASIC, {'docker_platform': 'windows'}
 
 
 @pytest.fixture

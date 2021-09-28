@@ -28,17 +28,20 @@ Follow the instructions below to install and configure this check for an Agent r
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
+
+### Service Checks
+
+The {integration_name} integration does not include any service checks.
+
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
+
 
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -46,4 +49,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-{repo_choice}/blob/master/{check_name}/metadata.csv
-[7]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/
