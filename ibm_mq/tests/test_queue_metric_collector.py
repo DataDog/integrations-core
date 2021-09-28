@@ -1,7 +1,8 @@
+import pytest
+from mock import Mock
+
 from datadog_checks.ibm_mq.collectors import QueueMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
-from mock import Mock
-import pytest
 
 pytestmark = pytest.mark.unit
 
