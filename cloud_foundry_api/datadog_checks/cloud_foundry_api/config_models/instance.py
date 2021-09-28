@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     api_url: str
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
@@ -43,6 +44,7 @@ class InstanceConfig(BaseModel):
     client_id: str
     client_secret: str
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     event_filter: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]
