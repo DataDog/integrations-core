@@ -89,24 +89,18 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-### Service Checks
-
-**glusterfs.brick.health**:<br>
-Returns `CRITICAL` if the sub volume is 'degraded'. Returns `OK` if 'up'.
-
-**glusterfs.volume.health**:<br>
-Returns `CRITICAL` if the volume is 'degraded'. Returns `OK` if 'up'.
-
-**glusterfs.cluster.health**:<br>
-Returns `CRITICAL` if the cluster is 'degraded'. Returns `OK` otherwise.
-
 ### Events
 
 GlusterFS does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
+
 
 [1]: https://www.redhat.com/en/technologies/storage/gluster
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -116,4 +110,5 @@ Need help? Contact [Datadog support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://github.com/gluster/gstatus#install
-[9]:  https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
+[10]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/assets/service_checks.json

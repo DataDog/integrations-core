@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.32.0",
+        "integration": "Citrix Hypervisor",
+        "check": "citrix_hypervisor.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "citrix_hypervisor_url"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the RRD endpoint. Returns `OK` otherwise."
+    }
+]

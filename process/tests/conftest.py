@@ -15,4 +15,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return ProcessCheck(common.CHECK_NAME, {}, {})
+    return ProcessCheck(common.CHECK_NAME, {}, [common.INSTANCE])

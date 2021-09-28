@@ -8,9 +8,25 @@
             "critical"
         ],
         "groups": [
+            "host",
             "server"
         ],
         "name": "Can Connect",
         "description": "Returns OK if the integration can connect to the oracle database, CRITICAL otherwise"
+    },
+    {
+        "agent_version": "7.32.0",
+        "integration": "Oracle Database",
+        "check": "oracle.can_query",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "server"
+        ],
+        "name": "Can Query",
+        "description": "Returns OK if the integration can run all the queries, CRITICAL otherwise"
     }
 ]

@@ -10,7 +10,7 @@ This integration collects JMX metrics for the following components:
 - Connect
 - Replicator
 - Schema Registry
-- SQL Server
+- ksqlDB Server
 - Streams
 - REST Proxy
 
@@ -104,18 +104,18 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-### Service Checks
-
-**confluentplatform.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform / Kafka component, otherwise returns `OK`.
-
 ### Events
 
 The Confluent Platform check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].
+
 
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/jmxfetch
@@ -126,3 +126,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [9]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml
 [10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[11]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/assets/service_checks.json
