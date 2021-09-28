@@ -15,7 +15,7 @@ openstack.nova.limits.max_server_meta,gauge,,,,The maximum allowed service metad
 openstack.nova.limits.max_total_cores,gauge,,,,The maximum allowed cores for this tenant,0,openstack,max cores
 openstack.nova.limits.max_total_floating_ips,gauge,,,,The maximum allowed floating IPs for this tenant,0,openstack,max floating ips
 openstack.nova.limits.max_total_instances,gauge,,,,The maximum number of instances allowed for this tenant,0,openstack,max instances
-openstack.nova.limits.max_total_keypairs,gauge,,,,The maximum allowed keypairs allowed for this tenant,0,openstack,max keypairs
+openstack.nova.limits.max_total_keypairs,gauge,,,,The maximum allowed key pairs allowed for this tenant,0,openstack,max key pairs
 openstack.nova.limits.total_cores_used,gauge,,,,The total cores used by this tenant,-1,openstack,total cores used
 openstack.nova.limits.total_floating_ips_used,gauge,,,,The total floating IPs used by this tenant,-1,openstack,floating IPs used
 openstack.nova.limits.total_instances_used,gauge,,,,The total instances used by this tenant,-1,openstack,total instances used

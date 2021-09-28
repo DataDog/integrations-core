@@ -72,7 +72,6 @@ class HTTPCheck(AgentCheck):
             instance_ca_certs,
             weakcipher,
             check_hostname,
-            allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
@@ -123,7 +122,6 @@ class HTTPCheck(AgentCheck):
             r = getattr(self.http, http_method)(
                 addr,
                 persist=True,
-                allow_redirects=allow_redirects,
                 stream=stream,
                 json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                 data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
@@ -247,6 +245,9 @@ class HTTPCheck(AgentCheck):
 
         for status in service_checks:
             sc_name, status, msg = status
+
+            if status is AgentCheck.OK:
+                msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):

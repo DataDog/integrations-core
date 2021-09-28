@@ -18,7 +18,7 @@
         "type": "query_value",
         "requests": [
           {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
             "aggregator": "last",
             "conditional_formats": [
               {
