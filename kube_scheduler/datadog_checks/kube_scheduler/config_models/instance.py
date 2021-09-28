@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -65,13 +66,16 @@ class InstanceConfig(BaseModel):
     bearer_token_auth: Optional[bool]
     bearer_token_path: Optional[str]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
     health_service_check: Optional[bool]
+    health_url: Optional[str]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
+    ignore_tags: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]
@@ -85,9 +89,9 @@ class InstanceConfig(BaseModel):
     leader_election: Optional[bool]
     leader_election_kind: Optional[str]
     log_requests: Optional[bool]
-    metrics: Sequence[str]
+    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
     min_collection_interval: Optional[float]
-    namespace: str
+    namespace: Optional[str]
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
