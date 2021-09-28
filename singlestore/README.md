@@ -41,7 +41,7 @@ No additional installation is needed on your server.
    logs_enabled: true
    ```
 
-2. Add the log files you are interested in to your `singlestore.d/conf.yaml` file to start collecting your ProxySQL logs:
+2. Add the log files you are interested in to your `singlestore.d/conf.yaml` file to start collecting your SingleStore logs:
 
    ```yaml
      logs:
@@ -51,9 +51,9 @@ No additional installation is needed on your server.
          service: "<SERVICE_NAME>"
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample proxysql.d/conf.yaml][5] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample singlestore.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
 
 #### Containerized
 
@@ -76,7 +76,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 **Log collection is not supported for this site.**
 {{< /site-region >}}
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -119,3 +119,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/singlestore/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/singlestore/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
