@@ -71,8 +71,13 @@ def dd_environment(config_e2e):
 
 
 @pytest.fixture(scope='session')
-def instance_basic(config_e2e):
-    return config_e2e['instances'][0]
+def instance_basic():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+    }
 
 
 @pytest.fixture
