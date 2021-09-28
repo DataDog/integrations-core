@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -54,6 +58,10 @@ def instance_detailed_subscribers(field, value):
 
 def instance_detailed_topics(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
