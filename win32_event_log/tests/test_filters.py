@@ -3,9 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.win32_event_log.filters import construct_xpath_query
 
 pytestmark = [pytest.mark.unit]
+
+
+def test_no_values():
+    with pytest.raises(Exception, match='No values set for property filter: source'):
+        construct_xpath_query({'source': []})
 
 
 @pytest.mark.parametrize(
@@ -43,37 +49,9 @@ pytestmark = [pytest.mark.unit]
         ),
     ],
 )
-def test_query_construction(filters, query):
-    assert construct_xpath_query(filters) == query
+def test_query_construction(new_check, instance, filters, query):
+    instance['filters'] = filters
+    check = new_check(instance)
+    check.load_configuration_models()
 
-
-class TestBasicValidation:
-    def test_unknown_filter(self):
-        with pytest.raises(Exception, match='Unknown property filter: foo'):
-            construct_xpath_query({'foo': 'bar'})
-
-    def test_no_values(self):
-        with pytest.raises(Exception, match='No values set for property filter: source'):
-            construct_xpath_query({'source': []})
-
-
-class TestSourceValidation:
-    def test_value_not_string(self):
-        with pytest.raises(Exception, match='Values for event filter `source` must be strings.'):
-            construct_xpath_query({'source': [0]})
-
-
-class TestTypeValidation:
-    def test_value_not_string(self):
-        with pytest.raises(Exception, match='Values for event filter `type` must be strings.'):
-            construct_xpath_query({'type': [0]})
-
-    def test_unknown_value(self):
-        with pytest.raises(Exception, match='Unknown value for event filter `type`: foo'):
-            construct_xpath_query({'type': ['foo']})
-
-
-class TestIdValidation:
-    def test_value_not_integer(self):
-        with pytest.raises(Exception, match='Values for event filter `id` must be integers.'):
-            construct_xpath_query({'id': ['foo']})
+    assert construct_xpath_query(exclude_undefined_keys(check.config.filters.dict())) == query
