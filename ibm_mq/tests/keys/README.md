@@ -1,7 +1,8 @@
-## Keys generated using:
+## Keys generated using (in the docker container):
 
 ```bash
-mkdir ./keys
+cd /etc/mqm/pki
+mkdir -p ./keys
 runmqakm -keydb -create -db ./keys/qm1.kdb -pw Secret13 -stash
 runmqakm -cert -create -db ./keys/qm1.kdb -type kdb -pw Secret13 -label qm1 -dn CN=qm1 -size 2048 -x509version 3 -expire 365 -sig_alg SHA256WithRSA
 runmqakm -keydb -create -db ./keys/client.kdb -pw Secret13 -stash

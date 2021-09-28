@@ -248,13 +248,15 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, params=None, timeout=None)
 
 
 def test_get_os_hypervisor_uptime(aggregator, requests_wrapper):
+    hypervisor_mock = mock.MagicMock(id=1)
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_os_hypervisor_uptime_pre_v2_52_response,
     ):
         api = SimpleApi(None, None, requests_wrapper)
         assert (
-            api.get_os_hypervisor_uptime(1) == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
+            api.get_os_hypervisor_uptime(hypervisor_mock)
+            == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
         )
 
     with mock.patch(
@@ -263,7 +265,8 @@ def test_get_os_hypervisor_uptime(aggregator, requests_wrapper):
     ):
         api = SimpleApi(None, None, requests_wrapper)
         assert (
-            api.get_os_hypervisor_uptime(1) == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
+            api.get_os_hypervisor_uptime(hypervisor_mock)
+            == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
         )
 
 

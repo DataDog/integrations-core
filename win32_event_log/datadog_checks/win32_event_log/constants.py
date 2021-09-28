@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# NOTE: Keep this in sync with config spec:
+# instances.filters.value.properties.type.items.enum
+
 # See:
 # https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
 # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-reporteventa#parameters

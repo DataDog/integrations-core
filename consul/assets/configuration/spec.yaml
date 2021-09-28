@@ -106,13 +106,22 @@ files:
         type: number
         example: 50
 
+    - name: threads_count
+      description: |
+        Increase the number of threads to collect consul services checks.
+      value:
+        type: number
+        example: 1
+
     - name: disable_legacy_service_tag
       description: |
         Whether or not to stop submitting the tag `service` that has been renamed
         to `consul_service` and disable the associated deprecation warning.
       value:
         type: boolean
-        example: false
+        display_default: false
+        example: true
+      enabled: true
 
     - template: instances/http
     - template: instances/default

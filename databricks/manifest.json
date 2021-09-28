@@ -32,5 +32,11 @@
     "service_checks": "assets/service_checks.json",
     "logs": {},
     "metrics_metadata": "metadata.csv"
-  }
+  },
+  "further_reading": [
+    {"link": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/",
+      "tag": "Blog",
+      "text": "Monitor Databricks with Datadog"
+    }
+  ]
 }

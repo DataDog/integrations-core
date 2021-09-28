@@ -62,10 +62,14 @@ class Disk(AgentCheck):
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
         self._blkid_cache_file = instance.get('blkid_cache_file')
+        self._use_lsblk = is_affirmative(instance.get('use_lsblk', False))
         self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        if self._use_lsblk and self._blkid_cache_file:
+            raise ConfigurationError("Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time.")
 
         if platform.system() == 'Windows':
             self._manual_mounts = instance.get('create_mounts', [])
@@ -106,7 +110,7 @@ class Disk(AgentCheck):
 
         self.devices_label = {}
 
-    def check(self, instance):
+    def check(self, _):
         """Get disk space/inode stats"""
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
@@ -115,6 +119,7 @@ class Disk(AgentCheck):
         for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
+                self.log.debug('Excluding device %s', part.device)
                 continue
 
             # Get disk metrics here to be able to exclude on total usage
@@ -413,9 +418,34 @@ class Disk(AgentCheck):
         """
         Get every label to create tags and returns a map of device name to label:value
         """
-        if not self._blkid_cache_file:
+        if self._use_lsblk:
+            return self._get_devices_label_from_lsblk()
+        elif not self._blkid_cache_file:
             return self._get_devices_label_from_blkid()
         return self._get_devices_label_from_blkid_cache()
+
+    def _get_devices_label_from_lsblk(self):
+        """
+        Get device labels using the `lsblk` command. Returns a map of device name to label:value
+        """
+        devices_labels = dict()
+        try:
+            # Use raw output mode (space-separated fields encoded in UTF-8).
+            # We want to be compatible with lsblk version 2.19 since
+            # it is the last version supported by CentOS 6 and SUSE 11.
+            lsblk_out, _, _ = get_subprocess_output(["lsblk", "--noheadings", "--raw", "--output=NAME,LABEL"], self.log)
+
+            for line in lsblk_out.splitlines():
+                device, _, label = line.partition(' ')
+                if label:
+                    # Line sample (device "/dev/sda1" with label " MY LABEL")
+                    # sda1  MY LABEL
+                    devices_labels["/dev/" + device] = ['label:{}'.format(label), 'device_label:{}'.format(label)]
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use lsblk to have device labels")
+
+        return devices_labels
 
     def _get_devices_label_from_blkid(self):
         devices_label = {}
