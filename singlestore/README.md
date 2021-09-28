@@ -29,6 +29,32 @@ No additional installation is needed on your server.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
+##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the log files you are interested in to your `singlestore.d/conf.yaml` file to start collecting your ProxySQL logs:
+
+   ```yaml
+     logs:
+       - type: file
+         path: /var/lib/memsql/<NODE_ID>/tracelogs/memsql.log
+         source: singlestore
+         service: "<SERVICE_NAME>"
+   ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample proxysql.d/conf.yaml][5] for all available configuration options.
+
+3. [Restart the Agent][6].
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -43,6 +69,20 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 
 **Note**: By default, the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS`, and `LEAVES` tables. To collect additional system level metrics (CPU, disk, network IO, and memory), add `"collect_system_metrics": "true"`  in your `singlestore.d/conf.yaml` file.
+
+##### Log collection
+
+{{< site-region region="us3" >}}
+**Log collection is not supported for this site.**
+{{< /site-region >}}
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "singlestore", "service": "<SERVICE_NAME>"}` |
+
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
