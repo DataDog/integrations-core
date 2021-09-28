@@ -29,7 +29,6 @@ class OpenMetricsScraperMixin(object):
     # This class is not supposed to be used by itself, it provides scraping behavior but
     # need to be within a check in the end
 
-    REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
     # indexes in the sample tuple of core.Metric
     SAMPLE_NAME = 0
     SAMPLE_LABELS = 1
@@ -421,7 +420,7 @@ class OpenMetricsScraperMixin(object):
         """
         if response.encoding is None:
             response.encoding = 'utf-8'
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+        input_gen = response.iter_lines(decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
