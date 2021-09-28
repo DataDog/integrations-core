@@ -10,6 +10,7 @@ from pkg_resources import parse_version
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
+from tests.conftest import MYSQL_VERSION
 
 from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
@@ -58,17 +59,16 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-
-    _assert_complex_config(aggregator)
+    _assert_complex_config(aggregator, hostname=None)  # Do not assert hostname
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator):
+def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check(
-        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname='stubbed.hostname', count=1
+        'mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname=hostname, count=1
     )
     aggregator.assert_service_check(
         'mysql.replication.slave_running',
