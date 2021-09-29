@@ -131,7 +131,7 @@ notify-slack:
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
-  - schedules
+  - master
   cache:
     <<: *slack-cache
   script:
