@@ -7,8 +7,8 @@ import re
 import yaml
 import os
 
-LOGS_BACKEND_INTGS_ROOT = os.path.abspath(os.environ['LOGS_BACKEND_INTGS_ROOT'])
-INTEGRATIONS_CORE = os.path.abspath(os.environ['INTEGRATIONS_CORE_ROOT'])
+LOGS_BACKEND_INTGS_ROOT = os.environ['LOGS_BACKEND_INTGS_ROOT']
+INTEGRATIONS_CORE = os.environ['INTEGRATIONS_CORE_ROOT']
 
 ERR_UNEXPECTED_LOG_COLLECTION_CAT = "The check does not have a log pipeline but defines 'log collection' in its manifest file."
 ERR_UNEXPECTED_LOG_DOC = "The check does not have a log pipeline but defines a source in its README."
