@@ -43,6 +43,10 @@ jobs:
       run: |
         ddev validate dashboards
 
+    - name: Run dependency validation
+      run: |
+        ddev validate dep
+
     - name: Run HTTP wrapper validation
       run: |
         ddev validate http
