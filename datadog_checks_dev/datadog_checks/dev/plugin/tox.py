@@ -24,6 +24,7 @@ BLACK_DEP = 'black==21.9b0'
 FLAKE8_DEP = 'flake8==3.9.2'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.9.1'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
+# TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
 
