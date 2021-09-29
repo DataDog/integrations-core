@@ -19,13 +19,13 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort==5.8.0'
-BLACK_DEP = 'black==20.8b1'
-FLAKE8_DEP = 'flake8==3.9.1'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.4.3'
+ISORT_DEP = 'isort==5.9.3'
+BLACK_DEP = 'black==21.9b0'
+FLAKE8_DEP = 'flake8==3.9.2'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.9.1'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
 MYPY_DEP = 'mypy==0.910'
-PYDANTIC_DEP = 'pydantic==1.8.1'  # Keep in sync with: /datadog_checks_base/requirements.in
+PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
 @tox.hookimpl
