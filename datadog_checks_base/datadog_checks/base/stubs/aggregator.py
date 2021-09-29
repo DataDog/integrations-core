@@ -222,8 +222,11 @@ class AggregatorStub(object):
         if candidates_with_tag:  # The metric was found with the tag but not enough times
             msg = "The metric '{}' with tag '{}' was only found {}/{} times".format(metric_name, tag, count, at_least)
         elif candidates:
-            msg = "The metric '{}' was found but not with the tag '{}'.\n" \
-                  + "Similar submitted:\n" + "\n".join(["     {}".format(m) for m in candidates])
+            msg = (
+                "The metric '{}' was found but not with the tag '{}'.\n"
+                + "Similar submitted:\n"
+                + "\n".join(["     {}".format(m) for m in candidates])
+            )
         else:
             msg = "Metric '{}' not found".format(metric_name)
 
