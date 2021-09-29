@@ -13,7 +13,7 @@ from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_config_files, get_config_spec, get_data_directory, get_version_string
+from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
@@ -49,7 +49,8 @@ def config(ctx, check, sync, verbose):
     for check in checks:
         check_display_queue = []
 
-        spec_path = get_config_spec(check)
+        manifest = ManifestGateway.load_manifest(check)
+        spec_path = manifest.get_config_spec()
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
@@ -61,8 +62,6 @@ def config(ctx, check, sync, verbose):
             continue
 
         file_counter.append(None)
-
-        manifest = ManifestGateway.load_manifest(check)
 
         # source is the default file name
         if check == 'agent':

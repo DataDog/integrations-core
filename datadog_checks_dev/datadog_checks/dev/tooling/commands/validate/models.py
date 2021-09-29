@@ -17,8 +17,9 @@ from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
+from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_config_spec, get_license_header, get_models_location, get_version_string
+from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
@@ -55,7 +56,8 @@ def models(ctx, check, sync, verbose):
             source = 'test'
             version = '0.0.1'
         else:
-            spec_path = get_config_spec(check)
+            manifest = ManifestGateway.load_manifest(check)
+            spec_path = manifest.get_config_spec()
             if not file_exists(spec_path):
                 continue
 

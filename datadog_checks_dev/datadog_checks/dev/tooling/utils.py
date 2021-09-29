@@ -266,14 +266,6 @@ def get_check_req_file(check_name):
     return os.path.join(get_root(), check_name, 'requirements.in')
 
 
-def get_config_spec(check_name):
-    if check_name == 'agent':
-        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
-    else:
-        path = load_manifest(check_name).get('assets', {}).get('configuration', {}).get('spec', '')
-        return os.path.join(get_root(), check_name, *path.split('/'))
-
-
 def get_default_config_spec(check_name):
     return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
 

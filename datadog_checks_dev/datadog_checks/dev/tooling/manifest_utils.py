@@ -12,18 +12,31 @@ from .utils import load_manifest
 class ManifestGateway:
     """
     Gateway class to retrieve a manifest class based on the check
+    This also supports the case of querying file information about the Agent
     """
 
     @staticmethod
     def load_manifest(check):
         raw_manifest_json = load_manifest(check)
         manifest_version = raw_manifest_json.get("manifest_version")
+
+        if check == 'agent':
+            return Agent(check, {})
         if manifest_version == "1.0.0":
             return ManifestV1(check, raw_manifest_json)
         elif manifest_version == "2.0.0":
             return ManifestV2(check, raw_manifest_json)
         else:
-            raise ValueError("Invalid manifest version")
+            ValueError("Invalid check or manifest version provided")
+
+
+class Agent:
+    def __init__(self, check_name, manifest_json):
+        self._check_name = check_name
+        self._manifest_json = manifest_json
+
+    def get_config_spec(self):
+        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
 
 
 class ManifestV1:
@@ -50,6 +63,10 @@ class ManifestV1:
     def get_service_checks_path(self):
         return self._manifest_json["assets"]["service_checks"]
 
+    def get_config_spec(self):
+        path = self._manifest_json.get('assets', {}).get('configuration', {}).get('spec', '')
+        return os.path.join(get_root(), self._check_name, *path.split('/'))
+
 
 class ManifestV2:
     """
@@ -74,3 +91,7 @@ class ManifestV2:
 
     def get_service_checks_path(self):
         return self._manifest_json["assets"]["integration"]["service_checks"]["metadata_path"]
+
+    def get_config_spec(self):
+        path = self._manifest_json.get_path('/assets/integration/configuration/spec') or ''
+        return os.path.join(get_root(), self._check_name, *path.split('/'))
