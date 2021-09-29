@@ -39,7 +39,7 @@ validate-log-integrations:
   variables:
     WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/shared/integrations/integrations.ts
     LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
-    INTEGRATIONS_CORE_ROOT: .
+    INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
   script:
     - cd /app
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
