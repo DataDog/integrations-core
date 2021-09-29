@@ -9,6 +9,12 @@ from six import PY2
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
+from .utils import construct_boto_config
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class AmazonMskCheck(OpenMetricsBaseCheck):
@@ -52,6 +58,13 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             (int(self.instance.get('node_exporter_port', 11002)), NODE_METRICS_MAP, NODE_METRICS_OVERRIDES),
         )
         self._prometheus_metrics_path = self.instance.get('prometheus_metrics_path', '/metrics')
+        proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        try:
+            self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        except TypeError as e:
+            self.log.debug("Got error when constructing Config object: %s", str(e))
+            self.log.debug("Boto Config parameters: %s", self.instance.get('boto_config'))
+            self._boto_config = None
 
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
@@ -77,11 +90,16 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
-            client = boto3.client('kafka', region_name=self._region_name)
+            client = boto3.client(
+                'kafka',
+                config=self._boto_config,
+                region_name=self._region_name,
+            )
 
         try:
             response = client.list_nodes(ClusterArn=self._cluster_arn)

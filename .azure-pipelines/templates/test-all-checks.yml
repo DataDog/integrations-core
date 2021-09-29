@@ -1,4 +1,6 @@
 parameters:
+  agent_image_win: ''
+  agent_image_win_py2: ''
   ispr: false
   pip_cache_config: null
   run_py2_tests: true
@@ -12,6 +14,8 @@ parameters:
 jobs:
 - template: ./test-all.yml
   parameters:
+    agent_image_win: ${{ parameters.agent_image_win }}
+    agent_image_win_py2: ${{ parameters.agent_image_win_py2 }}
     ispr: ${{ parameters.ispr }}
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
@@ -212,6 +216,9 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hudi
+      displayName: Hudi
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
@@ -391,6 +398,9 @@ jobs:
       os: linux
     - checkName: scylla
       displayName: Scylla
+      os: linux
+    - checkName: singlestore
+      displayName: SingleStore
       os: linux
     - checkName: snmp
       displayName: SNMP

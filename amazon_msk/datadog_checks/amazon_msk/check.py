@@ -11,6 +11,12 @@ from datadog_checks.base.utils.serialization import json
 
 from .config_models import ConfigMixin
 from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
+from .utils import construct_boto_config
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -30,7 +36,13 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._endpoint_prefix = None
         self._static_tags = None
         self._service_check_tags = None
-
+        proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        try:
+            self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        except TypeError as e:
+            self.log.debug("Got error when constructing Config object: %s", str(e))
+            self.log.debug("Boto Config parameters: %s", self.instance.get('boto_config'))
+            self._boto_config = None
         self.check_initializations.append(self.parse_config)
 
     def refresh_scrapers(self):
@@ -50,11 +62,16 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 aws_access_key_id=access_key_id,
                 aws_secret_access_key=secret_access_key,
                 aws_session_token=session_token,
+                config=self._boto_config,
                 region_name=self._region_name,
             )
         else:
             # Always create a new client to account for changes in auth
-            client = boto3.client('kafka', region_name=self._region_name)
+            client = boto3.client(
+                'kafka',
+                config=self._boto_config,
+                region_name=self._region_name,
+            )
 
         try:
             response = client.list_nodes(ClusterArn=self.config.cluster_arn)
