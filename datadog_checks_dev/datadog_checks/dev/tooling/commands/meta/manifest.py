@@ -184,11 +184,15 @@ def migrate(ctx, integration, to_version):
     classifier_tags = []
     supported_os = loaded_manifest.get_path("/supported_os")
     for os in supported_os:
-        classifier_tags.append(OS_TO_CLASSIFIER_TAGS.get(os.lower()))
+        os_tag = OS_TO_CLASSIFIER_TAGS.get(os.lower())
+        if os_tag:
+            classifier_tags.append(os_tag)
 
     categories = loaded_manifest.get_path("/categories")
     for category in categories:
-        classifier_tags.append(CATEGORIES_TO_CLASSIFIER_TAGS.get(category.lower()))
+        category_tag = CATEGORIES_TO_CLASSIFIER_TAGS.get(category.lower())
+        if category_tag:
+            classifier_tags.append(category_tag)
 
     # Write the manifest back to disk
     migrated_manifest.set_path("/classifier_tags", classifier_tags)
