@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.0.0 / 2021-09-29
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add new function to report dbm-activity events. See [#10223](https://github.com/DataDog/integrations-core/pull/10223).
+* [Changed] DBMAsyncJob send internal metrics as raw. See [#10274](https://github.com/DataDog/integrations-core/pull/10274).
+
 ## 22.0.0 / 2021-09-24
 
 * [Added] Upgrade python-dateutil to 2.8.2. See [#10206](https://github.com/DataDog/integrations-core/pull/10206).
