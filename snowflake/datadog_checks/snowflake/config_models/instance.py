@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -40,7 +40,7 @@ class InstanceConfig(BaseModel):
     ocsp_response_cache_filename: Optional[str]
     password: str
     role: str
-    schema: Optional[str]
+    schema_: Optional[str] = Field(None, alias='schema')
     service: Optional[str]
     tags: Optional[Sequence[str]]
     token: Optional[str]
