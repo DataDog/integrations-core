@@ -1,5 +1,6 @@
 """Python script to parse the logs pipeline from the logs-backend repository.
 This script is expected to run from a CLI, do not import it."""
+from io import RawIOBase
 import sys
 import json
 from typing import List, Optional, Set
@@ -8,9 +9,7 @@ import yaml
 import os
 
 LOGS_BACKEND_INTGS_ROOT = os.environ['LOGS_BACKEND_INTGS_ROOT']
-print(LOGS_BACKEND_INTGS_ROOT)
 INTEGRATIONS_CORE = os.environ['INTEGRATIONS_CORE_ROOT']
-print(INTEGRATIONS_CORE)
 
 ERR_UNEXPECTED_LOG_COLLECTION_CAT = "The check does not have a log pipeline but defines 'log collection' in its manifest file."
 ERR_UNEXPECTED_LOG_DOC = "The check does not have a log pipeline but defines a source in its README."
@@ -160,10 +159,10 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 logs_to_metrics_mapping = get_log_to_metric_map(sys.argv[1])
-print("Logs: " + str(logs_to_metrics_mapping))
+assert len(logs_to_metrics_mapping) > 0
 
 all_checks = list(get_all_checks())
-print("All checks: " + str(all_checks))
+assert len(all_checks) > 0
 for check in all_checks:
     if check.log_source in logs_to_metrics_mapping:
         check.is_defined_in_web_ui = True
@@ -178,8 +177,9 @@ if not validation_errors_per_check:
     print("Success, no errors were found!")
     sys.exit(0)
 
-print_err("Logs pipelines don't pass validation steps:")
 # Filter to only agt integrations checks
 for check, errs in validation_errors_per_check.items():
     for err in errs:
         print_err(f"- {check}: {err}")
+print_err("Logs pipelines don't pass validation steps:")
+raise Exception("Logs pipelines don't pass validation steps")

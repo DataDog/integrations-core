@@ -42,11 +42,8 @@ validate-log-integrations:
     INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
   script:
     - cd /app
-    - ls $INTEGRATIONS_CORE_ROOT
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
-    - cat $WEBUI_INTGS_FILE
     - ts-node parse_ts.ts > logs_integrations.json
-    - cat logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
     - python3 validate_log_intgs.py logs_integrations.json
   tags: [ "runner:main" ]
