@@ -235,10 +235,7 @@ validate-log-intgs-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
-    changes:
-      - .gitlab/validate-logs-intgs/**
-    refs:
-      - master
+    - schedules
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker build --tag $VALIDATE_LOG_INTGS .
