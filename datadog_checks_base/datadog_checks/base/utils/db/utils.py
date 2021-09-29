@@ -230,11 +230,13 @@ class DBMAsyncJob(object):
             while True:
                 if self._cancel_event.isSet():
                     self._log.info("[%s] Job loop cancelled", self._job_tags_str)
-                    self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags)
+                    self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break
                 if time.time() - self._last_check_run > self._min_collection_interval * 2:
                     self._log.info("[%s] Job loop stopping due to check inactivity", self._job_tags_str)
-                    self._check.count("dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags)
+                    self._check.count(
+                        "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
+                    )
                     break
                 self._run_job_rate_limited()
         except self._expected_db_exceptions as e:
@@ -248,6 +250,7 @@ class DBMAsyncJob(object):
                 "dd.{}.async_job.error".format(self._dbms),
                 1,
                 tags=self._job_tags + ["error:database-{}".format(type(e))],
+                raw=True,
             )
         except Exception as e:
             self._log.exception("[%s] Job loop crash", self._job_tags_str)
@@ -255,6 +258,7 @@ class DBMAsyncJob(object):
                 "dd.{}.async_job.error".format(self._dbms),
                 1,
                 tags=self._job_tags + ["error:crash-{}".format(type(e))],
+                raw=True,
             )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
