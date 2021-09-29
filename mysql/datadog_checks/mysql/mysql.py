@@ -108,7 +108,7 @@ class MySql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self._config.dbm_enabled:
+        if self._resolved_hostname is None and (self._config.dbm_enabled or self.disable_generic_tags):
             self._resolved_hostname = resolve_db_host(self._config.host)
         return self._resolved_hostname
 
@@ -218,9 +218,10 @@ class MySql(AgentCheck):
         if server is None:
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
-            'server:{0}'.format(server),
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
         ] + self._config.tags
+        if not self.disable_generic_tags:
+            service_check_tags.append('server:{0}'.format(server))
         return service_check_tags
 
     @contextmanager

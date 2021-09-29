@@ -58,18 +58,21 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-
-    _assert_complex_config(aggregator)
+    _assert_complex_config(aggregator, hostname=None)  # Do not assert hostname
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator):
+def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname=hostname, count=1)
     aggregator.assert_service_check(
-        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS + ['replication_mode:source'], at_least=1
+        'mysql.replication.slave_running',
+        status=MySql.OK,
+        tags=tags.SC_TAGS + ['replication_mode:source'],
+        hostname=hostname,
+        at_least=1,
     )
     testable_metrics = (
         variables.STATUS_VARS

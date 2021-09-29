@@ -292,14 +292,16 @@ def test__get_is_aurora():
 
 
 @pytest.mark.parametrize(
-    'hostname, expected_tags',
+    'disable_generic_tags, hostname, expected_tags',
     [
-        (None, {'port:unix_socket', 'server:localhost'}),
-        ('foo', {'port:unix_socket', 'server:foo'}),
+        (True, None, {'port:unix_socket'}),
+        (False, None, {'port:unix_socket', 'server:localhost'}),
+        (True, 'foo', {'port:unix_socket'}),
+        (False, 'foo', {'port:unix_socket', 'server:foo'}),
     ],
 )
-def test_service_check(expected_tags, hostname):
-    config = {'server': 'localhost', 'user': 'datadog'}
+def test_service_check(disable_generic_tags, expected_tags, hostname):
+    config = {'server': 'localhost', 'user': 'datadog', 'disable_generic_tags': disable_generic_tags}
     check = MySql(common.CHECK_NAME, {}, instances=[config])
 
     assert set(check._service_check_tags(hostname)) == expected_tags
