@@ -377,7 +377,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
     if not success:
         message = 'Try running `ddev validate ci --fix`'
         display_queue.append((echo_info, message))
-        annotate_display_queue(codecov_config_path, message)
+        annotate_display_queue(codecov_config_path, display_queue)
         for func, message in display_queue:
             func(message)
         abort()
