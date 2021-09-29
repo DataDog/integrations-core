@@ -71,7 +71,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         'mysql.replication.slave_running',
         status=MySql.OK,
         tags=tags.SC_TAGS + ['replication_mode:source'],
-        hostname='stubbed.hostname',
+        hostname=hostname,
         at_least=1,
     )
     testable_metrics = (
