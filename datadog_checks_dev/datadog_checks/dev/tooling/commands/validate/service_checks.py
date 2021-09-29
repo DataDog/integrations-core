@@ -55,7 +55,6 @@ def service_checks(check, sync):
 
     failed_checks = 0
     ok_checks = 0
-
     for check_name in checks:
         display_queue = []
         file_failed = False

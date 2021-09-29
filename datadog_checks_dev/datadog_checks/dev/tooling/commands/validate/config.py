@@ -14,7 +14,16 @@ from ....fs import basepath, file_exists, path_join, read_file, write_file
 from ...manifest_utils import ManifestGateway
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
 
 FILE_INDENT = ' ' * 8
 
@@ -50,6 +59,10 @@ def config(ctx, check, sync, verbose):
         check_display_queue = []
 
         manifest = ManifestGateway.load_manifest(check)
+        if not manifest:
+            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+            continue
+
         spec_path = manifest.get_config_spec()
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)

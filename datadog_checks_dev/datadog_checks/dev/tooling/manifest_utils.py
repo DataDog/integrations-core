@@ -4,19 +4,35 @@
 import os
 
 from ..fs import file_exists
+from .commands.console import abort
 from .constants import get_root
 from .datastructures import JSONDict
 from .utils import load_manifest
 
+NON_INTEGRATION_PATHS = [
+    "datadog_checks_base",
+    "datadog_checks_dependency_provider",
+    "datadog_checks_dev",
+    "datadog_checks_downloader",
+]
+
 
 class ManifestGateway:
     """
-    Gateway class to retrieve a manifest class based on the check
+    Gateway class to retrieve a manifest class based on the check/manifest_version
     This also supports the case of querying file information about the Agent
     """
 
     @staticmethod
     def load_manifest(check):
+        """
+        Return an accessor class based on the check or manifest_version provided
+        Return None for known non-valid checks and
+        abort for any non-known invalid manifests
+        """
+        if check in NON_INTEGRATION_PATHS:
+            return None
+
         raw_manifest_json = load_manifest(check)
         manifest_version = raw_manifest_json.get("manifest_version")
 
@@ -27,7 +43,7 @@ class ManifestGateway:
         elif manifest_version == "2.0.0":
             return ManifestV2(check, raw_manifest_json)
         else:
-            ValueError("Invalid check or manifest version provided")
+            abort(f"Unsupported check: {check} or manifest_version: {manifest_version}")
 
 
 class Agent:
