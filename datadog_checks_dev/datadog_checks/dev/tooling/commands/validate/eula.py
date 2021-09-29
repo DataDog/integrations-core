@@ -4,7 +4,7 @@
 import click
 
 from ...annotations import annotate_error
-from ...manifest_utils import ManifestGateway
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
@@ -26,7 +26,7 @@ def eula(check):
     echo_info(f"Validating EULA files for {len(checks)} checks...")
 
     for check_name in checks:
-        manifest = ManifestGateway.load_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
         if not manifest:
             echo_debug(f"Skipping validation for check: {check}; can't process manifest")
             continue

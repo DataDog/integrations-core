@@ -9,7 +9,7 @@ import click
 from ....fs import file_exists, read_file, write_file
 from ...annotations import annotate_display_queue, annotate_error
 from ...constants import get_root
-from ...manifest_utils import ManifestGateway
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_manifest_file, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -58,7 +58,7 @@ def service_checks(check, sync):
     for check_name in checks:
         display_queue = []
         file_failed = False
-        manifest = ManifestGateway.load_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
         manifest_file = get_manifest_file(check_name)
         service_check_relative = manifest.get_service_checks_path()
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))

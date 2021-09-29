@@ -17,9 +17,9 @@ NON_INTEGRATION_PATHS = [
 ]
 
 
-class ManifestGateway:
+class Manifest:
     """
-    Gateway class to retrieve a manifest class based on the check/manifest_version
+    Class to retrieve a manifest class based on the check/manifest_version
     This also supports the case of querying file information about the Agent
     """
 

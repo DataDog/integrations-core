@@ -11,7 +11,7 @@ from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....fs import basepath, file_exists, path_join, read_file, write_file
-from ...manifest_utils import ManifestGateway
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
 from ..console import (
@@ -58,7 +58,7 @@ def config(ctx, check, sync, verbose):
     for check in checks:
         check_display_queue = []
 
-        manifest = ManifestGateway.load_manifest(check)
+        manifest = Manifest.load_manifest(check)
         if not manifest:
             echo_debug(f"Skipping validation for check: {check}; can't process manifest")
             continue

@@ -17,7 +17,7 @@ from ...annotations import annotate_display_queue, annotate_error
 from ...configuration import ConfigSpec
 from ...configuration.consumers import ModelConsumer
 from ...constants import get_root
-from ...manifest_utils import ManifestGateway
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_license_header, get_models_location, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
@@ -56,7 +56,7 @@ def models(ctx, check, sync, verbose):
             source = 'test'
             version = '0.0.1'
         else:
-            manifest = ManifestGateway.load_manifest(check)
+            manifest = Manifest.load_manifest(check)
             if not manifest:
                 echo_debug(f"Skipping validation for check: {check}; can't process manifest")
                 continue

@@ -9,7 +9,7 @@ import click
 
 from ....utils import read_file
 from ...annotations import annotate_display_queue, annotate_error
-from ...manifest_utils import ManifestGateway
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -41,7 +41,7 @@ def recommended_monitors(check):
     for check_name in checks:
         display_queue = []
         file_failed = False
-        manifest = ManifestGateway.load_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
         monitors_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'monitors')
         manifest_file = get_manifest_file(check_name)
         for file in invalid_files:
