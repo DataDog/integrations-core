@@ -46,11 +46,11 @@ CLUSTER_TIME_INTERVAL = 7200
 # Metrics are only collected on vSphere VMs marked by custom field value
 VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
-DEFAULT_SIZE_POOL = 10
+DEFAULT_SIZE_POOL = 50
 # The interval in seconds between two refresh of the entities list
-REFRESH_MORLIST_INTERVAL = 5 * 60
+REFRESH_MORLIST_INTERVAL = 15 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
-REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
+REFRESH_METRICS_METADATA_INTERVAL = 30 * 60
 
 # Maximum number of objects to collect at once by the propertyCollector. The size of the response returned by the query
 # is significantly lower than the size of the queryPerf response, so allow specifying a different value.
@@ -61,6 +61,7 @@ DEFAULT_MAX_QUERY_METRICS = 64
 # the vcenter maxquerymetrics option
 MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
 
+UNLIMITED_HIST_METRICS_PER_QUERY = float('inf')
 
 REALTIME_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
 HISTORICAL_RESOURCES = [vim.Datastore, vim.ClusterComputeResource]
@@ -79,6 +80,7 @@ LAST = 'last'
 INTERVAL = 'interval'
 ERR_CODE = 'code'
 ERR_MSG = 'msg'
+START_TIMESTAMP = 'startTime'
 
 #statsd config default values
 STATSD_SERVER_HOST = '127.0.0.1'
@@ -138,6 +140,9 @@ class VSphereCheck(AgentCheck):
         # error config
         self.error_configs = {}
 
+        # collection timestamp for realtime mors
+        self.collection_ts = {}
+
         # Caching resources, timeouts
         self.cache_times = {}
         for instance in self.instances:
@@ -164,6 +169,7 @@ class VSphereCheck(AgentCheck):
                     ERR_CODE : None,
                     ERR_MSG : None
             }
+            self.collection_ts[i_key] = {}
 
         # managed entity raw view
         self.registry = {}
@@ -1257,120 +1263,104 @@ class VSphereCheck(AgentCheck):
         server_instance = self._get_server_instance(instance)
         error_config = {ERR_CODE : None,ERR_MSG : None}
         server_instance = self._get_server_instance(instance)
+        perf_manager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
         try:
-            service_content = server_instance.RetrieveServiceContent()
+            results = perf_manager.QueryPerf(querySpec=query_specs)
+            if results:
+                for entity_metrics in results:
+                    mor_name = str(entity_metrics.entity)
+                    mor_type = type(entity_metrics.entity)
+                    try:
+                        mor = self.morlist[i_key][mor_type][mor_name]
+                    except KeyError:
+                        self.log.warning(u"Trying to get metrics from object %s deleted from the cache, skipping.",mor_name)
+                        continue
 
-        except vmodl.RuntimeFault as e:
-            err_msg = u"Runtime fault while collecting metrics : %s , %s" % (str(e.faultCause),str(e.faultMessage))
-            error_config.update({ERR_CODE : 'RuntimeFault'})
-            error_config.update({ERR_MSG : err_msg})
-            self.log.warning(err_msg)
+                    for perf_metric in entity_metrics.value:
+                        counter_id = perf_metric.id.counterId
+                        if counter_id not in self.metrics_metadata[i_key][mor_type]:
+                            self.log.debug(u"Skipping this metric value %d, because there is no metadata about it",counter_id)
+                            continue
 
-        except ssl.SSLError:
-            err_msg = u"Read operation timed out while collecting metrics"
+                        # Metric types are absolute, delta, and rate
+                        try:
+                            metric_name = self.metrics_metadata[i_key][mor_type][counter_id]['name']
+                        except KeyError:
+                            self.log.debug(u"Skipping this metric value %d, because of missing metric name",counter_id)
+                            continue
+
+                        if not perf_metric.value:
+                            self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
+                            continue
+
+                        metric_instance = str(perf_metric.id.instance)
+                        instance_name = metric_instance or "none"
+                        # append metric name with valid instance value for datastore metrics
+                        if isinstance(entity_metrics.entity,vim.Datastore):
+                            if metric_instance and metric_instance in DATASTORE_METRIC_FILE_TYPES:
+                                metric_name = "{0}.{1}".format(metric_name,metric_instance.lower())
+
+                        # Get the most recent value that isn't negative
+                        valid_values = [v for v in perf_metric.value if v >= 0]
+                        if not valid_values:
+                            continue
+
+                        if mor_type in REALTIME_RESOURCES:
+                            value = self.calculate_average(instance, counter_id, mor_type, valid_values)
+                        else:
+                            value = self._transform_value(instance, counter_id, mor_type, valid_values[-1])
+
+                        tags = ['instance:%s' % instance_name]
+                        if not mor['hostname']:  # no host tags available
+                            tags.extend(mor['tags'])
+
+                        if custom_tags:
+                            tags.extend(custom_tags)
+
+                        #add the entity id and type to tags
+                        entity_tags = []
+                        entity_id = mor.get('entity_id',None)
+                        entity_type = mor.get('entity_type',None)
+                        if entity_id:
+                            entity_tags.append('entity_id:%s' %entity_id)
+                        if entity_type:
+                            entity_tags.append('entity_type:%s' %entity_type)
+
+                        entity_tags.append('endpoint_uuid:%s' %i_key)
+                        if entity_tags:
+                            tags.extend(entity_tags)
+
+                        self.log.debug(u"query results for %s : %f tags : %s",metric_name,value,tags)
+
+                        # vsphere "rates" should be submitted as gauges (rate is
+                        # precomputed).
+                        self.gauge(
+                            "vsphere.%s" % metric_name,
+                            value,
+                            hostname=mor['hostname'],
+                            tags=tags
+                        )
+        except vmodl.fault.InvalidArgument as e:
+            err_msg = u"InvalidArgument fault while querying perf metrics : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
             error_config.update({ERR_CODE : 'CollectionError'})
             error_config.update({ERR_MSG : err_msg})
             self.log.warning(err_msg)
-
-        else:
-            perfManager = service_content.perfManager
-            custom_tags = instance.get('tags', [])
-            try:
-                results = perfManager.QueryPerf(querySpec=query_specs)
-                if results:
-                    for entity_metrics in results:
-                        mor_name = str(entity_metrics.entity)
-                        mor_type = type(entity_metrics.entity)
-                        try:
-                            mor = self.morlist[i_key][mor_type][mor_name]
-                        except KeyError:
-                            self.log.warning(u"Trying to get metrics from object %s deleted from the cache, skipping.",mor_name)
-                            continue
-
-                        for perf_metric in entity_metrics.value:
-                            counter_id = perf_metric.id.counterId
-                            if counter_id not in self.metrics_metadata[i_key][mor_type]:
-                                self.log.debug(u"Skipping this metric value %d, because there is no metadata about it",counter_id)
-                                continue
-
-                            # Metric types are absolute, delta, and rate
-                            try:
-                                metric_name = self.metrics_metadata[i_key][mor_type][counter_id]['name']
-                            except KeyError:
-                                self.log.debug(u"Skipping this metric value %d, because of missing metric name",counter_id)
-                                continue
-
-                            if not perf_metric.value:
-                                self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
-                                continue
-
-                            metric_instance = str(perf_metric.id.instance)
-                            instance_name = metric_instance or "none"
-                            # append metric name with valid instance value for datastore metrics
-                            if isinstance(entity_metrics.entity,vim.Datastore):
-                                if metric_instance and metric_instance in DATASTORE_METRIC_FILE_TYPES:
-                                    metric_name = "{0}.{1}".format(metric_name,metric_instance.lower())
-
-                            # Get the most recent value that isn't negative
-                            valid_values = [v for v in perf_metric.value if v >= 0]
-                            if not valid_values:
-                                continue
-
-                            if mor_type in REALTIME_RESOURCES:
-                                value = self.calculate_average(instance, counter_id, mor_type, valid_values)
-                            else:
-                                value = self._transform_value(instance, counter_id, mor_type, valid_values[-1])
-
-                            tags = ['instance:%s' % instance_name]
-                            if not mor['hostname']:  # no host tags available
-                                tags.extend(mor['tags'])
-
-                            if custom_tags:
-                                tags.extend(custom_tags)
-
-                            #add the entity id and type to tags
-                            entity_tags = []
-                            entity_id = mor.get('entity_id',None)
-                            entity_type = mor.get('entity_type',None)
-                            if entity_id:
-                                entity_tags.append('entity_id:%s' %entity_id)
-                            if entity_type:
-                                entity_tags.append('entity_type:%s' %entity_type)
-
-                            entity_tags.append('endpoint_uuid:%s' %i_key)
-                            if entity_tags:
-                                tags.extend(entity_tags)
-
-                            self.log.debug(u"query results for %s : %f tags : %s",metric_name,value,tags)
-
-                            # vsphere "rates" should be submitted as gauges (rate is
-                            # precomputed).
-                            self.gauge(
-                                "vsphere.%s" % metric_name,
-                                value,
-                                hostname=mor['hostname'],
-                                tags=tags
-                            )
-            except vmodl.fault.InvalidArgument as e:
-                err_msg = u"InvalidArgument fault while querying perf metrics : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
-                error_config.update({ERR_CODE : 'CollectionError'})
-                error_config.update({ERR_MSG : err_msg})
-                self.log.warning(err_msg)
-            except vim.fault.RestrictedByAdministrator as e:
-                err_msg = u"RestrictedByAdministrator fault while querying perf metrics : %s , %s" % (str(e.details), str(e.faultMessage))
-                error_config.update({ERR_CODE : 'CollectionError'})
-                error_config.update({ERR_MSG : err_msg})
-                self.log.warning(err_msg)
-            except vmodl.RuntimeFault as e:
-                err_msg = u"Runtime fault while querying perf metrics : %s , %s" % (str(e.faultCause),str(e.faultMessage))
-                error_config.update({ERR_CODE : 'RuntimeFault'})
-                error_config.update({ERR_MSG : err_msg})
-                self.log.warning(err_msg)
-            except ssl.SSLError:
-                err_msg = u"Read operation timed out while querying perf metrics"
-                error_config.update({ERR_CODE : 'CollectionError'})
-                error_config.update({ERR_MSG : err_msg})
-                self.log.warning(err_msg)
+        except vim.fault.RestrictedByAdministrator as e:
+            err_msg = u"RestrictedByAdministrator fault while querying perf metrics : %s , %s" % (str(e.details), str(e.faultMessage))
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+        except vmodl.RuntimeFault as e:
+            err_msg = u"Runtime fault while querying perf metrics : %s , %s" % (str(e.faultCause),str(e.faultMessage))
+            error_config.update({ERR_CODE : 'RuntimeFault'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+        except ssl.SSLError:
+            err_msg = u"Read operation timed out while querying perf metrics"
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
 
         #extract the error config to check why monitor exited
         #raise alarms for vcenter errors if any
@@ -1419,6 +1409,28 @@ class VSphereCheck(AgentCheck):
         if batch:
             yield batch
 
+    def get_collection_time(self,instance):
+        i_key = self._instance_key(instance)
+        instance_ts = self.collection_ts.get(i_key)
+        timestamp = instance_ts.get(START_TIMESTAMP,None)
+        if timestamp is None:
+            raise Exception("No collection timestamp defined for vCenter instance")
+        return timestamp
+
+    def set_collection_time(self,instance):
+        i_key = self._instance_key(instance)
+        instance_ts = self.collection_ts.get(i_key)
+        timestamp = instance_ts.get(START_TIMESTAMP,None)
+        if timestamp:
+            timestamp = timestamp + timedelta(seconds=COLLECTION_TIME_INTERVAL)
+        else:
+            server_instance = self._get_server_instance(instance)
+            server_time = server_instance.CurrentTime()
+            timestamp = server_time - timedelta(seconds=COLLECTION_TIME_INTERVAL)
+
+        #update the timestamp for current iteration
+        instance_ts.update({START_TIMESTAMP : timestamp})
+
     def make_query_specs(self,instance):
         """
         Build query specs using MORs and metrics metadata.
@@ -1431,8 +1443,9 @@ class VSphereCheck(AgentCheck):
             return
         server_instance = self._get_server_instance(instance)
         error_config = self.error_configs[i_key]
+        server_time = server_instance.CurrentTime()
+        instance_ts = self.get_collection_time(instance)
         try:
-
             for resource_type in ALL_RESOURCES_WITH_METRICS:
                 # Safeguard, let's avoid collecting multiple resource types in the same call
                 # get entire list of mors with matching resource_type
@@ -1466,7 +1479,6 @@ class VSphereCheck(AgentCheck):
                             vmdisk_query_spec.entity = mor
                             vmdisk_query_spec.metricId = metrics
                             vmdisk_query_spec.format = "normal"
-                            server_time = server_instance.CurrentTime()
                             vmdisk_query_spec.startTime = server_time - timedelta(seconds=DATASTORE_TIME_INTERVAL)
                             vmdisk_query_spec.endTime = server_time
                             vmdisk_query_specs.append(vmdisk_query_spec)
@@ -1474,6 +1486,31 @@ class VSphereCheck(AgentCheck):
                             yield vmdisk_query_specs
 
                 max_batch_size = self.get_batch_size(resource_type)
+
+                start_time = None
+                end_time = None
+                interval = 0
+
+                # request for all realtime samples in the window based on collection interval
+                if resource_type in REALTIME_RESOURCES:
+                    start_time = instance_ts
+                    end_time = instance_ts + timedelta(seconds=COLLECTION_TIME_INTERVAL)
+                    interval = REAL_TIME_INTERVAL
+                # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
+                # contain at least one element based on the sampling period of the metrics being fetched
+                elif resource_type == vim.ClusterComputeResource:
+                    #use 2 hours as timewindow for cluster metrics
+                    start_time = server_time - timedelta(seconds=CLUSTER_TIME_INTERVAL)
+                    end_time = server_time
+                elif resource_type == vim.Datastore:
+                    # create offset time based on maximum overlap between historical intervals of 300 & 1800
+                    # for which datastore metrics r available
+                    # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.PerformanceManager.QuerySpec.html
+                    # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
+                    offset_time = DATASTORE_TIME_INTERVAL - 10
+                    start_time = server_time - timedelta(seconds=offset_time)
+                    end_time = server_time
+
                 for batch in self.make_batch(mors, metric_ids, max_batch_size):
                     query_specs = []
                     for mor, metrics in batch.items():
@@ -1481,30 +1518,12 @@ class VSphereCheck(AgentCheck):
                         query_spec.entity = mor
                         query_spec.metricId = metrics
                         query_spec.format = "normal"
-                        if resource_type in REALTIME_RESOURCES:
-                            # request for all realtime samples in the window based on collection interval
-                            query_spec.intervalId = REAL_TIME_INTERVAL
-                            server_time = server_instance.CurrentTime()
-                            query_spec.startTime = server_time - timedelta(seconds=COLLECTION_TIME_INTERVAL)
-                            query_spec.endTime = server_time
-                        # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
-                        # contain at least one element based on the sampling period of the metrics being fetched
-                        elif resource_type == vim.ClusterComputeResource:
-                            #use 2 hours as timewindow for cluster metrics
-                            server_time = server_instance.CurrentTime()
-                            query_spec.startTime = server_time - timedelta(seconds=CLUSTER_TIME_INTERVAL)
-                            query_spec.endTime = server_time
-                        elif resource_type == vim.Datastore:
-                            # create offset time based on maximum overlap between historical intervals of 300 & 1800
-                            # for which datastore metrics r available
-                            # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.PerformanceManager.QuerySpec.html
-                            # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
-                            offset_time = DATASTORE_TIME_INTERVAL - 10
-                            server_time = server_instance.CurrentTime()
-                            query_spec.startTime = server_time - timedelta(seconds=offset_time)
-                            query_spec.endTime = server_time
-
+                        query_spec.startTime = start_time
+                        query_spec.endTime = end_time
+                        if interval > 0:
+                            query_spec.intervalId = interval
                         query_specs.append(query_spec)
+
                     if query_specs:
                         yield query_specs
 
@@ -1535,6 +1554,7 @@ class VSphereCheck(AgentCheck):
             self.log.debug(u"Not collecting metrics for this instance, nothing to do yet: {0}".format(i_key))
             return
 
+        error_config = self.error_configs[i_key]
         custom_tags = instance.get('tags', [])
         n_mors = 0
         vm_count = 0
@@ -1555,13 +1575,34 @@ class VSphereCheck(AgentCheck):
 
         self.log.info(u"Collecting metrics of %d mors for vcenter instance %s",n_mors,i_key)
 
-        
         self.task_list = []
-        for query_specs in self.make_query_specs(instance):
-            if query_specs:
-                self.task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
+        try:
+            for query_specs in self.make_query_specs(instance):
+                if query_specs:
+                    self.task_list.append(self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs)))
+
+        except Exception as e:
+            err_msg = u"Unable to schedule metric collection tasks: %s" % (e)
+            error_config.update({ERR_CODE : 'CollectionError'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
 
         self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
+
+        #raise alarms if any
+        error_msg = error_config.get(ERR_MSG)
+        error_code = error_config.get(ERR_CODE)
+        if error_code and error_msg:
+            self.raiseAlert(instance, error_code, error_msg)
+
+    def get_max_query_metrics(self,instance):
+        server_instance = self._get_server_instance(instance)
+        vcenter_settings = server_instance.content.setting.QueryOptions(MAX_QUERY_METRICS_OPTION)
+        vcenter_max_historical_metrics = int(vcenter_settings[0].value)
+        if vcenter_max_historical_metrics > 0:
+            return vcenter_max_historical_metrics
+        else:
+            return UNLIMITED_HIST_METRICS_PER_QUERY
 
     def check(self, instance):
         if not self.pool_started:
@@ -1575,19 +1616,34 @@ class VSphereCheck(AgentCheck):
         error_config.update({ERR_CODE : None,ERR_MSG : None})
 
         # Update the value of `max_query_metrics` if needed
-        server_instance = self._get_server_instance(instance)
         try:
-            vcenter_settings = server_instance.content.setting.QueryOptions(MAX_QUERY_METRICS_OPTION)
-            vcenter_max_hist_metrics = int(vcenter_settings[0].value)
-            if vcenter_max_hist_metrics < 0:
-                self.max_historical_metrics = float('inf')
-            else:
+            vcenter_max_hist_metrics = self.get_max_query_metrics(instance)
+            if vcenter_max_hist_metrics < self.max_historical_metrics:
+                self.log.warning(
+                    u"The integration was configured with `max_query_metrics: %d` but vCenter has a"
+                    u"lower limit of %d. Hence ignoring configuration in favor of the vCenter value."
+                    u"To update the vCenter value, please update the `%s` field",
+                    self.max_historical_metrics,
+                    vcenter_max_hist_metrics,
+                    MAX_QUERY_METRICS_OPTION,
+                )
                 self.max_historical_metrics = vcenter_max_hist_metrics
         except Exception:
             self.max_historical_metrics = DEFAULT_MAX_QUERY_METRICS
-            self.log.debug(u"Could not fetch the value of %s, setting `max_historical_metrics` to default value %d.",
+            self.log.info(u"Could not fetch the value of %s, setting `max_historical_metrics` to default value %d.",
                                                                 MAX_QUERY_METRICS_OPTION,DEFAULT_MAX_QUERY_METRICS)
             pass
+
+        self.log.info(u"Metric collection configured with `max_query_metrics: %d`",self.max_historical_metrics)
+
+        try:
+            self.set_collection_time(instance)
+
+        except Exception as e:
+            err_msg = u"Unable to set timestamp for metric collection : %s" % (e)
+            self.log.error(err_msg)
+            self.raiseAlert(instance, 'CollectionError', err_msg)
+            raise Exception(e)
 
         # ## <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
