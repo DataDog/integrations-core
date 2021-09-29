@@ -8,7 +8,9 @@ import yaml
 import os
 
 LOGS_BACKEND_INTGS_ROOT = os.environ['LOGS_BACKEND_INTGS_ROOT']
+print(LOGS_BACKEND_INTGS_ROOT)
 INTEGRATIONS_CORE = os.environ['INTEGRATIONS_CORE_ROOT']
+print(INTEGRATIONS_CORE)
 
 ERR_UNEXPECTED_LOG_COLLECTION_CAT = "The check does not have a log pipeline but defines 'log collection' in its manifest file."
 ERR_UNEXPECTED_LOG_DOC = "The check does not have a log pipeline but defines a source in its README."
@@ -158,8 +160,10 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 logs_to_metrics_mapping = get_log_to_metric_map(sys.argv[1])
+print("Logs: " + str(logs_to_metrics_mapping))
 
 all_checks = list(get_all_checks())
+print("All checks: " + str(all_checks))
 for check in all_checks:
     if check.log_source in logs_to_metrics_mapping:
         check.is_defined_in_web_ui = True
