@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:kyototycoon"
-      ]
+      "query_filter": "integration:kyototycoon",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [
