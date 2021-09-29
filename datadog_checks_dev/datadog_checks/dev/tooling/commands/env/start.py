@@ -109,6 +109,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             'by doing `ddev config set dd_api_key`.'
         )
 
+    dd_site = org.get('site')
     dd_url = org.get('dd_url')
     log_url = org.get('log_url')
 
@@ -219,6 +220,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         metadata,
         agent_build,
         api_key,
+        dd_site,
         dd_url,
         log_url,
         python,
