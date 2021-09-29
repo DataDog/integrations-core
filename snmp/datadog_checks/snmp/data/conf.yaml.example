@@ -99,7 +99,7 @@ init_config:
     # service: <SERVICE>
 
     ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection for all
+    ## Enable device metadata collection for all instances.
     ## Only available using corecheck SNMP integration with `loader: core` config.
     #
     # collect_device_metadata: true
@@ -346,7 +346,7 @@ instances:
     # empty_default_hostname: false
 
     ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection
+    ## Enable device metadata collection.
     ## Only available using corecheck SNMP integration with `loader: core` config.
     #
     # collect_device_metadata: true
