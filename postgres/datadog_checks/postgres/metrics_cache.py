@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresMetricsCache:
-    """ Maintains a cache of metrics to collect """
+    """Maintains a cache of metrics to collect"""
 
     def __init__(self, config):
         self.config = config

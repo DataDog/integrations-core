@@ -135,7 +135,6 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
         else config.get('repo', 'core')
     )
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
@@ -156,6 +155,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
             # Repo choices use the integration repo name without the `integrations-` prefix
             config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
+    config['repo_name'] = REPO_CHOICES.get(config['repo_choice'], config['repo_choice'])
     set_root(root)
     return message
 
