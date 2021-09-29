@@ -67,6 +67,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    boto_config: Optional[Mapping[str, Any]]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     cluster_arn: str

@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.2.0 / 2021-09-27
+
+* [Added] Update AZP templates to take in a dd_url and small fixes to validator. See [#10230](https://github.com/DataDog/integrations-core/pull/10230).
+* [Added] Add batch option to `ddev dep updates` command. See [#10229](https://github.com/DataDog/integrations-core/pull/10229).
+* [Added] Add DDEV_E2E_AGENT_PY2 env option. See [#10221](https://github.com/DataDog/integrations-core/pull/10221).
+* [Fixed] Don't set empty asset values on migration. See [#10231](https://github.com/DataDog/integrations-core/pull/10231).
+* [Fixed] Forbid time_unit/time_unit metric metadata type. See [#10236](https://github.com/DataDog/integrations-core/pull/10236).
+
 ## 14.1.0 / 2021-09-23
 
 * [Added] Strengthen ImmutableAttributesValidator to check for manifest changes in asset short names. See [#10199](https://github.com/DataDog/integrations-core/pull/10199).

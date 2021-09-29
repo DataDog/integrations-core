@@ -206,7 +206,7 @@ class FargateCheck(AgentCheck):
                 cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
                 cpu_percent = round_value(cpu_percent, 2)
                 self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
-                if cpu_percent > 500:
+                if cpu_percent > active_cpus * 100.0:
                     self.log.debug(
                         "Anomalous CPU value for container_id: %s. cpu_percent: %f, system_delta: %f, cpu_delta: %f,"
                         " active_cpus: %f; prevalue_system: %f, value_system: %f, prevalue_total: %f, value_total: %f",
