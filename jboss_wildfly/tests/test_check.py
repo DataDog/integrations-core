@@ -12,7 +12,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     instance = {}
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
     metrics = [
         'jboss.jdbc_connections.active',
         'jboss.jdbc_connections.count',
