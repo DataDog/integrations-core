@@ -15,7 +15,7 @@ jmx_metrics:
       attribute:
         ActiveCount:
           alias: jboss.jdbc_connections.count
-          metric_type: monotonic_count
+          metric_type: gauge
         WaitCount:
           alias: jboss.jdbc_connections.request_wait
           metric_type: monotonic_count
@@ -95,7 +95,7 @@ jmx_metrics:
           metric_type: monotonic_count
         processingTime:
           alias: jboss.undertow_listener.processing_time
-          metric_type: monotonic_count
+          metric_type: gauge
         requestCount:
           alias: jboss.undertow_listener.request_count
           metric_type: monotonic_count
