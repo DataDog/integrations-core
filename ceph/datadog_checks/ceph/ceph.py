@@ -109,15 +109,20 @@ class Ceph(AgentCheck):
     def _extract_metrics(self, raw, tags):
         try:
             raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
-            store_type = { metadata['id']: metadata['osd_objectstore'] for metadata in raw.get('osd_metadata', []) }
-            devices = { metadata['id']: metadata['devices'] for metadata in raw.get('osd_metadata', []) }
-            device_ids = { metadata['id']: metadata['device_ids'] for metadata in raw.get('osd_metadata', []) }
-            device_class = { metadata['id']: metadata['default_device_class'] for metadata in raw.get('osd_metadata', []) }
-            version = { metadata['id']: metadata['ceph_version_short'] for metadata in raw.get('osd_metadata', []) }
-            release = { metadata['id']: metadata['ceph_release'] for metadata in raw.get('osd_metadata', []) }
+            osd_tags = {
+                metadata['id']: [
+                    'ceph_osd_objectstore:%s' % metadata["osd_objectstore"],
+                    'ceph_osd_device:%s' % metadata["devices"],
+                    'ceph_osd_device_id:%s' % metadata["device_ids"],
+                    'ceph_osd_device_class:%s' % metadata["default_device_class"],
+                    'ceph_version:%s' % metadata["ceph_version_short"],
+                    'ceph_release:%s' % metadata["ceph_release"],
+                ]
+                for metadata in raw.get('osd_metadata', [])
+            }
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id'], f'ceph_osd_objectstore:{store_type[osdperf["id"]]}', f'ceph_osd_device:{devices[osdperf["id"]]}', f'ceph_osd_device_id:{device_ids[osdperf["id"]]}', f'ceph_osd_device_class:{device_class[osdperf["id"]]}', f'ceph_version:{version[osdperf["id"]]}', f'ceph_release:{release[osdperf["id"]]}']
+                local_tags = tags + ['ceph_osd:osd%s' % osdperf["id"]] + osd_tags.get(osdperf['id'], [])
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
         except (KeyError, TypeError):
