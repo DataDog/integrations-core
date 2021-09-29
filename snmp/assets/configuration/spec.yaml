@@ -118,6 +118,14 @@ files:
         value:
           type: boolean
           example: true
+      - name: namespace
+        description: |
+            Namespace can be used to disambiguate devices with same IPs.
+            Changing namespace will cause devices being recreated in NDM app.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: init_config/default
     - template: instances
       options:
@@ -369,4 +377,12 @@ files:
         value:
           type: boolean
           example: true
+      - name: namespace
+        description: |
+          Namespace can be used to disambiguate devices with same IPs.
+          Changing namespace will cause devices being recreated in NDM app.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: instances/default
