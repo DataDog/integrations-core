@@ -58,7 +58,8 @@ instances:
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
-    ## This will be in addition to any queues discovered using autodiscovery, regex or patterns.
+    ## This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+    ## `queue_patterns`.
     #
     # queues:
     #   - <QUEUE_NAME>
@@ -108,7 +109,7 @@ instances:
     #   initializing: warning
 
     ## @param auto_discover_queues - boolean - optional - default: false
-    ## Autodiscover the queues to monitor. This autodiscover all available queues. If you have dynamic queues
+    ## Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
     ## it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
     ## queues to monitor use `queue_patterns` or `queue_regex` instead.
     ## Warning: this can lead to some warnings in your logs
