@@ -431,6 +431,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             ksm_instance['label_to_hostname'] = 'node'
             clustername = get_clustername()
             if clustername != "":
+                # some cluster names are not valid RFC1123, but as we use them as a hostAlias we want them to be valid.
+                clustername = clustername.replace("_", "-")
                 ksm_instance['label_to_hostname_suffix'] = "-" + clustername
 
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
