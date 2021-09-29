@@ -91,18 +91,18 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
+    ## @param collect_device_metadata - boolean - optional - default: true
+    ## Enable device metadata collection for all instances.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # collect_device_metadata: true
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
     ## Additionally, this sets the default `service` for every log source.
     #
     # service: <SERVICE>
-
-    ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection for all instances.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
 
 ## Every instance is scheduled independent of the others.
 #
@@ -316,6 +316,12 @@ instances:
     #
     # refresh_oids_cache_interval: 3600
 
+    ## @param collect_device_metadata - boolean - optional - default: true
+    ## Enable device metadata collection.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # collect_device_metadata: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -344,9 +350,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
