@@ -8,8 +8,9 @@ from collections import defaultdict
 import click
 
 from ...annotations import annotate_display_queue
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
+from ...utils import complete_valid_checks, get_metadata_file, normalize_display_name, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -281,13 +282,13 @@ def metadata(check, check_duplicates, show_warnings):
             continue
 
         # get any manifest info needed for validation
-        manifest = load_manifest(current_check)
+        manifest = Manifest.load_manifest(current_check)
         try:
-            metric_prefix = manifest['metric_prefix'].rstrip('.')
+            metric_prefix = manifest.get_metric_prefix().rstrip('.')
         except KeyError:
             metric_prefix = None
 
-        display_name = manifest['display_name']
+        display_name = manifest.get_display_name()
 
         metadata_file = get_metadata_file(current_check)
         display_queue.append((echo_debug, f"Checking {metadata_file}"))
