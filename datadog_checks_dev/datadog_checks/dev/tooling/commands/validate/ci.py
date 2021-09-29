@@ -402,10 +402,10 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
-    echo_info("Validating CI Configuration...", nl=False)
+    echo_info("Validating CI Configuration...")
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)
 
-    echo_info("Validating Code Coverage Configuration...", nl=False)
+    echo_info("Validating Code Coverage Configuration...")
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)
