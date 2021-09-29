@@ -186,7 +186,7 @@ def migrate(ctx, integration, to_version):
     for os in supported_os:
         os_tag = OS_TO_CLASSIFIER_TAGS.get(os.lower())
         if os_tag:
-            classifier_tags.append(OS_TO_CLASSIFIER_TAGS.get(os.lower()))
+            classifier_tags.append(os_tag)
 
     categories = loaded_manifest.get_path("/categories")
     for category in categories:
