@@ -1,6 +1,6 @@
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
-sqlcmd -Q "CREATE LOGIN datadog WITH PASSWORD = 'hey-there-datadog123';"
+sqlcmd -Q "CREATE LOGIN datadog WITH PASSWORD = 'Hey-there-datadog123!';"
 sqlcmd -Q "CREATE USER datadog FOR LOGIN datadog;"
 sqlcmd -Q "GRANT VIEW SERVER STATE to datadog;"
 sqlcmd -Q "GRANT CONNECT ANY DATABASE to datadog;"
