@@ -215,11 +215,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     if not rows:
                         return
                     for event in self._rows_to_fqt_events(rows):
-                        self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                        self.check.database_monitoring_query_sample(
+                            json.dumps(event, default=default_json_event_encoding)
+                        )
                     payload = self._to_metrics_payload(rows)
-                    self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+                    self.check.database_monitoring_query_metrics(
+                        json.dumps(payload, default=default_json_event_encoding)
+                    )
                     for event in self._collect_plans(rows, cursor):
-                        self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                        self.check.database_monitoring_query_sample(
+                            json.dumps(event, default=default_json_event_encoding)
+                        )
                         plans_submitted += 1
         except Exception:
             self.log.exception('Unable to collect statement metrics due to an error')
