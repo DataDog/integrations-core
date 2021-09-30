@@ -106,7 +106,7 @@ CPU, memory, block I/O, or huge page table metrics are collected out of the box.
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 This integration works on Linux and Windows, but some metrics are OS dependent.
-- Linux-specific: `containerd.hugetlb.*`, `containerd.blkio.*`, `containerd.cpu.throttled.periods`, and all the `containerd.mem.*` ones except these 3: `containerd.mem.commit`, `containerd.mem.commit_peak`, and `containerd.mem.private_working_set`.
+- Linux-specific: `containerd.hugetlb.*`, `containerd.blkio.*`, `containerd.cpu.throttled.periods`, and all the `containerd.mem.*` metrics except: `containerd.mem.commit`, `containerd.mem.commit_peak`, and `containerd.mem.private_working_set`.
 - Windows-specific: `containerd.mem.commit`, `containerd.mem.commit_peak`, `containerd.mem.private_working_set`, and `containerd.storage.*`.
  
 ### Events
