@@ -232,12 +232,6 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, path)
 
 
-def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula', '')
-    path = os.path.join(get_root(), check_name, *path.split('/'))
-    return path, file_exists(path)
-
-
 def get_jmx_metrics_file(check_name):
     path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
     return path, file_exists(path)
@@ -270,14 +264,6 @@ def get_config_file(check_name):
 
 def get_check_req_file(check_name):
     return os.path.join(get_root(), check_name, 'requirements.in')
-
-
-def get_config_spec(check_name):
-    if check_name == 'agent':
-        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
-    else:
-        path = load_manifest(check_name).get('assets', {}).get('configuration', {}).get('spec', '')
-        return os.path.join(get_root(), check_name, *path.split('/'))
 
 
 def get_default_config_spec(check_name):
