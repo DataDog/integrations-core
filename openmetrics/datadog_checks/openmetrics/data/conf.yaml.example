@@ -45,10 +45,11 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - required
+  -
+    ## @param openmetrics_endpoint - string - optional
     ## The URL exposing metrics in the OpenMetrics format.
     #
-  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    # openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
 
     ## @param namespace - string - required
     ## The namespace to be prepended to all metrics.
