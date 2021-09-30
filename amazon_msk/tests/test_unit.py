@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from mock import ANY
 from six import PY2
 
 from datadog_checks.amazon_msk import AmazonMskCheck
@@ -13,7 +14,7 @@ from datadog_checks.amazon_msk.metrics import (
     NODE_METRICS_OVERRIDES,
 )
 
-from .common import METRICS_FROM_LABELS
+from .common import INSTANCE, INSTANCE_LEGACY, METRICS_FROM_LABELS
 
 
 @pytest.mark.usefixtures('mock_data')
@@ -25,7 +26,7 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=ANY)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -60,7 +61,7 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
     cluster_arn = instance['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', config=ANY, region_name=region_name)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -156,7 +157,7 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=ANY)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -179,3 +180,19 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
                 aggregator.assert_service_check('aws.msk.prometheus.health', c.OK, tags=service_check_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
+        pytest.param(
+            INSTANCE, id='new config proxy', marks=pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+        ),
+    ],
+)
+def test_proxy_config(instance):
+    HTTP_PROXY = {"http": "example.com"}
+    init_config = {"proxy": HTTP_PROXY}
+    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    assert c._boto_config.proxies == HTTP_PROXY

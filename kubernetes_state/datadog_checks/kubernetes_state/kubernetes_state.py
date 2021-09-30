@@ -583,7 +583,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     # Also submits as an aggregated count with minimal tags so it is
     # visualisable over time per namespace and phase
     def kube_pod_status_phase(self, metric, scraper_config):
-        """ Phase a pod is in. """
+        """Phase a pod is in."""
         metric_name = scraper_config['namespace'] + '.pod.status_phase'
         status_phase_counter = Counter()
 
@@ -645,7 +645,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         )
 
     def kube_cronjob_next_schedule_time(self, metric, scraper_config):
-        """ Time until the next schedule """
+        """Time until the next schedule"""
         # Used as a service check so that one can be alerted if the cronjob's next schedule is in the past
         check_basename = scraper_config['namespace'] + '.cronjob.on_schedule_check'
         curr_time = int(time.time())
@@ -725,7 +725,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
 
     def kube_node_status_condition(self, metric, scraper_config):
-        """ The ready status of a cluster node. v1.0+"""
+        """The ready status of a cluster node. v1.0+"""
         base_check_name = scraper_config['namespace'] + '.node'
         metric_name = scraper_config['namespace'] + '.nodes.by_condition'
         by_condition_counter = Counter()
@@ -753,7 +753,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
-        """ The ready status of a cluster node (legacy)"""
+        """The ready status of a cluster node (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.ready'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -765,7 +765,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_out_of_disk(self, metric, scraper_config):
-        """ Whether the node is out of disk space (legacy)"""
+        """Whether the node is out of disk space (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.out_of_disk'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -777,7 +777,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_memory_pressure(self, metric, scraper_config):
-        """ Whether the node is in a memory pressure state (legacy)"""
+        """Whether the node is in a memory pressure state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.memory_pressure'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -789,7 +789,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_disk_pressure(self, metric, scraper_config):
-        """ Whether the node is in a disk pressure state (legacy)"""
+        """Whether the node is in a disk pressure state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.disk_pressure'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -801,7 +801,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_network_unavailable(self, metric, scraper_config):
-        """ Whether the node is in a network unavailable state (legacy)"""
+        """Whether the node is in a network unavailable state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.network_unavailable'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -813,7 +813,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_spec_unschedulable(self, metric, scraper_config):
-        """ Whether a node can schedule new pods. """
+        """Whether a node can schedule new pods."""
         metric_name = scraper_config['namespace'] + '.node.status'
         statuses = ('schedulable', 'unschedulable')
         if metric.type in METRIC_TYPES:
@@ -829,7 +829,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_resourcequota(self, metric, scraper_config):
-        """ Quota and current usage by resource type. """
+        """Quota and current usage by resource type."""
         metric_base_name = scraper_config['namespace'] + '.resourcequota.{}.{}'
         suffixes = {'used': 'used', 'hard': 'limit'}
         if metric.type in METRIC_TYPES:
@@ -846,7 +846,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_limitrange(self, metric, scraper_config):
-        """ Resource limits by consumer type. """
+        """Resource limits by consumer type."""
         # type's cardinality's low: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3872-L3879
         # idem for resource: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3342-L3352
         # idem for constraint: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3882-L3901
@@ -880,7 +880,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def sum_values_by_tags(self, metric, scraper_config):
-        """ Sum values by allowed tags and submit counts as gauges. """
+        """Sum values by allowed tags and submit counts as gauges."""
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
@@ -899,7 +899,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by allowed tags and submit counts as gauges. """
+        """Count objects by allowed tags and submit counts as gauges."""
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
