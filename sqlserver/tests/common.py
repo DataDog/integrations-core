@@ -82,6 +82,7 @@ INSTANCE_DOCKER = {
     'include_fci_metrics': True,
     'include_ao_metrics': False,
     'include_master_files_metrics': True,
+    'disable_generic_tags': True,
 }
 
 INSTANCE_AO_DOCKER_SECONDARY = {
@@ -92,6 +93,7 @@ INSTANCE_AO_DOCKER_SECONDARY = {
     'password': 'Password123',
     'tags': ['optional:tag1'],
     'include_ao_metrics': True,
+    'disable_generic_tags': True,
 }
 
 CUSTOM_QUERY_A = {
@@ -113,6 +115,7 @@ INSTANCE_SQL2017_DEFAULTS = {
     'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
+    'disable_generic_tags': True,
 }
 INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
 INSTANCE_SQL2017.update(
@@ -124,6 +127,7 @@ INSTANCE_SQL2017.update(
         'include_fci_metrics': True,
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
+        'disable_generic_tags': True,
     }
 )
 

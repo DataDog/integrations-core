@@ -32,7 +32,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['host:localhost,1433', 'db:master', 'optional:tag1'],
+        tags=['sqlserver_host:localhost,1433', 'db:master', 'optional:tag1'],
     )
 
 
