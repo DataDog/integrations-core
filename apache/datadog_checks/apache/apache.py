@@ -73,10 +73,14 @@ class Apache(AgentCheck):
         apache_host = parsed_url.hostname
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
-        if disable_generic_tags: 
+        if disable_generic_tags:
             service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         else:
-            service_check_tags = ['host:%s' % apache_host, 'apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
+            service_check_tags = [
+                'host:%s' % apache_host,
+                'apache_host:%s' % apache_host,
+                'port:%s' % apache_port,
+            ] + tags
         try:
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d',
