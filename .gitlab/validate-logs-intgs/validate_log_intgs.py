@@ -34,6 +34,10 @@ EXCEPTIONS = {
     'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
     'jmeter': [ERR_MISSING_LOG_DOC], # Tile only in integrations-core, logs collected in DataDog/jmeter-datadog-backend-listener
+    'journald': [
+        ERR_UNEXPECTED_LOG_DOC, # Journald is a type of logs, and has its own tile
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT, 
+    ],
     'kubernetes': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from kubernetes environment but there is no pipeline per se
     'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
     'linkerd': [
@@ -42,7 +46,7 @@ EXCEPTIONS = {
     ],
     'openshift': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from openshift environment but there is no pipeline
     'pan_firewall': [ERR_NOT_DEFINED_WEB_UI], # The integration doesn't emit metric
-    'pivotal_pks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # The agent collects logs from openshift environment but there is no pipeline
+    'pivotal_pks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Using kubernetes pipeline
     'win32_event_log': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # win32_event_log is about log collection but we don't collect win32_event_log logs
 }
 
