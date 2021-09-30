@@ -75,7 +75,7 @@ INSTANCE_DOCKER = {
     'connector': 'odbc',
     'driver': get_local_driver(),
     'username': 'datadog',
-    'password': 'hey-there-datadog123',
+    'password': 'Password12!',
     'tags': ['optional:tag1'],
     'include_task_scheduler_metrics': True,
     'include_db_fragmentation_metrics': True,
@@ -89,7 +89,7 @@ INSTANCE_AO_DOCKER_SECONDARY = {
     'connector': 'odbc',
     'driver': 'FreeTDS',
     'username': 'datadog',
-    'password': 'hey-there-datadog123',
+    'password': 'Password12!',
     'tags': ['optional:tag1'],
     'include_ao_metrics': True,
 }

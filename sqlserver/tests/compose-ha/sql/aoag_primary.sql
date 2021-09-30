@@ -2,7 +2,7 @@
 -- test db setup
 
 -- datadog user
-CREATE LOGIN datadog WITH PASSWORD = 'hey-there-datadog123';
+CREATE LOGIN datadog WITH PASSWORD = 'Password12!';
 CREATE USER datadog FOR LOGIN datadog;
 GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
