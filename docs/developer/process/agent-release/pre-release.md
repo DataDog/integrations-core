@@ -17,7 +17,6 @@ Ensure that you have configured the following:
 
 - [GitHub](../../ddev/configuration.md#github) credentials
 - [Trello](../../ddev/configuration.md#trello) credentials
-- [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
 ## Before Freeze
 
