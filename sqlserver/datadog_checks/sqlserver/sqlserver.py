@@ -88,6 +88,7 @@ INSUFFICIENT_PERM_MSG = "The user does not have permission to perform this actio
 
 SQLCONNECTION_FAILURE_ALERTS = {
     "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
+    "Unable to connect to SQL Server" : NTNX__microsoft_sqlserver_user_authn,
     VIEW_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_view_server_state,
     "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
     SELECT_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_select_permissions,
@@ -459,6 +460,8 @@ class SQLServer(AgentCheck):
                 if alert_title == NTNX__microsoft_sqlserver_user_authn:
                     alert_message = alert_message + instance.get('username')
                 self.raise_alert(instance, alert_title, alert_message)
+            else:
+                self.log.error("Missing Alert tile or Alert message. Alert not sent for the exception::{}".format(exception_details[-1]))
 
     def parse_tags(self, tags, key):
         for tag in tags:
