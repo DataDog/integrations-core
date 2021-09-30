@@ -1,6 +1,5 @@
 """Python script to parse the logs pipeline from the logs-backend repository.
 This script is expected to run from a CLI, do not import it."""
-from io import RawIOBase
 import sys
 import json
 from typing import List, Optional, Set
@@ -177,9 +176,8 @@ if not validation_errors_per_check:
     print("Success, no errors were found!")
     sys.exit(0)
 
+print_err("Logs pipelines don't pass validation steps:")
 # Filter to only agt integrations checks
 for check, errs in validation_errors_per_check.items():
     for err in errs:
         print_err(f"- {check}: {err}")
-print_err("Logs pipelines don't pass validation steps:")
-raise Exception("Logs pipelines don't pass validation steps")

@@ -45,7 +45,12 @@ validate-log-integrations:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
     - ts-node parse_ts.ts > logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 validate_log_intgs.py logs_integrations.json
+    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
+  artifacts:
+    paths:
+    - $CI_PROJECT_DIR/errors.txt
+    expire_in: 1 day
+    when: always
   tags: [ "runner:main" ]
 
 trigger-agent-build:
@@ -124,14 +129,14 @@ notify-slack:
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
-  - master
+  - schedules
   cache:
     <<: *slack-cache
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
-      if [[ -s ./errors.txt ]]; then
-          cat errors.txt
+      if [[ -s $CI_PROJECT_DIR/errors.txt ]]; then
+          cat $CI_PROJECT_DIR/errors.txt
           MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
       else
@@ -228,7 +233,11 @@ validate-log-intgs-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
-    - schedules
+    changes:
+      - .gitlab/validate-logs-intgs/**
+    refs:
+      - master
+      - paul/fix-log-validation
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker build --tag $VALIDATE_LOG_INTGS .
