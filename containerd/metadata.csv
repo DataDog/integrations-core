@@ -22,6 +22,9 @@ containerd.mem.cache,gauge,,byte,,The cache amount used,0,containerd, cache_amou
 containerd.mem.rss,gauge,,byte,,The rss amount used,0,containerd, mem_rss
 containerd.mem.rsshuge,gauge,,byte,,The rss_huge amount used,0,containerd, mem_rss_huge
 containerd.mem.dirty,gauge,,byte,,The dirty amount,0,containerd, mem_dirty
+containerd.mem.commit,gauge,,byte,,The committed memory,0,containerd,mem_commit
+containerd.mem.commit_peak,gauge,,byte,,The peak committed memory,0,containerd,mem_commit_peak
+containerd.mem.private_working_set,gauge,,byte,,The private working set usage,0,containerd,mem_private_working_set
 containerd.cpu.throttled.periods,rate,,nanosecond,,The total cpu throttled time,0,containerd,cpu_throttled_time
 containerd.cpu.system,rate,,nanosecond,,The total cpu time,0,containerd,cpu_system
 containerd.cpu.total,rate,,nanosecond,,The total cpu time,0,containerd,cpu_total
@@ -34,6 +37,8 @@ containerd.blkio.time_recursive,rate,,nanosecond,,The disk time allocated to cgr
 containerd.blkio.serviced_recursive,rate,,,,The number of IOs (bio) issued to the disk by the group,0,containerd,io_serviced_recursive
 containerd.blkio.wait_time_recursive,rate,,nanosecond,,The total amount of time the IOs for this cgroup spent waiting in the scheduler queues for service,0,containerd,io_wait_time_recursive
 containerd.blkio.service_time_recursive,rate,,,,The total amount of time between request dispatch and request completion for the IOs done by this cgroup,0,containerd,io service time recursive
+containerd.storage.read,rate,,byte,,Read bytes,0,containerd,storage_read
+containerd.storage.write,rate,,byte,,Write bytes,0,containerd,storage_write
 containerd.image.size,gauge,,byte,,The size of the container image,0,containerd,image size
 containerd.proc.open_fds,gauge,,file,,The number of open file descriptors,0,containerd,open_fds
 containerd.uptime,gauge,,second,,Time since the container was started,0,containerd,uptime
