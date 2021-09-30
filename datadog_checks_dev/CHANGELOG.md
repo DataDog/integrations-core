@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.3.0 / 2021-09-30
+
+* [Added] Allow setting DD_SITE in org config. See [#10285](https://github.com/DataDog/integrations-core/pull/10285).
+* [Added] Update readme validation to check repo over support. See [#10283](https://github.com/DataDog/integrations-core/pull/10283).
+* [Added] Create and use new Manifest interface class for ddev commands. See [#10261](https://github.com/DataDog/integrations-core/pull/10261).
+* [Added] Still support python2 with mypy. See [#10272](https://github.com/DataDog/integrations-core/pull/10272).
+* [Added] Update style dependencies. See [#10238](https://github.com/DataDog/integrations-core/pull/10238).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Fixed] Don't add null values to classifier tags. See [#10279](https://github.com/DataDog/integrations-core/pull/10279).
+* [Fixed] Set repo name after we process the `--here` flag. See [#10259](https://github.com/DataDog/integrations-core/pull/10259).
+
 ## 14.2.0 / 2021-09-27
 
 * [Added] Update AZP templates to take in a dd_url and small fixes to validator. See [#10230](https://github.com/DataDog/integrations-core/pull/10230).
