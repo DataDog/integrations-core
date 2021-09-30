@@ -1,8 +1,11 @@
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
+sqlcmd -Q "CREATE LOGIN datadog WITH PASSWORD = 'hey-there-datadog123';"
+sqlcmd -Q "CREATE USER datadog FOR LOGIN datadog;"
+sqlcmd -Q "GRANT VIEW SERVER STATE to datadog;"
+sqlcmd -Q "GRANT CONNECT ANY DATABASE to datadog;"
+sqlcmd -Q "GRANT VIEW ANY DEFINITION to datadog;"
 
-:: Set up tests
-sqlcmd -S localhost -U sa -P 'Password12!' -d master -i setup.sql -b
 
 :: Enable port
 powershell -Command "stop-service MSSQLSERVER"
