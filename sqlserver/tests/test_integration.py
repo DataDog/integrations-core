@@ -42,7 +42,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(instance_docker.get('host')), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
@@ -230,14 +230,14 @@ def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_auto
 
     # verify that the old status check returns OK
     aggregator.assert_service_check(
-        'sqlserver.can_connect', tags=['db:master', 'optional:tag1', 'host:localhost,1433'], status=SQLServer.OK
+        'sqlserver.can_connect', tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'], status=SQLServer.OK
     )
 
     # verify all databses in autodiscovery have a service check
     for database in instance_autodiscovery['autodiscovery_include']:
         aggregator.assert_service_check(
             'sqlserver.database.can_connect',
-            tags=['db:{}'.format(database), 'optional:tag1', 'host:localhost,1433'],
+            tags=['db:{}'.format(database), 'optional:tag1', 'sqlserver_host:localhost,1433'],
             status=SQLServer.OK,
         )
 
@@ -255,13 +255,13 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     # assert no connection is created for an excluded database
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:msdb', 'optional:tag1', 'host:localhost,1433'],
+        tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
         count=0,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:master', 'optional:tag1', 'host:localhost,1433'],
+        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
     )
 
