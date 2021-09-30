@@ -1,6 +1,6 @@
 name: Kube_scheduler
 files:
-- name: kube-scheduler.yaml
+- name: kube_scheduler.yaml
   options:
   - template: init_config
     options:
