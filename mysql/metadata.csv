@@ -77,8 +77,8 @@ mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync
 mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads
 mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes
 mysql.innodb.row_lock_current_waits,gauge,,,,"The number of row locks currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb row_lock_current_waits
-mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being waited for by operations on InnoDB tables.",,0,mysql,mysql innodb semaphore_waits
-mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",,0,mysql,mysql innodb semaphore_wait_time
+mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb semaphore_waits
+mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",0,mysql,mysql innodb semaphore_wait_time
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
