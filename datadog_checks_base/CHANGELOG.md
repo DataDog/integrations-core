@@ -2,6 +2,7 @@
 
 ## 23.0.0 / 2021-09-29
 
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228)
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
 * [Added] Add new function to report dbm-activity events. See [#10223](https://github.com/DataDog/integrations-core/pull/10223).
 * [Changed] DBMAsyncJob send internal metrics as raw. See [#10274](https://github.com/DataDog/integrations-core/pull/10274).
