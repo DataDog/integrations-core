@@ -122,6 +122,7 @@ files:
         description: |
             Namespace can be used to disambiguate devices with same IPs.
             Changing namespace will cause devices being recreated in NDM app.
+            Only available using corecheck SNMP integration with `loader: core` config.
         value:
           example: default
           type: string
@@ -381,6 +382,7 @@ files:
         description: |
           Namespace can be used to disambiguate devices with same IPs.
           Changing namespace will cause devices being recreated in NDM app.
+          Only available using corecheck SNMP integration with `loader: core` config.
         value:
           example: default
           type: string
