@@ -16,3 +16,4 @@ def initialize_instance(values, **kwargs):
             raise ValueError('`prometheus_url` is required')
         else:
             raise ValueError('`openmetrics_endpoint` is required')
+    return values
