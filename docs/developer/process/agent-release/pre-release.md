@@ -17,7 +17,6 @@ Ensure that you have configured the following:
 
 - [GitHub](../../ddev/configuration.md#github) credentials
 - [Trello](../../ddev/configuration.md#trello) credentials
-- [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
 ## Before Freeze
 
@@ -88,7 +87,7 @@ would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
 
-Cards are automatically assigned if `$trello_users_$team` table is [configured](../../ddev/configuration.md#card-assignment).
+Cards are automatically assigned to members of [the team](../../ddev/configuration.md#card-assignment).
 
 ### Release candidates
 
