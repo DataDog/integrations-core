@@ -285,7 +285,7 @@ instances:
     # empty_default_hostname: false
 
     ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `host` will be replaced by `sqlserver_host` to avoid
+    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
     ## getting mixed with other integraton tags.
     #
     disable_generic_tags: true
