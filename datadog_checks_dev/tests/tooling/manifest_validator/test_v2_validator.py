@@ -462,5 +462,5 @@ def test_manifest_v2_media_gallery_validator_bad_structure(_, setup_route):
     validator.validate('active_directory', JSONDict(input_constants.INVALID_MEDIA_MANIFEST_BAD_STRUCTURE), False)
 
     # Assert test case
-    assert not validator.result.failed, validator.result
+    assert validator.result.failed, validator.result
     assert not validator.result.fixed
