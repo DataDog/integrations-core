@@ -98,6 +98,25 @@ INVALID_MEDIA_MANIFEST_TOO_MANY_VIDEOS = JSONDict(
     }
 )
 
+INVALID_MEDIA_MANIFEST_BAD_STRUCTURE = JSONDict(
+    {
+        "tile": {
+            "media": [
+                {
+                    "media_type": "video",
+                    "cation": "This is an example image caption!",
+                    "imageurl": "images/video.png",
+                },
+                {
+                    "meda_type": "image",
+                    "captin": "This is an example image caption!",
+                    "image_url": "images/bigpanda_dd_before.png",
+                },
+            ]
+        }
+    }
+)
+
 IMMUTABLE_ATTRIBUTES_V1_MANIFEST = {"manifest_version": "1.0.0"}
 
 IMMUTABLE_ATTRIBUTES_V2_MANIFEST = JSONDict({"manifest_version": "2.0.0"})

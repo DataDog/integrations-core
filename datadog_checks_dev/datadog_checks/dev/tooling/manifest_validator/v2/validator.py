@@ -96,9 +96,14 @@ class MediaGalleryValidator(BaseManifestValidator):
         # Validate each media object
         video_count = 0
         for media in media_array:
-            media_type = media['media_type']
-            caption = media['caption']
-            image_url = media['image_url']
+            try:
+                media_type = media['media_type']
+                caption = media['caption']
+                image_url = media['image_url']
+            except KeyError:
+                output = f'  The structure for the following media element is incorrect:\n  {media}'
+                self.fail(output)
+                return
 
             # Image_url must lead to png or jpg
             if '.png' not in image_url and '.jpg' not in image_url:
