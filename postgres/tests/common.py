@@ -14,17 +14,17 @@ USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
-os.environ["POSTGRES_IMAGE"] = "alpine"
+POSTGRES_IMAGE = "alpine"
 
 USING_LATEST = False
 
 if POSTGRES_VERSION is not None:
     USING_LATEST = POSTGRES_VERSION.endswith('latest')
-    os.environ["POSTGRES_IMAGE"] = POSTGRES_VERSION + "-alpine"
+    POSTGRES_IMAGE = POSTGRES_VERSION + "-alpine"
 
 if USING_LATEST is True:
     POSTGRES_VERSION = str(maxsize)
-    os.environ["POSTGRES_IMAGE"] = "alpine"
+    POSTGRES_IMAGE = "alpine"
 
 SCHEMA_NAME = 'schemaname'
 
