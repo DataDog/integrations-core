@@ -36,7 +36,7 @@ EXCEPTIONS = {
     'jmeter': [ERR_MISSING_LOG_DOC], # Tile only in integrations-core, logs collected in DataDog/jmeter-datadog-backend-listener
     'journald': [
         ERR_UNEXPECTED_LOG_DOC, # Journald is a type of logs, and has its own tile
-        ERR_UNEXPECTED_LOG_COLLECTION_CAT, 
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT,
     ],
     'kubernetes': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from kubernetes environment but there is no pipeline per se
     'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments

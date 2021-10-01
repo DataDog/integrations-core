@@ -18,7 +18,6 @@
   "categories": [
     "cloud",
     "collaboration",
-    "log collection",
     "processing"
   ],
   "type": "check",
@@ -31,9 +30,7 @@
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "databricks"
-    },
+    "logs": {},
     "metrics_metadata": "metadata.csv"
   },
   "further_reading": [
