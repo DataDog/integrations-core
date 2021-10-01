@@ -113,7 +113,7 @@ def instance_ntlm_domain(field, value):
 
 
 def instance_only_custom_queries(field, value):
-    return True
+    return False
 
 
 def instance_password_hashed(field, value):

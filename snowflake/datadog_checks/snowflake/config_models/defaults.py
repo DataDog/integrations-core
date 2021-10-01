@@ -73,7 +73,7 @@ def instance_ocsp_response_cache_filename(field, value):
 
 
 def instance_only_custom_queries(field, value):
-    return True
+    return False
 
 
 def instance_schema(field, value):
