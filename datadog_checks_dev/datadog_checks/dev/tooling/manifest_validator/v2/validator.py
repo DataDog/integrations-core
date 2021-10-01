@@ -2,6 +2,7 @@
 #  All rights reserved
 #  Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import os
 
 import requests
 
@@ -9,6 +10,7 @@ import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 
 from ..constants import V2
+from ...constants import get_root
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
@@ -73,6 +75,62 @@ class SchemaValidator(BaseManifestValidator):
             self.fail(str(e))
 
 
+class MediaGalleryValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        if not self.should_validate():
+            return
+
+        media_path = '/tile/media'
+        media_array = decoded.get_path(media_path)
+        # Skip validations if no media is included in the manifest
+        if not media_array:
+            return
+
+        # Length must be between 1-8
+        num_media_elements = len(media_array)
+        if num_media_elements > 8:
+            output = f'  The maximum number of media elements is 8, there are currently {num_media_elements}.'
+            self.fail(output)
+            return
+
+        # Validate each media object
+        video_count = 0
+        for media in media_array:
+            media_type = media['media_type']
+            caption = media['caption']
+            image_url = media['image_url']
+
+            # Image_url must lead to png or jpg
+            if '.png' not in image_url and '.jpg' not in image_url:
+                output = f'  The filetype for `{image_url}` must be either `.jpg` or `.png`.'
+                self.fail(output)
+
+            # Caption must be smaller than 300 chars
+            if len(caption) > 300:
+                output = f'  The `caption` for `{image_url}` cannot contain more than 300 characters.'
+                self.fail(output)
+
+            # Keep track of video count (only 1 is allowed)
+            if media_type == 'video':
+                video_count += 1
+
+            try:
+                # Check if file is found in directory
+                cur_path = os.path.join(get_root(), check_name)
+                file_size = os.path.getsize(f'{cur_path}/{image_url}')
+                if file_size > 1000000:  # If file size greater than 1 megabyte, fail
+                    output = f'  File size for `{image_url}` must be smaller than 1 mb, currently {file_size} bytes.'
+                    self.fail(output)
+            except OSError as err:
+                print(err)
+                output = f'  File not found at `{image_url}`, please ensure the correct path is entered.'
+                self.fail(output)
+
+        if video_count > 1:
+            output = f'  There cannot be more than 1 video in the list of media, currently there are {video_count}'
+            self.fail(output)
+
+
 def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
         common.MaintainerValidator(
@@ -83,6 +141,7 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         common.ImmutableAttributesValidator(version=V2),
         common.LogsCategoryValidator(version=V2),
         DisplayOnPublicValidator(version=V2),
+        MediaGalleryValidator(is_marketplace, version=V2, check_in_extras=False),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]
