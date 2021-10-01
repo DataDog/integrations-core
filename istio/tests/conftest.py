@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-
+from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import get_here
@@ -20,6 +20,12 @@ HERE = get_here()
 VERSION = os.environ.get("ISTIO_VERSION")
 opj = os.path.join
 
+
+@pytest.fixture
+def instance_openmetrics_v2(dd_get_state):
+    openmetrics_v2 = deepcopy(dd_get_state('istio_instance', default={}))
+    openmetrics_v2['use_openmetrics'] = 'true'
+    return openmetrics_v2
 
 def setup_istio():
     run_command(
@@ -45,7 +51,6 @@ def setup_istio():
     )
     # Enable sidecar injection
     run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
-    # run_command(["kubectl", "label", "namespace", "istio-system", "istio-injection=enabled"])
     # Install sample application
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
@@ -55,7 +60,7 @@ def setup_istio():
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_istio]) as kubeconfig:
         with ExitStack() as stack:
             if VERSION == '1.5.1':
@@ -63,12 +68,12 @@ def dd_environment():
                     port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
                 )
 
-                istio_mesh_host, istio_mesh_port = stack.enter_context(
-                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istio-proxy')
-                )
-
-                instance = {'istiod_endpoint': 'http://{}:{}/metrics'.format(istiod_host, istiod_port),
-                            'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(istio_mesh_host, istio_mesh_port)
+                istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
+                instance = {'istiod_endpoint': istiod_endpoint,
+                            'use_openmetrics': 'false'
                             }
+
+                # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run
+                dd_save_state("istio_instance", instance)
 
                 yield instance
