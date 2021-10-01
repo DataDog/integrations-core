@@ -30,7 +30,10 @@ EXCEPTIONS = {
     ],
     'consul_connect': [ERR_MISSING_LOG_DOC], # Use envoy pipeline
     'docker_daemon': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Tile only integration
-    'ecs_fargate': [ERR_UNEXPECTED_LOG_DOC], # Not collecting logs directly, but has example in its readme
+    'ecs_fargate': [
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT, # Log collection but not from the agent
+        ERR_UNEXPECTED_LOG_DOC, # Not collecting logs directly, but has example in its readme
+    ],
     'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
     'jmeter': [ERR_MISSING_LOG_DOC], # Tile only in integrations-core, logs collected in DataDog/jmeter-datadog-backend-listener
