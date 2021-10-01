@@ -194,7 +194,7 @@ def test_set_default_driver_conf():
 def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_sql2017.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
@@ -206,5 +206,5 @@ def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql20
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
     dd_run_check(sqlserver_check)
-    expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)

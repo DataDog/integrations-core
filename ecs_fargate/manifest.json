@@ -2,6 +2,7 @@
   "categories": [
     "aws",
     "containers",
+    "log collection",
     "orchestration"
   ],
   "creates_events": false,
