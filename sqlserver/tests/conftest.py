@@ -62,6 +62,39 @@ def instance_docker():
 
 
 @pytest.fixture
+def datadog_conn_docker(instance_docker):
+    # Make DB connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def bob_conn(instance_docker):
+    # Make DB connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], "bob", "hey-there-bob123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def sa_conn(instance_docker):
+    # system administrator connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=30)
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
 def instance_e2e():
     return deepcopy(INSTANCE_E2E)
 
@@ -133,9 +166,5 @@ def dd_environment():
             )
         ]
 
-    with docker_run(
-        compose_file=compose_file,
-        conditions=conditions,
-        mount_logs=True,
-    ):
+    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True):
         yield FULL_E2E_CONFIG

@@ -9,10 +9,18 @@ from collections import defaultdict
 from itertools import chain
 
 import six
+from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 from . import metrics
 from .connection import Connection, SQLConnectionError
@@ -65,6 +73,8 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
+        self._resolved_hostname = None
+        self._agent_hostname = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -74,6 +84,7 @@ class SQLServer(AgentCheck):
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self.databases = set()
@@ -84,10 +95,25 @@ class SQLServer(AgentCheck):
         self.custom_metrics = init_config.get('custom_metrics', [])
 
         # use QueryManager to process custom queries
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.instance.get("tags", []))
+        self.tags = self.instance.get("tags", [])
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
+
+        # DBM
+        self.dbm_enabled = self.instance.get('dbm', False)
+        self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.statement_metrics = SqlserverStatementMetrics(self)
+
+        self.static_info_cache = TTLCache(
+            maxsize=100,
+            # cache these for a full day
+            ttl=60 * 60 * 24,
+        )
+
+    def cancel(self):
+        self.statement_metrics.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -99,6 +125,33 @@ class SQLServer(AgentCheck):
             self.log.warning(
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
+
+    @property
+    def resolved_hostname(self):
+        if self._resolved_hostname is None and self.dbm_enabled:
+            self._resolved_hostname = resolve_db_host(self.instance.get('host'))
+        return self._resolved_hostname
+
+    def load_static_information(self):
+        if 'version' not in self.static_info_cache:
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    cursor.execute("select @@version")
+                    results = cursor.fetchall()
+                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                        self.static_info_cache["version"] = results[0][0]
+                    else:
+                        self.log.warning("failed to load version static information due to empty results")
+
+    def debug_tags(self):
+        return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
+
+    @property
+    def agent_hostname(self):
+        # type: () -> str
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     def initialize_connection(self):
         self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
@@ -450,6 +503,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
@@ -458,6 +512,9 @@ class SQLServer(AgentCheck):
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
                         self.connection.check_database_conns(db_name)
+            if self.dbm_enabled:
+                self.statement_metrics.run_job_loop(self.tags)
+
         else:
             self.log.debug("Skipping check")
 
