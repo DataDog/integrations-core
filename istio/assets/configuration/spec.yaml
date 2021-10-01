@@ -3,8 +3,11 @@ files:
   - name: istio.yaml
     options:
     - template: init_config
+      options:
+      - template: init_config/default
     - template: instances
       options:
+        - template: instances/default
         - name: use_openmetrics
           description: |
             Use the latest OpenMetrics implementation for more features and better performance.
