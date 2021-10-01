@@ -83,6 +83,12 @@ instances:
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
 
+    ## @param only_custom_queries - boolean - optional - default: true
+    ## Set this parameter to `true` if you want to skip collecting default metrics.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: true
+
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
