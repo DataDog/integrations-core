@@ -9,8 +9,8 @@ import requests
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
 
-from ..constants import V2
 from ...constants import get_root
+from ..constants import V2
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
