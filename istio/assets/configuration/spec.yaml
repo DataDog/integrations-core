@@ -3,18 +3,15 @@ files:
   - name: istio.yaml
     options:
     - template: init_config
-      options:
-        - template: init_config/openmetrics_legacy
     - template: instances
       options:
         - name: use_openmetrics
           description: |
             Use the latest OpenMetrics implementation for more features and better performance.
-            In a future release, this option will be set to `true` by default.
             This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
           value:
             example: true
-            display_default: false
+            display_default: true
             type: boolean
           enabled: true
         - name: istiod_endpoint
@@ -72,22 +69,3 @@ files:
             display_default: null
             example: http://istio-citadel.istio-system:15014/metrics
             type: string
-        - template: instances/openmetrics_legacy
-          overrides:
-            prometheus_url.hidden: true
-            exclude_labels.enabled: true
-            exclude_labels.value.example:
-              - source_version
-              - destination_version
-              - source_canonical_revision
-              - destination_canonical_revision
-              - source_principal
-              - destination_principal
-              - source_cluster
-              - destination_cluster
-              - source_canonical_service
-              - destination_canonical_service
-              - source_workload_namespace
-              - destination_workload_namespace
-              - request_protocol
-              - connection_security_policy

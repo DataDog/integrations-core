@@ -45,6 +45,7 @@ def setup_istio():
     )
     # Enable sidecar injection
     run_command(["kubectl", "label", "namespace", "default", "istio-injection=enabled"])
+    # run_command(["kubectl", "label", "namespace", "istio-system", "istio-injection=enabled"])
     # Install sample application
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
@@ -61,6 +62,13 @@ def dd_environment():
                 istiod_host, istiod_port = stack.enter_context(
                     port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istiod')
                 )
-                instance = {'istiod_endpoint': 'http://{}:{}/metrics'.format(istiod_host, istiod_port)}
+
+                istio_mesh_host, istio_mesh_port = stack.enter_context(
+                    port_forward(kubeconfig, 'istio-system', 8080, 'deployment', 'istio-proxy')
+                )
+
+                instance = {'istiod_endpoint': 'http://{}:{}/metrics'.format(istiod_host, istiod_port),
+                            'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(istio_mesh_host, istio_mesh_port)
+                            }
 
                 yield instance
