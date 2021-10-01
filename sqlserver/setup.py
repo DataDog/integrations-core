@@ -29,6 +29,7 @@ def get_dependencies():
 
 CHECKS_BASE_REQ = 'datadog-checks-base>=23.0.0'
 
+
 setup(
     name='datadog-sqlserver',
     version=ABOUT['__version__'],

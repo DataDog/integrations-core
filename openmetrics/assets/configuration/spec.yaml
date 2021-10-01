@@ -13,3 +13,4 @@ files:
             namespace.hidden: false
             metrics.required: true
             metrics.hidden: false
+            openmetrics_endpoint.required: false
