@@ -48,7 +48,7 @@ steps:
   displayName: 'Install Codecov'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: pip install ./datadog_checks_dev[cli]
+  - script: pip install ./datadog_checks_dev[cli] setuptools==57.5.0
     displayName: 'Install ddev from local folder'
 
 - ${{ if eq(parameters.repo, 'core') }}:
