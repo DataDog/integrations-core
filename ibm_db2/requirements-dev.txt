@@ -1,3 +1,2 @@
 -e ../datadog_checks_dev
-setuptools==44.1.1
 ibm_db==3.0.1
