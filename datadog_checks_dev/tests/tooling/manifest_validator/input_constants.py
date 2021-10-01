@@ -55,6 +55,48 @@ V2_VALID_MANIFEST = {
     },
 }
 
+VALID_MEDIA_MANIFEST = JSONDict(
+    {
+        "tile": {
+            "media": [
+                {
+                    "media_type": "video",
+                    "caption": "This is an example image caption!",
+                    "image_url": "images/video.png",
+                },
+                {
+                    "media_type": "image",
+                    "caption": "This is an example image caption!",
+                    "image_url": "images/bigpanda_dd_before.png",
+                },
+                {
+                    "media_type": "image",
+                    "caption": "This is an example image caption!",
+                    "image_url": "images/bigpanda_dd_after.png",
+                },
+            ]
+        }
+    }
+)
+
+INVALID_MEDIA_MANIFEST_TOO_MANY_VIDEOS = JSONDict(
+    {
+        "tile": {
+            "media": [
+                {
+                    "media_type": "video",
+                    "caption": "This is an example image caption!",
+                    "image_url": "images/video.png",
+                },
+                {
+                    "media_type": "video",
+                    "caption": "This is an example image caption!",
+                    "image_url": "images/bigpanda_dd_before.png",
+                },
+            ]
+        }
+    }
+)
 
 IMMUTABLE_ATTRIBUTES_V1_MANIFEST = {"manifest_version": "1.0.0"}
 

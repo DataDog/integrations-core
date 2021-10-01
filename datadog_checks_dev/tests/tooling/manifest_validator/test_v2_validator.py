@@ -420,3 +420,36 @@ def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route)
     # Assert test case
     assert not validator.result.failed, validator.result
     assert not validator.result.fixed
+
+
+@mock.patch('os.path.getsize', return_value=300000)
+def test_manifest_v2_media_gallery_validator_pass(_, setup_route):
+    # Use specific validator
+    validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    validator.validate('active_directory', JSONDict(input_constants.VALID_MEDIA_MANIFEST), False)
+
+    # Assert test case
+    assert not validator.result.failed, validator.result
+    assert not validator.result.fixed
+
+
+@mock.patch('os.path.getsize', return_value=1300000)
+def test_manifest_v2_media_gallery_validator_image_size_too_large(_, setup_route):
+    # Use specific validator
+    validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    validator.validate('active_directory', JSONDict(input_constants.VALID_MEDIA_MANIFEST), False)
+
+    # Assert test case
+    assert validator.result.failed, validator.result
+    assert not validator.result.fixed
+
+
+@mock.patch('os.path.getsize', return_value=300000)
+def test_manifest_v2_media_gallery_validator_too_many_videos(_, setup_route):
+    # Use specific validator
+    validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    validator.validate('active_directory', JSONDict(input_constants.INVALID_MEDIA_MANIFEST_TOO_MANY_VIDEOS), False)
+
+    # Assert test case
+    assert validator.result.failed, validator.result
+    assert not validator.result.fixed
