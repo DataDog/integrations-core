@@ -74,10 +74,10 @@ class Apache(AgentCheck):
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
         service_check_tags = [
-                'host:%s' % apache_host,
-                'apache_host:%s' % apache_host,
-                'port:%s' % apache_port,
-            ] + tags
+            'host:%s' % apache_host,
+            'apache_host:%s' % apache_host,
+            'port:%s' % apache_port,
+        ] + tags
         if disable_generic_tags:
             service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
