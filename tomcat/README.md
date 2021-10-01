@@ -223,6 +223,9 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
+### Missing `tomcat.*` metrics
+The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, modify the `domain` filter to use the applicable domain name in the `metrics.yaml`. See the [JMX Check documentation][8] for more detailed information.
+
 ### Commands to view the available metrics
 
 The `datadog-agent jmx` command was added in version 4.1.0.
