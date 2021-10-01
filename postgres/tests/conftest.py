@@ -13,7 +13,7 @@ from semver import VersionInfo
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, USER, USING_LATEST
+from .common import DB_NAME, HOST, PASSWORD, PORT, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
@@ -36,14 +36,8 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
-    if USING_LATEST is True:
-        with docker_run(
-            os.path.join(HERE, 'compose', 'docker-compose-latest-alpine.yaml'), conditions=[WaitFor(connect_to_pg)]
-        ):
-            yield e2e_instance
-    else:
-        with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yaml'), conditions=[WaitFor(connect_to_pg)]):
-            yield e2e_instance
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yaml'), conditions=[WaitFor(connect_to_pg)]):
+        yield e2e_instance
 
 
 @pytest.fixture
