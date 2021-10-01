@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ssl
 from time import time
 
 from kafka import KafkaAdminClient, KafkaClient
@@ -16,6 +17,15 @@ from .new_kafka_consumer import NewKafkaConsumerCheck
 class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'
+
+    # This remapper is used to support legacy config values
+    TLS_CONFIG_REMAPPER = {
+        'ssl_check_hostname': {'name': 'tls_validate_hostname'},
+        'ssl_cafile': {'name': 'tls_ca_cert'},
+        'ssl_certfile': {'name': 'tls_cert'},
+        'ssl_keyfile': {'name': 'tls_private_key'},
+        'ssl_password': {'name': 'tls_private_key_password'},
+    }
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
@@ -120,6 +130,12 @@ class KafkaCheck(AgentCheck):
         if isinstance(kafka_version, str):
             kafka_version = tuple(map(int, kafka_version.split(".")))
 
+        tls_context = self.get_tls_context()
+        crlfile = self.instance.get('ssl_crlfile', self.instance.get('tls_crlfile'))
+        if crlfile:
+            tls_context.load_verify_locations(crlfile)
+            tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
+
         return clazz(
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
@@ -136,10 +152,5 @@ class KafkaCheck(AgentCheck):
             sasl_plain_password=self.instance.get('sasl_plain_password'),
             sasl_kerberos_service_name=self.instance.get('sasl_kerberos_service_name', 'kafka'),
             sasl_kerberos_domain_name=self.instance.get('sasl_kerberos_domain_name'),
-            ssl_cafile=self.instance.get('ssl_cafile'),
-            ssl_check_hostname=self.instance.get('ssl_check_hostname', True),
-            ssl_certfile=self.instance.get('ssl_certfile'),
-            ssl_keyfile=self.instance.get('ssl_keyfile'),
-            ssl_crlfile=self.instance.get('ssl_crlfile'),
-            ssl_password=self.instance.get('ssl_password'),
+            ssl_context=tls_context,
         )

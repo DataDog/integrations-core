@@ -64,6 +64,9 @@ mysql.performance.qcache_size,gauge,,byte,,"The amount of memory allocated for c
 mysql.performance.table_open_cache,gauge,,,,"The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.",0,mysql,mysql performance table_open_cache
 mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size
 mysql.innodb.active_transactions,gauge,,operation,,"The number of active transactions on InnoDB tables.",0,mysql,mysql innodb active_transactions
+mysql.innodb.buffer_pool_dirty,gauge,,byte,,"The total current number of bytes held in dirty pages in the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_dirty
+mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests
+mysql.innodb.buffer_pool_reads,gauge,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads
 mysql.innodb.ibuf_merged_delete_marks,gauge,,operation,,"Insert buffer and adaptative hash index merged delete marks",0,mysql,mysql innodb merged delete marks
 mysql.innodb.ibuf_merged_deletes,gauge,,operation,,"Insert buffer and adaptative hash index merged delete",0,mysql,mysql innodb merged deleted
 mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative hash index merged inserts",0,mysql,mysql innodb merged inserts
@@ -74,9 +77,8 @@ mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync
 mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads
 mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes
 mysql.innodb.row_lock_current_waits,gauge,,,,"The number of row locks currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb row_lock_current_waits
-mysql.innodb.buffer_pool_dirty,gauge,,byte,,"The total current number of bytes held in dirty pages in the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_dirty
-mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests
-mysql.innodb.buffer_pool_reads,gauge,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads
+mysql.innodb.semaphore_waits,gauge,,,,"The number semaphore currently being waited for by operations on InnoDB tables.",0,mysql,mysql innodb semaphore_waits
+mysql.innodb.semaphore_wait_time,gauge,,,,"Semaphore wait time",0,mysql,mysql innodb semaphore_wait_time
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit

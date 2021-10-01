@@ -263,6 +263,7 @@ class LogsCategoryValidator(BaseManifestValidator):
     CATEGORY_PATH = {V1: "/categories", V2: "/tile/classifier_tags"}
 
     IGNORE_LIST = {
+        'databricks',  # Logs are provided by Spark
         'docker_daemon',
         'ecs_fargate',  # Logs are provided by FireLens or awslogs
         'cassandra_nodetool',  # Logs are provided by cassandra

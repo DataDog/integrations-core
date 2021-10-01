@@ -90,7 +90,7 @@ instances:
 logs:
     - type: file
       path: /databricks/driver/logs/*.log
-      source: databricks
+      source: spark
       service: databricks
       log_processing_rules:
         - type: multi_line
@@ -168,7 +168,7 @@ instances:
 logs:
     - type: file
       path: /databricks/driver/logs/*.log
-      source: databricks
+      source: spark
       service: databricks
       log_processing_rules:
         - type: multi_line
@@ -254,7 +254,7 @@ instances:
 logs:
     - type: file
       path: /databricks/driver/logs/*.log
-      source: databricks
+      source: spark
       service: databricks
       log_processing_rules:
         - type: multi_line
