@@ -5,9 +5,19 @@ files:
     - template: init_config
       options:
       - template: init_config/default
+      - template: init_config/openmetrics
+        overrides:
+          service.hidden: true
     - template: instances
       options:
         - template: instances/default
+        - template: instances/openmetrics
+          overrides:
+            tags.hidden: true
+            service.hidden: true
+            min_collection_interval.hidden: true
+            empty_default_hostname.hidden: true
+            openmetrics_endpoint.required: false
         - name: use_openmetrics
           description: |
             Use the latest OpenMetrics implementation for more features and better performance.
@@ -42,8 +52,8 @@ files:
           description: |
             Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
             as gRPC metrics related to API calls and metrics on adapter dispatch.
-            If using Istio < v1.1, replace port 15014 with port 9093. See the changes here:
-            https://istio.io/about/notes/1.1/#configuration-management
+            Only available for Istio < 1.5. If using Istio < v1.1, replace port 15014 with port 9093.
+            See the changes here: https://istio.io/about/notes/1.1/#configuration-management
           value:
             display_default: null
             example: http://istio-telemetry.istio-system:15014/metrics
@@ -51,7 +61,7 @@ files:
         - name: pilot_endpoint
           description: |
             Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process.
-            Only available for Istio >= v1.1.
+            Only available for Istio >= v1.1 and <1.5.
           value:
             display_default: null
             example: http://istio-pilot.istio-system:15014/metrics
@@ -59,7 +69,7 @@ files:
         - name: galley_endpoint
           description: |
             Define the galley endpoint in order to collect all Prometheus metrics on the Galley process.
-            Only available for Istio >= v1.1.
+            Only available for Istio >= v1.1 and <1.5.
           value:
             display_default: null
             example: http://istio-galley.istio-system:15014/metrics
@@ -67,7 +77,7 @@ files:
         - name: citadel_endpoint
           description: |
             Define the citadel endpoint in order to collect all Prometheus metrics on the Citadel process.
-            Only available for Istio >= v1.1.
+            Only available for Istio >= v1.1 and <1.5.
           value:
             display_default: null
             example: http://istio-citadel.istio-system:15014/metrics
