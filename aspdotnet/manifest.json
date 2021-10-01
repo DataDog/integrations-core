@@ -30,7 +30,9 @@
       "ASP.NET - Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "iis"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }
