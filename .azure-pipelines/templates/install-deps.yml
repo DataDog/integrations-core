@@ -41,7 +41,7 @@ steps:
       path: ${{ parameters.pip_cache_config.path }}
     displayName: 'Cache pip dependencies'
 
-- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools==57.4.0 wheel
+- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
   displayName: 'Upgrade Python packaging tools'
 
 - script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@datadog
@@ -50,6 +50,10 @@ steps:
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: pip install ./datadog_checks_dev[cli]
     displayName: 'Install ddev from local folder'
+
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: python -m pip install --disable-pip-version-check setuptools==57.4.0 
+    displayName: 'Pin setuptools 57.4.0'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
   - script: pip install datadog-checks-dev[cli]
