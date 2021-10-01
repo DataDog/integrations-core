@@ -56,6 +56,10 @@ def instance_obfuscator_options(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_only_custom_queries(field, value):
+    return True
+
+
 def instance_options(field, value):
     return get_default_field_value(field, value)
 

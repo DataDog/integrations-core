@@ -33,7 +33,7 @@ def instance_min_collection_interval(field, value):
 
 
 def instance_only_custom_queries(field, value):
-    return False
+    return True
 
 
 def instance_service(field, value):

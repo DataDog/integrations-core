@@ -36,6 +36,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_only_custom_queries(field, value):
+    return True
+
+
 def instance_persist_db_connections(field, value):
     return True
 

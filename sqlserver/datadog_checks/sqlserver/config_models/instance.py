@@ -61,6 +61,7 @@ class InstanceConfig(BaseModel):
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     only_emit_local: Optional[bool]
     password: Optional[str]
     proc_only_if: Optional[str]
