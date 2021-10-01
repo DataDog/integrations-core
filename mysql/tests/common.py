@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 TESTS_HELPER_DIR = os.path.join(ROOT, 'datadog_checks_tests_helper')
 
-MYSQL_VERSION_IS_LATEST = os.getenv('MYSQL_VERSION').endswith('latest')
+MYSQL_VERSION_IS_LATEST = os.getenv('MYSQL_VERSION', '').endswith('latest')
 
 if MYSQL_VERSION_IS_LATEST is False:
     MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION', ''))
