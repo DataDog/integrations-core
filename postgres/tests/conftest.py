@@ -13,7 +13,7 @@ from semver import VersionInfo
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, USER, POSTGRES_IMAGE
+from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_IMAGE, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
