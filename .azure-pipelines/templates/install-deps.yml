@@ -52,7 +52,7 @@ steps:
     displayName: 'Install ddev from local folder'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: python -m pip install --disable-pip-version-check setuptools==57.4.0 
+  - script: python -m pip install --disable-pip-version-check setuptools==50.3.2
     displayName: 'Pin setuptools 50.3.2'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
