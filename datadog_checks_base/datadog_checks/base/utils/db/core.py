@@ -66,7 +66,7 @@ class QueryManager(object):
         self.hostname = hostname  # type: str
         self.logger = self.check.log
 
-        only_custom_queries = is_affirmative(self.check.instance.get('only_custom_queries', False))  # type: str
+        only_custom_queries = is_affirmative(self.check.instance.get('only_custom_queries', False))  # type: bool
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
