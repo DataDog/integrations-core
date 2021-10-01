@@ -224,7 +224,25 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Missing `tomcat.*` metrics
-The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, modify the `domain` filter to use the applicable domain name in the `metrics.yaml`. See the [JMX Check documentation][8] for more detailed information.
+The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` to the `conf` section of the `tomcat.d/conf.yaml` and modify the `domain` filter to use the applicable bean domain name. 
+
+```yaml
+- include:
+    domain: Tomcat      # default: Catalina
+    type: ThreadPool
+    attribute:
+      maxThreads:
+        alias: tomcat.threads.max
+        metric_type: gauge
+      currentThreadCount:
+        alias: tomcat.threads.count
+        metric_type: gauge
+      currentThreadsBusy:
+        alias: tomcat.threads.busy
+        metric_type: gauge
+```
+
+See the [JMX Check documentation][8] for more detailed information.
 
 ### Commands to view the available metrics
 
