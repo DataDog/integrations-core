@@ -52,8 +52,8 @@ steps:
     displayName: 'Install ddev from local folder'
 
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: python -m pip install --disable-pip-version-check setuptools==50.3.2
-    displayName: 'Pin setuptools 50.3.2'
+  - script: python -m pip install --disable-pip-version-check setuptools==57.5.0
+    displayName: 'Pin setuptools 57.5.0'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
   - script: pip install datadog-checks-dev[cli]
