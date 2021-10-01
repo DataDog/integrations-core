@@ -1,16 +1,10 @@
-import json
 import os
 
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
 
-try:
-    from functools import lru_cache
-except ImportError:
-    from backports.functools_lru_cache import lru_cache
-
-
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+DOCKER_DIR = os.path.join(HERE, 'docker')
 FLAVOR = os.getenv('FLAVOR', 'api_v3')
 
 HOST = get_docker_hostname()
@@ -36,22 +30,3 @@ INSTANCES = {
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
-
-
-class MockResponse:
-    def __init__(self, content, status_code):
-        self.content = content
-        self.status_code = status_code
-
-    def json(self):
-        return json.loads(self.content)
-
-
-@lru_cache(maxsize=None)
-def response(kind):
-    file_path = os.path.join(FIXTURE_DIR, kind)
-    if os.path.isfile(file_path):
-        with open(file_path, 'rb') as f:
-            return MockResponse(f.read(), 200)
-    else:
-        raise IOError('File `{}` does not exist.'.format(file_path))

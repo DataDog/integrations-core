@@ -92,3 +92,4 @@ typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivsk
 uptime,PyPI,BSD-2-Clause,Koen Crolla
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
+wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

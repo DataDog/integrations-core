@@ -14,6 +14,7 @@ from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.utils.date import parse_rfc3339
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
 # Skip the whole tests module on Windows
@@ -225,29 +226,6 @@ METRICS_WITH_INTERFACE_TAG = {
     'kubernetes.network.rx_dropped': 'eth0',
     'kubernetes.network.tx_dropped': 'eth0',
 }
-
-
-class MockStreamResponse:
-    """
-    Mocks raw contents of a stream request for the podlist get
-    """
-
-    def __init__(self, filename):
-        self.filename = filename
-
-    @property
-    def raw(self):
-        return open(os.path.join(HERE, 'fixtures', self.filename))
-
-    def json(self):
-        with open(os.path.join(HERE, 'fixtures', self.filename)) as f:
-            return json.load(f)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        pass
 
 
 @pytest.fixture
@@ -679,7 +657,11 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
 def test_report_container_state_metrics(monkeypatch, tagger):
     check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
-    monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
+    monkeypatch.setattr(
+        check,
+        'perform_kubelet_query',
+        mock.Mock(return_value=MockResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_crashed.json'))),
+    )
     monkeypatch.setattr(check, 'compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
@@ -778,7 +760,11 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     #   - hello1-1550504220-ljnzx succeeded and old enough to expire
     #   - hello5-1550509440-rlgvf succeeded but not old enough
     #   - hello8-1550505780-kdnjx has one old container and a recent container, don't expire
-    monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pods_expired.json')))
+    monkeypatch.setattr(
+        check,
+        'perform_kubelet_query',
+        mock.Mock(return_value=MockResponse(file_path=os.path.join(HERE, 'fixtures', 'pods_expired.json'))),
+    )
     monkeypatch.setattr(
         check, 'compute_pod_expiration_datetime', mock.Mock(return_value=parse_rfc3339("2019-02-18T16:00:06Z"))
     )
@@ -803,9 +789,9 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     aggregator.assert_metric("kubernetes.containers.running", value=1, tags=["pod_name:dd-agent-ntepl"])
 
 
-class MockResponse(mock.Mock):
+class MockedResponse(mock.Mock):
     @staticmethod
-    def iter_lines(decode_unicode=False):
+    def iter_lines(**kwargs):
         return []
 
 
@@ -816,7 +802,7 @@ def test_perform_kubelet_check(monkeypatch):
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
     instance_tags = ["one:1"]
-    get = MockResponse()
+    get = MockedResponse()
     with mock.patch("requests.get", side_effect=get):
         check._perform_kubelet_check(instance_tags)
 

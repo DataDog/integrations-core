@@ -4,6 +4,7 @@
 from __future__ import division
 
 import requests
+from dateutil import parser
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -203,24 +204,34 @@ class FargateCheck(AgentCheck):
 
             cpu_percent = 0.0
             if system_delta > 0 and cpu_delta > 0 and active_cpus > 0:
-                cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
-                cpu_percent = round_value(cpu_percent, 2)
-                self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
-                if cpu_percent > 500:
+                if system_delta > cpu_delta:
+                    cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                    cpu_percent = round_value(cpu_percent, 2)
+                    self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                else:
+                    # There is a bug where container CPU usage is occasionally reported as greater than system
+                    # CPU usage (which, in fact, represents the maximum available CPU time during this timeframe),
+                    # leading to a non-sensical CPU percentage to be reported. To mitigate this we substitute the
+                    # system_delta with (t1 - t0)*active_cpus (with a scale factor to convert to nanoseconds)
+
                     self.log.debug(
-                        "Anomalous CPU value for container_id: %s. cpu_percent: %f, system_delta: %f, cpu_delta: %f,"
-                        " active_cpus: %f; prevalue_system: %f, value_system: %f, prevalue_total: %f, value_total: %f",
+                        "Anomalous CPU value for container_id: %s. cpu_percent: %f",
                         container_id,
                         cpu_percent,
-                        system_delta,
-                        cpu_delta,
-                        active_cpus,
-                        prevalue_system,
-                        value_system,
-                        prevalue_total,
-                        value_total,
                     )
                     self.log.debug("ECS container_stats for container_id %s: %s", container_id, container_stats)
+
+                    # example format: '2021-09-22T04:55:52.490012924Z',
+                    t1 = container_stats.get('read', '')
+                    t0 = container_stats.get('preread', '')
+                    try:
+                        t_delta = int((parser.isoparse(t1) - parser.isoparse(t0)).total_seconds())
+                        # Simplified formula for cpu_percent where system_delta = t_delta * active_cpus * (10 ** 9)
+                        cpu_percent = (cpu_delta / (t_delta * (10 ** 9))) * 100.0
+                        cpu_percent = round_value(cpu_percent, 2)
+                        self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                    except ValueError:
+                        pass
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})

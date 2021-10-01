@@ -32,6 +32,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     port: Optional[int]
     queue_manager: str
+    queue_manager_timezone: Optional[str]
     queue_patterns: Optional[Sequence[str]]
     queue_regex: Optional[Sequence[str]]
     queue_tag_re: Optional[Mapping[str, Any]]

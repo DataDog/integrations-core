@@ -76,7 +76,7 @@ class IbmWasCheck(AgentCheck):
         if len(data):
             return data[0]
         else:
-            self.warning('Error finding %s stats in XML output.', path)
+            self.log.debug('Error finding %s stats in XML output for server name `%s`.', path, xml_data.get('name'))
             return []
 
     def get_node_from_root(self, xml_data, path):
