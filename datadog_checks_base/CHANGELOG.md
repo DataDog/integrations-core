@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.0 / 2021-10-01
+
+* [Added] Add only_custom_queries option to database utils. See [#10314](https://github.com/DataDog/integrations-core/pull/10314).
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+
 ## 23.0.0 / 2021-09-29
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
