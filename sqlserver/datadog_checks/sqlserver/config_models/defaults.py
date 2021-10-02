@@ -120,6 +120,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_only_custom_queries(field, value):
+    return False
+
+
 def instance_only_emit_local(field, value):
     return False
 

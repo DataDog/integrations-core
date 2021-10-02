@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     metric_groups: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     ocsp_response_cache_filename: Optional[str]
+    only_custom_queries: Optional[bool]
     password: str
     role: str
     schema_: Optional[str] = Field(None, alias='schema')
