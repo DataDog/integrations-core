@@ -11,21 +11,6 @@ parameters:
   force_base_package: false
 
 steps:
-- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
-    displayName: 'Run Unit/Integration tests'
-    env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
-
-- ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-    - script: ddev test --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
-      displayName: 'Run Unit/Integration tests (no coverage)'
-
-# Nightly base package check
-- ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
-    - script: ddev test --force-base-min --force-env-rebuild --junit ${{ parameters.check }}
-      displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
-
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
   - script: ddev env test --base --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests against latest base package'
