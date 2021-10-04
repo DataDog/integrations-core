@@ -1,0 +1,1489 @@
+{
+  "author_name": "Datadog",
+  "title": "Vault - Security",
+  "description": "",
+  "widgets": [
+    {
+      "id": 497433541771118,
+      "definition": {
+        "title": "About HashiCorp Vault",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8124893145382926,
+            "definition": {
+              "type": "image",
+              "url": "https://static.datadoghq.com/static/images/logos/vault_large.svg",
+              "sizing": "none",
+              "has_background": false,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 1
+            }
+          },
+          {
+            "id": 337472322357644,
+            "definition": {
+              "type": "note",
+              "content": "Audit devices is a logging mechanism that keeps detailed logs of all requests and responses to Vault. Audit Devices are not enabled by default and should be [enabled][1] to be used in the Cloud SIEM.\n\n*For more information on HashiCorp Vault, please visit their [documentation][2] or our [blog post][3] on monitoring HashiCorp Vault with Datadog.*\n\n# Using this dashboard\nThis dashboard provides high level visibility into your Vault infrastructure, in order to investigate security incidents related to vault, or to understand general vault activity patterns. This dashboard is broken down into two parts:\n\n# Overview\nThe Overview section of this dashboard provides high level visibility into your Vault infrastructure. You can use this section to surface anomalies in Vault audit logs.\n\n# Client Token Activity\nUse this section to quickly investigate a vault token. You can click on a client token in the Top Client Token Accessors widget and `Set $ctaaccessor.` This will update the widgets in the Client Token Investigator for all information related to the Client Token Accessor that was set in the template variables. \n\n[1]: https://www.vaultproject.io/docs/audit#enabling-disabling-audit-devices\n[2]: https://www.vaultproject.io/docs\n[3]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog/#collect-and-analyze-all-your-vault-logs",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 6
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 8
+      }
+    },
+    {
+      "id": 4429233569911062,
+      "definition": {
+        "title": "Logging Volume",
+        "type": "group",
+        "background_color": "white",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3941694759364258,
+            "definition": {
+              "title": "Vault Audit Log Volume by Environment",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Cloudtrail Logs",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "env",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 3099459337843900,
+            "definition": {
+              "title": "Log Activity by Vault Hosts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "host",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 100
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 603526345885270,
+            "definition": {
+              "title": "Vault Log Volume",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 2,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "id": 8484266425342124,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1241715669041196,
+            "definition": {
+              "title": "Top Client Token Accessors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3406654370547012,
+            "definition": {
+              "title": "Requests by mount type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 50,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2437383441671172,
+            "definition": {
+              "title": "Tokens Greater Than 30 Days",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault @auth.token_ttl:>46080 $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@auth.display_name",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 100
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1679912158391892,
+            "definition": {
+              "title": "Top Vault Requests by IP",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "log_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                    },
+                    "group_by": [
+                      {
+                        "facet": "@request.remote_address",
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "limit": 25
+                      }
+                    ],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3901990690590284,
+            "definition": {
+              "title": "Vault Operations",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "log_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                    },
+                    "group_by": [
+                      {
+                        "facet": "@request.operation",
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "limit": 10
+                      }
+                    ],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1716762255351192,
+            "definition": {
+              "title": "Token Types Created",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault @request.operation:create $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 4192586136674030,
+            "definition": {
+              "title": "Requests by Rare IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@request.remote_address",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "asc"
+                          },
+                          "limit": 100
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 371217551143988,
+            "definition": {
+              "title": "Token Types Created",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault @request.operation:create $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 9,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 3165097945127490,
+      "definition": {
+        "title": "Datadog Security Monitoring",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_pink",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4443208447450816,
+            "definition": {
+              "type": "note",
+              "content": "\nDatadog Security Monitoring analyzes and correlates HashiCorp Vault audit logs to detect threats to your environment in real time. If you don't see signals please make sure you're signed up for [Datadog Security Monitoring](https://app.datadoghq.com/security). ",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 4608892517540764,
+            "definition": {
+              "title": "CRITICALs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#bc303c",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "status:critical source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                      },
+                      "data_source": "security_signals",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "link": "/security?query=source:vault status:critical",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2046971508872196,
+            "definition": {
+              "title": "HIGHs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#d33043",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "status:high source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "link": "/security?query=source:vault status:high",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 863585451778296,
+            "definition": {
+              "title": "Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [
+                      {
+                        "facet": "@workflow.rule.name",
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "limit": 10
+                      }
+                    ],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 5402217092425274,
+            "definition": {
+              "title": "Security Signals by Events",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [
+                      {
+                        "facet": "@evt.name",
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "limit": 10
+                      }
+                    ],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 5561477046214058,
+            "definition": {
+              "title": "MEDIUMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#e5a21c",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "status:medium source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "link": "/security?source:vault status:medium",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1105967068309796,
+            "definition": {
+              "title": "LOWs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#ffb52b",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault status:low $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "link": "/security?query=source:vault status:low",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 6754820956428338,
+            "definition": {
+              "title": "INFOs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#84c1e0",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "security_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "status:info source:vault $request.operation $request.path $request.mount_type $displayname $ip $ctaccessor $ctoken"
+                    },
+                    "group_by": [],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "link": "/security?query=source:vault status:info",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 8397469720384466,
+      "definition": {
+        "title": "Client Token Activity",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4377127390403145,
+            "definition": {
+              "title": "Client Token by IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@request.remote_address",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "asc"
+                          },
+                          "limit": 100
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1530965112552076,
+            "definition": {
+              "title": "Historical Activity By Accessor",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctaccessor $ctoken $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 1473517447321656,
+            "definition": {
+              "title": "Top Users by Client Token Accessor ",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctaccessor $ctoken $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@auth.display_name",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7282464403620546,
+            "definition": {
+              "title": "Log Stream by Client Token",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [
+                "vault"
+              ],
+              "query": "service:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "host",
+                "@type",
+                "@request.path"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 4501418547530086,
+            "definition": {
+              "title": "Mount Types by Client Token",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 50,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": []
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5816115238427432,
+            "definition": {
+              "title": "Operations by Client Token",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "log_query": {
+                    "index": "*",
+                    "search": {
+                      "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                    },
+                    "group_by": [
+                      {
+                        "facet": "@request.operation",
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "limit": 10
+                      }
+                    ],
+                    "compute": {
+                      "aggregation": "count"
+                    }
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3165922155687067,
+            "definition": {
+              "title": "Request Paths by Client Token",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:vault $ctoken $ctaccessor $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@request.path",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8048894173923394,
+            "definition": {
+              "title": "Client Token by Accessor",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "$ctaccessor $ctoken $ip $displayname $request.mount_type $request.path $request.operation"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "vault"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@auth.client_token",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 6,
+              "width": 5,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 21,
+        "width": 12,
+        "height": 9
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "ctoken",
+      "default": "*",
+      "prefix": "@auth.client_token",
+      "available_values": []
+    },
+    {
+      "name": "ctaccessor",
+      "default": "*",
+      "prefix": "@request.client_token_accessor",
+      "available_values": []
+    },
+    {
+      "name": "ip",
+      "default": "*",
+      "prefix": "@request.remote_address",
+      "available_values": []
+    },
+    {
+      "name": "displayname",
+      "default": "*",
+      "prefix": "@auth.display_name",
+      "available_values": []
+    },
+    {
+      "name": "request.mount_type",
+      "default": "*",
+      "prefix": "@request.mount_type",
+      "available_values": []
+    },
+    {
+      "name": "request.path",
+      "default": "*",
+      "prefix": "@request.path",
+      "available_values": []
+    },
+    {
+      "name": "request.operation",
+      "default": "*",
+      "prefix": "@request.operation",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
