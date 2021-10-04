@@ -33,7 +33,7 @@ datadog-datadog-cluster-agent==1.2.0
 datadog-directory==1.11.0
 datadog-disk==4.4.0
 datadog-dns-check==2.0.1
-datadog-dotnetclr==1.8.0; sys_platform == 'win32'
+datadog-dotnetclr==1.9.0; sys_platform == 'win32'
 datadog-druid==1.6.1
 datadog-ecs-fargate==2.12.1
 datadog-eks-fargate==2.0.0
