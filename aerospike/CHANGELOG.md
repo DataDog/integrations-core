@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.12.1 / 2021-10-04
+
+* [Fixed] Fix Mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+
 ## 1.12.0 / 2021-06-22 / Agent 7.30.0
 
 * [Added] Stop using a deprecated method to support newer versions of Aerospike. See [#9566](https://github.com/DataDog/integrations-core/pull/9566).
