@@ -133,7 +133,7 @@ datadog-squid==1.11.0
 datadog-ssh-check==2.1.0
 datadog-statsd==1.8.0
 datadog-supervisord==2.1.0
-datadog-system-core==1.10.0
+datadog-system-core==1.11.0
 datadog-system-swap==1.11.0
 datadog-tcp-check==4.0.1
 datadog-teamcity==1.13.0
