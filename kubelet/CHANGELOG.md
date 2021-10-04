@@ -5,7 +5,7 @@
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
 * [Fixed] Apply namespace exclusion rules before reporting network metrics. See [#10237](https://github.com/DataDog/integrations-core/pull/10237).
 * [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
-* [Fixed] kubelet: don't call the tagger for pods not running. See [#10030](https://github.com/DataDog/integrations-core/pull/10030).
+* [Fixed] Don't call the tagger for pods not running. See [#10030](https://github.com/DataDog/integrations-core/pull/10030).
 
 ## 7.0.0 / 2021-05-28 / Agent 7.29.0
 
