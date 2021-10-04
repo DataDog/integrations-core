@@ -1,27 +1,27 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-istio.mesh.request.count,gauge,,request,,The number of requests,0,istio,request count
-istio.mesh.request.duration.count,gauge,,request,,count of request durations,0,istio,request durations count
-istio.mesh.request.duration.sum,gauge,,millisecond,,sum of request durations,0,istio,request durations sum
-istio.mesh.request.size.count,gauge,,request,,count of request sizes,0,istio,request sizes count
-istio.mesh.request.size.sum,gauge,,request,,sum of request sizes,0,istio,request sizes sum
-istio.mesh.response.size.count,gauge,,response,,count of response sizes,0,istio,response sizes count
-istio.mesh.response.size.sum,gauge,,response,,sum of response sizes,0,istio,response sizes sum
-istio.mixer.adapter.dispatch_count,gauge,,operation,,Total number of adapter dispatches handled by Mixer,0,istio,number of adapter dispatches
-istio.mixer.adapter.dispatch_duration.count,gauge,,operation,,Count of durations for adapter dispatches handled by Mixer,0,istio,
-istio.mixer.adapter.dispatch_duration.sum,gauge,,operation,,Sum of durations for adapter dispatches handled by Mixer,0,istio,
-istio.mixer.adapter.old_dispatch_count,gauge,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,
-istio.mixer.adapter.old_dispatch_duration.count,gauge,,operation,,Count of times for adapter dispatches handled by Mixer.,0,istio,
-istio.mixer.adapter.old_dispatch_duration.sum,gauge,,operation,,Sum of times for adapter dispatches handled by Mixer.,0,istio,
-istio.mixer.config.resolve_actions.count,gauge,,operation,,Count of actions resolved by Mixer.,0,istio,
-istio.mixer.config.resolve_actions.sum,gauge,,operation,,Sum of actions resolved by Mixer.,0,istio,
-istio.mixer.config.resolve_count,gauge,,operation,,Number of config resolves handled by mixer,0,istio,config resolves
-istio.mixer.config.resolve_duration.count,gauge,,second,,Seconds per config resolve,0,istio,seconds per config resolve
-istio.mixer.config.resolve_duration.sum,gauge,,second,,Sum of times for config resolves handled by Mixer.,0,istio,
-istio.mixer.config.resolve_rules.count,gauge,,item,,Number of rules resolved by mixer,0,istio,rules resolved
-istio.mixer.config.resolve_rules.sum,gauge,,item,,Sum of rules resolved by Mixer.,0,istio,
-istio.mixer.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,istio,
+istio.mesh.request.count,count,,request,,The number of requests,0,istio,request count
+istio.mesh.request.duration.count,count,,request,,Count of request durations,0,istio,request durations count
+istio.mesh.request.duration.sum,count,,millisecond,,Sum of request durations,0,istio,request durations sum
+istio.mesh.request.size.count,count,,request,,Count of request sizes,0,istio,request sizes count
+istio.mesh.request.size.sum,count,,request,,Sum of request sizes,0,istio,request sizes sum
+istio.mesh.response.size.count,count,,response,,Count of response sizes,0,istio,response sizes count
+istio.mesh.response.size.sum,count,,response,,Sum of response sizes,0,istio,response sizes sum
+istio.mixer.adapter.dispatch_count,count,,operation,,Total number of adapter dispatches handled by Mixer,0,istio,number of adapter dispatches
+istio.mixer.adapter.dispatch_duration.count,count,,operation,,Count of durations for adapter dispatches handled by Mixer,0,istio,
+istio.mixer.adapter.dispatch_duration.sum,count,,operation,,Sum of durations for adapter dispatches handled by Mixer,0,istio,
+istio.mixer.adapter.old_dispatch_count,count,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,
+istio.mixer.adapter.old_dispatch_duration.count,count,,operation,,Count of times for adapter dispatches handled by Mixer.,0,istio,
+istio.mixer.adapter.old_dispatch_duration.sum,count,,operation,,Sum of times for adapter dispatches handled by Mixer.,0,istio,
+istio.mixer.config.resolve_actions.count,count,,operation,,Count of actions resolved by Mixer.,0,istio,
+istio.mixer.config.resolve_actions.sum,count,,operation,,Sum of actions resolved by Mixer.,0,istio,
+istio.mixer.config.resolve_count,count,,operation,,Number of config resolves handled by mixer,0,istio,config resolves
+istio.mixer.config.resolve_duration.count,count,,second,,Seconds per config resolve,0,istio,seconds per config resolve
+istio.mixer.config.resolve_duration.sum,count,,second,,Sum of times for config resolves handled by Mixer.,0,istio,
+istio.mixer.config.resolve_rules.count,count,,item,,Number of rules resolved by mixer,0,istio,rules resolved
+istio.mixer.config.resolve_rules.sum,count,,item,,Sum of rules resolved by Mixer.,0,istio,
+istio.mixer.go.gc_duration_seconds.count,count,,second,,Count of the GC invocation durations.,0,istio,
 istio.mixer.go.gc_duration_seconds.quantile,gauge,,second,,Quantile of the GC invocation durations.,0,istio,
-istio.mixer.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,istio,
+istio.mixer.go.gc_duration_seconds.sum,count,,second,,Sum of the GC invocation durations.,0,istio,
 istio.mixer.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.mixer.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.mixer.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
@@ -50,8 +50,8 @@ istio.mixer.go.memstats.stack_sys_bytes,gauge,,byte,,Number of bytes obtained fr
 istio.mixer.go.memstats.sys_bytes,gauge,,byte,,Number of bytes obtained from system,0,istio,
 istio.mixer.go.threads,gauge,,thread,,Number of OS threads created.,0,istio,
 istio.mixer.grpc.server.handled_total,gauge,,request,,"Total number of fully handled requests, with responses",0,istio,
-istio.mixer.grpc.server.handling_seconds.count,gauge,,second,,Count of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
-istio.mixer.grpc.server.handling_seconds.sum,gauge,,second,,Sum of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
+istio.mixer.grpc.server.handling_seconds.count,count,,second,,Count of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
+istio.mixer.grpc.server.handling_seconds.sum,count,,second,,Sum of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
 istio.mixer.grpc.server.msg_received_total,gauge,,message,,Total number of RPC stream messages received on the server.,0,istio,
 istio.mixer.grpc.server.msg_sent_total,gauge,,message,,Total number of messages sent,0,istio,
 istio.mixer.grpc.server.started_total,gauge,,,,Total number of RPCs started on the server.,0,istio,
@@ -77,9 +77,9 @@ istio.mixer.mcp_sink.reconnections,gauge,,,,The number of times the sink has rec
 istio.mixer.mcp_sink.request_acks_total,gauge,,,,The number of request acks received by the source.,0,istio,
 istio.mixer.runtime.dispatches_total,gauge,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
 istio.mixer.runtime.dispatch_duration_seconds,gauge,,second,,Duration in seconds for adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
-istio.pilot.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,istio,
+istio.pilot.go.gc_duration_seconds.count,count,,second,,Count of the GC invocation durations.,0,istio,
 istio.pilot.go.gc_duration_seconds.quantile,gauge,,second,,Quantile of the GC invocation durations.,0,istio,
-istio.pilot.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,istio,
+istio.pilot.go.gc_duration_seconds.sum,count,,second,,Sum of the GC invocation durations.,0,istio,
 istio.pilot.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.pilot.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.pilot.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
@@ -127,8 +127,8 @@ istio.pilot.mcp_sink.recv_failures_total,count,,,,The number of recv failures in
 istio.pilot.mcp_sink.request_acks_total,count,,,,The number of request acks received by the source.,0,istio,
 istio.pilot.no_ip,gauge,,,,"Pods not found in the endpoint table, possibly invalid.",-1,istio,
 istio.pilot.proxy_convergence_time,gauge,,second,,Delay between config change and all proxies converging.,0,istio,
-istio.pilot.proxy_convergence_time.sum,gauge,,second,,Sum of the delay between config change and all proxies converging.,0,istio,
-istio.pilot.proxy_convergence_time.count,gauge,,second,,Number of entries of pilot.proxy_convergence_time.,0,istio,
+istio.pilot.proxy_convergence_time.sum,count,,second,,Sum of the delay between config change and all proxies converging.,0,istio,
+istio.pilot.proxy_convergence_time.count,count,,second,,Number of entries of pilot.proxy_convergence_time.,0,istio,
 istio.pilot.rds_expired_nonce,count,,,,Total number of RDS messages with an expired nonce.,0,istio,
 istio.pilot.services,gauge,,,,Total services known to pilot.,0,istio,
 istio.pilot.total_xds_internal_errors,count,,,,Total number of internal XDS errors in pilot.,-1,istio,
@@ -146,9 +146,9 @@ istio.pilot.xds.rds_reject,count,,,,Pilot rejected RDS.,0,istio,
 istio.pilot.xds.lds_reject,count,,,,Pilot rejected LDS.,0,istio,
 istio.pilot.xds.eds_reject,count,,,,Pilot rejected EDS.,0,istio,
 istio.pilot.xds.cds_reject,count,,,,Pilot rejected CDS.,0,istio,
-istio.galley.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,istio,
+istio.galley.go.gc_duration_seconds.count,count,,second,,Count of the GC invocation durations.,0,istio,
 istio.galley.go.gc_duration_seconds.quantile,gauge,,second,,Quantile of the GC invocation durations.,0,istio,
-istio.galley.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,istio,
+istio.galley.go.gc_duration_seconds.sum,count,,second,,Sum of the GC invocation durations.,0,istio,
 istio.galley.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.galley.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.galley.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
@@ -210,9 +210,9 @@ istio.citadel.server.csr_count,count,,,,The number of CSRs received by Citadel s
 istio.citadel.server.csr_parsing_err_count,count,,error,,The number of errors occurred when parsing the CSR.,-1,istio,
 istio.citadel.server.id_extraction_err_count,count,,error,,The number of errors occurred when extracting the ID from CSR.,-1,istio,
 istio.citadel.server.success_cert_issuance_count,count,,,,The number of certificates issuances that have succeeded.,1,istio,
-istio.citadel.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,istio,
+istio.citadel.go.gc_duration_seconds.count,count,,second,,Count of the GC invocation durations.,0,istio,
 istio.citadel.go.gc_duration_seconds.quantile,gauge,,second,,Quantile of the GC invocation durations.,0,istio,
-istio.citadel.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,istio,
+istio.citadel.go.gc_duration_seconds.sum,count,,second,,Sum of the GC invocation durations.,0,istio,
 istio.citadel.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.citadel.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.citadel.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
@@ -253,18 +253,18 @@ istio.pilot.conflict.outbound_listener.http_over_https,gauge,,,,Number of confli
 istio.pilot.inbound_updates,count,,,,Total number of updates received by pilot,0,istio,
 istio.pilot.k8s.cfg_events,count,,event,,Events from k8s config,0,istio,
 istio.pilot.k8s.reg_events,count,,event,,Events from k8s registry,0,istio,
-istio.pilot.proxy_queue_time.count,gauge,,,,Count of observation for when proxy is in a push queue before being dequeued,0,istio,
-istio.pilot.proxy_queue_time.sum,gauge,,,,Sum of observed values for when proxy is in a push queue before being dequeued,0,istio,
+istio.pilot.proxy_queue_time.count,count,,,,Count of observation for when proxy is in a push queue before being dequeued,0,istio,
+istio.pilot.proxy_queue_time.sum,count,,,,Sum of observed values for when proxy is in a push queue before being dequeued,0,istio,
 istio.pilot.push.triggers,count,,event,,Total number of times a push was triggered,0,istio,
 istio.pilot.xds.eds_all_locality_endpoints,gauge,,,,Network endpoints for each cluster (across all localities) as of last push. Zero endpoints is an error,0,istio,
-istio.pilot.xds.push.time.count,gauge,,,,Count of observation of total time Pilot takes a push,0,istio,
-istio.pilot.xds.push.time.sum,gauge,,,,Sum of observed values of total time Pilot takes a push,0,istio,
+istio.pilot.xds.push.time.count,count,,,,Count of observation of total time Pilot takes a push,0,istio,
+istio.pilot.xds.push.time.sum,count,,,,Sum of observed values of total time Pilot takes a push,0,istio,
 istio.sidecar_injection.requests_total,count,,request,,Total number of sidecar injection requests,0,istio,
 istio.sidecar_injection.success_total,count,,request,,Total number of successful sidecar injection requests,0,istio,
 istio.sidecar_injection.failure_total,count,,request,,Total number of failed sidecar injection requests,0,istio,
 istio.sidecar_injection.skip_total,count,,request,,Total number of skipped sidecar injection requests,0,istio,
-istio.mesh.request.duration.milliseconds.sum,gauge,,millisecond,,Total sum of observed values for duration of requests in ms,0,istio,
-istio.mesh.request.duration.milliseconds.count,gauge,,,,Total count of observed values for duration of requests,0,istio,
+istio.mesh.request.duration.milliseconds.sum,count,,millisecond,,Total sum of observed values for duration of requests in ms,0,istio,
+istio.mesh.request.duration.milliseconds.count,count,,,,Total count of observed values for duration of requests,0,istio,
 istio.mesh.tcp.connections_closed.total,gauge,,,,Total closed connections,0,istio,
 istio.mesh.tcp.connections_opened.total,gauge,,,,Total opened connections,0,istio,
 istio.mesh.tcp.received_bytes.total,gauge,,byte,,Size of total bytes received during request in case of a TCP connection,0,istio,
@@ -283,14 +283,14 @@ istio.mesh.tcp.send_bytes.total.total,count,,byte,,Size of total bytes sent duri
 istio.mesh.request.duration.count.total,count,,request,,Count of request durations as monotonic count,0,istio,request durations count total
 istio.mesh.request.duration.sum.total,count,,millisecond,,Sum of request durations as monotonic count,0,istio,request durations sum total
 istio.grpc.server.handled_total,count,,,,"Total number of RPCs completed on the server, regardless of success or failure.",0,istio,
-istio.grpc.server.handling_seconds.count,gauge,,,,Response latency of gRPC that had been application-level handled by the server.,0,istio,
-istio.grpc.server.handling_seconds.sum,gauge,,second,,Response latency of gRPC that had been application-level handled by the server.,0,istio,
+istio.grpc.server.handling_seconds.count,count,,,,Response latency of gRPC that had been application-level handled by the server.,0,istio,
+istio.grpc.server.handling_seconds.sum,count,,second,,Response latency of gRPC that had been application-level handled by the server.,0,istio,
 istio.grpc.server.msg_received_total,count,,message,,Total number of RPC stream messages received on the server.,0,istio,
 istio.grpc.server.msg_sent_total,count,,message,,Total number of gRPC stream messages sent by the server.,0,istio,
 istio.grpc.server.started_total,count,,,,Total number of RPCs started on the server.,0,istio,
-istio.go.gc_duration_seconds.count,gauge,,second,,[Istio v1.5+] Count of the GC invocation durations.,0,istio,
+istio.go.gc_duration_seconds.count,count,,second,,[Istio v1.5+] Count of the GC invocation durations.,0,istio,
 istio.go.gc_duration_seconds.quantile,gauge,,second,,[Istio v1.5+] Quantile of the GC invocation durations.,0,istio,
-istio.go.gc_duration_seconds.sum,gauge,,second,,[Istio v1.5+] Sum of the GC invocation durations.,0,istio,
+istio.go.gc_duration_seconds.sum,count,,second,,[Istio v1.5+] Sum of the GC invocation durations.,0,istio,
 istio.go.goroutines,gauge,,thread,,[Istio v1.5+] Number of goroutines that currently exist.,0,istio,
 istio.go.info,gauge,,,,[Istio v1.5+] Information about the Go environment.,0,istio,
 istio.go.memstats.alloc_bytes,gauge,,byte,,[Istio v1.5+] Number of bytes allocated and still in use.,0,istio,
@@ -325,3 +325,32 @@ istio.process.resident_memory_bytes,gauge,,byte,,[Istio v1.5+] Resident memory s
 istio.process.start_time_seconds,gauge,,second,,[Istio v1.5+] Start time of the process since unix epoch in seconds.,0,istio,
 istio.process.virtual_memory_bytes,gauge,,byte,,[Istio v1.5+] Amount of virtual memory used.,0,istio,
 istio.process.virtual_memory_max_bytes,gauge,,byte,,[Istio v1.5+] Maximum amount of virtual memory available.,0,istio,
+istio.galley.validation.config_update_error.count,count,,error,,[Istio v1.5+] K8s webhook configuration update error,0,istio,
+istio.galley.validation.config_update.count,count,,,,[Istio v1.5+] k8s webhook configuration updates.,0,istio,
+istio.galley.validation.failed.count,count,,,,[Istio v1.5+] Count of resource validation failed,0,istio,
+istio.go.memstats.frees.count,count,,,,[Istio v1.5+] Total number of frees.,0,istio, frees count
+istio.go.memstats.lookups.count,count,,operation,,[Istio v1.5+] Number of lookups,0,istio,lookups count
+istio.go.memstats.mallocs.count,count,,byte,,[Istio v1.5+] Number of mallocs,0,istio,mallocs count
+istio.grpc.server.handled.count,count,,request,,[Istio v1.5+] "Total number of fully handled requests, with responses",0,istio,
+istio.grpc.server.msg_received.count,count,,message,,[Istio v1.5+] Total number of RPC stream messages received on the server.,0,istio,
+istio.grpc.server.msg_sent.count,count,,message,,[Istio v1.5+] Total number of messages sent,0,istio,
+istio.grpc.server.started.count,count,,,,[Istio v1.5+] Total number of RPCs started on the server.,0,istio,
+istio.pilot.inbound_updates.count,count,,,,[Istio v1.5+] Total number of updates received by pilot,0,istio,
+istio.pilot.k8s.cfg_events.count,count,,event,,[Istio v1.5+] Events from k8s config,0,istio,
+istio.pilot.k8s.reg_events.count,count,,event,,[Istio v1.5+] Events from k8s registry,0,istio,
+istio.pilot.push.triggers.count,count,,,,[Istio v1.5+] Total number of times a push was triggered,0,istio,
+istio.pilot.xds.pushes.count,count,,,,[Istio v1.5+] "Pilot build and send errors for lds, rds, cds and eds.",0,istio,
+istio.process.cpu_seconds.count,count,,second,,[Istio v1.5+] Total user and system CPU time spent in seconds.,0,istio,
+istio.sidecar_injection.requests.count,count,,request,,[Istio v1.5+] Total number of sidecar injection requests,0,istio,
+istio.sidecar_injection.success.count,count,,request,,[Istio v1.5+] Total number of successful sidecar injection requests,0,istio,
+istio.mesh.tcp.connections_closed.count,count,,,,[Istio v1.5+] Total closed connections as monotonic count,0,istio,
+istio.mesh.tcp.connections_opened.count,count,,,,[Istio v1.5+] Total opened connections as monotonic count,0,istio,
+istio.mesh.tcp.received_bytes.count,count,,byte,,[Istio v1.5+] Size of total bytes received during request in case of a TCP connection as monotonic count,0,istio,tcp received bytes count
+istio.mesh.tcp.send_bytes.count,count,,byte,,[Istio v1.5+] Size of total bytes sent during response in case of a TCP connection as monotonic count,0,istio,tcp send bytes count
+istio.grpc.server.handling_seconds.bucket,count,,second,,[Istio v1.5+] Bucket of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,server handling seconds bucket
+istio.pilot.proxy_convergence_time.bucket,count,,second,,[Istio v1.5+] Bucket of delay between config change and all proxies converging.,0,istio,proxy convergence time bucket
+istio.pilot.proxy_queue_time.bucket,count,,,,[Istio v1.5+] Bucket of observed values for when proxy is in a push queue before being dequeued,0,istio,proxy queue time bucket
+istio.pilot.xds.push.time.bucket,count,,,,[Istio v1.5+] Bucket of observation of total time Pilot takes a push,0,istio,xds push time bucket
+istio.mesh.request.duration.milliseconds.bucket,count,,millisecond,,[Istio v1.5+] Bucket of observed values for duration of requests,0,istio,request duration milliseconds bucket
+istio.mesh.response.size.bucket,count,,response,,[Istio v1.5+] Bucket of response sizes,0,istio,response sizes bucker
+istio.mesh.request.size.bucket,count,,request,,[Istio v1.5+] Bucket of request sizes,0,istio,request sizes bucket
