@@ -2,7 +2,7 @@
 
 ## 10.0.0 / 2021-10-04
 
-* [Added] DBM-490: Add support for live queries feature . See [#9866](https://github.com/DataDog/integrations-core/pull/9866).
+* [Added] Add support for live queries feature . See [#9866](https://github.com/DataDog/integrations-core/pull/9866).
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Fixed] Bump datadog checks base version. See [#10300](https://github.com/DataDog/integrations-core/pull/10300).
 * [Fixed] Avoid re-explaining queries that cannot be explained. See [#9941](https://github.com/DataDog/integrations-core/pull/9941).
