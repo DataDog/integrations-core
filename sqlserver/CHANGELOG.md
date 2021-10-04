@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 5.0.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Collect query metrics & plans for Database Monitoring. See [#10234](https://github.com/DataDog/integrations-core/pull/10234).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Changed] Implement disable generic tags. See [#10290](https://github.com/DataDog/integrations-core/pull/10290).
+
 ## 4.1.0 / 2021-08-31
 
 * [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).

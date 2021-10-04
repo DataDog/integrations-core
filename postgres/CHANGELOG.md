@@ -1,5 +1,13 @@
 # CHANGELOG - postgres
 
+## 10.0.0 / 2021-10-04
+
+* [Added] Add support for live queries feature . See [#9866](https://github.com/DataDog/integrations-core/pull/9866).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Bump datadog checks base version. See [#10300](https://github.com/DataDog/integrations-core/pull/10300).
+* [Fixed] Avoid re-explaining queries that cannot be explained. See [#9941](https://github.com/DataDog/integrations-core/pull/9941).
+* [Changed] Add option to disable generic tags. See [#10099](https://github.com/DataDog/integrations-core/pull/10099).
+
 ## 9.0.2 / 2021-08-27 / Agent 7.31.0
 
 * [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).

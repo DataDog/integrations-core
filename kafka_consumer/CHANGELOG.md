@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.12.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+
 ## 2.11.0 / 2021-09-30
 
 * [Added] Manually create a `ssl.SSLContext` object for the Kafka client to use. See [#10284](https://github.com/DataDog/integrations-core/pull/10284).

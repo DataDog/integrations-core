@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.4.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Enable E2E logs agent by default if environments mount logs. See [#10293](https://github.com/DataDog/integrations-core/pull/10293).
+* [Added] Add annotations for ci. See [#10260](https://github.com/DataDog/integrations-core/pull/10260).
+* [Fixed] Fix scope of E2E state management fixtures. See [#10316](https://github.com/DataDog/integrations-core/pull/10316).
+
 ## 14.3.0 / 2021-09-30
 
 * [Added] Allow setting DD_SITE in org config. See [#10285](https://github.com/DataDog/integrations-core/pull/10285).

@@ -1,5 +1,12 @@
 # CHANGELOG - php_fpm
 
+## 1.12.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
 ## 1.11.2 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Set timeout for socket connection. See [#9722](https://github.com/DataDog/integrations-core/pull/9722).

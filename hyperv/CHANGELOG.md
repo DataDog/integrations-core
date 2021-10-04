@@ -1,5 +1,9 @@
 # CHANGELOG - Hyper-V
 
+## 1.4.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8933](https://github.com/DataDog/integrations-core/pull/8933).
+
 ## 1.3.1 / 2020-12-11 / Agent 7.25.0
 
 * [Fixed] Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
