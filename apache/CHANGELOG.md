@@ -6,7 +6,7 @@
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
-* [Changed] add disable generic tags options to apache. See [#10277](https://github.com/DataDog/integrations-core/pull/10277).
+* [Changed] Add disable generic tags options to apache. See [#10277](https://github.com/DataDog/integrations-core/pull/10277).
 
 ## 1.17.0 / 2021-06-09 / Agent 7.30.0
 
