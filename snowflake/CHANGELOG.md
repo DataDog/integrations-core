@@ -7,7 +7,7 @@
 * [Added] Disable generic tags. See [#9854](https://github.com/DataDog/integrations-core/pull/9854).
 * [Fixed] Bump snowflake and requests for Py3. See [#10060](https://github.com/DataDog/integrations-core/pull/10060).
 * [Changed] Add test for critical service check and fix namespace. See [#10062](https://github.com/DataDog/integrations-core/pull/10062).
-* [Removed] Drop snowflake support from py2, bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
+* [Removed] Drop support for Python 2 and bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
 
 ## 3.1.0 / 2021-08-22 / Agent 7.31.0
 
