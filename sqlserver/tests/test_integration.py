@@ -241,6 +241,18 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         aggregator.assert_metric(metric, tags=msdb_tags)
         aggregator.assert_metric(metric, tags=base_tags)
 
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collect(dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    for _cls,metric_names in check.instance_per_type_metrics.items():
+        expected = list(set(metric_names))
+        assert sorted(metric_names) == sorted(expected)
+
 
 @not_windows_ci
 @pytest.mark.integration
