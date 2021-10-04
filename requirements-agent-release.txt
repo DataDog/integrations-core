@@ -21,7 +21,7 @@ datadog-cilium==1.8.0
 datadog-cisco-aci==1.16.0
 datadog-citrix-hypervisor==1.0.0
 datadog-clickhouse==2.4.0
-datadog-cloud-foundry-api==1.1.1
+datadog-cloud-foundry-api==1.2.0
 datadog-cockroachdb==1.6.0
 datadog-confluent-platform==1.5.0
 datadog-consul==1.21.0
