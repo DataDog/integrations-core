@@ -11,7 +11,7 @@ datadog-avi-vantage==2.0.0
 datadog-azure-iot-edge==2.2.0
 datadog-btrfs==1.11.1; sys_platform != 'win32'
 datadog-cacti==1.8.3; sys_platform == 'linux2'
-datadog-cassandra-nodetool==1.8.0
+datadog-cassandra-nodetool==1.9.0
 datadog-cassandra==1.14.0
 datadog-ceph==2.4.1; sys_platform != 'win32'
 datadog-checks-base==23.1.0
