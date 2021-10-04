@@ -1,5 +1,10 @@
 # CHANGELOG - postfix
 
+## 1.10.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Change directory parameter to optional. See [#10051](https://github.com/DataDog/integrations-core/pull/10051).
+
 ## 1.9.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Add runtime configuration validation. See [#8970](https://github.com/DataDog/integrations-core/pull/8970).
