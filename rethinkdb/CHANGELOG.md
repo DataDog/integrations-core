@@ -1,5 +1,9 @@
 # CHANGELOG - RethinkDB
 
+## 2.0.1 / 2021-10-04
+
+* [Fixed] Fix Mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+
 ## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
