@@ -1,5 +1,15 @@
 # CHANGELOG - Snowflake
 
+## 4.0.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Add runtime configuration validation. See [#8983](https://github.com/DataDog/integrations-core/pull/8983).
+* [Added] snowflake disable generic tags. See [#9854](https://github.com/DataDog/integrations-core/pull/9854).
+* [Fixed] Fix Mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+* [Fixed] Bump snowflake and requests for Py3. See [#10060](https://github.com/DataDog/integrations-core/pull/10060).
+* [Changed] Add test for critical service check and fix namespace. See [#10062](https://github.com/DataDog/integrations-core/pull/10062).
+* [Removed] Drop snowflake support from py2, bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
+
 ## 3.1.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Pin snowflake-connector and requests. See [#9905](https://github.com/DataDog/integrations-core/pull/9905).
