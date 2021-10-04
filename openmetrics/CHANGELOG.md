@@ -5,7 +5,7 @@
 * [Added] Add runtime configuration validation. See [#8965](https://github.com/DataDog/integrations-core/pull/8965).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
-* [Added] Update openmetrics doc for v2. See [#10068](https://github.com/DataDog/integrations-core/pull/10068).
+* [Added] Update documentation for v2. See [#10068](https://github.com/DataDog/integrations-core/pull/10068).
 * [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
 
 ## 1.14.1 / 2021-08-22 / Agent 7.31.0
