@@ -90,6 +90,9 @@ class QueryManager(object):
             query.query_data.setdefault('name', 'custom query #{}'.format(i))
             self.queries.append(query)
 
+        if len(self.queries) == 0:
+            self.logger.warning('QueryManager initialized with no query')
+
     def compile_queries(self):
         """This method compiles every `Query` object."""
         column_transformers = COLUMN_TRANSFORMERS.copy()  # type: Dict[str, Transformer]
