@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.1 / 2021-10-05
+
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
 ## 23.1.0 / 2021-10-01
 
 * [Added] Add only_custom_queries option to database utils. See [#10314](https://github.com/DataDog/integrations-core/pull/10314).
