@@ -6,7 +6,7 @@ from copy import deepcopy
 import pytest
 
 INSTANCE = {
-    'url': 'localhost',
+    'url': 'http://localhost',
     'port': 80,
     'username': 'admin',
     'password': 'admin',

@@ -194,8 +194,6 @@ class AmbariCheck(AgentCheck):
             )
         except Timeout:
             self.warning("Connection timeout when connecting to %s", url)
-        except Exception as e:
-            self.warning("Couldn't connect to URL: %s with exception: %s.", url, e)
 
     def _submit_gauge(self, name, value, tags, hostname=None):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)
