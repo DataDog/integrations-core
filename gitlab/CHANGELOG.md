@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 4.6.1 / 2021-10-05
+
+* [Fixed] Fix config example. See [#10338](https://github.com/DataDog/integrations-core/pull/10338).
+
 ## 4.6.0 / 2021-10-04
 
 * [Added] Add runtime configuration validation. See [#8918](https://github.com/DataDog/integrations-core/pull/8918).
