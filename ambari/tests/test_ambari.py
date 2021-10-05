@@ -89,7 +89,9 @@ def test_get_clusters(init_config, instance, aggregator):
     clusters = ambari.get_clusters()
 
     ambari._make_request.assert_called_with('http://localhost/api/v1/clusters')
-    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.OK, tags=['foo:bar', 'url:http://localhost'])
+    aggregator.assert_service_check(
+        name="ambari.can_connect", status=AgentCheck.OK, tags=['foo:bar', 'url:http://localhost']
+    )
     assert clusters == ['LabCluster']
 
 
