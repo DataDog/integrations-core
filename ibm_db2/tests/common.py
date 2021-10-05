@@ -25,5 +25,5 @@ CONFIG = {
 }
 
 E2E_METADATA = {
-    'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev', 'pip install ibm_db']
+    'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev']
 }
