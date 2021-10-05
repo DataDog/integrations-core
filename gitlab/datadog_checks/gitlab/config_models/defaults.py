@@ -80,6 +80,10 @@ def instance_extra_headers(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_gitlab_url(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_headers(field, value):
     return get_default_field_value(field, value)
 
