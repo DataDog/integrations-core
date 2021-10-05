@@ -119,7 +119,7 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     """
     Test system vitals metrics (prefixed "couchbase.query.")
     """
-    couchbase = Couchbase('couchbase', {}, instances=[instance_query])
+    couchbase = Couchbase('couchbase', {}, [instance_query])
     dd_run_check(couchbase)
 
     for mname in QUERY_STATS:
@@ -132,7 +132,7 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
     """
     Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
     """
-    couchbase = Couchbase('couchbase', {}, instances=[instance_sg])
+    couchbase = Couchbase('couchbase', {}, [instance_sg])
     dd_run_check(couchbase)
     db_tags = ['db:sync_gateway'] + CHECK_TAGS
     for mname in SYNC_GATEWAY_METRICS:
@@ -147,9 +147,9 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_metadata(instance_query, dd_run_check, datadog_agent):
-    check = Couchbase('couchbase', {}, instances=[instance_query])
+    check = Couchbase('couchbase', {}, [instance_query])
     check.check_id = 'test:123'
-    dd_run_check(None)
+    dd_run_check(check)
 
     data = check.get_data()
 
