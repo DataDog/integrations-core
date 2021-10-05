@@ -24,6 +24,4 @@ CONFIG = {
     'tags': ['foo:bar'],
 }
 
-E2E_METADATA = {
-    'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev']
-}
+E2E_METADATA = {'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev']}
