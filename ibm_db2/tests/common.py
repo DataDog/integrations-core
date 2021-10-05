@@ -7,7 +7,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-REQUIREMENTS_FILE = os.path.join(HERE, '..', 'requirements-dev.txt')
+REQUIREMENTS_FILE = os.path.join(HERE, '..', '..', 'requirements-dev.txt')
 HOST = get_docker_hostname()
 PORT = '50000'
 DB = 'datadog'
