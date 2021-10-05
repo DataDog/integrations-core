@@ -52,6 +52,12 @@ The OpenMetrics check does not include any service checks.
 
 ## Troubleshooting
 
+#### High custom metrics billing
+OpenMetrics configurations with generic wildcard values for the `metrics` option will have significant impact on custom metrics billing.
+
+Consider using specific metric names or partial metric name matches for precise collection.
+
+
 Need help? Contact [Datadog support][7].
 
 ## Further Reading
