@@ -464,3 +464,16 @@ def test_manifest_v2_media_gallery_validator_bad_structure(_, setup_route):
     # Assert test case
     assert validator.result.failed, validator.result
     assert not validator.result.fixed
+
+
+@mock.patch('os.path.getsize', return_value=300000)
+def test_manifest_v2_media_gallery_validator_incorrect_vimeo_id_type(_, setup_route):
+    # Use specific validator
+    validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    validator.validate(
+        'active_directory', JSONDict(input_constants.INVALID_MEDIA_MANIFEST_INCORRECT_VIMEO_ID_TYPE), False
+    )
+
+    # Assert test case
+    assert validator.result.failed, validator.result
+    assert not validator.result.fixed

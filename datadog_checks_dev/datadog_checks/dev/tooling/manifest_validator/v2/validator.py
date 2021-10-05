@@ -95,40 +95,48 @@ class MediaGalleryValidator(BaseManifestValidator):
 
         # Validate each media object
         video_count = 0
-        for media in media_array:
+        for i, media in enumerate(media_array):
             try:
                 media_type = media['media_type']
                 caption = media['caption']
                 image_url = media['image_url']
             except KeyError:
-                output = f'  The structure for the following media element is incorrect:\n  {media}'
+                output = f'  The structure for the following media #{i} is incorrect:\n  {media}'
                 self.fail(output)
                 return
 
             # Image_url must lead to png or jpg
             if '.png' not in image_url and '.jpg' not in image_url:
-                output = f'  The filetype for `{image_url}` must be either `.jpg` or `.png`.'
+                output = f'  The filetype for media #{i} must be either `.jpg` or `.png`.'
                 self.fail(output)
 
             # Caption must be smaller than 300 chars
             if len(caption) > 300:
-                output = f'  The `caption` for `{image_url}` cannot contain more than 300 characters.'
+                output = f'  The `caption` for media #{i} cannot contain more than 300 characters.'
                 self.fail(output)
 
             # Keep track of video count (only 1 is allowed)
             if media_type == 'video':
                 video_count += 1
+                try:
+                    vimeo_id = media['vimeo_id']
+                    if not isinstance(vimeo_id, int):
+                        output = f'  The `vimeo_id` for video media #{i} must be an integer, currently {type(vimeo_id)}'
+                        self.fail(output)
+                except KeyError:
+                    output = f'  Video media #{i} must include a `vimeo_id` attribute.'
+                    self.fail(output)
 
             try:
                 # Check if file is found in directory
                 cur_path = os.path.join(get_root(), check_name)
                 file_size = os.path.getsize(f'{cur_path}/{image_url}')
                 if file_size > 1000000:  # If file size greater than 1 megabyte, fail
-                    output = f'  File size for `{image_url}` must be smaller than 1 mb, currently {file_size} bytes.'
+                    output = f'  File size for media #{i} must be smaller than 1 mb, currently {file_size} bytes.'
                     self.fail(output)
             except OSError as err:
                 print(err)
-                output = f'  File not found at `{image_url}`, please ensure the correct path is entered.'
+                output = f'  File not found for media #{i} at `{image_url}`, please fix the path.'
                 self.fail(output)
 
         if video_count > 1:

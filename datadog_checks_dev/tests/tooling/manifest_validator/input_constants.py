@@ -61,8 +61,9 @@ VALID_MEDIA_MANIFEST = JSONDict(
             "media": [
                 {
                     "media_type": "video",
-                    "caption": "This is an example image caption!",
+                    "caption": "This is an example video caption!",
                     "image_url": "images/video.png",
+                    "vimeo_id": 123456789,
                 },
                 {
                     "media_type": "image",
@@ -85,13 +86,15 @@ INVALID_MEDIA_MANIFEST_TOO_MANY_VIDEOS = JSONDict(
             "media": [
                 {
                     "media_type": "video",
-                    "caption": "This is an example image caption!",
+                    "caption": "This is an example video caption!",
                     "image_url": "images/video.png",
+                    "vimeo_id": 123456789,
                 },
                 {
                     "media_type": "video",
-                    "caption": "This is an example image caption!",
+                    "caption": "This is an example video caption!",
                     "image_url": "images/bigpanda_dd_before.png",
+                    "vimeo_id": 123456789,
                 },
             ]
         }
@@ -104,12 +107,33 @@ INVALID_MEDIA_MANIFEST_BAD_STRUCTURE = JSONDict(
             "media": [
                 {
                     "media_type": "video",
-                    "cation": "This is an example image caption!",
+                    "cation": "This is an example video caption!",
                     "imageurl": "images/video.png",
+                    "vimeo_id": 123456789,
                 },
                 {
                     "meda_type": "image",
                     "captin": "This is an example image caption!",
+                    "image_url": "images/bigpanda_dd_before.png",
+                },
+            ]
+        }
+    }
+)
+
+INVALID_MEDIA_MANIFEST_INCORRECT_VIMEO_ID_TYPE = JSONDict(
+    {
+        "tile": {
+            "media": [
+                {
+                    "media_type": "video",
+                    "cation": "This is an example video caption!",
+                    "image_url": "images/video.png",
+                    "vimeo_id": "123456789",
+                },
+                {
+                    "media_type": "image",
+                    "caption": "This is an example image caption!",
                     "image_url": "images/bigpanda_dd_before.png",
                 },
             ]
