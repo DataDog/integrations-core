@@ -70,7 +70,7 @@ def test_cant_connect(init_config, instance, aggregator):
     except CheckException:
         pass
     aggregator.assert_service_check(
-        name="ambari.can_connect", status=AgentCheck.CRITICAL, tags=['foo:bar', 'url:localhost']
+        name="ambari.can_connect", status=AgentCheck.CRITICAL, tags=['foo:bar', 'url:http://localhost']
     )
 
 
@@ -79,14 +79,16 @@ def test_get_clusters(init_config, instance, aggregator):
     ambari = AmbariCheck('Ambari', init_config, [instance])
     ambari._make_request = MagicMock(
         return_value={
-            'href': 'localhost/api/v1/clusters',
-            'items': [{'href': 'localhost/api/v1/clusters/LabCluster', 'Clusters': {'cluster_name': 'LabCluster'}}],
+            'href': 'http://localhost/api/v1/clusters',
+            'items': [
+                {'href': 'http://localhost/api/v1/clusters/LabCluster', 'Clusters': {'cluster_name': 'LabCluster'}}
+            ],
         }
     )
 
     clusters = ambari.get_clusters()
 
-    ambari._make_request.assert_called_with('localhost/api/v1/clusters')
+    ambari._make_request.assert_called_with('http://localhost/api/v1/clusters')
     aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.OK, tags=['foo:bar', 'url:localhost'])
     assert clusters == ['LabCluster']
 
@@ -94,10 +96,13 @@ def test_get_clusters(init_config, instance, aggregator):
 def test_get_hosts(init_config, instance):
     ambari = AmbariCheck('Ambari', init_config, [instance])
     ambari._make_request = MagicMock(
-        return_value={'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics', 'items': responses.HOSTS_INFO}
+        return_value={
+            'href': 'http://localhost/api/v1/clusters/myCluster/hosts?fields=metrics',
+            'items': responses.HOSTS_INFO,
+        }
     )
     hosts = ambari._get_hosts_info('myCluster')
-    ambari._make_request.assert_called_with('localhost/api/v1/clusters/myCluster/hosts?fields=metrics')
+    ambari._make_request.assert_called_with('http://localhost/api/v1/clusters/myCluster/hosts?fields=metrics')
     assert len(hosts) == 2
     assert hosts[0]['Hosts']['host_name'] == 'my_host_1'
     assert hosts[1]['Hosts']['host_name'] == 'my_host_2'
@@ -164,7 +169,7 @@ def test_get_component_metrics(init_config, instance, aggregator):
     )
 
     ambari._make_request.assert_called_with(
-        'localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics'
+        'http://localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics'
     )
     metrics = [
         ('cpu.cpu_idle', 90.3),
@@ -203,7 +208,9 @@ def test_get_service_health(init_config, instance, aggregator):
 
     ambari.get_service_checks('LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'])
 
-    ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
+    ambari._make_request.assert_called_with(
+        'http://localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo'
+    )
     aggregator.assert_service_check(
         name="ambari.state",
         status=AgentCheck.OK,
@@ -217,7 +224,9 @@ def test_get_service_health_no_response(init_config, instance, aggregator):
 
     ambari.get_service_checks('LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'])
 
-    ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
+    ambari._make_request.assert_called_with(
+        'http://localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo'
+    )
     aggregator.assert_service_check(
         name="ambari.state", status=AgentCheck.CRITICAL, tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
     )
