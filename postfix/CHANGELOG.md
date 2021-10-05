@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.10.1 / 2021-10-05
+
+* [Fixed] Fix config example. See [#10337](https://github.com/DataDog/integrations-core/pull/10337).
+
 ## 1.10.0 / 2021-10-04
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
