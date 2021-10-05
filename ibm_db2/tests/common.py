@@ -7,7 +7,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-REQUIREMENTS_FILE = os.path.join(HERE, '..', '..', 'requirements-dev.txt')
+REQUIREMENTS_FILE = os.path.join('dev', 'requirements-dev.txt')
 HOST = get_docker_hostname()
 PORT = '50000'
 DB = 'datadog'
@@ -25,9 +25,10 @@ CONFIG = {
 }
 
 E2E_METADATA = {
+    'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
     'start_commands': [
         'apt-get update',
         'apt-get install -y build-essential libxslt-dev',
-        'pip install -r {}'.format(REQUIREMENTS_FILE),
-    ]
+        'pip install -r /dev/requirements.txt',
+    ],
 }
