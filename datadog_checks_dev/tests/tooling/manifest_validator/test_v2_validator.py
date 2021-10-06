@@ -275,13 +275,11 @@ def test_manifest_v2_logs_category_validator_has_logs_no_tag(_, setup_route):
     """
     has_logs_no_tag_manifest = JSONDict(
         {
-            "tile": {
-                "classifier_tags": [
-                    "Category::Marketplace",
-                    "Offering::Integration",
-                    "Offering::UI Extension",
-                ],
-            },
+            "classifier_tags": [
+                "Category::Marketplace",
+                "Offering::Integration",
+                "Offering::UI Extension",
+            ],
         }
     )
 
