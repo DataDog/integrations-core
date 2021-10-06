@@ -324,3 +324,13 @@ coredns_plugin_enabled{name="cache",server="dns://:53",zone="."} 1
 coredns_plugin_enabled{name="errors",server="dns://:53",zone="."} 1
 coredns_plugin_enabled{name="forward",server="dns://:53",zone="."} 1
 coredns_plugin_enabled{name="prometheus",server="dns://:53",zone="."} 1
+
+# HELP coredns_forward_healthcheck_broken_total Counter of the number of complete failures of the healthchecks.
+# TYPE coredns_forward_healthcheck_broken_total counter
+coredns_forward_healthcheck_broken_total 0
+# HELP coredns_hosts_reload_timestamp_seconds The timestamp of the last reload of hosts file.
+# TYPE coredns_hosts_reload_timestamp_seconds gauge
+coredns_hosts_reload_timestamp_seconds 0
+# HELP coredns_reload_failed_total Counter of the number of failed reload attempts.
+# TYPE coredns_reload_failed_total counter
+coredns_reload_failed_total 0
