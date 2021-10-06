@@ -11,7 +11,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -79,11 +79,9 @@ class PostgreSql(AgentCheck):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
 
     def _get_service_check_tags(self):
-        host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
-        service_check_tags = ["host:%s" % host]
+        service_check_tags = []
         service_check_tags.extend(self._config.tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
+        return list(service_check_tags)
 
     def _get_replication_role(self):
         cursor = self.db.cursor()
@@ -157,15 +155,22 @@ class PostgreSql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self._config.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self._config.host)
+        if self._resolved_hostname is None:
+            if self._config.dbm_enabled or self.disable_generic_tags:
+                self._resolved_hostname = self.resolve_db_host()
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     @property
     def agent_hostname(self):
+        # type: () -> str
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self._config.host)
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:

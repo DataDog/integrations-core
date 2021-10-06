@@ -75,7 +75,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
-        'host:{}'.format(HOST),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
@@ -217,20 +216,17 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         assert check._config.tags == expected_tags
 
 
-@pytest.mark.parametrize('dbm_enabled', (True, False))
-def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize('dbm_enabled, expected_hostname', [(True, 'resolved.hostname'), (False, 'stubbed.hostname')])
+def test_correct_hostname(dbm_enabled, expected_hostname, aggregator, pg_instance):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
 
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
-
-    if dbm_enabled:
-        expected_hostname = 'stubbed.hostname'
-        expected_hostname_service_check = expected_hostname
-    else:
-        expected_hostname = None
-        expected_hostname_service_check = HOST
+    check = PostgreSql('test_instance', {}, [pg_instance])
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
+    ) as resolve_db_host:
+        check.check(pg_instance)
+        assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
@@ -244,7 +240,7 @@ def test_correct_hostname(dbm_enabled, aggregator, integration_check, pg_instanc
         'postgres.can_connect',
         count=1,
         status=PostgreSql.OK,
-        tags=expected_tags_with_db + ['host:{}'.format(expected_hostname_service_check)],
+        tags=expected_tags_with_db,
         hostname=expected_hostname,
     )
 
