@@ -191,20 +191,30 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
-    dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags)
-
-
-@windows_ci
-def test_check_generic_tags(aggregator, dd_run_check, init_config, instance_sql2017):
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_tags',
+    [
+        (
+            True,
+            {
+                'optional_tag:tag1',
+                'sqlserver_host:{}'.format(LOCAL_SERVER),
+                'db:master',
+            },
+        ),
+        (
+            False,
+            {'optional_tag:tag1', 'host:{}'.format(LOCAL_SERVER), 'db:master'},
+        ),
+    ],
+)
+def test_check_local_generic_tags(
+    disable_generic_tags, expected_tags, aggregator, dd_run_check, init_config, instance_sql2017
+):
     instance_generic_tags = copy.deepcopy(instance_sql2017)
-    instance_generic_tags['disable_generic_tags'] = False
+    instance_generic_tags['disable_generic_tags'] = disable_generic_tags
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_generic_tags])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
