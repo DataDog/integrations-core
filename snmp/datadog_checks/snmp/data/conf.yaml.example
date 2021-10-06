@@ -260,13 +260,11 @@ instances:
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
-    ## Only available using python SNMP integration.
     #
     # network_address: <NETWORK_ADDRESS>
 
     ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
-    ## Only available using python SNMP integration.
     #
     # ignored_ip_addresses:
     #   - <IP_ADDRESS_1>

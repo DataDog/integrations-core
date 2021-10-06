@@ -297,13 +297,11 @@ files:
       - name: network_address
         description: |
           The network address of the devices to scan for monitor.
-          Only available using python SNMP integration.
         value:
           type: string
       - name: ignored_ip_addresses
         description: |
           A list of IP addresses to ignore when scanning the network.
-          Only available using python SNMP integration.
         value:
           type: array
           items:
