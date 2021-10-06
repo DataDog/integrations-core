@@ -91,12 +91,6 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection for all instances.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
-
     ## @param namespace - string - optional - default: default
     ## Namespace can be used to disambiguate devices with same IPs.
     ## Changing namespace will cause devices being recreated in NDM app.
@@ -320,12 +314,6 @@ instances:
     ##         the OIDs are refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
-
-    ## @param collect_device_metadata - boolean - optional - default: true
-    ## Enable device metadata collection.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # collect_device_metadata: true
 
     ## @param namespace - string - optional - default: default
     ## Namespace can be used to disambiguate devices with same IPs.
