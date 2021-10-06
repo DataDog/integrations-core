@@ -4,6 +4,7 @@
 import json
 import os
 
+import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
@@ -76,34 +77,110 @@ class SchemaValidator(BaseManifestValidator):
 
 
 class MediaGalleryValidator(BaseManifestValidator):
+    VIDEO_MEDIA_ATTRIBUTES = ('media_type', 'caption', 'image_url', 'vimeo_id')
+    IMAGE_MEDIA_ATTRIBUTES = ('media_type', 'caption', 'image_url')
+    MEDIA_PATH = '/tile/media'
+    MAX_MEDIA_ELEMENTS = 8
+
+    IMAGE_SCHEMA = jsonschema.Draft7Validator(
+        {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "V2 Manifest Image Media Element Validator",
+            "description": "Defines the various components of an image media element",
+            "type": "object",
+            "properties": {
+                "media_type": {
+                    "description": "The type of media (image or video)",
+                    "type": "string",
+                    "pattern": "image",
+                    "minLength": 5,
+                },
+                "caption": {
+                    "description": "The caption for this media",
+                    "type": "string",
+                },
+                "image_url": {
+                    "description": "The relative path to the image from integration root",
+                    "type": "string",
+                },
+            },
+            "required": ["media_type", "caption", "image_url"],
+        }
+    )
+    VIDEO_SCHEMA = jsonschema.Draft7Validator(
+        {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "V2 Manifest Video Media Element Validator",
+            "description": "Defines the various components of a video media element",
+            "type": "object",
+            "properties": {
+                "media_type": {
+                    "description": "The type of media (image or video)",
+                    "type": "string",
+                    "pattern": "video",
+                    "minLength": 5,
+                },
+                "caption": {
+                    "description": "The caption for this media",
+                    "type": "string",
+                },
+                "image_url": {
+                    "description": "The relative path to the image from integration root",
+                    "type": "string",
+                },
+                "vimeo_id": {
+                    "description": "The vimeo id (9 digits) corresponding to this video",
+                    "type": "integer",
+                },
+            },
+            "required": ["media_type", "caption", "image_url"],
+        }
+    )
+
     def validate(self, check_name, decoded, fix):
         if not self.should_validate():
             return
 
-        media_path = '/tile/media'
-        media_array = decoded.get_path(media_path)
+        media_array = decoded.get_path(self.MEDIA_PATH)
         # Skip validations if no media is included in the manifest
         if not media_array:
             return
 
         # Length must be between 1-8
         num_media_elements = len(media_array)
-        if num_media_elements > 8:
+        if num_media_elements > self.MAX_MEDIA_ELEMENTS:
             output = f'  The maximum number of media elements is 8, there are currently {num_media_elements}.'
             self.fail(output)
             return
 
         # Validate each media object
         video_count = 0
-        for i, media in enumerate(media_array):
+        for i, media in enumerate(media_array, 1):
+            # Ensure each media contains valid keys
             try:
                 media_type = media['media_type']
-                caption = media['caption']
-                image_url = media['image_url']
+                if media_type == 'image':
+                    attribute_schema = self.IMAGE_SCHEMA
+                elif media_type == 'video':
+                    attribute_schema = self.VIDEO_SCHEMA
+                else:
+                    output = f'  Media #{i} `media_type` attribute must be "video" or "image"'
+                    self.fail(output)
+                    continue
+
+                # Validate with the correct schema
+                errors = sorted(attribute_schema.iter_errors(media), key=lambda e: e.path)
+                if errors:
+                    for error in errors:
+                        self.fail(f'  Media #{i}: {error.message}')
+                    continue
             except KeyError:
-                output = f'  The structure for the following media #{i} is incorrect:\n  {media}'
+                output = f'  Media #{i}: \'media_type\' is a required property'
                 self.fail(output)
-                return
+                continue
+
+            caption = media['caption']
+            image_url = media['image_url']
 
             # Image_url must lead to png or jpg
             if '.png' not in image_url and '.jpg' not in image_url:
@@ -118,14 +195,6 @@ class MediaGalleryValidator(BaseManifestValidator):
             # Keep track of video count (only 1 is allowed)
             if media_type == 'video':
                 video_count += 1
-                try:
-                    vimeo_id = media['vimeo_id']
-                    if not isinstance(vimeo_id, int):
-                        output = f'  The `vimeo_id` for video media #{i} must be an integer, currently {type(vimeo_id)}'
-                        self.fail(output)
-                except KeyError:
-                    output = f'  Video media #{i} must include a `vimeo_id` attribute.'
-                    self.fail(output)
 
             try:
                 # Check if file is found in directory
