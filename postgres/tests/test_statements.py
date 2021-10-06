@@ -147,7 +147,7 @@ def test_statement_metrics(
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
+    expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
@@ -259,6 +259,7 @@ def dbm_instance(pg_instance):
 
 def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags'] + [
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(dbm_instance['dbname']),
     ]
@@ -338,6 +339,7 @@ def test_failed_explain_handling(
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'agent_hostname:stubbed.hostname',
         expected_error_tag,
@@ -442,6 +444,7 @@ def test_statement_samples_collect(
     check._connect()
 
     tags = dbm_instance['tags'] + [
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(dbname),
     ]
@@ -756,6 +759,7 @@ def test_statement_run_explain_errors(
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'agent_hostname:stubbed.hostname',
         expected_err_tag,
@@ -1081,6 +1085,7 @@ def test_statement_metrics_database_errors(
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'agent_hostname:stubbed.hostname',
         expected_error_tag,
