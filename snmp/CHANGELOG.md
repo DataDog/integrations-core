@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 5.4.1 / 2021-10-06
+
+* [Fixed] Remove python only mention from check discovery props. See [#10352](https://github.com/DataDog/integrations-core/pull/10352).
+
 ## 5.4.0 / 2021-10-04
 
 * [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
