@@ -1,3 +1,5 @@
+import certifi
+
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
@@ -9,15 +11,29 @@ class MongoConfig(object):
         self.log = log
 
         # x.509 authentication
-        self.ssl_params = exclude_undefined_keys(
-            {
-                'ssl': instance.get('ssl', None),
-                'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': instance.get('ssl_ca_certs', None),
-            }
-        )
+
+        if (
+            instance.get('options', None) is not None and is_affirmative(instance.get('options').get("ssl", None))
+        ) or is_affirmative(instance.get('ssl', None)):
+            self.ssl_params = exclude_undefined_keys(
+                {
+                    'ssl': instance.get('ssl', None),
+                    'ssl_keyfile': instance.get('ssl_keyfile', None),
+                    'ssl_certfile': instance.get('ssl_certfile', None),
+                    'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
+                    'ssl_ca_certs': instance.get('ssl_ca_certs', certifi.where()),
+                }
+            )
+        else:
+            self.ssl_params = exclude_undefined_keys(
+                {
+                    'ssl': instance.get('ssl', None),
+                    'ssl_keyfile': instance.get('ssl_keyfile', None),
+                    'ssl_certfile': instance.get('ssl_certfile', None),
+                    'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
+                    'ssl_ca_certs': instance.get('ssl_ca_certs', None),
+                }
+            )
 
         if 'server' in instance:
             self.server = instance['server']
