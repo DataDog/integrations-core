@@ -115,6 +115,7 @@ files:
         description: |
           Enable device metadata collection for all instances.
           Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
         value:
           type: boolean
           example: true
@@ -375,6 +376,7 @@ files:
         description: |
           Enable device metadata collection.
           Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
         value:
           type: boolean
           example: true
