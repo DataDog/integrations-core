@@ -18,7 +18,7 @@ If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` envi
 
 For example, to install the integration on Kubernetes, edit your DaemonSet to mount the Containerd socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the DaemonSet mount path:
 
-<!-- xxz tab xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Linux container" xxx -->
 
 ##### Linux container
