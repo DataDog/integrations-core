@@ -7,14 +7,14 @@ datadog-amazon-msk==2.0.0
 datadog-ambari==2.1.0; sys_platform != 'win32'
 datadog-apache==2.0.0
 datadog-aspdotnet==1.7.0; sys_platform == 'win32'
-datadog-avi-vantage==2.0.0
+datadog-avi-vantage==2.0.1
 datadog-azure-iot-edge==2.2.0
 datadog-btrfs==1.11.1; sys_platform != 'win32'
 datadog-cacti==1.8.3; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.9.0
 datadog-cassandra==1.14.0
 datadog-ceph==2.5.0; sys_platform != 'win32'
-datadog-checks-base==23.1.1
+datadog-checks-base==23.1.2
 datadog-checks-dependency-provider==1.1.0
 datadog-checks-downloader==3.4.0
 datadog-cilium==1.8.0

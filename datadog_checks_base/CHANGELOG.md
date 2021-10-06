@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.2 / 2021-10-05
+
+* [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
+
 ## 23.1.1 / 2021-10-05
 
 * [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
