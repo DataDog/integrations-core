@@ -1,5 +1,9 @@
 # CHANGELOG - Avi Vantage
 
+## 2.0.1 / 2021-10-05
+
+* [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
+
 ## 2.0.0 / 2021-10-04
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
