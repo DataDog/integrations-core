@@ -92,11 +92,10 @@ class MediaGalleryValidator(BaseManifestValidator):
                 "media_type": {
                     "description": "The type of media (image or video)",
                     "type": "string",
-                    "pattern": "image",
-                    "minLength": 5,
+                    "enum": ["image"],
                 },
                 "caption": {
-                    "description": "The caption for this media",
+                    "description": "The caption for this image media",
                     "type": "string",
                 },
                 "image_url": {
@@ -117,11 +116,10 @@ class MediaGalleryValidator(BaseManifestValidator):
                 "media_type": {
                     "description": "The type of media (image or video)",
                     "type": "string",
-                    "pattern": "video",
-                    "minLength": 5,
+                    "enum": ["video"],
                 },
                 "caption": {
-                    "description": "The caption for this media",
+                    "description": "The caption for this video media",
                     "type": "string",
                 },
                 "image_url": {
@@ -133,7 +131,7 @@ class MediaGalleryValidator(BaseManifestValidator):
                     "type": "integer",
                 },
             },
-            "required": ["media_type", "caption", "image_url"],
+            "required": ["media_type", "caption", "image_url", "vimeo_id"],
         }
     )
 
