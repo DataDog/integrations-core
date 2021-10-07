@@ -7,11 +7,18 @@ import os
 
 import mock
 import pytest
+from conftest import (
+    EXPECTED_CONTAINER_METRICS,
+    EXTRA_EXPECTED_CONTAINER_METRICS,
+    EXTRA_NETWORK_METRICS,
+    INSTANCE_TAGS,
+    mocked_get_tags,
+    mocked_is_excluded,
+    mocked_requests_get,
+)
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
-from conftest import INSTANCE_TAGS, EXPECTED_CONTAINER_METRICS, EXTRA_EXPECTED_CONTAINER_METRICS, EXTRA_NETWORK_METRICS, \
-    mocked_requests_get, mocked_get_tags, mocked_is_excluded
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
