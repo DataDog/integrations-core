@@ -143,8 +143,9 @@ def options_validator(options, loader, file_name, *sections):
                 hide_template = True
             else:
                 hide_template = False
-            overrides.update(option.pop('overrides', {}))
 
+            overrides.update(option.pop('overrides', {}))
+            print(overrides)
             try:
                 template = loader.templates.load(option.pop('template'))
             except Exception as e:
@@ -198,7 +199,7 @@ def options_validator(options, loader, file_name, *sections):
         if not templates_resolved:
             continue
 
-        if hide_template and not option.get('hidden', False):
+        if hide_template:
             option['hidden'] = True
 
         if 'name' not in option:
