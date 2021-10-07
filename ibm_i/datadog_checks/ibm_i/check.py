@@ -37,8 +37,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             self.query_manager.execute()
             check_status = AgentCheck.OK
-        except AttributeError:
-            self.warning('Could not set up query manager, skipping check run')
+        except AttributeError as e:
+            self.warning('Could not set up query manager, skipping check run: %s', e)
             check_status = None
         except Exception as e:
             self._delete_connection_subprocess(e)
@@ -145,8 +145,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
                         # Remove subprocess to restart on a clean state and raise.
                         self._delete_connection_subprocess(e)
                         raise
-            except TypeError:
+            except TypeError as e:
                 # We couldn't read anything
+                self.log.debug("Could not read from stdout pipe: %s", e)
                 continue
             except BrokenPipeError as e:
                 # The stdout pipe is broken, usually due to the Agent
@@ -158,9 +159,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
         e = None
         try:
             e = self.connection_subprocess.stderr.read().strip()
-        except TypeError:
+        except TypeError as e:
             # We couldn't read anything
-            pass
+            self.log.debug("Could not read from stderr pipe: %s", e)
         except BrokenPipeError as e:
             # The stderr pipe is broken, usually due to the Agent
             # killing the subprocess when stopping.
@@ -242,9 +243,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
     def fetch_system_info(self):
         try:
             return self.system_info_query()
-        except Exception:
+        except Exception as e:
             # In case of errors, the connection will have already been cleaned by execute_query.
-            pass
+            # We only log the error.
+            self.log.error("Failed to fetch system info: %s", e)
 
     def system_info_query(self):
         query = {
