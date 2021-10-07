@@ -19,6 +19,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 @preview
+@pytest.mark.integration
 def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
     check = Etcd('etcd', {}, [instance])
     dd_run_check(check)
@@ -32,6 +33,7 @@ def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
 
 
 @preview
+@pytest.mark.integration
 def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics, dd_run_check):
     instance = deepcopy(instance)
     instance['leader_tag'] = False
@@ -46,6 +48,7 @@ def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics, dd_run_c
 
 
 @preview
+@pytest.mark.integration
 def test_service_check(aggregator, instance, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [instance])
     dd_run_check(check)
@@ -56,6 +59,7 @@ def test_service_check(aggregator, instance, dd_run_check):
 
 
 @legacy
+@pytest.mark.integration
 def test_bad_config(aggregator, dd_run_check):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url, 'use_preview': False}
@@ -69,6 +73,7 @@ def test_bad_config(aggregator, dd_run_check):
 
 
 @legacy
+@pytest.mark.integration
 def test_legacy_metrics(legacy_instance, aggregator, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
     dd_run_check(check)
@@ -83,6 +88,7 @@ def test_legacy_metrics(legacy_instance, aggregator, dd_run_check):
 
 
 @legacy
+@pytest.mark.integration
 def test_legacy_service_checks(legacy_instance, aggregator, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
     dd_run_check(check)
@@ -94,6 +100,7 @@ def test_legacy_service_checks(legacy_instance, aggregator, dd_run_check):
 
 
 @legacy
+@pytest.mark.integration
 def test_followers(aggregator, dd_run_check):
     urls = []
     result = run_command('docker-compose -f {} ps -q'.format(COMPOSE_FILE), capture='out', check=True)
@@ -143,6 +150,7 @@ def test_followers(aggregator, dd_run_check):
         ("legacy ssl config unset", {}, {'verify': False}),
     ],
 )
+@pytest.mark.integration
 def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
     legacy_instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
@@ -176,6 +184,7 @@ def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_k
         ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
     ],
 )
+@pytest.mark.integration
 def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
