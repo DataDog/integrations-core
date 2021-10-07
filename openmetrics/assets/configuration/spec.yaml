@@ -5,12 +5,6 @@ files:
     - template: init_config
       options:
         - template: init_config/openmetrics
-        - template: init_config/openmetrics_legacy
-          overrides:
-            proxy.hidden: true
-            skip_proxy.hidden: true
-            timeout.hidden: true
-            service.hidden: true
     - template: instances
       options:
         - template: instances/openmetrics
@@ -20,3 +14,5 @@ files:
             metrics.required: true
             metrics.hidden: false
             openmetrics_endpoint.required: false
+        - template: instances/openmetrics_legacy_base
+          hidden: true
