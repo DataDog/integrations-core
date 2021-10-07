@@ -72,15 +72,10 @@ spec:
           # ...
           env:
             - name: DD_CRI_SOCKET_PATH
-              value: \\\\.\\pipe\\containerd-containerd\\containerd.sock
-          volumeMounts:
-            - name: containerdsocket
-              mountPath: \\\\.\\pipe\\containerd-containerd\\containerd.sock
-            - mountPath: \\\\.\\pipe\\docker_engine
-              name: var-run
+              value: \\\\.\\pipe\\containerd-containerd
           volumes:
             - hostPath:
-                path: \\\\.\\pipe\\containerd-containerd\\containerd.sock
+                path: \\\\.\\pipe\\containerd-containerd
               name: containerdsocket
             - hostPath:
                 path: \\\\.\\pipe\\docker_engine
