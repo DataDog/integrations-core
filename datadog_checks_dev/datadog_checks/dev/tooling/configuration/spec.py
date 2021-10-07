@@ -198,8 +198,8 @@ def options_validator(options, loader, file_name, *sections):
         if not templates_resolved:
             continue
 
-        if hide_template:
-            continue
+        if hide_template and not option.get('hidden', False):
+            option['hidden'] = True
 
         if 'name' not in option:
             loader.errors.append(
