@@ -30,7 +30,7 @@ def test_additional_metrics(aggregator, caplog, dd_run_check):
     instance['additional_metrics'] = [
         [
             'HTTP Service Request Queues',
-            None,
+            'none',
             'RejectedRequests',
             'iis.httpd_service_request_queues.rejectedrequests',
             'gauge',
