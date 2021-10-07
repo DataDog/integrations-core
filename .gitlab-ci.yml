@@ -3,6 +3,7 @@ variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
+  VALIDATE_CONSUL_SYNC: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_consul_sync
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
@@ -45,10 +46,33 @@ validate-log-integrations:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
     - ts-node parse_ts.ts > logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
+    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors_logs.txt
   artifacts:
     paths:
-    - $CI_PROJECT_DIR/errors.txt
+    - $CI_PROJECT_DIR/errors_logs.txt
+    expire_in: 1 day
+    when: always
+  tags: [ "runner:main" ]
+
+validate-consul-sync:
+  stage: validate
+  image: $VALIDATE_CONSUL_SYNC
+  only:
+  - schedules
+  - paul/job-validate-sync
+  variables:
+    INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
+    INTEGRATIONS_EXTRAS_ROOT: integrations-extras
+    CONSUL_ROOT: consul-config
+  script:
+    - cd /app
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/consul-config.git --depth 1
+    - git clone https://github.com/DataDog/integrations-extras.git
+    - CONSUL_INTEGRATIONS=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.consul_integrations_path --with-decryption --query "Parameter.Value" --out text)
+    - python3 validate_consul_sync.py 2> $CI_PROJECT_DIR/errors_sync.txt
+  artifacts:
+    paths:
+    - $CI_PROJECT_DIR/errors_sync.txt
     expire_in: 1 day
     when: always
   tags: [ "runner:main" ]
@@ -134,13 +158,22 @@ notify-slack:
     <<: *slack-cache
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
+    - export VALIDATION_ERROR="false"
     - |
-      if [[ -s $CI_PROJECT_DIR/errors.txt ]]; then
-          cat $CI_PROJECT_DIR/errors.txt
-          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
+      if [[ -s $CI_PROJECT_DIR/errors_logs.txt ]]; then
+          export VALIDATION_ERROR="true"
+          cat $CI_PROJECT_DIR/errors_logs.txt
+          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors.\n```$(cat $CI_PROJECT_DIR/errors_logs.txt)```"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-      else
-          MESSAGE="Logs pipelines passed validation steps, good job :+1:"
+      fi
+      if [[ -s $CI_PROJECT_DIR/errors_sync.txt ]]; then
+          export VALIDATION_ERROR="true"
+          cat $CI_PROJECT_DIR/errors_sync.txt
+          MESSAGE="Sync pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors.\n```$(cat $CI_PROJECT_DIR/errors_sync.txt)```"
+          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+      fi
+      if [[ "$VALIDATION_ERROR" = "false" ]]; then
+          MESSAGE="Validation pipelines passed, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
   tags: [ "runner:main" ]
@@ -258,4 +291,19 @@ validate-agent-build-builder:
     - docker build --tag $VALIDATE_AGENT_BUILD .
     - docker images $VALIDATE_AGENT_BUILD
     - docker push $VALIDATE_AGENT_BUILD
+  tags: [ "runner:docker" ]
+
+validate-consul-sync-builder:
+  stage: build
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  only:
+    changes:
+      - .gitlab/validate-consul-sync/**
+    refs:
+      - master
+  script:
+    - cd .gitlab/validate-consul-sync/
+    - docker build --tag $VALIDATE_CONSUL_SYNC .
+    - docker images $VALIDATE_CONSUL_SYNC
+    - docker push $VALIDATE_CONSUL_SYNC
   tags: [ "runner:docker" ]
