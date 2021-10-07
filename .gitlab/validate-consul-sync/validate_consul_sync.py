@@ -81,7 +81,7 @@ def check_sync_consul(name1: str, dirs1: Dict[str, List[str]], name2: str, dirs2
         diff = set(dirs1['names']) - set(dirs2['names'])
         return [f"Missing sync in {name2}: {diff}"]
     if len(dirs1['names']) < len(dirs2['names']):
-        diff = set(dirs1['names']) - set(dirs1['names'])
+        diff = set(dirs2['names']) - set(dirs1['names'])
         return [f"Missing sync in {name1}: {diff}"]
     errors = []
     for i in range(len(dirs1['paths'])):
@@ -106,30 +106,39 @@ def get_integration_id(name: str) -> str:
     Integration name is the integration_id defined in the manifest.json
     """
     core = os.path.join(INTEGRATIONS_CORE, name, 'manifest.json')
+    extras = os.path.join(INTEGRATIONS_EXTRAS, name, 'manifest.json')
     if os.path.exists(core):
         manifest = open(core)
+    elif os.path.exists(extras):
+        manifest = open(extras)
     else:
-        manifest = open(os.path.join(INTEGRATIONS_EXTRAS, name, 'manifest.json'))
+        return None
     integration_id = json.load(manifest)['integration_id']
 
     return integration_id.replace('_', '-')
 
 
 if __name__ == '__main__':
-    integrations = sorted(get_all_repo_integrations(INTEGRATIONS_CORE) + get_all_repo_integrations(INTEGRATIONS_EXTRAS))
+    core = get_all_repo_integrations(INTEGRATIONS_CORE)
+    extras = get_all_repo_integrations(INTEGRATIONS_EXTRAS)
+    integrations = sorted(core + extras)
     consuls = CONSUL_INTEGRATIONS.split(';')
     integrations_id = []
 
     assert len(consuls) > 0
-    assert len(integrations) > 0
+    assert len(core) > 0
+    assert len(extras) > 0
 
     for i in range(len(integrations)):
-        integrations_id.append(get_integration_id(integrations[i]))
+        id = get_integration_id(integrations[i])
+        if id is not None:
+            integrations_id.append(id)
 
     dirs = {}
     for p in consuls:
-        full_path = os.path.join(CONSUL_ROOT, p)
-        dir = list(set(integrations_id).intersection(set(os.listdir(full_path))))
+        full_path = os.path.abspath(os.path.join(CONSUL_ROOT, p))
+        consul_set = set(os.listdir(full_path))
+        dir = list(set(integrations_id).intersection(consul_set))
         assert len(dir) > 0
         dirs[p] = {'names': sorted(dir)}
         dirs[p]['paths'] = [os.path.join(full_path, i) for i in dirs[p]['names']]
@@ -140,7 +149,8 @@ if __name__ == '__main__':
             name1 = consuls[c1]
             name2 = consuls[c2]
             errors += check_sync_consul(name1, dirs[name1], name2, dirs[name2])
+    errors = sorted(errors)
     errors.append(check_integrations(integrations_id, dirs[consuls[0]]['names']))
 
     for err in errors:
-        print(err, file=sys.stderr)
+        print(err, end='\n', file=sys.stderr)
