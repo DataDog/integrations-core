@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 5.4.2 / 2021-10-07
+
+* [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).
+
 ## 5.4.1 / 2021-10-06
 
 * [Fixed] Remove python only mention from check discovery props. See [#10352](https://github.com/DataDog/integrations-core/pull/10352).
