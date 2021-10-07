@@ -91,6 +91,7 @@ SQLCONNECTION_FAILURE_ALERTS = {
     "Unable to connect to SQL Server" : NTNX__microsoft_sqlserver_user_authn,
     VIEW_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_view_server_state,
     "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
+    "Connection timed out" : NTNX__microsoft_sqlserver_sql_server_target,
     SELECT_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_select_permissions,
     INSUFFICIENT_PERM_MSG : NTNX__microsoft_sqlserver_incorrect_permissions
 }
