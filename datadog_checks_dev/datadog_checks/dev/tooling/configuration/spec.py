@@ -145,7 +145,6 @@ def options_validator(options, loader, file_name, *sections):
                 hide_template = False
 
             overrides.update(option.pop('overrides', {}))
-            print(overrides)
             try:
                 template = loader.templates.load(option.pop('template'))
             except Exception as e:
