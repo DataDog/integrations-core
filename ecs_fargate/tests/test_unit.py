@@ -7,7 +7,11 @@ import os
 
 import mock
 import pytest
-from conftest import (
+
+from datadog_checks.dev.http import MockResponse
+from datadog_checks.ecs_fargate import FargateCheck
+
+from .conftest import (
     EXPECTED_CONTAINER_METRICS,
     EXTRA_EXPECTED_CONTAINER_METRICS,
     EXTRA_NETWORK_METRICS,
@@ -17,18 +21,14 @@ from conftest import (
     mocked_requests_get,
 )
 
-from datadog_checks.dev.http import MockResponse
-from datadog_checks.ecs_fargate import FargateCheck
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.mark.unit
-def test_failing_check(check, instance, aggregator, dd_run_check):
+def test_failing_check(check, aggregator, dd_run_check):
     """
     Testing fargate metadata endpoint error.
     """
-    check.instance = instance
     with mock.patch(
         'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=500)
     ):
@@ -38,11 +38,10 @@ def test_failing_check(check, instance, aggregator, dd_run_check):
 
 
 @pytest.mark.unit
-def test_invalid_response_check(check, instance, aggregator, dd_run_check):
+def test_invalid_response_check(check, aggregator, dd_run_check):
     """
     Testing invalid fargate metadata payload.
     """
-    check.instance = instance
     with mock.patch(
         'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=200)
     ):
@@ -52,11 +51,10 @@ def test_invalid_response_check(check, instance, aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check(check, instance, aggregator, dd_run_check):
+def test_successful_check(check, aggregator, dd_run_check):
     """
     Testing successful fargate check.
     """
-    check.instance = instance
     with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):

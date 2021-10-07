@@ -116,11 +116,9 @@ def mocked_is_excluded(name, image):
     return False
 
 
-@pytest.fixture
-def instance():
-    return {'timeout': '2', 'tags': INSTANCE_TAGS}
+INSTANCE = {'timeout': '2', 'tags': INSTANCE_TAGS}
 
 
 @pytest.fixture
 def check():
-    return FargateCheck('ecs_fargate', {}, {})
+    return FargateCheck('ecs_fargate', {}, [INSTANCE])
