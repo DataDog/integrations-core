@@ -35,7 +35,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
-from ..utils.tagging import GENERIC_TAGS
+from ..utils.tagging import GENERIC_TAGS, RESERVED_TAGS, TAGS_TO_RENAME
 from ..utils.tls import TlsContextWrapper
 
 try:
@@ -192,12 +192,29 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
+        self._manual_custom_tags = []
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
+
+        if isinstance(self.instance, dict):
+            if self.instance.get('tags'):
+                self._manual_custom_tags = [self.normalize_tag(tag) for tag in self.instance['tags']]
+                self.instance['tags'] = []
+            # Warn users they are using generic tags
+            additional_tags = []
+            for tag in self._manual_custom_tags:
+                tag_name = tag.split(':')[0]
+                if tag_name in RESERVED_TAGS:
+                    self.log.warning('{} is a reserved tag and is attached to Datadog feature, try to avoid using it.'.format(tag_name))
+                    if self.disable_generic_tags:
+                        additional_tags.append(self.degeneralise_tag(tag_name))
+                # elif tag_name in GENERIC_TAGS:
+                #     self.log.warning('{} is a generic tag, try to avoid using it.'.format(tag_name))
+            self._manual_custom_tags += additional_tags
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -508,7 +525,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        tags = self._normalize_tags_type(tags, metric_name=name)
+        tags = self._normalize_tags_type(tags, metric_name=name) + self._manual_custom_tags
         if hostname is None:
             hostname = ''
 
@@ -554,7 +571,7 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags or [], device_name, name)
+        tags = self._normalize_tags_type(tags or [], device_name, name) + self._manual_custom_tags
         if hostname is None:
             hostname = ''
 
@@ -736,7 +753,7 @@ class AgentCheck(object):
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
-        tags = self._normalize_tags_type(tags or [])
+        tags = self._normalize_tags_type(tags or []) + self._manual_custom_tags
         if hostname is None:
             hostname = ''
         if message is None:
@@ -1111,7 +1128,7 @@ class AgentCheck(object):
 
     def degeneralise_tag(self, tag):
         tag_name, value = tag.split(':', 1)
-        if tag_name in GENERIC_TAGS:
+        if tag_name in TAGS_TO_RENAME:
             new_name = '{}_{}'.format(self.name, tag_name)
             return '{}:{}'.format(new_name, value)
         else:

@@ -8,16 +8,26 @@ except ImportError:
     from ..stubs import tagger  # noqa: F401
 
 
+RESERVED_TAGS = {
+    'cluster',
+    'device',
+    'env',
+    'host',
+    'service',
+    'source',
+    'version',
+}
+
 GENERIC_TAGS = {
     'cluster_name',
     'clustername',
-    'cluster',
     'clusterid',
     'cluster_id',
-    'env',
     'host_name',
     'hostname',
-    'host',
-    'service',
-    'version',
+    'node',
+    'port',
+    'server',
 }
+
+TAGS_TO_RENAME = RESERVED_TAGS | GENERIC_TAGS
