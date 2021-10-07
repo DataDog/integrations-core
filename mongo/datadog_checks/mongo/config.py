@@ -15,16 +15,16 @@ class MongoConfig(object):
         if (
             instance.get('options', None) is not None and is_affirmative(instance.get('options').get("ssl", None))
         ) or is_affirmative(instance.get('ssl', None)):
-            ca_cert_dir = certifi.where()
+            ca_certs_dir = certifi.where()
         else:
-            ca_cert_dir = None
+            ca_certs_dir = None
         self.ssl_params = exclude_undefined_keys(
             {
                 'ssl': instance.get('ssl', None),
                 'ssl_keyfile': instance.get('ssl_keyfile', None),
                 'ssl_certfile': instance.get('ssl_certfile', None),
                 'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': instance.get('ssl_ca_certs', ca_cert_dir),
+                'ssl_ca_certs': instance.get('ssl_ca_certs', ca_certs_dir),
             }
         )
 
