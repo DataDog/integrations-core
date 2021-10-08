@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_scheduler
 
+## 2.1.1 / 2021-10-08
+
+* [Fixed] fix kube scheduler config. See [#10382](https://github.com/DataDog/integrations-core/pull/10382).
+
 ## 2.1.0 / 2021-10-04
 
 * [Added] Add runtime configuration validation. See [#8945](https://github.com/DataDog/integrations-core/pull/8945).
