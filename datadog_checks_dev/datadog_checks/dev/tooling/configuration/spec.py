@@ -139,8 +139,7 @@ def options_validator(options, loader, file_name, *sections):
 
         templates_resolved = False
         while 'template' in option:
-            if option.get('hidden', False):
-                hide_template = True
+            hide_template = option.get('hidden', False)
 
             overrides.update(option.pop('overrides', {}))
             try:
