@@ -27,12 +27,13 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][7]) to connect to Istio. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 #### Metric collection
-1. To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
+To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
     
     ```yaml
     init_config:
     
     instances:
+      - use_openmetrics: true
       - istiod_endpoint: http://istiod.istio-system:15014/metrics
       - istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
         exclude_labels:
@@ -52,9 +53,52 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
          - connection_security_policy
     ```
    
-       **Note**: `connectionID` Prometheus label is excluded, the conf.yaml.example also has a list of suggested labels to exclude.
+**Note**: `connectionID` Prometheus label is excluded, the `conf.yaml.example` also has a list of suggested labels to exclude.
 
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
+
+#### OpenMetrics V2 vs OpenMetrics V1
+Setting `use_openmetrics` to `true` will use the OpenMetrics V2 implementation of the check. 
+This change will be the default option as of Agent 7.33.x. However, setting `use_openmetrics: false` 
+will return to using the OpenMetrics V1 implementation. More information on this change can be found [here][23].
+
+The main differences between OpenMetrics V1 and OpenMetrics V2 are the metrics that are changed. All `*.count` and `*.sum` have changed type from `gauge` to `monotonic_count`.
+The following metrics are new in OpenMetrics V2:
+
+```shell
+istio.galley.validation.config_update_error.count
+istio.galley.validation.config_update.count
+istio.galley.validation.failed.count
+istio.go.memstats.frees.count
+istio.go.memstats.lookups.count
+istio.go.memstats.mallocs.count
+istio.grpc.server.handled.count
+istio.grpc.server.msg_received.count
+istio.grpc.server.msg_sent.count
+istio.grpc.server.started.count
+istio.pilot.inbound_updates.count
+istio.pilot.k8s.cfg_events.count
+istio.pilot.k8s.reg_events.count
+istio.pilot.push.triggers.count
+istio.pilot.xds.pushes.count
+istio.process.cpu_seconds.count
+istio.sidecar_injection.requests.count
+istio.sidecar_injection.success.count
+istio.mesh.tcp.connections_closed.count
+istio.mesh.tcp.connections_opened.count
+istio.mesh.tcp.received_bytes.count
+istio.mesh.tcp.send_bytes.count
+istio.grpc.server.handling_seconds.bucket
+istio.pilot.proxy_convergence_time.bucket
+istio.pilot.proxy_queue_time.bucket
+istio.pilot.xds.push.time.bucket
+istio.mesh.request.duration.milliseconds.bucket
+istio.mesh.response.size.bucket
+istio.mesh.request.size.bucket
+```
+
+To view the metrics that are collected using OpenMetrics V1, see [here][24]. 
+To view the `conf.yaml.example` config parameters for OpenMetrics V1, see [here][25].
 
 ##### Disable sidecar injection for Datadog Agent pods
 

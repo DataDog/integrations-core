@@ -352,5 +352,5 @@ istio.pilot.proxy_convergence_time.bucket,count,,second,,[Istio v1.5+] Bucket of
 istio.pilot.proxy_queue_time.bucket,count,,,,[Istio v1.5+] Bucket of observed values for when proxy is in a push queue before being dequeued,0,istio,proxy queue time bucket
 istio.pilot.xds.push.time.bucket,count,,,,[Istio v1.5+] Bucket of observation of total time Pilot takes a push,0,istio,xds push time bucket
 istio.mesh.request.duration.milliseconds.bucket,count,,millisecond,,[Istio v1.5+] Bucket of observed values for duration of requests,0,istio,request duration milliseconds bucket
-istio.mesh.response.size.bucket,count,,response,,[Istio v1.5+] Bucket of response sizes,0,istio,response sizes bucker
+istio.mesh.response.size.bucket,count,,response,,[Istio v1.5+] Bucket of response sizes,0,istio,response sizes bucket
 istio.mesh.request.size.bucket,count,,request,,[Istio v1.5+] Bucket of request sizes,0,istio,request sizes bucket
