@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.4.1 / 2021-10-08
+
+* [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).
+
 ## 14.4.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
