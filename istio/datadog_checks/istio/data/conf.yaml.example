@@ -245,11 +245,6 @@ instances:
     #
     # cache_shared_labels: true
 
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-    #
-    # request_size: 16
-
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
     ## from being parsed.
@@ -548,6 +543,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -557,6 +557,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param use_openmetrics - boolean - optional - default: true
     ## Use the latest OpenMetrics implementation for more features and better performance.
