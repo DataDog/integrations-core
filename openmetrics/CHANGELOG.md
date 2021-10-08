@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.15.1 / 2021-10-08
+
+* [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).
+
 ## 1.15.0 / 2021-10-04
 
 * [Added] Add runtime configuration validation. See [#8965](https://github.com/DataDog/integrations-core/pull/8965).
