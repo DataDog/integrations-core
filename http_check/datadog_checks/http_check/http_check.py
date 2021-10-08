@@ -253,7 +253,6 @@ class HTTPCheck(AgentCheck):
             if status is AgentCheck.OK:
                 msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
-        self.log.debug('WHAT IS HEADER end %s', self.http.options['headers'])
 
     def _get_service_checks_tags(self, instance):
         instance_name = self.normalize_tag(instance['name'])
