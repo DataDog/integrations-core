@@ -195,8 +195,6 @@ def options_validator(options, loader, file_name, *sections):
         if not templates_resolved:
             continue
 
-        option.setdefault('hidden', hide_template)
-
         if 'name' not in option:
             loader.errors.append(
                 '{}, {}, {}option #{}: Every option must contain a `name` attribute'.format(
@@ -213,7 +211,7 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', False)
+        option.setdefault('hidden', hide_template)
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
