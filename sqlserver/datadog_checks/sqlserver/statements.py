@@ -128,7 +128,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         )
         self._state = StatementMetrics()
         self._init_caches()
-        self._conn_extra_key = "dbm-"
+        self._conn_key_prefix = "dbm-"
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -212,8 +212,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         try:
             # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
             # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
-            with self.check.connection_manager.open_managed_default_connection(extra_key=self._conn_extra_key):
-                with self.check.connection_manager.get_managed_cursor(extra_key=self._conn_extra_key) as cursor:
+            with self.check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+                with self.check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                     rows = self._collect_metrics_rows(cursor)
                     if not rows:
                         return

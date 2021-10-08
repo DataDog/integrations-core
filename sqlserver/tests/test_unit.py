@@ -29,7 +29,7 @@ def test_get_cursor(instance_sql2017):
     check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
     check.initialize_connection()
     with pytest.raises(SQLConnectionError):
-        check.connection_manager.get_cursor('foo')
+        check.connection.get_cursor('foo')
 
 
 def test_missing_db(instance_sql2017, dd_run_check):
