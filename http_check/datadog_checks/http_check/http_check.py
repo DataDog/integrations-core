@@ -77,7 +77,11 @@ class HTTPCheck(AgentCheck):
         timeout = self.http.options['timeout'][0]
         start = time.time()
         # allows default headers to be included based on `include_default_headers` flag
-        self.http.options['headers'] = headers
+        # Preserve authorization token if present on headers
+        if instance.get('auth_token') and 'Authorization' in self.http.options['headers']:
+            self.http.options['headers'].update(headers)
+        else:
+            self.http.options['headers'] = headers
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
@@ -249,6 +253,7 @@ class HTTPCheck(AgentCheck):
             if status is AgentCheck.OK:
                 msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
+        self.log.debug('WHAT IS HEADER end %s', self.http.options['headers'])
 
     def _get_service_checks_tags(self, instance):
         instance_name = self.normalize_tag(instance['name'])
