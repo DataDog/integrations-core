@@ -331,7 +331,7 @@ istio.galley.validation.failed.count,count,,,,[Istio v1.5+] Count of resource va
 istio.go.memstats.frees.count,count,,,,[Istio v1.5+] Total number of frees.,0,istio, frees count
 istio.go.memstats.lookups.count,count,,operation,,[Istio v1.5+] Number of lookups,0,istio,lookups count
 istio.go.memstats.mallocs.count,count,,byte,,[Istio v1.5+] Number of mallocs,0,istio,mallocs count
-istio.grpc.server.handled.count,count,,request,,[Istio v1.5+] "Total number of fully handled requests, with responses",0,istio,
+istio.grpc.server.handled.count,count,,request,,"[Istio v1.5+] Total number of fully handled requests, with responses",0,istio,
 istio.grpc.server.msg_received.count,count,,message,,[Istio v1.5+] Total number of RPC stream messages received on the server.,0,istio,
 istio.grpc.server.msg_sent.count,count,,message,,[Istio v1.5+] Total number of messages sent,0,istio,
 istio.grpc.server.started.count,count,,,,[Istio v1.5+] Total number of RPCs started on the server.,0,istio,
@@ -339,7 +339,7 @@ istio.pilot.inbound_updates.count,count,,,,[Istio v1.5+] Total number of updates
 istio.pilot.k8s.cfg_events.count,count,,event,,[Istio v1.5+] Events from k8s config,0,istio,
 istio.pilot.k8s.reg_events.count,count,,event,,[Istio v1.5+] Events from k8s registry,0,istio,
 istio.pilot.push.triggers.count,count,,,,[Istio v1.5+] Total number of times a push was triggered,0,istio,
-istio.pilot.xds.pushes.count,count,,,,[Istio v1.5+] "Pilot build and send errors for lds, rds, cds and eds.",0,istio,
+istio.pilot.xds.pushes.count,count,,,,"[Istio v1.5+] Pilot build and send errors for lds, rds, cds and eds.",0,istio,
 istio.process.cpu_seconds.count,count,,second,,[Istio v1.5+] Total user and system CPU time spent in seconds.,0,istio,
 istio.sidecar_injection.requests.count,count,,request,,[Istio v1.5+] Total number of sidecar injection requests,0,istio,
 istio.sidecar_injection.success.count,count,,request,,[Istio v1.5+] Total number of successful sidecar injection requests,0,istio,
