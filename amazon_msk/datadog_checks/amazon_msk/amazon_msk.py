@@ -66,7 +66,6 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
             self.log.debug("Boto Config parameters: %s", self.instance.get('boto_config'))
             self._boto_config = None
 
-        self.log.debug("HELLO")
         instance = self.instance.copy()
         instance['prometheus_url'] = 'necessary for scraper creation'
 
