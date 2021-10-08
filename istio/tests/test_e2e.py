@@ -14,6 +14,7 @@ INTERMITTENT_METRICS = [
     'istio.pilot.rds_expired_nonce',
 ]
 
+
 @pytest.mark.e2e
 def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)

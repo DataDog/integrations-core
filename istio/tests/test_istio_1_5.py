@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import requests_mock
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
 
 from . import common

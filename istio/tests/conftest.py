@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from copy import deepcopy
+
 import pytest
 
 from datadog_checks.dev import get_here
@@ -26,6 +27,7 @@ def instance_openmetrics_v2(dd_get_state):
     openmetrics_v2 = deepcopy(dd_get_state('istio_instance', default={}))
     openmetrics_v2['use_openmetrics'] = 'true'
     return openmetrics_v2
+
 
 def setup_istio():
     run_command(
@@ -69,9 +71,7 @@ def dd_environment(dd_save_state):
                 )
 
                 istiod_endpoint = 'http://{}:{}/metrics'.format(istiod_host, istiod_port)
-                instance = {'istiod_endpoint': istiod_endpoint,
-                            'use_openmetrics': 'false'
-                            }
+                instance = {'istiod_endpoint': istiod_endpoint, 'use_openmetrics': 'false'}
 
                 # save this instance to use for openmetrics_v2 instance, since the endpoint is different each run
                 dd_save_state("istio_instance", instance)
