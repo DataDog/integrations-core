@@ -180,13 +180,7 @@ class MediaGalleryValidator(BaseManifestValidator):
             image_url = media['image_url']
 
             # Image_url must lead to png or jpg
-            accepted_file_extensions = ('.png', '.jpg', '.PNG', '.JPG')
-            valid_file = False
-            for extension in accepted_file_extensions:
-                if extension in image_url:
-                    valid_file = True
-                    break
-            if not valid_file:
+            if '.png' not in image_url and '.jpg' not in lower(image_url):
                 output = f'  The filetype for media #{i} must be either `.jpg` or `.png`.'
                 self.fail(output)
 
