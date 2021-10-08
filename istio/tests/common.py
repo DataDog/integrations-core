@@ -23,6 +23,7 @@ MOCK_V2_MESH_OVERRIDE_INSTANCE = {
 
 MOCK_LEGACY_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': False,
 }
 
 MOCK_V2_ISTIOD_INSTANCE = {
@@ -30,7 +31,10 @@ MOCK_V2_ISTIOD_INSTANCE = {
     'use_openmetrics': True,
 }
 
-MOCK_LEGACY_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
+MOCK_LEGACY_ISTIOD_INSTANCE = {
+    'istiod_endpoint': 'http://localhost:8080/metrics',
+    'use_openmetrics': False,
+}
 
 CONFIG_EXCLUDE_LABELS = [
     "source_version",
