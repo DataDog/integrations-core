@@ -28,7 +28,7 @@ class SQLConnectionError(Exception):
     pass
 
 
-class Connection(object):
+class ConnectionManager(object):
     """Manages the connection to a SQL Server instance."""
 
     DEFAULT_COMMAND_TIMEOUT = 5
@@ -75,17 +75,17 @@ class Connection(object):
         self.log.debug('Connection initialized.')
 
     @contextmanager
-    def get_managed_cursor(self):
-        cursor = self.get_cursor(self.DEFAULT_DB_KEY)
+    def get_managed_cursor(self, extra_key=None):
+        cursor = self.get_cursor(self.DEFAULT_DB_KEY, extra_key=extra_key)
         yield cursor
         self.close_cursor(cursor)
 
-    def get_cursor(self, db_key, db_name=None):
+    def get_cursor(self, db_key, db_name=None, extra_key=None):
         """
         Return a cursor to execute query against the db
         Cursor are cached in the self.connections dict
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, extra_key)
         try:
             conn = self._conns[conn_key]
         except KeyError:
@@ -122,24 +122,24 @@ class Connection(object):
             yield
 
     @contextmanager
-    def open_managed_default_connection(self):
-        with self._open_managed_db_connections(self.DEFAULT_DB_KEY):
+    def open_managed_default_connection(self, extra_key=None):
+        with self._open_managed_db_connections(self.DEFAULT_DB_KEY, extra_key=extra_key):
             yield
 
     @contextmanager
-    def _open_managed_db_connections(self, db_key, db_name=None):
-        self.open_db_connections(db_key, db_name)
+    def _open_managed_db_connections(self, db_key, db_name=None, extra_key=None):
+        self.open_db_connections(db_key, db_name, extra_key=extra_key)
         yield
-        self.close_db_connections(db_key, db_name)
+        self.close_db_connections(db_key, db_name, extra_key=extra_key)
 
-    def open_db_connections(self, db_key, db_name=None, is_default=True):
+    def open_db_connections(self, db_key, db_name=None, is_default=True, extra_key=None):
         """
         We open the db connections explicitly, so we can ensure they are open
         before we use them, and are closable, once we are finished. Open db
         connections keep locks on the db, presenting issues such as the SQL
         Server Agent being unable to stop.
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, extra_key)
 
         _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
 
@@ -158,7 +158,6 @@ class Connection(object):
                 rawconn = pyodbc.connect(cs, timeout=self.timeout)
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
-
             if conn_key not in self._conns:
                 self._conns[conn_key] = rawconn
             else:
@@ -184,13 +183,13 @@ class Connection(object):
 
             raise_from(SQLConnectionError(message), None)
 
-    def close_db_connections(self, db_key, db_name=None):
+    def close_db_connections(self, db_key, db_name=None, extra_key=None):
         """
         We close the db connections explicitly b/c when we don't they keep
         locks on the db. This presents as issues such as the SQL Server Agent
         being unable to stop.
         """
-        conn_key = self._conn_key(db_key, db_name)
+        conn_key = self._conn_key(db_key, db_name, extra_key)
         if conn_key not in self._conns:
             return
 
@@ -275,10 +274,12 @@ class Connection(object):
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _conn_key(self, db_key, db_name=None):
+    def _conn_key(self, db_key, db_name=None, extra_key=None):
         """Return a key to use for the connection cache"""
         dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
-        return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
+        if not extra_key:
+            extra_key = ""
+        return '{}{}:{}:{}:{}:{}:{}'.format(extra_key, dsn, host, username, password, database, driver)
 
     def _connection_options_validation(self, db_key, db_name):
         cs = self.instance.get('connection_string')

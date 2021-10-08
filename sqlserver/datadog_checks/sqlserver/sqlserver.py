@@ -23,7 +23,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from . import metrics
-from .connection import Connection, SQLConnectionError
+from .connection_manager import ConnectionManager, SQLConnectionError
 from .const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
@@ -75,7 +75,7 @@ class SQLServer(AgentCheck):
 
         self._resolved_hostname = None
         self._agent_hostname = None
-        self.connection = None
+        self.connection_manager = None
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(list)
@@ -134,8 +134,8 @@ class SQLServer(AgentCheck):
 
     def load_static_information(self):
         if 'version' not in self.static_info_cache:
-            with self.connection.open_managed_default_connection():
-                with self.connection.get_managed_cursor() as cursor:
+            with self.connection_manager.open_managed_default_connection():
+                with self.connection_manager.get_managed_cursor() as cursor:
                     cursor.execute("select @@version")
                     results = cursor.fetchall()
                     if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
@@ -154,17 +154,17 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
+        self.connection_manager = ConnectionManager(self.init_config, self.instance, self.handle_service_check)
 
         # Pre-process the list of metrics to collect
         try:
             # check to see if the database exists before we try any connections to it
-            db_exists, context = self.connection.check_database()
+            db_exists, context = self.connection_manager.check_database()
 
             if db_exists:
                 if self.instance.get('stored_procedure') is None:
-                    with self.connection.open_managed_default_connection():
-                        with self.connection.get_managed_cursor() as cursor:
+                    with self.connection_manager.open_managed_default_connection():
+                        with self.connection_manager.get_managed_cursor() as cursor:
                             self.autodiscover_databases(cursor)
                         self._make_metric_list_to_collect(self.custom_metrics)
             else:
@@ -286,7 +286,7 @@ class SQLServer(AgentCheck):
         # Load database statistics
         for name, table, column in DATABASE_METRICS:
             # include database as a filter option
-            db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            db_names = self.databases or [self.instance.get('database', self.connection_manager.DEFAULT_DATABASE)]
             for db_name in db_names:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -333,7 +333,7 @@ class SQLServer(AgentCheck):
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            db_names = self.databases or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            db_names = self.databases or [self.instance.get('database', self.connection_manager.DEFAULT_DATABASE)]
 
             if not db_fragmentation_object_names:
                 self.log.debug(
@@ -446,7 +446,7 @@ class SQLServer(AgentCheck):
         If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         """
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection_manager.get_managed_cursor() as cursor:
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_type,) = cursor.fetchone()
             if sql_type == PERF_LARGE_RAW_BASE:
@@ -510,8 +510,8 @@ class SQLServer(AgentCheck):
                 self.collect_metrics()
             if self.autodiscovery:
                 for db_name in self.databases:
-                    if db_name != self.connection.DEFAULT_DATABASE:
-                        self.connection.check_database_conns(db_name)
+                    if db_name != self.connection_manager.DEFAULT_DATABASE:
+                        self.connection_manager.check_database_conns(db_name)
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
 
@@ -521,8 +521,8 @@ class SQLServer(AgentCheck):
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
 
-        with self.connection.open_managed_default_connection():
-            with self.connection.get_managed_cursor() as cursor:
+        with self.connection_manager.open_managed_default_connection():
+            with self.connection_manager.get_managed_cursor() as cursor:
                 # initiate autodiscovery or if the server was down at check __init__ key could be missing.
                 if self.autodiscover_databases(cursor) or not self.instance_metrics:
                     self._make_metric_list_to_collect(self.custom_metrics)
@@ -561,7 +561,7 @@ class SQLServer(AgentCheck):
             self._query_manager.execute()
 
     def execute_query_raw(self, query):
-        with self.connection.get_managed_cursor() as cursor:
+        with self.connection_manager.get_managed_cursor() as cursor:
             cursor.execute(query)
             return cursor.fetchall()
 
@@ -575,12 +575,12 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
-            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
+            self.connection_manager.open_db_connections(self.connection_manager.DEFAULT_DB_KEY)
+            cursor = self.connection_manager.get_cursor(self.connection_manager.DEFAULT_DB_KEY)
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.get_connector() == 'adodbapi':
+                if self.connection_manager.get_connector() == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.
@@ -606,8 +606,8 @@ class SQLServer(AgentCheck):
                 self.log.warning("Could not call procedure %s: %s", proc, e)
                 raise e
 
-            self.connection.close_cursor(cursor)
-            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
+            self.connection_manager.close_cursor(cursor)
+            self.connection_manager.close_db_connections(self.connection_manager.DEFAULT_DB_KEY)
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 
@@ -616,8 +616,8 @@ class SQLServer(AgentCheck):
         check to see if the guard SQL returns a single column containing 0 or 1
         We return true if 1, else False
         """
-        self.connection.open_db_connections(self.connection.PROC_GUARD_DB_KEY)
-        cursor = self.connection.get_cursor(self.connection.PROC_GUARD_DB_KEY)
+        self.connection_manager.open_db_connections(self.connection_manager.PROC_GUARD_DB_KEY)
+        cursor = self.connection_manager.get_cursor(self.connection_manager.PROC_GUARD_DB_KEY)
 
         should_run = False
         try:
@@ -627,6 +627,6 @@ class SQLServer(AgentCheck):
         except Exception as e:
             self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
 
-        self.connection.close_cursor(cursor)
-        self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
+        self.connection_manager.close_cursor(cursor)
+        self.connection_manager.close_db_connections(self.connection_manager.PROC_GUARD_DB_KEY)
         return should_run

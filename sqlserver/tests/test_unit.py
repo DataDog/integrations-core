@@ -29,27 +29,31 @@ def test_get_cursor(instance_sql2017):
     check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
     check.initialize_connection()
     with pytest.raises(SQLConnectionError):
-        check.connection.get_cursor('foo')
+        check.connection_manager.get_cursor('foo')
 
 
 def test_missing_db(instance_sql2017, dd_run_check):
     instance = copy.copy(instance_sql2017)
     instance['ignore_missing_database'] = False
-    with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
+    with mock.patch(
+        'datadog_checks.sqlserver.connection_manager.ConnectionManager.check_database', return_value=(False, 'db')
+    ):
         with pytest.raises(ConfigurationError):
             check = SQLServer(CHECK_NAME, {}, [instance])
             check.initialize_connection()
 
     instance['ignore_missing_database'] = True
-    with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
+    with mock.patch(
+        'datadog_checks.sqlserver.connection_manager.ConnectionManager.check_database', return_value=(False, 'db')
+    ):
         check = SQLServer(CHECK_NAME, {}, [instance])
         check.initialize_connection()
         dd_run_check(check)
         assert check.do_check is False
 
 
-@mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
-@mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
+@mock.patch('datadog_checks.sqlserver.connection_manager.ConnectionManager.open_managed_default_database')
+@mock.patch('datadog_checks.sqlserver.connection_manager.ConnectionManager.get_cursor')
 def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
     Row = namedtuple('Row', 'name,collation_name')
     db_results = [
