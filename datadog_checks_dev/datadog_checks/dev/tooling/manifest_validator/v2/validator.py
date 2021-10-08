@@ -149,7 +149,6 @@ class MediaGalleryValidator(BaseManifestValidator):
         if num_media_elements > self.MAX_MEDIA_ELEMENTS:
             output = f'  The maximum number of media elements is 8, there are currently {num_media_elements}.'
             self.fail(output)
-            return
 
         # Validate each media object
         video_count = 0
@@ -201,8 +200,7 @@ class MediaGalleryValidator(BaseManifestValidator):
                 if file_size > 1000000:  # If file size greater than 1 megabyte, fail
                     output = f'  File size for media #{i} must be smaller than 1 mb, currently {file_size} bytes.'
                     self.fail(output)
-            except OSError as err:
-                print(err)
+            except OSError:
                 output = f'  File not found for media #{i} at `{image_url}`, please fix the path.'
                 self.fail(output)
 
@@ -221,7 +219,7 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         common.ImmutableAttributesValidator(version=V2),
         common.LogsCategoryValidator(version=V2),
         DisplayOnPublicValidator(version=V2),
-        MediaGalleryValidator(is_marketplace, version=V2, check_in_extras=False),
+        MediaGalleryValidator(is_marketplace, is_extras, version=V2),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]
