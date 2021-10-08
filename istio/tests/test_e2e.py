@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+import platform
 
 from datadog_checks.istio import Istio
 
@@ -29,6 +30,7 @@ def test_e2e_openmetrics_v1(dd_agent_check):
             aggregator.assert_metric(metric)
 
 
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
 def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
