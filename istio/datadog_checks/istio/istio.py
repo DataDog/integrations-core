@@ -45,12 +45,6 @@ class Istio(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        # if using openmetrics_endpoint or use_openmetrics is true , then use openmetricsV2
-        # not sure if i should do this, since check.py fills in openmetrics_endpoint
-
-        # else if using prometheus_url or using istiod_endpoint, then use openmetricsV1
-
-        # else, use legacy_1_4
         if is_affirmative(instance.get('use_openmetrics', True)):
             if PY2:
                 raise ConfigurationError(
