@@ -59,7 +59,6 @@ validate-consul-sync:
   image: $VALIDATE_CONSUL_SYNC
   only:
   - schedules
-  - paul/consul-sync
   variables:
     INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
     INTEGRATIONS_EXTRAS_ROOT: integrations-extras
@@ -153,7 +152,7 @@ notify-slack:
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
-  - paul/consul-sync
+  - schedules
   cache:
     <<: *slack-cache
   script:
@@ -162,13 +161,14 @@ notify-slack:
     - |
       if [[ -s $CI_PROJECT_DIR/errors_logs.txt ]]; then
           export VALIDATION_ERROR="true"
+          cat $CI_PROJECT_DIR/errors_logs.txt
           ERRORS=$(cat $CI_PROJECT_DIR/errors_logs.txt)
-          echo $ERRORS
           MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
       fi
       if [[ -s $CI_PROJECT_DIR/errors_sync.txt ]]; then
           export VALIDATION_ERROR="true"
+          cat $CI_PROJECT_DIR/errors_sync.txt
           ERRORS=$(cat $CI_PROJECT_DIR/errors_sync.txt)
           echo $ERRORS
           MESSAGE="Sync pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
@@ -298,12 +298,11 @@ validate-agent-build-builder:
 validate-consul-sync-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  # only:
-  #   changes:
-  #     - .gitlab/validate-consul-sync/**
-  #   refs:
-  #     - master
-  #     - paul/consul-sync
+  only:
+    changes:
+      - .gitlab/validate-consul-sync/**
+    refs:
+      - master
   script:
     - cd .gitlab/validate-consul-sync/
     - docker build --tag $VALIDATE_CONSUL_SYNC .
