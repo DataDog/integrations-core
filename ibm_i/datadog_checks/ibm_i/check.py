@@ -229,12 +229,17 @@ class IbmICheck(AgentCheck, ConfigMixin):
             else:
                 query_list.append(queries.get_base_disk_usage_72(self.config.query_timeout))
 
+            hostname = system_info.hostname
+            # Override hostname with configuration
+            if self.config.hostname:
+                hostname = self.config.hostname
+
             self._query_manager = QueryManager(
                 self,
                 self.execute_query,
                 tags=self.config.tags,
                 queries=query_list,
-                hostname=system_info.hostname,
+                hostname=hostname,
                 error_handler=self.handle_query_error,
             )
             self._query_manager.compile_queries()
