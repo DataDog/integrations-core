@@ -7,6 +7,7 @@ import json
 import os
 import re
 from base64 import urlsafe_b64encode
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
@@ -232,6 +233,13 @@ def dd_save_state():
     return save_state
 
 
+@pytest.fixture(scope='session')
+def dd_default_hostname():
+    import socket
+
+    return socket.gethostname()
+
+
 @pytest.fixture
 def mock_http_response(mocker):
     # Lazily import `requests` as it may be costly under certain conditions
@@ -242,6 +250,48 @@ def mock_http_response(mocker):
     yield lambda *args, **kwargs: mocker.patch(
         kwargs.pop('method', 'requests.get'), return_value=MockResponse(*args, **kwargs)
     )
+
+
+@pytest.fixture
+def mock_performance_objects(mocker, dd_default_hostname):
+    def mock_perf_objects(
+        perf_objects,  # type: Dict[str, Tuple[List[Optional[str]], Dict[str, List[float]]]]
+        server=dd_default_hostname,  # type: str
+    ):
+        import win32pdh
+
+        mocker.patch('win32pdh.OpenQuery')
+        mocker.patch('win32pdh.CollectQueryData')
+        mocker.patch('win32pdh.AddCounter', side_effect=lambda _, path: path)
+        mocker.patch('win32pdh.AddEnglishCounter', side_effect=lambda _, path: path)
+        mocker.patch('win32pdh.RemoveCounter')
+        mocker.patch('win32pdh.EnumObjects', return_value=list(perf_objects))
+
+        def enum_object_items(data_source, machine_name, object_name, detail_level):
+            instances, counter_values = perf_objects[object_name]
+            return list(counter_values), instances if instances != [None] else []
+
+        mocker.patch('win32pdh.EnumObjectItems', side_effect=enum_object_items)
+
+        counters = {}
+        for object_name, data in perf_objects.items():
+            instances, counter_values = data
+            instance_counts = {instance_name: 0 for instance_name in instances}
+            instance_indices = []
+            for instance_name in instances:
+                instance_indices.append(instance_counts[instance_name])
+                instance_counts[instance_name] += 1
+
+            for counter_name, values in counter_values.items():
+                for instance_name, index, value in zip(instances, instance_indices, values):
+                    counters[
+                        win32pdh.MakeCounterPath((server, object_name, instance_name, None, index, counter_name))
+                    ] = value
+
+        mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
+        mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
+
+    return mock_perf_objects
 
 
 def pytest_configure(config):
