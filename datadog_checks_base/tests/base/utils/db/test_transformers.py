@@ -33,10 +33,10 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'affirmative:true']
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'affirmative:true']
         )
         aggregator.assert_metric(
-            'test.foo', 7, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'affirmative:false']
+            'test.foo', 7, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'affirmative:false']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -64,19 +64,19 @@ class TestColumnTransformers:
             'test.foo',
             5,
             metric_type=aggregator.GAUGE,
-            tags=['test:foo', 'test:bar', 'test:tag1', 'foo_tag:tagA', 'foo_tag:tagB'],
+            tags=['test:bar', 'test:foo', 'test:tag1', 'foo_tag:tagA', 'foo_tag:tagB'],
         )
         aggregator.assert_metric(
             'test.foo',
             7,
             metric_type=aggregator.GAUGE,
-            tags=['test:foo', 'test:bar', 'test:tag2', 'foo_tag:tagC', 'foo_tag:tagD'],
+            tags=['test:bar', 'test:foo', 'test:tag2', 'foo_tag:tagC', 'foo_tag:tagD'],
         )
         aggregator.assert_metric(
             'test.foo',
             9,
             metric_type=aggregator.GAUGE,
-            tags=['test:foo', 'test:bar', 'test:tag3', 'foo_tag:tagE', 'foo_tag:tagF'],
+            tags=['test:bar', 'test:foo', 'test:tag3', 'foo_tag:tagE', 'foo_tag:tagF'],
         )
         aggregator.assert_all_metrics_covered()
 
@@ -95,16 +95,16 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo.total', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo.total', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'test.foo.count', 5, metric_type=aggregator.MONOTONIC_COUNT, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo.count', 5, metric_type=aggregator.MONOTONIC_COUNT, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'test.foo.total', 7, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag2']
+            'test.foo.total', 7, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag2']
         )
         aggregator.assert_metric(
-            'test.foo.count', 7, metric_type=aggregator.MONOTONIC_COUNT, tags=['test:foo', 'test:bar', 'test:tag2']
+            'test.foo.count', 7, metric_type=aggregator.MONOTONIC_COUNT, tags=['test:bar', 'test:foo', 'test:tag2']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -126,7 +126,7 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 500, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 500, metric_type=aggregator.RATE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -148,7 +148,7 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 500, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 500, metric_type=aggregator.RATE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -170,7 +170,7 @@ class TestColumnTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 520, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 520, metric_type=aggregator.RATE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -200,7 +200,7 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
-        aggregator.assert_metric('test.global', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
+        aggregator.assert_metric('test.global', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo'])
         aggregator.assert_all_metrics_covered()
 
     def test_match_local(self, aggregator):
@@ -229,7 +229,7 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
-        aggregator.assert_metric('test.local', 7, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
+        aggregator.assert_metric('test.local', 7, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo'])
         aggregator.assert_all_metrics_covered()
 
     def test_match_none(self, aggregator):
@@ -276,7 +276,7 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
-        aggregator.assert_service_check('test.foo', 0, tags=['test:foo', 'test:bar'])
+        aggregator.assert_service_check('test.foo', 0, tags=['test:bar', 'test:foo'])
         aggregator.assert_all_metrics_covered()
 
     def test_service_check_unknown(self, aggregator):
@@ -295,7 +295,7 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
-        aggregator.assert_service_check('test.foo', 3, message='baz', tags=['test:foo', 'test:bar'])
+        aggregator.assert_service_check('test.foo', 3, message='baz', tags=['test:bar', 'test:foo'])
         aggregator.assert_all_metrics_covered()
 
     def test_time_elapsed_native(self, aggregator):
@@ -322,7 +322,7 @@ class TestColumnTransformers:
 
         assert 3599 < m.value < 3601
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
     def test_time_elapsed_native_default(self, aggregator):
         query_manager = create_query_manager(
@@ -345,7 +345,7 @@ class TestColumnTransformers:
 
         assert 3599 < m.value < 3601
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
     def test_time_elapsed_unix_time(self, aggregator):
         query_manager = create_query_manager(
@@ -371,7 +371,7 @@ class TestColumnTransformers:
 
         assert 3599 < m.value < 3601
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
     def test_time_elapsed_format(self, aggregator):
         time_format = '%Y-%m-%dT%H-%M-%S%Z'
@@ -398,7 +398,7 @@ class TestColumnTransformers:
 
         assert abs(m.value - 3600) < 2
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
     def test_time_elapsed_datetime_naive(self, aggregator):
         query_manager = create_query_manager(
@@ -424,7 +424,7 @@ class TestColumnTransformers:
 
         assert 3599 < m.value < 3601
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
     def test_time_elapsed_datetime_aware(self, aggregator):
         query_manager = create_query_manager(
@@ -450,7 +450,7 @@ class TestColumnTransformers:
 
         assert 3599 < m.value < 3601
         assert m.type == aggregator.GAUGE
-        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+        assert m.tags == ['test:bar', 'test:foo', 'test:tag1']
 
 
 class TestExtraTransformers:
@@ -472,10 +472,10 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -495,10 +495,10 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -520,10 +520,10 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -546,10 +546,10 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'src.cube', 8, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'src.cube', 8, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -576,10 +576,10 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.foo', 10, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.foo', 10, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'temp.pct', 500, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'temp.pct', 500, metric_type=aggregator.RATE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
 
@@ -603,12 +603,12 @@ class TestExtraTransformers:
         query_manager.execute()
 
         aggregator.assert_metric(
-            'test.part', 3, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.part', 3, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'test.total', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'test.total', 5, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_metric(
-            'percent', 60, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+            'percent', 60, metric_type=aggregator.GAUGE, tags=['test:bar', 'test:foo', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()

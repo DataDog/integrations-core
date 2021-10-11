@@ -15,7 +15,7 @@ from os.path import basename
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import PY2, binary_type, iteritems, raise_from, text_type
+from six import PY2, binary_type, iteritems, raise_from, string_types, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -200,9 +200,8 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        if isinstance(self.instance, dict):
-            if self.instance.get('tags'):
-                self._static_tags = [self.normalize_tag(tag) for tag in self.instance['tags']]
+        if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
+            self._static_tags = [self.normalize_tag(tag) for tag in self.instance['tags'] if isinstance(tag, string_types)]
             # Warn users they are using generic tags
             additional_tags = []
             for tag in self._static_tags:
@@ -214,6 +213,12 @@ class AgentCheck(object):
                 # elif tag_name in GENERIC_TAGS:
                 #     self.log.warning('{} is a generic tag, try to avoid using it.'.format(tag_name))
             self._static_tags += additional_tags
+
+            # Openmetrics compatibility
+            ignore_tags = self.instance.get('ignore_tags', [])
+            if ignore_tags:
+                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+                self._static_tags = [tag for tag in self._static_tags if not ignored_tags_re.search(tag)]
 
         # TODO: Remove with Agent 5
         # Set proxy settings
