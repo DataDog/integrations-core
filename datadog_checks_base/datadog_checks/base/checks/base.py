@@ -35,7 +35,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
-from ..utils.tagging import GENERIC_TAGS, RESERVED_TAGS, TAGS_TO_RENAME
+from ..utils.tagging import RESERVED_TAGS, TAGS_TO_RENAME
 from ..utils.tls import TlsContextWrapper
 
 try:
@@ -201,17 +201,19 @@ class AgentCheck(object):
         self.log = CheckLoggingAdapter(logger, self)
 
         if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
-            self._static_tags = [self.normalize_tag(tag) for tag in self.instance['tags'] if isinstance(tag, string_types)]
+            self._static_tags = [tag for tag in self.instance['tags'] if isinstance(tag, string_types)]
             # Warn users they are using generic tags
             additional_tags = []
             for tag in self._static_tags:
-                tag_name = tag.split(':')[0]
+                tag_name = self.normalize_tag(tag).split(':')[0]
                 if tag_name in RESERVED_TAGS:
-                    self.log.warning('{} is a reserved tag and is attached to Datadog feature, try to avoid using it.'.format(tag_name))
+                    self.log.warning(
+                        '{} is a reserved tag and is attached to Datadog feature, try to avoid using it.'.format(
+                            tag_name
+                        )
+                    )
                     if self.disable_generic_tags:
                         additional_tags.append(self.degeneralise_tag(tag_name))
-                # elif tag_name in GENERIC_TAGS:
-                #     self.log.warning('{} is a generic tag, try to avoid using it.'.format(tag_name))
             self._static_tags += additional_tags
 
             # Openmetrics compatibility
@@ -529,7 +531,9 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        tags = self._normalize_tags_type(tags, metric_name=name) + self._static_tags
+        tags = self._normalize_tags_type(tags, metric_name=name) + [
+            self.normalize_tag(tag) for tag in self._static_tags
+        ]
         if hostname is None:
             hostname = ''
 
@@ -575,7 +579,9 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags or [], device_name, name) + self._static_tags
+        tags = self._normalize_tags_type(tags or [], device_name, name) + [
+            self.normalize_tag(tag) for tag in self._static_tags
+        ]
         if hostname is None:
             hostname = ''
 
@@ -757,7 +763,7 @@ class AgentCheck(object):
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
-        tags = self._normalize_tags_type(tags or []) + self._static_tags
+        tags = self._normalize_tags_type(tags or []) + [self.normalize_tag(tag) for tag in self._static_tags]
         if hostname is None:
             hostname = ''
         if message is None:

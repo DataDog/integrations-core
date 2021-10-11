@@ -134,7 +134,9 @@ class AggregatorStub(object):
             raise Exception("Expected empty message on OK service check")
 
         check_tag_names(name, tags)
-        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, deduplicate_tags(tags), hostname, message))
+        self._service_checks[name].append(
+            ServiceCheckStub(check_id, name, status, deduplicate_tags(tags), hostname, message)
+        )
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
