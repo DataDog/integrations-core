@@ -531,9 +531,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        tags = self._normalize_tags_type(tags, metric_name=name) + [
-            self.normalize_tag(tag) for tag in self._static_tags
-        ]
+        tags = self._normalize_tags_type(tags, metric_name=name) + self._static_tags
         if hostname is None:
             hostname = ''
 
@@ -579,9 +577,7 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags or [], device_name, name) + [
-            self.normalize_tag(tag) for tag in self._static_tags
-        ]
+        tags = self._normalize_tags_type(tags or [], device_name, name) + self._static_tags
         if hostname is None:
             hostname = ''
 
@@ -763,7 +759,7 @@ class AgentCheck(object):
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
-        tags = self._normalize_tags_type(tags or []) + [self.normalize_tag(tag) for tag in self._static_tags]
+        tags = self._normalize_tags_type(tags or []) + self._static_tags
         if hostname is None:
             hostname = ''
         if message is None:
