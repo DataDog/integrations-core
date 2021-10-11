@@ -19,12 +19,15 @@ METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
 METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
 
 
+def deduplicate_tags(tags):
+    # De-duplicate tags like the datadog agent
+    return sorted(set(tags))
+
+
 def normalize_tags(tags, sort=False):
     # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
     # This function makes sure strings are compared with the same type.
     if tags:
-        # De-duplicate tags like the datadog agent
-        tags = list(set(tags))
         if sort:
             return sorted(to_native_string(tag) for tag in tags)
         else:
@@ -116,7 +119,7 @@ class AggregatorStub(object):
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
         check_tag_names(name, tags)
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+            self._metrics[name].append(MetricStub(name, mtype, value, deduplicate_tags(tags), hostname, None))
 
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
@@ -124,14 +127,14 @@ class AggregatorStub(object):
         check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
+            self._metrics[name].append(MetricStub(name, mtype, value, deduplicate_tags(tags), hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         if status == ServiceCheck.OK and message:
             raise Exception("Expected empty message on OK service check")
 
         check_tag_names(name, tags)
-        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
+        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, deduplicate_tags(tags), hostname, message))
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
@@ -144,7 +147,7 @@ class AggregatorStub(object):
     ):
         check_tag_names(name, tags)
         self._histogram_buckets[name].append(
-            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, deduplicate_tags(tags))
         )
 
     def metrics(self, name):
