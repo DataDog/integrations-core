@@ -237,6 +237,7 @@ validate-log-intgs-builder:
       - .gitlab/validate-logs-intgs/**
     refs:
       - master
+      - paul/fix-log-job
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker build --tag $VALIDATE_LOG_INTGS .
