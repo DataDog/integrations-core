@@ -23,6 +23,8 @@ def normalize_tags(tags, sort=False):
     # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
     # This function makes sure strings are compared with the same type.
     if tags:
+        # De-duplicate tags like the datadog agent
+        tags = list(set(tags))
         if sort:
             return sorted(to_native_string(tag) for tag in tags)
         else:

@@ -192,7 +192,7 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
-        self._manual_custom_tags = []
+        self._static_tags = []
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -202,11 +202,10 @@ class AgentCheck(object):
 
         if isinstance(self.instance, dict):
             if self.instance.get('tags'):
-                self._manual_custom_tags = [self.normalize_tag(tag) for tag in self.instance['tags']]
-                self.instance['tags'] = []
+                self._static_tags = [self.normalize_tag(tag) for tag in self.instance['tags']]
             # Warn users they are using generic tags
             additional_tags = []
-            for tag in self._manual_custom_tags:
+            for tag in self._static_tags:
                 tag_name = tag.split(':')[0]
                 if tag_name in RESERVED_TAGS:
                     self.log.warning('{} is a reserved tag and is attached to Datadog feature, try to avoid using it.'.format(tag_name))
@@ -214,7 +213,7 @@ class AgentCheck(object):
                         additional_tags.append(self.degeneralise_tag(tag_name))
                 # elif tag_name in GENERIC_TAGS:
                 #     self.log.warning('{} is a generic tag, try to avoid using it.'.format(tag_name))
-            self._manual_custom_tags += additional_tags
+            self._static_tags += additional_tags
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -525,7 +524,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        tags = self._normalize_tags_type(tags, metric_name=name) + self._manual_custom_tags
+        tags = self._normalize_tags_type(tags, metric_name=name) + self._static_tags
         if hostname is None:
             hostname = ''
 
@@ -571,7 +570,7 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags or [], device_name, name) + self._manual_custom_tags
+        tags = self._normalize_tags_type(tags or [], device_name, name) + self._static_tags
         if hostname is None:
             hostname = ''
 
@@ -753,7 +752,7 @@ class AgentCheck(object):
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
-        tags = self._normalize_tags_type(tags or []) + self._manual_custom_tags
+        tags = self._normalize_tags_type(tags or []) + self._static_tags
         if hostname is None:
             hostname = ''
         if message is None:
