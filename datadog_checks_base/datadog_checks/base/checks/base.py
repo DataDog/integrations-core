@@ -192,7 +192,7 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
-        self._static_tags = []
+        self._base_static_tags = []
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -201,10 +201,10 @@ class AgentCheck(object):
         self.log = CheckLoggingAdapter(logger, self)
 
         if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
-            self._static_tags = [tag for tag in self.instance['tags'] if isinstance(tag, string_types)]
+            self._base_static_tags = [tag for tag in self.instance['tags'] if isinstance(tag, string_types)]
             # Warn users they are using generic tags
             additional_tags = []
-            for tag in self._static_tags:
+            for tag in self._base_static_tags:
                 tag_name = self.normalize_tag(tag).split(':')[0]
                 if tag_name in RESERVED_TAGS:
                     self.log.warning(
@@ -214,13 +214,13 @@ class AgentCheck(object):
                     )
                     if self.disable_generic_tags:
                         additional_tags.append(self.degeneralise_tag(tag_name))
-            self._static_tags += additional_tags
+            self._base_static_tags += additional_tags
 
             # Openmetrics compatibility
             ignore_tags = self.instance.get('ignore_tags', [])
             if ignore_tags:
                 ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-                self._static_tags = [tag for tag in self._static_tags if not ignored_tags_re.search(tag)]
+                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -531,7 +531,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        tags = self._normalize_tags_type(tags, metric_name=name) + self._static_tags
+        tags = self._normalize_tags_type(tags, metric_name=name) + self._base_static_tags
         if hostname is None:
             hostname = ''
 
@@ -577,7 +577,7 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags or [], device_name, name) + self._static_tags
+        tags = self._normalize_tags_type(tags or [], device_name, name) + self._base_static_tags
         if hostname is None:
             hostname = ''
 
@@ -759,7 +759,7 @@ class AgentCheck(object):
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
-        tags = self._normalize_tags_type(tags or []) + self._static_tags
+        tags = self._normalize_tags_type(tags or []) + self._base_static_tags
         if hostname is None:
             hostname = ''
         if message is None:
