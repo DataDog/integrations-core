@@ -92,7 +92,12 @@ def pdh():
 @pdh.command(context_settings=CONTEXT_SETTINGS, short_help='Explore performance counters')
 @click.argument('counterset', required=False)
 def browse(counterset):
-    """Explore performance counters."""
+    """
+    Explore performance counters.
+
+    You'll need to install pywin32 manually beforehand.
+    """
+    # Leave imports in function to not add the dependencies
     import win32pdh
 
     if not counterset:
