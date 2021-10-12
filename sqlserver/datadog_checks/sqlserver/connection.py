@@ -28,7 +28,7 @@ class SQLConnectionError(Exception):
     pass
 
 
-class ConnectionManager(object):
+class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
     DEFAULT_COMMAND_TIMEOUT = 5

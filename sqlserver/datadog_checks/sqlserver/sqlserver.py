@@ -23,7 +23,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from . import metrics
-from .connection_manager import ConnectionManager, SQLConnectionError
+from .connection import Connection, SQLConnectionError
 from .const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
@@ -154,7 +154,7 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = ConnectionManager(self.init_config, self.instance, self.handle_service_check)
+        self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
 
         # Pre-process the list of metrics to collect
         try:
