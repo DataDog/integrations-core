@@ -75,8 +75,8 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         self.check_initializations.append(self.parse_config)
 
     def check(self, _):
-        # Create assume_role credentials if assume_role ARN is specified in config
         try:
+            # Create assume_role credentials if assume_role ARN is specified in config
             if self._assume_role:
                 self.log.info('Assume role %s found. Creating temporary credentials using role...', self._assume_role)
                 sts = boto3.client('sts')
