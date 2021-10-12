@@ -192,7 +192,7 @@ class AgentCheck(object):
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
         )
-        self._base_static_tags = []
+        self._base_static_tags = []  # type: List[str]
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -200,31 +200,7 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
-        if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
-            for tag in self.instance['tags']:
-                if isinstance(tag, string_types):
-                    try:
-                        self._base_static_tags.append(to_native_string(tag))
-                    except UnicodeError:
-                        self.log.warning('Encoding error with tag `%s`, ignoring static tag', tag)
-                        continue
-            # Warn users they are using generic tags
-            additional_tags = []
-            for tag in self._base_static_tags:
-                tag_name = self.normalize_tag(tag).split(':')[0]
-                if tag_name in RESERVED_TAGS:
-                    self.log.warning(
-                        '%s is a reserved tag and is attached to Datadog feature, try to avoid using it.', tag_name
-                    )
-                    if self.disable_generic_tags:
-                        additional_tags.append(self.degeneralise_tag(tag_name))
-            self._base_static_tags += additional_tags
-
-            # Openmetrics compatibility
-            ignore_tags = self.instance.get('ignore_tags', [])
-            if ignore_tags:
-                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
+        self._populate_base_static_tags()
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -292,6 +268,33 @@ class AgentCheck(object):
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
+
+    def _populate_base_static_tags(self):
+        if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
+            for tag in self.instance['tags']:
+                if isinstance(tag, string_types):
+                    try:
+                        self._base_static_tags.append(to_native_string(tag))
+                    except UnicodeError:
+                        self.log.warning('Encoding error with tag `%s`, ignoring static tag', tag)
+                        continue
+            # Warn users they are using generic tags
+            additional_tags = []
+            for tag in self._base_static_tags:
+                tag_name = self.normalize_tag(tag).split(':')[0]
+                if tag_name in RESERVED_TAGS:
+                    self.log.warning(
+                        '%s is a reserved tag and is attached to Datadog feature, try to avoid using it.', tag_name
+                    )
+                    if self.disable_generic_tags:
+                        additional_tags.append(self.degeneralise_tag(tag_name))
+            self._base_static_tags += additional_tags
+
+            # Openmetrics compatibility
+            ignore_tags = self.instance.get('ignore_tags', [])
+            if ignore_tags:
+                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
