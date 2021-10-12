@@ -61,7 +61,9 @@ def service_checks(check, sync):
         manifest = Manifest.load_manifest(check_name)
 
         if not manifest.has_integration():
-            echo_success(f"Skipping {check_name} - service_checks not required since this check doesn't contain an integration.")
+            echo_success(
+                f"Skipping {check_name} - service_checks not required since this check doesn't contain an integration."
+            )
             continue
 
         manifest_file = get_manifest_file(check_name)
