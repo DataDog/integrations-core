@@ -36,7 +36,7 @@ def test_channel_status_service_check_default_mapping(aggregator, get_check, ins
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
-            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
+            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status), "foo:bar"]
         )
 
 
@@ -79,7 +79,7 @@ def test_channel_status_service_check_custom_mapping(aggregator, get_check, inst
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
-            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
+            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status), "foo:bar"]
         )
 
 
