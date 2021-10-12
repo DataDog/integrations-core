@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.5.0 / 2021-10-12
+
+* [Added] Add meta command for browsing Windows performance counters. See [#10385](https://github.com/DataDog/integrations-core/pull/10385).
+
 ## 14.4.1 / 2021-10-08
 
 * [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).
