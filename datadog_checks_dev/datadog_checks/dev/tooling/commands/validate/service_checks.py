@@ -59,6 +59,11 @@ def service_checks(check, sync):
         display_queue = []
         file_failed = False
         manifest = Manifest.load_manifest(check_name)
+
+        if not manifest.has_integration():
+            echo_success(f"Skipping {check_name} - service_checks not required.")
+            continue
+
         manifest_file = get_manifest_file(check_name)
         service_check_relative = manifest.get_service_checks_path()
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))
