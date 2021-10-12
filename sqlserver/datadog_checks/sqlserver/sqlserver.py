@@ -192,6 +192,10 @@ class SQLServer(AgentCheck):
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
+
+        # initialise the retry interval from yaml file
+        self.connection_retry_interval = init_config.get('connection_retry_interval', CONNECTION_RETRY_INTERVAL)
+
         for instance in instances:
             try:
                 instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
@@ -576,7 +580,7 @@ class SQLServer(AgentCheck):
         instance_ts = self.failed_instances.get(instance_key,None)
         if instance_ts:
             current_ts = time.time()
-            if (current_ts - instance_ts) >= CONNECTION_RETRY_INTERVAL:
+            if (current_ts - instance_ts) >= self.connection_retry_interval:
                 self.do_check[instance_key] = True
                 del self.failed_instances[instance_key]
 
