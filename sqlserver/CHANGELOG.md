@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 5.0.1 / 2021-10-12
+
+* [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+
 ## 5.0.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
