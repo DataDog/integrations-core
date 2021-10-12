@@ -98,7 +98,7 @@ istio.mesh.request.size.bucket
 ```
 
 To view the metrics that are collected using OpenMetrics V1, see [the metadata.csv file][24]. 
-To view the `conf.yaml.example` config parameters for OpenMetrics V1, see [here][25].
+To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][25].
 
 **WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metric type will repeatedly switch between the two.
 
