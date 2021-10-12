@@ -50,14 +50,14 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+        'postgres_port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
         'schema:public',
     ]
 
     expected_size_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+        'postgres_port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
         'schema:public',
@@ -83,7 +83,7 @@ def test_bloat_metric(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+        'postgres_port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:pg_index',
         'schema:pg_catalog',
@@ -108,7 +108,7 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     expected_tags = {}
     for relation in relations:
         expected_tags[relation] = pg_instance['tags'] + [
-            'port:{}'.format(pg_instance['port']),
+            'postgres_port:{}'.format(pg_instance['port']),
             'db:%s' % pg_instance['dbname'],
             'table:{}'.format(relation.lower()),
             'schema:public',
@@ -158,7 +158,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+        'postgres_port:{}'.format(pg_instance['port']),
         'db:dogs',
         'table:breed',
         'index:breed_names',
@@ -179,7 +179,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
     check_with_lock(check, pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(PORT),
+        'postgres_port:{}'.format(PORT),
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
         'lock_type:relation',

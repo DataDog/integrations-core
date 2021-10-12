@@ -239,7 +239,7 @@ def test_get_wal_dir(integration_check, pg_instance, pg_version, wal_path):
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = ['foo:bar', 'port:5432']
+    base_tags = ['foo:bar', 'postgres_port:5432']
     app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
     app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
 
@@ -273,7 +273,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
             True,
             {
                 'db:datadog_test',
-                'port:5432',
+                'postgres_port:5432',
                 'foo:bar',
             },
         ),
@@ -282,7 +282,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
             {
                 'db:datadog_test',
                 'foo:bar',
-                'port:5432',
+                'postgres_port:5432',
                 'server:localhost',
             },
         ),
