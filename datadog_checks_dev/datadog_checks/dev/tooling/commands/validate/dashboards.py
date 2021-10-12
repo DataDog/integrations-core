@@ -6,11 +6,13 @@ import os
 
 import click
 
+from ....fs import write_file
 from ....utils import read_file
 from ...annotations import annotate_display_queue, annotate_error
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"description", "template_variables", "widgets"}
 DASHBOARD_ONLY_FIELDS = {"layout_type", "title", "created_at"}
@@ -32,7 +34,8 @@ def _is_dashboard_format(payload):
 
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def dashboards(check):
+@click.option('--fix', is_flag=True, help='Attempt to fix errors')
+def dashboards(check, fix):
     """Validate all Dashboard definition files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
@@ -45,11 +48,15 @@ def dashboards(check):
     echo_info(f"Validating Dashboard definition files for {len(checks)} checks...")
 
     for check_name in checks:
+        echo_debug(f"Validating Dashboard definition files for {check_name} check...")
         display_queue = []
         file_failed = False
+        file_fixed = False
+
+        manifest = Manifest.load_manifest(check_name)
+        manifest_file = get_manifest_file(check_name)
 
         dashboard_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'dashboards')
-        manifest_file = get_manifest_file(check_name)
         for invalid in invalid_files:
             message = f'{invalid} does not exist'
             echo_info(f'{check_name}... ', nl=False)
@@ -89,6 +96,35 @@ def dashboards(check):
                 display_queue.append(
                     (echo_failure, f'    {dashboard_filename} is not using the new /dashboard payload format.'),
                 )
+
+            # check app_id for Manifest V2 dashboards
+            if manifest.version == Manifest.V2:
+                echo_debug(f'Validating app dashboard {dashboard_filename} ..')
+                app_uuid = manifest.get_app_uuid()
+
+                for widget in decoded.get('widgets', []):
+
+                    widget_app_uuid = widget.get('definition', {}).get('app_id')
+                    if widget_app_uuid and widget_app_uuid != app_uuid:
+                        if fix:
+                            widget['definition']['app_id'] = app_uuid
+                            file_fixed = True
+                            continue
+                        else:
+                            file_failed = True
+                            msg = (
+                                f"    {dashboard_filename} widget {widget['id']} does not contain correct app_uuid: "
+                                f"{widget_app_uuid} should be {app_uuid}"
+                            )
+                            display_queue.append(
+                                (echo_failure, msg),
+                            )
+
+            if fix and file_fixed:
+                new_dashboard = f"{json.dumps(decoded, indent=2, separators=(',', ': '))}\n"
+                write_file(dashboard_file, new_dashboard)
+                echo_info(f"{dashboard_file}... ", nl=False)
+                echo_success("FIXED")
 
             if file_failed:
                 failed_checks += 1
