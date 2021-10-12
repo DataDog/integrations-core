@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import platform
+
+import pytest
 
 from datadog_checks.istio import Istio
 
