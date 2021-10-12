@@ -1,5 +1,9 @@
 # CHANGELOG - Avi Vantage
 
+## 2.0.2 / 2021-10-12
+
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
 ## 2.0.1 / 2021-10-05
 
 * [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
