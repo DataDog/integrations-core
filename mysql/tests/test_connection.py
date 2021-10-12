@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 def test_connection_with_defaults_file():
     file_instance = {
         'host': 'localhost',
-        'port': '123',
+        'mysql_port': '123',
         'user': 'ddog',
         'defaults_file': '/foo/bar',
     }

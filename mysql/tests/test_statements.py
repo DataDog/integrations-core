@@ -133,7 +133,7 @@ def test_statement_metrics(
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'mysql_port:{}'.format(common.PORT)])
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
     assert set(event['tags']) == expected_tags
@@ -299,7 +299,7 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'mysql_port:{}'.format(common.PORT)])
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
@@ -542,7 +542,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'mysql_port:{}'.format(common.PORT)]
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
