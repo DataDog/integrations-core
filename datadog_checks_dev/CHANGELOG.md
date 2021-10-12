@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 14.5.1 / 2021-10-12
+
+* [Fixed] Update dashboard validation for Manifest V2. See [#10398](https://github.com/DataDog/integrations-core/pull/10398).
+* [Fixed] Ignore metadata and service-checks when no integration included. See [#10399](https://github.com/DataDog/integrations-core/pull/10399).
+
 ## 14.5.0 / 2021-10-12
 
 * [Added] Add meta command for browsing Windows performance counters. See [#10385](https://github.com/DataDog/integrations-core/pull/10385).
