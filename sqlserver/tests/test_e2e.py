@@ -82,6 +82,9 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     for mname in EXPECTED_METRICS:
         aggregator.assert_metric(mname)
 
+    # Our test environment does not have failover clustering enabled, so these metrics are not expected.
+    # To test them follow this guide:
+    # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
     for mname in UNEXPECTED_METRICS:
         aggregator.assert_metric(mname, count=0)
 
