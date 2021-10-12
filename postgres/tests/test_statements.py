@@ -147,7 +147,7 @@ def test_statement_metrics(
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_dbm_metrics_tags = {'foo:bar', 'postgres_port:{}'.format(PORT)}
+    expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
@@ -422,6 +422,7 @@ def test_failed_explain_handling(
         ),
     ],
 )
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -438,12 +439,14 @@ def test_statement_samples_collect(
     datadog_agent,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    dbm_instance['disable_generic_tags'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
     tags = dbm_instance['tags'] + [
-        'postgres_port:{}'.format(PORT),
+        'port:{}'.format(PORT),
         'db:{}'.format(dbname),
+        'server:{}'.format(HOST),
     ]
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
@@ -478,7 +481,7 @@ def test_statement_samples_collect(
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
             aggregator.assert_metric(
                 "dd.postgres.statement_samples.error",
-                tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
+                tags=sorted(tags + [expected_error_tag, 'agent_hostname:stubbed.hostname']),
                 hostname='stubbed.hostname',
             )
         else:
@@ -586,9 +589,7 @@ def test_activity_snapshot_collection(
 
         assert 'query' not in bobs_query
 
-        expected_tags = dbm_instance['tags'] + [
-            'postgres_port:{}'.format(PORT),
-        ]
+        expected_tags = dbm_instance['tags'] + ['port:{}'.format(PORT)]
 
         # check postgres_connections are set
         assert len(event['postgres_connections']) > 0

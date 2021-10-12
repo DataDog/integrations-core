@@ -273,7 +273,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
             True,
             {
                 'db:datadog_test',
-                'postgres_port:5432',
+                'port:5432',
                 'foo:bar',
             },
         ),
@@ -282,7 +282,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
             {
                 'db:datadog_test',
                 'foo:bar',
-                'postgres_port:5432',
+                'port:5432',
                 'server:localhost',
             },
         ),

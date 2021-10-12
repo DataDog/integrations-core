@@ -207,11 +207,11 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['postgres_port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['db:datadog_test', 'port:{}'.format(PORT)]
 
     for _ in range(3):
         check.check(pg_instance)
-        assert check._config.tags == expected_tags
+        assert sorted(check._config.tags) == sorted(expected_tags)
 
 
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
@@ -228,7 +228,7 @@ def test_correct_hostname(dbm_enabled, expected_hostname, aggregator, pg_instanc
         check.check(pg_instance)
         assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
-    expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'postgres_port:{}'.format(PORT)]
+    expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
     for name in COMMON_METRICS + ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
