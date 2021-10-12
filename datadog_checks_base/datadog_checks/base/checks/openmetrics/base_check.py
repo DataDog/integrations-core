@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from copy import deepcopy
 
-import re
 import requests
 from six import PY2
 

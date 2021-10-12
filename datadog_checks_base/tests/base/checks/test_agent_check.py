@@ -4,10 +4,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 from collections import OrderedDict
 from typing import Any
 
-import logging
 import mock
 import pytest
 from six import PY3
@@ -647,7 +647,9 @@ class TestTags:
         "disable_generic_tags, expected_tags",
         [
             pytest.param(False, {"foo:bar", "cluster:my_cluster", "server:my_server"}),
-            pytest.param(True, {"foo:bar", "cluster:my_cluster", "myintegration_cluster:my_cluster", "server:my_server"}),
+            pytest.param(
+                True, {"foo:bar", "cluster:my_cluster", "myintegration_cluster:my_cluster", "server:my_server"}
+            ),
         ],
     )
     def test_custom_generic_tags(self, caplog, disable_generic_tags, expected_tags):
@@ -656,7 +658,7 @@ class TestTags:
 
         instance = {
             'disable_generic_tags': disable_generic_tags,
-            'tags': ['foo:bar', 'cluster:my_cluster', 'server:my_server']
+            'tags': ['foo:bar', 'cluster:my_cluster', 'server:my_server'],
         }
 
         check = AgentCheck('myintegration', {}, [instance])
