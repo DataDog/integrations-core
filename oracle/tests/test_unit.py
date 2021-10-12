@@ -187,7 +187,9 @@ def test_sys_metrics(aggregator, check):
     check._query_manager.execute()
 
     for metric in metrics.values():
-        aggregator.assert_metric('oracle.{}'.format(metric['name']), count=1, value=0, tags=['custom_tag'])
+        aggregator.assert_metric(
+            'oracle.{}'.format(metric['name']), count=1, value=0, tags=['custom_tag', 'optional:tag1']
+        )
 
 
 def test_process_metrics(aggregator, check):
@@ -205,7 +207,7 @@ def test_process_metrics(aggregator, check):
 
     check._cached_connection = con
     check._query_manager.queries = [Query(queries.ProcessMetrics)]
-    check._query_manager.tags = ['custom_tag']
+    check._query_manager.tags = ['custom_tag', 'optional:tag1']
     check._query_manager.compile_queries()
     check._query_manager.execute()
 
@@ -215,7 +217,7 @@ def test_process_metrics(aggregator, check):
             'oracle.{}'.format(metric['name']),
             count=1,
             value=0,
-            tags=['custom_tag', 'program:{}'.format(expected_program)],
+            tags=['custom_tag', 'optional:tag1', 'program:{}'.format(expected_program)],
         )
 
 
@@ -232,33 +234,33 @@ def test_tablespace_metrics(aggregator, check):
 
     check._cached_connection = con
     check._query_manager.queries = [Query(queries.TableSpaceMetrics)]
-    check._query_manager.tags = ['custom_tag']
+    check._query_manager.tags = ['custom_tag', 'optional:tag1']
     check._query_manager.compile_queries()
     check._query_manager.execute()
 
     # Offline tablespace
-    tags = ["custom_tag", "tablespace:offline"]
+    tags = ["custom_tag", "optional:tag1", "tablespace:offline"]
     aggregator.assert_metric("oracle.tablespace.used", value=0, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.size", value=100, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.in_use", value=0, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.offline", value=1, count=1, tags=tags)
 
     # Normal tablespace
-    tags = ["custom_tag", "tablespace:normal"]
+    tags = ["custom_tag", "optional:tag1", "tablespace:normal"]
     aggregator.assert_metric("oracle.tablespace.used", value=50, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.size", value=100, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.in_use", value=50, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.offline", value=0, count=1, tags=tags)
 
     # Full tablespace
-    tags = ["custom_tag", "tablespace:full"]
+    tags = ["custom_tag", "optional:tag1", "tablespace:full"]
     aggregator.assert_metric("oracle.tablespace.used", value=100, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.size", value=100, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.in_use", value=100, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.offline", value=0, count=1, tags=tags)
 
     # Size 0 tablespace
-    tags = ["custom_tag", "tablespace:size_0"]
+    tags = ["custom_tag", "optional:tag1", "tablespace:size_0"]
     aggregator.assert_metric("oracle.tablespace.used", value=1, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.size", value=0, count=1, tags=tags)
     aggregator.assert_metric("oracle.tablespace.in_use", value=100, count=1, tags=tags)
@@ -293,27 +295,30 @@ def test_custom_metrics(aggregator, check):
     check.instance['custom_queries'] = custom_queries
     check._fix_custom_queries()
     check._cached_connection = con
-    query_manager = QueryManager(check, check.execute_query_raw, tags=['custom_tag'])
+    query_manager = QueryManager(check, check.execute_query_raw, tags=['custom_tag', 'optional:tag1'])
     query_manager.compile_queries()
 
     query_manager.execute()
 
     aggregator.assert_metric(
-        "oracle.test1.metric", value=1, count=1, tags=["tag_name:tag_value1", "query_tags1", "custom_tag"]
+        "oracle.test1.metric",
+        value=1,
+        count=1,
+        tags=["custom_tag", "optional:tag1", "query_tags1", "tag_name:tag_value1"],
     )
     aggregator.assert_metric(
         "oracle.test2.gauge",
         value=2,
         count=1,
         metric_type=aggregator.GAUGE,
-        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+        tags=["custom_tag", "optional:tag1", "query_tags2", "tag_name:tag_value2"],
     )
     aggregator.assert_metric(
         "oracle.test2.rate",
         value=1,
         count=1,
         metric_type=aggregator.RATE,
-        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+        tags=["custom_tag", "optional:tag1", "query_tags2", "tag_name:tag_value2"],
     )
 
 
@@ -342,8 +347,14 @@ def test_custom_metrics_multiple_results(aggregator, check):
     query_manager.execute()
 
     aggregator.assert_metric(
-        "oracle.test1.metric", value=1, count=1, tags=["tag_name:tag_value1", "query_tags1", "custom_tag"]
+        "oracle.test1.metric",
+        value=1,
+        count=1,
+        tags=["custom_tag", "optional:tag1", "query_tags1", "tag_name:tag_value1"],
     )
     aggregator.assert_metric(
-        "oracle.test1.metric", value=2, count=1, tags=["tag_name:tag_value2", "query_tags1", "custom_tag"]
+        "oracle.test1.metric",
+        value=2,
+        count=1,
+        tags=["custom_tag", "optional:tag1", "query_tags1", "tag_name:tag_value2"],
     )
