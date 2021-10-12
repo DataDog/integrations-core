@@ -201,16 +201,20 @@ class AgentCheck(object):
         self.log = CheckLoggingAdapter(logger, self)
 
         if isinstance(self.instance, dict) and isinstance(self.instance.get('tags'), list):
-            self._base_static_tags = [tag for tag in self.instance['tags'] if isinstance(tag, string_types)]
+            for tag in self.instance['tags']:
+                if isinstance(tag, string_types):
+                    try:
+                        self._base_static_tags.append(to_native_string(tag))
+                    except UnicodeError:
+                        self.log.warning('Encoding error with tag `%s`, ignoring static tag', tag)
+                        continue
             # Warn users they are using generic tags
             additional_tags = []
             for tag in self._base_static_tags:
                 tag_name = self.normalize_tag(tag).split(':')[0]
                 if tag_name in RESERVED_TAGS:
                     self.log.warning(
-                        '{} is a reserved tag and is attached to Datadog feature, try to avoid using it.'.format(
-                            tag_name
-                        )
+                        '%s is a reserved tag and is attached to Datadog feature, try to avoid using it.', tag_name
                     )
                     if self.disable_generic_tags:
                         additional_tags.append(self.degeneralise_tag(tag_name))
