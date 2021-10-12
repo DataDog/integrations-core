@@ -7,6 +7,7 @@ from ..fs import file_exists
 from .commands.console import abort
 from .constants import get_root
 from .datastructures import JSONDict
+from .manifest_validator.constants import V1, V2
 from .utils import load_manifest
 
 NON_INTEGRATION_PATHS = [
@@ -22,6 +23,10 @@ class Manifest:
     Class to retrieve a manifest class based on the check/manifest_version
     This also supports the case of querying file information about the Agent
     """
+
+    # add version constants to avoid extra imports
+    V1 = V1
+    V2 = V2
 
     @staticmethod
     def load_manifest(check):
@@ -50,6 +55,7 @@ class Agent:
     def __init__(self, check_name, manifest_json):
         self._check_name = check_name
         self._manifest_json = manifest_json
+        self.version = None
 
     def get_config_spec(self):
         return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
@@ -64,9 +70,19 @@ class ManifestV1:
     def __init__(self, check_name, manifest_json):
         self._check_name = check_name
         self._manifest_json = JSONDict(manifest_json)
+        self.version = V1
+
+    def get_path(self, path):
+        return self._manifest_json.get(path)
 
     def get_display_name(self):
         return self._manifest_json['display_name']
+
+    def get_app_id(self):
+        return None
+
+    def get_app_uuid(self):
+        return None
 
     def get_metric_prefix(self):
         return self._manifest_json['metric_prefix']
@@ -100,9 +116,19 @@ class ManifestV2:
     def __init__(self, check_name, manifest_json):
         self._check_name = check_name
         self._manifest_json = JSONDict(manifest_json)
+        self.version = V2
+
+    def get_path(self, path):
+        return self._manifest_json.get(path)
 
     def get_display_name(self):
         return self._manifest_json.get_path("/assets/integration/source_type_name")
+
+    def get_app_id(self):
+        return self._manifest_json['app_id']
+
+    def get_app_uuid(self):
+        return self._manifest_json['app_uuid']
 
     def get_metric_prefix(self):
         return self._manifest_json.get_path("/assets/integration/metrics/prefix") or ''
