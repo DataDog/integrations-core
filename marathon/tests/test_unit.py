@@ -55,8 +55,12 @@ def test_process_apps(check, aggregator):
 
     check.process_apps('url', 'acs_url', [], [], None)
     aggregator.assert_metric('marathon.apps', value=2, count=1)
-    aggregator.assert_metric('marathon.backoffSeconds', value=99, count=1, tags=['app_id:/', 'version:'])
-    aggregator.assert_metric('marathon.backoffSeconds', value=101, count=1, tags=['app_id:/', 'version:'])
+    aggregator.assert_metric(
+        'marathon.backoffSeconds', value=99, count=1, tags=['optional:tag1', 'app_id:/', 'version:']
+    )
+    aggregator.assert_metric(
+        'marathon.backoffSeconds', value=101, count=1, tags=['optional:tag1', 'app_id:/', 'version:']
+    )
 
 
 def test_get_instance_config(check):

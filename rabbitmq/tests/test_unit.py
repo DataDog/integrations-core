@@ -29,8 +29,10 @@ def test__get_data(check):
 
 
 @pytest.mark.unit
-def test_status_check(check, aggregator):
-    check.check({"rabbitmq_api_url": "http://example.com"})
+def test_status_check(aggregator):
+    inst = {"rabbitmq_api_url": "http://example.com"}
+    check = RabbitMQ(common.CHECK_NAME, {}, [inst])
+    check.check(inst)
     assert len(aggregator._service_checks) == 1
     scs = aggregator.service_checks('rabbitmq.status')
     assert len(scs) == 1
@@ -113,9 +115,9 @@ def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggre
     ]
     mock__get_object_data.return_value = data
     check.get_stats(instance, 'base_url', EXCHANGE_TYPE, 3, {'explicit': [], 'regexes': ['ex.*']}, [], [])
-    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex1'])
-    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex2'])
-    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex4'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex1', 'tag1:1', 'tag2'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex2', 'tag1:1', 'tag2'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex4', 'tag1:1', 'tag2'])
 
 
 @pytest.mark.parametrize(

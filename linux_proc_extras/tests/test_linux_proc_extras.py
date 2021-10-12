@@ -13,8 +13,6 @@ pytestmark = pytest.mark.unit
 
 # Really a basic check to see if all metrics are there
 def test_check(aggregator, check):
-
-    check.tags = []
     check.set_paths()
 
     with open(os.path.join(common.FIXTURE_DIR, "entropy_avail")) as f:
@@ -49,7 +47,7 @@ def test_check(aggregator, check):
 
     for irq in common.INTERRUPTS_IDS:
         for cpu_id in range(common.CPU_COUNT):
-            tags = ["irq:{}".format(irq), "cpu_id:{}".format(cpu_id)]
+            tags = ["irq:{}".format(irq), "cpu_id:{}".format(cpu_id), 'foo:bar']
             aggregator.assert_metric("system.linux.irq", value=None, tags=tags)
 
     aggregator.assert_all_metrics_covered()

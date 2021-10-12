@@ -244,7 +244,13 @@ def test__check_key_lengths_multi_db(aggregator, redis_instance):
 
     redis_check._check_key_lengths(c, [])
     aggregator.assert_metric('redis.key.length', count=4)
-    aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db0'])
-    aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db3'])
-    aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar', 'key_type:list', 'redis_db:db0'])
-    aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])
+    aggregator.assert_metric(
+        'redis.key.length', value=2, tags=['foo:bar', 'key:test_foo', 'key_type:list', 'redis_db:db0']
+    )
+    aggregator.assert_metric(
+        'redis.key.length', value=2, tags=['foo:bar', 'key:test_foo', 'key_type:list', 'redis_db:db3']
+    )
+    aggregator.assert_metric(
+        'redis.key.length', value=1, tags=['foo:bar', 'key:test_bar', 'key_type:list', 'redis_db:db0']
+    )
+    aggregator.assert_metric('redis.key.length', value=0, tags=['foo:bar', 'key:missing_key'])

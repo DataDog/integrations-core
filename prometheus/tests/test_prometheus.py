@@ -173,7 +173,7 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
     aggregator.assert_metric(
         CHECK_NAME + '.metric2',
         hostname="host2",
-        tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
+        tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'extra:foo'],
         metric_type=aggregator.GAUGE,
     )
     assert aggregator.metrics_asserted_pct == 100.0

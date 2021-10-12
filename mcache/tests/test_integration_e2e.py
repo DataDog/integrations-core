@@ -47,7 +47,7 @@ def test_service_ok(instance, aggregator, dd_run_check):
     """
     Service is up
     """
-    tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
+    tags = ["foo:bar", "host:{}".format(HOST), "port:{}".format(PORT)]
     check = Memcache('mcache', {}, [instance])
     dd_run_check(check)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
@@ -106,7 +106,7 @@ def test_service_with_socket_ok(instance_socket, aggregator, dd_run_check):
 
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
-    expected_tags = ["host:unix", "port:{}".format(get_host_socket_path()), "foo:bar"]
+    expected_tags = ["foo:bar", "host:unix", "port:{}".format(get_host_socket_path())]
     assert sc.status == check.OK
     assert sc.tags == expected_tags
 

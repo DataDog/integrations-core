@@ -72,7 +72,7 @@ CONFIG = {"expvar_url": common.URL_WITH_PATH, 'tags': ['my_tag'], 'metrics': [{'
 def test_go_expvar_mocked(go_expvar_mock, check, aggregator):
     check.check(MOCK_CONFIG)
 
-    shared_tags = ['optionaltag1', 'optionaltag2', 'expvar_url:{0}'.format(common.URL_WITH_PATH)]
+    shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH), 'my_tag', 'optionaltag1', 'optionaltag2']
 
     for gauge in CHECK_HISTOGRAM_DEFAULT:
         aggregator.assert_metric(
@@ -138,7 +138,7 @@ def test_go_expvar_mocked_namespace(go_expvar_mock, check, aggregator):
 
     check.check(mock_config)
 
-    shared_tags = ['optionaltag1', 'optionaltag2', 'expvar_url:{0}'.format(common.URL_WITH_PATH)]
+    shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH), 'my_tag', 'optionaltag1', 'optionaltag2']
 
     for gauge in CHECK_HISTOGRAM_DEFAULT:
         aggregator.assert_metric(gauge.format(metric_namespace), count=2, tags=shared_tags)
@@ -167,7 +167,7 @@ def test_max_metrics(go_expvar_mock, check, aggregator):
 
     check.check(config_max)
 
-    shared_tags = ['optionaltag1', 'optionaltag2', 'expvar_url:{0}'.format(common.URL_WITH_PATH)]
+    shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH), 'my_tag', 'optionaltag1', 'optionaltag2']
 
     # Default metrics
     for gauge in CHECK_HISTOGRAM_DEFAULT:
@@ -210,7 +210,7 @@ def test_alias_tag_path(go_expvar_mock, check, aggregator):
     }
     check.check(mock_config)
 
-    shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH)]
+    shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH), 'my_tag']
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.0.key"])
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.1.key"])
 

@@ -71,7 +71,8 @@ def assert_metric_covered(aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_regex(aggregator, check):
+def test_regex(aggregator):
+    check = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_REGEX])
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -111,7 +112,8 @@ def test_regex(aggregator, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_limit_vhosts(aggregator, check):
+def test_limit_vhosts(aggregator):
+    check = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_REGEX])
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -147,7 +149,8 @@ def test_limit_vhosts(aggregator, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_family_tagging(aggregator, check):
+def test_family_tagging(aggregator):
+    check = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_WITH_FAMILY])
     check.check(common.CONFIG_WITH_FAMILY)
 
     # Node attributes
@@ -181,7 +184,8 @@ def test_family_tagging(aggregator, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_family_tagging_with_named_groups(aggregator, check):
+def test_family_tagging_with_named_groups(aggregator):
+    check = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_WITH_FAMILY_NAMED_GROUP])
     check.check(common.CONFIG_WITH_FAMILY_NAMED_GROUP)
 
     # Node attributes
@@ -228,7 +232,8 @@ def test_connections(aggregator, check):
 
     # no connections with a 'vhosts' list in the conf produce one metrics per vhost
     aggregator.reset()
-    check.check(common.CONFIG_TEST_VHOSTS)
+    check_vhost = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_TEST_VHOSTS])
+    check_vhost.check(common.CONFIG_TEST_VHOSTS)
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections', count=2)
@@ -246,14 +251,15 @@ def test_connections(aggregator, check):
         )
 
         aggregator.reset()
-        check.check(common.CONFIG_DEFAULT_VHOSTS)
+        check_def_vhost = RabbitMQ(common.CHECK_NAME, {}, [common.CONFIG_DEFAULT_VHOSTS])
+        check_def_vhost.check(common.CONFIG_DEFAULT_VHOSTS)
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=2)
         aggregator.assert_metric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
 
         aggregator.reset()
-        check.check(common.CONFIG_TEST_VHOSTS)
+        check_vhost.check(common.CONFIG_TEST_VHOSTS)
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=2)

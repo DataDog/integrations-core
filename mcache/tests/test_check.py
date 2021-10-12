@@ -21,7 +21,7 @@ def test_service_ko(check, aggregator):
     """
     If the service is down, the service check should be sent accordingly
     """
-    tags = ['host:{}'.format(HOST), 'port:{}'.format(PORT), 'foo:bar']
+    tags = ['foo:bar', 'host:{}'.format(HOST), 'port:{}'.format(PORT)]
     with pytest.raises(ConfigurationError):
         check.check({'url': '{}'.format(HOST), 'port': PORT, 'tags': ['foo:bar']})
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1

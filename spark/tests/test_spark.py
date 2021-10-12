@@ -405,12 +405,15 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
     'spark.job.num_failed_stages': 100,
 }
 
-SPARK_JOB_RUNNING_METRIC_TAGS = [
-    'status:running',
-    'job_id:0',
-    'stage_id:0',
-    'stage_id:1',
-] + COMMON_TAGS
+SPARK_JOB_RUNNING_METRIC_TAGS = sorted(
+    [
+        'status:running',
+        'job_id:0',
+        'stage_id:0',
+        'stage_id:1',
+    ]
+    + COMMON_TAGS
+)
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -712,7 +715,7 @@ def test_mesos_filter(aggregator):
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:5050'] + CLUSTER_TAGS
+            assert sc.tags == CLUSTER_TAGS + ['url:http://localhost:5050']
 
         assert aggregator.metrics_asserted_pct == 100.0
 
@@ -1003,7 +1006,7 @@ def test_disable_legacy_cluster_tags(aggregator):
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
             # Only spark_cluster tag is present
-            assert sc.tags == ['url:http://localhost:5050', 'spark_cluster:{}'.format(CLUSTER_NAME)]
+            assert sc.tags == ['spark_cluster:{}'.format(CLUSTER_NAME), 'url:http://localhost:5050']
 
         assert aggregator.metrics_asserted_pct == 100.0
 
