@@ -13,8 +13,8 @@ class MongoConfig(object):
         # x.509 authentication
 
         cacert_cert_dir = instance.get('ssl_ca_certs')
-        if (cacert_cert_dir is None and (is_affirmative(instance.get('options', {}).get("ssl")))) or is_affirmative(
-            instance.get('ssl')
+        if cacert_cert_dir is None and (
+            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
         ):
             cacert_cert_dir = certifi.where()
 
