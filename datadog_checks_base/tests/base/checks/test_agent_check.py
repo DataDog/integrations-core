@@ -7,6 +7,7 @@ import json
 from collections import OrderedDict
 from typing import Any
 
+import logging
 import mock
 import pytest
 from six import PY3
@@ -632,15 +633,38 @@ class TestTags:
     @pytest.mark.parametrize(
         "disable_generic_tags, expected_tags",
         [
-            pytest.param(False, {"foo:bar", "cluster:my_cluster"}),
-            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster"}),
+            pytest.param(False, {"foo:bar", "cluster:my_cluster", "server:my_server"}),
+            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster", "myintegration_server:my_server"}),
         ],
     )
     def test_generic_tags(self, disable_generic_tags, expected_tags):
         instance = {'disable_generic_tags': disable_generic_tags}
         check = AgentCheck('myintegration', {}, [instance])
-        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
+        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster", "server:my_server"])
         assert set(tags) == expected_tags
+
+    @pytest.mark.parametrize(
+        "disable_generic_tags, expected_tags",
+        [
+            pytest.param(False, {"foo:bar", "cluster:my_cluster", "server:my_server"}),
+            pytest.param(True, {"foo:bar", "cluster:my_cluster", "myintegration_cluster:my_cluster", "server:my_server"}),
+        ],
+    )
+    def test_custom_generic_tags(self, caplog, disable_generic_tags, expected_tags):
+        caplog.clear()
+        caplog.set_level(logging.WARNING)
+
+        instance = {
+            'disable_generic_tags': disable_generic_tags,
+            'tags': ['foo:bar', 'cluster:my_cluster', 'server:my_server']
+        }
+
+        check = AgentCheck('myintegration', {}, [instance])
+        assert set(check._base_static_tags) == expected_tags
+
+        assert 'server' not in caplog.text
+        cluster_warning = '`cluster` is a reserved tag and is attached to Datadog features, try to avoid using it.'
+        assert cluster_warning in caplog.text
 
 
 class LimitedCheck(AgentCheck):

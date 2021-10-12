@@ -281,20 +281,15 @@ class AgentCheck(object):
             # Warn users they are using generic tags
             additional_tags = []
             for tag in self._base_static_tags:
-                tag_name = self.normalize_tag(tag).split(':')[0]
+                normalized_tag = self.normalize_tag(tag)
+                tag_name = normalized_tag.split(':')[0]
                 if tag_name in RESERVED_TAGS:
                     self.log.warning(
-                        '%s is a reserved tag and is attached to Datadog feature, try to avoid using it.', tag_name
+                        '`%s` is a reserved tag and is attached to Datadog features, try to avoid using it.', tag_name
                     )
                     if self.disable_generic_tags:
-                        additional_tags.append(self.degeneralise_tag(tag_name))
+                        additional_tags.append(self.degeneralise_tag(normalized_tag))
             self._base_static_tags += additional_tags
-
-            # Openmetrics compatibility
-            ignore_tags = self.instance.get('ignore_tags', [])
-            if ignore_tags:
-                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
-                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]

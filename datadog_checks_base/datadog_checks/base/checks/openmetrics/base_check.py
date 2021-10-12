@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+import re
 import requests
 from six import PY2
 
@@ -122,6 +123,15 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
                         )
                 else:
                     self.get_scraper_config(instance)
+
+    def _populate_base_static_tags(self):
+        super(OpenMetricsBaseCheck, self)._populate_base_static_tags()
+        # Openmetrics compatibility
+        if isinstance(self.instance, dict):
+            ignore_tags = self.instance.get('ignore_tags', [])
+            if ignore_tags:
+                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
 
     def check(self, instance):
         # Get the configuration for this specific instance

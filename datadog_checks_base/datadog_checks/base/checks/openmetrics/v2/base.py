@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # TODO: remove ignore when we stop invoking Mypy with --py2
 # type: ignore
+import re
 from collections import ChainMap
 from contextlib import contextmanager
 
@@ -33,6 +34,15 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
             with self.adopt_namespace(scraper.namespace):
                 scraper.scrape()
+
+    def _populate_base_static_tags(self):
+        super(OpenMetricsBaseCheckV2, self)._populate_base_static_tags()
+        # Openmetrics compatibility
+        if isinstance(self.instance, dict):
+            ignore_tags = self.instance.get('ignore_tags', [])
+            if ignore_tags:
+                ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+                self._base_static_tags = [tag for tag in self._base_static_tags if not ignored_tags_re.search(tag)]
 
     def configure_scrapers(self):
         scrapers = {}
