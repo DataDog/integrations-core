@@ -58,9 +58,9 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
 
 #### OpenMetrics V2 vs OpenMetrics V1
-Setting `use_openmetrics` to `true` will use the OpenMetrics V2 implementation of the check. 
-This change will be the default option as of Agent 7.33.x. However, setting `use_openmetrics: false` 
-will return to using the OpenMetrics V1 implementation. More information on this change can be found [here][23].
+Setting `use_openmetrics` to `true` uses the OpenMetrics V2 implementation of the check. 
+This change is the default option as of Agent 7.33.x. However, setting `use_openmetrics: false` 
+returns to the OpenMetrics V1 implementation. For more information, see [the GitHub Pull Request for the change][23].
 
 The main differences between OpenMetrics V1 and OpenMetrics V2 are the metrics that are changed. All `*.count` and `*.sum` have changed type from `gauge` to `monotonic_count`.
 The following metrics are new in OpenMetrics V2:
