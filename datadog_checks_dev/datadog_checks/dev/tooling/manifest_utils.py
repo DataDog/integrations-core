@@ -76,12 +76,19 @@ class ManifestV1:
         path = os.path.join(get_root(), self._check_name, *path.split('/'))
         return path, file_exists(path)
 
+    def get_metadata_path(self):
+        return self._manifest_json.get_path("/assets/metrics_metadata")
+
     def get_service_checks_path(self):
         return self._manifest_json["assets"]["service_checks"]
 
     def get_config_spec(self):
         path = self._manifest_json.get('assets', {}).get('configuration', {}).get('spec', '')
         return os.path.join(get_root(), self._check_name, *path.split('/'))
+
+    def has_integration(self):
+        # we assume all V1 manifests have an integration, this should avoid breaking any existing validations
+        return True
 
 
 class ManifestV2:
@@ -105,9 +112,15 @@ class ManifestV2:
         path = os.path.join(get_root(), self._check_name, *path.split('/'))
         return path, file_exists(path)
 
+    def get_metadata_path(self):
+        return self._manifest_json.get_path("/assets/integration/metrics/metadata_path")
+
     def get_service_checks_path(self):
-        return self._manifest_json["assets"]["integration"]["service_checks"]["metadata_path"]
+        return self._manifest_json.get_path("/assets/integration/service_checks/metadata_path")
 
     def get_config_spec(self):
         path = self._manifest_json.get_path('/assets/integration/configuration/spec') or ''
         return os.path.join(get_root(), self._check_name, *path.split('/'))
+
+    def has_integration(self):
+        return self._manifest_json.get_path("/assets/integration") is not None
