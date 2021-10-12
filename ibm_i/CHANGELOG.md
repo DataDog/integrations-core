@@ -1,5 +1,8 @@
 # CHANGELOG - IBM i
 
+## 1.1.0-beta.1 / 2021-10-12
+
+
 ## 1.0.1 / 2021-10-04
 
 * [Fixed] Bump minimum base package. See [#10325](https://github.com/DataDog/integrations-core/pull/10325).
