@@ -1,5 +1,9 @@
 # CHANGELOG - ClickHouse
 
+## 2.4.1 / 2021-10-12
+
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
 ## 2.4.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).

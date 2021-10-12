@@ -1,5 +1,9 @@
 # CHANGELOG - Amazon MSK
 
+## 2.0.1 / 2021-10-12
+
+* [Fixed] Account for errors in boto client creation. See [#10386](https://github.com/DataDog/integrations-core/pull/10386).
+
 ## 2.0.0 / 2021-10-04
 
 * [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
