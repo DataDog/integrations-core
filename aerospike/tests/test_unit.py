@@ -49,7 +49,7 @@ def test_xdr_metrics(aggregator):
     check.collect_xdr()
 
     for metric in common.XDR_DC_METRICS:
-        aggregator.assert_metric(metric, tags=['datacenter:test'])
+        aggregator.assert_metric(metric, tags=['tag:value', 'datacenter:test'])
 
 
 def test_multiple_xdr_metrics(aggregator):
@@ -68,7 +68,7 @@ def test_multiple_xdr_metrics(aggregator):
     for host in ['ip-10-10-17-247.ec2.internal', 'ip-10-10-17-144.ec2.internal']:
         for metric in common.XDR_DC_METRICS:
             aggregator.assert_metric(
-                metric, tags=['datacenter:test', 'remote_dc_port:3000', 'remote_dc_host:{}'.format(host)]
+                metric, tags=['tag:value', 'datacenter:test', 'remote_dc_port:3000', 'remote_dc_host:{}'.format(host)]
             )
 
 
