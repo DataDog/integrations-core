@@ -715,7 +715,7 @@ def test_mesos_filter(aggregator):
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == CLUSTER_TAGS + ['url:http://localhost:5050']
+            assert sc.tags == sorted(CLUSTER_TAGS + ['url:http://localhost:5050'])
 
         assert aggregator.metrics_asserted_pct == 100.0
 
@@ -838,10 +838,10 @@ def test_standalone_unit(aggregator):
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:8080'] + CLUSTER_TAGS)
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:4040'] + CLUSTER_TAGS)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -900,10 +900,10 @@ def test_standalone_unit_with_proxy_warning_page(aggregator):
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:8080'] + CLUSTER_TAGS)
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:4040'] + CLUSTER_TAGS)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
@@ -962,10 +962,10 @@ def test_standalone_pre20(aggregator):
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:8080'] + CLUSTER_TAGS)
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+            assert sc.tags == sorted(['url:http://localhost:4040'] + CLUSTER_TAGS)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
