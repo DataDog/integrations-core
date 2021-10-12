@@ -8,7 +8,7 @@ import os
 import re
 from collections import OrderedDict, defaultdict
 
-from six import iteritems
+from six import iteritems, string_types
 
 from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
@@ -21,6 +21,11 @@ METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
 
 def deduplicate_tags(tags):
     # De-duplicate tags like the datadog agent
+
+    # Haproxy legacy is sending tuple tags
+    for t in tags:
+        if not isinstance(t, string_types):
+            return tags
     return sorted(set(tags))
 
 
