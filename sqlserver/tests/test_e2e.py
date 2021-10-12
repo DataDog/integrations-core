@@ -81,6 +81,9 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     for mname in EXPECTED_METRICS:
         aggregator.assert_metric(mname)
 
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname, count=0)
+
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
