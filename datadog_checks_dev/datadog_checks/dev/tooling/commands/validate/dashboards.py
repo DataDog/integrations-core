@@ -32,6 +32,34 @@ def _is_dashboard_format(payload):
     return False
 
 
+def check_widgets(decoded, filename, app_uuid, fix, file_fixed, file_failed, display_queue):
+    """Recursively check the decoded dashboard object for widget references and validate the app_id inside."""
+    for widget in decoded.get('widgets', []):
+
+        if widget.get('definition', {}).get('widgets'):
+            decoded = {'widgets': widget['definition']['widgets']}
+            file_fixed, file_failed = check_widgets(
+                decoded, filename, app_uuid, fix, file_fixed, file_failed, display_queue
+            )
+
+        widget_app_uuid = widget.get('definition', {}).get('app_id')
+        if widget_app_uuid and widget_app_uuid != app_uuid:
+            if fix:
+                widget['definition']['app_id'] = app_uuid
+                file_fixed = True
+                continue
+            else:
+                file_failed = True
+                msg = (
+                    f"    {filename} widget {widget['id']} does not contain correct app_uuid: "
+                    f"{widget_app_uuid} should be {app_uuid}"
+                )
+                display_queue.append(
+                    (echo_failure, msg),
+                )
+    return file_fixed, file_failed
+
+
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
@@ -102,23 +130,9 @@ def dashboards(check, fix):
                 echo_debug(f'Validating app dashboard {dashboard_filename} ..')
                 app_uuid = manifest.get_app_uuid()
 
-                for widget in decoded.get('widgets', []):
-
-                    widget_app_uuid = widget.get('definition', {}).get('app_id')
-                    if widget_app_uuid and widget_app_uuid != app_uuid:
-                        if fix:
-                            widget['definition']['app_id'] = app_uuid
-                            file_fixed = True
-                            continue
-                        else:
-                            file_failed = True
-                            msg = (
-                                f"    {dashboard_filename} widget {widget['id']} does not contain correct app_uuid: "
-                                f"{widget_app_uuid} should be {app_uuid}"
-                            )
-                            display_queue.append(
-                                (echo_failure, msg),
-                            )
+                file_fixed, file_failed = check_widgets(
+                    decoded, dashboard_filename, app_uuid, fix, file_fixed, file_failed, display_queue
+                )
 
             if fix and file_fixed:
                 new_dashboard = f"{json.dumps(decoded, indent=2, separators=(',', ': '))}\n"
