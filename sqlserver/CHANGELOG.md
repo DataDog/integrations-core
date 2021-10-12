@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 5.0.1 / 2021-10-12
+
+* [Fixed] Fix: SQLServer DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+* [Fixed] [Fixed] Remove duplicate names from the list of sql-server metrics to collect. See [#10334](https://github.com/DataDog/integrations-core/pull/10334). Thanks [pedroreys](https://github.com/pedroreys).
+
 ## 5.0.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
