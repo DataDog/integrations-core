@@ -59,11 +59,12 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
 
 #### OpenMetrics V2 vs OpenMetrics V1
-Setting `use_openmetrics` to `true` uses the OpenMetrics V2 implementation of the check. 
-This change is the default option as of Agent 7.33.x. However, setting `use_openmetrics: false` 
-returns to the OpenMetrics V1 implementation. For more information, see [the GitHub Pull Request for the change][23].
+Enabling the `use_openmetrics` configuration option, the Istio integration will use the OpenMetrics V2 implementation of the check. 
 
-The main differences between OpenMetrics V1 and OpenMetrics V2 are the metrics that are changed. All `*.count` and `*.sum` have changed type from `gauge` to `monotonic_count`.
+
+Disable `use_openmetrics` configuration option to utilize the OpenMetrics V1 implementation.
+
+In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
 The following metrics are new in OpenMetrics V2:
 
 ```shell
@@ -98,10 +99,9 @@ istio.mesh.response.size.bucket
 istio.mesh.request.size.bucket
 ```
 
-To view the metrics that are collected using OpenMetrics V1, see [the metadata.csv file][24]. 
 To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][25].
 
-**WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metric type will repeatedly switch between the two.
+**WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
 
 ##### Disable sidecar injection for Datadog Agent pods
 
