@@ -115,7 +115,6 @@ class Disk(AgentCheck):
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
 
-        self._valid_disks = {}
         for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
@@ -148,8 +147,6 @@ class Disk(AgentCheck):
                     self.log.info('Excluding device %s with total disk size %s', part.device, disk_usage.total)
                 continue
 
-            # For later, latency metrics
-            self._valid_disks[part.device] = (part.fstype, part.mountpoint)
             self.log.debug('Passed: %s', part.device)
 
             device_name = part.mountpoint if self._use_mount else part.device
