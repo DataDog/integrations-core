@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.0.0 / 2021-10-13
+
+* [Changed] Rename legacy PDH config spec. See [#10412](https://github.com/DataDog/integrations-core/pull/10412).
+
 ## 14.5.1 / 2021-10-12
 
 * [Fixed] Update dashboard validation for Manifest V2. See [#10398](https://github.com/DataDog/integrations-core/pull/10398).
