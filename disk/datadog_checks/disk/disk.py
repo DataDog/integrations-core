@@ -159,8 +159,10 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags.extend(device_tags)
 
-            if self.devices_label.get(device_name):
-                tags.extend(self.devices_label.get(device_name))
+            # apply device labels as tags (from blkid or lsblk).
+            # we want to use the real device name and not the device_name (which can be the mountpoint)
+            if self.devices_label.get(part.device):
+                tags.extend(self.devices_label.get(part.device))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
