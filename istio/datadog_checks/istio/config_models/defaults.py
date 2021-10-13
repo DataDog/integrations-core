@@ -52,10 +52,6 @@ def instance_cache_shared_labels(field, value):
     return True
 
 
-def instance_citadel_endpoint(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_collect_counters_with_distributions(field, value):
     return False
 
@@ -97,10 +93,6 @@ def instance_extra_headers(field, value):
 
 
 def instance_extra_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_galley_endpoint(field, value):
     return get_default_field_value(field, value)
 
 
@@ -172,10 +164,6 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
-def instance_mixer_endpoint(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_namespace(field, value):
     return get_default_field_value(field, value)
 
@@ -198,10 +186,6 @@ def instance_password(field, value):
 
 def instance_persist_connections(field, value):
     return False
-
-
-def instance_pilot_endpoint(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_proxy(field, value):

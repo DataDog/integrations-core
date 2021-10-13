@@ -61,43 +61,9 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
 #### OpenMetrics V2 vs OpenMetrics V1
 Enabling the `use_openmetrics` configuration option, the Istio integration will use the OpenMetrics V2 implementation of the check. 
 
+In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
 
 Disable `use_openmetrics` configuration option to utilize the OpenMetrics V1 implementation.
-
-In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
-The following metrics are new in OpenMetrics V2:
-
-```shell
-istio.galley.validation.config_update_error.count
-istio.galley.validation.config_update.count
-istio.galley.validation.failed.count
-istio.go.memstats.frees.count
-istio.go.memstats.lookups.count
-istio.go.memstats.mallocs.count
-istio.grpc.server.handled.count
-istio.grpc.server.msg_received.count
-istio.grpc.server.msg_sent.count
-istio.grpc.server.started.count
-istio.pilot.inbound_updates.count
-istio.pilot.k8s.cfg_events.count
-istio.pilot.k8s.reg_events.count
-istio.pilot.push.triggers.count
-istio.pilot.xds.pushes.count
-istio.process.cpu_seconds.count
-istio.sidecar_injection.requests.count
-istio.sidecar_injection.success.count
-istio.mesh.tcp.connections_closed.count
-istio.mesh.tcp.connections_opened.count
-istio.mesh.tcp.received_bytes.count
-istio.mesh.tcp.send_bytes.count
-istio.grpc.server.handling_seconds.bucket
-istio.pilot.proxy_convergence_time.bucket
-istio.pilot.proxy_queue_time.bucket
-istio.pilot.xds.push.time.bucket
-istio.mesh.request.duration.milliseconds.bucket
-istio.mesh.response.size.bucket
-istio.mesh.request.size.bucket
-```
 
 To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][25].
 

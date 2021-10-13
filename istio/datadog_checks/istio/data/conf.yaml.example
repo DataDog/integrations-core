@@ -45,7 +45,29 @@ init_config:
 #
 instances:
 
-  -
+    ## @param use_openmetrics - boolean - optional - default: true
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+    #
+  - use_openmetrics: true
+
+    ## @param istiod_endpoint - string - optional
+    ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
+    ## Only available for Istio >= v1.5.
+    #
+    # istiod_endpoint: http://istiod.istio-system:15014/metrics
+
+    ## @param istio_mesh_endpoint - string - optional
+    ## To enable Istio metrics you must specify the url exposing the API.
+    ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
+    ## the CPP extension to process Protocol buffer messages coming from the api. Depending
+    ## on the metrics volume, the check may run very slowly.
+    ##
+    ## When collecting mesh metrics in Istio < v1.5, use
+    ## istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+    #
+    # istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -562,52 +584,3 @@ instances:
     ## Whether or not to allow URL redirection.
     #
     # allow_redirects: true
-
-    ## @param use_openmetrics - boolean - optional - default: true
-    ## Use the latest OpenMetrics implementation for more features and better performance.
-    ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
-    #
-    use_openmetrics: true
-
-    ## @param istiod_endpoint - string - optional
-    ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
-    ## Only available for Istio >= v1.5.
-    #
-    # istiod_endpoint: http://istiod.istio-system:15014/metrics
-
-    ## @param istio_mesh_endpoint - string - optional
-    ## To enable Istio metrics you must specify the url exposing the API.
-    ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
-    ## the CPP extension to process Protocol buffer messages coming from the api. Depending
-    ## on the metrics volume, the check may run very slowly.
-    ##
-    ## When collecting mesh metrics in Istio < v1.5, use
-    ## istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
-    #
-    # istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
-
-    ## @param mixer_endpoint - string - optional
-    ## Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
-    ## as gRPC metrics related to API calls and metrics on adapter dispatch.
-    ## Only available for Istio < 1.5. If using Istio < v1.1, replace port 15014 with port 9093.
-    ## See the changes here: https://istio.io/about/notes/1.1/#configuration-management
-    #
-    # mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
-
-    ## @param pilot_endpoint - string - optional
-    ## Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process.
-    ## Only available for Istio >= v1.1 and <1.5.
-    #
-    # pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
-
-    ## @param galley_endpoint - string - optional
-    ## Define the galley endpoint in order to collect all Prometheus metrics on the Galley process.
-    ## Only available for Istio >= v1.1 and <1.5.
-    #
-    # galley_endpoint: http://istio-galley.istio-system:15014/metrics
-
-    ## @param citadel_endpoint - string - optional
-    ## Define the citadel endpoint in order to collect all Prometheus metrics on the Citadel process.
-    ## Only available for Istio >= v1.1 and <1.5.
-    #
-    # citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
