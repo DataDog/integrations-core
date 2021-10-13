@@ -1,2 +1,2 @@
 -e ../datadog_checks_dev
-ndg-httpsclient
+ndg-httpsclient==0.5.0
