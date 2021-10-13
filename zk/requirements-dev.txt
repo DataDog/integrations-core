@@ -1,2 +1,4 @@
 -e ../datadog_checks_dev
 ndg-httpsclient==0.5.0
+pyopenssl==21.0.0
+pyasn1==0.4.8
