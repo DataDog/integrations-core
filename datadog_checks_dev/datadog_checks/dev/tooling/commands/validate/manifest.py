@@ -7,6 +7,7 @@ import os
 import click
 
 from ....fs import file_exists, read_file, write_file
+from ...annotations import annotate_display_queue, annotate_error, annotate_warning
 from ...constants import get_root
 from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
@@ -55,6 +56,7 @@ def manifest(ctx, check, fix):
                 echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
                 echo_failure(f'  invalid json: {e}')
+                annotate_error(manifest_file, f"Invalid json: {e}")
                 continue
 
             version = decoded.get('manifest_version', V1_STRING)
@@ -71,11 +73,19 @@ def manifest(ctx, check, fix):
                     for message in messages:
                         display_queue.append((message_methods[msg_type], message))
 
+            # Check is_public
+            is_public = decoded.get("is_public")
+            if not is_public:
+                echo_warning(
+                    f"{check_name}: `is_public` is disabled, set to `True` if you want the integration documentation to be published.",
+                )
+
             if file_failures > 0:
                 failed_checks += 1
                 # Display detailed info if file invalid
                 echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
+                annotate_display_queue(manifest_file, display_queue)
                 for display_func, message in display_queue:
                     display_func(message)
             elif not file_fixed:
