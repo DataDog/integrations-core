@@ -65,7 +65,7 @@ In OpenMetrics V2, metrics are submitted more accurately by default and behave c
 
 Disable `use_openmetrics` configuration option to utilize the OpenMetrics V1 implementation.
 
-To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][25].
+To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
 
 **WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
 
