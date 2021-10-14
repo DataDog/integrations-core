@@ -44,7 +44,7 @@ def test_error_unknown(instance):
     check.query_master_database = query_master_database
 
     check.check(None)
-    check.log.error.assert_any_call('Unexpected error running `%s`: %s', 'query_master_database', 'test')
+    check.log.exception.assert_any_call('Unexpected error running `%s`: %s', 'query_master_database', 'test')
 
 
 def test_custom_query_configuration(instance):
