@@ -13,10 +13,10 @@ from .metrics import get_metrics
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_check(aggregator, instance):
+def test_check(aggregator, instance, dd_run_check):
     # We do not do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
     check = ClickhouseCheck('clickhouse', {}, [instance])
-    check.run()
+    dd_run_check(check)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
     metrics = get_metrics(CLICKHOUSE_VERSION)
