@@ -77,9 +77,9 @@ spec:
             - hostPath:
                 path: \\\\.\\pipe\\containerd-containerd
               name: containerdsocket
-            - hostPath:
-                path: \\\\.\\pipe\\docker_engine
-              name: var-run
+          volumeMounts:
+            - name: containerdsocket
+              mountPath: \\\\.\\pipe\\containerd-containerd
 ```
 
 <!-- xxz tab xxx -->
