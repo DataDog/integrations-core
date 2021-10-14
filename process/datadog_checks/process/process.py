@@ -260,7 +260,7 @@ class ProcessCheck(AgentCheck):
             except psutil.AccessDenied:
                 self.log.debug("psutil was denied access for method %s", method)
             except psutil.NoSuchProcess:
-                self.warning("Process %s disappeared while scanning", process.pid)
+                self.log.debug("Process %s disappeared while scanning", process.pid)
 
         return result
 
