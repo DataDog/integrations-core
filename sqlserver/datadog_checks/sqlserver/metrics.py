@@ -471,10 +471,13 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=[]):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         # special case since this table is specific to databases, need to run query for each database instance
         rows = []
         columns = []
+
+        if databases is None:
+            databases = []
 
         cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
         data = cursor.fetchall()
@@ -680,10 +683,12 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=[]):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
         # special case to limit this query to specific databases and monitor performance
         rows = []
         columns = []
+        if databases is None:
+            databases = []
 
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
