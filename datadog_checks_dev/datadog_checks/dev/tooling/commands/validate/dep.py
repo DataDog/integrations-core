@@ -45,40 +45,47 @@ def verify_base_dependency(source, name, base_versions, force_pinned=True, min_b
     Optionally validate a specific version satisfies the base requirement spec.
     """
     failed = False
-
     for specifier_set, dependency_definitions in base_versions.items():
         checks = sorted(dep.check_name for dep in dependency_definitions)
-
+        file = os.path.join(get_root(), format_check_usage(checks, source), 'setup.py')
         if not specifier_set and force_pinned:
-            echo_failure(f'Unspecified version found for dependency `{name}`: {format_check_usage(checks, source)}')
+            message = f'Unspecified version found for dependency `{name}`: {format_check_usage(checks, source)}'
+            echo_failure(message)
+            annotate_error(file, message)
             failed = True
         elif len(specifier_set) > 1:
-            echo_failure(
+            message = (
                 f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}`: '
                 f'{format_check_usage(checks, source)}'
             )
+            echo_failure(message)
+            annotate_error(file, message)
             failed = True
         elif specifier_set:
             specifier = get_next(specifier_set)
 
             if specifier.operator != '>=':
-                echo_failure(
+                message = (
                     f'Forced version pin `{specifier}` found for dependency `{name}` '
                     f'(use >= explicitly for base dependency): {format_check_usage(checks, source)}'
                 )
+                echo_failure(message)
+                annotate_error(file, message)
                 failed = True
 
             if min_base_version is not None and min_base_version not in specifier:
-                echo_failure(
-                    f'Minimum datadog_checks_base version `{min_base_version}` not satisfied by dependency specifier '
+                message = (
+                    f'Minimum datadog_checks_base version `{min_base_version}` not satisfied by dependency specifier'
                     f'`{specifier}`: {format_check_usage(checks, source)}'
                 )
+                echo_failure(message)
+                annotate_error(file, message)
                 failed = True
 
     return not failed
 
 
-def verify_dependency(source, name, versions):
+def verify_dependency(source, name, versions, file):
     markers = {}
     for specifier_set, dependency_definitions in versions.items():
         checks = set()
@@ -98,6 +105,7 @@ def verify_dependency(source, name, versions):
                         f'    {existing_specifier_set} from: {existing_check_name or source}'
                     )
                     echo_failure(message)
+                    annotate_error(file, message)
                     return False
             else:
                 markers[marker] = (check_name, specifier_set)
@@ -105,21 +113,27 @@ def verify_dependency(source, name, versions):
         checks = sorted(checks)
 
         if not specifier_set:
-            echo_failure(f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}')
+            message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
+            echo_failure(message)
+            annotate_error(file, message)
             return False
         elif len(specifier_set) > 1:
-            echo_failure(
+            message = (
                 f'Multiple unstable version pins `{specifier_set}` found for dependency `{name}` '
                 f'(use a single == explicitly): {format_check_usage(checks, source)}'
             )
+            echo_failure(message)
+            annotate_error(file, message)
             return False
 
         specifier = get_next(specifier_set)
         if specifier.operator != '==':
-            echo_failure(
+            message = (
                 f'Unstable version pin `{specifier}` found for dependency `{name}` '
                 f'(use == explicitly): {format_check_usage(checks, source)}'
             )
+            echo_failure(message)
+            annotate_error(file, message)
             return False
 
     return True
@@ -174,76 +188,73 @@ def dep(check, require_base_check_version, min_base_check_version):
             abort()
 
         for name, versions in sorted(check_dependencies.items()):
-            if not verify_dependency('Checks', name, versions):
+            if not verify_dependency('Checks', name, versions, req_file):
                 failed = True
 
             if name not in agent_dependencies:
                 failed = True
                 message = f'Dependency needs to be synced: {name}'
                 echo_failure(message)
-                annotate_error(agent_dependencies_file, message)
-
-        for name, versions in sorted(check_base_dependencies.items()):
-            if not verify_base_dependency(
-                'Base Checks', name, versions, require_base_check_version, min_base_check_version
-            ):
-                failed = True
-
-        # If validating a single check, whether all Agent dependencies are included in check dependencies is irrelevant.
-        if check is not None:
-            agent_dependencies = {}
-
-        for name, versions in sorted(agent_dependencies.items()):
-            if not verify_dependency('Agent', name, versions):
-                failed = True
-
-            if name not in check_dependencies:
-                failed = True
-                message = f'Stale dependency needs to be removed by syncing: {name}'
-                echo_failure(message)
                 annotate_error(req_file, message)
-                continue
 
-            agent_versions = sorted(versions, key=lambda v: str(v))
-            check_versions = sorted(check_dependencies[name], key=lambda v: str(v))
+    check_base_dependencies, check_base_errors = read_check_base_dependencies(checks)
+    check_dependencies, check_errors = read_check_dependencies(checks)
 
-            if agent_versions != check_versions:
+    for name, versions in sorted(check_base_dependencies.items()):
+        if not verify_base_dependency(
+            'Base Checks', name, versions, require_base_check_version, min_base_check_version
+        ):
+            failed = True
+
+    # If validating a single check, whether all Agent dependencies are included in check dependencies is irrelevant.
+    if check is not None:
+        agent_dependencies = {}
+
+    for name, versions in sorted(agent_dependencies.items()):
+        if not verify_dependency('Agent', name, versions, agent_dependencies_file):
+            failed = True
+
+        if name not in check_dependencies:  # Looks like this fails because of the per check run....
+            failed = True
+            message = f'Stale dependency needs to be removed by syncing: {name}'
+            echo_failure(message)
+            annotate_error(agent_dependencies_file, message)
+            continue
+
+        agent_versions = sorted(versions, key=lambda v: str(v))
+        check_versions = sorted(check_dependencies[name], key=lambda v: str(v))
+
+        if agent_versions != check_versions:
+            failed = True
+            message = (
+                f'Version mismatch for dependency `{name}`:'
+                f'    Agent: {" | ".join(map(str, agent_versions))}'
+                f'    Checks: {" | ".join(map(str, check_versions))}'
+            )
+            echo_failure(message)
+            annotate_error(agent_dependencies_file, message)
+            continue
+
+        for specifier_set in agent_versions:
+            agent_dependency_definitions = versions[specifier_set]
+            check_dependency_definitions = check_dependencies[name][specifier_set]
+
+            agent_markers = sorted(
+                set(get_marker_string(dependency_definition) for dependency_definition in agent_dependency_definitions)
+            )
+            check_markers = sorted(
+                set(get_marker_string(dependency_definition) for dependency_definition in check_dependency_definitions)
+            )
+
+            if agent_markers != check_markers:
                 failed = True
                 message = (
-                    f'Version mismatch for dependency `{name}`:'
-                    f'    Agent: {" | ".join(map(str, agent_versions))}'
-                    f'    Checks: {" | ".join(map(str, check_versions))}'
+                    f'Marker mismatch for dependency `{name}`:'
+                    f'    Agent: {" | ".join(agent_markers)}'
+                    f'    Checks: {" | ".join(check_markers)}'
                 )
                 echo_failure(message)
-                annotate_error(req_file, message)
-                continue
-
-            for specifier_set in agent_versions:
-                agent_dependency_definitions = versions[specifier_set]
-                check_dependency_definitions = check_dependencies[name][specifier_set]
-
-                agent_markers = sorted(
-                    set(
-                        get_marker_string(dependency_definition)
-                        for dependency_definition in agent_dependency_definitions
-                    )
-                )
-                check_markers = sorted(
-                    set(
-                        get_marker_string(dependency_definition)
-                        for dependency_definition in check_dependency_definitions
-                    )
-                )
-
-                if agent_markers != check_markers:
-                    failed = True
-                    message = (
-                        f'Marker mismatch for dependency `{name}`:'
-                        f'    Agent: {" | ".join(agent_markers)}'
-                        f'    Checks: {" | ".join(check_markers)}'
-                    )
-                    echo_failure(message)
-                    annotate_error(agent_dependencies_file, message)
+                annotate_error(agent_dependencies_file, message)
 
         if failed:
             abort()

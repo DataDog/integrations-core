@@ -29,8 +29,9 @@ def annotate_display_queue(file, display_queue):
 
 
 def annotate_errors(file, errors):
-    message = "%0A".join(errors)
-    annotate_error(file, message)
+    if errors:
+        message = "%0A".join(errors)
+        annotate_error(file, message)
 
 
 def annotate_warning(file, message, line=1):
