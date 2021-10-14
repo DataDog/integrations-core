@@ -166,6 +166,17 @@
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    May be used in conjunction with `include_labels`. If configured, excluded labels that are not in `include_labels`
+    will be excluded as tags.
+  value:
+    type: array
+    items:
+      type: string
+- name: include_labels
+  description: |
+    A list of labels to include, useful for high cardinality values like timestamps or UUIDs.
+    May be used in conjunction with `exclude_labels`. If configured, included labels that are not in `exclude_labels`
+    will be included as tags.
   value:
     type: array
     items:
