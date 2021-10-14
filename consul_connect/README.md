@@ -26,6 +26,12 @@ To configure this check for an Agent running on a host:
 2. Enable the [Envoy integration][4] to configure metric collection.
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 Follow the [Envoy host][6] instructions to configure log collection.  
 
 <!-- xxz tab xxx -->
@@ -41,6 +47,12 @@ Follow the [Envoy containerized instructions][7] to configure your Datadog Agent
  2. Configure the [Envoy integration for containerized environments instructions][9] to start collecting metrics. 
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 Follow the [Envoy containerized instructions][10] to configure log collection.
 
 <!-- xxz tab xxx -->

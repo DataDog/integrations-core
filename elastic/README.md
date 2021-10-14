@@ -71,6 +71,12 @@ Datadog APM integrates with Elasticsearch to see the traces across your distribu
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
@@ -158,6 +164,12 @@ LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
 
@@ -215,6 +227,12 @@ spec:
 ```
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
@@ -275,6 +293,12 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 ```
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].

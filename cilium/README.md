@@ -55,6 +55,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
@@ -90,6 +96,12 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics"}`       |
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 

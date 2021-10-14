@@ -43,6 +43,12 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
@@ -91,6 +97,12 @@ LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/serv
 
 ##### Log collection
 
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
+
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][16].
 
@@ -131,6 +143,12 @@ spec:
 ```
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][20].
@@ -176,6 +194,12 @@ Set [Autodiscovery Integrations Templates][23] as Docker labels on your applicat
 ```
 
 ##### Log collection
+
+<!-- partial
+{{< site-region region="us3" >}}
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
+{{< /site-region >}}
+partial -->
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
