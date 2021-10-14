@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import mock
 import pytest
 
@@ -159,3 +161,30 @@ def test_no_tls_overwrite_by_default():
         with pytest.raises(Exception, match='Invalid message header received'):
             conn.connect()
         tls_context.wrap_socket.assert_not_called()
+
+
+def test_persisted_db_connection(instance, dd_run_check, caplog):
+    expected_message = 'Refreshing database connection.'
+    caplog.clear()
+    caplog.set_level(logging.DEBUG)
+    # Test option set in init_config
+    instance['persist_db_connections'] = False
+    check_instance = SapHanaCheck('sap_hana', {}, [instance])
+    dd_run_check(check_instance)
+    assert expected_message in caplog.text
+    assert check_instance._persist_db_connections is False
+    caplog.clear()
+    # Test option set in instance
+    instance['persist_db_connections'] = None
+    check_init = SapHanaCheck('sap_hana', {'persist_db_connections': False}, [instance])
+    dd_run_check(check_init)
+    assert expected_message in caplog.text
+    assert check_init._persist_db_connections is False
+    caplog.clear()
+    # Test default behavior
+    check_persist = SapHanaCheck('sap_hana', {}, [instance])
+    expected_message = 'Refreshing database connection.'
+    dd_run_check(check_persist)
+    assert expected_message not in caplog.text
+    assert check_persist._persist_db_connections is True
+    caplog.clear()
