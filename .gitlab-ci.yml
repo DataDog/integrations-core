@@ -37,14 +37,14 @@ validate-log-integrations:
   only:
   - schedules
   variables:
-    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/shared/integrations/integrations.ts
-    LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
     INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
   script:
     - cd /app
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
+    - export WEBUI_INTGS_FILE=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.webui_intgs_file --with-decryption --query "Parameter.Value" --out text)
+    - export LOGS_BACKEND_INTGS_ROOT=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.logs_backend_intgs_root --with-decryption --query "Parameter.Value" --out text)
+    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
     - ts-node parse_ts.ts > logs_integrations.json
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
+    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
     - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
   artifacts:
     paths:
