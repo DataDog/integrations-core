@@ -3,11 +3,11 @@ datadog-activemq-xml==1.12.0
 datadog-activemq==2.2.0
 datadog-aerospike==1.12.0; sys_platform == 'linux2'
 datadog-airflow==2.1.0
-datadog-amazon-msk==2.0.1
+datadog-amazon-msk==2.0.2
 datadog-ambari==2.1.0; sys_platform != 'win32'
 datadog-apache==2.0.0
 datadog-aspdotnet==1.7.0; sys_platform == 'win32'
-datadog-avi-vantage==2.0.2
+datadog-avi-vantage==2.0.3
 datadog-azure-iot-edge==2.2.0
 datadog-btrfs==1.11.1; sys_platform != 'win32'
 datadog-cacti==1.8.3; sys_platform == 'linux2'
@@ -99,7 +99,7 @@ datadog-nfsstat==1.9.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==1.10.0
 datadog-nginx==4.0.0
 datadog-openldap==1.8.0
-datadog-openmetrics==1.15.1
+datadog-openmetrics==1.15.2
 datadog-openstack-controller==1.13.0
 datadog-openstack==1.11.1
 datadog-oracle==3.5.0
