@@ -15,7 +15,7 @@ class HanaConnection(Connection):
 
         # Create socket
         self._socket = socket.create_connection((self.host, self.port), self._timeout)
-
+# test
         # Wrap socket if tls_context is set
         if self.tls_context:
             self._socket = self.tls_context.wrap_socket(self._socket, server_hostname=self.host)
