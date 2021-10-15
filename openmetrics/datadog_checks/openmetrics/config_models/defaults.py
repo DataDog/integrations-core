@@ -184,6 +184,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_namespace(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_non_cumulative_histogram_buckets(field, value):
     return False
 
