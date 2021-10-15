@@ -73,6 +73,13 @@ def manifest(ctx, check, fix):
                     for message in messages:
                         display_queue.append((message_methods[msg_type], message))
 
+            # Check is_public
+            is_public = decoded.get("is_public")
+            if not is_public:
+                echo_warning(
+                    f"{check_name}: `is_public` is disabled, set to `True` if you want the integration documentation to be published.",
+                )
+
             if file_failures > 0:
                 failed_checks += 1
                 # Display detailed info if file invalid
