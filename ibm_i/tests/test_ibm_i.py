@@ -188,7 +188,7 @@ def test_query_error_system_info(instance):
         system_info = check.fetch_system_info()
 
     assert system_info is None
-    check.log.error.assert_not_called()
+    check.log.error.assert_called_once()
 
 
 def test_set_up_query_manager_error(instance):
