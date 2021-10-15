@@ -4,7 +4,6 @@
 
 * [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
 * [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
-* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
 
 ## 23.1.2 / 2021-10-05
 
