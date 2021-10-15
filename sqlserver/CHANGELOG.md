@@ -1,5 +1,8 @@
 # CHANGELOG - sqlserver
 
+## 6.0.1-beta.1 / 2021-10-15
+
+
 ## 6.0.0 / 2021-10-13
 
 * [Fixed] Account for possible nonetype. See [#10257](https://github.com/DataDog/integrations-core/pull/10257).
