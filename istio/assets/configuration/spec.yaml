@@ -14,7 +14,6 @@ files:
           description: |
             Use the latest OpenMetrics implementation for more features and better performance.
             This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
-          hidden: true
           value:
             example: true
             display_default: true
@@ -49,3 +48,4 @@ files:
             min_collection_interval.hidden: true
             empty_default_hostname.hidden: true
             openmetrics_endpoint.required: false
+            openmetrics_endpoint.hidden: true
