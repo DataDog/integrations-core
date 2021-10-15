@@ -325,32 +325,32 @@ istio.process.resident_memory_bytes,gauge,,byte,,[Istio v1.5+] Resident memory s
 istio.process.start_time_seconds,gauge,,second,,[Istio v1.5+] Start time of the process since unix epoch in seconds.,0,istio,
 istio.process.virtual_memory_bytes,gauge,,byte,,[Istio v1.5+] Amount of virtual memory used.,0,istio,
 istio.process.virtual_memory_max_bytes,gauge,,byte,,[Istio v1.5+] Maximum amount of virtual memory available.,0,istio,
-istio.galley.validation.config_update_error.count,count,,error,,[Openmetrics V2, Istio v1.5+] K8s webhook configuration update error,0,istio,
-istio.galley.validation.config_update.count,count,,,,[Openmetrics V2, Istio v1.5+] k8s webhook configuration updates.,0,istio,
-istio.galley.validation.failed.count,count,,,,[Openmetrics V2, Istio v1.5+] Count of resource validation failed,0,istio,
-istio.go.memstats.frees.count,count,,,,[Openmetrics V2, Istio v1.5+] Total number of frees.,0,istio, frees count
-istio.go.memstats.lookups.count,count,,operation,,[Openmetrics V2, Istio v1.5+] Number of lookups,0,istio,lookups count
-istio.go.memstats.mallocs.count,count,,byte,,[Openmetrics V2, Istio v1.5+] Number of mallocs,0,istio,mallocs count
-istio.grpc.server.handled.count,count,,request,,"[Openmetrics V2, Istio v1.5+] Total number of fully handled requests, with responses",0,istio,
-istio.grpc.server.msg_received.count,count,,message,,[Openmetrics V2, Istio v1.5+] Total number of RPC stream messages received on the server.,0,istio,
-istio.grpc.server.msg_sent.count,count,,message,,[Openmetrics V2, Istio v1.5+] Total number of messages sent,0,istio,
-istio.grpc.server.started.count,count,,,,[Openmetrics V2, Istio v1.5+] Total number of RPCs started on the server.,0,istio,
-istio.pilot.inbound_updates.count,count,,,,[Openmetrics V2, Istio v1.5+] Total number of updates received by pilot,0,istio,
-istio.pilot.k8s.cfg_events.count,count,,event,,[Openmetrics V2, Istio v1.5+] Events from k8s config,0,istio,
-istio.pilot.k8s.reg_events.count,count,,event,,[Openmetrics V2, Istio v1.5+] Events from k8s registry,0,istio,
-istio.pilot.push.triggers.count,count,,,,[Openmetrics V2, Istio v1.5+] Total number of times a push was triggered,0,istio,
-istio.pilot.xds.pushes.count,count,,,,"[Openmetrics V2, Istio v1.5+] Pilot build and send errors for lds, rds, cds and eds.",0,istio,
-istio.process.cpu_seconds.count,count,,second,,[Openmetrics V2, Istio v1.5+] Total user and system CPU time spent in seconds.,0,istio,
-istio.sidecar_injection.requests.count,count,,request,,[Openmetrics V2, Istio v1.5+] Total number of sidecar injection requests,0,istio,
-istio.sidecar_injection.success.count,count,,request,,[Openmetrics V2, Istio v1.5+] Total number of successful sidecar injection requests,0,istio,
-istio.mesh.tcp.connections_closed.count,count,,,,[Openmetrics V2, Istio v1.5+] Total closed connections as monotonic count,0,istio,
-istio.mesh.tcp.connections_opened.count,count,,,,[Openmetrics V2, Istio v1.5+] Total opened connections as monotonic count,0,istio,
-istio.mesh.tcp.received_bytes.count,count,,byte,,[Openmetrics V2, Istio v1.5+] Size of total bytes received during request in case of a TCP connection as monotonic count,0,istio,tcp received bytes count
-istio.mesh.tcp.send_bytes.count,count,,byte,,[Openmetrics V2, Istio v1.5+] Size of total bytes sent during response in case of a TCP connection as monotonic count,0,istio,tcp send bytes count
-istio.grpc.server.handling_seconds.bucket,count,,second,,[Openmetrics V2, Istio v1.5+] Bucket of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,server handling seconds bucket
-istio.pilot.proxy_convergence_time.bucket,count,,second,,[Openmetrics V2, Istio v1.5+] Bucket of delay between config change and all proxies converging.,0,istio,proxy convergence time bucket
-istio.pilot.proxy_queue_time.bucket,count,,,,[Openmetrics V2, Istio v1.5+] Bucket of observed values for when proxy is in a push queue before being dequeued,0,istio,proxy queue time bucket
-istio.pilot.xds.push.time.bucket,count,,,,[Openmetrics V2, Istio v1.5+] Bucket of observation of total time Pilot takes a push,0,istio,xds push time bucket
-istio.mesh.request.duration.milliseconds.bucket,count,,millisecond,,[Openmetrics V2, Istio v1.5+] Bucket of observed values for duration of requests,0,istio,request duration milliseconds bucket
-istio.mesh.response.size.bucket,count,,response,,[Openmetrics V2, Istio v1.5+] Bucket of response sizes,0,istio,response sizes bucket
-istio.mesh.request.size.bucket,count,,request,,[Openmetrics V2, Istio v1.5+] Bucket of request sizes,0,istio,request sizes bucket
+istio.galley.validation.config_update_error.count,count,,error,,[Openmetrics V2 and Istio v1.5+] K8s webhook configuration update error,0,istio,
+istio.galley.validation.config_update.count,count,,,,[Openmetrics V2 and Istio v1.5+] k8s webhook configuration updates.,0,istio,
+istio.galley.validation.failed.count,count,,,,[Openmetrics V2 and Istio v1.5+] Count of resource validation failed,0,istio,
+istio.go.memstats.frees.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total number of frees.,0,istio, frees count
+istio.go.memstats.lookups.count,count,,operation,,[Openmetrics V2 and Istio v1.5+] Number of lookups,0,istio,lookups count
+istio.go.memstats.mallocs.count,count,,byte,,[Openmetrics V2 and Istio v1.5+] Number of mallocs,0,istio,mallocs count
+istio.grpc.server.handled.count,count,,request,,"[Openmetrics V2 and Istio v1.5+] Total number of fully handled requests, with responses",0,istio,
+istio.grpc.server.msg_received.count,count,,message,,[Openmetrics V2 and Istio v1.5+] Total number of RPC stream messages received on the server.,0,istio,
+istio.grpc.server.msg_sent.count,count,,message,,[Openmetrics V2 and Istio v1.5+] Total number of messages sent,0,istio,
+istio.grpc.server.started.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total number of RPCs started on the server.,0,istio,
+istio.pilot.inbound_updates.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total number of updates received by pilot,0,istio,
+istio.pilot.k8s.cfg_events.count,count,,event,,[Openmetrics V2 and Istio v1.5+] Events from k8s config,0,istio,
+istio.pilot.k8s.reg_events.count,count,,event,,[Openmetrics V2 and Istio v1.5+] Events from k8s registry,0,istio,
+istio.pilot.push.triggers.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total number of times a push was triggered,0,istio,
+istio.pilot.xds.pushes.count,count,,,,"[Openmetrics V2 and Istio v1.5+] Pilot build and send errors for lds, rds, cds and eds.",0,istio,
+istio.process.cpu_seconds.count,count,,second,,[Openmetrics V2 and Istio v1.5+] Total user and system CPU time spent in seconds.,0,istio,
+istio.sidecar_injection.requests.count,count,,request,,[Openmetrics V2 and Istio v1.5+] Total number of sidecar injection requests,0,istio,
+istio.sidecar_injection.success.count,count,,request,,[Openmetrics V2 and Istio v1.5+] Total number of successful sidecar injection requests,0,istio,
+istio.mesh.tcp.connections_closed.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total closed connections as monotonic count,0,istio,
+istio.mesh.tcp.connections_opened.count,count,,,,[Openmetrics V2 and Istio v1.5+] Total opened connections as monotonic count,0,istio,
+istio.mesh.tcp.received_bytes.count,count,,byte,,[Openmetrics V2 and Istio v1.5+] Size of total bytes received during request in case of a TCP connection as monotonic count,0,istio,tcp received bytes count
+istio.mesh.tcp.send_bytes.count,count,,byte,,[Openmetrics V2 and Istio v1.5+] Size of total bytes sent during response in case of a TCP connection as monotonic count,0,istio,tcp send bytes count
+istio.grpc.server.handling_seconds.bucket,count,,second,,[Openmetrics V2 and Istio v1.5+] Bucket of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,server handling seconds bucket
+istio.pilot.proxy_convergence_time.bucket,count,,second,,[Openmetrics V2 and Istio v1.5+] Bucket of delay between config change and all proxies converging.,0,istio,proxy convergence time bucket
+istio.pilot.proxy_queue_time.bucket,count,,,,[Openmetrics V2 and Istio v1.5+] Bucket of observed values for when proxy is in a push queue before being dequeued,0,istio,proxy queue time bucket
+istio.pilot.xds.push.time.bucket,count,,,,[Openmetrics V2 and Istio v1.5+] Bucket of observation of total time Pilot takes a push,0,istio,xds push time bucket
+istio.mesh.request.duration.milliseconds.bucket,count,,millisecond,,[Openmetrics V2 and Istio v1.5+] Bucket of observed values for duration of requests,0,istio,request duration milliseconds bucket
+istio.mesh.response.size.bucket,count,,response,,[Openmetrics V2 and Istio v1.5+] Bucket of response sizes,0,istio,response sizes bucket
+istio.mesh.request.size.bucket,count,,request,,[Openmetrics V2 and Istio v1.5+] Bucket of request sizes,0,istio,request sizes bucket
