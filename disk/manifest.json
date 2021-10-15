@@ -5,7 +5,7 @@
   "creates_events": false,
   "display_name": "Disk",
   "guid": "94588b23-111e-4ed2-a2af-fd6e4caeea04",
-  "is_public": true,
+  "is_public": false,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "system.",
