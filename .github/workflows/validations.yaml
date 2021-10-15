@@ -38,10 +38,6 @@ jobs:
     - name: Run CI validation
       run: |
         ddev validate ci
-
-    - name: Run codeowners validation
-      run: |
-        ddev validate codeowners
         
     - name: Run configuration validation
       run: |
