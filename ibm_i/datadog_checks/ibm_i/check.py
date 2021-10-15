@@ -156,9 +156,9 @@ class IbmICheck(AgentCheck, ConfigMixin):
                 self._delete_connection_subprocess(e)
                 return
 
-        e = None
+        err = None
         try:
-            e = self.connection_subprocess.stderr.read().strip()
+            err = self.connection_subprocess.stderr.read().strip()
         except TypeError as e:
             # We couldn't read anything
             self.log.debug("Could not read from stderr pipe: %s", e)
@@ -171,10 +171,10 @@ class IbmICheck(AgentCheck, ConfigMixin):
 
         # disconnect_on_error can be set to False for queries we
         # expect to fail and where we don't want to disconnect.
-        if e:
+        if err:
             if disconnect_on_error:
-                self._delete_connection_subprocess(e)
-            raise Exception(e)
+                self._delete_connection_subprocess(err)
+            raise Exception(err)
 
         if not done:
             if disconnect_on_error:
