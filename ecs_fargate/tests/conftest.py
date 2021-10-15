@@ -7,10 +7,11 @@ import os
 
 import pytest
 
+from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 INSTANCE_TAGS = ['foo:bar']
 
 EXPECTED_CONTAINER_METRICS = [
