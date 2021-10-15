@@ -62,12 +62,8 @@ class SapHanaCheck(AgentCheck):
         self._connection_lost = False
 
         # Whether or not to persist database connection. Default is True
-        self._persist_db_connections = (
-            self.instance.get('persist_db_connections')
-            if self.instance.get('persist_db_connections') is not None
-            else self.init_config.get('persist_db_connections')
-            if self.init_config.get('persist_db_connections') is not None
-            else True
+        self._persist_db_connections = self.instance.get(
+            'persist_db_connections', self.init_config.get('persist_db_connections', True)
         )
 
         # Whether or not to use the hostnames contained in the queried views

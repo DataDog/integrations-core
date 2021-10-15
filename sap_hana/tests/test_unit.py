@@ -164,22 +164,26 @@ def test_no_tls_overwrite_by_default():
 
 
 @pytest.mark.parametrize(
-    'init_config, instance_config, log_message, expected_config',
+    'init_config, instance_config, default_instance, persist',
     [
         pytest.param({'persist_db_connections': False}, None, True, False, id='Test option set in init_config'),
-        pytest.param({}, False, True, False, id='Test option set in instance'),
-        pytest.param({}, None, False, True, id='Test default behavior, persisted db connections'),
+        pytest.param({}, False, False, False, id='Test option set in instance'),
+        pytest.param({'persist_db_connections': False}, True, False, True, id='Test instance override'),
+        pytest.param({}, None, True, True, id='Test instance default behavior'),
     ],
 )
 def test_persisted_db_connection(
-    instance, dd_run_check, caplog, init_config, instance_config, log_message, expected_config
+    instance, dd_run_check, caplog, init_config, instance_config, persist, default_instance
 ):
     caplog.clear()
     caplog.set_level(logging.DEBUG)
     expected_message = 'Refreshing database connection.'
-    instance['persist_db_connections'] = instance_config
+    if not default_instance:
+        instance['persist_db_connections'] = instance_config
     check = SapHanaCheck('sap_hana', init_config, [instance])
     dd_run_check(check)
-    if log_message:
+    if persist:
+        assert expected_message not in caplog.text
+    else:
         assert expected_message in caplog.text
-    assert check._persist_db_connections is expected_config
+    assert check._persist_db_connections == persist
