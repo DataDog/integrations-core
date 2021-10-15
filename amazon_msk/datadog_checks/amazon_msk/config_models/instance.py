@@ -60,18 +60,21 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     assume_role: Optional[str]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    boto_config: Optional[Mapping[str, Any]]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     cluster_arn: str
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
@@ -95,7 +98,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w+')
+    namespace: Optional[str] = Field(None, regex='\\w*')
     node_exporter_port: Optional[int]
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]

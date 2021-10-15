@@ -133,7 +133,7 @@ The Supervisor check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 

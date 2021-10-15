@@ -1,6 +1,6 @@
 # CHANGELOG - RethinkDB
 
-## 2.0.0 / 2021-08-22
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
 

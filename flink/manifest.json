@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "flink",
   "metric_prefix": "flink.",
-  "metric_to_check": "flink.taskmanager.Status.JVM.CPU.load",
+  "metric_to_check": "flink.taskmanager.Status.JVM.CPU.Load",
   "creates_events": false,
   "short_description": "Track metrics for your flink jobs.",
   "guid": "8b3e5591-533e-4504-aabb-e697f07461ca",

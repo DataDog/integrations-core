@@ -36,6 +36,7 @@ class PostgresConfig:
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
+        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
@@ -81,6 +82,7 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
@@ -98,7 +100,8 @@ class PostgresConfig:
             tags = list(set(custom_tags))
 
         # preset tags to host
-        tags.append('server:{}'.format(self.host))
+        if not self.disable_generic_tags:
+            tags.append('server:{}'.format(self.host))
         if self.port:
             tags.append('port:{}'.format(self.port))
         else:

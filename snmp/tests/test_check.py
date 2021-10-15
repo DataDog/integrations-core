@@ -19,7 +19,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.snmp_integration_only]
 
 
 def test_command_generator():
@@ -904,7 +904,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
-    network_tags = ['network:{}'.format(network)]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
 
     instance = {
         'name': 'snmp_conf',
@@ -953,7 +953,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
-    network_tags = ['network:{}'.format(network)]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes

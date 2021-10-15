@@ -7,9 +7,10 @@ import click
 import markdown
 from bs4 import BeautifulSoup
 
+from ...annotations import annotate_display_queue
 from ...constants import get_root
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_readme_file, load_manifest, read_readme_file
+from ...utils import complete_valid_checks, get_readme_file, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
@@ -34,15 +35,16 @@ def readmes(ctx, check):
 
     for integration in integrations:
         display_queue = []
-        manifest = load_manifest(integration)
+        readme_path = get_readme_file(integration)
 
         # Validate the README itself
-        validate_readme(integration, repo, manifest, display_queue, files_failed, readme_counter)
+        validate_readme(integration, repo, display_queue, files_failed, readme_counter)
 
         if display_queue:
+            annotate_display_queue(readme_path, display_queue)
             echo_info(f'{integration}:')
-            for display in display_queue:
-                display(indent=True)
+            for func, message in display_queue:
+                func(message)
 
     num_files = len(readme_counter)
     files_failed = len(files_failed)
@@ -62,7 +64,7 @@ def readmes(ctx, check):
         abort()
 
 
-def validate_readme(integration, repo, manifest, display_queue, files_failed, readme_counter):
+def validate_readme(integration, repo, display_queue, files_failed, readme_counter):
     readme_path = get_readme_file(integration)
     html = markdown.markdown(read_readme_file(integration))
     soup = BeautifulSoup(html, features="html.parser")
@@ -72,22 +74,16 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
     h2s = [h2.text for h2 in soup.find_all("h2")]
     if "Overview" not in h2s or "Setup" not in h2s:
         files_failed[readme_path] = True
-        display_queue.append(
-            lambda **kwargs: echo_failure(
-                "     readme is missing either an Overview or Setup H2 (##) section", **kwargs
-            )
-        )
+        display_queue.append((echo_failure, "     readme is missing either an Overview or Setup H2 (##) section"))
 
-    if "Support" not in h2s and manifest.get("support") == "partner":
+    if "Support" not in h2s and repo == 'marketplace':
         files_failed[readme_path] = True
-        display_queue.append(
-            lambda **kwargs: echo_failure("     readme is missing a Support H2 (##) section", **kwargs)
-        )
+        display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
     allow_relative = False
-    if manifest.get("support") == "partner":
+    if repo == "marketplace":
         allow_relative = True
     img_srcs = [img.attrs.get("src") for img in soup.find_all("img")]
     for img_src in img_srcs:
@@ -97,9 +93,7 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
             if not os.path.exists(file_path):
                 files_failed[readme_path] = True
                 display_queue.append(
-                    lambda img_src=img_src, **kwargs: echo_failure(
-                        f"     image: {img_src} is linked in its readme but does not exist", **kwargs
-                    )
+                    (echo_failure, f"     image: {img_src} is linked in its readme but does not exist")
                 )
         else:
             error_msg = (
@@ -111,4 +105,4 @@ def validate_readme(integration, repo, manifest, display_queue, files_failed, re
                 error_msg += "or be a relative path to the `images/` folder (without a `/` prefix)."
             error_msg += f" Image currently is: {img_src}"
 
-            display_queue.append(lambda repo=repo, integration=integration, **kwargs: echo_failure(error_msg, **kwargs))
+            display_queue.append((echo_failure, error_msg))

@@ -1,6 +1,11 @@
 # CHANGELOG - mongo
 
-## 2.6.0 / 2021-08-22
+## 2.7.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Add runtime configuration validation. See [#8957](https://github.com/DataDog/integrations-core/pull/8957).
+
+## 2.6.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Support collection-agnostic aggregations for custom queries. See [#9857](https://github.com/DataDog/integrations-core/pull/9857).
 

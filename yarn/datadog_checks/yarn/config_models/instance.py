@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     application_status_mapping: Optional[Mapping[str, Any]]
     application_tags: Optional[Mapping[str, Any]]
     auth_token: Optional[AuthToken]
@@ -45,6 +46,7 @@ class InstanceConfig(BaseModel):
     collect_app_metrics: Optional[bool]
     collect_node_metrics: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     disable_legacy_cluster_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
@@ -64,6 +66,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     queue_blacklist: Optional[Sequence[str]]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     resourcemanager_uri: Optional[str]
     service: Optional[str]
     skip_proxy: Optional[bool]

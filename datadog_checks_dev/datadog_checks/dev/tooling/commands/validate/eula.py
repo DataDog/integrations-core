@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ...annotations import annotate_error
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_eula_from_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...utils import complete_valid_checks, get_manifest_file
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success
 
 
 @click.command('eula', context_settings=CONTEXT_SETTINGS, short_help='Validate EULA files')
@@ -24,12 +26,20 @@ def eula(check):
     echo_info(f"Validating EULA files for {len(checks)} checks...")
 
     for check_name in checks:
-        eula_relative_location, eula_exists = get_eula_from_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
+        if not manifest:
+            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+            continue
+
+        eula_relative_location, eula_exists = manifest.get_eula_from_manifest()
+        manifest_file = get_manifest_file(check_name)
 
         if not eula_exists:
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  {eula_relative_location} does not exist')
+            message = f'{eula_relative_location} does not exist'
+            echo_failure('  ' + message)
+            annotate_error(manifest_file, message)
             failed_checks += 1
             continue
 
@@ -37,7 +47,9 @@ def eula(check):
         if not eula_relative_location.endswith(".pdf"):
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  {eula_relative_location} is missing the pdf extension')
+            message = f'{eula_relative_location} is missing the pdf extension'
+            echo_failure('  ' + message)
+            annotate_error(manifest_file, message)
             continue
 
         # Check PDF starts with PDF magic_number: "%PDF"
@@ -46,7 +58,9 @@ def eula(check):
             if b'%PDF' not in magic_number:
                 echo_info(f'{check_name}... ', nl=False)
                 echo_info(' FAILED')
-                echo_failure(f'  {eula_relative_location} is not a PDF file')
+                message = f'{eula_relative_location} is not a PDF file'
+                echo_failure('  ' + message)
+                annotate_error(manifest_file, message)
                 failed_checks += 1
                 continue
 

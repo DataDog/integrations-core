@@ -68,6 +68,14 @@ def instance_db_fragmentation_object_names(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_dbm(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_driver(field, value):
     return 'SQL Server'
 
@@ -112,6 +120,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_only_custom_queries(field, value):
+    return False
+
+
 def instance_only_emit_local(field, value):
     return False
 
@@ -126,6 +138,10 @@ def instance_proc_only_if(field, value):
 
 def instance_proc_only_if_database(field, value):
     return 'master'
+
+
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_service(field, value):

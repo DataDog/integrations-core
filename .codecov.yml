@@ -86,6 +86,10 @@ coverage:
         target: 75
         flags:
         - cisco_aci
+      Citrix_Hypervisor:
+        target: 75
+        flags:
+        - citrix_hypervisor
       ClickHouse:
         target: 75
         flags:
@@ -226,6 +230,10 @@ coverage:
         target: 75
         flags:
         - ibm_was
+      IBM_i:
+        target: 75
+        flags:
+        - ibm_i
       IIS:
         target: 75
         flags:
@@ -442,6 +450,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      SingleStore:
+        target: 75
+        flags:
+        - singlestore
       Snowflake:
         target: 75
         flags:
@@ -628,6 +640,11 @@ flags:
     paths:
     - cisco_aci/datadog_checks/cisco_aci
     - cisco_aci/tests
+  citrix_hypervisor:
+    carryforward: true
+    paths:
+    - citrix_hypervisor/datadog_checks/citrix_hypervisor
+    - citrix_hypervisor/tests
   clickhouse:
     carryforward: true
     paths:
@@ -818,6 +835,11 @@ flags:
     paths:
     - ibm_db2/datadog_checks/ibm_db2
     - ibm_db2/tests
+  ibm_i:
+    carryforward: true
+    paths:
+    - ibm_i/datadog_checks/ibm_i
+    - ibm_i/tests
   ibm_mq:
     carryforward: true
     paths:
@@ -1083,6 +1105,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  singlestore:
+    carryforward: true
+    paths:
+    - singlestore/datadog_checks/singlestore
+    - singlestore/tests
   snmp:
     carryforward: true
     paths:

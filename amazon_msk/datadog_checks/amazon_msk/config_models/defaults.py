@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_assume_role(field, value):
     return get_default_field_value(field, value)
 
@@ -44,6 +48,10 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_boto_config(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_cache_metric_wildcards(field, value):
     return True
 
@@ -62,6 +70,10 @@ def instance_collect_histogram_buckets(field, value):
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):

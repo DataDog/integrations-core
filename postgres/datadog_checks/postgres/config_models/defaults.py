@@ -56,6 +56,10 @@ def instance_dbstrict(field, value):
     return False
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -86,6 +90,10 @@ def instance_pg_stat_statements_view(field, value):
 
 def instance_port(field, value):
     return 5432
+
+
+def instance_query_activity(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_query_metrics(field, value):

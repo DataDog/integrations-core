@@ -26,6 +26,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import EnvVars, TempDir
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.dev.fs import read_file, write_file
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = pytest.mark.http
@@ -43,6 +44,7 @@ DEFAULT_OPTIONS = {
     'proxies': None,
     'timeout': (10.0, 10.0),
     'verify': True,
+    'allow_redirects': True,
 }
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'fixtures')
@@ -92,6 +94,39 @@ class TestTimeout:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['timeout'] == (16, 16)
+
+
+class TestRequestSize:
+    def test_config_default(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.request_size == 16384
+
+    def test_config_correct(self):
+        instance = {'request_size': 0.5}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert isinstance(http.request_size, int)
+        assert http.request_size == 512
+
+    def test_behavior_correct(self, mock_http_response):
+        instance = {'request_size': 0.5}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        chunk_size = 512
+        payload_size = 1000
+        mock_http_response('a' * payload_size)
+
+        with http.get('https://www.google.com', stream=True) as response:
+            chunks = list(response.iter_content())
+
+        assert len(chunks) == 2
+        assert len(chunks[0]) == chunk_size
+        assert len(chunks[1]) == payload_size - chunk_size
 
 
 class TestHeaders:
@@ -166,6 +201,7 @@ class TestHeaders:
                 proxies=None,
                 timeout=(10.0, 10.0),
                 verify=True,
+                allow_redirects=True,
             )
 
         # make sure the original headers are not modified
@@ -374,8 +410,11 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
-            assert http.get('https://www.google.com') == '/test/file'
+        with mock.patch(
+            'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', ''))
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
@@ -387,8 +426,11 @@ class TestAuth:
 
         assert os.environ.get('KRB5CCNAME') is None
 
-        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
-            assert http.get('https://www.google.com') == '/test/file'
+        with mock.patch(
+            'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+        ):
+            response = http.get('https://www.google.com')
+            assert response.text == '/test/file'
 
         assert os.environ.get('KRB5CCNAME') is None
 
@@ -399,8 +441,11 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         with EnvVars({'KRB5CCNAME': 'old'}):
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
-                assert http.get('https://www.google.com') == '/test/file'
+            with mock.patch(
+                'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
+            ):
+                response = http.get('https://www.google.com')
+                assert response.text == '/test/file'
 
             assert os.environ.get('KRB5CCNAME') == 'old'
 
@@ -413,8 +458,12 @@ class TestAuth:
         with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
-            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
-                assert http.get('https://www.google.com') == '/test/file'
+            with mock.patch(
+                'requests.get',
+                side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5_CLIENT_KTNAME', '')),
+            ):
+                response = http.get('https://www.google.com')
+                assert response.text == '/test/file'
 
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
@@ -949,6 +998,7 @@ class TestAuthTokenReadFile:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -956,17 +1006,6 @@ class TestAuthTokenReadFile:
 
 class TestAuthTokenDCOS:
     def test_token_auth(self):
-        class MockResponse:
-            def __init__(self, json_data, status_code):
-                self.json_data = json_data
-                self.status_code = status_code
-
-            def json(self):
-                return self.json_data
-
-            def raise_for_status(self):
-                return True
-
         priv_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'private-key.pem')
         pub_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'public-key.pem')
 
@@ -996,14 +1035,14 @@ class TestAuthTokenDCOS:
                 assert isinstance(decoded['exp'], int)
                 assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
-                return MockResponse({'token': 'auth-token'}, 200)
-            return MockResponse(None, 404)
+                return MockResponse(json_data={'token': 'auth-token'})
+            return MockResponse(status_code=404)
 
         def auth(*args, **kwargs):
             if args[0] == 'https://leader.mesos/service/some-service':
                 assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockResponse({}, 200)
-            return MockResponse(None, 404)
+                return MockResponse(json_data={})
+            return MockResponse(status_code=404)
 
         http = RequestsWrapper(instance, init_config)
         with mock.patch('requests.post', side_effect=login), mock.patch('requests.get', side_effect=auth):
@@ -1037,6 +1076,7 @@ class TestAuthTokenWriteHeader:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1069,6 +1109,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1085,6 +1126,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1113,6 +1155,8 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                 if counter['errors'] <= 1:
                     raise Exception
 
+                return MockResponse()
+
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
             with mock.patch('requests.get', side_effect=raise_error_once) as get:
@@ -1128,6 +1172,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1165,6 +1210,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     proxies=None,
                     timeout=(10.0, 10.0),
                     verify=True,
+                    allow_redirects=True,
                 )
 
                 assert http.options['headers'] == expected_headers
@@ -1998,3 +2044,17 @@ class TestAIAChasing:
     def test_incomplete_chain(self):
         http = RequestsWrapper({}, {})
         http.get("https://incomplete-chain.badssl.com/")
+
+
+class TestAllowRedirect:
+    def test_allow_redirect_default(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is True
+
+    def test_allow_redirect_override_default(self):
+        instance = {'allow_redirects': False}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert http.options['allow_redirects'] is False

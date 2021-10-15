@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
+
 import mock
 import psycopg2
 import pytest
@@ -237,7 +239,7 @@ def test_get_wal_dir(integration_check, pg_instance, pg_version, wal_path):
 def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    base_tags = ['foo:bar', 'server:localhost', 'port:5432']
+    base_tags = ['foo:bar', 'port:5432']
     app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
     app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
 
@@ -262,3 +264,50 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     except psycopg2.OperationalError:
         # could not connect to server because there is no server running
         pass
+
+
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_tags',
+    [
+        (
+            True,
+            {
+                'db:datadog_test',
+                'port:5432',
+                'foo:bar',
+            },
+        ),
+        (
+            False,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+            },
+        ),
+    ],
+)
+def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = PostgreSql('test_instance', {}, [instance])
+    tags = check._get_service_check_tags()
+    assert set(tags) == expected_tags
+
+
+@pytest.mark.parametrize(
+    'disable_generic_tags, expected_hostname', [(True, 'resolved.hostname'), (False, 'stubbed.hostname')]
+)
+def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
+    instance = copy.deepcopy(pg_instance)
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = PostgreSql('test_instance', {}, [instance])
+
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
+    ) as resolve_db_host:
+        assert check.resolved_hostname == expected_hostname
+        assert resolve_db_host.called == disable_generic_tags, 'Expected resolve_db_host.called to be ' + str(
+            disable_generic_tags
+        )

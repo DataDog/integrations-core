@@ -1,6 +1,10 @@
 # CHANGELOG - IBM Db2
 
-## 1.7.0 / 2021-08-22
+## 1.8.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+
+## 1.7.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Log message for invalid queries. See [#9797](https://github.com/DataDog/integrations-core/pull/9797).
 

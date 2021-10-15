@@ -22,6 +22,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -39,6 +47,8 @@ class InstanceConfig(BaseModel):
     database_autodiscovery: Optional[bool]
     database_autodiscovery_interval: Optional[int]
     db_fragmentation_object_names: Optional[Sequence[str]]
+    dbm: Optional[bool]
+    disable_generic_tags: Optional[bool]
     driver: Optional[str]
     dsn: Optional[str]
     empty_default_hostname: Optional[bool]
@@ -51,10 +61,12 @@ class InstanceConfig(BaseModel):
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     only_emit_local: Optional[bool]
     password: Optional[str]
     proc_only_if: Optional[str]
     proc_only_if_database: Optional[str]
+    query_metrics: Optional[QueryMetrics]
     service: Optional[str]
     stored_procedure: Optional[str]
     tags: Optional[Sequence[str]]

@@ -40,6 +40,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -82,6 +86,10 @@ def instance_default_include(field, value):
 
 def instance_default_tag(field, value):
     return 'component'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -190,6 +198,10 @@ def instance_proxy(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
 
 
 def instance_rmi_client_timeout(field, value):

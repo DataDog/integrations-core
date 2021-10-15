@@ -1,6 +1,10 @@
 # CHANGELOG - ignite
 
-## 2.0.0 / 2021-08-22
+## 2.1.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8937](https://github.com/DataDog/integrations-core/pull/8937).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Changed] Change `ignite.total_allocated_pages` and `ignite.total_allocated_size` from monotonic_count to gauge. See [#9939](https://github.com/DataDog/integrations-core/pull/9939).
 

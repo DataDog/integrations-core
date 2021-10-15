@@ -1,6 +1,10 @@
 # CHANGELOG - tcp_check
 
-## 4.0.1 / 2021-08-24
+## 4.1.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 4.0.1 / 2021-08-24 / Agent 7.31.0
 
 * [Fixed] Elevate log level for failed connections. See [#9965](https://github.com/DataDog/integrations-core/pull/9965).
 

@@ -1,6 +1,10 @@
 # CHANGELOG - gearmand
 
-## 2.0.0 / 2021-08-22
+## 2.0.1 / 2021-10-04
+
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
 

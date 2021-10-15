@@ -41,4 +41,5 @@ def test_timeout(test_case, timeout_config, expected_timeout):
             proxies=mock.ANY,
             timeout=expected_timeout,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )

@@ -17,7 +17,6 @@ Ensure that you have configured the following:
 
 - [GitHub](../../ddev/configuration.md#github) credentials
 - [Trello](../../ddev/configuration.md#trello) credentials
-- [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
 ## Before Freeze
 
@@ -88,7 +87,7 @@ would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
 
-Cards are automatically assigned if `$trello_users_$team` table is [configured](../../ddev/configuration.md#card-assignment).
+Cards are automatically assigned to members of [the team](../../ddev/configuration.md#card-assignment).
 
 ### Release candidates
 
@@ -108,6 +107,12 @@ After all fixes have been cherry-picked:
 
 1. Push the changes to GitHub
 1. [Tag](#tag) with the appropriate `rc` number even if there were no changes
+
+After the RC build is done, manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the release branch, and the latest RC built. Select the options to run both Python 2 and Python 3 tests. This will run all the e2e tests against the current agent docker RCs. 
+
+!!! note
+    Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
+
 
 ### Communication
 

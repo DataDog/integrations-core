@@ -22,9 +22,13 @@ For each instance the following parameters are required:
 
 | Parameter        | Description                                                                                                                                                                                                                                                              |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `prometheus_url` | The URL where your application metrics are exposed by Prometheus (must be unique).                                                                                                                                                                                       |
+| `openmetrics_endpoint` | The URL where your application metrics are exposed by Prometheus (must be unique).                                                                                                                         |
 | `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
 | `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. Use `*` as a wildcard (`metric*`) to fetch all matching metrics. **Note**: Wildcards can potentially send a lot of custom metrics. |
+
+**Note**: This is a new default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][11].
+
+**Note**: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. To learn how to customize the metrics to collect, visit the [Prometheus and OpenMetrics Metrics Collection][10] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][7].
 
 For more configurations, see [Prometheus and OpenMetrics Metrics Collection][10].
 
@@ -48,6 +52,12 @@ The OpenMetrics check does not include any service checks.
 
 ## Troubleshooting
 
+### High custom metrics billing
+
+OpenMetrics configurations with generic wildcard values for the `metrics` option have significant impact on custom metrics billing.
+
+Datadog recommends that you use specific metric names or partial metric name matches for more precise collection.
+
 Need help? Contact [Datadog support][7].
 
 ## Further Reading
@@ -64,3 +74,4 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.datadoghq.com/agent/openmetrics/
 [9]: https://docs.datadoghq.com/developers/openmetrics/
 [10]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
+[11]: https://github.com/DataDog/integrations-core/blob/7.30.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example

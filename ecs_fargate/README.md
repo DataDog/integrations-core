@@ -96,7 +96,7 @@ Resources:
               apikey: <API_KEY>
           MemoryReservation: 500
         - Name: log_router
-          Image: 'amazon/aws-for-fluent-bit:latest'
+          Image: 'amazon/aws-for-fluent-bit:stable'
           Essential: true
           FirelensConfiguration:
             Type: fluentbit
@@ -234,7 +234,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    ```json
    {
      "essential": true,
-     "image": "amazon/aws-for-fluent-bit:latest",
+     "image": "amazon/aws-for-fluent-bit:stable",
      "name": "log_router",
      "firelensConfiguration": {
        "type": "fluentbit",
@@ -248,7 +248,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
    ```json
    {
      "essential": true,
-     "image": "amazon/aws-for-fluent-bit:latest",
+     "image": "amazon/aws-for-fluent-bit:stable",
      "name": "log_router",
      "firelensConfiguration": {
        "type": "fluentbit",

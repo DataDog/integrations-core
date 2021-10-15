@@ -17,7 +17,15 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
-from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, HAPROXY_VERSION, HAPROXY_VERSION_RAW, HERE, INSTANCE
+from .common import (
+    ENDPOINT_PROMETHEUS,
+    HAPROXY_LEGACY,
+    HAPROXY_VERSION,
+    HAPROXY_VERSION_RAW,
+    HERE,
+    INSTANCE,
+    requires_static_version,
+)
 from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
@@ -197,6 +205,7 @@ def haproxy_mock_enterprise_version_info():
         yield p
 
 
+@requires_static_version
 @pytest.fixture(scope="session")
 def version_metadata():
     # some version has release info

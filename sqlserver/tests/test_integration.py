@@ -21,7 +21,6 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
-
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -32,7 +31,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['host:localhost,1433', 'db:master', 'optional:tag1'],
+        tags=['sqlserver_host:localhost,1433', 'db:master', 'optional:tag1'],
     )
 
 
@@ -42,73 +41,11 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
+    expected_tags = instance_docker.get('tags', []) + [
+        'sqlserver_host:{}'.format(instance_docker.get('host')),
+        'db:master',
+    ]
     assert_metrics(aggregator, expected_tags)
-
-
-@not_windows_ci
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def load_stored_procedure(instance, proc_name, sp_tags):
-    # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-        instance['driver'], instance['host'], instance['username'], instance['password']
-    )
-    conn = pyodbc.connect(conn_str, timeout=30)
-
-    # Create cursor associated with connection
-    cursor = conn.cursor()
-
-    # Stored Procedure Drop Statement
-    sqlDropSP = "IF EXISTS (SELECT * FROM sys.objects \
-               WHERE type='P' AND name='{0}') \
-               DROP PROCEDURE {0}".format(
-        proc_name
-    )
-    cursor.execute(sqlDropSP)
-
-    # Stored Procedure Create Statement
-    # Note: the INSERT statement uses single quotes (') intentionally
-    # Double-quotes caused the odd error: "Invalid column name 'sql.sp.testa'."
-    # https://dba.stackexchange.com/a/219875
-    sqlCreateSP = """\
-    CREATE PROCEDURE {0} AS
-        BEGIN
-            CREATE TABLE #Datadog
-            (
-              [metric] varchar(255) not null,
-              [type] varchar(50) not null,
-              [value] float not null,
-              [tags] varchar(255)
-            )
-            SET NOCOUNT ON;
-            INSERT INTO #Datadog (metric, type, value, tags) VALUES
-                ('sql.sp.testa', 'gauge', 100, '{1}'),
-                ('sql.sp.testb', 'gauge', 1, '{1}'),
-                ('sql.sp.testb', 'gauge', 2, '{1}');
-            SELECT * FROM #Datadog;
-        END;
-        """.format(
-        proc_name, sp_tags
-    )
-    cursor.execute(sqlCreateSP)
-
-    # # For debugging. Calls the stored procedure and prints the results.
-    # # use call_proc for macOS
-    # call_proc = '{{CALL {}}}'.format(proc)
-    # cursor.execute(call_proc)
-    # # otherwise just execute proc directly
-    # # cursor.execute(proc)
-    # rows = cursor.fetchall()
-    # while rows:
-    #     print(rows)
-    #     if cursor.nextset():
-    #         rows = cursor.fetchall()
-    #     else:
-    #         rows = None
-
-    cursor.commit()
-    cursor.close()
 
 
 @not_windows_ci
@@ -120,8 +57,6 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     proc = 'pyStoredProc'
     sp_tags = "foo:bar,baz:qux"
     instance_pass['stored_procedure'] = proc
-
-    load_stored_procedure(instance_pass, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_pass])
     dd_run_check(sqlserver_check)
@@ -138,12 +73,9 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
     instance_fail = deepcopy(instance_docker)
     proc = 'pyStoredProc'
     proc_only_fail = "select cntr_type from sys.dm_os_performance_counters where counter_name in ('FOO');"
-    sp_tags = "foo:bar,baz:qux"
 
     instance_fail['proc_only_if'] = proc_only_fail
     instance_fail['stored_procedure'] = proc
-
-    load_stored_procedure(instance_fail, proc, sp_tags)
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_fail])
     dd_run_check(sqlserver_check)
@@ -156,7 +88,6 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
-
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     dd_run_check(sqlserver_check)
 
@@ -230,14 +161,16 @@ def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_auto
 
     # verify that the old status check returns OK
     aggregator.assert_service_check(
-        'sqlserver.can_connect', tags=['db:master', 'optional:tag1', 'host:localhost,1433'], status=SQLServer.OK
+        'sqlserver.can_connect',
+        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        status=SQLServer.OK,
     )
 
     # verify all databses in autodiscovery have a service check
     for database in instance_autodiscovery['autodiscovery_include']:
         aggregator.assert_service_check(
             'sqlserver.database.can_connect',
-            tags=['db:{}'.format(database), 'optional:tag1', 'host:localhost,1433'],
+            tags=['db:{}'.format(database), 'optional:tag1', 'sqlserver_host:localhost,1433'],
             status=SQLServer.OK,
         )
 
@@ -255,13 +188,13 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     # assert no connection is created for an excluded database
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:msdb', 'optional:tag1', 'host:localhost,1433'],
+        tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
         count=0,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:master', 'optional:tag1', 'host:localhost,1433'],
+        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
     )
 
@@ -312,6 +245,19 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
 @not_windows_ci
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_perf_counters_doesnt_duplicate_names_of_metrics_to_collect(dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+
+    for _cls, metric_names in check.instance_per_type_metrics.items():
+        expected = list(set(metric_names))
+        assert sorted(metric_names) == sorted(expected)
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     querya = copy(CUSTOM_QUERY_A)
@@ -329,6 +275,17 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker):
 
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:custom'])
         aggregator.assert_metric('sqlserver.num', value=value, tags=custom_tags + ['query:another_custom_one'])
+
+
+@not_windows_ci
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_load_static_information(aggregator, dd_run_check, instance_docker):
+    instance = copy(instance_docker)
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+    assert 'version' in check.static_info_cache, "missing version static information"
+    assert check.static_info_cache['version'], "empty version in static information"
 
 
 @windows_ci

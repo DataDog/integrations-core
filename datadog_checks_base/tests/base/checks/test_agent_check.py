@@ -629,6 +629,19 @@ class TestTags:
             else:
                 set_external_tags.assert_called_with([('hostnam\xc3\xa9', {'src_name': ['key1:val1']})])
 
+    @pytest.mark.parametrize(
+        "disable_generic_tags, expected_tags",
+        [
+            pytest.param(False, {"foo:bar", "cluster:my_cluster"}),
+            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster"}),
+        ],
+    )
+    def test_generic_tags(self, disable_generic_tags, expected_tags):
+        instance = {'disable_generic_tags': disable_generic_tags}
+        check = AgentCheck('myintegration', {}, [instance])
+        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
+        assert set(tags) == expected_tags
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
