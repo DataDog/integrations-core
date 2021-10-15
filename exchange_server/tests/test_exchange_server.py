@@ -11,12 +11,11 @@ from .common import CHECK_NAME, METRIC_INSTANCES, MINIMAL_INSTANCE
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-@pytest.mark.integration
-def test_basic_check(aggregator, dd_run_check):
+def test_basic_check(aggregator):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
     c = ExchangeCheck(CHECK_NAME, {}, [instance])
-    dd_run_check(c)
+    c.check(instance)
 
     for metric_def in DEFAULT_COUNTERS:
         metric = metric_def[3]
