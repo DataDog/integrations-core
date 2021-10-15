@@ -58,7 +58,7 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
 
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
 
-#### OpenMetrics V2 vs OpenMetrics V1
+##### OpenMetrics V2 vs OpenMetrics V1
 Enabling the `use_openmetrics` configuration option, the Istio integration will use the OpenMetrics V2 implementation of the check. 
 
 In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
