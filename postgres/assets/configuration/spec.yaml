@@ -86,6 +86,15 @@ files:
         type: string
         display_default: false
         example: "false"
+    - name: ssl_cert
+      description: |
+        The path to the ssl certificate.
+
+        For a detailed description of how this options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/postgresql.crt"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT

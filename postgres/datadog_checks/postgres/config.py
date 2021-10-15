@@ -55,6 +55,7 @@ class PostgresConfig:
         else:
             self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
+        self.ssl_cert = instance.get('ssl_cert', None)
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility

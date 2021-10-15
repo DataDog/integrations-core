@@ -77,6 +77,13 @@ instances:
     #
     # ssl: 'false'
 
+    ## @param ssl_cert - string - optional - default: false
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this options work see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: /home/datadog/postgresql.crt
+
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,

@@ -94,6 +94,7 @@ class InstanceConfig(BaseModel):
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
+    ssl_cert: Optional[str]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]
