@@ -45,7 +45,7 @@ class Istio(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if is_affirmative(instance.get('use_openmetrics', True)):
+        if is_affirmative(instance.get('use_openmetrics', False)):
             if PY2:
                 raise ConfigurationError(
                     "Openmetrics on this integration is only available when using py3. "
