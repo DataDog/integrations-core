@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import requests_mock
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
 
 from . import common
@@ -21,6 +22,7 @@ def test_legacy_istiod(aggregator):
     for metric in common.ISTIOD_METRICS:
         aggregator.assert_metric(metric)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -39,6 +41,7 @@ def test_legacy_proxy_mesh(aggregator):
 
     _assert_tags_excluded(aggregator, [])
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -61,6 +64,7 @@ def test_istio_proxy_mesh_exclude(aggregator):
 
     _assert_tags_excluded(aggregator, exclude_tags)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
