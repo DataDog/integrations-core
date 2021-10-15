@@ -75,7 +75,7 @@ def manifest(ctx, check, fix):
 
             # Check is_public only for changed checks or specific check for reduced verbosity
             is_public = decoded.get("is_public")
-            if not is_public and (check.lower() == 'changed' or check != 'all'):
+            if not is_public and check != 'all':
                 message = (
                     f"{check_name}: `is_public` is disabled, set to `True` "
                     f"if you want the integration documentation to be published."
