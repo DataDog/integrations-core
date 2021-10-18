@@ -543,19 +543,20 @@ class MySql(AgentCheck):
             # At last, get mysql cpu data out of psutil or procfs
 
             try:
-                ucpu, scpu = None, None
                 if PSUTIL_AVAILABLE:
+                    self.log.debug("psutil is available")
                     proc = psutil.Process(pid)
 
                     ucpu = proc.cpu_times()[0]
                     scpu = proc.cpu_times()[1]
 
-                if ucpu and scpu:
-                    self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
-                    # should really be system_time
-                    self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
-                    self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
-
+                    if ucpu and scpu:
+                        self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
+                        # should really be system_time
+                        self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
+                        self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
+                else:
+                    self.log.debug("psutil is not available, will not collect mysql.performance.* metrics")
             except Exception:
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
 
