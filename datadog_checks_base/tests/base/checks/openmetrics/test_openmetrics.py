@@ -2814,3 +2814,29 @@ def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
     check.process_metric(ref_gauge, config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+def test_first_sample(aggregator, text_data, mocked_openmetrics_check_factory):
+    """
+    Test that first sample is flushed or not depending on metric type, agent and server process start times.
+    """
+
+    instance = {
+        "prometheus_url": "xx",
+        "metrics": ["*"],
+        "namespace": "",
+        "send_distribution_counts_as_monotonic": True,
+    }
+
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
+    check.check(instance)
+
+    aggregator.assert_metric('go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=False)
+    aggregator.assert_metric('skydns_skydns_dns_request_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=42, flush_first_value=False)
+    aggregator.assert_metric('go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=False)
+
+    check.check(instance)
+
+    aggregator.assert_metric('go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True)
+    aggregator.assert_metric('skydns_skydns_dns_request_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=42, flush_first_value=True)
+    aggregator.assert_metric('go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True)
