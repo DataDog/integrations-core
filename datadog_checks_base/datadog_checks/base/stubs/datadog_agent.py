@@ -88,5 +88,6 @@ class DatadogAgentStub(object):
     def set_process_start_time(self, time):
         self._process_start_time = time
 
+
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()

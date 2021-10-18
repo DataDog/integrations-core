@@ -133,7 +133,17 @@ class AggregatorStub(object):
         self._event_platform_events[event_type].append(raw_event)
 
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=False
+        self,
+        check,
+        check_id,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        flush_first_value=False,
     ):
         check_tag_names(name, tags)
         self._histogram_buckets[name].append(
@@ -276,7 +286,16 @@ class AggregatorStub(object):
         )
 
     def assert_metric(
-        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None, flush_first_value=None,
+        self,
+        name,
+        value=None,
+        tags=None,
+        count=None,
+        at_least=1,
+        hostname=None,
+        metric_type=None,
+        device=None,
+        flush_first_value=None,
     ):
         """
         Assert a metric was processed by this stub

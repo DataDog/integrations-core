@@ -7,4 +7,7 @@ from collections import namedtuple
 
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname device flush_first_value')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
-HistogramBucketStub = namedtuple('HistogramBucketStub', 'name value lower_bound upper_bound monotonic hostname tags flush_first_value')
+HistogramBucketStub = namedtuple(
+    'HistogramBucketStub',
+    'name value lower_bound upper_bound monotonic hostname tags flush_first_value',
+)

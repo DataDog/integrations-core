@@ -2865,14 +2865,15 @@ go_gc_duration_seconds_sum 1.154763349
 go_gc_duration_seconds_count 2351
 """
 
+
 @pytest.mark.parametrize(
     'use_process_start_time, expect_first_flush, agent_start_time, process_start_time',
     [
         (False, False, None, None),
-        (True, True,  10, [20]),
+        (True, True, 10, [20]),
         (True, False, 20, [10]),
         (True, False, 10, []),
-        (True, True,  10, [20, 30, 40]),
+        (True, True, 10, [20, 30, 40]),
         (True, False, 20, [10, 30, 40]),
     ],
     ids=[
@@ -2882,9 +2883,17 @@ go_gc_duration_seconds_count 2351
         "enabled, metric n/a",
         "enabled, many metrics, all newer",
         "enabled, many metrics, some newer",
-    ]
+    ],
 )
-def test_use_process_start_time(aggregator, datadog_agent, mocked_openmetrics_check_factory, expect_first_flush, use_process_start_time, process_start_time, agent_start_time):
+def test_use_process_start_time(
+    aggregator,
+    datadog_agent,
+    mocked_openmetrics_check_factory,
+    expect_first_flush,
+    use_process_start_time,
+    process_start_time,
+    agent_start_time,
+):
     """
     Test that first sample is flushed or not depending on metric type, agent and server process start times.
     """
@@ -2905,7 +2914,10 @@ def test_use_process_start_time(aggregator, datadog_agent, mocked_openmetrics_ch
         test_data += "# TYPE process_start_time_seconds gauge\n"
         for seq, pst in enumerate(process_start_time):
             label = '{pid="%d"}' % (seq,) if len(process_start_time) > 1 else ""
-            test_data += "process_start_time_seconds%s %f\n" % (label, pst,)
+            test_data += "process_start_time_seconds%s %f\n" % (
+                label,
+                pst,
+            )
 
     datadog_agent.set_process_start_time(agent_start_time)
 
@@ -2913,14 +2925,38 @@ def test_use_process_start_time(aggregator, datadog_agent, mocked_openmetrics_ch
     check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
     check.check(instance)
 
-    aggregator.assert_metric('go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=expect_first_flush)
-    aggregator.assert_metric('skydns_skydns_dns_request_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=2, flush_first_value=expect_first_flush)
-    aggregator.assert_metric('go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=expect_first_flush)
+    aggregator.assert_metric(
+        'go_memstats_alloc_bytes_total',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=1,
+        flush_first_value=expect_first_flush,
+    )
+    aggregator.assert_metric(
+        'skydns_skydns_dns_request_duration_seconds.count',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=2,
+        flush_first_value=expect_first_flush,
+    )
+    aggregator.assert_metric(
+        'go_gc_duration_seconds.count',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=1,
+        flush_first_value=expect_first_flush,
+    )
 
     for _ in range(0, 5):
         aggregator.reset()
         check.check(instance)
 
-        aggregator.assert_metric('go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True)
-        aggregator.assert_metric('skydns_skydns_dns_request_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=2, flush_first_value=True)
-        aggregator.assert_metric('go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True)
+        aggregator.assert_metric(
+            'go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True
+        )
+        aggregator.assert_metric(
+            'skydns_skydns_dns_request_duration_seconds.count',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=2,
+            flush_first_value=True,
+        )
+        aggregator.assert_metric(
+            'go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True
+        )
