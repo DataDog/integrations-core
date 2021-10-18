@@ -416,7 +416,9 @@ class AgentCheck(object):
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
             unknown_shared_options = list(set(intg_shared_config) - set(shared_config))
             if unknown_shared_options:
-                message = "Detected unknown configuration options in {}: {}".format(self.name, unknown_shared_options)
+                message = "Detected undocumented or unknown configuration options in {}: {}".format(
+                    self.name, unknown_shared_options
+                )
                 self.log.warning(message)
             if shared_config is not None:
                 self._config_model_shared = shared_config
@@ -429,7 +431,9 @@ class AgentCheck(object):
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
             unknown_instance_options = list(set(intg_instance_config) - set(instance_config))
             if unknown_instance_options:
-                message = "Detected unknown configuration options in {}: {}".format(self.name, unknown_instance_options)
+                message = "Detected undocumented or unknown configuration options in {}: {}".format(
+                    self.name, unknown_instance_options
+                )
                 self.log.warning(message)
             if instance_config is not None:
                 self._config_model_instance = instance_config
