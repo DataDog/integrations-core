@@ -26,7 +26,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "Datadog Cluster Agent Overview": "assets/dashboards/datadog_cluster_agent_overview.json"
+      "Datadog Cluster Agent - Overview": "assets/dashboards/datadog_cluster_agent_overview.json"
     },
     "monitors": {},
     "saved_views": {},
