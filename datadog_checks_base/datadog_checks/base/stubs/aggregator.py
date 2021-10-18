@@ -113,7 +113,7 @@ class AggregatorStub(object):
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
         check_tag_names(name, tags)
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None, flush_first_value))
 
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
@@ -121,7 +121,7 @@ class AggregatorStub(object):
         check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device, flush_first_value))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         if status == ServiceCheck.OK and message:
@@ -141,7 +141,7 @@ class AggregatorStub(object):
     ):
         check_tag_names(name, tags)
         self._histogram_buckets[name].append(
-            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value)
         )
 
     def metrics(self, name):
@@ -156,6 +156,7 @@ class AggregatorStub(object):
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
                 stub.device,
+                stub.flush_first_value,
             )
             for stub in self._metrics.get(to_native_string(name), [])
         ]
@@ -202,6 +203,7 @@ class AggregatorStub(object):
                 stub.monotonic,
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
+                stub.flush_first_value,
             )
             for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
@@ -277,7 +279,7 @@ class AggregatorStub(object):
 
             candidates.append(bucket)
 
-        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, None)
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
@@ -290,7 +292,7 @@ class AggregatorStub(object):
         )
 
     def assert_metric(
-        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None, flush_first_value=None,
     ):
         """
         Assert a metric was processed by this stub
@@ -316,9 +318,12 @@ class AggregatorStub(object):
             if device is not None and device != metric.device:
                 continue
 
+            if flush_first_value is not None and flush_first_value != metric.flush_first_value:
+                continue
+
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
+        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device, flush_first_value)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
