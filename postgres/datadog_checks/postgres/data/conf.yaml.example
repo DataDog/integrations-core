@@ -153,6 +153,11 @@ instances:
     #
     # collect_default_database: false
 
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
+
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
     ## NOTE: You must be running the check local to your database if you want to enable this option.

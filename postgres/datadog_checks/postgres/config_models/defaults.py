@@ -16,6 +16,10 @@ def instance_collect_activity_metrics(field, value):
     return False
 
 
+def instance_collect_bloat_metrics(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return True
 

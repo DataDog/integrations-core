@@ -76,8 +76,16 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_bloat_metrics(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'collect_bloat_metrics, expected_count',
+    [
+        pytest.param(True, 1, id='bloat enabled'),
+        pytest.param(False, 0, id='bloat disabled'),
+    ],
+)
+def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integration_check, pg_instance):
     pg_instance['relations'] = ['pg_index']
+    pg_instance['collect_bloat_metrics'] = collect_bloat_metrics
 
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
@@ -89,12 +97,12 @@ def test_bloat_metrics(aggregator, integration_check, pg_instance):
         'schema:pg_catalog',
     ]
 
-    aggregator.assert_metric('postgresql.table_bloat', count=1, tags=base_tags)
+    aggregator.assert_metric('postgresql.table_bloat', count=expected_count, tags=base_tags)
 
     indices = ['pg_index_indrelid_index', 'pg_index_indexrelid_index']
     for index in indices:
         expected_tags = base_tags + ['index:{}'.format(index)]
-        aggregator.assert_metric('postgresql.index_bloat', count=1, tags=expected_tags)
+        aggregator.assert_metric('postgresql.index_bloat', count=expected_count, tags=expected_tags)
 
 
 @pytest.mark.integration
