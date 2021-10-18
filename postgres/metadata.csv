@@ -53,6 +53,7 @@ postgresql.heap_blocks_hit,gauge,,hit,second,The number of buffer hits in this t
 postgresql.index_blocks_read,gauge,,block,second,The number of disk blocks read from all indexes on this table.,0,postgres,idx blks read
 postgresql.index_blocks_hit,gauge,,hit,second,The number of buffer hits in all indexes on this table.,0,postgres,idx blks hit
 postgresql.table_bloat,gauge,,percent,,The estimated percentage of table bloat.,0,postgres,tbloat
+postgresql.index_bloat,gauge,,percent,,The estimated percentage of index bloat.,0,postgres,ibloat
 postgresql.toast_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table.,0,postgres,toast blks read
 postgresql.toast_blocks_hit,gauge,,hit,second,The number of buffer hits in this table's TOAST table.,0,postgres,toast blks hit
 postgresql.toast_index_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table index.,0,postgres,toast idx blks read

@@ -76,21 +76,25 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_bloat_metric(aggregator, integration_check, pg_instance):
+def test_bloat_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['pg_index']
 
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
+    base_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:pg_index',
         'schema:pg_catalog',
-        'index:pg_index_indrelid_index',
     ]
 
-    aggregator.assert_metric('postgresql.table_bloat', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.table_bloat', count=1, tags=base_tags)
+
+    indices = ['pg_index_indrelid_index', 'pg_index_indexrelid_index']
+    for index in indices:
+        expected_tags = base_tags + ['index:{}'.format(index)]
+        aggregator.assert_metric('postgresql.index_bloat', count=1, tags=expected_tags)
 
 
 @pytest.mark.integration
