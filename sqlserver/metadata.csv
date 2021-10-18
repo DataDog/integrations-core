@@ -52,10 +52,10 @@ sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that 
 sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte
 sqlserver.fci.status,gauge,,,,Status of the node in a SQL Server failover cluster instance,0,sql_server,fci status
 sqlserver.fci.is_current_owner,gauge,,,,Whether or not this node is the current owner of the SQL Server FCI ,0,sql_server,fci current owner
-sqlserver.queries.count,count,,query,,Total count of executed queries per query,0,sql_server,query count
-sqlserver.queries.time,count,,nanosecond,,Total elapsed time for executed queries per query,0,sql_server,query time
-sqlserver.queries.clr_time,count,,nanosecond,,Total time consumed inside Microsoft .NET Framework common language runtime (CLR) objects for executed queries per query,0,sql_server,query clr time
-sqlserver.queries.worker_time,count,,nanosecond,,Total CPU time consumed by executed queries per query,0,sql_server,query worker time
+sqlserver.queries.count,count,,query,,Total count of executed queries per query (DBM only),0,sql_server,query count
+sqlserver.queries.time,count,,nanosecond,,Total elapsed time for executed queries per query (DBM only),0,sql_server,query time
+sqlserver.queries.clr_time,count,,nanosecond,,Total time consumed inside Microsoft .NET Framework common language runtime (CLR) objects for executed queries per query (DBM only),0,sql_server,query clr time
+sqlserver.queries.worker_time,count,,nanosecond,,Total CPU time consumed by executed queries per query (DBM only),0,sql_server,query worker time
 sqlserver.queries.rows,count,,row,,Total number of rows returned by executed queries per query (DBM only),0,sql_server,query rows
 sqlserver.queries.physical_reads,count,,read,,Total number of physical reads performed by executed queries per query (DBM only),0,sql_server,query physical reads
 sqlserver.queries.logical_reads,count,,read,,Total number of logical reads performed by executed queries per query (DBM only),0,sql_server,query logical reads
