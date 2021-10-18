@@ -67,6 +67,7 @@ class InstanceConfig(BaseModel):
 
     application_name: Optional[str]
     collect_activity_metrics: Optional[bool]
+    collect_bloat_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
