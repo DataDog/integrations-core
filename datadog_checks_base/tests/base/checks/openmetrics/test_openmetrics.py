@@ -2844,7 +2844,7 @@ def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
     aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
 
 
-test_first_sample_value_data = """\
+test_process_start_time_data = """\
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
 # TYPE go_memstats_alloc_bytes_total counter
 go_memstats_alloc_bytes_total 9.339544592e+09
@@ -2884,7 +2884,7 @@ go_gc_duration_seconds_count 2351
         "enabled, many metrics, some newer",
     ]
 )
-def test_first_sample(aggregator, datadog_agent, mocked_openmetrics_check_factory, expect_first_flush, use_process_start_time, process_start_time, agent_start_time):
+def test_use_process_start_time(aggregator, datadog_agent, mocked_openmetrics_check_factory, expect_first_flush, use_process_start_time, process_start_time, agent_start_time):
     """
     Test that first sample is flushed or not depending on metric type, agent and server process start times.
     """
@@ -2897,7 +2897,7 @@ def test_first_sample(aggregator, datadog_agent, mocked_openmetrics_check_factor
         "use_process_start_time": use_process_start_time,
     }
 
-    test_data = test_first_sample_value_data
+    test_data = test_process_start_time_data
     if process_start_time:
         if not test_data.endswith('\n'):
             test_data += '\n'
