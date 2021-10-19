@@ -96,6 +96,7 @@ class InstanceConfig(BaseModel):
     ssl: Optional[str]
     ssl_cert: Optional[str]
     ssl_key: Optional[str]
+    ssl_password: Optional[str]
     ssl_root_cert: Optional[str]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]

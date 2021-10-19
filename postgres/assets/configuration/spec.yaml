@@ -113,6 +113,16 @@ files:
         type: string
         display_default: false
         example: "/home/datadog/client-key.pem"
+    - name: ssl_password
+      description: |
+        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+        in encrypted form on disk.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT

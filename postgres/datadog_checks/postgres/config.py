@@ -58,6 +58,7 @@ class PostgresConfig:
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
         self.ssl_key = instance.get('ssl_key', None)
+        self.ssl_password = instance.get('ssl_password', None)
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
