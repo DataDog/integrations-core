@@ -16,6 +16,7 @@ from six import string_types
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
 
@@ -38,8 +39,6 @@ SAMPLE_QUERIES = [
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
-DEFAULT_TZ_INFO = datetime.timezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
@@ -609,15 +608,15 @@ def test_activity_snapshot_collection(
 
 
 def new_time():
-    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 def old_time():
-    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=UTC)
 
 
 def very_old_time():
-    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 @pytest.mark.parametrize(
