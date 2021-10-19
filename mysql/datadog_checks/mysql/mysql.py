@@ -544,7 +544,7 @@ class MySql(AgentCheck):
 
             try:
                 if PSUTIL_AVAILABLE:
-                    self.log.debug("psutil is available")
+                    self.log.debug("psutil is available, attempting to collect mysql.performance.* metrics")
                     proc = psutil.Process(pid)
 
                     ucpu = proc.cpu_times()[0]
@@ -556,7 +556,7 @@ class MySql(AgentCheck):
                         self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
                         self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
                 else:
-                    self.log.warning("psutil is not available, will not collect mysql.performance.* metrics")
+                    self.log.debug("psutil is not available, will not collect mysql.performance.* metrics")
             except Exception:
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
 
