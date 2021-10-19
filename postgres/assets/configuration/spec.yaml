@@ -185,6 +185,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_bloat_metrics
+      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+      enabled: true
+      value: 
+        type: boolean
+        example: false
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.

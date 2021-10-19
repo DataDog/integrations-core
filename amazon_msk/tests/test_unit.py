@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
+import mock
 import pytest
-from mock import ANY
 from six import PY2
 
 from datadog_checks.amazon_msk import AmazonMskCheck
@@ -26,7 +28,7 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name, config=ANY)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=mock.ANY)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -61,7 +63,7 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
     cluster_arn = instance['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', config=ANY, region_name=region_name)
+    caller.assert_called_once_with('kafka', config=mock.ANY, region_name=region_name)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -157,7 +159,7 @@ def test_custom_metric_path(aggregator, instance_legacy, mock_client):
     cluster_arn = instance_legacy['cluster_arn']
     region_name = cluster_arn.split(':')[3]
 
-    caller.assert_called_once_with('kafka', region_name=region_name, config=ANY)
+    caller.assert_called_once_with('kafka', region_name=region_name, config=mock.ANY)
     client.list_nodes.assert_called_once_with(ClusterArn=cluster_arn)
 
     global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name)]
@@ -195,4 +197,55 @@ def test_proxy_config(instance):
     HTTP_PROXY = {"http": "example.com"}
     init_config = {"proxy": HTTP_PROXY}
     c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    assert c._boto_config.proxies == HTTP_PROXY
+
+
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
+        pytest.param(
+            INSTANCE, id='new config proxy', marks=pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+        ),
+    ],
+)
+def test_boto_config(instance):
+    instance = copy.deepcopy(instance)
+    HTTP_PROXY = {"http": "example.com"}
+    init_config = {"proxy": HTTP_PROXY}
+    instance["boto_config"] = {"proxies_config": {"proxy_use_forwarding_for_https": True}, "read_timeout": 60}
+    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    assert c._boto_config.proxies == HTTP_PROXY
+    assert c._boto_config.proxies_config.get("proxy_use_forwarding_for_https")
+    assert c._boto_config.read_timeout == 60
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(INSTANCE_LEGACY, id='legacy config proxy'),
+        pytest.param(
+            INSTANCE, id='new config proxy', marks=pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+        ),
+    ],
+)
+def test_invalid_boto_config(aggregator, instance, dd_run_check, caplog):
+    instance = copy.deepcopy(instance)
+    HTTP_PROXY = {"http": "example.com"}
+    init_config = {"proxy": HTTP_PROXY}
+    instance["boto_config"] = {"proxies_config": {}, "read_timeout": True}
+    c = AmazonMskCheck('amazon_msk', init_config, [instance])
+    with pytest.raises(Exception, match=r'Timeout cannot be a boolean value. It must be an int, float or None.'):
+        dd_run_check(c)
+
+    cluster_arn = instance['cluster_arn']
+    region_name = cluster_arn.split(':')[3]
+    global_tags = ['cluster_arn:{}'.format(cluster_arn), 'region_name:{}'.format(region_name), 'test:msk']
+    aggregator.assert_service_check(
+        AmazonMskCheck.SERVICE_CHECK_CONNECT,
+        AmazonMskCheck.CRITICAL,
+        message="Timeout cannot be a boolean value. It must be an int, float or None.",
+        tags=global_tags,
+    )
     assert c._boto_config.proxies == HTTP_PROXY

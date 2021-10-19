@@ -78,7 +78,7 @@ class SQLServer(AgentCheck):
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
-        self.instance_per_type_metrics = defaultdict(list)
+        self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
@@ -411,9 +411,9 @@ class SQLServer(AgentCheck):
             name = m.sql_name or m.column
             self.log.debug("Adding metric class %s named %s", cls, name)
 
-            self.instance_per_type_metrics[cls].append(name)
+            self.instance_per_type_metrics[cls].add(name)
             if m.base_name:
-                self.instance_per_type_metrics[cls].append(m.base_name)
+                self.instance_per_type_metrics[cls].add(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None):
         if db is not None:
@@ -535,7 +535,7 @@ class SQLServer(AgentCheck):
                         instance_results[cls] = None, None
                     else:
                         try:
-                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, metric_names, self.log)
+                            rows, cols = getattr(metrics, cls).fetch_all_values(cursor, list(metric_names), self.log)
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None

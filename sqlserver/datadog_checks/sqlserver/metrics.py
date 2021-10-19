@@ -435,6 +435,8 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
         for row in rows:
             column_val = row[value_column_index]
+            if column_val is None:
+                continue
             if self.column in ('size', 'max_size'):
                 column_val *= 8  # size reported in 8 KB pages
 
@@ -651,11 +653,6 @@ class SqlFailoverClusteringInstance(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
-
-        # report dummy metric
-        metric_name = '{}'.format(self.datadog_name)
-        column_val = 10
-        self.report_function(metric_name, column_val, tags=self.tags)
 
 
 # sys.dm_db_index_physical_stats

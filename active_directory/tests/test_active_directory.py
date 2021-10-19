@@ -13,12 +13,12 @@ from .common import CHECK_NAME, MINIMAL_INSTANCE
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_basic_check(aggregator):
+def test_basic_check(aggregator, dd_run_check):
     # type: (AggregatorStub) -> None
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
-    c = ActiveDirectoryCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    check = ActiveDirectoryCheck(CHECK_NAME, {}, [instance])
+    dd_run_check(check)
 
     for metric_def in DEFAULT_COUNTERS:
         metric = metric_def[3]
