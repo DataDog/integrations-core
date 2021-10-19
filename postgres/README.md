@@ -2,7 +2,7 @@
 
 ![PostgreSQL Graph][1]
 
-<div class="alert alert-info">This page describes the Postgres agent integration; if you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the Postgres agent integration; if you are looking for the Database Monitoring (DBM) product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ## Overview
 
@@ -121,10 +121,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][16] on this topic for additional details.
@@ -201,10 +197,6 @@ LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%", "port":5432,"username":
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][21].
 
@@ -266,10 +258,6 @@ spec:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][25].
 
@@ -329,10 +317,6 @@ Set [Autodiscovery Integrations Templates][28] as Docker labels on your applicat
 ```
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][29].

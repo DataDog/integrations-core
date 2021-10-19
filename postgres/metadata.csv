@@ -34,8 +34,10 @@ postgresql.index_rel_rows_fetched,gauge,,row,second,The number of live rows fetc
 postgresql.rows_hot_updated,gauge,,row,second,"The number of rows HOT updated, meaning no separate index update was needed.",0,postgres,rows hot updated
 postgresql.live_rows,gauge,,row,,The estimated number of live rows.,0,postgres,live rows
 postgresql.dead_rows,gauge,,row,,The estimated number of dead rows.,0,postgres,dead rows
+postgresql.vacuumed,count,,,,The number of times this table has been manually vacuumed.,0,postgres,vac
 postgresql.autovacuumed,count,,,,The number of times this table has been vacuumed by the autovacuum daemon.,0,postgres,auto vac
 postgresql.analyzed,count,,,,The number of times this table has been manually analyzed.,0,postgres,analyze
+postgresql.autoanalyzed,count,,,,The number of times this table has been analyzed by the autovacuum daemon.,0,postgres,auto analyze
 postgresql.index_rows_read,gauge,,row,second,The number of index entries returned by scans on this index.,0,postgres,idx rows read
 postgresql.table_size,gauge,,byte,,"The total disk space used by the specified table. Includes TOAST, free space map, and visibility map. Excludes indexes.",0,postgres,tbl size
 postgresql.index_size,gauge,,byte,,The total disk space used by indexes attached to the specified table.,0,postgres,idx size
@@ -62,17 +64,17 @@ postgresql.transactions.idle_in_transaction,gauge,,transaction,,The number of 'i
 postgresql.before_xid_wraparound,gauge,,transaction,,The number of transactions that can occur until a transaction wraparound.,0,postgres,tx before xid wraparound
 postgresql.active_queries,gauge,,,,The number of active queries in this database.,0,postgres,active queries
 postgresql.waiting_queries,gauge,,,,The number of waiting queries in this database.,0,postgres,transactions waiting queries
-postgresql.queries.count,count,,query,,"The total query execution count per normalized query, database, and user.",0,postgres,postgres queries count
-postgresql.queries.time,count,,nanosecond,,"The total query execution time per normalized query, database, and user.",0,postgres,postgres queries time
-postgresql.queries.rows,count,,row,,"The total number of rows retrieved or affected per normalized query, database, and user.",0,postgres,postgres queries rows
-postgresql.queries.shared_blks_hit,count,,block,,"Total number of shared block cache hits per normalized query, database, and user.",0,postgres,postgres queries shared blocks hit
-postgresql.queries.shared_blks_read,count,,block,,"Total number of shared blocks read per normalized query, database, and user.",0,postgres,postgres queries shared blocks read
-postgresql.queries.shared_blks_dirtied,count,,block,,"Total number of shared blocks dirtied per normalized query, database, and user.",0,postgres,postgres queries shared blocks dirtied
-postgresql.queries.shared_blks_written,count,,block,,"Total number of shared blocks written per normalized query, database, and user.",0,postgres,postgres queries shared blocks written
-postgresql.queries.local_blks_hit,count,,block,,"Total number of local block cache hits per normalized query, database, and user.",0,postgres,postgres queries local blocks hit
-postgresql.queries.local_blks_read,count,,block,,"Total number of local blocks read per normalized query, database, and user.",0,postgres,postgres queries local blocks read
-postgresql.queries.local_blks_dirtied,count,,block,,"Total number of local blocks dirtied per normalized query, database, and user.",0,postgres,postgres queries local blocks dirtied
-postgresql.queries.local_blks_written,count,,block,,"Total number of local blocks written per normalized query, database, and user.",0,postgres,postgres queries local blocks written
-postgresql.queries.temp_blks_read,count,,block,,"Total number of temp blocks read per normalized query, database, and user.",0,postgres,postgres queries temp blocks read
-postgresql.queries.temp_blks_written,count,,block,,"Total number of temp blocks written per normalized query, database, and user.",0,postgres,postgres queries temp blocks written
+postgresql.queries.count,count,,query,,"The total query execution count per normalized query, database, and user. (DBM only)",0,postgres,postgres queries count
+postgresql.queries.time,count,,nanosecond,,"The total query execution time per normalized query, database, and user. (DBM only)",0,postgres,postgres queries time
+postgresql.queries.rows,count,,row,,"The total number of rows retrieved or affected per normalized query, database, and user. (DBM only)",0,postgres,postgres queries rows
+postgresql.queries.shared_blks_hit,count,,block,,"Total number of shared block cache hits per normalized query, database, and user. (DBM only)",0,postgres,postgres queries shared blocks hit
+postgresql.queries.shared_blks_read,count,,block,,"Total number of shared blocks read per normalized query, database, and user. (DBM only)",0,postgres,postgres queries shared blocks read
+postgresql.queries.shared_blks_dirtied,count,,block,,"Total number of shared blocks dirtied per normalized query, database, and user. (DBM only)",0,postgres,postgres queries shared blocks dirtied
+postgresql.queries.shared_blks_written,count,,block,,"Total number of shared blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries shared blocks written
+postgresql.queries.local_blks_hit,count,,block,,"Total number of local block cache hits per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks hit
+postgresql.queries.local_blks_read,count,,block,,"Total number of local blocks read per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks read
+postgresql.queries.local_blks_dirtied,count,,block,,"Total number of local blocks dirtied per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks dirtied
+postgresql.queries.local_blks_written,count,,block,,"Total number of local blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks written
+postgresql.queries.temp_blks_read,count,,block,,"Total number of temp blocks read per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks read
+postgresql.queries.temp_blks_written,count,,block,,"Total number of temp blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks written
 postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file,0,postgres,wal age

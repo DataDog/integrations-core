@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=21.2.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=23.1.0'
 
 
 setup(
@@ -51,8 +51,6 @@ setup(
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
     ],

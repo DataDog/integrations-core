@@ -16,6 +16,10 @@ def instance_collect_activity_metrics(field, value):
     return False
 
 
+def instance_collect_bloat_metrics(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return True
 
@@ -90,6 +94,10 @@ def instance_pg_stat_statements_view(field, value):
 
 def instance_port(field, value):
     return 5432
+
+
+def instance_query_activity(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_query_metrics(field, value):

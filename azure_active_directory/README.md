@@ -44,10 +44,6 @@ For more details on the setup, see the [Azure tutorial][3].
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
 This includes the following:

@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool]
     driver: Optional[str]
     empty_default_hostname: Optional[bool]
+    hostname: Optional[str] = Field(None, max_length=255, min_length=1)
     job_query_timeout: Optional[int] = Field(None, gt=0.0)
     min_collection_interval: Optional[float]
     password: Optional[str]

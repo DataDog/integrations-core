@@ -13,7 +13,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import BLOAT_METRICS, RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -316,6 +316,8 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             metric_scope.extend(RELATION_METRICS)
+            if self._config.collect_bloat_metrics:
+                metric_scope.extend([BLOAT_METRICS])
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:

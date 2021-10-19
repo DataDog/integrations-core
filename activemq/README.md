@@ -45,9 +45,11 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
 {{< /site-region >}}
+partial -->
 
 _Available for Agent versions >6.0_
 
@@ -90,9 +92,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 
 ##### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
+**Log collection is not supported for the Datadog {{< region-param key="dd_site_name" >}} site**.
 {{< /site-region >}}
+partial -->
 
 _Available for Agent versions >6.0_
 

@@ -18,10 +18,6 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 ### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, so to enable it in `datadog.yaml`, update this setting:
 
    ```yaml

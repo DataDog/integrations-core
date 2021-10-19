@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     admin_forwarder: Optional[bool]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -68,6 +69,7 @@ class InstanceConfig(BaseModel):
     pshard_graceful_timeout: Optional[bool]
     pshard_stats: Optional[bool]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     slm_stats: Optional[bool]

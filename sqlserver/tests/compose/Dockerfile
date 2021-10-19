@@ -12,8 +12,8 @@ WORKDIR /var/opt/mssql/backup
 RUN curl -L -o AdventureWorks2017.bak https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2017.bak
 
 WORKDIR /
-COPY setup.* /
-COPY entrypoint.sh /
+COPY *.sh /
+COPY *.sql /
 
 RUN chmod +x setup.sh
 RUN chmod +x entrypoint.sh

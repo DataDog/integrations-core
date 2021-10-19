@@ -26,9 +26,9 @@ instance_new = {
 }
 
 
-def test_openmetrics_check(aggregator):
+def test_openmetrics_check(dd_run_check, aggregator):
     c = OpenMetricsCheck('openmetrics', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -45,10 +45,10 @@ def test_openmetrics_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_openmetrics_check_counter_gauge(aggregator):
+def test_openmetrics_check_counter_gauge(dd_run_check, aggregator):
     instance['send_monotonic_counter'] = False
     c = OpenMetricsCheck('openmetrics', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -63,7 +63,7 @@ def test_openmetrics_check_counter_gauge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_invalid_metric(aggregator):
+def test_invalid_metric(dd_run_check, aggregator):
     """
     Testing that invalid values of metrics are discarded
     """
@@ -74,11 +74,11 @@ def test_invalid_metric(aggregator):
         'send_histograms_buckets': True,
     }
     c = OpenMetricsCheck('openmetrics', {}, [bad_metric_instance])
-    c.check(bad_metric_instance)
+    dd_run_check(c)
     assert aggregator.metrics('metric3') == []
 
 
-def test_openmetrics_wildcard(aggregator):
+def test_openmetrics_wildcard(dd_run_check, aggregator):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'openmetrics',
@@ -86,7 +86,7 @@ def test_openmetrics_wildcard(aggregator):
     }
 
     c = OpenMetricsCheck('openmetrics', {}, [instance_wildcard])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],

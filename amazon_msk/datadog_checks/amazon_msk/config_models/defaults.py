@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_assume_role(field, value):
     return get_default_field_value(field, value)
 
@@ -41,6 +45,10 @@ def instance_aws_region(field, value):
 
 
 def instance_aws_service(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_boto_config(field, value):
     return get_default_field_value(field, value)
 
 

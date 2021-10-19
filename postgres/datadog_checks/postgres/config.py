@@ -62,6 +62,7 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', False)):
@@ -82,6 +83,7 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {

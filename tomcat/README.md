@@ -113,10 +113,6 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 1. To submit logs to Datadog, Tomcat uses the `log4j` logger. For versions of Tomcat before 8.0, `log4j` is configured by default. For Tomcat 8.0 and after, you must configure Tomcat to use `log4j` by following the [Apache Tomcat documentation][15]. In the first step of those instructions, edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
 
@@ -226,6 +222,27 @@ The Tomcat check does not include any events.
 See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+### Missing `tomcat.*` metrics
+The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` to the `conf` section of the `tomcat.d/conf.yaml` and modify the `domain` filter to use the applicable bean domain name. 
+
+```yaml
+- include:
+    domain: Tomcat      # default: Catalina
+    type: ThreadPool
+    attribute:
+      maxThreads:
+        alias: tomcat.threads.max
+        metric_type: gauge
+      currentThreadCount:
+        alias: tomcat.threads.count
+        metric_type: gauge
+      currentThreadsBusy:
+        alias: tomcat.threads.busy
+        metric_type: gauge
+```
+
+See the [JMX Check documentation][8] for more detailed information.
 
 ### Commands to view the available metrics
 

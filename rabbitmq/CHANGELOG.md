@@ -1,5 +1,17 @@
 # CHANGELOG - rabbitmq
 
+## 2.2.0 / 2021-09-30
+
+* [Added] Minor refactor. See [#10270](https://github.com/DataDog/integrations-core/pull/10270).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.1.0 / 2021-09-17
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 2.0.0 / 2021-08-22 / Agent 7.31.0
 
 * [Fixed] Fix documented default value of `use_legacy_auth_encoding`. See [#9880](https://github.com/DataDog/integrations-core/pull/9880).
