@@ -375,6 +375,14 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            if self._config.ssl_cert:
+                args['sslcert'] = self._config.ssl_cert
+            if self._config.ssl_root_cert:
+                args['sslrootcert'] = self._config.ssl_root_cert
+            if self._config.ssl_key:
+                args['sslkey'] = self._config.ssl_key
+            if self._config.ssl_password:
+                args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)

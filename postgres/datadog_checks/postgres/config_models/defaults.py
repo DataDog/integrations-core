@@ -124,6 +124,22 @@ def instance_ssl(field, value):
     return False
 
 
+def instance_ssl_cert(field, value):
+    return False
+
+
+def instance_ssl_key(field, value):
+    return False
+
+
+def instance_ssl_password(field, value):
+    return False
+
+
+def instance_ssl_root_cert(field, value):
+    return False
+
+
 def instance_table_count_limit(field, value):
     return 200
 
