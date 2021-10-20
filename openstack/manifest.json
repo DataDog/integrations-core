@@ -15,7 +15,7 @@
   "process_signatures": [
     "stack.sh"
   ],
-  "public_title": "OpenStack",
+  "public_title": "OpenStack (legacy)",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",
   "supported_os": [
