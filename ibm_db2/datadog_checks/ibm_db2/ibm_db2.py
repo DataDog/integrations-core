@@ -69,7 +69,7 @@ class IbmDb2Check(AgentCheck):
                     self.SERVICE_CHECK_CONNECT,
                     self.CRITICAL,
                     tags=self._tags,
-                    message=f'Unable to create new connection to database: {self._db}',
+                    message="Unable to create new connection to database: " + self._db,
                 )
                 return
 
