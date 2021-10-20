@@ -10,6 +10,11 @@ BROKER_METRICS = [
     'confluent.kafka.controller.leader_election_rate_and_time_ms.rate',
     'confluent.kafka.controller.offline_partitions_count',
     'confluent.kafka.controller.unclean_leader_elections_per_sec.rate',
+    'confluent.kafka.controller.PreferredReplicaImbalanceCount',
+    'confluent.kafka.controller.GlobalUnderMinIsrPartitionCount',
+    'confluent.kafka.controller.OfflinePartitionsCount',
+    'confluent.kafka.controller.GlobalTopicCount',
+    'confluent.kafka.controller.GlobalPartitionCount',
     'confluent.kafka.network.request.local_time_ms.50percentile',
     'confluent.kafka.network.request.local_time_ms.75percentile',
     'confluent.kafka.network.request.local_time_ms.95percentile',
@@ -86,6 +91,14 @@ BROKER_METRICS = [
     'confluent.kafka.server.topic.messages_in_per_sec.rate',
     'confluent.kafka.server.topic.total_fetch_requests_per_sec.rate',
     'confluent.kafka.server.topic.total_produce_requests_per_sec.rate',
+    'confluent.kafka.server.broker_topic_metrics.BytesInPerSec',
+    'confluent.kafka.server.broker_topic_metrics.BytesOutPerSec',
+    'confluent.kafka.server.broker_topic_metrics.MessagesInPerSec',
+    'confluent.kafka.server.broker_topic_metrics.MessagesOutPerSec',
+    'confluent.kafka.server.broker_topic_metrics.ProduceMessageConversionsPerSec',
+    'confluent.kafka.server.broker_topic_metrics.FetchMessageConversionsPerSec',
+    'confluent.kafka.log.Log.Size.log_size',
+
 ]
 
 CONNECT_METRICS = [
@@ -148,6 +161,16 @@ CONNECT_PER_CONNECTOR_METRICS = [
     'confluent.kafka.connect.worker.connector_running_task_count',
     'confluent.kafka.connect.worker.connector_total_task_count',
     'confluent.kafka.connect.worker.connector_unassigned_task_count',
+    'confluent.kafka.connect.connect-metrics.outgoing-byte-rate',
+    'confluent.kafka.connect.connect-metrics.incoming-byte-rate',
+    'confluent.kafka.connect.connect-metrics.failed-authentication-rate',
+    'confluent.kafka.connect.connect-metrics.successful-authentication-rate',
+    'confluent.kafka.connect.connect-metrics.failed-authentication-total',
+    'confluent.kafka.connect.connect-metrics.successful-authentication-total',
+    'confluent.kafka.connect.connector-metrics.connector-type',
+    'confluent.kafka.connect.connector-metrics.connector-class',
+    'confluent.kafka.connect.connector-metrics.connector-version',
+    'confluent.kafka.connect.connector-metrics.status',
 ]
 
 REST_JETTY_METRICS = [
@@ -259,6 +282,14 @@ SCHEMA_REGISTRY_JERSEY_METRICS = [
 
 SCHEMA_REGISTRY_METRICS = [
     'confluent.kafka.schema.registry.master_slave_role.master_slave_role',
+    'confluent.kafka.schema.registry.avro-schemas-created.avro-schemas-created',
+    'confluent.kafka.schema.registry.json-schemas-created.json-schemas-created',
+    'confluent.kafka.schema.registry.protobuf-schemas-created.protobuf-schemas-created',
+    'confluent.kafka.schema.registry.avro-schemas-deleted.avro-schemas-deleted',
+    'confluent.kafka.schema.registry.json-schemas-deleted.json-schemas-deleted',
+    'confluent.kafka.schema.registry.protobuf-schemas-deleted.protobuf-schemas-deleted',
+    'confluent.kafka.schema.registry.registered-count.registered-count',
+
 ]
 
 BROKER_OPTIONAL_METRICS = [
@@ -352,6 +383,29 @@ KSQL_QUERY_STATS = [
     'confluent.ksql.query_stats.num_persistent_queries',
 ]
 
+KSQL_ROCKSDB_OPTIONAL = [
+    'confluent.ksql.ksql_rocksdb_aggregates.cur-size-all-mem-tables-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.cur-size-active-mem-table-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.mem-table-flush-pending-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.block-cache-pinned-usage-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.estimate-num-keys-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.live-sst-files-size-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.block-cache-usage-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.estimate-table-readers-mem-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.compaction-pending-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-entries-imm-mem-tables-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.total-sst-files-size-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-running-compactions-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.block-cache-pinned-usage-max',
+    'confluent.ksql.ksql_rocksdb_aggregates.estimate-pending-compaction-bytes-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-deletes-active-mem-table-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-immutable-mem-table-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-running-flushes-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.block-cache-usage-max',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-entries-active-mem-table-total',
+    'confluent.ksql.ksql_rocksdb_aggregates.num-deletes-imm-mem-tables-total',
+]
+
 ALWAYS_PRESENT_METRICS = (
     BROKER_METRICS
     + CONNECT_METRICS
@@ -380,4 +434,5 @@ NOT_ALWAYS_PRESENT_METRICS = (
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS
     + CONSUMER_FETCH_TOPIC_METRICS
+    + KSQL_ROCKSDB_OPTIONAL
 )
