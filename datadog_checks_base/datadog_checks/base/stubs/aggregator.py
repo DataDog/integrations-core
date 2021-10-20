@@ -247,7 +247,17 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+        self,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        count=None,
+        at_least=1,
+        flush_first_value=None,
     ):
         expected_tags = normalize_tags(tags, sort=True)
 
@@ -265,9 +275,14 @@ class AggregatorStub(object):
             if monotonic != bucket.monotonic:
                 continue
 
+            if flush_first_value is not None and flush_first_value != bucket.flush_first_value:
+                continue
+
             candidates.append(bucket)
 
-        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, None)
+        expected_bucket = HistogramBucketStub(
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value
+        )
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
