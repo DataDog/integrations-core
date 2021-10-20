@@ -95,7 +95,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][116].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
