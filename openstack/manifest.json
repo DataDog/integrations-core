@@ -15,7 +15,7 @@
   "process_signatures": [
     "stack.sh"
   ],
-  "public_title": "Datadog-OpenStack Integration",
+  "public_title": "OpenStack",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",
   "supported_os": [

@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Openstack Controller",
+  "public_title": "OpenStack Controller",
   "categories": [
     "cloud",
     "log collection"
