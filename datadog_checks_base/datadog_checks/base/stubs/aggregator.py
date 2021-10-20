@@ -94,13 +94,7 @@ class AggregatorStub(object):
     }
 
     def __init__(self):
-        self._metrics = defaultdict(list)
-        self._asserted = set()
-        self._service_checks = defaultdict(list)
-        self._events = []
-        # dict[event_type, [events]]
-        self._event_platform_events = {}
-        self._histogram_buckets = defaultdict(list)
+        self.reset()
 
     @classmethod
     def is_aggregate(cls, mtype):
@@ -538,7 +532,9 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        # dict[event_type, [events]]
         self._event_platform_events = defaultdict(list)
+        self._histogram_buckets = defaultdict(list)
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0
