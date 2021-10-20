@@ -94,7 +94,9 @@ instances:
 
     ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
+    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## Note: tool.jar was removed in Java 9: https://openjdk.java.net/jeps/220,
+    ## so this option will only work on Java 8 and below.
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
