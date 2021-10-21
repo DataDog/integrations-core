@@ -42,11 +42,11 @@ dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
 DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
 
 
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    DBMAsyncJob.executor.shutdown(wait=True)
-    DBMAsyncJob.executor = ThreadPoolExecutor()
+# @pytest.fixture(autouse=True)
+# def stop_orphaned_threads():
+#     # make sure we shut down any orphaned threads and create a new Executor for each test
+#     DBMAsyncJob.executor.shutdown(wait=True)
+#     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 @pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
