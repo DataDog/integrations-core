@@ -372,7 +372,7 @@ Need help? Contact [Datadog support][19].
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
 [3]: https://aws.amazon.com/cli
 [4]: https://aws.amazon.com/console
-[5]: https://app.datadoghq.com/account/settings#api
+[5]: https://app.datadoghq.com/organization-settings/api-keys
 [6]: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html#ecs-config-s3
 [7]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
 [8]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
