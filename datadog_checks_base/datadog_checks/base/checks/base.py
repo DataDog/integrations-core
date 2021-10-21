@@ -405,7 +405,7 @@ class AgentCheck(object):
     def validate_unknown_options(self, user_config, models_config, level):
         user_config = user_config or {}
         models_config = models_config or {}
-        unknown_options = sorted(list(dict(user_config).keys() - dict(models_config).keys()))
+        unknown_options = sorted(list(user_config.keys() - dict(models_config).keys()))
         if unknown_options:
             message = "Detected undocumented or unknown configuration options in {}/{} section: {}".format(
                 self.name, level, ", ".join(unknown_options)

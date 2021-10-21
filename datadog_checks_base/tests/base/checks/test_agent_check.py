@@ -894,8 +894,8 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_instance is None
     assert check._config_model_shared is None
 
-    instance_config = object()
-    shared_config = object()
+    instance_config = {}
+    shared_config = {}
     package = mocker.MagicMock()
     package.InstanceConfig = mocker.MagicMock(return_value=instance_config)
     package.SharedConfig = mocker.MagicMock(return_value=shared_config)
