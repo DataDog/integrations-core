@@ -1,10 +1,10 @@
 # Agent Check: Openstack Controller
 
-<div class="alert alert-warning">
-<b>Important Note</b>: This integration only applies to OpenStack versions 13 and above (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack) please use the <a href="https://docs.datadoghq.com/integrations/openstack/">OpenStack integration.</a>
-</div>
-
 ## Overview
+
+<div class="alert alert-warning">
+<b>Important Note</b>: This integration only applies to OpenStack versions 13 and above (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), please use the <a href="https://docs.datadoghq.com/integrations/openstack/">OpenStack integration.</a>
+</div>
 
 This check monitors [OpenStack][1] from the controller node.
 
