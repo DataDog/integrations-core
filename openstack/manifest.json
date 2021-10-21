@@ -31,8 +31,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "openstack": "assets/dashboards/openstack_dashboard.json",
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
+      "openstack": "assets/dashboards/openstack_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
