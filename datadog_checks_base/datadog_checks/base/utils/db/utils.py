@@ -159,6 +159,7 @@ def default_json_event_encoding(o):
 
 
 class DBMAsyncJob(object):
+    executor = ThreadPoolExecutor()
 
     """
     Runs Async Jobs
@@ -196,8 +197,6 @@ class DBMAsyncJob(object):
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
-        # Use a max worker count of 1 since an async job only ever has one thread to run
-        self._executor = ThreadPoolExecutor(1)
 
     def cancel(self):
         self._cancel_event.set()
@@ -221,7 +220,7 @@ class DBMAsyncJob(object):
             self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
             self._run_job_rate_limited()
         elif self._job_loop_future is None or not self._job_loop_future.running():
-            self._job_loop_future = self._executor.submit(self._job_loop)
+            self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
