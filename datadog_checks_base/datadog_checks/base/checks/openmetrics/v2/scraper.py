@@ -19,6 +19,12 @@ from ....utils.functions import no_op, return_true
 from ....utils.http import RequestsWrapper
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
+from .first_scrape_handler import first_scrape_handler
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class OpenMetricsScraper:
@@ -190,13 +196,15 @@ class OpenMetricsScraper:
             self.parse_metric_families = parse_metric_families
             self.http.options['headers'].setdefault('Accept', 'text/plain')
 
+        self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
+
         # Used for monotonic counts
         self.has_successfully_executed = False
 
     def scrape(self):
         runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
 
-        for metric in self.consume_metrics():
+        for metric in self.consume_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
@@ -205,8 +213,10 @@ class OpenMetricsScraper:
 
         self.has_successfully_executed = True
 
-    def consume_metrics(self):
+    def consume_metrics(self, runtime_data):
         metric_parser = self.parse_metrics()
+        if not self.has_successfully_executed and self.use_process_start_time:
+            metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
 
