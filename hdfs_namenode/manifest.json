@@ -29,7 +29,7 @@
     },
     "monitors": {},
     "dashboards": {
-      "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashbaord.json"
+      "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashboard.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
