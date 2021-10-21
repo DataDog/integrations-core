@@ -8,6 +8,8 @@
 
 ## Overview
 
+This integration only applies to OpenStack versions 12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13 and above (containerized OpenStack) please use the [OpenStack Controller integration][13].
+
 Get metrics from OpenStack service in real time to:
 
 - Visualize and monitor OpenStack states.
@@ -178,3 +180,4 @@ See also these other Datadog blog posts:
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
 [12]: https://github.com/DataDog/integrations-core/blob/master/openstack/assets/service_checks.json
+[13]: https://docs.datadoghq.com/integrations/openstack_controller
