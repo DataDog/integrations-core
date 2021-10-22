@@ -19,7 +19,8 @@ IMAGE_EXTENSIONS = {".png", ".jpg"}
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def readmes(ctx, check):
+@click.option('--format_links', '-fl', is_flag=True, help='Format links')
+def readmes(ctx, check, format_links):
     """Validates README files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
@@ -45,6 +46,18 @@ def readmes(ctx, check):
             echo_info(f'{integration}:')
             for func, message in display_queue:
                 func(message)
+
+        if format_links:
+            import requests
+            response = requests.get(
+                "https://raw.githubusercontent.com/DataDog/documentation/master/local/bin/py/build/actions/format_link.py"
+            )
+            try:
+                import subprocess
+                r = subprocess.run("curl -s https://raw.githubusercontent.com/DataDog/documentation/master/local/bin/py/build/actions/format_link.py ")
+                raise Exception(r)
+            except Exception as e:
+                raise
 
     num_files = len(readme_counter)
     files_failed = len(files_failed)
