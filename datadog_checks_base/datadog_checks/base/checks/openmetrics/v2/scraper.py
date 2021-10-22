@@ -17,9 +17,9 @@ from ....constants import ServiceCheck
 from ....errors import ConfigurationError
 from ....utils.functions import no_op, return_true
 from ....utils.http import RequestsWrapper
+from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
-from .first_scrape_handler import first_scrape_handler
 
 try:
     import datadog_agent
