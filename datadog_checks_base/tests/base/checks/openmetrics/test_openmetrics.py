@@ -2855,14 +2855,20 @@ def _make_test_use_process_start_time_data(process_start_time):
 
 
 @pytest.mark.parametrize(
-    'use_process_start_time, expect_first_flush, agent_start_time, process_start_time',
+    'use_process_start_time, send_distribution_buckets, expect_first_flush, agent_start_time, process_start_time',
     [
-        (False, False, None, None),
-        (True, True, 10, [20]),
-        (True, False, 20, [10]),
-        (True, False, 10, []),
-        (True, True, 10, [20, 30, 40]),
-        (True, False, 20, [10, 30, 40]),
+        (False, False, False, None, None),
+        (True, False, True, 10, [20]),
+        (True, False, False, 20, [10]),
+        (True, False, False, 10, []),
+        (True, False, True, 10, [20, 30, 40]),
+        (True, False, False, 20, [10, 30, 40]),
+        (False, True, False, None, None),
+        (True, True, True, 10, [20]),
+        (True, True, False, 20, [10]),
+        (True, True, False, 10, []),
+        (True, True, True, 10, [20, 30, 40]),
+        (True, True, False, 20, [10, 30, 40]),
     ],
     ids=[
         "disabled",
@@ -2871,6 +2877,12 @@ def _make_test_use_process_start_time_data(process_start_time):
         "enabled, metric n/a",
         "enabled, many metrics, all newer",
         "enabled, many metrics, some newer",
+        "with buckets, disabled",
+        "with buckets, enabled, agent is older",
+        "with buckets, enabled, agent is newer",
+        "with buckets, enabled, metric n/a",
+        "with buckets, enabled, many metrics, all newer",
+        "with buckets, enabled, many metrics, some newer",
     ],
 )
 def test_use_process_start_time(
@@ -2878,6 +2890,7 @@ def test_use_process_start_time(
     datadog_agent,
     mocked_openmetrics_check_factory,
     expect_first_flush,
+    send_distribution_buckets,
     use_process_start_time,
     process_start_time,
     agent_start_time,
@@ -2891,6 +2904,7 @@ def test_use_process_start_time(
         "metrics": ["*"],
         "namespace": "",
         "send_distribution_counts_as_monotonic": True,
+        "send_distribution_buckets": send_distribution_buckets,
         "use_process_start_time": use_process_start_time,
     }
 
@@ -2899,125 +2913,42 @@ def test_use_process_start_time(
     check = mocked_openmetrics_check_factory(instance)
     test_data = _make_test_use_process_start_time_data(process_start_time)
     check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
-    check.check(instance)
-
-    aggregator.assert_metric(
-        'go_memstats_alloc_bytes_total',
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=1,
-        flush_first_value=expect_first_flush,
-    )
-    aggregator.assert_metric(
-        'skydns_skydns_dns_request_duration_seconds.count',
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=2,
-        flush_first_value=expect_first_flush,
-    )
-    aggregator.assert_metric(
-        'go_gc_duration_seconds.count',
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=1,
-        flush_first_value=expect_first_flush,
-    )
 
     for _ in range(0, 5):
         aggregator.reset()
         check.check(instance)
 
         aggregator.assert_metric(
-            'go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True
-        )
-        aggregator.assert_metric(
-            'skydns_skydns_dns_request_duration_seconds.count',
+            'go_memstats_alloc_bytes_total',
             metric_type=aggregator.MONOTONIC_COUNT,
-            count=2,
-            flush_first_value=True,
+            count=1,
+            flush_first_value=expect_first_flush,
         )
         aggregator.assert_metric(
-            'go_gc_duration_seconds.count', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True
+            'go_gc_duration_seconds.count',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            flush_first_value=expect_first_flush,
         )
 
+        if send_distribution_buckets:
+            aggregator.assert_histogram_bucket(
+                'skydns_skydns_dns_request_duration_seconds',
+                None,
+                None,
+                None,
+                True,
+                None,
+                None,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
+        else:
+            aggregator.assert_metric(
+                'skydns_skydns_dns_request_duration_seconds.count',
+                metric_type=aggregator.MONOTONIC_COUNT,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
 
-@pytest.mark.parametrize(
-    'use_process_start_time, expect_first_flush, agent_start_time, process_start_time',
-    [
-        (False, False, None, None),
-        (True, True, 10, [20]),
-        (True, False, 20, [10]),
-        (True, False, 10, []),
-        (True, True, 10, [20, 30, 40]),
-        (True, False, 20, [10, 30, 40]),
-    ],
-    ids=[
-        "disabled",
-        "enabled, agent is older",
-        "enabled, agent is newer",
-        "enabled, metric n/a",
-        "enabled, many metrics, all newer",
-        "enabled, many metrics, some newer",
-    ],
-)
-def test_use_process_start_time_histograms(
-    aggregator,
-    datadog_agent,
-    mocked_openmetrics_check_factory,
-    expect_first_flush,
-    use_process_start_time,
-    process_start_time,
-    agent_start_time,
-):
-    """
-    Test that first sample is flushed or not depending on metric type, agent and server process start times.
-    """
-
-    instance = {
-        "prometheus_url": "xx",
-        "metrics": ["*"],
-        "namespace": "",
-        "send_distribution_buckets": True,
-        "use_process_start_time": use_process_start_time,
-    }
-
-    datadog_agent.set_process_start_time(agent_start_time)
-
-    check = mocked_openmetrics_check_factory(instance)
-    test_data = _make_test_use_process_start_time_data(process_start_time)
-    check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
-    check.check(instance)
-
-    aggregator.assert_metric(
-        'go_memstats_alloc_bytes_total',
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=1,
-        flush_first_value=expect_first_flush,
-    )
-    aggregator.assert_histogram_bucket(
-        'skydns_skydns_dns_request_duration_seconds',
-        None,
-        None,
-        None,
-        True,
-        None,
-        None,
-        count=2,
-        flush_first_value=expect_first_flush,
-    )
-
-    for _ in range(0, 5):
-        aggregator.reset()
-        check.check(instance)
-
-        aggregator.assert_metric(
-            'go_memstats_alloc_bytes_total', metric_type=aggregator.MONOTONIC_COUNT, count=1, flush_first_value=True
-        )
-        aggregator.assert_histogram_bucket(
-            'skydns_skydns_dns_request_duration_seconds',
-            None,
-            None,
-            None,
-            True,
-            None,
-            None,
-            count=2,
-            flush_first_value=True,
-        )
+        expect_first_flush = True
