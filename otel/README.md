@@ -90,7 +90,7 @@ Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
 [2]: https://opentelemetry.io/docs/collector/getting-started/
-[3]: https://app.datadoghq.com/account/settings#api
+[3]: https://app.datadoghq.com/organization-settings/api-keys
 [4]: https://docs.datadoghq.com/tracing/setup_overview/open_standards/#opentelemetry-collector-datadog-exporter
 [5]: https://opentelemetry.io/docs/collector/getting-started/
 [6]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv

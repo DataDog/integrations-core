@@ -127,7 +127,7 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [9]: https://docs.datadoghq.com/help/
-[10]: https://app.datadoghq.com/account/settings#api
+[10]: https://app.datadoghq.com/organization-settings/api-keys
 [11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [12]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
 [13]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
