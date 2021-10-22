@@ -408,7 +408,7 @@ Need help? Contact [Datadog support][20].
 [11]: https://app.datadoghq.com/account/settings#integrations/amazon-eks
 [12]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
 [13]: http://docs.datadoghq.com/integrations/kubernetes
-[14]: https://app.datadoghq.com/account/settings#api
+[14]: https://app.datadoghq.com/organization-settings/api-keys
 [15]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [16]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
 [17]: https://docs.datadoghq.com/developers/dogstatsd/

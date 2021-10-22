@@ -123,6 +123,7 @@ Need help? Contact [Datadog support][12].
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://app.datadoghq.com/account/settings#api
+[5]: https://app.datadoghq.com/organization-settings/api-keys
 [6]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
 [7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
