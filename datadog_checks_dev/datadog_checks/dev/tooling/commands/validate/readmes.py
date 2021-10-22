@@ -2,11 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from tempfile import TemporaryDirectory
 
 import click
 import markdown
 from bs4 import BeautifulSoup
 
+from ....fs import chdir, create_file
+from ....subprocess import run_command
+from ....utils import download_file
 from ...annotations import annotate_display_queue
 from ...constants import get_root
 from ...testing import process_checks_option
@@ -15,11 +19,16 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
 
+# Get latest format_link script from Datadog/documentation repo
+DOCS_LINK_FORMAT_URL = (
+    "https://raw.githubusercontent.com/DataDog/documentation/master/local/bin/py/build/actions/format_link.py"
+)
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-@click.option('--format_links', '-fl', is_flag=True, help='Format links')
+@click.option('--format-links', '-fl', is_flag=True, help='Automatically format links')
 def readmes(ctx, check, format_links):
     """Validates README files.
 
@@ -33,6 +42,14 @@ def readmes(ctx, check, format_links):
     readme_counter = set()
 
     integrations = process_checks_option(check, source='integrations', extend_changed=True)
+    format_link_script_path = None
+    if format_links:
+        format_link_dir = TemporaryDirectory()
+
+        with chdir(format_link_dir.name):
+            format_link_script_path = os.path.join(format_link_dir.name, "format_link.py")
+            create_file("format_link.py")
+            download_file(DOCS_LINK_FORMAT_URL, format_link_script_path)
 
     for integration in integrations:
         display_queue = []
@@ -47,17 +64,12 @@ def readmes(ctx, check, format_links):
             for func, message in display_queue:
                 func(message)
 
-        if format_links:
-            import requests
-            response = requests.get(
-                "https://raw.githubusercontent.com/DataDog/documentation/master/local/bin/py/build/actions/format_link.py"
-            )
+        if format_links and format_link_script_path:
+            echo_info("Formatting links in {}".format(os.path.basename(readme_path)))
             try:
-                import subprocess
-                r = subprocess.run("curl -s https://raw.githubusercontent.com/DataDog/documentation/master/local/bin/py/build/actions/format_link.py ")
-                raise Exception(r)
+                run_command(["python", format_link_script_path, "-f", readme_path])
             except Exception as e:
-                raise
+                echo_failure("Unable to format file: {}".format(str(e)), indent=True)
 
     num_files = len(readme_counter)
     files_failed = len(files_failed)
