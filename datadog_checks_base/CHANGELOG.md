@@ -2,7 +2,7 @@
 
 ## 23.1.4 / 2021-10-19
 
-* [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+* [Fixed] Update tuf to 0.19.0 for Python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
 
 ## 23.1.3 / 2021-10-15
 
