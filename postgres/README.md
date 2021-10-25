@@ -366,6 +366,8 @@ Some of the metrics listed below require additional configuration, see the [samp
 
 See [metadata.csv][20] for a list of metrics provided by this integration.
 
+For Agent version `7.32.0` and later, if you have Database Monitoring enabled, the `postgresql.connections` metric is tagged with `state`, `app`, and `user`.
+
 ### Events
 
 The PostgreSQL check does not include any events.
