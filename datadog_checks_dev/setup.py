@@ -28,7 +28,6 @@ REQUIRES = [
     'mock',
     'psutil',
     'PyYAML==5.4.1',
-    'types-PyYAML==5.4.10',
     'pytest',
     'pytest-benchmark[histogram]>=3.2.1',
     'pytest-cov>=2.6.1',

@@ -26,6 +26,13 @@ FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==21.9.1'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.6.0'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
+# TODO: when we drop Python 2 and replace with --install-types --non-interactive
+TYPES_DEPS = [
+    'types-PyYAML==5.4.10',
+    'types-python-dateutil==2.8.2',
+    'types_requests==2.25.11',
+    'types_six==1.16.2'
+]
 PYDANTIC_DEP = 'pydantic==1.8.2'  # Keep in sync with: /datadog_checks_base/requirements.in
 
 
@@ -131,7 +138,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         BLACK_DEP,
         ISORT_DEP,
         PYDANTIC_DEP,
-    ]
+    ] + TYPES_DEPS
 
     commands = [
         'flake8 --config=../.flake8 .',
