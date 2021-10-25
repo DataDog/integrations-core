@@ -38,7 +38,7 @@ def get_schema_field(descriptors):
 
 fmt = PartialFormatter()
 
-MAIN_CHECK_COMMON_METRICS = {
+DBM_MIGRATED_METRICS = {
     'numbackends': ('postgresql.connections', AgentCheck.gauge),
 }
 

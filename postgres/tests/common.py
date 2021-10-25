@@ -30,7 +30,7 @@ COMMON_METRICS = [
     'postgresql.temp_files',
 ]
 
-MAIN_CHECK_COMMON_METRICS = [
+DBM_MIGRATED_METRICS = [
     'postgresql.connections',
 ]
 

@@ -7,14 +7,14 @@ from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.util import (
     COMMON_METRICS,
-    MAIN_CHECK_COMMON_METRICS,
+    DBM_MIGRATED_METRICS,
     NEWER_92_METRICS,
     REPLICATION_METRICS_9_1,
     REPLICATION_METRICS_10,
 )
 from datadog_checks.postgres.version_utils import V9_1, V9_2, V10
 
-COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **MAIN_CHECK_COMMON_METRICS)
+COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **DBM_MIGRATED_METRICS)
 
 
 @pytest.mark.unit
