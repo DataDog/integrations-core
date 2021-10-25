@@ -1116,15 +1116,10 @@ class OpenMetricsScraperMixin(object):
         _tags = list(custom_tags)
         _tags.extend(scraper_config['_metric_tags'])
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
-            if len(scraper_config['include_labels']) > 0:
-                if label_name in scraper_config['include_labels'] and label_name not in scraper_config['exclude_labels']:
+            if label_name not in scraper_config['exclude_labels']:
+                if label_name in scraper_config['include_labels'] or len(scraper_config['include_labels']) == 0:
                     tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
                     _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
-            else:
-                if label_name not in scraper_config['exclude_labels']:
-                    tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                    _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
-
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )

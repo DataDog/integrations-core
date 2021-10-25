@@ -164,6 +164,25 @@ class TestExcludeLabels:
         aggregator.assert_all_metrics_covered()
 
 
+class TestIncludeLabels:
+    def test(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar",bar="baz"} 6.396288e+06
+            """
+        )
+        check = get_check({'metrics': ['.+'], 'include_labels': ['foo']})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
+        )
+
+        aggregator.assert_all_metrics_covered()
+
+
 class TestRenameLabels:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(
