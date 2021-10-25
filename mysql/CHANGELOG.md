@@ -1,5 +1,8 @@
 # CHANGELOG - mysql
 
+## 6.2.0-rc.1 / 2021-10-25
+
+
 ## 6.1.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
