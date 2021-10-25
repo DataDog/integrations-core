@@ -666,57 +666,57 @@ jmx_metrics:
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka\.connect:type=connect-metrics,client-id=.*
+        - kafka\.connect:type=connect_metrics,client-id=.*
       attribute:
         outgoing-byte-rate: 
           # Rate of outgoing bytes
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
         incoming-byte-rate:
           # Rate of incoming bytes
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
         failed-authentication-rate:
           # Rate of failed authentications
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
         successful-authentication-rate:
           # Rate of successful authentication
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
         failed-authentication-total:
           # Total amount of failed authentications
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
         successful-authentication-total:
           # Total amount of failed authentications
-          alias: confluent.$domain.connect-metrics.$attribute
+          alias: confluent.$domain.connect_metrics.$attribute
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka\.connect:type=connector-metrics,connector=.*
+        - kafka\.connect:type=connector_metrics,connector=.*
       attribute:
         connector-type:
           # Type of connector: source|sink (string)
-          alias: confluent.$domain.connector-metrics.$attribute
+          alias: confluent.$domain.connector_metrics.$attribute
         connector-class:
           # Class of connector (string)
-          alias: confluent.$domain.connector-metrics.$attribute
+          alias: confluent.$domain.connector_metrics.$attribute
         connector-version: 
           # Version of the connector (string)
-          alias: confluent.$domain.connector-metrics.$attribute
+          alias: confluent.$domain.connector_metrics.$attribute
         status:
           # Status of the connector (string)
-          alias: confluent.$domain.connector-metrics.$attribute
+          alias: confluent.$domain.connector_metrics.$attribute
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
   - include:
       domain: kafka.connect
       bean_regex:
-        # The bean should `connect-worker-metrics` but in practice the type is `connector-metrics`
+        # The bean should `connect-worker-metrics` but in practice the type is `connector_metrics`
         # We are supporting both while the issue is solved: https://issues.apache.org/jira/browse/KAFKA-9790
         # Issue above is solved. Leaving for backwards compatibility.
         - kafka\.connect:type=connect-worker-metrics,connector=.*
-        - kafka\.connect:type=connector-metrics,connector=.*
+        - kafka\.connect:type=connector_metrics,connector=.*
       attribute:
         connector-destroyed-task-count:
           # The number of destroyed tasks of the connector on the worker.
@@ -1002,25 +1002,25 @@ jmx_metrics:
         - kafka.schema.registry:type=registered-count
       attribute:
         avro-schemas-created:
-          alias: confluent.$domain.schemascreated.$attribute
+          alias: confluent.$domain.avro_schemas_created
           metric_type: gauge
         json-schemas-created:
-          alias: confluent.$domain.schemascreated.$attribute
+          alias: confluent.$domain.json_schemas_created
           metric_type: gauge
         protobuf-schemas-created:
-          alias: confluent.$domain.schemascreated.$attribute
+          alias: confluent.$domain.protobuf_schemas_created
           metric_type: gauge
         avro-schemas-deleted:
-          alias: confluent.$domain.schemasdeleted.$attribute
+          alias: confluent.$domain.avro_schemas_deleted
           metric_type: gauge
         json-schemas-deleted:
-          alias: confluent.$domain.schemasdeleted.$attribute
+          alias: confluent.$domain.json_schemas_deleted
           metric_type: gauge
         protobuf-schemas-deleted:
-          alias: confluent.$domain.schemasdeleted.$attribute
+          alias: confluent.$domain.protobuf_schemas_deleted
           metric_type: gauge
         registered-count:
-          alias: confluent.$domain.schemasregistered.$attribute
+          alias: confluent.$domain.registered_count
           metric_type: gauge
 
   - include:
