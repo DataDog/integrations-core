@@ -1296,67 +1296,67 @@ jmx_metrics:
       bean: io.confluent.ksql.metrics:type=ksql-rocksdb-aggregates
       attribute:
         cur-size-all-mem-tables-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total
           metric_type: gauge
         cur-size-active-mem-table-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total
           metric_type: gauge
         mem-table-flush-pending-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total
           metric_type: gauge
         block-cache-pinned-usage-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_total
           metric_type: gauge
         estimate-num-keys-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_num_keys_total
           metric_type: gauge
         live-sst-files-size-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.live_sst_files_size_total
           metric_type: gauge
         size-all-mem-tables-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.size_all_mem_tables_total
           metric_type: gauge
         block-cache-usage-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_total
           metric_type: gauge
         estimate-table-readers-mem-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_table_readers_mem_total
           metric_type: gauge
         compaction-pending-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.compaction_pending_total
           metric_type: gauge
         num-entries-imm-mem-tables-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_entries_imm_mem_tables_total
           metric_type: gauge
         total-sst-files-size-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.total_sst_files_size_total
           metric_type: gauge
         num-running-compactions-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_running_compactions_total
           metric_type: gauge
         block-cache-pinned-usage-max:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_max
           metric_type: gauge
         estimate-pending-compaction-bytes-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_pending_compaction_bytes_total
           metric_type: gauge
         num-deletes-active-mem-table-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_deletes_active_mem_table_total
           metric_type: gauge
         num-immutable-mem-table-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_immutable_mem_table_total
           metric_type: gauge
         num-running-flushes-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_running_flushes_total
           metric_type: gauge
         block-cache-usage-max:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max
           metric_type: gauge
         num-entries-active-mem-table-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total
           metric_type: gauge
         num-deletes-imm-mem-tables-total:
-          alias: confluent.ksql.ksql_rocksdb_aggregates.$attribute
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total
           metric_type: gauge
 
   # Components Metrics:

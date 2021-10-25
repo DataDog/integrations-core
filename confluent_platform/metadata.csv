@@ -225,16 +225,16 @@ confluent.kafka.connect.task_error.total_record_errors,gauge,,record,,The number
 confluent.kafka.connect.task_error.total_record_failures,gauge,,record,,The number of record processing failures in this task.,0,confluent_platform,task tot record failures
 confluent.kafka.connect.task_error.total_records_skipped,gauge,,record,,The number of records skipped due to errors.,0,confluent_platform,task tot records skipped
 confluent.kafka.connect.task_error.total_retries,gauge,,operation,,The number of operations retried.,0,confluent_platform,task tot retries
-confluent.kafka.connect.connect-metrics.outgoing-byte-rate,gauge,,byte,,Outgoing byte_rate,0,confluent_platform,incoming byte rate
-confluent.kafka.connect.connect-metrics.incoming-byte-rate,gauge,,byte,,Incoming byte rate,0,confluent_platform,outgoing byte rate
-confluent.kafka.connect.connect-metrics.failed-authentication-rate,gauge,,attempts,,Failed authentication rate,0,confluent_platform,failed auth rate
-confluent.kafka.connect.connect-metrics.successful-authentication-rate,gauge,,attempts,,,Successful authentication rate,0,confluent_platform,succ auth rate
-confluent.kafka.connect.connect-metrics.failed-authentication-total,gauge,,attempts,,failed authentication total,0,confluent_platform,fail auth total
-confluent.kafka.connect.connect-metrics.successful-authentication-total,gauge,,attempts,,successful authentication total,0,confluent_platform,succ auth total
-confluent.kafka.connect.connector-metrics.connector-type,gauge,,,,Type of connector,0,confluent_platform,connector type
-confluent.kafka.connect.connector-metrics.connector-class,gauge,,,,Class of connector,0,confluent_platform,connector class
-confluent.kafka.connect.connector-metrics.connector-version,gauge,,,,Version of connector,0,confluent_platform,connector version
-confluent.kafka.connect.connector-metrics.status,gauge,,,,Status of connector,0,confluent_platform,connector status
+confluent.kafka.connect.connect_metrics.outgoing-byte-rate,gauge,,byte,,Outgoing byte_rate,0,confluent_platform,incoming byte rate
+confluent.kafka.connect.connect_metrics.incoming-byte-rate,gauge,,byte,,Incoming byte rate,0,confluent_platform,outgoing byte rate
+confluent.kafka.connect.connect_metrics.failed-authentication-rate,gauge,,attempts,,Failed authentication rate,0,confluent_platform,failed auth rate
+confluent.kafka.connect.connect_metrics.successful-authentication-rate,gauge,,attempts,,,Successful authentication rate,0,confluent_platform,succ auth rate
+confluent.kafka.connect.connect_metrics.failed-authentication-total,gauge,,attempts,,failed authentication total,0,confluent_platform,fail auth total
+confluent.kafka.connect.connect_metrics.successful-authentication-total,gauge,,attempts,,successful authentication total,0,confluent_platform,succ auth total
+confluent.kafka.connect.connector_metrics.connector-type,gauge,,,,Type of connector,0,confluent_platform,connector type
+confluent.kafka.connect.connector_metrics.connector-class,gauge,,,,Class of connector,0,confluent_platform,connector class
+confluent.kafka.connect.connector_metrics.connector-version,gauge,,,,Version of connector,0,confluent_platform,connector version
+confluent.kafka.connect.connector_metrics.status,gauge,,,,Status of connector,0,confluent_platform,connector status
 confluent.kafka.rest.jetty.connections_active,gauge,,connection,,Total number of active TCP connections (REST).,0,confluent_platform,rest jetty connections active
 confluent.kafka.rest.jetty.connections_opened_rate,gauge,,connection,second,The average rate per second of opened TCP connections (REST).,0,confluent_platform,rest jetty connections opened rate
 confluent.kafka.rest.jetty.connections_closed_rate,gauge,,connection,second,The average rate per second of closed TCP connections (REST).,0,confluent_platform,rest jetty connections closed rate
@@ -349,26 +349,26 @@ confluent.ksql.query_stats.messages_produced_per_sec,gauge,,message,second,Numbe
 confluent.ksql.query_stats.num_persistent_queries,gauge,,query,,Number of persistent queries that are currently executing.,0,confluent_platform,query stats num persistent queries
 confluent.ksql.query_stats.num_active_queries,gauge,,message,,Number of queries that are actively processing messages.,0,confluent_platform,query stats num active queries
 confluent.ksql.query_stats.num_idle_queries,gauge,,message,,Number of queries with no messages available to process.,0,confluent_platform,query stats num idle queries
-confluent.ksql.ksql_rocksdb_aggregates.cur-size-all-mem-tables-total,gauge,,byte,,size all mem tables,0,confluent_platform,size all mem tables
-confluent.ksql.ksql_rocksdb_aggregates.cur-size-active-mem-table-total,gauge,,byte,,cur-size-active-mem-table-total,0,confluent_platform,cur-size-active-mem-table-total
-confluent.ksql.ksql_rocksdb_aggregates.mem-table-flush-pending-total,gauge,,byte,,mem-table-flush-pending-total,0,confluent_platform,mem-table-flush-pending-total
-confluent.ksql.ksql_rocksdb_aggregates.block-cache-pinned-usage-total,gauge,,byte,,block-cache-pinned-usage-total,0,confluent_platform,block-cache-pinned-usage-total
-confluent.ksql.ksql_rocksdb_aggregates.estimate-num-keys-total,gauge,,keys,,estimate-num-keys-total,0,confluent_platform,estimate-num-keys-total
-confluent.ksql.ksql_rocksdb_aggregates.live-sst-files-size-total,gauge,,byte,,live-sst-files-size-total,0,confluent_platform,live-sst-files-size-total
-confluent.ksql.ksql_rocksdb_aggregates.block-cache-usage-total,gauge,,byte,,block-cache-usage-total,0,confluent_platform,block-cache-usage-total
-confluent.ksql.ksql_rocksdb_aggregates.estimate-table-readers-mem-total,gauge,,byte,,estimate-table-readers-mem-total,0,confluent_platform,estimate-table-readers-mem-total
-confluent.ksql.ksql_rocksdb_aggregates.compaction-pending-total,gauge,,,,compaction-pending-total,0,confluent_platform,compaction-pending-total
-confluent.ksql.ksql_rocksdb_aggregates.num-entries-imm-mem-tables-total,gauge,,byte,,num-entries-imm-mem-tables-total,0,confluent_platform,num-entries-imm-mem-tables-total
-confluent.ksql.ksql_rocksdb_aggregates.total-sst-files-size-total,gauge,,byte,,total-sst-files-size-total,0,confluent_platform,total-sst-files-size-total
-confluent.ksql.ksql_rocksdb_aggregates.num-running-compactions-total,gauge,,,,num-running-compactions,0,confluent_platform,num-running-compactions
-confluent.ksql.ksql_rocksdb_aggregates.block-cache-pinned-usage-max,gauge,,byte,,block-cache-pinned-usage-max,0,confluent_platform,block-cache-pinned-usage-max
-confluent.ksql.ksql_rocksdb_aggregates.estimate-pending-compaction-bytes-total,gauge,,,,estimate-pending-compaction-bytes-total,0,confluent_platform,estimate-pending-compaction-bytes-total
-confluent.ksql.ksql_rocksdb_aggregates.num-deletes-active-mem-table-total,gauge,,,,num-deletes-active-mem-table-total,0,confluent_platform,num-deletes-active-mem-table-total
-confluent.ksql.ksql_rocksdb_aggregates.num-immutable-mem-table-total,gauge,,,,immutable mem table total,0,confluent_platform,immutable mem table total
-confluent.ksql.ksql_rocksdb_aggregates.num-running-flushes-total,gauge,,,,running flushes total,0,confluent_platform,running flushes total
-confluent.ksql.ksql_rocksdb_aggregates.block-cache-usage-max,gauge,,byte,,block cache usage,0,confluent_platform,block cache usage
-confluent.ksql.ksql_rocksdb_aggregates.num-entries-active-mem-table-total,gauge,,,,entries all mem tables,0,confluent_platform,entries all mem tables
-confluent.ksql.ksql_rocksdb_aggregates.num-deletes-imm-mem-tables-total,gauge,,,,delete all mem tables,0,confluent_platform,delete all mem tables
+confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total,gauge,,byte,,size all mem tables,0,confluent_platform,size all mem tables
+confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total,gauge,,byte,,cur_size_active_mem_table_total,0,confluent_platform,cur_size_active_mem_table_total
+confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total,gauge,,byte,,mem_table_flush_pending_total,0,confluent_platform,mem_table_flush_pending_total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_total,gauge,,byte,,block_cache_pinned_usage_total,0,confluent_platform,block_cache_pinned_usage_total
+confluent.ksql.ksql_rocksdb_aggregates.estimate_num_keys_total,gauge,,,,estimate_num_keys_total,0,confluent_platform,estimate_num_keys_total
+confluent.ksql.ksql_rocksdb_aggregates.live_sst_files_size_total,gauge,,byte,,live_sst_files_size_total,0,confluent_platform,live_sst_files_size_total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_total,gauge,,byte,,block_cache_usage_total,0,confluent_platform,block_cache_usage_total
+confluent.ksql.ksql_rocksdb_aggregates.estimate_table_readers_mem_total,gauge,,byte,,estimate_table_readers_mem_total,0,confluent_platform,estimate_table_readers_mem_total
+confluent.ksql.ksql_rocksdb_aggregates.compaction_pending_total,gauge,,,,compaction_pending_total,0,confluent_platform,compaction_pending_total
+confluent.ksql.ksql_rocksdb_aggregates.num_entries_imm_mem_tables_total,gauge,,byte,,num_entries_imm_mem_tables_total,0,confluent_platform,num_entries_imm_mem_tables_total
+confluent.ksql.ksql_rocksdb_aggregates.total_sst_files_size_total,gauge,,byte,,total_sst_files_size_total,0,confluent_platform,total_sst_files_size_total
+confluent.ksql.ksql_rocksdb_aggregates.num_running_compactions_total,gauge,,,,num_running_compactions,0,confluent_platform,num_running_compactions
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_max,gauge,,byte,,block_cache_pinned_usage_max,0,confluent_platform,block_cache_pinned_usage_max
+confluent.ksql.ksql_rocksdb_aggregates.estimate_pending_compaction_bytes_total,gauge,,,,estimate_pending_compaction_bytes_total,0,confluent_platform,estimate_pending_compaction_bytes_total
+confluent.ksql.ksql_rocksdb_aggregates.num_deletes_active_mem_table_total,gauge,,,,num_deletes_active_mem_table_total,0,confluent_platform,num_deletes_active_mem_table_total
+confluent.ksql.ksql_rocksdb_aggregates.num_immutable_mem_table_total,gauge,,,,immutable mem table total,0,confluent_platform,immutable mem table total
+confluent.ksql.ksql_rocksdb_aggregates.num_running_flushes_total,gauge,,,,running flushes total,0,confluent_platform,running flushes total
+confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max,gauge,,byte,,block cache usage,0,confluent_platform,block cache usage
+confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total,gauge,,,,entries all mem tables,0,confluent_platform,entries all mem tables
+confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total,gauge,,,,delete all mem tables,0,confluent_platform,delete all mem tables
 confluent.kafka.streams.stream.commit_latency_avg,gauge,,nanosecond,,The average value of commit-latency.,0,confluent_platform,stream commit latency avg
 confluent.kafka.streams.stream.commit_latency_max,gauge,,nanosecond,,The maximum value of commit-latency.,0,confluent_platform,stream commit latency max
 confluent.kafka.streams.stream.commit_rate,gauge,,commit,second,The average per-second number of commit calls,0,confluent_platform,stream commit rate
