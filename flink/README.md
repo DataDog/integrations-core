@@ -122,7 +122,6 @@ Need help? Contact [Datadog support][12].
 [2]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://app.datadoghq.com/account/settings#api
 [5]: https://app.datadoghq.com/organization-settings/api-keys
 [6]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
 [7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
@@ -131,3 +130,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
+

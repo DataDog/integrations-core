@@ -94,3 +94,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/hostmetricsreceiver
 [5]: https://github.com/DataDog/integrations-core/blob/master/opentelemetry/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+
