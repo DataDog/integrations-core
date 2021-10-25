@@ -16,7 +16,7 @@ In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Conta
 
 If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the Containerd socket automatically enables the Containerd integration with the default configuration.
 
-For example, to install the integration on Kubernetes, edit your DaemonSet to mount the Containerd socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the DaemonSet mount path:
+For example, to install the integration on Kubernetes, edit your DaemonSet to mount the Containerd socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` environment variable to the DaemonSet mount path:
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux container" xxx -->
