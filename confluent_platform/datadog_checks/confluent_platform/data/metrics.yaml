@@ -670,22 +670,22 @@ jmx_metrics:
       attribute:
         outgoing-byte-rate: 
           # Rate of outgoing bytes
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.outgoing_byte_rate
         incoming-byte-rate:
           # Rate of incoming bytes
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.incoming_byte_rate
         failed-authentication-rate:
           # Rate of failed authentications
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.failed_authentication_rate
         successful-authentication-rate:
           # Rate of successful authentication
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.successful_authentication_rate
         failed-authentication-total:
           # Total amount of failed authentications
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.failed_authentication_total
         successful-authentication-total:
           # Total amount of failed authentications
-          alias: confluent.$domain.connect_metrics.$attribute
+          alias: confluent.$domain.connect_metrics.successful_authentication_total
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
@@ -696,16 +696,16 @@ jmx_metrics:
       attribute:
         connector-type:
           # Type of connector: source|sink (string)
-          alias: confluent.$domain.connector_metrics.$attribute
+          alias: confluent.$domain.connector_metrics.connector_type
         connector-class:
           # Class of connector (string)
-          alias: confluent.$domain.connector_metrics.$attribute
+          alias: confluent.$domain.connector_metrics.connector_class
         connector-version: 
           # Version of the connector (string)
-          alias: confluent.$domain.connector_metrics.$attribute
+          alias: confluent.$domain.connector_metrics.connector_version
         status:
           # Status of the connector (string)
-          alias: confluent.$domain.connector_metrics.$attribute
+          alias: confluent.$domain.connector_metrics.status
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
