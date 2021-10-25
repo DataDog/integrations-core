@@ -88,7 +88,7 @@ files:
         type: string
     - name: appcenter
       description: |
-        Whether or not appcenter user certificates are being used.
+        Whether appcenter user certificates are being used.
       value:
         type: boolean
         example: False

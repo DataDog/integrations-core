@@ -120,7 +120,7 @@ instances:
     # cert_key_path: <CERT_KEY_PATH>
 
     ## @param appcenter - boolean - optional - default: false
-    ## Whether or not appcenter user certificates are being used.
+    ## Whether appcenter user certificates are being used.
     #
     # appcenter: false
 
