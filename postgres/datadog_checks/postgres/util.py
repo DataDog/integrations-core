@@ -38,9 +38,11 @@ def get_schema_field(descriptors):
 
 fmt = PartialFormatter()
 
+MAIN_CHECK_COMMON_METRICS = {
+    'numbackends': ('postgresql.connections', AgentCheck.gauge),
+}
 
 COMMON_METRICS = {
-    'numbackends': ('postgresql.connections', AgentCheck.gauge),
     'xact_commit': ('postgresql.commits', AgentCheck.rate),
     'xact_rollback': ('postgresql.rollbacks', AgentCheck.rate),
     'blks_read': ('postgresql.disk_read', AgentCheck.rate),
