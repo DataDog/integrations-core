@@ -228,7 +228,7 @@ confluent.kafka.connect.task_error.total_retries,gauge,,operation,,The number of
 confluent.kafka.connect.connect_metrics.outgoing_byte_rate,gauge,,byte,,Outgoing byte_rate,0,confluent_platform,incoming byte rate
 confluent.kafka.connect.connect_metrics.incoming_byte_rate,gauge,,byte,,Incoming byte rate,0,confluent_platform,outgoing byte rate
 confluent.kafka.connect.connect_metrics.failed_authentication_rate,gauge,,,,Failed authentication rate,0,confluent_platform,failed auth rate
-confluent.kafka.connect.connect_metrics.successful_authentication_rate,gauge,,,,,Successful authentication rate,0,confluent_platform,succ auth rate
+confluent.kafka.connect.connect_metrics.successful_authentication_rate,gauge,,,,Successful authentication rate,0,confluent_platform,succ auth rate
 confluent.kafka.connect.connect_metrics.failed_authentication_total,gauge,,,,failed authentication total,0,confluent_platform,fail auth total
 confluent.kafka.connect.connect_metrics.successful_authentication_total,gauge,,,,successful authentication total,0,confluent_platform,succ auth total
 confluent.kafka.connect.connector_metrics.connector_type,gauge,,,,Type of connector,0,confluent_platform,connector type
