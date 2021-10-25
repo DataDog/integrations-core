@@ -148,7 +148,7 @@ class Memcache(AgentCheck):
             limit_maxbytes = stats.get("limit_maxbytes")
             curr_items = stats.get("curr_items")
 
-            if get_hits and cmd_get and cmd_get != 0:
+            if get_hits and cmd_get and float(cmd_get) != 0:
                 self.gauge("memcache.get_hit_percent", 100.0 * float(get_hits) / float(cmd_get), tags=tags)
             else:
                 self.log.warning(
@@ -156,7 +156,7 @@ class Memcache(AgentCheck):
                     "missing, or `cmd_get` is 0"
                 )
 
-            if bytes and limit_maxbytes and limit_maxbytes != 0:
+            if bytes and limit_maxbytes and float(limit_maxbytes) != 0:
                 self.gauge("memcache.fill_percent", 100.0 * float(bytes) / float(limit_maxbytes), tags=tags)
             else:
                 self.log.warning(
@@ -164,7 +164,7 @@ class Memcache(AgentCheck):
                     "missing, or `limit_maxbytes` is 0"
                 )
 
-            if bytes and curr_items and curr_items != 0:
+            if bytes and curr_items and float(curr_items) != 0:
                 self.gauge("memcache.avg_item_size", float(bytes) / float(curr_items), tags=tags)
             else:
                 self.log.warning(
