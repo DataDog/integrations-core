@@ -366,6 +366,8 @@ Some of the metrics listed below require additional configuration, see the [samp
 
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
+For Agent version `7.32.0` and later, if you have Database Monitoring enabled, the `postgresql.connections` metric is tagged with `state`, `app`, and `user`.
+
 ### Events
 
 The PostgreSQL check does not include any events.
@@ -377,8 +379,6 @@ See [service_checks.json][34] for a list of service checks provided by this inte
 ## Troubleshooting
 
 Need help? Contact [Datadog support][35].
-
-As of [#10482](https://github.com/DataDog/integrations-core/pull/10482) the `postgresql.connections` metric will be collected differently for customers who have `dbm` enabled. As a consequence of this change, the metric will be tagged by `state`, `app` and `user` for dbm customers only. All other postgres integration customers should not see any change to the existing `postgresql.connections` metric. 
 
 ## Further Reading
 
