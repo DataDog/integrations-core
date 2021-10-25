@@ -142,14 +142,14 @@ class Memcache(AgentCheck):
 
             # calculate some metrics based on other metrics.
             # stats should be present, but log an exception just in case.
-            get_hits = float(stats.get("get_hits"))
-            cmd_get = float(stats.get("cmd_get"))
-            bytes = float(stats.get("bytes"))
-            limit_maxbytes = float(stats.get("limit_maxbytes"))
-            curr_items = float(stats.get("curr_items"))
+            get_hits = stats.get("get_hits")
+            cmd_get = stats.get("cmd_get")
+            bytes = stats.get("bytes")
+            limit_maxbytes = stats.get("limit_maxbytes")
+            curr_items = stats.get("curr_items")
 
             if get_hits and cmd_get and cmd_get != 0:
-                self.gauge("memcache.get_hit_percent", 100.0 * get_hits / cmd_get, tags=tags)
+                self.gauge("memcache.get_hit_percent", 100.0 * float(get_hits) / float(cmd_get), tags=tags)
             else:
                 self.log.warning(
                     "memcache.get_hit_percent cannot be collected because `get_hits` or `cmd_get` are "
@@ -157,7 +157,7 @@ class Memcache(AgentCheck):
                 )
 
             if bytes and limit_maxbytes and limit_maxbytes != 0:
-                self.gauge("memcache.fill_percent", 100.0 * bytes / limit_maxbytes, tags=tags)
+                self.gauge("memcache.fill_percent", 100.0 * float(bytes) / float(limit_maxbytes), tags=tags)
             else:
                 self.log.warning(
                     "memcache.fill_percent cannot be collected because `bytes` or `limit_maxbytes` are "
@@ -165,7 +165,7 @@ class Memcache(AgentCheck):
                 )
 
             if bytes and curr_items and curr_items != 0:
-                self.gauge("memcache.avg_item_size", bytes / curr_items, tags=tags)
+                self.gauge("memcache.avg_item_size", float(bytes) / float(curr_items), tags=tags)
             else:
                 self.log.warning(
                     "memcache.avg_item_size cannot be collected because `bytes` or `curr_items` are "
