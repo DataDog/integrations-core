@@ -870,6 +870,24 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
+    # test the activity collection loop rate limit
+    collection_interval = 0.1
+    activity_interval = 0.2  # double the main loop
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['collection_interval'] = activity_interval
+    dbm_instance['query_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_activity_collections = int(1 / activity_interval * sleep_time) + 1
+    check.cancel()
+    activity_metrics = aggregator.metrics("dd.postgres.collect_activity_snapshot.time")
+    assert max_activity_collections / 2.0 <= len(activity_metrics) <= max_activity_collections
+
+
 @pytest.mark.skip(reason='debugging flaky test (2021-09-03)')
 def test_statement_samples_unique_plans_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
     # tests rate limiting ingestion of samples per unique (query, plan)
