@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 10.0.1 / 2021-10-25
+
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10466](https://github.com/DataDog/integrations-core/pull/10466).
+
 ## 10.0.0 / 2021-10-04
 
 * [Added] Add support for live queries feature . See [#9866](https://github.com/DataDog/integrations-core/pull/9866).
