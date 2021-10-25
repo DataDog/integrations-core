@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.5 / 2021-10-22
+
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+
 ## 23.1.4 / 2021-10-19
 
 * [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
