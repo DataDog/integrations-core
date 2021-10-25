@@ -112,14 +112,14 @@ CUSTOM_QUERY_B = {
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
-INSTANCE_SQL2017_DEFAULTS = {
+INSTANCE_SQL_DEFAULTS = {
     'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
     'disable_generic_tags': True,
 }
-INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
-INSTANCE_SQL2017.update(
+INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
+INSTANCE_SQL.update(
     {
         'connector': 'odbc',
         'driver': '{ODBC Driver 17 for SQL Server}',
