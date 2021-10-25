@@ -86,6 +86,12 @@ files:
         If you want to keep the cert in a separate file, enter the file path here
       value:
         type: string
+    - name: appcenter
+      description: |
+        Whether or not appcenter user certificates are being used.
+      value:
+        type: boolean
+        example: False
     - template: instances/http
       overrides:
         username.display_priority: 9
