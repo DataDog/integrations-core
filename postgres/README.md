@@ -378,6 +378,8 @@ See [service_checks.json][34] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][35].
 
+As of [#10482](https://github.com/DataDog/integrations-core/pull/10482) the `postgresql.connections` metric will be collected differently for customers who have `dbm` enabled. As a consequence of this change, the metric will be tagged by `state`, `app` and `user` for dbm customers only. All other postgres integration customers should not see any change to the existing `postgresql.connections` metric. 
+
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
