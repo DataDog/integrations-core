@@ -266,9 +266,15 @@ instances:
     # send_distribution_sums_as_monotonic: false
 
     ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded
+    ## A list of labels to be excluded. When conflicts arise, this option takes precedence over `include_labels`.
     #
     # exclude_labels:
+    #   - timestamp
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to be included. When conflicts arise, `exclude_labels` takes precedence.
+    #
+    # include_labels:
     #   - timestamp
 
     ## @param bearer_token_auth - boolean - optional - default: false
