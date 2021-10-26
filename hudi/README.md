@@ -28,23 +28,23 @@ No additional installation is needed on your server.
    Agent's configuration directory to start collecting your hudi performance data.
    See the [sample hudi.d/conf.yaml][6] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][12].
+   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][7].
    You can specify the metrics you are interested in by editing the [configuration][6].
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][7] for more detailed instructions.
-   If you need to monitor more metrics, contact [Datadog support][8].
+   To learn how to customize the metrics to collect visit the [JMX Checks documentation][8] for more detailed instructions.
+   If you need to monitor more metrics, contact [Datadog support][9].
 
-3. [Restart the Agent][9]
+3. [Restart the Agent][10]
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `hudi` under the Checks section.
+[Run the Agent's `status` subcommand][11] and look for `hudi` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][11] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
 
 
 ### Log collection
@@ -96,11 +96,12 @@ The Hudi integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
+
 
 [1]: https://hudi.apache.org/
 [2]: https://github.com/apache/hudi/releases
@@ -108,13 +109,12 @@ Need help? Contact [Datadog support][8].
 [4]: https://hudi.apache.org/docs/configurations#Metrics-Configurations
 [5]: https://hudi.apache.org/docs/metrics/#jmxmetricsreporter
 [6]: https://github.com/DataDog/integrations-core/blob/master/hudi/datadog_checks/hudi/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/integrations/java/
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/hudi/metadata.csv
-[12]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/hudi/assets/service_checks.json
+[8]: https://docs.datadoghq.com/integrations/java/
+[9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/hudi/metadata.csv
 [13]: https://github.com/apache/flink/tree/release-1.11.4/flink-dist/src/main/flink-bin/conf
 [14]: https://github.com/apache/spark/tree/v3.1.2/conf
 [15]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-

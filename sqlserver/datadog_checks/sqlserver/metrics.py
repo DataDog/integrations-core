@@ -334,14 +334,17 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
         memnode_index = columns.index("memory_node_id")
 
+        sum_by_memory_node_id = defaultdict(int)
         for row in rows:
             column_val = row[value_column_index]
             node_id = row[memnode_index]
             met_type = row[type_column_index]
             if met_type != self.sql_name:
                 continue
+            sum_by_memory_node_id[node_id] += column_val
 
-            metric_tags = ['memory_node_id:{}'.format(str(node_id))]
+        for memory_node_id, column_val in sum_by_memory_node_id.items():
+            metric_tags = ['memory_node_id:{}'.format(memory_node_id)]
             metric_tags.extend(self.tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)

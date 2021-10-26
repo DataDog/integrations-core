@@ -1,5 +1,10 @@
 # CHANGELOG - SAP HANA
 
+## 1.8.2 / 2021-10-15
+
+* [Fixed] Ensure `persist_db_connections` is read from init_config. See [#10417](https://github.com/DataDog/integrations-core/pull/10417).
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
 ## 1.8.1 / 2021-10-12
 
 * [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).

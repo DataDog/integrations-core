@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 6.1.1 / 2021-10-18
+
+* [Fixed] Avoid resetting auth token on headers. See [#10388](https://github.com/DataDog/integrations-core/pull/10388).
+
 ## 6.1.0 / 2021-10-04
 
 * [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).

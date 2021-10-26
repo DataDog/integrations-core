@@ -51,10 +51,10 @@ instances:
     #
     # openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
 
-    ## @param namespace - string - required
+    ## @param namespace - string - optional
     ## The namespace to be prepended to all metrics.
     #
-    namespace: <NAMESPACE>
+    # namespace: <NAMESPACE>
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.

@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 2.1.1 / 2021-10-25
+
+* [Fixed] Fix possible KeyError when collecting metrics. See [#10471](https://github.com/DataDog/integrations-core/pull/10471).
+
 ## 2.1.0 / 2021-10-04
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).

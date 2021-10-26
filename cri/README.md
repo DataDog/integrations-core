@@ -59,7 +59,7 @@ spec:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `cri` under the Checks section.
+[Run the Agent's `status` subcommand][2] and look for `cri` under the Checks section.
 
 ## Data Collected
 
@@ -70,7 +70,7 @@ CRI collect metrics about the resource usage of your containers running through 
 CPU and memory metrics are collected out of the box and you can additionally collect some disk metrics
 if they are supported by your CRI (CRI-O doesn't support them for now)
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -82,10 +82,9 @@ CRI does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][4].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.default
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
-[5]: https://docs.datadoghq.com/help/
+[3]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
+[4]: https://docs.datadoghq.com/help/
