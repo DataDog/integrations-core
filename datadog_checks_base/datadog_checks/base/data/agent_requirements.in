@@ -22,6 +22,7 @@ flup-py3==1.0.3; python_version > "3.0"
 flup==1.0.3.dev-20110405; python_version < "3.0"
 futures==3.3.0; python_version < "3.0"
 gearman==2.0.2; sys_platform != "win32" and python_version < "3.0"
+google-auth==1.34.0; python_version < "3.0"
 immutables==0.15; python_version > "3.0"
 in-toto==1.0.1
 ipaddress==1.0.22; python_version < "3.0"
