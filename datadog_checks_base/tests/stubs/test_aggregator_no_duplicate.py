@@ -29,7 +29,7 @@ Duplicate metrics found:
   - check.metric.dup2
       MetricStub(name='check.metric.dup2', type=0, value=3.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
       MetricStub(name='check.metric.dup2', type=0, value=4.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
-''' # noqa: E501
+'''  # noqa: E501
     print("\n===\n{}\n===\n".format(expected_msg.strip()))
     print("\n===\n{}\n===\n".format(actual_msg.strip()))
     assert expected_msg.strip() == actual_msg.split("assert")[0].strip()
