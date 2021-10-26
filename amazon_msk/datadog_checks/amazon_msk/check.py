@@ -48,32 +48,31 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def refresh_scrapers(self):
         # Create assume_role credentials if assume_role ARN is specified in config
         assume_role = self.config.assume_role
-        if assume_role:
-            self.log.info('Assume role %s found. Creating temporary credentials using role...', assume_role)
-            sts = boto3.client('sts')
-            response = sts.assume_role(
-                RoleArn=assume_role, RoleSessionName='dd-msk-check-session', DurationSeconds=3600
-            )
-            access_key_id = response['Credentials']['AccessKeyId']
-            secret_access_key = response['Credentials']['SecretAccessKey']
-            session_token = response['Credentials']['SessionToken']
-            client = boto3.client(
-                'kafka',
-                aws_access_key_id=access_key_id,
-                aws_secret_access_key=secret_access_key,
-                aws_session_token=session_token,
-                config=self._boto_config,
-                region_name=self._region_name,
-            )
-        else:
-            # Always create a new client to account for changes in auth
-            client = boto3.client(
-                'kafka',
-                config=self._boto_config,
-                region_name=self._region_name,
-            )
-
         try:
+            if assume_role:
+                self.log.info('Assume role %s found. Creating temporary credentials using role...', assume_role)
+                sts = boto3.client('sts')
+                response = sts.assume_role(
+                    RoleArn=assume_role, RoleSessionName='dd-msk-check-session', DurationSeconds=3600
+                )
+                access_key_id = response['Credentials']['AccessKeyId']
+                secret_access_key = response['Credentials']['SecretAccessKey']
+                session_token = response['Credentials']['SessionToken']
+                client = boto3.client(
+                    'kafka',
+                    aws_access_key_id=access_key_id,
+                    aws_secret_access_key=secret_access_key,
+                    aws_session_token=session_token,
+                    config=self._boto_config,
+                    region_name=self._region_name,
+                )
+            else:
+                # Always create a new client to account for changes in auth
+                client = boto3.client(
+                    'kafka',
+                    config=self._boto_config,
+                    region_name=self._region_name,
+                )
             response = client.list_nodes(ClusterArn=self.config.cluster_arn)
             self.log.debug('Received list_nodes response: %s', json.dumps(response))
         except Exception as e:

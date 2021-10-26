@@ -222,12 +222,12 @@ def dd_run_check():
     return run_check
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def dd_get_state():
     return get_state
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def dd_save_state():
     return save_state
 

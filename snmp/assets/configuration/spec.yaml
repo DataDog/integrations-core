@@ -111,6 +111,23 @@ files:
         value:
           type: boolean
           example: false
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection for all instances.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+            Namespace can be used to disambiguate devices with same IPs.
+            Changing namespace will cause devices being recreated in NDM app.
+            Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: init_config/default
     - template: instances
       options:
@@ -281,13 +298,11 @@ files:
       - name: network_address
         description: |
           The network address of the devices to scan for monitor.
-          Only available using python SNMP integration.
         value:
           type: string
       - name: ignored_ip_addresses
         description: |
           A list of IP addresses to ignore when scanning the network.
-          Only available using python SNMP integration.
         value:
           type: array
           items:
@@ -355,4 +370,21 @@ files:
           type: integer
           example: 3600
           display_default: 0
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+          Namespace can be used to disambiguate devices with same IPs.
+          Changing namespace will cause devices being recreated in NDM app.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: instances/default

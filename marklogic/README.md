@@ -107,11 +107,11 @@ MarkLogic does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 
 [1]: https://www.marklogic.com
@@ -124,5 +124,5 @@ Need help? Contact [Datadog support][11].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/marklogic/metadata.csv
-[11]: https://docs.datadoghq.com/help
-[12]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json
+[11]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help

@@ -159,7 +159,10 @@ def default_json_event_encoding(o):
 
 
 class DBMAsyncJob(object):
-    executor = ThreadPoolExecutor()
+    # Set an arbitrary high limit so that dbm async jobs (which aren't CPU bound) don't
+    # get artificially limited by the default max_workers count. Note that since threads are
+    # created lazily, it's safe to set a high maximum
+    executor = ThreadPoolExecutor(100000)
 
     """
     Runs Async Jobs

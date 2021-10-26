@@ -71,7 +71,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]
-    gitlab_url: str
+    gitlab_url: Optional[str]
     headers: Optional[Mapping[str, Any]]
     health_service_check: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]

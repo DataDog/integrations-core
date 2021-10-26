@@ -19,7 +19,7 @@ To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-Set [Autodiscovery Integration Templates][9] as Docker labels on your application container:
+Set [Autodiscovery Integration Templates][2] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["coredns"]'
@@ -34,9 +34,9 @@ LABEL "com.datadoghq.ad.instances"='[{"prometheus_url":"http://%%host%%:9153/met
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][3].
 
-Then, set [Log Integrations][11] as Docker labels:
+Then, set [Log Integrations][4] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source":"coredns","service":"<SERVICE_NAME>"}]'
@@ -51,7 +51,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][13].
+Set [Autodiscovery Integrations Templates][5] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][6].
 
 ```yaml
 apiVersion: v1
@@ -82,9 +82,9 @@ spec:
 
 #### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][14].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][7].
 
-Then, set [Log Integrations][15] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][16].
+Then, set [Log Integrations][8] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][9].
 
 ```yaml
 apiVersion: v1
@@ -106,7 +106,7 @@ To configure this check for an Agent running on ECS:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][17] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][10] as Docker labels on your application container:
 
 ```json
 {
@@ -129,9 +129,9 @@ Set [Autodiscovery Integrations Templates][17] as Docker labels on your applicat
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][18].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][11].
 
-Then, set [Log Integrations][19] as Docker labels:
+Then, set [Log Integrations][12] as Docker labels:
 
 ```yaml
 {
@@ -149,13 +149,13 @@ Then, set [Log Integrations][19] as Docker labels:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `coredns` under the Checks section.
+[Run the Agent's `status` subcommand][13] and look for `coredns` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][14] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -163,29 +163,26 @@ The CoreDNS check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][20] for a list of service checks provided by this integration.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][16].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
-[6]: http://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[8]: https://docs.datadoghq.com/agent/kubernetes/log/
-[9]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
-[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
-[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
-[15]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=kubernetes#examples---datadog-redis-integration
-[16]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file
-[17]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
-[18]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-[19]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations
-[20]: https://github.com/DataDog/integrations-core/blob/master/coredns/assets/service_checks.json
+[2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
+[4]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[7]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=kubernetes#examples---datadog-redis-integration
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file
+[10]: https://docs.datadoghq.com/agent/amazon_ecs/?tab=awscli#process-collection
+[11]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[12]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux#activate-log-integrations
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[14]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
+[15]: https://github.com/DataDog/integrations-core/blob/master/coredns/assets/service_checks.json
+[16]: http://docs.datadoghq.com/help
