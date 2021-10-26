@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
     aci_url: str
     aci_urls: Optional[Sequence[str]]
     allow_redirects: Optional[bool]
+    appcenter: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
