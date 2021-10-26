@@ -75,6 +75,27 @@ def test_init_bad_instance(_):
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_id": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
+@pytest.mark.e2e
+def test_check(_, __, ___, aggregator, instance, dd_events):
+    with mock.patch.object(CloudFoundryApiCheck, "get_events", return_value=dd_events):
+        check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+        check.check({})
+
+    aggregator.assert_metric(
+        "cloud_foundry_api.events.count",
+        3,
+        tags=["api_url:api.sys.domain.com", "foo:bar"],
+        metric_type=aggregator.COUNT,
+        count=1,
+    )
+    aggregator.assert_event(count=1, **dd_events["event1"])
+    aggregator.assert_event(count=1, **dd_events["event2"])
+    aggregator.assert_all_metrics_covered()
+
+
+@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
+@mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_id": "org_name"})
+@mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
 def test_get_events(_, __, ___, instance, dd_events):
     scroll_events_mock = mock.MagicMock(return_value=dd_events)
     with mock.patch.object(CloudFoundryApiCheck, "scroll_events", scroll_events_mock), mock.patch.object(
@@ -720,27 +741,6 @@ def test_get_auth_headers(_, __, ___, ____, instance):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
     check._oauth_token = "oauth_token"
     assert check.get_auth_header() == {"Authorization": "Bearer oauth_token"}
-
-
-@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
-@mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_id": "org_name"})
-@mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
-@pytest.mark.e2e
-def test_e2e(_, __, ___, aggregator, instance, dd_events):
-    with mock.patch.object(CloudFoundryApiCheck, "get_events", return_value=dd_events):
-        check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
-        check.check({})
-
-    aggregator.assert_metric(
-        "cloud_foundry_api.events.count",
-        3,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        metric_type=aggregator.COUNT,
-        count=1,
-    )
-    aggregator.assert_event(count=1, **dd_events["event1"])
-    aggregator.assert_event(count=1, **dd_events["event2"])
-    aggregator.assert_all_metrics_covered()
 
 
 @mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.time.time", return_value=FREEZE_TIME)
