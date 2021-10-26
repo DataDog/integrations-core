@@ -98,7 +98,6 @@ BROKER_METRICS = [
     'confluent.kafka.server.broker_topic_metrics.ProduceMessageConversionsPerSec',
     'confluent.kafka.server.broker_topic_metrics.FetchMessageConversionsPerSec',
     'confluent.kafka.log.Log.Size.log_size',
-
 ]
 
 CONNECT_METRICS = [
@@ -289,7 +288,6 @@ SCHEMA_REGISTRY_METRICS = [
     'confluent.kafka.schema.registry.json_schemas_deleted.json_schemas_deleted',
     'confluent.kafka.schema.registry.protobuf_schemas_deleted.protobuf_schemas_deleted',
     'confluent.kafka.schema.registry.registered_count.registered_count',
-
 ]
 
 BROKER_OPTIONAL_METRICS = [
