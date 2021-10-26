@@ -109,7 +109,10 @@ class OpenMetricsScraper:
         for i, entry in enumerate(include_labels, 1):
             if not isinstance(entry, str):
                 raise ConfigurationError(f'Entry #{i} of setting `include_labels` must be a string')
-
+            if entry in self.exclude_labels:
+                self.log.debug(
+                    'Label `%s` is set in both `exclude_labels` and `include_labels`. Excluding label.', entry
+                )
             self.include_labels.add(entry)
 
         self.rename_labels = config.get('rename_labels', {})
@@ -297,7 +300,7 @@ class OpenMetricsScraper:
                     break
                 elif label_name in self.exclude_labels:
                     continue
-                elif len(self.include_labels) > 0 and label_name not in self.include_labels:
+                elif self.include_labels and label_name not in self.include_labels:
                     continue
 
                 label_name = self.rename_labels.get(label_name, label_name)
