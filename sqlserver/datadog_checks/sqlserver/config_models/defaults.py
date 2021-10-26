@@ -25,7 +25,7 @@ def instance_ao_database(field, value):
 
 
 def instance_autodiscovery_db_service_check(field, value):
-    return False
+    return True
 
 
 def instance_autodiscovery_exclude(field, value):

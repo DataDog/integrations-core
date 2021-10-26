@@ -93,7 +93,7 @@ instances:
     #
     # database_autodiscovery_interval: 3600
 
-    ## @param autodiscovery_db_service_check - boolean - optional - default: false
+    ## @param autodiscovery_db_service_check - boolean - optional - default: true
     ## When enabled with database autodiscovery, attempts to connect to the list of
     ## autodiscovered databases and submits a service check that signifies whether
     ## the agent can connect to that database or not.

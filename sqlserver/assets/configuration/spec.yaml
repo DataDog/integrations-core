@@ -99,6 +99,7 @@ files:
       value:
         type: boolean
         example: false
+        display_default: true
     - name: include_ao_metrics
       description: |
         Include AlwaysOn availability group metrics.
