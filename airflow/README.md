@@ -215,15 +215,13 @@ _Available for Agent versions >6.0_
         - type: file
           path: "<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log"
           source: airflow
-          service: "<SERVICE_NAME>"
           log_processing_rules:
             - type: multi_line
               name: new_log_start_with_date
               pattern: \[\d{4}\-\d{2}\-\d{2}
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/scheduler/latest/**/*.log"
           source: airflow
-          service: "<SERVICE_NAME>"
           log_processing_rules:
             - type: multi_line
               name: new_log_start_with_date
@@ -237,9 +235,8 @@ _Available for Agent versions >6.0_
       ```yaml
       logs:
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/*/*/*/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/!(scheduler)/**/*.log"
           source: airflow
-          service: "<SERVICE_NAME>"
           log_processing_rules:
             - type: multi_line
               name: new_log_start_with_date
@@ -255,7 +252,6 @@ _Available for Agent versions >6.0_
         - type: file
           path: "<PATH_TO_AIRFLOW>/logs/dag_tasks.log"
           source: airflow
-          service: "<SERVICE_NAME>"
           log_processing_rules:
             - type: multi_line
               name: new_log_start_with_date
