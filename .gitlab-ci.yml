@@ -62,10 +62,11 @@ trigger-agent-build:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
     - export AGENT_REQUIREMENTS_CHANGED="false"
+    - export CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
     - git fetch origin master
     - git --no-pager diff --exit-code --name-only HEAD $(git merge-base HEAD FETCH_HEAD) -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
     - |
-      if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
+      if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]] && [[ "$CURRENT_BRANCH" != "master" ]]; then
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
