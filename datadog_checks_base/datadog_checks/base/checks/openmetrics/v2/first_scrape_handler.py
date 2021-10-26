@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 def first_scrape_handler(metrics, runtime_data, agent_start_time):
     process_start_time = None
     metrics_buffer = []

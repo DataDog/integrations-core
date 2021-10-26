@@ -30,7 +30,7 @@ Score   Most similar
 0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
 0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
 0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
-    '''.strip() # noqa: E501
+    '''.strip()  # noqa: E501
         delta = difflib.ndiff([expected_msg], [actual_msg])
         assert expected_msg == actual_msg, delta
 
