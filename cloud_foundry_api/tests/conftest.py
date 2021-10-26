@@ -12,7 +12,7 @@ from .constants import HERE
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield {}
 
 
 @pytest.fixture
