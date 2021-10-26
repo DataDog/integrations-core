@@ -11,11 +11,11 @@ from .constants import HERE
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
-    yield {}
+def dd_environment(instance):
+    yield instance
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance():
     return {
         "api_url": "https://api.sys.domain.com",

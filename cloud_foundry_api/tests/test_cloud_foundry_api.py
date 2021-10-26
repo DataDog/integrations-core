@@ -75,7 +75,6 @@ def test_init_bad_instance(_):
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_id": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_id": "space_name"})
-@pytest.mark.e2e
 def test_check(_, __, ___, aggregator, instance, dd_events):
     with mock.patch.object(CloudFoundryApiCheck, "get_events", return_value=dd_events):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
@@ -743,22 +742,11 @@ def test_get_auth_headers(_, __, ___, ____, instance):
     assert check.get_auth_header() == {"Authorization": "Bearer oauth_token"}
 
 
-@mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.time.time", return_value=FREEZE_TIME)
-@mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"7b6fdcb8-c2c2-4b2c-9c9a-682de9cf607f": "org_name"})
-@mock.patch.object(
-    CloudFoundryApiCheck, "get_spaces", return_value={"fe712d4e-91a9-46f2-b82c-fa26da40dc53": "space_name"}
-)
-@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @pytest.mark.e2e
-def test_e2e_request_exception(_, __, ___, ____, aggregator, instance):
-    check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
-    check._http = None  # initialize the _http attribute for mocking
-
+def test_e2e_request_exception(aggregator, instance, dd_agent_check):
     try:
-        with mock.patch.object(check, "_http") as http_mock:
-            http_mock.get.side_effect = RequestException()
-            check.check(instance)
-    except RequestException:
+        dd_agent_check(instance)
+    except Exception:
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate", status=CloudFoundryApiCheck.CRITICAL, count=1
         )
