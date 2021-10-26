@@ -20,8 +20,8 @@ from .common import (
     INSTANCE_AO_DOCKER_SECONDARY,
     INSTANCE_DOCKER,
     INSTANCE_E2E,
-    INSTANCE_SQL2017,
-    INSTANCE_SQL2017_DEFAULTS,
+    INSTANCE_SQL,
+    INSTANCE_SQL_DEFAULTS,
     get_local_driver,
 )
 
@@ -47,13 +47,13 @@ def init_config_alt_tables():
 
 
 @pytest.fixture
-def instance_sql2017_defaults():
-    return deepcopy(INSTANCE_SQL2017_DEFAULTS)
+def instance_sql_defaults():
+    return deepcopy(INSTANCE_SQL_DEFAULTS)
 
 
 @pytest.fixture
-def instance_sql2017():
-    return deepcopy(INSTANCE_SQL2017)
+def instance_sql():
+    return deepcopy(INSTANCE_SQL)
 
 
 @pytest.fixture

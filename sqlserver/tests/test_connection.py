@@ -20,9 +20,9 @@ pytestmark = pytest.mark.unit
         pytest.param('adodbapi', 'driver', id='Driver is ignored when using adodbapi'),
     ],
 )
-def test_will_warn_parameters_for_the_wrong_connection(instance_sql2017_defaults, connector, param):
-    instance_sql2017_defaults.update({'connector': connector, param: 'foo'})
-    connection = Connection({}, instance_sql2017_defaults, None)
+def test_will_warn_parameters_for_the_wrong_connection(instance_sql_defaults, connector, param):
+    instance_sql_defaults.update({'connector': connector, param: 'foo'})
+    connection = Connection({}, instance_sql_defaults, None)
     connection.log = mock.MagicMock()
     connection._connection_options_validation('somekey', 'somedb')
     connection.log.warning.assert_called_once_with(
@@ -44,9 +44,9 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_sql2017_defaults
         pytest.param('adodbapi', 'Password', 'password', id='Cannot define Password twice'),
     ],
 )
-def test_will_fail_for_duplicate_parameters(instance_sql2017_defaults, connector, cs, param):
-    instance_sql2017_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
-    connection = Connection({}, instance_sql2017_defaults, None)
+def test_will_fail_for_duplicate_parameters(instance_sql_defaults, connector, cs, param):
+    instance_sql_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
+    connection = Connection({}, instance_sql_defaults, None)
     match = (
         "%s has been provided both in the connection string and as a configuration option (%s), "
         "please specify it only once" % (cs, param)
@@ -70,10 +70,10 @@ def test_will_fail_for_duplicate_parameters(instance_sql2017_defaults, connector
         pytest.param('odbc', 'Password', id='Cannot define Password for odbc'),
     ],
 )
-def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_sql2017_defaults, connector, cs):
-    instance_sql2017_defaults.update({'connector': connector, 'connection_string': cs + '=foo'})
+def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_sql_defaults, connector, cs):
+    instance_sql_defaults.update({'connector': connector, 'connection_string': cs + '=foo'})
     other_connector = 'odbc' if connector != 'odbc' else 'adodbapi'
-    connection = Connection({}, instance_sql2017_defaults, None)
+    connection = Connection({}, instance_sql_defaults, None)
     match = (
         "%s has been provided in the connection string. "
         "This option is only available for %s connections, however %s has been selected"

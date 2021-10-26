@@ -65,10 +65,17 @@ class IbmDb2Check(AgentCheck):
         if self._conn is None:
             connection = self.get_connection()
             if connection is None:
+                self.service_check(
+                    self.SERVICE_CHECK_CONNECT,
+                    self.CRITICAL,
+                    tags=self._tags,
+                    message="Unable to create new connection to database: {}".format(self._db),
+                )
                 return
 
             self._conn = connection
 
+        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
         self.collect_metadata()
 
         for query_method in self._query_methods:
@@ -560,9 +567,7 @@ class IbmDb2Check(AgentCheck):
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
 
     @classmethod
