@@ -130,17 +130,8 @@ instances:
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
-    ## May be used in conjunction with `include_labels`. If configured, excluded labels that are not in `include_labels`
-    ## will be excluded as tags.
     #
     # exclude_labels: []
-
-    ## @param include_labels - list of strings - optional
-    ## A list of labels to include, useful for high cardinality values like timestamps or UUIDs.
-    ## May be used in conjunction with `exclude_labels`. If configured, included labels that are not in `exclude_labels`
-    ## will be included as tags.
-    #
-    # include_labels: []
 
     ## @param rename_labels - mapping - optional
     ## A mapping of label names to how they should be renamed.
