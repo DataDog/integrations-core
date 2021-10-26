@@ -102,6 +102,16 @@ class OpenMetricsScraper:
 
             self.exclude_labels.add(entry)
 
+        include_labels = config.get('include_labels', [])
+        if not isinstance(include_labels, list):
+            raise ConfigurationError('Setting `include_labels` must be an array')
+        self.include_labels = set()
+        for i, entry in enumerate(include_labels, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError(f'Entry #{i} of setting `include_labels` must be a string')
+
+            self.include_labels.add(entry)
+
         self.rename_labels = config.get('rename_labels', {})
         if not isinstance(self.rename_labels, dict):
             raise ConfigurationError('Setting `rename_labels` must be a mapping')
@@ -286,6 +296,8 @@ class OpenMetricsScraper:
                     skip_sample = True
                     break
                 elif label_name in self.exclude_labels:
+                    continue
+                elif len(self.include_labels) > 0 and label_name not in self.include_labels:
                     continue
 
                 label_name = self.rename_labels.get(label_name, label_name)
