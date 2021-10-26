@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 5.0.2 / 2021-10-26
+
+* [Fixed] Upgrade datadog checks base to 23.1.5 in sqlserver integration. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
+
 ## 5.0.1 / 2021-10-12
 
 * [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
