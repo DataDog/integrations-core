@@ -164,4 +164,4 @@ Follow the following steps to release an integration off of the release branch:
 
 4. [Tag](#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.0-rc.<RC_NUM>`.
 
-5. After the release has been made, make a PR to `master` with the updates to changelog, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch.
+5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch.
