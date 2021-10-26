@@ -41,11 +41,11 @@ confluent.kafka.controller.unclean_leader_elections_per_sec.rate,gauge,,unit,sec
 confluent.kafka.controller.unclean_leader_elections_per_sec.avg,gauge,,unit,second,Unclean leader election rate avg.,0,confluent_platform,controller unclean leader elections avg
 confluent.kafka.controller.leader_election_rate_and_time_ms.rate,gauge,,millisecond,,Leader election rate.,0,confluent_platform,controller leader election rate
 confluent.kafka.controller.leader_election_rate_and_time_ms.avg,gauge,,millisecond,,Leader election rate avg.,0,confluent_platform,controller leader election avg
-confluent.kafka.controller.PreferredReplicaImbalanceCount,gauge,,,,Preferred Replica Imbalance Count,0,confluent_platform,rep imbalance count
-confluent.kafka.controller.GlobalUnderMinIsrPartitionCount,gauge,,,,under min isr count,0,confluent_platform,under min isr count
-confluent.kafka.controller.OfflinePartitionsCount,gauge,,,,offline partition count,0,confluent_platform,bytes in per sec
-confluent.kafka.controller.GlobalTopicCount,gauge,,,,global topic count,0,confluent_platform,topic count
-confluent.kafka.controller.GlobalPartitionCount,gauge,,,,global partition count,0,confluent_platform,partition count
+confluent.kafka.controller.preferred_replica_imbalance_count,gauge,,,,Preferred Replica Imbalance Count,0,confluent_platform,rep imbalance count
+confluent.kafka.controller.global_under_min_isr_partition_count,gauge,,,,under min isr count,0,confluent_platform,under min isr count
+confluent.kafka.controller.offline_partitions_count,gauge,,,,offline partition count,0,confluent_platform,bytes in per sec
+confluent.kafka.controller.global_topic_count,gauge,,,,global topic count,0,confluent_platform,topic count
+confluent.kafka.controller.global_partition_count,gauge,,,,global partition count,0,confluent_platform,partition count
 confluent.kafka.log.log_flush_rate_and_time_ms.rate,gauge,,millisecond,,Log flush rate.,0,confluent_platform,log flush rate
 confluent.kafka.log.log_flush_rate_and_time_ms.avg,gauge,,millisecond,,Log flush rate avg.,0,confluent_platform,log flush avg
 confluent.kafka.log.Log.Size.log_size,gauge,,byte,,log size per topic,0,confluent_platform,log per topic
