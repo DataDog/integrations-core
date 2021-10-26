@@ -4,9 +4,7 @@
 
 ## Overview
 
-<div class="alert alert-warning">
-<b>Important Note</b>: This integration only applies to OpenStack versions 12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13 and above (containerized OpenStack), please use the <a href="https://docs.datadoghq.com/integrations/openstack_controller/">OpenStack Controller integration.</a>
-</div>
+**Important Note**: This integration only applies to OpenStack versions 12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13 and above (containerized OpenStack), please use the [OpenStack Controller integration][13].
 
 Get metrics from OpenStack service in real time to:
 
