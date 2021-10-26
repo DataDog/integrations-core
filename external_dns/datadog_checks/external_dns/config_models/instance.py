@@ -75,7 +75,6 @@ class InstanceConfig(BaseModel):
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]
-    include_labels: Optional[Sequence[str]]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
     kerberos_delegate: Optional[bool]

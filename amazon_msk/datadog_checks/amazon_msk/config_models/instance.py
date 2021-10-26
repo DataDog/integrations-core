@@ -87,7 +87,6 @@ class InstanceConfig(BaseModel):
     hostname_format: Optional[str]
     hostname_label: Optional[str]
     ignore_tags: Optional[Sequence[str]]
-    include_labels: Optional[Sequence[str]]
     jmx_exporter_port: Optional[int]
     kerberos_auth: Optional[str]
     kerberos_cache: Optional[str]
