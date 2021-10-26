@@ -62,9 +62,9 @@ sqlserver.queries.logical_reads,count,,read,,Total number of logical reads perfo
 sqlserver.queries.logical_writes,count,,write,,Total number of logical writes performed by executed queries per query (DBM only),0,sql_server,query logical writes
 sqlserver.queries.columnstore_segment_reads,count,,segment,,Total columnstore segments read by executed queries per query (DBM only),0,sql_server,query columnstore segment reads
 sqlserver.queries.columnstore_segment_skips,count,,segment,,Total columnstore segments skipped by executed queries per query (DBM only),0,sql_server,query columnstore segment skips
-sqlserver.queries.grant_kb,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query grant kb
-sqlserver.queries.used_grant_kb,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query used grant kb
-sqlserver.queries.ideal_grant_kb,count,,byte,,The total amount of ideal memory grant estimated by executions of this query per query (DBM only),0,sql_server,query ideal grant kb
+sqlserver.queries.memory_grant,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query grant kb
+sqlserver.queries.used_memory_grant,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query used grant kb
+sqlserver.queries.ideal_memory_grant,count,,byte,,The total amount of ideal memory grant estimated by executions of this query per query (DBM only),0,sql_server,query ideal grant kb
 sqlserver.queries.reserved_threads,count,,thread,,The total sum of reserved parallel threads used by executions of this query per query (DBM only),0,sql_server,query reserved threads
 sqlserver.queries.used_threads,count,,thread,,The total sum of used parallel threads used by executions of this query per query (DBM only),0,sql_server,query used threads
 sqlserver.queries.dop,count,,,,The total sum of degree of parallelism used by executions of this query per query (DBM only),0,sql_server,query dop
