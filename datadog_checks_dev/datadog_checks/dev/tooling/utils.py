@@ -10,7 +10,6 @@ from ast import literal_eval
 from datetime import datetime, timezone
 from json.decoder import JSONDecodeError
 
-from packaging import version
 import requests
 import semver
 import yaml
@@ -460,13 +459,6 @@ def load_manifest(check_name):
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path).strip())
     return {}
-
-
-def get_manifest_version(manifest):
-    """
-    Parse manifest version
-    """
-    return version.parse(manifest['manifest_version'])
 
 
 def load_service_checks(check_name):
