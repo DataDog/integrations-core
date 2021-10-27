@@ -3,7 +3,6 @@
 -----
 
 OpenMetrics is used for collecting metrics via the CNCF-backed OpenMetrics format. This version is the default version for all new OpenMetric-checks, and it is compatible with Python 3 only.
-There were flaws with the original implementation of the Prometheus/OpenMetrics check, including performance issues, abnormal class signature, and inability to define multiple endpoints.
 
 ## Interface
 
@@ -17,18 +16,6 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
         - __init__
         - check
         - configure_scrapers
-
-## Labels
-All functionality is exposed by the `LabelAggregator` class.
-::: datadog_checks.base.checks.openmetrics.v2.labels.LabelAggregator
-    rendering:
-      heading_level: 4
-    selection:
-      members:
-        - __init__
-        - __call__
-        - collect
-        - populate
 
 ## Scrapers
 All functionality is exposed by the `OpenMetricsScraper` class.
@@ -48,12 +35,6 @@ All functionality is exposed by the `OpenMetricsScraper` class.
         - send_requests
         - set_dynamic_tags
         - submit_health_check
-        - submit_telemetry_number_of_total_metric_samples
-        - submit_telemetry_number_of_ignored_metric_samples
-        - submit_telemetry_number_of_processed_metric_samples
-        - submit_telemetry_number_of_ignored_lines
-        - submit_telemetry_endpoint_response_size
-        - __getattr__
 
 ## Transformers
 All functionality is exposed by the `MetricTransformer` class.
