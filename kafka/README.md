@@ -142,20 +142,19 @@ The Kafka check does not include any events.
 
 ### Service Checks
 
-**kafka.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-- [Troubleshooting and Deep Dive for Kafka][15]
-- [Agent failed to retrieve RMIServer stub][16]
-- [Producer and Consumer metrics don't appear in my Datadog application][17]
+- [Troubleshooting and Deep Dive for Kafka][16]
+- [Agent failed to retrieve RMIServer stub][17]
+- [Producer and Consumer metrics don't appear in my Datadog application][18]
 
 ## Further Reading
 
-- [Monitoring Kafka performance metrics][18]
-- [Collecting Kafka performance metrics][19]
-- [Monitoring Kafka with Datadog][20]
+- [Monitoring Kafka performance metrics][19]
+- [Collecting Kafka performance metrics][20]
+- [Monitoring Kafka with Datadog][21]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
@@ -171,9 +170,10 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
-[15]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[16]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[17]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[18]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[19]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[20]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[15]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json
+[16]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[17]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[18]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
+[19]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

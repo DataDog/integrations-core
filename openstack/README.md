@@ -78,7 +78,7 @@ You may need to restart your Keystone, Neutron, and Nova API services to ensure 
 
 **Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
 
-#### Agent Configuration
+#### Agent configuration
 
 1. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] with the configuration below. See the [sample openstack.d/conf.yaml][4] for all available configuration options:
 
@@ -151,33 +151,20 @@ The OpenStack check does not include any events.
 
 ### Service Checks
 
-**openstack.neutron.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
-
-**openstack.keystone.api.up**:<br>
-Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
-
-**openstack.nova.hypervisor.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
-
-**openstack.neutron.network.up**:<br>
-Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][9] about it.
+To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][10] about it.
 
 See also these other Datadog blog posts:
 
-- [Install OpenStack in two commands for dev and test][10]
-- [OpenStack: host aggregates, flavors, and availability zones][11]
+- [Install OpenStack in two commands for dev and test][11]
+- [OpenStack: host aggregates, flavors, and availability zones][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -186,7 +173,8 @@ See also these other Datadog blog posts:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
-[10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
-[11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
+[8]: https://github.com/DataDog/integrations-core/blob/master/openstack/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/openstack-monitoring-nova
+[11]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
+[12]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones

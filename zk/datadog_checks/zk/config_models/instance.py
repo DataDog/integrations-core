@@ -17,6 +17,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     expected_mode: Optional[str]
     host: str

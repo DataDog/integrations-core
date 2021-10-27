@@ -326,7 +326,7 @@ IdleTimeMetrics = {
 }
 
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureoutput
-# One row per procedure, summarized accross the cluster.
+# One row per procedure, summarized across the cluster.
 ProcedureOutputMetrics = {
     'name': 'procedureoutput',
     'query': '@Statistics:[PROCEDUREOUTPUT]',
@@ -344,7 +344,7 @@ ProcedureOutputMetrics = {
 
 
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureprofile
-# One row per procedure, summarized accross the cluster.
+# One row per procedure, summarized across the cluster.
 ProcedureProfileMetrics = {
     'name': 'procedureprofile',
     'query': '@Statistics:[PROCEDUREPROFILE]',

@@ -45,7 +45,13 @@ init_config:
 #
 instances:
 
-  -
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ## In a future release, this option will be set to `true` by default.
+    ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+    #
+  - use_openmetrics: true
+
     ## @param istiod_endpoint - string - optional
     ## Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
     ## Only available for Istio >= v1.5.
@@ -160,8 +166,21 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
     #
-    # exclude_labels:
-    #   - timestamp
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
 
     ## @param bearer_token_auth - boolean - optional - default: false
     ## If set to true, adds a bearer token authentication header.
@@ -176,14 +195,13 @@ instances:
     # bearer_token_path: <TOKEN_PATH>
 
     ## @param ignore_metrics - list of strings - optional
-    ## A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+    ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
+    ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
     #
     # ignore_metrics:
     #   - <IGNORED_METRIC_NAME>
-    #   - <PREFIX_*>
-    #   - <*_SUFFIX>
-    #   - <PREFIX_*_SUFFIX>
-    #   - <*_SUBSTRING_*>
+    #   - <SUBSTRING_*>
+    #   - <*_SUBSTRING>
 
     ## @param ignore_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label key and values are ignored.
@@ -195,6 +213,14 @@ instances:
     #   - <LABEL_2>
     #   <KEY_2>:
     #   - '*'
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -464,6 +490,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 10
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 10
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -473,6 +504,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

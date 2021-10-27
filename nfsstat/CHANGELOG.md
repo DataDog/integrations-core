@@ -1,5 +1,17 @@
 # CHANGELOG - Nfsstat
 
+## 1.9.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.8.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8961](https://github.com/DataDog/integrations-core/pull/8961).
+
 ## 1.6.2 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).

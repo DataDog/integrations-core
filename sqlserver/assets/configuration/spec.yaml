@@ -117,6 +117,12 @@ files:
         AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
       value:
         type: string
+    - name: include_master_files_metrics
+      description: |
+        Include database file size and state from `sys.master_files`.
+      value:
+        type: boolean
+        example: false
     - name: include_fci_metrics
       description: |
         Include Failover Cluster Instance metrics. Note that these metrics
@@ -189,6 +195,30 @@ files:
       value:
         type: string
         example: "<CONNECTION_STRING>"
+    - name: dbm
+      description: |
+        Set to `true` to enable the Database Monitoring beta.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: query_metrics
+      description: Configure collection of query metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query metric collection interval (in seconds). Each collection involves one or more queries to
+            the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
+            for *every* check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:
@@ -219,6 +249,12 @@ files:
         type: boolean
         example: false
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: |
+            Generic tags such as `host` are replaced by `sqlserver_host` to avoid
+            getting mixed with other integraton tags.
 
   - template: logs
     example:

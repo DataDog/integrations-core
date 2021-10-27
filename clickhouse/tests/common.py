@@ -9,7 +9,7 @@ HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
-HTTP_START_PORT = 8127
+HTTP_START_PORT = 8128
 TCP_START_PORT = 9001
 CLICKHOUSE_VERSION = os.environ['CLICKHOUSE_VERSION']
 

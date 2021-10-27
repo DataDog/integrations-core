@@ -35,10 +35,10 @@ instances:
     #
     service_name: <SERVICE_NAME>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## The username for the Datadog user account.
     #
-    user: <USER>
+    username: <USERNAME>
 
     ## @param password - string - required
     ## The password for the Datadog user account.
@@ -52,7 +52,8 @@ instances:
     # jdbc_driver_path: <DRIVER_PATH>.jar
 
     ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip default system, process, and tablespace metrics checks.
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
     #
     # only_custom_queries: false
 

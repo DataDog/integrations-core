@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_application_status_mapping(field, value):
     return get_default_field_value(field, value)
 
@@ -48,6 +52,10 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_cluster_name(field, value):
+    return 'default_cluster'
+
+
 def instance_collect_app_metrics(field, value):
     return True
 
@@ -60,8 +68,12 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_disable_legacy_cluster_tag(field, value):
-    return True
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -134,6 +146,14 @@ def instance_queue_blacklist(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
+
+
+def instance_resourcemanager_uri(field, value):
+    return 'http://localhost:8088'
 
 
 def instance_service(field, value):

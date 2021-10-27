@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -42,6 +46,10 @@ def instance_aws_service(field, value):
 
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -105,7 +113,7 @@ def instance_persist_connections(field, value):
 
 
 def instance_plus_api_version(field, value):
-    return get_default_field_value(field, value)
+    return 2
 
 
 def instance_proxy(field, value):
@@ -114,6 +122,10 @@ def instance_proxy(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
 
 
 def instance_service(field, value):
@@ -165,7 +177,7 @@ def instance_use_plus_api(field, value):
 
 
 def instance_use_plus_api_stream(field, value):
-    return False
+    return True
 
 
 def instance_use_vts(field, value):

@@ -35,6 +35,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 
 try:
@@ -188,6 +189,9 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
+        self.disable_generic_tags = (
+            is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -238,6 +242,13 @@ class AgentCheck(object):
                     'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `%s`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
                     'The default will become `true` and cannot be changed in Agent version 8.'
+                ),
+            ),
+            '_config_renamed': (
+                False,
+                (
+                    'DEPRECATION NOTICE: The `%s` config option has been renamed '
+                    'to `%s` and will be removed in a future release.'
                 ),
             ),
         }  # type: Dict[str, Tuple[bool, str]]
@@ -477,8 +488,10 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool) -> None
+    def submit_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
+    ):
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -509,6 +522,7 @@ class AgentCheck(object):
             monotonic,
             hostname,
             tags,
+            flush_first_value,
         )
 
     def database_monitoring_query_sample(self, raw_event):
@@ -524,6 +538,13 @@ class AgentCheck(object):
             return
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+
+    def database_monitoring_query_activity(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
@@ -1077,13 +1098,21 @@ class AgentCheck(object):
         for tag in tags:
             if tag is None:
                 continue
-
             try:
                 tag = to_native_string(tag)
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-
-            normalized_tags.append(tag)
-
+            if self.disable_generic_tags:
+                normalized_tags.append(self.degeneralise_tag(tag))
+            else:
+                normalized_tags.append(tag)
         return normalized_tags
+
+    def degeneralise_tag(self, tag):
+        tag_name, value = tag.split(':', 1)
+        if tag_name in GENERIC_TAGS:
+            new_name = '{}_{}'.format(self.name, tag_name)
+            return '{}:{}'.format(new_name, value)
+        else:
+            return tag

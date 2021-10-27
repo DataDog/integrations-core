@@ -1,6 +1,31 @@
 # CHANGELOG - kafka_consumer
 
-## 2.8.6 / 2021-04-20
+## 2.12.1 / 2021-10-04
+
+* [Fixed] Bump minimum base package. See [#10325](https://github.com/DataDog/integrations-core/pull/10325).
+
+## 2.12.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+
+## 2.11.0 / 2021-09-30
+
+* [Added] Manually create a `ssl.SSLContext` object for the Kafka client to use. See [#10284](https://github.com/DataDog/integrations-core/pull/10284).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Remove unused ssl_context documentation. See [#10152](https://github.com/DataDog/integrations-core/pull/10152).
+* [Fixed] Lazily create client on legacy implementation. See [#9981](https://github.com/DataDog/integrations-core/pull/9981).
+
+## 2.10.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Correctly handle errors during initialization + code refactor. See [#9626](https://github.com/DataDog/integrations-core/pull/9626).
+
+## 2.9.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8942](https://github.com/DataDog/integrations-core/pull/8942).
+* [Fixed] Fix zk_connect_str type. See [#9368](https://github.com/DataDog/integrations-core/pull/9368).
+
+## 2.8.6 / 2021-04-20 / Agent 7.28.0
 
 * [Fixed] Fix warning log format. See [#9192](https://github.com/DataDog/integrations-core/pull/9192).
 * [Fixed] Provide better error message when api version cannot be determined. See [#9186](https://github.com/DataDog/integrations-core/pull/9186).

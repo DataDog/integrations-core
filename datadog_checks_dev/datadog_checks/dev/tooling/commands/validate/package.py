@@ -5,8 +5,9 @@ import re
 
 import click
 
+from ...annotations import annotate_display_queue
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, normalize_package_name, read_setup_file
+from ...utils import complete_valid_checks, get_setup_file, normalize_package_name, read_setup_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
@@ -31,7 +32,7 @@ def package(check):
     for check in checks:
         display_queue = []
         file_failed = False
-
+        setup_file_path = get_setup_file(check)
         if check in EXCLUDE_CHECKS:
             continue
 
@@ -56,9 +57,9 @@ def package(check):
             # Display detailed info if file is invalid
             echo_info(f'{check}... ', nl=False)
             echo_failure(' FAILED')
+            annotate_display_queue(setup_file_path, display_queue)
             for display_func, message in display_queue:
                 display_func(message)
-            display_queue = []
         else:
             ok_checks += 1
 

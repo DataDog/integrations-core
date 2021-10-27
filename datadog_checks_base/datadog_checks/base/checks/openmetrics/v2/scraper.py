@@ -8,7 +8,6 @@ from copy import deepcopy
 from itertools import chain
 from math import isinf, isnan
 
-from binary import KIBIBYTE
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
 
@@ -47,8 +46,6 @@ class OpenMetricsScraper:
         self.namespace = check.__NAMESPACE__ or config.get('namespace', '')
         if not isinstance(self.namespace, str):
             raise ConfigurationError('Setting `namespace` must be a string')
-        elif not self.namespace:
-            raise ConfigurationError('Setting `namespace` is required')
 
         self.raw_metric_prefix = config.get('raw_metric_prefix', '')
         if not isinstance(self.raw_metric_prefix, str):
@@ -144,9 +141,15 @@ class OpenMetricsScraper:
             if not isinstance(entry, str):
                 raise ConfigurationError(f'Entry #{i} of setting `tags` must be a string')
 
-        # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
-        # https://www.bittorrent.org/beps/bep_0003.html
-        self.request_size = int(float(config.get('request_size') or 16) * KIBIBYTE)
+        # Some tags can be ignored to reduce the cardinality.
+        # This can be useful for cost optimization in containerized environments
+        # when the openmetrics check is configured to collect custom metrics.
+        # Even when the Agent's Tagger is configured to add low-cardinality tags only,
+        # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
+        ignore_tags = config.get('ignore_tags', [])
+        if ignore_tags:
+            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
         # These will be applied only to service checks
         self.static_tags = [f'endpoint:{self.endpoint}']
@@ -266,7 +269,7 @@ class OpenMetricsScraper:
 
     def stream_connection_lines(self):
         with self.get_connection() as connection:
-            for line in connection.iter_lines(chunk_size=self.request_size, decode_unicode=True):
+            for line in connection.iter_lines(decode_unicode=True):
                 yield line
 
     def filter_connection_lines(self, line_streamer):

@@ -1,5 +1,5 @@
 comment:
-  layout: flags, files
+  layout: flags
   behavior: default
   branches: null
 coverage:
@@ -50,6 +50,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Avi_Vantage:
+        target: 75
+        flags:
+        - avi_vantage
       Azure_IoT_Edge:
         target: 75
         flags:
@@ -82,6 +86,10 @@ coverage:
         target: 75
         flags:
         - cisco_aci
+      Citrix_Hypervisor:
+        target: 75
+        flags:
+        - citrix_hypervisor
       ClickHouse:
         target: 75
         flags:
@@ -126,6 +134,10 @@ coverage:
         target: 75
         flags:
         - datadog_checks_downloader
+      Datadog_Cluster_Agent:
+        target: 75
+        flags:
+        - datadog_cluster_agent
       Directory:
         target: 75
         flags:
@@ -218,6 +230,10 @@ coverage:
         target: 75
         flags:
         - ibm_was
+      IBM_i:
+        target: 75
+        flags:
+        - ibm_i
       IIS:
         target: 75
         flags:
@@ -434,6 +450,10 @@ coverage:
         target: 75
         flags:
         - scylla
+      SingleStore:
+        target: 75
+        flags:
+        - singlestore
       Snowflake:
         target: 75
         flags:
@@ -580,6 +600,11 @@ flags:
     paths:
     - aspdotnet/datadog_checks/aspdotnet
     - aspdotnet/tests
+  avi_vantage:
+    carryforward: true
+    paths:
+    - avi_vantage/datadog_checks/avi_vantage
+    - avi_vantage/tests
   azure_iot_edge:
     carryforward: true
     paths:
@@ -615,6 +640,11 @@ flags:
     paths:
     - cisco_aci/datadog_checks/cisco_aci
     - cisco_aci/tests
+  citrix_hypervisor:
+    carryforward: true
+    paths:
+    - citrix_hypervisor/datadog_checks/citrix_hypervisor
+    - citrix_hypervisor/tests
   clickhouse:
     carryforward: true
     paths:
@@ -670,6 +700,11 @@ flags:
     paths:
     - datadog_checks_downloader/datadog_checks/downloader
     - datadog_checks_downloader/tests
+  datadog_cluster_agent:
+    carryforward: true
+    paths:
+    - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
+    - datadog_cluster_agent/tests
   directory:
     carryforward: true
     paths:
@@ -800,6 +835,11 @@ flags:
     paths:
     - ibm_db2/datadog_checks/ibm_db2
     - ibm_db2/tests
+  ibm_i:
+    carryforward: true
+    paths:
+    - ibm_i/datadog_checks/ibm_i
+    - ibm_i/tests
   ibm_mq:
     carryforward: true
     paths:
@@ -1065,6 +1105,11 @@ flags:
     paths:
     - scylla/datadog_checks/scylla
     - scylla/tests
+  singlestore:
+    carryforward: true
+    paths:
+    - singlestore/datadog_checks/singlestore
+    - singlestore/tests
   snmp:
     carryforward: true
     paths:

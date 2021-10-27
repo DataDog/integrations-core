@@ -53,12 +53,21 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 continue
 
                             submit_histogram_bucket_method(
-                                metric_name, sample.value, lower_bound, upper_bound, True, hostname, tags
+                                metric_name,
+                                sample.value,
+                                lower_bound,
+                                upper_bound,
+                                True,
+                                hostname,
+                                tags,
+                                flush_first_value=has_successfully_executed,
                             )
 
             else:
 
                 def histogram(metric, sample_data, runtime_data):
+                    has_successfully_executed = runtime_data['has_successfully_executed']
+
                     for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
                         if not sample.name.endswith('_bucket'):
                             continue
@@ -74,7 +83,14 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             continue
 
                         submit_histogram_bucket_method(
-                            metric_name, sample.value, lower_bound, upper_bound, True, hostname, tags
+                            metric_name,
+                            sample.value,
+                            lower_bound,
+                            upper_bound,
+                            True,
+                            hostname,
+                            tags,
+                            flush_first_value=has_successfully_executed,
                         )
 
         else:

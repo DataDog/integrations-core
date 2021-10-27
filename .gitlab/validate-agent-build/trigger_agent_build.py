@@ -12,7 +12,7 @@ def trigger_pipeline():
     # TODO: Opt out of kitchen tests when the appropriate flag is implemented.
     data = {
         "token": CI_TOKEN,
-        "ref": "master",
+        "ref": "main",
         "variables": {
             "RELEASE_VERSION_6": "nightly",
             "RELEASE_VERSION_7": "nightly-a7",

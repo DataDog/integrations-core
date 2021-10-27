@@ -24,6 +24,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     "contextlib2; python_version < '3.0'",
     'coverage>=5.0.3',
+    'flaky',
     'mock',
     'psutil',
     'PyYAML==5.4.1',
@@ -69,15 +70,19 @@ setup(
     include_package_data=True,
     extras_require={
         'cli': [
+            'aiohttp',
+            'aiomultiprocess',
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
             'click~=8.0',
+            'codespell',
             'colorama',
             'datamodel-code-generator~=0.11.4',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'jsonschema',
             'markdown',
+            'orjson',
             'packaging',
             'pip-tools',
             'platformdirs>=2.0.0a3',
@@ -89,7 +94,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
-            'virtualenv>=20.4.6',
+            'virtualenv>=20.5.0',
             'wheel>=0.31.0',
         ]
     },

@@ -24,6 +24,7 @@ class InstanceConfig(BaseModel):
     collect_statistics_metrics: Optional[bool]
     connection_name: Optional[str]
     convert_endianness: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
     min_collection_interval: Optional[float]
@@ -31,6 +32,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     port: Optional[int]
     queue_manager: str
+    queue_manager_timezone: Optional[str]
     queue_patterns: Optional[Sequence[str]]
     queue_regex: Optional[Sequence[str]]
     queue_tag_re: Optional[Mapping[str, Any]]
@@ -41,6 +43,7 @@ class InstanceConfig(BaseModel):
     ssl_cipher_spec: Optional[str]
     ssl_key_repository_location: Optional[str]
     tags: Optional[Sequence[str]]
+    timeout: Optional[float]
     username: Optional[str]
 
     @root_validator(pre=True)

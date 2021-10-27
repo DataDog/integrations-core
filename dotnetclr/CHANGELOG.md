@@ -1,6 +1,10 @@
 # CHANGELOG - Dotnetclr
 
-## 1.8.0 / 2021-04-19
+## 1.9.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8907](https://github.com/DataDog/integrations-core/pull/8907).
+
+## 1.8.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade pywin32 on Python 3. See [#8845](https://github.com/DataDog/integrations-core/pull/8845).
 

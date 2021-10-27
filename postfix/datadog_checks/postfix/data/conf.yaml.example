@@ -2,7 +2,7 @@
 #
 init_config:
 
-    ## @param postfix_user - string - required
+    ## @param postfix_user - string - optional - default: root
     ## The user running dd-agent must have passwordless sudo access for the find
     ## command to run the postfix check.
     ## Example /etc/sudoers entry:
@@ -11,7 +11,7 @@ init_config:
     ## On Redhat, CentOS, and Amazon Linux, also add:
     ##   Defaults:dd-agent !requiretty
     #
-    postfix_user: postfix
+    # postfix_user: root
 
     ## @param postqueue - boolean - optional - default: false
     ## Set `postqueue: true` to gather mail queue counts using `postqueue -p` without the use of sudo.
@@ -39,12 +39,13 @@ init_config:
 #
 instances:
 
-    ## @param directory - string - required
-    ## Path to the postfix directory.
+    ## @param directory - string - optional
+    ## Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+    ## information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
     #
   - directory: /var/spool/postfix
 
-    ## @param queues - list of strings - required
+    ## @param queues - list of strings - optional
     ## List of queues to monitor.
     #
     queues:
@@ -93,7 +94,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

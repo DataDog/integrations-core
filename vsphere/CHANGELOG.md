@@ -1,6 +1,34 @@
 # CHANGELOG - vsphere
 
-## 5.9.0 / 2021-04-01
+## 5.12.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 5.11.2 / 2021-08-30
+
+* [Fixed] Fix crash when some permissions are missing. See [#10012](https://github.com/DataDog/integrations-core/pull/10012).
+
+## 5.11.1 / 2021-08-25 / Agent 7.31.0
+
+* [Fixed] Fix collect_events default. See [#9979](https://github.com/DataDog/integrations-core/pull/9979).
+
+## 5.11.0 / 2021-08-22
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+* [Fixed] Check if rest_api_options is empty. See [#9798](https://github.com/DataDog/integrations-core/pull/9798).
+* [Fixed] Fix config validation. See [#9781](https://github.com/DataDog/integrations-core/pull/9781).
+
+## 5.10.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#9005](https://github.com/DataDog/integrations-core/pull/9005).
+* [Added] Use new REST API when possible. See [#9293](https://github.com/DataDog/integrations-core/pull/9293).
+* [Fixed] Upgrade pyvmomi to 7.0.2. See [#9287](https://github.com/DataDog/integrations-core/pull/9287).
+
+## 5.9.0 / 2021-04-01 / Agent 7.28.0
 
 * [Added] Add rest_api_options to expose all RequestsWrapper options. See [#9070](https://github.com/DataDog/integrations-core/pull/9070).
 * [Fixed] Tag collection only available from vSphere 6.5. See [#8864](https://github.com/DataDog/integrations-core/pull/8864).

@@ -16,6 +16,10 @@ def instance_collect_activity_metrics(field, value):
     return False
 
 
+def instance_collect_bloat_metrics(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return True
 
@@ -32,19 +36,31 @@ def instance_collect_function_metrics(field, value):
     return False
 
 
+def instance_collect_wal_metrics(field, value):
+    return False
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_data_directory(field, value):
+    return '/usr/local/pgsql/data'
+
+
+def instance_dbm(field, value):
+    return False
+
+
 def instance_dbname(field, value):
-    return get_default_field_value(field, value)
+    return 'postgres'
 
 
 def instance_dbstrict(field, value):
     return False
 
 
-def instance_deep_database_monitoring(field, value):
+def instance_disable_generic_tags(field, value):
     return False
 
 
@@ -64,6 +80,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_obfuscator_options(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 
@@ -76,8 +96,20 @@ def instance_port(field, value):
     return 5432
 
 
+def instance_query_activity(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_samples(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_query_timeout(field, value):
-    return 1000
+    return 5000
 
 
 def instance_relations(field, value):
@@ -89,15 +121,23 @@ def instance_service(field, value):
 
 
 def instance_ssl(field, value):
-    return 'false'
+    return False
 
 
-def instance_statement_metrics_limits(field, value):
-    return get_default_field_value(field, value)
+def instance_ssl_cert(field, value):
+    return False
 
 
-def instance_statement_samples(field, value):
-    return get_default_field_value(field, value)
+def instance_ssl_key(field, value):
+    return False
+
+
+def instance_ssl_password(field, value):
+    return False
+
+
+def instance_ssl_root_cert(field, value):
+    return False
 
 
 def instance_table_count_limit(field, value):

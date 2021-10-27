@@ -1,6 +1,10 @@
 # CHANGELOG - openstack
 
-## 1.11.0 / 2021-04-19
+## 1.11.1 / 2021-10-04
+
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Openstack log support. See [#9116](https://github.com/DataDog/integrations-core/pull/9116).
 * [Fixed] Include missing default config templates. See [#9150](https://github.com/DataDog/integrations-core/pull/9150).

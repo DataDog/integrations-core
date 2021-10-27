@@ -35,10 +35,10 @@ instances:
     #
     # port: 9000
 
-    ## @param user - string - optional - default: default
+    ## @param username - string - optional - default: default
     ## The database user to authenticate as.
     #
-    # user: default
+    # username: default
 
     ## @param password - string - optional
     ## The password of `username`.
@@ -74,6 +74,12 @@ instances:
     ## Whether or not to connect securely using TLS. The server must also support this.
     #
     # tls_verify: false
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -150,7 +156,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

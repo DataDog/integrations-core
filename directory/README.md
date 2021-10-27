@@ -52,13 +52,12 @@ The Directory check does not include any events.
 
 ### Service Checks
 
-**system.disk.directory.exists**:<br>
-Returns `WARNING` if the Agent is unable to find or access the directory to monitor, `OK` otherwise.
-
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -66,4 +65,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
-[7]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/directory/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

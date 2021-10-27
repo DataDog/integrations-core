@@ -64,7 +64,7 @@ def _parse_metric(metric, metric_mapping, skip_part=None):
     return metric_parts, tag_value_builder, tag_names, tag_values, unknown_tags, tags_to_build, metric_mapping
 
 
-def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
+def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy_cluster_tag=False):
     # type: (str, Dict[str, Any]) -> Tuple[str, List[str], str]
     """Takes a metric formatted by Envoy and splits it into a unique
     metric name. Returns the unique metric name, a list of tags, and
@@ -119,6 +119,15 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE):
 
     if unknown_tags:
         raise UnknownTags('{}'.format('|||'.join(unknown_tags)))
+
+    if not disable_legacy_cluster_tag:
+        for name, legacy_name in [('envoy_cluster', 'cluster_name'), ('virtual_envoy_cluster', 'virtual_cluster_name')]:
+            try:
+                pos = tag_names.index(name)
+                tag_names.append(legacy_name)
+                tag_values.append(tag_values[pos])
+            except ValueError:
+                pass
 
     tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 

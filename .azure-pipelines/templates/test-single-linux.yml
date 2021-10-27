@@ -6,15 +6,18 @@ parameters:
   test_e2e: true
   ddtrace_flag: ''
   benchmark: true
-  latest_metrics: false
+  latest: false
   validate: false
+  validate_changed: ''
   validate_codeowners: false
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
+  run_py3_tests: true  # Whether or not to run python3 tests.
   force_base_package: false
   pip_cache_config: null
   coverage: true
+  dd_url: https://app.datadoghq.com
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
@@ -30,6 +33,8 @@ jobs:
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+    ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
+      TOX_SKIP_ENV: py3.*  # Don't run py2 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}
@@ -44,6 +49,7 @@ jobs:
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
       run_py2_tests: ${{ parameters.run_py2_tests }}
+      dd_url: ${{ parameters.dd_url }}
 
   - template: './set-up-integrations.yml'
     parameters:
@@ -52,6 +58,7 @@ jobs:
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
       parameters:
+        validate_changed: ${{ parameters.validate_changed }}
         check: ${{ parameters.check }}
         repo: ${{ parameters.repo }}
         ispr: ${{ parameters.ispr }}
@@ -65,7 +72,7 @@ jobs:
       test_e2e: ${{ parameters.test_e2e }}
       ddtrace_flag: ${{ parameters.ddtrace_flag }}
       benchmark: ${{ parameters.benchmark }}
-      latest_metrics: ${{ parameters.latest_metrics }}
+      latest: ${{ parameters.latest }}
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}

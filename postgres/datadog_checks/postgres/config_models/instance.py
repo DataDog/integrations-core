@@ -13,6 +13,43 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class ObfuscatorOptions(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    replace_digits: Optional[bool]
+
+
+class QueryActivity(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+    payload_row_limit: Optional[float]
+
+
+class QueryMetrics(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class QuerySamples(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+    explain_function: Optional[str]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
+    samples_per_hour_per_query: Optional[int]
+    seen_samples_cache_maxsize: Optional[int]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -24,47 +61,44 @@ class Relation(BaseModel):
     schemas: Optional[Sequence[str]]
 
 
-class StatementSamples(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collections_per_second: Optional[float]
-    enabled: Optional[bool]
-    explain_function: Optional[str]
-    explained_statements_cache_maxsize: Optional[int]
-    explained_statements_per_hour_per_query: Optional[int]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
-
-
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
     application_name: Optional[str]
     collect_activity_metrics: Optional[bool]
+    collect_bloat_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
+    collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
+    data_directory: Optional[str]
+    dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
-    deep_database_monitoring: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]
     max_relations: Optional[int]
     min_collection_interval: Optional[float]
+    obfuscator_options: Optional[ObfuscatorOptions]
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
+    query_activity: Optional[QueryActivity]
+    query_metrics: Optional[QueryMetrics]
+    query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
-    statement_metrics_limits: Optional[Mapping[str, Any]]
-    statement_samples: Optional[StatementSamples]
+    ssl_cert: Optional[str]
+    ssl_key: Optional[str]
+    ssl_password: Optional[str]
+    ssl_root_cert: Optional[str]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]

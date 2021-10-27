@@ -30,13 +30,15 @@ class InstanceConfig(BaseModel):
     client_lib_log_level: Optional[str]
     connection_load_balance: Optional[bool]
     custom_queries: Optional[Sequence[CustomQuery]]
-    db: str
+    db: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     metric_groups: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: Optional[str]
-    port: int
-    server: str
+    port: Optional[int]
+    server: Optional[str]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
@@ -48,7 +50,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool]
     use_global_custom_queries: Optional[str]
     use_tls: Optional[bool]
-    username: str
+    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

@@ -1,11 +1,28 @@
 # CHANGELOG - Envoy
 
-## 1.22.0 / 2021-05-06
+## 1.25.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.24.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 1.23.0 / 2021-06-17 / Agent 7.30.0
+
+* [Added] Add v3 API metrics. See [#9468](https://github.com/DataDog/integrations-core/pull/9468).
+* [Added] Rename cluster_name tag to envoy_cluster. See [#9430](https://github.com/DataDog/integrations-core/pull/9430).
+
+## 1.22.0 / 2021-05-06 / Agent 7.29.0
 
 * [Added] Add collect_server_info config option. See [#9298](https://github.com/DataDog/integrations-core/pull/9298).
 * [Added] Add missing Envoy HTTP router filter vhost metrics. See [#8586](https://github.com/DataDog/integrations-core/pull/8586). Thanks [csssuf](https://github.com/csssuf).
 
-## 1.21.1 / 2021-04-20
+## 1.21.1 / 2021-04-20 / Agent 7.28.0
 
 * [Fixed] Fix retry parsing when metric has multiple metric parts. See [#9189](https://github.com/DataDog/integrations-core/pull/9189).
 

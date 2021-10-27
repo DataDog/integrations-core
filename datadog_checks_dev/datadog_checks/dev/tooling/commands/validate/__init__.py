@@ -15,7 +15,9 @@ from .dep import dep
 from .eula import eula
 from .http import http
 from .imports import imports
+from .integration_style import integration_style
 from .jmx_metrics import jmx_metrics
+from .licenses import licenses
 from .manifest import manifest
 from .metadata import metadata
 from .models import models
@@ -24,6 +26,7 @@ from .readmes import readmes
 from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
 from .service_checks import service_checks
+from .typos import typos
 
 ALL_COMMANDS = (
     agent_reqs,
@@ -34,10 +37,12 @@ ALL_COMMANDS = (
     dashboards,
     dep,
     eula,
-    jmx_metrics,
     http,
-    legacy_signature,
     imports,
+    integration_style,
+    jmx_metrics,
+    legacy_signature,
+    licenses,
     manifest,
     metadata,
     models,
@@ -46,6 +51,7 @@ ALL_COMMANDS = (
     recommended_monitors,
     saved_views,
     service_checks,
+    typos,
 )
 
 

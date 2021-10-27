@@ -1,5 +1,17 @@
 # CHANGELOG - IBM Db2
 
+## 1.8.1 / 2021-10-21
+
+* [Fixed] Modify can_connect to emit every run. See [#10455](https://github.com/DataDog/integrations-core/pull/10455).
+
+## 1.8.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+
+## 1.7.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Log message for invalid queries. See [#9797](https://github.com/DataDog/integrations-core/pull/9797).
+
 ## 1.6.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

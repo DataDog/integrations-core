@@ -1,5 +1,32 @@
 # CHANGELOG - Kube_scheduler
 
+## 2.1.1 / 2021-10-08
+
+* [Fixed] fix kube scheduler config. See [#10382](https://github.com/DataDog/integrations-core/pull/10382).
+
+## 2.1.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8945](https://github.com/DataDog/integrations-core/pull/8945).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.0.1 / 2021-08-25 / Agent 7.31.0
+
+* [Fixed] Correctly use SSL options for health checks. See [#9977](https://github.com/DataDog/integrations-core/pull/9977).
+
+## 2.0.0 / 2021-08-22
+
+* [Changed] Add service check for K8s API Server components. See [#9773](https://github.com/DataDog/integrations-core/pull/9773).
+
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9574](https://github.com/DataDog/integrations-core/pull/9574).
+
+## 1.8.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+
 ## 1.7.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add support for Kubernetes leader election based on Lease objects. See [#8535](https://github.com/DataDog/integrations-core/pull/8535).

@@ -4,6 +4,8 @@ services:
         build:
             context: ./sql
             dockerfile: Dockerfile
+            args:
+                - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
         environment:
             SA_PASSWORD: "Password123"
             ACCEPT_EULA: "Y"
@@ -23,6 +25,8 @@ services:
         build:
             context: ./sql
             dockerfile: Dockerfile
+            args:
+                - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
         environment:
             SA_PASSWORD: "Password123"
             ACCEPT_EULA: "Y"
