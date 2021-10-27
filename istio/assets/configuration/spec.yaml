@@ -4,10 +4,7 @@ files:
     options:
     - template: init_config
       options:
-      - template: init_config/default
       - template: init_config/openmetrics
-        overrides:
-          service.hidden: true
     - template: instances
       options:
         - name: use_openmetrics
@@ -40,12 +37,7 @@ files:
             display_default: null
             example: http://istio-proxy.istio-system:15090/stats/prometheus
             type: string
-        - template: instances/default
         - template: instances/openmetrics
           overrides:
-            tags.hidden: true
-            service.hidden: true
-            min_collection_interval.hidden: true
-            empty_default_hostname.hidden: true
             openmetrics_endpoint.required: false
             openmetrics_endpoint.hidden: true
