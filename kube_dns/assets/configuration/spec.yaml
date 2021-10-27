@@ -16,8 +16,6 @@ files:
         example: http://localhost:10055/metrics
     - template: instances/openmetrics_legacy
       overrides:
-        # prometheus_url.value.example: http://localhost:10055/metrics
-        # prometheus_url.display_priority: 1
         prometheus_url.hidden: true
 
 - name: auto_conf.yaml
@@ -41,6 +39,7 @@ files:
     - name: tags
       description: |
         A list of tags to attach to every metric and service check emitted by this instance.
+        
         Learn more about tagging at https://docs.datadoghq.com/tagging
       enabled: true
       value:
