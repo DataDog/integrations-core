@@ -63,7 +63,7 @@ When you enable the `use_openmetrics` configuration option, the Istio integratio
 
 In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
 
-OpenMetrics V2 was introduced due to performance and quality issues in OpenMetrics V1. Some updates include native metric types support, improved configuration, and custom metric types.
+OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updates include native metric types support, improved configuration, and custom metric types.
 
 Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
 
