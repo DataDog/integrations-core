@@ -111,13 +111,20 @@ After all fixes have been cherry-picked:
 1. Push the changes to GitHub
 1. [Tag](#tag) with the appropriate `rc` number even if there were no changes
 
-After the RC build is done, manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the [release branch](#branch), and the latest RC built. Select the options to run both Python 2 and Python 3 tests. This will run all the e2e tests against the current agent docker RCs. 
+After the RC build is done:
 
-!!! note
-    Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
+1. Manually run an [Agent Azure Pipeline](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=60) using the [release branch](#branch), and the latest RC built. Select the options to run both Python 2 and Python 3 tests. This will run all the e2e tests against the current agent docker RCs. 
 
-!!! note
-    In some cases, the CI may be broken on both the release branch and `master` during release week due to testing limits or developement dependency changes and **not** code changes. Fixes for these issues will be merged to `master`, and if they aren't include on the release branch the Azure pipelines will fail. If these changes are only test related (no code change), the CI fixes can be cherry-picked to the release branch and don't need a release. This will ensure that the Azure pipelines only fail on code-related errors.
+    !!! note
+        Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
+
+    !!! note
+        In some cases, the CI may be broken on both the release branch and `master` during release week due to testing limits or developement dependency changes and **not** code changes. Fixes for these issues will be merged to `master`, and if they aren't include on the release branch the Azure pipelines will fail. If these changes are only test related (no code change), the CI fixes can be cherry-picked to the release branch and don't need a release. This will ensure that the Azure pipelines only fail on code-related errors.
+
+2. Create and assign new [QA cards](#create-items) for the newly built RC based off of the newest tag, for example, if the new RC is 7.8.0-rc.8, you will run:
+```
+ddev release trello testable 7.8.0-rc.7 7.8.0-rc.8
+```
 
 
 ### Communication
@@ -141,27 +148,11 @@ the same process outlined above, but with more complexities due to the freeze be
 
 Notify the Agent Release Manager when code freeze ends.
 
-### Releasing integrations off of the release branch
+### Releasing integrations off of the release branch post-freeze
 
-There are two main cases where the release manager will have to release integrations off of the release branch: the freeze has lifted and changes to an integration have been merged after freeze and before a bugfix for an RC, or a [patch release](post-release.md#patches) is required. This section will focus on the former case.
+If the freeze has lifted and changes to an integration have been merged after freeze and before a bugfix for an RC, you will need to release an integration off the release branch. See this [section](post-release.md#multiple-check-releases-between-bugfix-release) for more details. After releasing, continue following the same steps for creating [release candidates](#release-candidates)
+
 
 !!! note
     Sometimes, an RC will need to be made with an integration that can be released off of the release branch, and an integration that can be released off of `master`. In this case, you can make two release PRs, one for the release branch, and one for `master`. The order of creation for these does not matter. 
 
-Follow the following steps to release an integration off of the release branch:
-
-1. Cherry-pick the bugfix commit to the [release branch](#branch).
-2. Release the integration on the release branch.
-    - Make a pull request with [integration release](../integration-release.md#new-integrations), then merge it to the release branch.
-
-    !!! important
-        Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#ddev-release-tag):
-
-            `ddev release tag <INTEGRATION>`
-
-
-3. Then pull the latest release branch so your branch has both the bugfix commit and release commit.
-
-4. [Tag](#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.0-rc.<RC_NUM>`.
-
-5. After the release has been made, make a PR to `master` with the updates to `CHANGELOG.md`, [agent release requirements](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt), and `__about__.py` of the integrations that were released on the release branch.
