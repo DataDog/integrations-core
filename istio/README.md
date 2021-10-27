@@ -67,7 +67,9 @@ OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updat
 
 Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
 
-**WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
+<div class="alert alert-warning">
+<b>Important Note</b>: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
+</div>
 
 ##### Disable sidecar injection for Datadog Agent pods
 
