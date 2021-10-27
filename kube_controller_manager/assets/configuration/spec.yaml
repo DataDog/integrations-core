@@ -114,3 +114,4 @@ files:
       value:
         type: boolean
         example: false
+        display_default: true

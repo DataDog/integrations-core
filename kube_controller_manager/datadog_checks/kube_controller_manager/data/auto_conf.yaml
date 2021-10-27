@@ -37,7 +37,7 @@ instances:
     #
     bearer_token_auth: true
 
-    ## @param ssl_verify - boolean - optional - default: false
+    ## @param ssl_verify - boolean - optional - default: true
     ## Used to verify self signed certificates.
     #
     ssl_verify: false
