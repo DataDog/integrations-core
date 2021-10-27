@@ -68,7 +68,7 @@ python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
 python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"VMware, Inc."
 pywin32,PyPI,PSF,Mark Hammond (et al)
-redis,PyPI,MIT,Andy McCurdy
+redis,PyPI,MIT,Andy McCurdy | Redis Inc.
 requests,PyPI,Apache-2.0,Kenneth Reitz
 requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
 requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
