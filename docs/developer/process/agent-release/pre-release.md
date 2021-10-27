@@ -119,7 +119,7 @@ After the RC build is done:
         Image for Windows-Python 2 might not be built automatically for each RC. In order to build it, trigger the [dev_branch-a6-windows](https://github.com/DataDog/datadog-agent/blob/1b99fefa1d31eef8631e6343bdd2a4cf2b11f82d/.gitlab/image_deploy/docker_windows.yml#L43-L61) job in the datadog-agent Gitlab pipeline building the RC (link shared by the release coordinator).
 
     !!! note
-        In some cases, the CI may be broken on both the release branch and `master` during release week due to testing limits or developement dependency changes and **not** code changes. Fixes for these issues will be merged to `master`, and if they aren't include on the release branch the Azure pipelines will fail. If these changes are only test related (no code change), the CI fixes can be cherry-picked to the release branch and don't need a release. This will ensure that the Azure pipelines only fail on code-related errors.
+        In some cases, the CI may be broken on both the release branch and `master` during release week due to testing limits or development dependency changes and **not** code changes. Fixes for these issues will be merged to the `master` branch, and if they aren't include on the release branch the Azure pipelines will fail. If these changes are only test related (no code change), the CI fixes can be cherry-picked to the release branch and don't need a release. This will ensure that the Azure pipelines only fail on code-related errors.
 
 2. Create and assign new [QA cards](#create-items) for the newly built RC based off of the newest tag, for example, if the new RC is 7.8.0-rc.8, you will run:
 ```
@@ -132,7 +132,7 @@ ddev release trello testable 7.8.0-rc.7 7.8.0-rc.8
 The Agent Release Manager will post a [daily status](../../ddev/cli.md#ddev-release-trello-status) for the entire release cycle.
 Reply in the thread with any pending PRs meant for the next RC and update the spreadsheet `PRs included in Agent RCs`. 
 
-Since it can be hard to predict when and if a new RC will be built, it is better to cherry-pick, release, and tag new integrations for RCs proactively so the creation of RCs is not held back. If new fixes for integratioins are discovered after you have already tagged the branch, then you can always delete the tag from github and locally, release the new changes, and re-tag. 
+Since it can be hard to predict when and if a new RC will be built, it is better to cherry-pick, release, and tag new integrations for RCs proactively so the creation of RCs is not held back. If new fixes for integrations are discovered after you have already tagged the branch, then you can always delete the tag from Github and locally, release the new changes, and re-tag. 
 
 ### Logs
 
