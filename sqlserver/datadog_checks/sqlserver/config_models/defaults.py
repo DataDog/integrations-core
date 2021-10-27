@@ -24,6 +24,10 @@ def instance_ao_database(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_autodiscovery_db_service_check(field, value):
+    return True
+
+
 def instance_autodiscovery_exclude(field, value):
     return get_default_field_value(field, value)
 
