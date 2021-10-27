@@ -9,7 +9,7 @@ files:
     options:
     - name: leader_election
       description: |
-        Monitor the leader-election process on the kube-system:kube-controller-manager endpoints.
+        Monitor the leader-election process on the kube-system:kube-controller-manager.
       value:
         type: boolean
         example: true
@@ -107,15 +107,10 @@ files:
       value:
         type: boolean
         example: true
-        default: false
-    - name: bearer_token_path
-      description: Used to specify the path where the service account token is located.
-      value:
-        type: string
-        example: /var/run/secrets/kubernetes.io/serviceaccount/token
+        display_default: false
     - name: ssl_verify
       description: Used to verify self signed certificates.
       enabled: true
       value:
         type: boolean
-        example: true
+        example: false
