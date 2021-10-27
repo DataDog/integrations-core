@@ -395,8 +395,8 @@ class ZookeeperCheck(AgentCheck):
 
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type, tags))
 
-            except ValueError:
-                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
+            except ValueError as e:
+                self.log.warning("Cannot format `mntr` value - key=%s, value=%s: %s", key, value, str(e))
 
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)
