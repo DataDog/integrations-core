@@ -89,10 +89,10 @@ def export(ctx, url, integration, author):
         if file_name.startswith(integration):
             match = integration
         else:
-            display_name = manifest.get('display_name', '').lower()
             if version_major == 2:
                 display_name = manifest['tile']['title'].lower()
-
+            else:
+                 display_name = manifest.get('display_name', '').lower()
             if file_name.startswith(display_name):
                 match = display_name
 
