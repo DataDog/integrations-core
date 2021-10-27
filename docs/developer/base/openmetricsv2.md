@@ -171,19 +171,6 @@ For more information, see: https://datadoghq.dev/integrations-core/base/metadata
 
 This submits metrics as service checks.
 
-The spec says:
-
-> A gauge MAY be used to encode an enum where the enum has many states and changes over time, it is the most efficient but least user friendly.
-
-The required modifier `status_map` is a mapping of values to statuses. Valid statuses include:
-
-- `OK`
-- `WARNING`
-- `CRITICAL`
-- `UNKNOWN`
-
-Any encountered values that are not defined will be sent as `UNKNOWN`.
-
 Example:
 
 ```yaml
@@ -198,12 +185,6 @@ metrics:
 #### Temporal percent
 
 This calculates values as a percentage of time since the last check run.
-
-For example, say the result is a forever increasing counter representing the total time spent pausing for
-garbage collection since start up. That number by itself is quite useless, but as a percentage of time
-spent pausing since the previous collection interval it becomes a useful metric.
-
-There is one required parameter called `scale` that indicates what unit of time the result should be considered.
 
 Valid values are:
 
@@ -235,9 +216,6 @@ metrics:
 - last_backup_time:
     type: time_elapsed
 ```
-
-## New Changes
-- Others: Subclasses, additional endpoints, custom metric types, transformers
 
 ## Interface
 
@@ -279,4 +257,7 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2`, `LabelAggregator`,
 
 
 ## Options
-Talk about config options for this
+For complete documentation on every option, see the associated templates for the 
+[instance](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics.yaml) 
+and [init_config](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics.yaml)
+ sections. 
