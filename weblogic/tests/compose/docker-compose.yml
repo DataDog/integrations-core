@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  weblogic-admin-server:
+    build: .
+    image: '14110-domain-with-app'
+    hostname: wlsadmin
+    ports:
+      - 7001:7001
+      - 7002:7002
+    volumes:
+      - ${PROPERTIES_DIR}:/u01/oracle/properties
+      - ./config.xml:/u01/oracle/user_projects/domains/domain1/config/config.xml
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=7002
+        -Dcom.sun.management.jmxremote.rmi.port=7002
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+  weblogic-managed-server-1:
+    build: .
+    image: '14110-domain-with-app'
+    ports:
+      - 8001:8001
+      - 7003:7003
+    volumes:
+      - ${PROPERTIES_DIR}:/u01/oracle/properties
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=7003
+        -Dcom.sun.management.jmxremote.rmi.port=7003
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+      MANAGED_SERV_NAME: managed-server1
+    command: 'startManagedServer.sh'
+  weblogic-managed-server-2:
+    build: .
+    image: '14110-domain-with-app'
+    ports:
+      - 8002:8001
+      - 7004:7004
+    volumes:
+      - ${PROPERTIES_DIR}:/u01/oracle/properties
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=7004
+        -Dcom.sun.management.jmxremote.rmi.port=7004
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+      MANAGED_SERV_NAME: managed-server2
+    command: 'startManagedServer.sh'
