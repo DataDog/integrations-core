@@ -92,4 +92,3 @@ def test_with_tags(aggregator):
 def test_e2e(dd_agent_check, aggregator, instance):
     dd_agent_check(instance)
     aggregator.assert_service_check("aspdotnet.can_connect", AgentCheck.CRITICAL)
-
