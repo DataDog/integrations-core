@@ -53,11 +53,6 @@ if sample.name.endswith('_bucket'):
     self.monotonic_count(f'{metric.name}.bucket', ...)
 ```
 
-No longer being aggregated under the `.count` suffix eliminates the need to submit a
-[dummy tag](https://github.com/DataDog/integrations-core/pull/3777) for the actual `.count` metric.
-This aligns with the alternative solution that was proposed
-[here](https://github.com/DataDog/architecture/blob/f5813a5b6451a4dbaa1846925a83a977890aaed1/rfcs/openmetrics/histograms-support.md#recommended-solution).
-
 #### Summary
 
 The `_sum` and `_count` suffixes for samples will now be submitted as monotonic counts.
@@ -258,6 +253,5 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2`, `LabelAggregator`,
 
 ## Options
 For complete documentation on every option, see the associated templates for the 
-[instance](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics.yaml) 
-and [init_config](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics.yaml)
+[instance][config-spec-template-instances-openmetrics] and [init_config][config-spec-template-init-config-openmetrics]
  sections. 

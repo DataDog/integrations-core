@@ -37,7 +37,7 @@ All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScrap
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
 For complete documentation of every option, see the associated configuration templates for the
-[instances][config-spec-template-instances-openmetrics] and [init_config][config-spec-template-init-config-openmetrics] sections.
+[instances][config-spec-template-instances-openmetrics-legacy] and [init_config][config-spec-template-init-config-openmetrics-legacy] sections.
 
 All [HTTP options](http.md#options) are also supported.
 
