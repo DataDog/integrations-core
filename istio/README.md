@@ -33,7 +33,7 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
     init_config:
     
     instances:
-      - use_openmetrics: true
+      - use_openmetrics: true  # This will enable Openmetrics V2 version of the integration
       - istiod_endpoint: http://istiod.istio-system:15014/metrics
       - istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
         exclude_labels:
@@ -53,19 +53,19 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
          - connection_security_policy
     ```
    
-**Note**: `connectionID` Prometheus label is excluded, the [sample istio.d/conf.yaml][4] also has a list of suggested labels to exclude.
+**Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][4] also has a list of suggested labels to exclude.
 
 
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
 
 ##### OpenMetrics V2 vs OpenMetrics V1
-By enabling the `use_openmetrics` configuration option, the Istio integration will use the OpenMetrics V2 implementation of the check. 
+When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check. 
 
-In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
+In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are now submitted as `monotonic_count` by default.
 
 OpenMetrics V2 was introduced due to performance and quality issues in OpenMetrics V1. Some updates include native metric types support, improved configuration, and custom metric types.
 
-Disable `use_openmetrics` configuration option to utilize the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
+Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
 
 **WARNING**: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
 
