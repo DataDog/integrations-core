@@ -9,7 +9,6 @@ import click
 import requests
 
 from ....fs import ensure_dir_exists, path_join, write_file
-from ...constants import get_root
 from ...manifest_utils import Manifest
 from ...utils import get_valid_integrations, write_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_success
@@ -99,10 +98,10 @@ def export(ctx, url, integration, author):
                 file_name = new_file_name
 
         file_name = f"{file_name.replace(' ', '_')}.json"
-        location = path_join(get_root(), integration, 'assets', 'dashboards')
+        location = manifest.get_dashboards_location()
         ensure_dir_exists(location)
 
-        manifest._manifest_json['assets']['dashboards'][new_payload['title']] = f'assets/dashboards/{file_name}'
+        manifest.add_dashboard(new_payload['title'], file_name)
         write_manifest(manifest._manifest_json, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
