@@ -220,7 +220,7 @@ _Available for Agent versions >6.0_
               name: new_log_start_with_date
               pattern: \[\d{4}\-\d{2}\-\d{2}
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/scheduler/latest/**/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/scheduler/latest/*.log"
           source: airflow
           log_processing_rules:
             - type: multi_line
@@ -235,7 +235,7 @@ _Available for Agent versions >6.0_
       ```yaml
       logs:
         - type: file
-          path: "<PATH_TO_AIRFLOW>/logs/!(scheduler)/**/*.log"
+          path: "<PATH_TO_AIRFLOW>/logs/!(scheduler)/*/*.log"
           source: airflow
           log_processing_rules:
             - type: multi_line
