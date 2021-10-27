@@ -408,6 +408,7 @@ def test_submit_gauge_with_include_labels(aggregator, mocked_prometheus_check, m
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
     mocked_prometheus_scraper_config['include_labels'] = [
         'my_2nd_label',
+        'whatever_else',
         'env',
     ]  # custom tags are not filtered out
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]

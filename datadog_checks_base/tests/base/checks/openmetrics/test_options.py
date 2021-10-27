@@ -183,6 +183,67 @@ class TestIncludeLabels:
         aggregator.assert_all_metrics_covered()
 
 
+class TestExcludeIncludeLabels:
+    def test(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar"} 6.396288e+06
+            # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+            # TYPE go_memstats_gc_sys_bytes gauge
+            go_memstats_gc_sys_bytes{bar="foo"} 901120
+            # HELP go_memstats_free_bytes Number of bytes free and available for use.
+            # TYPE go_memstats_free_bytes gauge
+            go_memstats_free_bytes{foo="bar"} 6.396288e+06
+            """
+        )
+
+        check = get_check({'metrics': ['.+'], 'include_labels': ['foo'], 'exclude_labels': ['bar']})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_gc_sys_bytes', 901120, metric_type=aggregator.GAUGE, tags=['endpoint:test']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_free_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'foo:bar']
+        )
+
+
+class TestExcludeIncludeLabelsOverride:
+    def test(self, aggregator, dd_run_check, mock_http_response):
+        mock_http_response(
+            """
+            # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+            # TYPE go_memstats_alloc_bytes gauge
+            go_memstats_alloc_bytes{foo="bar",zip="zap"} 6.396288e+06
+            # HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+            # TYPE go_memstats_gc_sys_bytes gauge
+            go_memstats_gc_sys_bytes{bar="foo"} 901120
+            # HELP go_memstats_free_bytes Number of bytes free and available for use.
+            # TYPE go_memstats_free_bytes gauge
+            go_memstats_free_bytes{foo="bar",zip="zap"} 6.396288e+06
+            """
+        )
+
+        check = get_check({'metrics': ['.+'], 'include_labels': ['zip', 'bar'], 'exclude_labels': ['foo', 'bar']})
+        dd_run_check(check)
+
+        aggregator.assert_metric(
+            'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'zip:zap']
+        )
+
+        aggregator.assert_metric(
+            'test.go_memstats_gc_sys_bytes', 901120, metric_type=aggregator.GAUGE, tags=['endpoint:test']
+        )
+        aggregator.assert_metric(
+            'test.go_memstats_free_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test', 'zip:zap']
+        )
+
+
 class TestRenameLabels:
     def test(self, aggregator, dd_run_check, mock_http_response):
         mock_http_response(

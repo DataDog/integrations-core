@@ -249,7 +249,7 @@ class OpenMetricsScraperMixin(object):
         config['exclude_labels'] = default_instance.get('exclude_labels', []) + instance.get('exclude_labels', [])
 
         # `include_labels` is an array of label names to include. If these labels are not in
-        # the `exclude_labels` list, then they will be added as tags when submitting the metric.
+        # the `exclude_labels` list, then they are added as tags when submitting the metric.
         config['include_labels'] = default_instance.get('include_labels', []) + instance.get('include_labels', [])
 
         # `type_overrides` is a dictionary where the keys are prometheus metric names
