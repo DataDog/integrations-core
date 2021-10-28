@@ -1,6 +1,14 @@
 # CHANGELOG - supervisord
 
-## 1.9.1 / 2021-07-22
+## 2.1.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.9.1 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
 
@@ -9,7 +17,7 @@
 * [Added] Add runtime configuration validation. See [#8991](https://github.com/DataDog/integrations-core/pull/8991).
 * [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
 
-## 1.8.0 / 2021-05-28
+## 1.8.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Remove unused dependency. See [#9435](https://github.com/DataDog/integrations-core/pull/9435).
 

@@ -33,7 +33,11 @@ def instance_auth_type(field, value):
 
 
 def instance_bookmark_frequency(field, value):
-    return get_default_field_value(field, value)
+    return '<PAYLOAD_SIZE>'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_domain(field, value):
@@ -45,7 +49,7 @@ def instance_empty_default_hostname(field, value):
 
 
 def instance_event_format(field, value):
-    return get_default_field_value(field, value)
+    return ['Message']
 
 
 def instance_event_id(field, value):
@@ -65,7 +69,7 @@ def instance_filters(field, value):
 
 
 def instance_host(field, value):
-    return get_default_field_value(field, value)
+    return 'localhost'
 
 
 def instance_included_messages(field, value):
@@ -77,7 +81,7 @@ def instance_interpret_messages(field, value):
 
 
 def instance_legacy_mode(field, value):
-    return False
+    return True
 
 
 def instance_log_file(field, value):
@@ -141,7 +145,7 @@ def instance_timeout(field, value):
 
 
 def instance_type(field, value):
-    return get_default_field_value(field, value)
+    return ['information']
 
 
 def instance_user(field, value):

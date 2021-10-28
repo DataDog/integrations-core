@@ -213,10 +213,13 @@ instances:
     #
     # share_labels: {}
 
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for increased performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
-    # request_size: 16
+    # cache_shared_labels: true
 
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -516,6 +519,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -525,6 +533,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -561,7 +574,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

@@ -1,10 +1,24 @@
 # CHANGELOG - ClickHouse
 
-## 2.2.1 / 2021-07-12
+## 2.4.1 / 2021-10-12
+
+* [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).
+
+## 2.4.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
+## 2.3.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add support for Clickhouse v21. See [#9235](https://github.com/DataDog/integrations-core/pull/9235).
+
+## 2.2.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
 
-## 2.2.0 / 2021-05-28
+## 2.2.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Upgrade ClickHouse dependencies. See [#9344](https://github.com/DataDog/integrations-core/pull/9344).
 

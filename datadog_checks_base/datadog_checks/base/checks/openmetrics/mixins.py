@@ -29,7 +29,6 @@ class OpenMetricsScraperMixin(object):
     # This class is not supposed to be used by itself, it provides scraping behavior but
     # need to be within a check in the end
 
-    REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
     # indexes in the sample tuple of core.Metric
     SAMPLE_NAME = 0
     SAMPLE_LABELS = 1
@@ -258,7 +257,7 @@ class OpenMetricsScraperMixin(object):
         config['type_overrides'].update(instance.get('type_overrides', {}))
 
         # `_type_override_patterns` is a dictionary where we store Pattern objects
-        # that match metric names as keys, and their corresponding metric type overrrides as values.
+        # that match metric names as keys, and their corresponding metric type overrides as values.
         config['_type_override_patterns'] = {}
 
         with_wildcards = set()
@@ -271,7 +270,7 @@ class OpenMetricsScraperMixin(object):
         for metric in with_wildcards:
             del config['type_overrides'][metric]
 
-        # Some metrics are retrieved from differents hosts and often
+        # Some metrics are retrieved from different hosts and often
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
@@ -421,7 +420,7 @@ class OpenMetricsScraperMixin(object):
         """
         if response.encoding is None:
             response.encoding = 'utf-8'
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+        input_gen = response.iter_lines(decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
@@ -743,7 +742,7 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
-            # check for wilcards in transformers
+            # check for wildcards in transformers
             for transformer_name, transformer in iteritems(metric_transformers):
                 if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
                     transformer(metric, scraper_config, transformer_name)

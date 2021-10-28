@@ -1,6 +1,10 @@
 # CHANGELOG - system_swap
 
-## 1.11.0 / 2021-05-28
+## 1.12.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.11.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8993](https://github.com/DataDog/integrations-core/pull/8993).
 

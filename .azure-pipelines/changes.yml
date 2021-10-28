@@ -26,6 +26,7 @@ jobs:
       restoreKeys: |
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
+    ispr: true
 
 - template: './templates/test-single-windows.yml'
   parameters:
@@ -38,3 +39,4 @@ jobs:
       restoreKeys: |
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
+    ispr: true

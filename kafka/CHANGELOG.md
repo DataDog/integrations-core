@@ -1,10 +1,18 @@
 # CHANGELOG - kafka
 
-## 2.8.0 / 2021-07-12
+## 2.10.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 2.9.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 2.8.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
 
-## 2.7.0 / 2021-05-28
+## 2.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).
 * [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).

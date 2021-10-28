@@ -4,7 +4,7 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
 
@@ -318,7 +318,7 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## source  - required - Attribute that defines which integration sent the logs.
         ## encoding - optional - For file specifies the file encoding, default is utf-8, other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
@@ -382,7 +382,7 @@ def test_section_example_indent_required():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
+        ## source  - required - Attribute that defines which integration sent the logs.
         ## encoding - optional - For file specifies the file encoding, default is utf-8, other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.

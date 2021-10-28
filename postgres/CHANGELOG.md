@@ -1,6 +1,49 @@
 # CHANGELOG - postgres
 
-## 8.0.5 / 2021-07-21
+## 11.0.0 / 2021-10-26
+
+* [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10466](https://github.com/DataDog/integrations-core/pull/10466).
+* [Changed] Change `postgresql.connections` metric collection when DBM is enabled . See [#10482](https://github.com/DataDog/integrations-core/pull/10482).
+
+## 10.0.0 / 2021-10-04
+
+* [Added] Add support for live queries feature . See [#9866](https://github.com/DataDog/integrations-core/pull/9866).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Bump datadog checks base version. See [#10300](https://github.com/DataDog/integrations-core/pull/10300).
+* [Fixed] Avoid re-explaining queries that cannot be explained. See [#9941](https://github.com/DataDog/integrations-core/pull/9941).
+* [Changed] Add option to disable generic tags. See [#10099](https://github.com/DataDog/integrations-core/pull/10099).
+
+## 9.0.2 / 2021-08-27 / Agent 7.31.0
+
+* [Fixed] Fix missing caching of pg_settings. See [#10006](https://github.com/DataDog/integrations-core/pull/10006).
+
+## 9.0.1 / 2021-08-25
+
+* [Fixed] Fix postgres collection_errors error reference. See [#9982](https://github.com/DataDog/integrations-core/pull/9982).
+
+## 9.0.0 / 2021-08-22
+
+* [Added] Collect settings from pg_settings and submit pg_stat_statements metrics. See [#9928](https://github.com/DataDog/integrations-core/pull/9928).
+* [Added] Add agent version to postgres database monitoring payloads. See [#9917](https://github.com/DataDog/integrations-core/pull/9917).
+* [Fixed] Send the correct hostname with metrics when DBM is enabled. See [#9865](https://github.com/DataDog/integrations-core/pull/9865).
+* [Fixed] Revert "Upgrade `psycopg2` on Python 3". See [#9835](https://github.com/DataDog/integrations-core/pull/9835).
+* [Changed] Update postgres obfuscator options config. See [#9884](https://github.com/DataDog/integrations-core/pull/9884).
+* [Changed] Set a default statement timeout for postgres to 5s. See [#9847](https://github.com/DataDog/integrations-core/pull/9847).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 8.2.0 / 2021-08-03
+
+* [Added] Add metric for estimated table bloat percentage. See [#9786](https://github.com/DataDog/integrations-core/pull/9786).
+* [Added] Collect WAL file age metric. See [#9784](https://github.com/DataDog/integrations-core/pull/9784).
+
+## 8.1.0 / 2021-07-26
+
+* [Added] Add new relation metrics. See [#9758](https://github.com/DataDog/integrations-core/pull/9758).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Fixed] Fix debug log formatting. See [#9752](https://github.com/DataDog/integrations-core/pull/9752).
+
+## 8.0.5 / 2021-07-21 / Agent 7.30.0
 
 * [Fixed] Fix wrong errors related to pg_stat_statements setup. See [#9733](https://github.com/DataDog/integrations-core/pull/9733).
 * [Fixed] Bump `datadog-checks-base` version requirement. See [#9719](https://github.com/DataDog/integrations-core/pull/9719).
@@ -36,7 +79,7 @@
 * [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9618](https://github.com/DataDog/integrations-core/pull/9618).
 * [Changed] Upgrade psycopg2-binary to 2.8.6. See [#9535](https://github.com/DataDog/integrations-core/pull/9535).
 
-## 7.0.2 / 2021-06-03
+## 7.0.2 / 2021-06-03 / Agent 7.29.0
 
 * [Fixed] Remove instance-level database tag from DBM metrics & events. See [#9469](https://github.com/DataDog/integrations-core/pull/9469).
 

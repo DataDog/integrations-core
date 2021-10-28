@@ -1,5 +1,9 @@
 # CHANGELOG - linux_proc_extras
 
+## 2.1.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8949](https://github.com/DataDog/integrations-core/pull/8949).
+
 ## 2.0.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

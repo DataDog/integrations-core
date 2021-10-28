@@ -12,8 +12,16 @@ def instance_collect_response_time(field, value):
     return False
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
+
+
+def instance_ip_cache_duration(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):

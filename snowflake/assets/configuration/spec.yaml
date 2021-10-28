@@ -165,3 +165,5 @@ files:
           min_collection_interval.display_default: 3600
           min_collection_interval.value.example: 3600
           min_collection_interval.enabled: 3600
+          disable_generic_tags.hidden: False
+          disable_generic_tags.enabled: True

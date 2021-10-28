@@ -24,6 +24,10 @@ def instance_ao_database(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_autodiscovery_db_service_check(field, value):
+    return True
+
+
 def instance_autodiscovery_exclude(field, value):
     return get_default_field_value(field, value)
 
@@ -68,6 +72,14 @@ def instance_db_fragmentation_object_names(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_dbm(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_driver(field, value):
     return 'SQL Server'
 
@@ -100,12 +112,20 @@ def instance_include_instance_metrics(field, value):
     return True
 
 
+def instance_include_master_files_metrics(field, value):
+    return False
+
+
 def instance_include_task_scheduler_metrics(field, value):
     return False
 
 
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_only_emit_local(field, value):
@@ -122,6 +142,10 @@ def instance_proc_only_if(field, value):
 
 def instance_proc_only_if_database(field, value):
     return 'master'
+
+
+def instance_query_metrics(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_service(field, value):

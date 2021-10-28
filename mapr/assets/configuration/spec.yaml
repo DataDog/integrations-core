@@ -46,5 +46,13 @@ files:
       value:
         example: 1
         type: integer
-
+    - name: disable_legacy_cluster_tag
+      description: |
+        Enable to stop submitting the tag `clustername`, which has been renamed to `mapr_cluster` and `clusterid`
+        which has been renamed to `mapr_cluster_id`
+      value:
+        type: boolean
+        display_default: false
+        example: true
+      enabled: true
     - template: instances/default

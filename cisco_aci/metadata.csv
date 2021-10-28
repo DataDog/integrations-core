@@ -126,7 +126,7 @@ cisco_aci.capacity.leaf.multicast.limit,gauge,,item,,the multicast endpoint capa
 cisco_aci.capacity.apic.endpoint_group.utilized,gauge,,item,,the endpoint groups the apic is utilizing,0,cisco_aci,
 cisco_aci.capacity.apic.bridge_domain.utilized,gauge,,item,,the bridge domains the apic is utilizing,0,cisco_aci,
 cisco_aci.capacity.apic.endpoint.utilized,gauge,,item,,the endpoints the apic is utilizing,0,cisco_aci,
-cisco_aci.capacity.apic.fabric_node.utilized,gauge,,item,,the numer of fabric nodes the apic is using,0,cisco_aci,
+cisco_aci.capacity.apic.fabric_node.utilized,gauge,,item,,the number of fabric nodes the apic is using,0,cisco_aci,
 cisco_aci.capacity.apic.private_network.utilized,gauge,,item,,the number of private networks the apic is using,0,cisco_aci,
 cisco_aci.capacity.apic.tenant.utilized,gauge,,item,,the number of tenants the apic is using,0,cisco_aci,
 cisco_aci.capacity.apic.vmware_domain.limit,gauge,,item,,the limit on number of vmware domains the apic can use,0,cisco_aci,

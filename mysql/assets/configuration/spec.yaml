@@ -369,15 +369,21 @@ files:
           - name: obfuscator_options
             description: Configure how the SQL obfuscator behaves.
             options:
-              - name: quantize_sql_tables
+              - name: replace_digits
                 description: |
-                  Set to `true` to perform quantization on your SQL tables.
+                  Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
 
                   Note that this option only applies when `dbm` is enabled.
                 value:
                   type: boolean
                   example: false
           - template: instances/default
+            overrides:
+              disable_generic_tags.hidden: false
+              disable_generic_tags.enabled: true
+              disable_generic_tags.description: |
+                  Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+                  other integrations tags.
 
       - template: logs
         example:

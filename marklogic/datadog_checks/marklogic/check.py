@@ -163,21 +163,21 @@ class MarklogicCheck(AgentCheck):
 
     def _collect_resource_status_metrics(self, resource_type, uri, tags):
         # type: (str, str, List[str]) -> None
-        """ Collect status metrics of a specific resource """
+        """Collect status metrics of a specific resource"""
         data = self.api.http_get(uri, {'view': 'status'})
         metrics = parse_per_resource_status_metrics(resource_type, data, tags)
         self.submit_metrics(metrics)
 
     def _collect_resource_storage_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
-        """ Collect storage metrics of a specific resource """
+        """Collect storage metrics of a specific resource"""
         data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
         metrics = parse_per_resource_storage_metrics(data, tags)
         self.submit_metrics(metrics)
 
     def _collect_resource_request_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
-        """ Collect request metrics of a specific resource """
+        """Collect request metrics of a specific resource"""
         data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
         metrics = parse_per_resource_request_metrics(data, tags)
         self.submit_metrics(metrics)
@@ -217,9 +217,8 @@ class MarklogicCheck(AgentCheck):
                     res_tags = self._config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
                     res_detailed = health_report[res['type']].get(res['name'])
                     if res_detailed:
-                        self.service_check(
-                            service_check_name, res_detailed['code'], tags=res_tags, message=res_detailed['message']
-                        )
+                        message = res_detailed['message'] if res_detailed['code'] is not AgentCheck.OK else None
+                        self.service_check(service_check_name, res_detailed['code'], tags=res_tags, message=message)
                     else:
                         self.service_check(service_check_name, self.OK, res_tags)
 

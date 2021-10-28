@@ -46,13 +46,13 @@ To configure this check for an Agent running on a host:
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `iis` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `iis` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -60,11 +60,11 @@ The IIS check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][10].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
@@ -73,7 +73,7 @@ Need help? Contact [Datadog support][11].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/iis/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

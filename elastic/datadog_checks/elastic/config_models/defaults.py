@@ -24,6 +24,10 @@ def instance_admin_forwarder(field, value):
     return False
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -56,8 +60,12 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_disable_legacy_cluster_tag(field, value):
-    return True
+    return False
 
 
 def instance_empty_default_hostname(field, value):
@@ -150,6 +158,10 @@ def instance_pshard_stats(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
 
 
 def instance_service(field, value):
