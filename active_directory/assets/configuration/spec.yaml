@@ -7,7 +7,7 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/pdh
+    - template: instances/pdh_legacy
       overrides:
           host.required: true
           additional_metrics.value.example:

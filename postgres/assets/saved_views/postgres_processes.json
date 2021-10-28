@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:postgres"
-      ]
+      "query_filter": "integration:postgres",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

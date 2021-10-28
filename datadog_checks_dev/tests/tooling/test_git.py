@@ -57,7 +57,7 @@ file2
                 ]
             )
             calls = [
-                mock.call('git diff --name-status master...', capture='out'),
+                mock.call('git diff --name-status origin/master...', capture='out'),
                 mock.call('git diff --name-only master', capture='out'),
             ]
             run.assert_has_calls(calls)
@@ -78,7 +78,7 @@ R100	foo2	foo3
             retval = files_changed(include_uncommitted=False)
 
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-status master...', capture='out')
+            run.assert_called_once_with('git diff --name-status origin/master...', capture='out')
             assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 

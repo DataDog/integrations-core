@@ -45,6 +45,11 @@ def test_format_filter_list_expected():
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( a < '3' )"
 
+    filters = [{'a': ['three', 3]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a = 'three' OR a = '3' ) )"
+
 
 @requires_windows
 @pytest.mark.unit
@@ -54,6 +59,80 @@ def test_format_filter_tuple():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( a < '3' )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_bool_op_alt():
+    filters = [{'a': {'OR': [['>=', 10], ['<', 0]]}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a >= '10' OR a < '0' ) )"
+
+    filters = [{'a': {'AND': [['<>', 'c'], ['<>', 'd']]}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( a <> 'c' AND a <> 'd' ) )"
+
+    filters = [{'a': {'NOR': ['c', 'd']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( a = 'c' OR a = 'd' ) )"
+
+    filters = [{'a': {'NAND': ['c%', '%d']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( a LIKE 'c%' AND a LIKE '%d' ) )"
+
+    filters = [{'a': {'AND': [['!=', 'AA'], ['!=', 'BB']], 'OR': 'CC%'}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    # python2 sometimes return the other set of conditions first.
+    assert (
+        formatted_filters == " WHERE ( ( a != 'AA' AND a != 'BB' ) OR a LIKE 'CC%' )"
+        or formatted_filters == " WHERE ( a LIKE 'CC%' OR ( a != 'AA' AND a != 'BB' ) )"
+    )
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_bool_op_not():
+    filters = [{'my.prop': {'NOT': ['c', 'd']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( my.prop = 'c' OR my.prop = 'd' ) )"
+
+    sampler = WMISampler(
+        logger=None, class_name='MyClass', property_names='my.prop', filters=filters, and_props=['my.prop']
+    )
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( NOT ( my.prop = 'c' AND my.prop = 'd' ) )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_bool_op_invalid():
+    # Falls back to default_bool_op
+    filters = [{'my.prop': {'XXX': ['c', 'd']}}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( my.prop = 'c' OR my.prop = 'd' ) )"
+
+    sampler = WMISampler(
+        logger=None, class_name='MyClass', property_names='my.prop', filters=filters, and_props=['my.prop']
+    )
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( ( my.prop = 'c' AND my.prop = 'd' ) )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_wql_op_invalid():
+    # Falls back to default_wql_op
+    filters = [{'a': [['XXX', 3]]}]
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
+    formatted_filters = sampler.formatted_filters
+    assert formatted_filters == " WHERE ( a = '3' )"
 
 
 @requires_windows
@@ -70,7 +149,7 @@ def test_format_filter_win32_log():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
     formatted_filters = sampler.formatted_filters
     assert (
-        formatted_filters == " WHERE ( ( SourceName = 'MSSQLSERVER' ) "
+        formatted_filters == " WHERE ( SourceName = 'MSSQLSERVER' "
         "AND ( Type = 'Warning' OR Type = 'Error' ) AND TimeGenerated >= '202056101355.000000+' )"
     )
 

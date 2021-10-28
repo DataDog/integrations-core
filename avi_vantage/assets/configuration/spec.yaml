@@ -37,8 +37,3 @@ files:
         persist_connections.default: true
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
-        disable_generic_tags.hidden: false
-        disable_generic_tags.value.display_default: true
-        disable_generic_tags.description: |
-          Replaces generic tag such as `server` with `avi_vantage_server` to avoid getting it mixed with
-          other integratons tags.
