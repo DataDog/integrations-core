@@ -29,7 +29,7 @@ def milliseconds_to_nanoseconds(value):
 
 def get_schema_field(descriptors):
     # type: (List[Tuple[Any, str]]) -> str
-    """Return column containig the schema name for that query."""
+    """Return column containing the schema name for that query."""
     for column, name in descriptors:
         if name == 'schema':
             return column
@@ -38,9 +38,11 @@ def get_schema_field(descriptors):
 
 fmt = PartialFormatter()
 
+DBM_MIGRATED_METRICS = {
+    'numbackends': ('postgresql.connections', AgentCheck.gauge),
+}
 
 COMMON_METRICS = {
-    'numbackends': ('postgresql.connections', AgentCheck.gauge),
     'xact_commit': ('postgresql.commits', AgentCheck.rate),
     'xact_rollback': ('postgresql.rollbacks', AgentCheck.rate),
     'blks_read': ('postgresql.disk_read', AgentCheck.rate),

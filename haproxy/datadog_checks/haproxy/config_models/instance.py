@@ -58,6 +58,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     active_tag: Optional[bool]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -71,6 +72,7 @@ class InstanceConfig(BaseModel):
     collect_status_metrics_by_host: Optional[bool]
     connect_timeout: Optional[float]
     count_status_by_service: Optional[bool]
+    disable_generic_tags: Optional[bool]
     disable_legacy_service_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_service_check: Optional[bool]
@@ -102,6 +104,7 @@ class InstanceConfig(BaseModel):
     prometheus_url: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     send_distribution_buckets: Optional[bool]
     send_distribution_counts_as_monotonic: Optional[bool]
     send_distribution_sums_as_monotonic: Optional[bool]

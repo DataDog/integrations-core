@@ -11,6 +11,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.http import RequestsWrapper
 
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.
@@ -168,11 +169,33 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
         tags = instance.get("tags", [])
         service_check_name = 'kube_scheduler.up'
+        http_handler = self._healthcheck_http_handler(instance, url)
 
         try:
-            response = self.http.get(url)
+            response = http_handler.get(url)
             response.raise_for_status()
             self.service_check(service_check_name, AgentCheck.OK, tags=tags)
         except requests.exceptions.RequestException as e:
             message = str(e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
+
+    def _healthcheck_http_handler(self, instance, endpoint):
+        if endpoint in self._http_handlers:
+            return self._http_handlers[endpoint]
+
+        config = {}
+        config['tls_cert'] = instance.get('ssl_cert', None)
+        config['tls_private_key'] = instance.get('ssl_private_key', None)
+        config['tls_verify'] = instance.get('ssl_verify', True)
+        config['tls_ignore_warning'] = instance.get('ssl_ignore_warning', False)
+        config['tls_ca_cert'] = instance.get('ssl_ca_cert', None)
+
+        if config['tls_ca_cert'] is None:
+            config['tls_ignore_warning'] = True
+            config['tls_verify'] = False
+
+        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        return http_handler

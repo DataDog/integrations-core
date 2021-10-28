@@ -555,13 +555,26 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
@@ -570,7 +583,7 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
+                        "value": "y = 1",
                         "display_type": "error dashed"
                     }
                 ],
@@ -1399,13 +1412,26 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}, avg:kubernetes.memory.usage_pct{$cluster,$host} by {host}*100",
-                        "display_type": "line",
+                        "formulas": [
+                            {
+                                "alias": "mem used pct",
+                                "formula": "1 - query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "avg:system.mem.pct_usable{$cluster,$host} by {host}"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "custom_links": [],
@@ -1414,14 +1440,14 @@
                 },
                 "markers": [
                     {
-                        "value": "y = 100",
-                        "display_type": "error dashed",
-                        "label": "y = 100"
+                        "label": "y = 1",
+                        "value": "y = 1",
+                        "display_type": "error dashed"
                     },
                     {
-                        "value": "y = 80",
-                        "display_type": "warning dashed",
-                        "label": "y = 80"
+                        "label": "y = 0.8",
+                        "value": "y = 0.8",
+                        "display_type": "warning dashed"
                     }
                 ],
                 "title": "Memory utilization % per node",

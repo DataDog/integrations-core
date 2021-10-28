@@ -25,12 +25,12 @@ from .common import (
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_additional_metrics(aggregator, caplog):
+def test_additional_metrics(aggregator, caplog, dd_run_check):
     instance = copy.deepcopy(MINIMAL_INSTANCE)
     instance['additional_metrics'] = [
         [
             'HTTP Service Request Queues',
-            None,
+            'none',
             'RejectedRequests',
             'iis.httpd_service_request_queues.rejectedrequests',
             'gauge',
@@ -40,17 +40,17 @@ def test_additional_metrics(aggregator, caplog):
     c = IIS(CHECK_NAME, {}, [instance])
 
     with caplog.at_level(logging.DEBUG):
-        c.check(None)
+        dd_run_check(c)
 
         aggregator.assert_metric('iis.httpd_service_request_queues.rejectedrequests')
         assert 'Unknown IIS counter: HTTP Service Request Queues. Falling back to default submission' in caplog.text
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_basic_check(aggregator):
+def test_basic_check(aggregator, dd_run_check):
     instance = MINIMAL_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(None)
+    dd_run_check(c)
     iis_host = c.get_iishost()
 
     namespace_data = ((SITE_METRICS, IIS.SITE, DEFAULT_SITES), (APP_POOL_METRICS, IIS.APP_POOL, DEFAULT_APP_POOLS))
@@ -69,10 +69,10 @@ def test_basic_check(aggregator):
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_check_on_specific_websites_and_app_pools(aggregator):
+def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(None)
+    dd_run_check(c)
     iis_host = c.get_iishost()
 
     namespace_data = (
@@ -99,10 +99,10 @@ def test_check_on_specific_websites_and_app_pools(aggregator):
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_service_check_with_invalid_host(aggregator):
+def test_service_check_with_invalid_host(aggregator, dd_run_check):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(None)
+    dd_run_check(c)
     iis_host = c.get_iishost()
 
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=['site:Total', iis_host])
@@ -110,13 +110,13 @@ def test_service_check_with_invalid_host(aggregator):
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_check(aggregator):
+def test_check(aggregator, dd_run_check):
     """
     Returns the right metrics and service checks
     """
     instance = WIN_SERVICES_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(None)
+    dd_run_check(c)
     iis_host = c.get_iishost()
 
     # Test tag name normalization
@@ -161,14 +161,14 @@ def test_check(aggregator):
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_check_without_sites_specified(aggregator):
+def test_check_without_sites_specified(aggregator, dd_run_check):
     """
     Returns the right metrics and service checks for the `_Total` site
     """
     # Run check
     instance = WIN_SERVICES_MINIMAL_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(None)
+    dd_run_check(c)
     iis_host = c.get_iishost()
 
     namespace_data = ((SITE_METRICS, IIS.SITE, DEFAULT_SITES), (APP_POOL_METRICS, IIS.APP_POOL, DEFAULT_APP_POOLS))

@@ -23,7 +23,7 @@ class MetadataCollector(object):
             self.log.debug('IBM MQ version: %s', raw_version)
             return raw_version
         except Exception as e:
-            self.log.debug("Version could not be retreived: %s", e)
+            self.log.debug("Version could not be retrieved: %s", e)
             return
 
     def _get_version(self, queue_manager):

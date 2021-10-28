@@ -13,7 +13,7 @@ from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCo
 from .config import IBMMQConfig
 
 try:
-    from typing import Any
+    from typing import Any, Dict, List
 except ImportError:
     pass
 
@@ -88,6 +88,7 @@ class IbmMqCheck(AgentCheck):
             self.log.debug('Could not retrieve ibm_mq version info: %s', e)
 
     def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
+        # type: (Dict, Dict, str, List[str]) -> None
         for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:

@@ -18,6 +18,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     collect_response_time: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ip_cache_duration: Optional[float]

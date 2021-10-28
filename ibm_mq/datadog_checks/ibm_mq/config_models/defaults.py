@@ -32,6 +32,10 @@ def instance_convert_endianness(field, value):
     return False
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -54,6 +58,10 @@ def instance_password(field, value):
 
 def instance_port(field, value):
     return 1414
+
+
+def instance_queue_manager_timezone(field, value):
+    return 'Etc/UTC'
 
 
 def instance_queue_patterns(field, value):

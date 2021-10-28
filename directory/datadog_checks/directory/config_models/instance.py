@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     directory: str
     dirs_patterns_full: Optional[bool]
     dirtagname: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exclude_dirs: Optional[Sequence[str]]
     filegauges: Optional[bool]
@@ -33,6 +34,7 @@ class InstanceConfig(BaseModel):
     recursive: Optional[bool]
     service: Optional[str]
     stat_follow_symlinks: Optional[bool]
+    submit_histograms: Optional[bool]
     tags: Optional[Sequence[str]]
 
     @root_validator(pre=True)

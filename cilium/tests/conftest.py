@@ -29,18 +29,6 @@ PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 def setup_cilium():
     config = os.path.join(HERE, 'kind', 'cilium.yaml')
-    run_command(
-        [
-            "kubectl",
-            "create",
-            "clusterrolebinding",
-            "cluster-admin-binding",
-            "--clusterrole",
-            "cluster-admin",
-            "--user",
-            "ddtest@google.email",
-        ]
-    )
     run_command(["kubectl", "create", "ns", "cilium"])
     run_command(["kubectl", "create", "-f", config])
     run_command(
@@ -51,10 +39,12 @@ def setup_cilium():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_cilium]) as kubeconfig:
+    kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
+    with kind_run(conditions=[setup_cilium], kind_config=kind_config) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
+                stack.enter_context(port_forward(kubeconfig, 'cilium', port, 'deployment', 'cilium-operator'))
+                for port in PORTS
             ]
         instances = {
             'instances': [

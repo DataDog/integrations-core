@@ -139,7 +139,7 @@ class MetricTransformer:
 
 def get_native_transformer(check, metric_name, modifiers, global_options):
     """
-    Uses whatever the endpoint describes as the metric type in the first occurence.
+    Uses whatever the endpoint describes as the metric type in the first occurrence.
     """
     transformer = None
 

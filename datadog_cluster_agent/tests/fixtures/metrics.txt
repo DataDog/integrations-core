@@ -1,10 +1,22 @@
 # HELP admission_webhooks_certificate_expiry Time left before the certificate expires in hours.
 # TYPE admission_webhooks_certificate_expiry gauge
 admission_webhooks_certificate_expiry 11.083180892013889
+# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type (agent config, standard tags).
+# TYPE admission_webhooks_mutation_attempts gauge
+admission_webhooks_mutation_attempts{mutation_type="agent_config"} 100
+# HELP admission_webhooks_mutation_errors Number of mutation failures by mutation type (agent config, standard tags).
+# TYPE admission_webhooks_mutation_errors gauge
+admission_webhooks_mutation_errors{mutation_type="agent_config"} 1
+# HELP admission_webhooks_reconcile_errors Number of reconcile errors per controller.
+# TYPE admission_webhooks_reconcile_errors gauge
+admission_webhooks_reconcile_errors{controller="secrets"} 5
 # HELP admission_webhooks_reconcile_success Number of reconcile success per controller.
 # TYPE admission_webhooks_reconcile_success gauge
 admission_webhooks_reconcile_success{controller="secrets"} 221
 admission_webhooks_reconcile_success{controller="webhooks"} 7
+# HELP admission_webhooks_webhooks_received Number of mutation webhook requests received.
+# TYPE admission_webhooks_webhooks_received gauge
+admission_webhooks_webhooks_received 300
 # HELP aggregator__dogstatsd_contexts Count the number of dogstatsd contexts in the aggregator
 # TYPE aggregator__dogstatsd_contexts gauge
 aggregator__dogstatsd_contexts 1
@@ -32,11 +44,17 @@ api_requests{handler="postCheckStatus",status="200"} 11
 cluster_checks_busyness{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-4bhpr"} 5188
 cluster_checks_busyness{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-6x9zl"} 46944
 cluster_checks_busyness{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-czgvd"} 5366
+# HELP cluster_checks_configs_dangling Number of check configurations not dispatched.
+# TYPE cluster_checks_configs_dangling gauge
+cluster_checks_configs_dangling{join_leader="true"} 0
 # HELP cluster_checks_configs_dispatched Number of check configurations dispatched, by node.
 # TYPE cluster_checks_configs_dispatched gauge
 cluster_checks_configs_dispatched{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-4bhpr"} 23
 cluster_checks_configs_dispatched{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-6x9zl"} 14
 cluster_checks_configs_dispatched{join_leader="true",node="datadog-agent-cluster-worker-5fcdf964b7-czgvd"} 22
+# HELP cluster_checks_failed_stats_collection Total number of unsuccessful stats collection attempts
+# TYPE cluster_checks_failed_stats_collection counter
+cluster_checks_failed_stats_collection 1
 # HELP cluster_checks_nodes_reporting Number of node agents reporting.
 # TYPE cluster_checks_nodes_reporting gauge
 cluster_checks_nodes_reporting{join_leader="true"} 3
@@ -65,6 +83,9 @@ compressor__total_payloads 12
 # TYPE datadog_requests counter
 datadog_requests{join_leader="true",status="error"} 2
 datadog_requests{join_leader="true",status="success"} 13006
+# HELP external_metrics Number of external metrics tagged.
+# TYPE external_metrics gauge
+external_metrics{join_leader="true"} 100
 # HELP external_metrics_delay_seconds freshness of the metric evaluated from querying Datadog
 # TYPE external_metrics_delay_seconds gauge
 external_metrics_delay_seconds{join_leader="true",metric="kubernetes.cpu.usage.total"} 41

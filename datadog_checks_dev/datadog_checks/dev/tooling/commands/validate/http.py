@@ -2,30 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 import click
 
+from datadog_checks.dev.tooling.annotations import annotate_error
 from datadog_checks.dev.tooling.utils import complete_valid_checks, get_check_files, get_default_config_spec
-from datadog_checks.dev.utils import print_github_annotation
 
 from ...testing import process_checks_option
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 # Integrations that are not fully updated to http wrapper class but is owned partially by a different organization
 
 EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
-REQUEST_LIBRARY_FUNCTIONS = {
-    'requests.get',
-    'requests.post',
-    'requests.head',
-    'requests.put',
-    'requests.patch',
-    'requests.delete',
-    'requests.options',
-}
-
-TEMPLATES = ['http', 'openmetrics', 'openmetrics_legacy']
+REQUEST_LIBRARY_FUNC_RE = r"requests.[get|post|head|put|patch|delete]*\("
+HTTP_WRAPPER_INIT_CONFIG_RE = r"init_config\/[http|openmetrics_legacy|openmetrics]*"
+HTTP_WRAPPER_INSTANCE_RE = r"instances\/[http|openmetrics_legacy|openmetrics]*"
 
 
 def validate_config_http(file, check):
@@ -39,26 +32,20 @@ def validate_config_http(file, check):
     if not os.path.exists(file):
         return
 
-    has_instance_http = False
-    has_init_config_http = False
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
-        for _, line in enumerate(f):
-            if any('instances/{}'.format(temp) in line for temp in TEMPLATES):
-                has_instance_http = True
-
-            if any('init_config/{}'.format(temp) in line for temp in TEMPLATES):
-                has_init_config_http = True
-
-            if has_init_config_http and has_instance_http:
-                break
+        read_file = f.read()
+        has_init_config_http = re.search(HTTP_WRAPPER_INIT_CONFIG_RE, read_file)
+        has_instance_http = re.search(HTTP_WRAPPER_INSTANCE_RE, read_file)
+        if has_init_config_http and has_instance_http:
+            return
 
     if not has_instance_http:
         message = (
             f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
         )
         echo_failure(message)
-        print_github_annotation(file, message, level="error")
+        annotate_error(file, message)
         has_failed = True
 
     if not has_init_config_http:
@@ -66,7 +53,7 @@ def validate_config_http(file, check):
             f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
         )
         echo_failure(message)
-        print_github_annotation(file, message, level="error")
+        annotate_error(file, message)
         has_failed = True
 
     return has_failed
@@ -82,25 +69,26 @@ def validate_use_http_wrapper_file(file, check):
     file_uses_http_wrapper = False
     has_failed = False
     with open(file, 'r', encoding='utf-8') as f:
-        for num, line in enumerate(f):
-            if ('self.http' in line or 'OpenMetricsBaseCheck' in line) and 'SKIP_HTTP_VALIDATION' not in line:
-                return True, has_failed
+        read_file = f.read()
+        found_match_arg = re.search(r"auth=|header=", read_file)
+        found_http = re.search(r"self.http|OpenMetricsBaseCheck", read_file)
+        skip_validation = re.search(r"SKIP_HTTP_VALIDATION", read_file)
+        if found_http and not skip_validation:
+            return found_http, has_failed, found_match_arg
 
-            for http_func in REQUEST_LIBRARY_FUNCTIONS:
-                if http_func in line:
-                    echo_failure(
-                        f'Check `{check}` uses `{http_func}` on line {num} in `{os.path.basename(file)}`, '
-                        f'please use the HTTP wrapper instead'
-                    )
-                    print_github_annotation(
-                        file,
-                        "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
-                        level="error",
-                        line=num + 1,
-                    )
-                    has_failed = True
+        http_func = re.search(REQUEST_LIBRARY_FUNC_RE, read_file)
+        if http_func:
+            echo_failure(
+                f'Check `{check}` uses `{http_func}` in `{os.path.basename(file)}`, '
+                f'please use the HTTP wrapper instead'
+            )
+            annotate_error(
+                file,
+                "Detected use of `{}`, please use the HTTP wrapper instead".format(http_func),
+            )
+            return False, True, None
 
-    return file_uses_http_wrapper, has_failed
+    return file_uses_http_wrapper, has_failed, None
 
 
 def validate_use_http_wrapper(check):
@@ -113,9 +101,19 @@ def validate_use_http_wrapper(check):
     check_uses_http_wrapper = False
     for file in get_check_files(check, include_tests=False):
         if file.endswith('.py'):
-            file_uses_http_wrapper, file_uses_request_lib = validate_use_http_wrapper_file(file, check)
+            file_uses_http_wrapper, file_uses_request_lib, has_arg_warning = validate_use_http_wrapper_file(file, check)
             has_failed = has_failed or file_uses_request_lib
             check_uses_http_wrapper = check_uses_http_wrapper or file_uses_http_wrapper
+            if check_uses_http_wrapper and has_arg_warning:
+                # Check for headers= or auth=
+                echo_warning(
+                    f"{check}: \n"
+                    f"    The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
+                    f"this configuration is handled by the wrapper automatically.\n"
+                    f"    If this a genuine usage of the parameters, "
+                    f"please inline comment `# SKIP_HTTP_VALIDATION`"
+                )
+                pass
 
     if has_failed:
         abort()

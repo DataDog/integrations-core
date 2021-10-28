@@ -1,6 +1,10 @@
 # CHANGELOG - cassandra
 
-## 1.13.0 / 2021-08-05
+## 1.14.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.13.0 / 2021-08-05 / Agent 7.31.0
 
 * [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
 

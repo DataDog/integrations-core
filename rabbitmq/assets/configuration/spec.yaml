@@ -12,7 +12,7 @@ files:
       required: true
       description: |
         For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-        url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+        url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
       value:
         type: string
         example: http://localhost:15672/api/

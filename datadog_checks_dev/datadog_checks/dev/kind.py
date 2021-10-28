@@ -19,7 +19,7 @@ else:
 
 
 @contextmanager
-def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None, kind_config=None):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
@@ -33,6 +33,8 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
+    :type kind_config: ``str``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
@@ -50,7 +52,7 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
             create_file(kubeconfig_path)
 
         with EnvVars({'KUBECONFIG': kubeconfig_path}):
-            set_up = KindUp(cluster_name)
+            set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
             with environment_run(
@@ -70,12 +72,17 @@ class KindUp(LazyFunction):
     `kind create cluster --name <integration>-cluster`
     """
 
-    def __init__(self, cluster_name):
+    def __init__(self, cluster_name, kind_config):
         self.cluster_name = cluster_name
+        self.kind_config = kind_config
 
     def __call__(self):
         # Create cluster
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True)
+        create_cmd = ['kind', 'create', 'cluster', '--name', self.cluster_name]
+        if self.kind_config:
+            create_cmd += ['--config', self.kind_config]
+
+        run_command(create_cmd, check=True)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True)
 

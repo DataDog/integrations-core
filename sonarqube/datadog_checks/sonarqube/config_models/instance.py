@@ -43,6 +43,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -54,6 +55,7 @@ class InstanceConfig(BaseModel):
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]
     default_tag: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
@@ -81,6 +83,7 @@ class InstanceConfig(BaseModel):
     process_name_regex: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     rmi_client_timeout: Optional[float]
     rmi_connection_timeout: Optional[float]
     rmi_registry_ssl: Optional[bool]

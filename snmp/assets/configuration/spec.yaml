@@ -82,7 +82,7 @@ files:
                   - This means new OIDs are also only picked up every refresh interval.
                   - With auto discovery, if the same IP is assigned to a different device with different OIDs,
                   the OIDs are refreshed only according to the refresh interval.
-          
+
 
         value:
           type: integer
@@ -111,6 +111,23 @@ files:
         value:
           type: boolean
           example: false
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection for all instances.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+            Namespace can be used to disambiguate devices with same IPs.
+            Changing namespace will cause devices being recreated in NDM app.
+            Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: init_config/default
     - template: instances
       options:
@@ -281,13 +298,11 @@ files:
       - name: network_address
         description: |
           The network address of the devices to scan for monitor.
-          Only available using python SNMP integration.
         value:
           type: string
       - name: ignored_ip_addresses
         description: |
           A list of IP addresses to ignore when scanning the network.
-          Only available using python SNMP integration.
         value:
           type: array
           items:
@@ -298,21 +313,25 @@ files:
       - name: discovery_interval
         description: |
           Interval between 2 discovery starts, in seconds.
-          Only available using python SNMP integration.
         value:
           type: integer
           example: 3600
       - name: discovery_allowed_failures
         description: |
           Number of times a discovered host can fail before it is removed from the discovered list.
-          Only available using python SNMP integration.
         value:
           type: integer
           example: 3
       - name: workers
         description: |
-          Number of workers used for check when using discovery.
-          Only available using python SNMP integration.
+          Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
+        value:
+          type: integer
+          example: 5
+      - name: discovery_workers
+        description: |
+          Number of workers used to discover new devices.
+          Only available using corecheck SNMP integration.
         value:
           type: integer
           example: 5
@@ -351,4 +370,21 @@ files:
           type: integer
           example: 3600
           display_default: 0
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - name: namespace
+        description: |
+          Namespace can be used to disambiguate devices with same IPs.
+          Changing namespace will cause devices being recreated in NDM app.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        value:
+          example: default
+          type: string
+          display_default: default
       - template: instances/default

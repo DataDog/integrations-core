@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:fluentd"
-      ]
+      "query_filter": "integration:fluentd",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -11,9 +11,9 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import BLOAT_METRICS, RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -28,8 +28,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-TRACK_ACTIVITY_QUERY_SIZE_QUERY = "SELECT setting FROM pg_settings WHERE name='track_activity_query_size'"
-TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s)"
 
 
 class PostgreSql(AgentCheck):
@@ -54,14 +53,13 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
+        self.pg_settings = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
-        # The value is loaded when connecting to the main database
-        self._db_configured_track_activity_query_size = TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE
 
         # map[dbname -> psycopg connection]
         self._db_pool = {}
@@ -81,11 +79,9 @@ class PostgreSql(AgentCheck):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
 
     def _get_service_check_tags(self):
-        host = self.resolved_hostname if self.resolved_hostname is not None else self._config.host
-        service_check_tags = ["host:%s" % host]
+        service_check_tags = []
         service_check_tags.extend(self._config.tags)
-        service_check_tags = list(set(service_check_tags))
-        return service_check_tags
+        return list(service_check_tags)
 
     def _get_replication_role(self):
         cursor = self.db.cursor()
@@ -127,7 +123,7 @@ class PostgreSql(AgentCheck):
         all_dir_contents = os.listdir(wal_log_dir)
         all_files = [f for f in all_dir_contents if os.path.isfile(os.path.join(wal_log_dir, f))]
 
-        # files extentions that are not valid WAL files
+        # files extensions that are not valid WAL files
         exluded_file_exts = [".backup", ".history"]
         all_wal_files = [
             os.path.join(wal_log_dir, file_name)
@@ -159,15 +155,23 @@ class PostgreSql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self._config.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self._config.host)
+        # type: () -> str
+        if self._resolved_hostname is None:
+            if self._config.dbm_enabled or self.disable_generic_tags:
+                self._resolved_hostname = self.resolve_db_host()
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     @property
     def agent_hostname(self):
+        # type: () -> str
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    def resolve_db_host(self):
+        return agent_host_resolver(self._config.host)
 
     def _run_query_scope(self, cursor, scope, is_custom_metrics, cols, descriptors):
         if scope is None:
@@ -312,6 +316,8 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             metric_scope.extend(RELATION_METRICS)
+            if self._config.collect_bloat_metrics:
+                metric_scope.extend([BLOAT_METRICS])
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -369,6 +375,14 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            if self._config.ssl_cert:
+                args['sslcert'] = self._config.ssl_cert
+            if self._config.ssl_root_cert:
+                args['sslrootcert'] = self._config.ssl_root_cert
+            if self._config.ssl_key:
+                args['sslkey'] = self._config.ssl_key
+            if self._config.ssl_password:
+                args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)
@@ -387,20 +401,26 @@ class PostgreSql(AgentCheck):
         else:
             self.db = self._new_connection(self._config.dbname)
 
-    # Reload the track_activity_query_size setting on a new connection to the main db
-    def _load_query_max_text_size(self, db):
+    # Reload pg_settings on a new connection to the main db
+    def _load_pg_settings(self, db):
         try:
             with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                self.log.debug("Running query [%s]", TRACK_ACTIVITY_QUERY_SIZE_QUERY)
-                cursor.execute(TRACK_ACTIVITY_QUERY_SIZE_QUERY)
-                row = cursor.fetchone()
-                self._db_configured_track_activity_query_size = int(row['setting'])
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
-            self.log.warning("cannot read track_activity_query_size from pg_settings: %s", repr(e))
+                self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                cursor.execute(
+                    PG_SETTINGS_QUERY,
+                    ("pg_stat_statements.max", "track_activity_query_size"),
+                )
+                rows = cursor.fetchall()
+                self.pg_settings.clear()
+                for setting in rows:
+                    name, val = setting
+                    self.pg_settings[name] = val
+        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+            self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
                 1,
-                tags=self._config.tags + ["error:load-track-activity-query-size"] + self._get_debug_tags(),
+                tags=self._config.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
                 hostname=self.resolved_hostname,
             )
 
@@ -419,11 +439,12 @@ class PostgreSql(AgentCheck):
                 db = self._new_connection(dbname)
                 db.set_session(autocommit=True)
                 self._db_pool[dbname] = db
+                if self._config.dbname == dbname:
+                    # reload settings for the main DB only once every time the connection is reestablished
+                    self._load_pg_settings(db)
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
-            if self._config.dbname == dbname:
-                self._load_query_max_text_size(db)
             return db
 
     def _close_db_pool(self):
@@ -566,16 +587,10 @@ class PostgreSql(AgentCheck):
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (
-                self._config.host,
-                self._config.port,
-                self._config.dbname,
-            )
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=self._get_service_check_tags(),
-                message=message,
                 hostname=self.resolved_hostname,
             )
             try:

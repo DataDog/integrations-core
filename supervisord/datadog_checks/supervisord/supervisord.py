@@ -148,7 +148,7 @@ class SupervisordCheck(AgentCheck):
 
             # Report Service Check
             status = DD_STATUS[proc['statename']]
-            msg = self._build_message(proc)
+            msg = self._build_message(proc) if status is not AgentCheck.OK else None
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
             # Report Uptime

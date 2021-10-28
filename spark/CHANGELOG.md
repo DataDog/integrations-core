@@ -1,5 +1,18 @@
 # CHANGELOG - spark
 
+## 2.1.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.21.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8986](https://github.com/DataDog/integrations-core/pull/8986).

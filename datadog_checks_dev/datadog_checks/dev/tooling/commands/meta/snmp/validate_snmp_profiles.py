@@ -76,7 +76,7 @@ def show_report(report):
     if report['failed']:
         echo_failure("FAILED")
     else:
-        echo_success("Successfuly validated")
+        echo_success("Successfully validated")
 
     for display_func, message in report['messages']:
         display_func(message)

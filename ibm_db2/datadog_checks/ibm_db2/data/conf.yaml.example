@@ -51,10 +51,16 @@ instances:
     # port: 50000
 
     ## @param tls_cert - string - optional
-    ## The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
+    ## The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
     ## has to be accessible and readable by the agent user.
     #
     # tls_cert: <TLS_CERT>
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:

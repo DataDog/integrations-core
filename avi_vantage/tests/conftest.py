@@ -10,12 +10,13 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
 
 @pytest.fixture(scope='session')
-def dd_environment(unit_instance):
+def dd_environment(integration_instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     # We need a custom condition to wait a bit longer
     with docker_run(
@@ -25,7 +26,7 @@ def dd_environment(unit_instance):
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
     ):
-        yield unit_instance
+        yield integration_instance
 
 
 @pytest.fixture
@@ -33,6 +34,7 @@ def get_expected_metrics():
     def _get_metrics(endpoint=None):
         with open(os.path.join(HERE, 'compose', 'fixtures', "metrics.json")) as f:
             expected_metrics = json.load(f)
+
         if endpoint is None:
             return expected_metrics
 
@@ -53,12 +55,8 @@ def mock_client():
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
 
         def get(url: AnyStr, *_: Any, **__: Any):
-            response = mock.MagicMock()
             resource = url.split('/')[-1]
-            with open(os.path.join(HERE, 'compose', 'fixtures', f"{resource}_metrics")) as f:
-                content = f.read()
-                response.iter_lines = lambda *_, **__: content.splitlines()
-                return mock.MagicMock(__enter__=mock.MagicMock(return_value=response))
+            return MockResponse(file_path=os.path.join(HERE, 'compose', 'fixtures', f'{resource}_metrics'))
 
         req.Session = mock.MagicMock(return_value=mock.MagicMock(get=get))
         yield

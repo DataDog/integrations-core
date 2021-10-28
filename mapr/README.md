@@ -16,8 +16,8 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 
 - [MapR monitoring][3] is running correctly.
 - You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user.
-- **On a non-secure cluster**: Follow [this guide][12] so that the `dd-agent` user can impersonate this MapR user.
-- **On a secure cluster**: Generate a [long-lived service ticket][5] for this user that is readable by the `dd-agent` user.
+- **On a non-secure cluster**: Follow [this guide][5] so that the `dd-agent` user can impersonate this MapR user.
+- **On a secure cluster**: Generate a [long-lived service ticket][6] for this user that is readable by the `dd-agent` user.
 
 Installation steps for each node:
 
@@ -42,13 +42,13 @@ Installation steps for each node:
 
 #### Metric collection
 
-1. Edit the `mapr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your MapR performance data. See the [sample mapr.d/conf.yaml][6] for all available configuration options.
+1. Edit the `mapr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your MapR performance data. See the [sample mapr.d/conf.yaml][7] for all available configuration options.
 2. Set the `ticket_location` parameter in the config to the path of the long-lived ticket you created.
-3. [Restart the Agent][7].
+3. [Restart the Agent][8].
 
 #### Log collection
 
-MapR uses fluentD for logs. Use the [fluentD datadog plugin][8] to collect MapR logs. The following command downloads and installs the plugin into the right directory.
+MapR uses fluentD for logs. Use the [fluentD datadog plugin][9] to collect MapR logs. The following command downloads and installs the plugin into the right directory.
 
 `curl https://raw.githubusercontent.com/DataDog/fluent-plugin-datadog/master/lib/fluent/plugin/out_datadog.rb -o /opt/mapr/fluentd/fluentd-<VERSION>/lib/fluentd-<VERSION>-linux-x86_64/lib/app/lib/fluent/plugin/out_datadog.rb`
 
@@ -73,17 +73,17 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
   </store>
 ```
 
-Refer to [fluent_datadog_plugin][8] documentation for more details about the options you can use.
+Refer to [fluent_datadog_plugin][9] documentation for more details about the options you can use.
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `mapr` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `mapr` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of default metrics provided by this integration.
+See [metadata.csv][11] for a list of default metrics provided by this integration.
 
 ### Events
 
@@ -91,7 +91,7 @@ The MapR check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -108,19 +108,19 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 
   The Agent embedded environment was not able to run the command `import confluent_kafka`. This means that either the _mapr-streams-library_ was not installed inside the embedded environment, or that it can't find the mapr-core libraries. The error message should give more details.
 
-Need more help? Contact [Datadog support][11].
+Need more help? Contact [Datadog support][13].
 
 
 [1]: https://mapr.com
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://mapr.com/docs/61/AdministratorGuide/Monitoring.html
 [4]: https://mapr.com/docs/61/AdministratorGuide/c-managing-users-and-groups.html
-[5]: https://mapr.com/docs/61/SecurityGuide/GeneratingServiceTicket.html
-[6]: https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://www.rubydoc.info/gems/fluent-plugin-datadog
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datafabric.hpe.com/52/SecurityGuide/t_config_impersonation_notsecure.html?hl=secure%2Ccluster
-[13]: https://github.com/DataDog/integrations-core/blob/master/mapr/assets/service_checks.json
+[5]: https://docs.datafabric.hpe.com/52/SecurityGuide/t_config_impersonation_notsecure.html?hl=secure%2Ccluster
+[6]: https://mapr.com/docs/61/SecurityGuide/GeneratingServiceTicket.html
+[7]: https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/data/conf.yaml.example
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://www.rubydoc.info/gems/fluent-plugin-datadog
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
+[12]: https://github.com/DataDog/integrations-core/blob/master/mapr/assets/service_checks.json
+[13]: https://docs.datadoghq.com/help/

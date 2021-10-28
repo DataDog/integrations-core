@@ -166,8 +166,21 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
     #
-    # exclude_labels:
-    #   - timestamp
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
 
     ## @param bearer_token_auth - boolean - optional - default: false
     ## If set to true, adds a bearer token authentication header.
@@ -477,6 +490,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 10
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 10
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -486,6 +504,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

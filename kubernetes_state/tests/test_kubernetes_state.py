@@ -277,7 +277,7 @@ def assert_not_all_zeroes(aggregator, metric_name):
 
 
 def resourcequota_was_collected(aggregator):
-    """ The metric name is created dynamically so we just check some exist. """
+    """The metric name is created dynamically so we just check some exist."""
     for m in aggregator.metric_names:
         if '.resourcequota.' in m:
             return True
@@ -437,6 +437,18 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     )
     aggregator.assert_metric(
         NAMESPACE + '.deployment.count',
+        tags=['namespace:kube-system', 'optional:tag1'],
+        value=2,
+    )
+
+    # statefulset count
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
         tags=['namespace:kube-system', 'optional:tag1'],
         value=2,
     )
@@ -874,9 +886,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=93895.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=994.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1326.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94412.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1002.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1334.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(

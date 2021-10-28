@@ -4,7 +4,9 @@
 
 import pytest
 
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.base import AgentCheck
+from datadog_checks.dev.jmx import JVM_E2E_METRICS, JVM_E2E_METRICS_NEW
+from datadog_checks.dev.utils import get_metadata_metrics
 
 
 @pytest.mark.e2e
@@ -44,8 +46,5 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric)
 
     tags = ['instance:jboss_wildfly']
-    # TODO: Assert the status "status=AgentCheck.OK"
-    # JMXFetch is currently sending the service check status as string, but should be number.
-    # Add "status=AgentCheck.OK" once that's fixed
-    # See https://github.com/DataDog/jmxfetch/pull/287
-    aggregator.assert_service_check('jboss.can_connect', tags=tags)
+    aggregator.assert_service_check('jboss.can_connect', status=AgentCheck.OK, tags=tags)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)

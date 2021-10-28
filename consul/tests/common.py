@@ -39,7 +39,7 @@ PROMETHEUS_METRICS = [
     'consul.serf.member.update',
 ]
 
-PROMETHEUS_METRICS_1_9 = ['consul.client.rpc.failed']
+PROMETHEUS_METRICS_1_9 = ['consul.client.rpc.failed', 'consul.raft.leader.lastContact.count']
 
 PROMETHEUS_HIST_METRICS = [
     'consul.memberlist.gossip.',
