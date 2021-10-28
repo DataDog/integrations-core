@@ -14,6 +14,7 @@ from datadog_checks.postgres.util import PartialFormatter, fmt
 from .common import (
     COMMON_METRICS,
     DB_NAME,
+    DBM_MIGRATED_METRICS,
     HOST,
     PORT,
     POSTGRES_VERSION,
@@ -240,7 +241,10 @@ def test_correct_hostname(dbm_enabled, expected_hostname, aggregator, pg_instanc
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
-    for name in COMMON_METRICS + ACTIVITY_METRICS:
+    c_metrics = COMMON_METRICS
+    if not dbm_enabled:
+        c_metrics = c_metrics + DBM_MIGRATED_METRICS
+    for name in c_metrics + ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:

@@ -86,6 +86,43 @@ files:
         type: string
         display_default: false
         example: "false"
+    - name: ssl_root_cert
+      description: |
+        The path to the ssl root certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/server-ca.pem"
+    - name: ssl_cert
+      description: |
+        The path to the ssl certificate.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-cert.pem"
+    - name: ssl_key
+      description: |
+        The path to the ssl client key.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "/home/datadog/client-key.pem"
+    - name: ssl_password
+      description: |
+        The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+        in encrypted form on disk.
+
+        For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+      value:
+        type: string
+        display_default: false
+        example: "ssl_key_password"
     - name: query_timeout
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -183,6 +220,12 @@ files:
     - name: collect_default_database
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
+        type: boolean
+        example: false
+    - name: collect_bloat_metrics
+      description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+      enabled: true
+      value: 
         type: boolean
         example: false
     - name: collect_wal_metrics
@@ -320,6 +363,29 @@ files:
           value:
             type: integer
             example: 10000
+    - name: query_activity
+      description: Configure collection of query activity
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query activity collection interval (in seconds). This number cannot be smaller than
+            query_samples configured collection_interval.
+          value:
+            type: number
+            example: 10
+        - name: payload_row_limit
+          description: |
+            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            than the maximum rows set, then the top N longest running transactions will be reported.
+          value:
+            type: number
+            example: 3500
     - name: obfuscator_options
       description: Configure how the SQL obfuscator behaves.
       options:

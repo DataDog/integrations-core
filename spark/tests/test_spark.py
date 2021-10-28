@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import os
 import ssl
 import threading
@@ -16,7 +15,7 @@ from six import iteritems
 from six.moves import BaseHTTPServer
 from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
-from datadog_checks.base import ensure_unicode
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.spark import SparkCheck
 
 from .common import CLUSTER_NAME, CLUSTER_TAGS, INSTANCE_DRIVER_1, INSTANCE_DRIVER_2, INSTANCE_STANDALONE
@@ -161,65 +160,25 @@ FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
 
-class MockedResponse:
-    def __init__(self, json_data, status_code, cookies=None):
-        self.json_data = json_data
-        self.status_code = status_code
-        self.cookies = cookies
-
-    @property
-    def text(self):
-        return ensure_unicode(self.json_data)
-
-    def json(self):
-        return json.loads(self.json_data)
-
-    def raise_for_status(self):
-        return True
-
-
 def yarn_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == YARN_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'yarn_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'yarn_apps'))
     elif arg_url == YARN_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
     elif arg_url == YARN_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
     elif arg_url == YARN_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
     elif arg_url == YARN_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
     elif arg_url == YARN_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
     elif arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
     elif arg_url == YARN_SPARK_METRICS_JSON_URL:
-        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
 def yarn_requests_auth_mock(*args, **kwargs):
@@ -237,206 +196,100 @@ def mesos_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == MESOS_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'mesos_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'mesos_apps'))
     elif arg_url == MESOS_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
     elif arg_url == MESOS_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
     elif arg_url == MESOS_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
     elif arg_url == MESOS_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
     elif arg_url == MESOS_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
     elif arg_url == MESOS_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
     elif arg_url == MESOS_SPARK_METRICS_JSON_URL:
-        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
 def driver_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == DRIVER_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
     elif arg_url == DRIVER_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
     elif arg_url == DRIVER_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
     elif arg_url == DRIVER_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
     elif arg_url == DRIVER_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
     elif arg_url == DRIVER_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
     elif arg_url == DRIVER_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
     elif arg_url == DRIVER_SPARK_METRICS_JSON_URL:
-        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
 def standalone_requests_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
     elif arg_url == STANDALONE_APP_HTML_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
     elif arg_url == STANDALONE_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
     elif arg_url == STANDALONE_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
     elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL:
-        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
 def standalone_requests_pre20_get_mock(url, *args, **kwargs):
     arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
     elif arg_url == STANDALONE_APP_HTML_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps_pre20'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps_pre20'))
     elif arg_url == STANDALONE_SPARK_JOB_URL:
-        return MockedResponse("{}", 404)
-
+        return MockResponse(status_code=404)
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        return MockedResponse("{}", 404)
-
+        return MockResponse(status_code=404)
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        return MockedResponse("{}", 404)
-
+        return MockResponse(status_code=404)
     elif arg_url == STANDALONE_SPARK_RDD_URL:
-        return MockedResponse("{}", 404)
-
+        return MockResponse(status_code=404)
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        return MockedResponse("{}", 404)
-
+        return MockResponse(status_code=404)
     elif arg_url == STANDALONE_SPARK_JOB_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
     elif arg_url == STANDALONE_SPARK_STAGE_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
     elif arg_url == STANDALONE_SPARK_RDD_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
     elif arg_url == VERSION_PATH:
-        with open(os.path.join(FIXTURE_DIR, 'version'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
-
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'version'))
     elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'metrics_json'), 'rb') as f:
-            body = f.read()
-            return MockedResponse(body, 200)
+        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
 
 
 def proxy_with_warning_page_mock(url, *args, **kwargs):
@@ -454,8 +307,7 @@ def proxy_with_warning_page_mock(url, *args, **kwargs):
         url_parts[4] = urlencode(query)
         with open(os.path.join(FIXTURE_DIR, 'html_warning_page'), 'r') as f:
             body = f.read().replace('$REDIRECT_URL$', urlunparse(url_parts))
-            cookies['proxy_cookie'] = 'foo'
-            return MockedResponse(body, 200, cookies)
+            return MockResponse(body, cookies={'proxy_cookie': 'foo'})
 
 
 CHECK_NAME = 'spark'

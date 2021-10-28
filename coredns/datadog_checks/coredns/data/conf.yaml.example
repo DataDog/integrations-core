@@ -52,13 +52,13 @@ instances:
     #
   - prometheus_url: http://%%host%%:9153/metrics
 
-    ## @param tags - list of strings - required
+    ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
-    tags:
-      - dns-pod:%%host%%
+    # tags:
+    #   - dns-pod:%%host%%
 
     ## @param metrics - (list of string or mapping) - optional
     ## List of metrics to be fetched from the prometheus endpoint, if there's a
@@ -450,6 +450,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 10
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 10
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

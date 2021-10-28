@@ -26,7 +26,7 @@ def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
 
-    sc_tags = ['host:localhost', 'port:1234']
+    sc_tags = ['apache_host:localhost', 'port:1234']
     aggregator.assert_service_check('apache.can_connect', Apache.CRITICAL, tags=sc_tags)
     assert len(aggregator._metrics) == 0
 
@@ -41,7 +41,7 @@ def test_no_metrics_failure(aggregator, check):
         "No metrics were fetched for this instance. Make sure that http://localhost:18180 " "is the proper url."
     )
 
-    sc_tags = ['host:localhost', 'port:18180']
+    sc_tags = ['apache_host:localhost', 'port:18180']
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
     assert len(aggregator._metrics) == 0
 
@@ -59,7 +59,7 @@ def test_check(aggregator, check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags, count=1)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -76,7 +76,7 @@ def test_check_auto(aggregator, check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags, count=1)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -90,7 +90,7 @@ def test_e2e(dd_agent_check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
