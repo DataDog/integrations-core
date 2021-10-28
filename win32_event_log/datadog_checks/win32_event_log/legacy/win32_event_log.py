@@ -291,7 +291,7 @@ class LogEvent(object):
         return event_dict
 
     def is_after(self, ts):
-        ''' Compare this event's timestamp to a give timestamp. '''
+        '''Compare this event's timestamp to a give timestamp.'''
         if self.timestamp >= int(calendar.timegm(ts.timetuple())):
             return True
         return False

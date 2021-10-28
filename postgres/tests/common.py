@@ -15,7 +15,6 @@ SCHEMA_NAME = 'schemaname'
 
 COMMON_METRICS = [
     'postgresql.before_xid_wraparound',
-    'postgresql.connections',
     'postgresql.commits',
     'postgresql.rollbacks',
     'postgresql.disk_read',
@@ -29,6 +28,10 @@ COMMON_METRICS = [
     'postgresql.deadlocks',
     'postgresql.temp_bytes',
     'postgresql.temp_files',
+]
+
+DBM_MIGRATED_METRICS = [
+    'postgresql.connections',
 ]
 
 COMMON_BGW_METRICS = [

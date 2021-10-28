@@ -126,7 +126,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
 
     def _is_dogstatsd_configured(self):
-        """ Check if the agent has a consul dogstatsd profile configured """
+        """Check if the agent has a consul dogstatsd profile configured"""
         dogstatsd_mapper = datadog_agent.get_config('dogstatsd_mapper_profiles')
         if dogstatsd_mapper:
             for profile in dogstatsd_mapper:

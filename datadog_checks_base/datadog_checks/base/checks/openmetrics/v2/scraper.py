@@ -46,8 +46,6 @@ class OpenMetricsScraper:
         self.namespace = check.__NAMESPACE__ or config.get('namespace', '')
         if not isinstance(self.namespace, str):
             raise ConfigurationError('Setting `namespace` must be a string')
-        elif not self.namespace:
-            raise ConfigurationError('Setting `namespace` is required')
 
         self.raw_metric_prefix = config.get('raw_metric_prefix', '')
         if not isinstance(self.raw_metric_prefix, str):

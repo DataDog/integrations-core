@@ -378,6 +378,12 @@ files:
                   type: boolean
                   example: false
           - template: instances/default
+            overrides:
+              disable_generic_tags.hidden: false
+              disable_generic_tags.enabled: true
+              disable_generic_tags.description: |
+                  Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+                  other integrations tags.
 
       - template: logs
         example:

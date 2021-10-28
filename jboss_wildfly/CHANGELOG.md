@@ -1,5 +1,10 @@
 # CHANGELOG - JBoss/WildFly
 
+## 1.7.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8940](https://github.com/DataDog/integrations-core/pull/8940).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
 ## 1.6.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
