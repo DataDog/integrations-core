@@ -98,7 +98,7 @@ services:
       KAFKA_JMX_PORT: 31002
 
   ksql-server:
-    image: confluentinc/cp-ksql-server:6.2.0
+    image: confluentinc/cp-ksqldb-server:6.2.0
     hostname: ksql-server
     container_name: ksql-server
     depends_on:
@@ -121,7 +121,7 @@ services:
       KSQL_JMX_PORT: 31004
 
   ksql-datagen:
-    image: confluentinc/ksql-examples:6.2.0
+    image: confluentinc/ksqldb-examples:6.2.0
     hostname: ksql-datagen
     container_name: ksql-datagen
     depends_on:
