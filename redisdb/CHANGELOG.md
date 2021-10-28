@@ -1,5 +1,13 @@
 # CHANGELOG - redisdb
 
+## 4.2.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 4.1.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add runtime configuration validation. See [#8977](https://github.com/DataDog/integrations-core/pull/8977).
+
 ## 4.0.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Make critical service checks more verbose. See [#9280](https://github.com/DataDog/integrations-core/pull/9280).

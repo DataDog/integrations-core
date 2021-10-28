@@ -1,6 +1,17 @@
 # CHANGELOG - oracle
 
-## 3.3.4 / 2021-08-04
+## 3.5.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
+## 3.4.0 / 2021-09-02
+
+* [Added] Add new service check `oracle.can_query`. See [#10004](https://github.com/DataDog/integrations-core/pull/10004).
+
+## 3.3.4 / 2021-08-04 / Agent 7.31.0
 
 * [Fixed] Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
 

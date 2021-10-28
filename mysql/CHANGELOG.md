@@ -1,5 +1,26 @@
 # CHANGELOG - mysql
 
+## 6.1.1 / 2021-10-26
+
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
+
+## 6.1.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] disable generic tags in mysql. See [#10167](https://github.com/DataDog/integrations-core/pull/10167).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+* [Fixed] Avoid re-explaining queries that cannot be explained. See [#9989](https://github.com/DataDog/integrations-core/pull/9989).
+
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add agent version to mysql database monitoring payloads. See [#9916](https://github.com/DataDog/integrations-core/pull/9916).
+* [Added] Add fetching of null row in events_statements_by_digest. See [#9892](https://github.com/DataDog/integrations-core/pull/9892).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Update mysql obfuscator options config. See [#9885](https://github.com/DataDog/integrations-core/pull/9885).
+* [Changed] Send the correct hostname with metrics when DBM is enabled. See [#9878](https://github.com/DataDog/integrations-core/pull/9878).
+
 ## 5.0.4 / 2021-07-22 / Agent 7.30.0
 
 * [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).

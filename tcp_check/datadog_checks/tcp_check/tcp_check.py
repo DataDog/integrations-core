@@ -80,7 +80,7 @@ class TCPCheck(AgentCheck):
             try:
                 self.resolve_ip()
             except Exception as e:
-                self.log.debug(str(e))
+                self.log.error(str(e))
                 msg = "URL: {} could not be resolved".format(self.host)
                 raise CheckException(msg)
         return self._addr
@@ -149,7 +149,7 @@ class TCPCheck(AgentCheck):
                 self._addr = None
 
     def report_as_service_check(self, status, msg=None):
-        if status == AgentCheck.OK:
+        if status is AgentCheck.OK:
             msg = None
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.service_check_tags, message=msg)
         # Report as a metric as well

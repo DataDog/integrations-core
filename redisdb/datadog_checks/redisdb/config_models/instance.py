@@ -21,6 +21,7 @@ class InstanceConfig(BaseModel):
     command_stats: Optional[bool]
     db: Optional[int]
     disable_connection_cache: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     keys: Optional[Sequence[str]]

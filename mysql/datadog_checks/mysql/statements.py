@@ -79,9 +79,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._config = config
         self.log = get_check_logger()
         self._state = StatementMetrics()
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=self._config.full_statement_text_cache_max_size,
@@ -126,6 +124,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
+                'ddagentversion': datadog_agent.get_version(),
                 'min_collection_interval': self._metric_collection_interval,
                 'tags': self._tags,
                 'mysql_rows': rows,
@@ -212,6 +211,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

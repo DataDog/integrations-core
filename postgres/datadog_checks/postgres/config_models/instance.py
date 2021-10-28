@@ -17,7 +17,16 @@ class ObfuscatorOptions(BaseModel):
     class Config:
         allow_mutation = False
 
-    quantize_sql_tables: Optional[bool]
+    replace_digits: Optional[bool]
+
+
+class QueryActivity(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+    payload_row_limit: Optional[float]
 
 
 class QueryMetrics(BaseModel):
@@ -58,6 +67,7 @@ class InstanceConfig(BaseModel):
 
     application_name: Optional[str]
     collect_activity_metrics: Optional[bool]
+    collect_bloat_metrics: Optional[bool]
     collect_count_metrics: Optional[bool]
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
@@ -68,6 +78,7 @@ class InstanceConfig(BaseModel):
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     ignore_databases: Optional[Sequence[str]]
@@ -77,12 +88,17 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     pg_stat_statements_view: Optional[str]
     port: Optional[int]
+    query_activity: Optional[QueryActivity]
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
     relations: Optional[Sequence[Union[str, Relation]]]
     service: Optional[str]
     ssl: Optional[str]
+    ssl_cert: Optional[str]
+    ssl_key: Optional[str]
+    ssl_password: Optional[str]
+    ssl_root_cert: Optional[str]
     table_count_limit: Optional[int]
     tag_replication_role: Optional[bool]
     tags: Optional[Sequence[str]]

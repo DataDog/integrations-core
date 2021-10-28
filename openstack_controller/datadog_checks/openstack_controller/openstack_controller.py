@@ -173,7 +173,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     # Compute
     def _parse_uptime_string(self, uptime):
-        """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
+        """Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'"""
         uptime = uptime.strip()
         load_averages = uptime[uptime.find('load average:') :].split(':')[1].strip().split(',')
         load_averages = [float(load_avg) for load_avg in load_averages]
@@ -758,7 +758,7 @@ class OpenStackControllerCheck(AgentCheck):
                     "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
-                self.warning("Configuration Incomplete: %s! Check your openstack.yaml file", e)
+                self.warning("Configuration Incomplete: %s! Check your openstack_controller config file", e)
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()

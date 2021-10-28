@@ -32,7 +32,7 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
-MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_COMPOSE_VERSION = os.environ.get('IBM_MQ_COMPOSE_VERSION', '')
 MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
 IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
@@ -180,7 +180,10 @@ QUEUE_METRICS = [
 ]
 
 QUEUE_STATUS_METRICS = [
+    ('ibm_mq.queue.oldest_message_age', GAUGE),
     ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+    ('ibm_mq.queue.last_get_time', GAUGE),
+    ('ibm_mq.queue.last_put_time', GAUGE),
 ]
 
 CHANNEL_METRICS = [

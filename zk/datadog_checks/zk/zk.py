@@ -72,7 +72,7 @@ if PY3:
 
 
 class ZKConnectionFailure(Exception):
-    """ Raised when we are unable to connect or get the output of a command. """
+    """Raised when we are unable to connect or get the output of a command."""
 
     pass
 
@@ -143,9 +143,10 @@ class ZookeeperCheck(AgentCheck):
             ruok = ruok_out.readline()
             if ruok == 'imok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.WARNING
-            message = u'Response from the server: %s' % ruok
+                message = u'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -179,7 +180,7 @@ class ZookeeperCheck(AgentCheck):
             if self.expected_mode:
                 if mode == self.expected_mode:
                     status = AgentCheck.OK
-                    message = u"Server is in %s mode" % mode
+                    message = None
                 else:
                     status = AgentCheck.CRITICAL
                     message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
@@ -221,7 +222,7 @@ class ZookeeperCheck(AgentCheck):
         gauges[mode] = 1
         for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
-            self.gauge(gauge_name, v)
+            self.gauge(gauge_name, v, tags=self.base_tags)
 
     @staticmethod
     def _get_data(sock, command):

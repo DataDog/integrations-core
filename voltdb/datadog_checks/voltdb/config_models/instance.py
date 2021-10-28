@@ -43,6 +43,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -50,6 +51,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     extra_headers: Optional[Mapping[str, Any]]
     headers: Optional[Mapping[str, Any]]
@@ -63,11 +65,13 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
+    only_custom_queries: Optional[bool]
     password: str
     password_hashed: Optional[bool]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     statistics_components: Optional[Sequence[str]]

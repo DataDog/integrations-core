@@ -1,5 +1,25 @@
 # CHANGELOG - OpenMetrics
 
+## 1.15.2 / 2021-10-15
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+
+## 1.15.1 / 2021-10-08
+
+* [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).
+
+## 1.15.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8965](https://github.com/DataDog/integrations-core/pull/8965).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Update documentation for v2. See [#10068](https://github.com/DataDog/integrations-core/pull/10068).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.14.1 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Update `metrics` option in legacy OpenMetrics example config. See [#9891](https://github.com/DataDog/integrations-core/pull/9891).
+
 ## 1.14.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).

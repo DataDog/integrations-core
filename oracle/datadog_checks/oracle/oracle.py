@@ -33,6 +33,7 @@ class Oracle(AgentCheck):
     JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
+    SERVICE_CHECK_CAN_QUERY = "can_query"
 
     def __init__(self, name, init_config, instances):
         super(Oracle, self).__init__(name, init_config, instances)
@@ -64,7 +65,8 @@ class Oracle(AgentCheck):
         self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-        self._current_errors = 0
+        self._query_errors = 0
+        self._connection_errors = 0
 
     def _fix_custom_queries(self):
         """
@@ -93,7 +95,7 @@ class Oracle(AgentCheck):
             return cursor.fetchall()
 
     def handle_query_error(self, error):
-        self._current_errors += 1
+        self._query_errors += 1
         try:
             self._cached_connection.close()
         except Exception as e:
@@ -106,11 +108,17 @@ class Oracle(AgentCheck):
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
-        self._current_errors = 0
+        self._query_errors = 0
+        self._connection_errors = 0
 
         self._query_manager.execute()
 
-        if self._current_errors:
+        if self._query_errors:
+            self.service_check(self.SERVICE_CHECK_CAN_QUERY, self.CRITICAL, tags=self._service_check_tags)
+        else:
+            self.service_check(self.SERVICE_CHECK_CAN_QUERY, self.OK, tags=self._service_check_tags)
+
+        if self._connection_errors:
             self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL, tags=self._service_check_tags)
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
@@ -123,6 +131,7 @@ class Oracle(AgentCheck):
                 self._cached_connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
                 self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             elif JDBC_IMPORT_ERROR:
+                self._connection_errors += 1
                 self.log.error(
                     "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
                     "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
@@ -153,6 +162,7 @@ class Oracle(AgentCheck):
                 host, port = self._server.split(':')
                 port = int(port)
         except Exception:
+            self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
         return cx_Oracle.makedsn(host, port, service_name=self._service)
 
@@ -170,6 +180,7 @@ class Oracle(AgentCheck):
             self.log.debug("Connected to Oracle DB using JDBC connector")
             return connection
         except Exception as e:
+            self._connection_errors += 1
             if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                 msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
                 is available.

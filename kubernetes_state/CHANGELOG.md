@@ -1,5 +1,12 @@
 # CHANGELOG - kubernetes_state
 
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add `kubernetes_state.statefulset.count` metric. See [#9813](https://github.com/DataDog/integrations-core/pull/9813).
+* [Fixed] [ksm] Fix statefulset tag. See [#9832](https://github.com/DataDog/integrations-core/pull/9832).
+* [Fixed] Add kube_job tag to job metrics. See [#9775](https://github.com/DataDog/integrations-core/pull/9775).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 5.7.1 / 2021-06-03 / Agent 7.29.0
 
 * [Fixed] Fix `node.by_condition` metric. See [#9467](https://github.com/DataDog/integrations-core/pull/9467).

@@ -1,5 +1,15 @@
 # CHANGELOG - kong
 
+## 1.16.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.15.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] [OpenMetricsV2] Improve label sharing behavior. See [#9804](https://github.com/DataDog/integrations-core/pull/9804).
+
 ## 1.14.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Raise exception if attempting to use new style openmetrics with py2. See [#9613](https://github.com/DataDog/integrations-core/pull/9613).

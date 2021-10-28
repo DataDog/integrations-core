@@ -135,7 +135,6 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
         else config.get('repo', 'core')
     )
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
@@ -156,6 +155,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
             # Repo choices use the integration repo name without the `integrations-` prefix
             config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
+    config['repo_name'] = REPO_CHOICES.get(config['repo_choice'], config['repo_choice'])
     set_root(root)
     return message
 
@@ -232,12 +232,6 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, path)
 
 
-def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula', '')
-    path = os.path.join(get_root(), check_name, *path.split('/'))
-    return path, file_exists(path)
-
-
 def get_jmx_metrics_file(check_name):
     path = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'metrics.yaml')
     return path, file_exists(path)
@@ -272,14 +266,6 @@ def get_check_req_file(check_name):
     return os.path.join(get_root(), check_name, 'requirements.in')
 
 
-def get_config_spec(check_name):
-    if check_name == 'agent':
-        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
-    else:
-        path = load_manifest(check_name).get('assets', {}).get('configuration', {}).get('spec', '')
-        return os.path.join(get_root(), check_name, *path.split('/'))
-
-
 def get_default_config_spec(check_name):
     return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
 
@@ -311,8 +297,12 @@ def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
 
+def get_codeowners_file():
+    return os.path.join(get_root(), '.github', 'CODEOWNERS')
+
+
 def get_codeowners():
-    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    codeowners_file = get_codeowners_file()
     contents = read_file_lines(codeowners_file)
     return contents
 
@@ -551,6 +541,8 @@ def has_e2e(check):
 
 def has_process_signature(check):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -578,6 +570,8 @@ def has_recommended_monitor(check):
 
 def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())

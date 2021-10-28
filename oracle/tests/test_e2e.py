@@ -41,6 +41,7 @@ METRICS = [
     'oracle.tablespace.in_use',
     'oracle.tablespace.offline',
 ]
+SERVICE_CHECKS = ['oracle.can_connect', 'oracle.can_query']
 
 
 @pytest.mark.e2e
@@ -48,4 +49,7 @@ def test_check(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in METRICS:
         aggregator.assert_metric(metric)
+
+    for service_check in SERVICE_CHECKS:
+        aggregator.assert_service_check(service_check)
     aggregator.assert_all_metrics_covered()

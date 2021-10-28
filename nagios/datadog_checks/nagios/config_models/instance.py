@@ -20,6 +20,7 @@ class InstanceConfig(BaseModel):
     collect_events: Optional[bool]
     collect_host_performance_data: Optional[bool]
     collect_service_performance_data: Optional[bool]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
     nagios_conf: str

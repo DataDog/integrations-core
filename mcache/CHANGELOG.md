@@ -1,5 +1,18 @@
 # CHANGELOG - mcache
 
+## 2.1.1 / 2021-10-25
+
+* [Fixed] Fix possible KeyError when collecting metrics. See [#10471](https://github.com/DataDog/integrations-core/pull/10471).
+
+## 2.1.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Add runtime configuration validation. See [#8954](https://github.com/DataDog/integrations-core/pull/8954).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
 ## 1.12.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Upgrade `python-binary-memcached` dependency. See [#9251](https://github.com/DataDog/integrations-core/pull/9251).

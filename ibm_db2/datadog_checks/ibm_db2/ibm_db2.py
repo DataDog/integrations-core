@@ -52,25 +52,33 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
-
-    def check(self, instance):
-        if self._conn is None:
-            connection = self.get_connection()
-            if connection is None:
-                return
-
-            self._conn = connection
-
-        self.collect_metadata()
-
-        for query_method in (
+        self._query_methods = (
             self.query_instance,
             self.query_database,
             self.query_buffer_pool,
             self.query_table_space,
             self.query_transaction_log,
             self.query_custom,
-        ):
+        )
+
+    def check(self, instance):
+        if self._conn is None:
+            connection = self.get_connection()
+            if connection is None:
+                self.service_check(
+                    self.SERVICE_CHECK_CONNECT,
+                    self.CRITICAL,
+                    tags=self._tags,
+                    message="Unable to create new connection to database: {}".format(self._db),
+                )
+                return
+
+            self._conn = connection
+
+        self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+        self.collect_metadata()
+
+        for query_method in self._query_methods:
             try:
                 query_method()
             except ConnectionError:
@@ -559,9 +567,7 @@ class IbmDb2Check(AgentCheck):
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
 
     @classmethod

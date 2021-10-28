@@ -67,6 +67,37 @@ def test_query_function_error(aggregator, instance):
         ibmdb2.log.warning.assert_called_with('Encountered error running `%s`: %s', 'query_instance', exception_msg)
 
 
+def test_non_connection_errors_are_ignored(aggregator, instance):
+    erroring_query = mock.Mock(side_effect=Exception("I'm broken"))
+    erroring_query.__name__ = 'Erroring query'
+
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    ibmdb2._conn = mock.MagicMock()
+    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2._query_methods = (mock.Mock(), erroring_query, mock.Mock())
+
+    ibmdb2.check(instance)
+    for query_method in ibmdb2._query_methods:
+        query_method.assert_called()
+
+
+def test_connection_errors_stops_execution(aggregator, instance):
+    erroring_query = mock.Mock(side_effect=ConnectionError("I'm broken"))
+    erroring_query.__name__ = 'Erroring query'
+
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    ibmdb2._conn = mock.MagicMock()
+    ibmdb2.get_connection = mock.MagicMock()
+    ibmdb2._query_methods = (mock.Mock(), erroring_query, mock.Mock())
+
+    with pytest.raises(ConnectionError):
+        ibmdb2.check(instance)
+
+    ibmdb2._query_methods[0].assert_called()
+    ibmdb2._query_methods[1].assert_called()
+    ibmdb2._query_methods[2].assert_not_called()
+
+
 def test_parse_version(instance):
     raw_version = '11.01.0202'
     check = IbmDb2Check('ibm_db2', {}, [instance])

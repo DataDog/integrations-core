@@ -12,9 +12,9 @@ CHECK_ID = 'test:123'
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_check(aggregator, dd_run_check, check, instance):
     check = check(instance)
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
@@ -23,10 +23,10 @@ def test_check(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, check, instance, datadog_agent):
+def test_metadata(aggregator, dd_run_check, check, instance, datadog_agent):
     check = check(instance)
     check.check_id = CHECK_ID
-    check.check(instance)
+    dd_run_check(check)
 
     major, minor, patch = common.HDFS_RAW_VERSION.split('.')
 

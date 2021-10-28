@@ -32,6 +32,10 @@ def instance_defaults_file(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -50,6 +54,10 @@ def instance_min_collection_interval(field, value):
 
 def instance_obfuscator_options(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_options(field, value):

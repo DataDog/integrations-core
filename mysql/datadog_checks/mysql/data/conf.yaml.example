@@ -83,6 +83,12 @@ instances:
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
 
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
@@ -341,12 +347,12 @@ instances:
     #
     obfuscator_options:
 
-        ## @param quantize_sql_tables - boolean - optional - default: false
-        ## Set to `true` to perform quantization on your SQL tables.
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ##
         ## Note that this option only applies when `dbm` is enabled.
         #
-        # quantize_sql_tables: false
+        # replace_digits: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -376,6 +382,12 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+    ## other integrations tags.
+    #
+    disable_generic_tags: true
 
 ## Log Section
 ##

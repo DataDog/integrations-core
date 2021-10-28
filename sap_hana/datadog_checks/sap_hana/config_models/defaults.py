@@ -8,6 +8,10 @@ def shared_global_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_persist_db_connections(field, value):
+    return True
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
@@ -20,12 +24,24 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
 
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_only_custom_queries(field, value):
+    return False
+
+
+def instance_persist_db_connections(field, value):
+    return True
 
 
 def instance_port(field, value):

@@ -19,6 +19,7 @@ class InstanceConfig(BaseModel):
 
     additional_metrics: Optional[Sequence[str]]
     connect_timeout: Optional[int]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: str
     min_collection_interval: Optional[float]

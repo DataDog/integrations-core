@@ -1,5 +1,13 @@
 # CHANGELOG - ignite
 
+## 2.1.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8937](https://github.com/DataDog/integrations-core/pull/8937).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Change `ignite.total_allocated_pages` and `ignite.total_allocated_size` from monotonic_count to gauge. See [#9939](https://github.com/DataDog/integrations-core/pull/9939).
+
 ## 1.4.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).

@@ -32,6 +32,10 @@ def instance_db(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -42,6 +46,10 @@ def instance_metric_groups(field, value):
 
 def instance_min_collection_interval(field, value):
     return 15
+
+
+def instance_only_custom_queries(field, value):
+    return False
 
 
 def instance_password(field, value):
