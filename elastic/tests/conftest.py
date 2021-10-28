@@ -74,7 +74,7 @@ def dd_environment(instance):
         compose_file=compose_file,
         conditions=[WaitFor(ping_elastic, attempts=100), WaitFor(create_slm, attempts=5)],
         attempts=2,
-        attempt_wait=10,
+        attempts_wait=10,
     ):
         yield instance
 
