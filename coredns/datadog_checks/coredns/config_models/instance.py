@@ -105,7 +105,7 @@ class InstanceConfig(BaseModel):
     send_monotonic_with_gauge: Optional[bool]
     service: Optional[str]
     skip_proxy: Optional[bool]
-    tags: Sequence[str]
+    tags: Optional[Sequence[str]]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
