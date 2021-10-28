@@ -134,7 +134,7 @@ files:
     - name: mappings
       description: |
         Rate mappings. DO NOT EDIT unless you know what you're doing.
-        See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
+        See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
         for the definitive list
       value:
         type: array
