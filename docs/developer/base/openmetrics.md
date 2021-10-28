@@ -2,7 +2,7 @@
 
 -----
 
-OpenMetrics is used for collecting metrics via the CNCF-backed OpenMetrics format. This version is the default version for all new OpenMetric-checks, and it is compatible with Python 3 only.
+OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics format. This version is the default version for all new OpenMetric-checks, and it is compatible with Python 3 only.
 
 ## Interface
 
@@ -18,6 +18,7 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
         - configure_scrapers
 
 ## Scrapers
+
 All functionality is exposed by the `OpenMetricsScraper` class.
 ::: datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper
     rendering:
@@ -50,10 +51,12 @@ All functionality is exposed by the `MetricTransformer` class.
         - normalize_metric_config
 
 ## Options
+
 For complete documentation on every option, see the associated templates for the 
 [instance][config-spec-template-instances-openmetrics] and [init_config][config-spec-template-init-config-openmetrics]
  sections. 
 
 ## Legacy
+
 This OpenMetrics implementation is the updated version of the original Prometheus/OpenMetrics implementation. 
-The docs for the deprecated implementation can be found [here](../legacy/prometheus.md).
+The [docs for the deprecated implementation](../legacy/prometheus.md) are still available as a reference.
