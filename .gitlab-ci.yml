@@ -84,7 +84,6 @@ trigger-agent-build:
     - pipeline_id.txt
     expire_in: 1 day
     when: always
-    allow_failure: true
   tags: [ "runner:main" ]
 
 
@@ -94,6 +93,7 @@ validate-agent-build:
   timeout: 2 hours
   cache:
     <<: *slack-cache
+  allow_failure: true
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
@@ -123,7 +123,6 @@ validate-agent-build:
       else
         echo "A pipeline was not triggered, skipping this job."
       fi
-
   tags: [ "runner:main" ]
 
 notify-slack:
