@@ -357,118 +357,49 @@ def test_submit_gauge_with_labels_mapper(aggregator, mocked_prometheus_check, mo
     )
 
 
-def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """
-    Submitting metrics when filtering with exclude_labels should end up with
-    a filtered tags list
-    """
-    ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
-    )
-    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
-
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['labels_mapper'] = {
-        'my_1st_label': 'transformed_1st',
-        'non_existent': 'should_not_matter',
-        'env': 'dont_touch_custom_tags',
-    }
-    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['exclude_labels'] = [
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]  # custom tags are not filtered out
-    metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
-    aggregator.assert_metric(
-        'prometheus.process.vm.bytes',
-        54927360.0,
-        tags=['env:dev', 'app:my_pretty_app', 'transformed_1st:my_1st_label_value'],
-        count=1,
-    )
-
-
-def test_submit_gauge_with_include_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """
-    Submitting metrics when filtering with include_labels should end up with
-    a filtered tags list
-    """
-    ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
-    )
-    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
-
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['labels_mapper'] = {
-        'my_2nd_label': 'transformed_2nd',
-        'non_existent': 'should_not_matter',
-        'env': 'dont_touch_custom_tags',
-    }
-    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['include_labels'] = [
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]  # custom tags are not filtered out
-    metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
-    aggregator.assert_metric(
-        'prometheus.process.vm.bytes',
-        54927360.0,
-        tags=['env:dev', 'app:my_pretty_app', 'transformed_2nd:my_2nd_label_value'],
-        count=1,
-    )
-
-
+@pytest.mark.parametrize(
+    'excluded_labels, included_labels, expected',
+    (
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            [],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+        (
+            [],
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'my_2nd_label:my_2nd_label_value'],
+        ),
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['my_1st_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+        (
+            ['my_2nd_label', 'whatever_else', 'env'],
+            ['my_1st_label', 'my_2nd_label', 'whatever_else', 'env'],
+            ['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        ),
+    ),
+    ids=(
+        'Test excluded labels.',
+        'Test included labels.',
+        'Test both excluded and included labels, no override.',
+        'Test both excluded and included labels with override.',
+    ),
+)
 def test_submit_gauge_with_exclude_include_labels(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    excluded_labels,
+    included_labels,
+    expected,
 ):
     """
-    Submitting metrics when filtering with both exclude_labels and include_labels should end up with
-    a filtered tags list where include_labels are included and exclude_labels are excluded.
-    """
-    ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
-    )
-    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
-
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['labels_mapper'] = {
-        'my_1st_label': 'transformed_1st',
-        'my_2nd_label': 'transformed_2nd',
-        'non_existent': 'should_not_matter',
-        'env': 'dont_touch_custom_tags',
-    }
-    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['include_labels'] = [
-        'my_1st_label',
-        'whatever_else',
-        'env',
-    ]  # custom tags are not filtered out
-    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['exclude_labels'] = [
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]
-    metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
-
-    aggregator.assert_metric(
-        'prometheus.process.vm.bytes',
-        54927360.0,
-        tags=['env:dev', 'app:my_pretty_app', 'transformed_1st:my_1st_label_value'],
-        count=1,
-    )
-
-
-def test_submit_gauge_with_exclude_include_labels_override(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
-):
-    """
-    Submitting metrics when filtering with both exclude_labels and include_labels should end up with
-    a filtered tags list where labels configured in both options are excluded.
+    Submitting metrics when filtering with exclude_labels and/or include_labels should
+    end up with a filtered tags list, where exclude_labels are excluded and
+    include_labels are included. Labels that are present in both exclude_labels and include_labels are excluded.
     """
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
@@ -478,29 +409,18 @@ def test_submit_gauge_with_exclude_include_labels_override(
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['labels_mapper'] = {
         'my_1st_label': 'transformed_1st_label',
-        'my_2nd_label': 'transformed_2nd',
         'non_existent': 'should_not_matter',
         'env': 'dont_touch_custom_tags',
     }
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['include_labels'] = [
-        'my_1st_label',
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]  # custom tags are not filtered out
-    mocked_prometheus_scraper_config['exclude_labels'] = [
-        'my_2nd_label',
-        'whatever_else',
-        'env',
-    ]
+    mocked_prometheus_scraper_config['exclude_labels'] = excluded_labels
+    mocked_prometheus_scraper_config['include_labels'] = included_labels
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
-
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
-        tags=['env:dev', 'app:my_pretty_app', 'transformed_1st_label:my_1st_label_value'],
+        tags=expected,
         count=1,
     )
 
