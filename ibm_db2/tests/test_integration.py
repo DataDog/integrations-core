@@ -29,6 +29,7 @@ def test_buffer_pool_tags(aggregator, instance):
 
     for metric in metrics.BUFFERPOOL:
         aggregator.assert_metric_has_tag_prefix(metric, 'bufferpool:')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -38,6 +39,7 @@ def test_table_space_tags(aggregator, instance):
 
     for metric in metrics.TABLESPACE:
         aggregator.assert_metric_has_tag_prefix(metric, 'tablespace:')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -47,6 +49,7 @@ def test_table_space_state_change(aggregator, instance):
     check.check(instance)
 
     aggregator.assert_event('State of `USERSPACE1` changed from `test` to `NORMAL`.')
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -75,6 +78,7 @@ def test_custom_queries(aggregator, instance):
             metric_type=3,
             tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -105,6 +109,7 @@ def test_custom_queries_init_config(aggregator, instance):
             metric_type=3,
             tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
 
 @pytest.mark.usefixtures('dd_environment')

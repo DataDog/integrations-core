@@ -1,5 +1,23 @@
 # CHANGELOG - sqlserver
 
+## 6.0.0 / 2021-10-13
+
+* [Fixed] Account for possible nonetype. See [#10257](https://github.com/DataDog/integrations-core/pull/10257).
+* [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+* [Fixed] Remove duplicate names from the list of sql-server metrics to collect. See [#10334](https://github.com/DataDog/integrations-core/pull/10334). Thanks [pedroreys](https://github.com/pedroreys).
+* [Changed] Stop sending FCI metrics when not available. See [#10395](https://github.com/DataDog/integrations-core/pull/10395).
+
+## 5.0.1 / 2021-10-12
+
+* [Fixed] DBM check should use its own connection. See [#10387](https://github.com/DataDog/integrations-core/pull/10387).
+
+## 5.0.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Collect query metrics & plans for Database Monitoring. See [#10234](https://github.com/DataDog/integrations-core/pull/10234).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Changed] Implement disable generic tags. See [#10290](https://github.com/DataDog/integrations-core/pull/10290).
+
 ## 4.1.0 / 2021-08-31
 
 * [Added] Add autodiscovered database connection service check. See [#9900](https://github.com/DataDog/integrations-core/pull/9900).

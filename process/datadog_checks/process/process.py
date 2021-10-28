@@ -260,7 +260,7 @@ class ProcessCheck(AgentCheck):
             except psutil.AccessDenied:
                 self.log.debug("psutil was denied access for method %s", method)
             except psutil.NoSuchProcess:
-                self.warning("Process %s disappeared while scanning", process.pid)
+                self.log.debug("Process %s disappeared while scanning", process.pid)
 
         return result
 
@@ -285,7 +285,7 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('New process in cache: %s', pid)
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.warning('Process %s disappeared while scanning', pid)
+                    self.log.debug('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
                     self.process_list_cache.reset()
