@@ -66,6 +66,8 @@ def dd_environment(config_e2e):
                 CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
                 populate_database,
             ],
+            attempts=2,
+            attempts_wait=10,
         ):
             yield config_e2e, e2e_metadata
 
