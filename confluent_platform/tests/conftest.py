@@ -38,7 +38,7 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Sample loading finished.'),
+            CheckDockerLogs('broker', 'Creating topic _confluent_balancer_partition_samples'),
             # Kafka Schema Registry
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
