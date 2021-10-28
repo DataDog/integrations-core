@@ -21,15 +21,11 @@ Follow the instructions below to configure this check for an Agent running on a 
 To configure this check for an Agent running on a host:
 
 ##### Metric collection
-1. In Consul Connect, enable the config option [`-admin-bind`][5] to configure the port where the Envoy Admin API will be exposed.
+1. In Consul Connect, enable the config option [`-admin-bind`][4] to configure the port where the Envoy Admin API will be exposed.
 
-2. Enable the [Envoy integration][4] to configure metric collection.
+2. Enable the [Envoy integration][5] to configure metric collection.
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 Follow the [Envoy host][6] instructions to configure log collection.  
 
 <!-- xxz tab xxx -->
@@ -45,10 +41,6 @@ Follow the [Envoy containerized instructions][7] to configure your Datadog Agent
  2. Configure the [Envoy integration for containerized environments instructions][9] to start collecting metrics. 
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 Follow the [Envoy containerized instructions][10] to configure log collection.
 
 <!-- xxz tab xxx -->
@@ -79,8 +71,8 @@ Need help? Contact [Datadog support][14].
 [1]: https://www.consul.io/docs/connect#connect
 [2]: https://docs.datadoghq.com/integrations/envoy/
 [3]: https://www.consul.io/docs/connect/proxies/envoy#envoy-integration
-[4]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metric-collection
-[5]: https://www.consul.io/commands/connect/envoy#admin-bind
+[4]: https://www.consul.io/commands/connect/envoy#admin-bind
+[5]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metric-collection
 [6]: https://docs.datadoghq.com/integrations/envoy/?tab=host#log-collection
 [7]: https://docs.datadoghq.com/integrations/envoy/?tab=containerized#containerized
 [8]: https://www.consul.io/docs/connect/proxies/envoy#envoy_stats_bind_addr

@@ -29,10 +29,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -70,10 +66,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
@@ -101,11 +93,11 @@ The Harbor integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][11] for a list of service checks provided by this integration.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 
 [1]: https://goharbor.io
@@ -117,5 +109,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/harbor/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://github.com/DataDog/integrations-core/blob/master/harbor/assets/service_checks.json
+[10]: https://github.com/DataDog/integrations-core/blob/master/harbor/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

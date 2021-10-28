@@ -20,6 +20,10 @@ def shared_timeout(field, value):
     return 10
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_application_status_mapping(field, value):
     return get_default_field_value(field, value)
 
@@ -142,6 +146,10 @@ def instance_queue_blacklist(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
 
 
 def instance_resourcemanager_uri(field, value):

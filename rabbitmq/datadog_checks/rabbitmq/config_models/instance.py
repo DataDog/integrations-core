@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -66,6 +67,7 @@ class InstanceConfig(BaseModel):
     queues_regexes: Optional[Sequence[str]]
     rabbitmq_api_url: str
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     tag_families: Optional[bool]

@@ -1,5 +1,56 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.5 / 2021-10-22
+
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+
+## 23.1.4 / 2021-10-19
+
+* [Fixed] Update tuf to 0.19.0 for Python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+
+## 23.1.3 / 2021-10-15
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.2 / 2021-10-05
+
+* [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
+
+## 23.1.1 / 2021-10-05
+
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
+## 23.1.0 / 2021-10-01
+
+* [Added] Add only_custom_queries option to database utils. See [#10314](https://github.com/DataDog/integrations-core/pull/10314).
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+
+## 23.0.0 / 2021-09-29
+
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228)
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add new function to report dbm-activity events. See [#10223](https://github.com/DataDog/integrations-core/pull/10223).
+* [Changed] DBMAsyncJob send internal metrics as raw. See [#10274](https://github.com/DataDog/integrations-core/pull/10274).
+
+## 22.0.0 / 2021-09-24
+
+* [Added] Upgrade python-dateutil to 2.8.2. See [#10206](https://github.com/DataDog/integrations-core/pull/10206).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Removed] Drop snowflake support from py2, bump requests. See [#10105](https://github.com/DataDog/integrations-core/pull/10105).
+
+## 21.3.0 / 2021-09-21
+
+* [Added] Add force yaml loader utils. See [#10163](https://github.com/DataDog/integrations-core/pull/10163).
+
+## 21.2.1 / 2021-09-20
+
+* [Fixed] Add limit to tag split. See [#10165](https://github.com/DataDog/integrations-core/pull/10165).
+* [Fixed] Revert "Allow non-default yaml loader and dumper (#10032)". See [#10154](https://github.com/DataDog/integrations-core/pull/10154).
+* [Fixed] Fix mypy tests. See [#10134](https://github.com/DataDog/integrations-core/pull/10134).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+* [Fixed] Fix TLSContextWrapper to not override tls_verify. See [#10098](https://github.com/DataDog/integrations-core/pull/10098).
+
 ## 21.2.0 / 2021-09-10
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).

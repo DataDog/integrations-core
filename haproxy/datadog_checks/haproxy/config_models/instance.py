@@ -58,6 +58,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     active_tag: Optional[bool]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -103,6 +104,7 @@ class InstanceConfig(BaseModel):
     prometheus_url: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     send_distribution_buckets: Optional[bool]
     send_distribution_counts_as_monotonic: Optional[bool]
     send_distribution_sums_as_monotonic: Optional[bool]

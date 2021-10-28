@@ -84,7 +84,7 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -96,10 +96,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 <!-- xxz tabs xxx -->
 
 #### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
@@ -123,13 +119,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `supervisord` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `supervisord` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 
@@ -137,24 +133,24 @@ The Supervisor check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Supervisor monitors your processes. Datadog monitors Supervisor.][9]
+- [Supervisor monitors your processes. Datadog monitors Supervisor.][11]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[11]: https://github.com/DataDog/integrations-core/blob/master/supervisord/assets/service_checks.json
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/supervisord/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor

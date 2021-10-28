@@ -38,10 +38,6 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 1. In your `gitlab_runner` [configuration file][8], change the log format to `json` (_Available for Gitlab Runner versions >=11.4.0_ ):
    ```toml

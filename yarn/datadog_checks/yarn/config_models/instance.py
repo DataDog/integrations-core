@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     application_status_mapping: Optional[Mapping[str, Any]]
     application_tags: Optional[Mapping[str, Any]]
     auth_token: Optional[AuthToken]
@@ -65,6 +66,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     queue_blacklist: Optional[Sequence[str]]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     resourcemanager_uri: Optional[str]
     service: Optional[str]
     skip_proxy: Optional[bool]

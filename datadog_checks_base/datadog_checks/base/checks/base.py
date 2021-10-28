@@ -539,6 +539,13 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
+    def database_monitoring_query_activity(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
     ):
@@ -1103,7 +1110,7 @@ class AgentCheck(object):
         return normalized_tags
 
     def degeneralise_tag(self, tag):
-        tag_name, value = tag.split(':')
+        tag_name, value = tag.split(':', 1)
         if tag_name in GENERIC_TAGS:
             new_name = '{}_{}'.format(self.name, tag_name)
             return '{}:{}'.format(new_name, value)

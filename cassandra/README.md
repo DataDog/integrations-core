@@ -36,10 +36,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -82,10 +78,6 @@ For containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
@@ -113,7 +105,7 @@ The Cassandra check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][16] for a list of service checks provided by this integration.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -121,9 +113,9 @@ Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-- [How to monitor Cassandra performance metrics][13]
-- [How to collect Cassandra metrics][14]
-- [Monitoring Cassandra with Datadog][15]
+- [How to monitor Cassandra performance metrics][14]
+- [How to collect Cassandra metrics][15]
+- [Monitoring Cassandra with Datadog][16]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -137,7 +129,7 @@ Need help? Contact [Datadog support][4].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv
-[13]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[14]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[15]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
-[16]: https://github.com/DataDog/integrations-core/blob/master/cassandra/assets/service_checks.json
+[13]: https://github.com/DataDog/integrations-core/blob/master/cassandra/assets/service_checks.json
+[14]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
+[15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
+[16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog

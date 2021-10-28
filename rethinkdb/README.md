@@ -54,10 +54,6 @@ configuration options.
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -98,11 +94,11 @@ RethinkDB does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][13].
 
 
 [1]: https://rethinkdb.com
@@ -116,5 +112,5 @@ Need help? Contact [Datadog support][12].
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
-[12]: https://docs.datadoghq.com/help/
-[13]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/assets/service_checks.json
+[12]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/assets/service_checks.json
+[13]: https://docs.datadoghq.com/help/

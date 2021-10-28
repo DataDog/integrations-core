@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     acl_token: Optional[str]
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -64,6 +65,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     self_leader_check: Optional[bool]
     service: Optional[str]
     services_exclude: Optional[Sequence[str]]

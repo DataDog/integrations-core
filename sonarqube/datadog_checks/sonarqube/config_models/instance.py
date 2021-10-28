@@ -43,6 +43,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -82,6 +83,7 @@ class InstanceConfig(BaseModel):
     process_name_regex: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     rmi_client_timeout: Optional[float]
     rmi_connection_timeout: Optional[float]
     rmi_registry_ssl: Optional[bool]

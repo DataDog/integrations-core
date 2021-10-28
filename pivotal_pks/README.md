@@ -14,10 +14,6 @@ Monitoring PKS requires that you set up the Datadog integration for [Kubernetes]
 
 ### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 The setup is exactly the same as for Kubernetes.

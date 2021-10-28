@@ -36,6 +36,7 @@ class PostgresConfig:
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
+        self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
@@ -54,6 +55,10 @@ class PostgresConfig:
         else:
             self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
 
+        self.ssl_cert = instance.get('ssl_cert', None)
+        self.ssl_root_cert = instance.get('ssl_root_cert', None)
+        self.ssl_key = instance.get('ssl_key', None)
+        self.ssl_password = instance.get('ssl_password', None)
         self.table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         self.collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
@@ -61,6 +66,7 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', False)):
@@ -81,6 +87,7 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = {
@@ -98,7 +105,8 @@ class PostgresConfig:
             tags = list(set(custom_tags))
 
         # preset tags to host
-        tags.append('server:{}'.format(self.host))
+        if not self.disable_generic_tags:
+            tags.append('server:{}'.format(self.host))
         if self.port:
             tags.append('port:{}'.format(self.port))
         else:

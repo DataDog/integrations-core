@@ -67,10 +67,6 @@ If you plan to use the `enable_health_service_checks` configuration, give the Da
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -111,11 +107,11 @@ MarkLogic does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 
 [1]: https://www.marklogic.com
@@ -128,5 +124,5 @@ Need help? Contact [Datadog support][11].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/marklogic/metadata.csv
-[11]: https://docs.datadoghq.com/help
-[12]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json
+[11]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help

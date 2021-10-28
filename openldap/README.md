@@ -102,10 +102,6 @@ To configure this check for an Agent running on a host:
 
 ###### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
@@ -145,10 +141,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 
 ###### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][5].
@@ -180,11 +172,11 @@ The openldap check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][9] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -194,5 +186,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://github.com/DataDog/integrations-core/blob/master/openldap/assets/service_checks.json
+[8]: https://github.com/DataDog/integrations-core/blob/master/openldap/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

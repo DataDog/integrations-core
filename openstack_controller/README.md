@@ -54,10 +54,6 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, you can enable it in `datadog.yaml`:
 
    ```yaml
@@ -73,7 +69,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
        source: openstack
    ```
 
-    Change the `path` parameter value and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][7] for all available configuration options.
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options.
    
 
 ### Validation
@@ -92,11 +88,11 @@ OpenStack Controller does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 
 [1]: https://www.openstack.org
@@ -104,6 +100,5 @@ Need help? Contact [Datadog support][6].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
-[8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
+[6]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/

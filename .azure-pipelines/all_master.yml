@@ -13,7 +13,7 @@ variables:
 resources:
   containers:
     - container: dd_agent
-      image: datadog/agent:latest
+      image: gcr.io/datadoghq/agent:latest
       ports:
         - 8127:8126
       env:

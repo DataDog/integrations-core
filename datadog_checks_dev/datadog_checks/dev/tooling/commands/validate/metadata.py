@@ -8,8 +8,9 @@ from collections import defaultdict
 import click
 
 from ...annotations import annotate_display_queue
+from ...manifest_utils import Manifest
 from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_metadata_file, load_manifest, normalize_display_name, read_metadata_rows
+from ...utils import complete_valid_checks, get_metadata_file, normalize_display_name, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -45,6 +46,17 @@ EXCLUDE_INTEGRATIONS = [
     'tcp',
 ]
 
+VALID_TIME_UNIT_NAMES = {
+    'nanosecond',
+    'microsecond',
+    'millisecond',
+    'second',
+    'minute',
+    'hour',
+    'day',
+    'week',
+}
+
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
 # pyperclip.copy('\n'.join("    '{}',".format(line.split(',')[2]) for line in pyperclip.paste().splitlines()))
@@ -52,11 +64,17 @@ VALID_UNIT_NAMES = {
     'name',
     'bit',
     'byte',
+    'kilobyte',
     'kibibyte',
+    'megabyte',
     'mebibyte',
+    'gigabyte',
     'gibibyte',
+    'terabyte',
     'tebibyte',
+    'petabyte',
     'pebibyte',
+    'exabyte',
     'exbibyte',
     'microsecond',
     'millisecond',
@@ -260,7 +278,11 @@ def metadata(check, check_duplicates, show_warnings):
 
     # If a check is specified, abort if it doesn't have a metadata file
     if check not in ('all', 'changed') and not checks:
-        abort(f'Metadata file for {check} not found.')
+
+        # only abort if we have an integration and require a manifest file
+        manifest = Manifest.load_manifest(check)
+        if manifest.has_integration():
+            abort(f'Metadata file for {check} not found.')
 
     errors = False
 
@@ -269,14 +291,18 @@ def metadata(check, check_duplicates, show_warnings):
         if current_check.startswith('datadog_checks_'):
             continue
 
-        # get any manifest info needed for validation
-        manifest = load_manifest(current_check)
+        # get any manifest info needed for validation - and skip if no integration included in manifest
+        manifest = Manifest.load_manifest(current_check)
+        if not manifest.has_integration():
+            echo_success(f"Skipping {check} - metadata not required since this check doesn't contain an integration.")
+            continue
+
         try:
-            metric_prefix = manifest['metric_prefix'].rstrip('.')
+            metric_prefix = manifest.get_metric_prefix().rstrip('.')
         except KeyError:
             metric_prefix = None
 
-        display_name = manifest['display_name']
+        display_name = manifest.get_display_name()
 
         metadata_file = get_metadata_file(current_check)
         display_queue.append((echo_debug, f"Checking {metadata_file}"))
@@ -371,6 +397,18 @@ def metadata(check, check_duplicates, show_warnings):
                 errors = True
                 display_queue.append(
                     (echo_failure, f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
+                )
+
+            # Check if unit/per_unit is valid
+            if row['unit_name'] in VALID_TIME_UNIT_NAMES and row['per_unit_name'] in VALID_TIME_UNIT_NAMES:
+                errors = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"{current_check}:{line} `{row['unit_name']}/{row['per_unit_name']}` unit is invalid, "
+                        f"use the fraction unit instead. If `{row['unit_name']}` and `{row['per_unit_name']}` "
+                        "are not the same unit, eg ms/s, note that in the description.",
+                    )
                 )
 
             # integration header

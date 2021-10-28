@@ -70,7 +70,9 @@ def dd_environment(instance):
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
     compose_file = os.path.join(HERE, 'compose', compose_file)
 
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(ping_elastic), WaitFor(create_slm, attempts=5)]):
+    with docker_run(
+        compose_file=compose_file, conditions=[WaitFor(ping_elastic, attempts=100), WaitFor(create_slm, attempts=5)]
+    ):
         yield instance
 
 

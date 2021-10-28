@@ -56,8 +56,10 @@ REL_METRICS = {
         'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
         'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
         'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+        'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
         'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
         'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
+        'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
     },
     'query': """
 SELECT relname,schemaname,{metrics_columns}
@@ -191,7 +193,7 @@ BLOAT_METRICS = {
     'relation': True,
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS, BLOAT_METRICS]
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
 
 
 class RelationsManager(object):

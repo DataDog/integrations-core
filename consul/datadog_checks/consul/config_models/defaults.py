@@ -24,6 +24,10 @@ def instance_acl_token(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -138,6 +142,10 @@ def instance_proxy(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 16
 
 
 def instance_self_leader_check(field, value):

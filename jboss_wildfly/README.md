@@ -38,10 +38,6 @@ To configure this check for an Agent running on a host:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -72,10 +68,6 @@ _Available for Agent versions >6.0_
 For containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 ##### Log collection
-
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
 
 _Available for Agent versions >6.0_
 

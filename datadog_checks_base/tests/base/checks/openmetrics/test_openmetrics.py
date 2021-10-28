@@ -20,28 +20,10 @@ from six import iteritems
 from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockResponse
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', 'fixtures', 'prometheus'))
-
-
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-        self.encoding = 'utf-8'
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def close(self):
-        pass
-
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
@@ -106,27 +88,17 @@ def text_data():
     # Loading test text data
     f_name = os.path.join(FIXTURE_PATH, 'metrics.txt')
     with open(f_name, 'r') as f:
-        text_data = f.read()
-        assert len(text_data) == 14494
+        data = f.read()
+        assert len(data) == 14494
 
-    return text_data
+    yield data
 
 
-@pytest.fixture()
-def mock_get():
-    text_data = None
-    f_name = os.path.join(FIXTURE_PATH, 'ksm.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': text_content_type},
-        ),
-    ):
-        yield text_data
+@pytest.fixture
+def mock_get(mock_http_response):
+    yield mock_http_response(
+        file_path=os.path.join(FIXTURE_PATH, 'ksm.txt'), headers={'Content-Type': text_content_type}
+    ).return_value.text
 
 
 def test_config_instance(mocked_prometheus_check):
@@ -141,7 +113,7 @@ def test_config_instance(mocked_prometheus_check):
 
 def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
     check = mocked_prometheus_check
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
@@ -153,7 +125,7 @@ def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_c
 
 
 def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
-    """ Gauge ref submission """
+    """Gauge ref submission"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['_dry_run'] = False
     check.process_metric(ref_gauge, mocked_prometheus_scraper_config)
@@ -162,7 +134,7 @@ def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_promet
 
 
 def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Metric absent from the metrics_mapper """
+    """Metric absent from the metrics_mapper"""
     filtered_gauge = GaugeMetricFamily(
         'process_start_time_seconds', 'Start time of the process since unix epoch in seconds.'
     )
@@ -209,7 +181,7 @@ def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_co
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes',
         'Virtual memory size in bytes.',
@@ -239,7 +211,7 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
 def test_submit_gauge_with_labels_and_hostname_override(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -275,7 +247,7 @@ def test_submit_gauge_with_labels_and_hostname_override(
 def test_submit_gauge_with_labels_and_hostname_override_empty_label(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain empty label_to_hostname """
+    """submitting metrics that contain empty label_to_hostname"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -298,7 +270,7 @@ def test_submit_gauge_with_labels_and_hostname_override_empty_label(
 def test_submit_gauge_with_labels_and_hostname_already_overridden(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -344,7 +316,7 @@ def test_labels_not_added_as_tag_once_for_each_metric(
 def test_submit_gauge_with_custom_tags(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge
 ):
-    """ Providing custom tags should add them as is on the gauge call """
+    """Providing custom tags should add them as is on the gauge call"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
     mocked_prometheus_scraper_config['_metric_tags'] = ['foo:bar']
@@ -727,7 +699,7 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
     expected_metric.add_metric(['heapster-v1.4.3'], 1)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     mocked_prometheus_scraper_config['_text_filter_blacklist'] = ["deployment=\"kube-dns\""]
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
@@ -760,7 +732,7 @@ def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_metric([], 1)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -792,7 +764,7 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.name = 'go_memstats_mallocs_total'
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -850,7 +822,7 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -984,7 +956,7 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
     assert 1 == len(metrics)
@@ -1086,7 +1058,7 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1124,7 +1096,7 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1213,7 +1185,7 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1276,7 +1248,7 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="POST"} 150\n'
     )
 
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1344,7 +1316,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
         'random_histogram_count{url="http://127.0.0.1:8080/api",verb="GET"} 70\n'
     )
 
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1396,7 +1368,7 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
         'rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755\n'
     )
 
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1467,7 +1439,7 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
     expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.99"}, 25763.0)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1510,7 +1482,7 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
     expected_etcd_metric.add_metric(["prometheus"], 5.0, 120512.0)
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1565,7 +1537,7 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
 
@@ -1606,7 +1578,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     )
 
     # Iter on the generator to get all metrics
-    response = MockResponse(text_data, text_content_type)
+    response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
     assert 1 == len(metrics)
@@ -1706,7 +1678,7 @@ def test_ignore_metrics_multiple_wildcards(
 
 
 def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
     )
@@ -1726,7 +1698,7 @@ def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, m
 
 
 def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node', 'worker_name']
     )
@@ -1757,7 +1729,7 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
 
 
 def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
     )
@@ -1860,7 +1832,7 @@ def test_match_metrics_multiple_wildcards(
 
 
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join on text format """
+    """Tests label join on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2247,7 +2219,7 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
 
 
 def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join GC on text format """
+    """Tests label join GC on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2305,7 +2277,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
 
 def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join missconfigured label is ignored """
+    """Tests label join missconfigured label is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2344,7 +2316,7 @@ def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_
 
 
 def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join on non existing matching label is ignored """
+    """Tests label join on non existing matching label is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2367,7 +2339,7 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
 def test_label_join_metric_not_existing(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get
 ):
-    """ Tests label join on non existing metric is ignored """
+    """Tests label join on non existing metric is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2388,7 +2360,7 @@ def test_label_join_metric_not_existing(
 
 
 def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2464,7 +2436,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
 
 def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2491,7 +2463,7 @@ def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_promet
 
 
 def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2518,7 +2490,7 @@ def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prom
 
 
 def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Tests endpoint health service check OK """
+    """Tests endpoint health service check OK"""
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2535,7 +2507,7 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
 
 
 def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Tests endpoint health service check failing """
+    """Tests endpoint health service check failing"""
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2606,7 +2578,7 @@ def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_che
 def test_filter_metrics(
     aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
 ):
-    """ Tests label join GC on text format """
+    """Tests label join GC on text format"""
     check = mocked_filter_openmetrics_check
     mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
     mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {
@@ -2627,7 +2599,7 @@ def test_filter_metrics(
 def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
 
     check.check(instance)
     datadog_agent.assert_metadata_count(0)
@@ -2638,7 +2610,7 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
     instance['metadata_metric_name'] = 'kubernetes_build_info'
     instance['metadata_label_map'] = {'version': 'gitVersion'}
     check = mocked_openmetrics_check_factory(instance)
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
 
     version_metadata = {
         'version.major': '1',
@@ -2734,7 +2706,7 @@ def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
@@ -2757,7 +2729,7 @@ def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data)
     config = check.get_scraper_config(instance)
     config['_dry_run'] = False
 
-    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, headers={'Content-Type': text_content_type}))
     check.process(config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)

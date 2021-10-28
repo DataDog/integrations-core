@@ -213,7 +213,7 @@ class ProcessCheck(AgentCheck):
             self.last_ad_cache_ts[name] = time.time()
         return matching_pids
 
-    def psutil_wrapper(self, process, method, accessors, try_sudo, *args, **kwargs):
+    def psutil_wrapper(self, process, method, accessors=None, *args, **kwargs):
         """
         A psutil wrapper that is calling
         * psutil.method(*args, **kwargs) and returns the result
@@ -260,11 +260,11 @@ class ProcessCheck(AgentCheck):
             except psutil.AccessDenied:
                 self.log.debug("psutil was denied access for method %s", method)
             except psutil.NoSuchProcess:
-                self.warning("Process %s disappeared while scanning", process.pid)
+                self.log.debug("Process %s disappeared while scanning", process.pid)
 
         return result
 
-    def get_process_state(self, name, pids, try_sudo):
+    def get_process_state(self, name, pids):
         st = defaultdict(list)
 
         # Remove from cache the processes that are not in `pids`
@@ -285,7 +285,7 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('New process in cache: %s', pid)
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.warning('Process %s disappeared while scanning', pid)
+                    self.log.debug('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
                     self.process_list_cache.reset()
@@ -293,27 +293,27 @@ class ProcessCheck(AgentCheck):
 
             p = self.process_cache[name][pid]
 
-            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'], try_sudo)
+            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'])
             st['rss'].append(meminfo.get('rss'))
             st['vms'].append(meminfo.get('vms'))
 
-            mem_percent = self.psutil_wrapper(p, 'memory_percent', None, try_sudo)
+            mem_percent = self.psutil_wrapper(p, 'memory_percent')
             st['mem_pct'].append(mem_percent)
 
             # will fail on win32 and solaris
-            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared'], try_sudo).get('shared')
+            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared']).get('shared')
             if shared_mem is not None and meminfo.get('rss') is not None:
                 st['real'].append(meminfo['rss'] - shared_mem)
             else:
                 st['real'].append(None)
 
-            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'], try_sudo)
+            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'])
             st['ctx_swtch_vol'].append(ctxinfo.get('voluntary'))
             st['ctx_swtch_invol'].append(ctxinfo.get('involuntary'))
 
-            st['thr'].append(self.psutil_wrapper(p, 'num_threads', None, try_sudo))
+            st['thr'].append(self.psutil_wrapper(p, 'num_threads'))
 
-            cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None, try_sudo)
+            cpu_percent = self.psutil_wrapper(p, 'cpu_percent')
             cpu_count = psutil.cpu_count()
             if not new_process:
                 # psutil returns `0.` for `cpu_percent` the
@@ -324,12 +324,10 @@ class ProcessCheck(AgentCheck):
                     st['cpu_norm'].append(cpu_percent / cpu_count)
                 else:
                     self.log.debug('could not calculate the normalized cpu pct, cpu_count: %s', cpu_count)
-            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
-            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
+            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds'))
+            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles'))
 
-            ioinfo = self.psutil_wrapper(
-                p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'], try_sudo
-            )
+            ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
             st['r_count'].append(ioinfo.get('read_count'))
             st['w_count'].append(ioinfo.get('write_count'))
             st['r_bytes'].append(ioinfo.get('read_bytes'))
@@ -349,7 +347,7 @@ class ProcessCheck(AgentCheck):
                 st['cmajflt'].append(None)
 
             # calculate process run time
-            create_time = self.psutil_wrapper(p, 'create_time', None, try_sudo)
+            create_time = self.psutil_wrapper(p, 'create_time')
             if create_time is not None:
                 now = time.time()
                 run_time = now - create_time
@@ -383,7 +381,7 @@ class ProcessCheck(AgentCheck):
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
-                pass
+                self.log.debug("Unable to get children for process because process %s does not exist", pid)
 
         return children_pids
 
@@ -441,7 +439,7 @@ class ProcessCheck(AgentCheck):
         if self.user:
             pids = self._filter_by_user(self.user, pids)
 
-        proc_state = self.get_process_state(self.name, pids, self.try_sudo)
+        proc_state = self.get_process_state(self.name, pids)
 
         # FIXME 8.x remove the `name` tag
         tags.extend(['process_name:{}'.format(self.name), self.name])
@@ -482,6 +480,7 @@ class ProcessCheck(AgentCheck):
         try:
             return {psutil.Process(pid).pid}
         except psutil.NoSuchProcess:
+            self.log.debug("Unable to get pid set, process %s does not exist", pid)
             return set()
 
     def _process_service_check(self, name, nb_procs, bounds, tags):
@@ -533,6 +532,7 @@ class ProcessCheck(AgentCheck):
                 else:
                     self.log.debug("Discarding pid %s not belonging to %s", pid, user)
             except psutil.NoSuchProcess:
+                self.log.debug("Unable to filter pids by username, process %s does not exist", pid)
                 pass
 
         return filtered_pids

@@ -80,10 +80,6 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
 #### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -103,17 +99,17 @@ If [TLS/SSL][5] is enabled on the client HTTP port:
 
   3. [Restart the Agent][4].
 
-  See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+  See [Datadog's documentation][6] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `voltdb` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `voltdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 
@@ -121,11 +117,11 @@ This check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][10] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
@@ -136,8 +132,8 @@ Need help? Contact [Datadog support][8].
 [3]: https://github.com/DataDog/integrations-core/blob/master/voltdb/datadog_checks/voltdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-[10]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json
+[6]: https://docs.datadoghq.com/agent/kubernetes/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

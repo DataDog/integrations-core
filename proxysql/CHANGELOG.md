@@ -1,5 +1,9 @@
 # CHANGELOG - ProxySQL
 
+## 3.2.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
 ## 3.1.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add runtime configuration validation. See [#8975](https://github.com/DataDog/integrations-core/pull/8975).

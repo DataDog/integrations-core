@@ -8,7 +8,7 @@
 
 ### Installation
 
-The Prisma Cloud Compute Edition check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
+The Prisma Cloud Compute Edition check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -21,16 +21,16 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `twistlock.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your twistlock performance data. See the [sample twistlock.d/conf.yaml][3] for all available configuration options.
+1. Edit the `twistlock.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your twistlock performance data. See the [sample twistlock.d/conf.yaml][2] for all available configuration options.
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][3].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -70,13 +70,9 @@ spec:
 
 ##### Log collection
 
-{{< site-region region="us3" >}}
-**Log collection is not supported for this site.**
-{{< /site-region >}}
-
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][5].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
@@ -105,7 +101,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
 
-4. [Restart the Agent][4].
+4. [Restart the Agent][3].
 
 ###### Docker
 
@@ -121,22 +117,22 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
 
-3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][11].
+3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8].
 
-4. [Restart the Agent][4].
+4. [Restart the Agent][3].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `twistlock` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `twistlock` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 
@@ -144,22 +140,22 @@ Prisma Cloud Compute Edition sends an event when a new CVE is found.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][12].
 
 
 [1]: https://www.paloaltonetworks.com/prisma/cloud
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[2]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[5]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
 [7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
-[8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[9]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
-[12]: https://github.com/DataDog/integrations-core/blob/master/twistlock/assets/service_checks.json
+[8]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/twistlock/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help/

@@ -91,6 +91,13 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -247,13 +254,11 @@ instances:
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
-    ## Only available using python SNMP integration.
     #
     # network_address: <NETWORK_ADDRESS>
 
     ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
-    ## Only available using python SNMP integration.
     #
     # ignored_ip_addresses:
     #   - <IP_ADDRESS_1>
@@ -261,21 +266,24 @@ instances:
 
     ## @param discovery_interval - integer - optional - default: 3600
     ## Interval between 2 discovery starts, in seconds.
-    ## Only available using python SNMP integration.
     #
     # discovery_interval: 3600
 
     ## @param discovery_allowed_failures - integer - optional - default: 3
     ## Number of times a discovered host can fail before it is removed from the discovered list.
-    ## Only available using python SNMP integration.
     #
     # discovery_allowed_failures: 3
 
     ## @param workers - integer - optional - default: 5
-    ## Number of workers used for check when using discovery.
-    ## Only available using python SNMP integration.
+    ## Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
     #
     # workers: 5
+
+    ## @param discovery_workers - integer - optional - default: 5
+    ## Number of workers used to discover new devices.
+    ## Only available using corecheck SNMP integration.
+    #
+    # discovery_workers: 5
 
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
@@ -306,6 +314,13 @@ instances:
     ##         the OIDs are refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
+
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
