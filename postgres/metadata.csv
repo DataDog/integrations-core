@@ -78,4 +78,5 @@ postgresql.queries.local_blks_dirtied,count,,block,,"Total number of local block
 postgresql.queries.local_blks_written,count,,block,,"Total number of local blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks written
 postgresql.queries.temp_blks_read,count,,block,,"Total number of temp blocks read per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks read
 postgresql.queries.temp_blks_written,count,,block,,"Total number of temp blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks written
-postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file,0,postgres,wal age
+postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file.,0,postgres,wal age
+postgresql.function.calls,rate,,,,The number of calls made to a function.,0,postgres,postgres_function_calls
