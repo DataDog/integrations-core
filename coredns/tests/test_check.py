@@ -27,7 +27,7 @@ class TestCoreDNS:
 
         for metric in metrics:
             aggregator.assert_metric(metric)
-        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
     def test_docker(self, aggregator, dd_environment, dockerinstance):
@@ -42,4 +42,4 @@ class TestCoreDNS:
             aggregator.assert_metric(metric)
 
         aggregator.assert_all_metrics_covered()
-        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

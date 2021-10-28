@@ -14,13 +14,15 @@ def test__get_config(check, instance):
     """
     Test the _get_config method
     """
-    _, user, password, service, jdbc_driver, tags, only_custom_queries = check._get_config(instance)
-    assert user == 'system'
-    assert password == 'oracle'
-    assert service == 'xe'
-    assert jdbc_driver is None
-    assert tags == ['optional:tag1']
-    assert only_custom_queries is False
+    check = Oracle(CHECK_NAME, {}, [instance])
+
+    assert check._user == 'system'
+    assert check._password == 'oracle'
+    assert check._service == 'xe'
+    assert check._jdbc_driver is None
+    assert check._tags == ['optional:tag1']
+    assert check._service_check_tags == ['server:{}'.format(instance['server']), 'optional:tag1']
+    assert len(check._query_manager.queries) == 3
 
 
 def test_check_misconfig(instance):

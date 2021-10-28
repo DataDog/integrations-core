@@ -4,14 +4,12 @@
 
 ## Overview
 
-This check monitors [Spark][13] through the Datadog Agent. Collect Spark metrics for:
+This check monitors [Spark][2] through the Datadog Agent. Collect Spark metrics for:
 
 - Drivers and executors: RDD blocks, memory used, disk used, duration, etc.
 - RDDs: partition count, memory used, and disk used.
 - Tasks: number of tasks active, skipped, failed, and total.
 - Job state: number of jobs active, completed, skipped, and failed.
-
-**Note**: Spark Structured Streaming metrics are not supported.
 
 ## Setup
 
@@ -21,9 +19,12 @@ The Spark check is included in the [Datadog Agent][3] package. No additional ins
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. The following parameters may require updating. See the [sample spark.d/conf.yaml][5] for all available configuration options.
 
@@ -48,9 +49,12 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                             |
 | -------------------- | ----------------------------------------------------------------- |
@@ -58,8 +62,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
-##### Log collection
+### Log collection
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -84,18 +90,17 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 3. [Restart the Agent][6].
 
-See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
-
+See [Datadog's documentation][8] for additional information on how to configure the Agent for log collection in Docker environments.
 
 ### Validation
 
-Run the Agent's [status subcommand][7] and look for `spark` under the Checks section.
+Run the Agent's [status subcommand][9] and look for `spark` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 
@@ -103,46 +108,36 @@ The Spark check does not include any events.
 
 ### Service Checks
 
-The Agent submits one of the following service checks, depending on how you're running Spark:
-
-**spark.standalone_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Standalone Master. Returns `OK` otherwise.
-
-**spark.mesos_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Mesos Master. Returns `OK` otherwise.
-
-**spark.application_master.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ApplicationMaster. Returns `OK` otherwise.
-
-**spark.resource_manager.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
-
-**spark.driver.can_connect**<br>
-Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 ### Spark on AWS EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent][10] and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][11].
+To receive metrics for Spark on AWS EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
+
+For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][14].
+
+For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configuration file with the [proper values on each EMR node][14].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Hadoop & Spark monitoring with Datadog][12]
+- [Hadoop and Spark monitoring with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[2]: https://spark.apache.org/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
-[9]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
-[10]: https://docs.datadoghq.com/agent/
-[11]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
-[12]: https://www.datadoghq.com/blog/monitoring-spark
-[13]: https://spark.apache.org/
-[14]:  https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/docker/log/
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/spark/assets/service_checks.json
+[12]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
+[13]: https://docs.datadoghq.com/agent/
+[14]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
+[15]: https://www.datadoghq.com/blog/monitoring-spark

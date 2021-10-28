@@ -230,6 +230,9 @@ GALERA_VARS = {
     'wsrep_cluster_size': ('mysql.galera.wsrep_cluster_size', GAUGE),
     'wsrep_local_recv_queue_avg': ('mysql.galera.wsrep_local_recv_queue_avg', GAUGE),
     'wsrep_flow_control_paused': ('mysql.galera.wsrep_flow_control_paused', GAUGE),
+    'wsrep_flow_control_paused_ns': ('mysql.galera.wsrep_flow_control_paused_ns', MONOTONIC),
+    'wsrep_flow_control_recv': ('mysql.galera.wsrep_flow_control_recv', MONOTONIC),
+    'wsrep_flow_control_sent': ('mysql.galera.wsrep_flow_control_sent', MONOTONIC),
     'wsrep_cert_deps_distance': ('mysql.galera.wsrep_cert_deps_distance', GAUGE),
     'wsrep_local_send_queue_avg': ('mysql.galera.wsrep_local_send_queue_avg', GAUGE),
 }
@@ -241,9 +244,21 @@ PERFORMANCE_VARS = {
 
 SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
+
+# Vars found in "show slave status" or "show replication status" (depending on mysql version)
 REPLICA_VARS = {
-    'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
+    'Seconds_Behind_Source': [  # for 8 onwards
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),  # for retrocompatibility
+    ],
+    'Seconds_Behind_Master': [  # before 8
+        ('mysql.replication.seconds_behind_source', GAUGE),
+        ('mysql.replication.seconds_behind_master', GAUGE),
+    ],
+    'Replicas_connected': [
+        ('mysql.replication.slaves_connected', GAUGE),
+        ('mysql.replication.replicas_connected', GAUGE),
+    ],
 }
 
 SYNTHETIC_VARS = {

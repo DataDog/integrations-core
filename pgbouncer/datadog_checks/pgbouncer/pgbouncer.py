@@ -4,11 +4,11 @@
 import re
 
 import psycopg2 as pg
-import psycopg2.extras as pgextras
+from psycopg2 import extras as pgextras
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
+from datadog_checks.pgbouncer.metrics import CONFIG_METRICS, DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
 class ShouldRestartException(Exception):
@@ -55,7 +55,7 @@ class PgBouncer(AgentCheck):
     def _collect_stats(self, db):
         """Query pgbouncer for various metrics"""
 
-        metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS]
+        metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS, CONFIG_METRICS]
 
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
@@ -67,18 +67,23 @@ class PgBouncer(AgentCheck):
                     try:
                         self.log.debug("Running query: %s", query)
                         cursor.execute(query)
-
                         rows = cursor.fetchall()
 
-                    except pg.Error:
-                        self.log.exception("Not all metrics may be available")
+                    except Exception as e:
+                        self.log.exception("Not all metrics may be available: %s", str(e))
 
                     else:
                         for row in rows:
                             self.log.debug("Processing row: %r", row)
 
+                            if 'key' in row:  # We are processing "config metrics"
+                                # Make a copy of the row to allow mutation
+                                # (a `psycopg2.lib.extras.DictRow` object doesn't accept a new key)
+                                row = row.copy()
+                                # We flip/rotate the row: row value becomes the column name
+                                row[row['key']] = row['value']
                             # Skip the "pgbouncer" database
-                            if row['database'] == self.DB_NAME:
+                            elif row.get('database') == self.DB_NAME:
                                 continue
 
                             tags = list(self.tags)
@@ -132,7 +137,7 @@ class PgBouncer(AgentCheck):
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
             self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message,
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message
             )
             raise
 
@@ -157,11 +162,7 @@ class PgBouncer(AgentCheck):
             db = self._get_connection(use_cached=False)
             self._collect_stats(db)
 
-        redacted_dsn = self._get_redacted_dsn()
-        message = u'Established connection to {}'.format(redacted_dsn)
-        self.service_check(
-            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message,
-        )
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags())
         self._set_metadata()
 
     def _set_metadata(self):

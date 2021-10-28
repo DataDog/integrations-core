@@ -1,0 +1,59 @@
+- name: host
+  required: false
+  description: |
+    The host the current check connects to.
+    "." means the current host
+  value:
+    example: .
+    type: string
+- name: username
+  required: false
+  description: The username from the credentials needed to connect to the host.
+  value:
+    type: string
+- name: password
+  required: false
+  description: The password from the credentials needed to connect to the host.
+  value:
+    type: string
+- name: additional_metrics
+  required: false
+  description: |
+    The additional metrics is a list of items that represent additional counters to collect.
+    Each item is a list of strings, formatted as follows:
+
+    ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
+
+    <COUNTERSET_NAME> is the name of the PDH counter set (the name of the counter).
+    <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
+                            "Default Web Site".  Specify 'none' for all instances of
+                            the counter.
+    <COUNTER_NAME> is the individual counter to report.
+    <METRIC_NAME> is the name that displays in Datadog.
+    <METRIC_TYPE> is from the standard choices for all Agent checks, such as gauge,
+                  rate, histogram, or count.
+  value:
+    example:
+    - ['Processor', none, '% Processor Time', processor.time, gauge]
+    - ['Processor', none, '% User Time', processor.user.time, gauge]
+    type: array
+    compact_example: true
+    items:
+      type: array
+      items:
+        type: string
+- name: counter_data_types
+  required: false
+  description: |
+    counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
+    allow the precision in which counters are queried on a per metric basis.
+    <METRIC_NAME>: The name of your metric
+    <DATA_TYPE>  : The type of your metric (int or float)
+  value:
+      example:
+        - <METRIC_NAME>,<DATA_TYPE>
+        - processor.time,int
+        - processor.user.time,float
+      type: array
+      items:
+        type: string

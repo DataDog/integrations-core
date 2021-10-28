@@ -60,6 +60,10 @@ The `dd_mypy_args` defines the [mypy command line option][mypy-command-line] for
 - `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
 - `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
 
+The `datadog_checks/ tests/` arguments represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
+
+For a complete example, see the [`datadog_checks_base` tox configuration][datadog-checks-base-tox-ini].
+
 Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
 
 ### Example
@@ -84,7 +88,7 @@ class RethinkDBCheck(AgentCheck):
         Collect metrics from the RethinkDB cluster we are connected to.
         """
         for query in self.queries:
-            for metric in query.run(logger=self.log, conn=conn, config=self.config):
+            for metric in query.run(logger=self.log, conn=conn, config=self._config):
                 yield metric
 ```
 

@@ -2,6 +2,7 @@
   "categories": [
     "aws",
     "containers",
+    "log collection",
     "orchestration"
   ],
   "creates_events": false,
@@ -13,7 +14,7 @@
   "metric_prefix": "ecs.",
   "metric_to_check": "ecs.fargate.cpu.user",
   "name": "ecs_fargate",
-  "public_title": "Datadog-Amazon Fargate Integration",
+  "public_title": "Datadog-Amazon ECS on AWS Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "support": "core",
   "supported_os": [
@@ -24,11 +25,15 @@
   "type": "check",
   "integration_id": "aws-fargate",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

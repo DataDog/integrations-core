@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Squid][9] metrics from the Cache Manager through the Datadog Agent.
+This check monitors [Squid][1] metrics from the Cache Manager through the Datadog Agent.
 
 ## Setup
 
@@ -12,9 +12,12 @@ The Agent's Squid check is included in the [Datadog Agent][2] package. No additi
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -50,9 +53,12 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -66,21 +72,24 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "squid", "service": "<YOUR_APP_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `squid` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `squid` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
@@ -88,20 +97,21 @@ The Squid check does not include any events.
 
 ### Service Checks
 
-**squid.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Squid to collect metrics, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][11].
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+
+[1]: http://www.squid-cache.org/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: http://www.squid-cache.org/
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[7]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/squid/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

@@ -1,0 +1,34 @@
+{{
+  "display_name": "{integration_name}",
+  "maintainer": "{email}",
+  "manifest_version": "1.0.0",
+  "name": "snmp_{check_name}",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "Collect SNMP metrics from your {integration_name} network devices.",
+  "guid": "{guid}",
+  "support": "{support_type}",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-{integration_name}",
+  "categories": [ 
+    "monitoring", 
+    "notification", 
+    "network", 
+    "autodiscovery",
+    "snmp"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "snmp-{integration_id}",
+  "assets": {{
+    "dashboards": {{}},
+    "saved_views": {{}},
+    "monitors": {{}},
+    "service_checks": "assets/service_checks.json",
+    "logs": {{}}
+  }}
+}}

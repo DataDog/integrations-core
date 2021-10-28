@@ -1,0 +1,432 @@
+{
+    "title": "Marathon - Overview",
+    "description": "",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.cpus{$app,$version} by {app_id,version}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "CPUs configured for apps",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": -3.552713678800501e-15,
+                "y": 35,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.disk{$app,$version} by {app_id,version}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Disk configured for apps",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": -3.552713678800501e-15,
+                "y": 51,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:marathon.instances{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Number of instances",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 96,
+                "y": 51,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.queue.count{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Queue count",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 96,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.tasksStaged{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Staged tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 48,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.tasksHealthy{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Healthy tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 48,
+                "y": 34,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.tasksRunning{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Running tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 48,
+                "y": 0,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.tasksUnhealthy{$app,$version} by {app_id,version}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Unhealthy tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 48,
+                "y": 51,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:marathon.apps{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Number of apps",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": -3.552713678800501e-15,
+                "y": 9,
+                "width": 14,
+                "height": 9
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:marathon.mem{$app,$version} by {app_id,version}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Memory configured for apps",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": -3.552713678800501e-15,
+                "y": 19,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:marathon.queue.size{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Queue size",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 33,
+                "y": 9,
+                "width": 14,
+                "height": 9
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:marathon.deployments{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Number of deployments",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 15,
+                "y": 9,
+                "width": 17,
+                "height": 9
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:marathon.backoffFactor{$app,$version} by {app_id,version}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backoff factor",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 96,
+                "y": 17,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:marathon.backoffSeconds{$app,$version} by {app_id,version}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backoff seconds",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 96,
+                "y": 34,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "check_status",
+                "title": "Marathon - Can Connect",
+                "title_size": "16",
+                "title_align": "center",
+                "check": "marathon.can_connect",
+                "grouping": "cluster",
+                "group_by": ["url"],
+                "tags": ["*"]
+            },
+            "layout": {
+                "x": -3.552713678800501e-15,
+                "y": 0,
+                "width": 47,
+                "height": 8
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "app",
+            "default": "*",
+            "prefix": "app_id"
+        },
+        {
+            "name": "version",
+            "default": "*",
+            "prefix": "version"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 245
+}

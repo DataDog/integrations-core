@@ -7,6 +7,7 @@ files:
     - template: init_config/jmx
       overrides:
         is_jmx.value.example: false
+    - template: init_config/http
   - template: instances
     options:
     - name: mc_health_check_endpoint
@@ -33,6 +34,11 @@ files:
         port.display_priority: 9
         port.description: Hazelcast or Hazelcast Management Center port with which to connect.
         port.value.example: 1099
+        password.description: |
+          Password to use when connecting to JMX or HTTP depending on which is enabled.
+    - template: instances/http
+      overrides:
+        password.hidden: true
   - template: logs
     example:
     - type: file

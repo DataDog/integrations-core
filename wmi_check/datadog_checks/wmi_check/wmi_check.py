@@ -37,7 +37,7 @@ class WMICheck(WinWMICheck):
         # Create or retrieve an existing WMISampler
         metric_name_and_type_by_property, properties = self.get_wmi_properties()
 
-        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters)
+        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters, tag_by=self.tag_by)
 
         # Sample, extract & submit metrics
         try:

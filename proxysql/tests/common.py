@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.dev import get_docker_hostname
+
 GLOBAL_METRICS = (
     'proxysql.active_transactions',
     'proxysql.query_processor_time_pct',
@@ -99,3 +105,89 @@ ALL_METRICS = (
     + USER_TAGS_METRICS
     + QUERY_RULES_TAGS_METRICS
 )
+
+DOCKER_HOST = get_docker_hostname()
+MYSQL_PORT = 6612
+PROXY_PORT = 6033
+PROXY_ADMIN_PORT = 6032
+MYSQL_USER = 'proxysql'
+MYSQL_PASS = 'pass'
+PROXY_ADMIN_USER = 'proxy'
+PROXY_ADMIN_PASS = 'proxy'
+PROXY_STATS_USER = 'proxystats'
+PROXY_STATS_PASS = 'proxystats'
+MYSQL_DATABASE = 'test'
+PROXY_MAIN_DATABASE = 'main'
+PROXYSQL_VERSION = os.environ['PROXYSQL_VERSION']
+
+BASIC_INSTANCE = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
+    'tags': ["application:test"],
+    'additional_metrics': [],
+}
+
+
+BASIC_INSTANCE_TLS = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
+    'tags': ["application:test"],
+    'additional_metrics': [],
+    'tls_verify': True,
+    'tls_ca_cert': "/etc/ssl/certs/proxysql-ca.pem",
+    'tls_validate_hostname': True,
+}
+
+
+INSTANCE_ALL_METRICS = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
+    'tags': ["application:test"],
+    'additional_metrics': [
+        'command_counters_metrics',
+        'connection_pool_metrics',
+        'users_metrics',
+        'memory_metrics',
+        'query_rules_metrics',
+    ],
+}
+
+INSTANCE_ALL_METRICS_STATS = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_STATS_USER,
+    'password': PROXY_STATS_PASS,
+    'database_name': PROXY_MAIN_DATABASE,
+    'tags': ["application:test"],
+    'additional_metrics': [
+        'command_counters_metrics',
+        'connection_pool_metrics',
+        'users_metrics',
+        'memory_metrics',
+        'query_rules_metrics',
+    ],
+}
+
+
+def mock_executor(result=()):
+    def executor(_):
+        return result
+
+    return executor
+
+
+def create_query_manager(*args, **kwargs):
+    executor = kwargs.pop('executor', None)
+    if executor is None:
+        executor = mock_executor()
+
+    check = kwargs.pop('check', None) or AgentCheck('test', {}, [{}])
+    check.check_id = 'test:instance'
+
+    return QueryManager(check, executor, args, **kwargs)

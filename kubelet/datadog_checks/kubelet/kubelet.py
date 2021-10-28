@@ -3,37 +3,25 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import json
 import logging
 import re
 import sys
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime, timedelta
 
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
+from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
+from .common import CADVISOR_DEFAULT_PORT, PodListUtils, replace_container_rt_prefix
 from .prometheus import CadvisorPrometheusScraperMixin
 from .summary import SummaryScraperMixin
-
-try:
-    from datadog_agent import get_config
-except ImportError:
-
-    def get_config(key):
-        return ""
-
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
@@ -70,11 +58,15 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
 }
 
 DEPRECATED_GAUGES = {
     'kubelet_runtime_operations': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+    'kubelet_docker_operations': 'kubelet.docker.operations',
+    'kubelet_docker_operations_errors': 'kubelet.docker.errors',
 }
 
 NEW_1_14_GAUGES = {
@@ -99,58 +91,45 @@ DEFAULT_SUMMARIES = {}
 
 DEPRECATED_SUMMARIES = {
     'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_latency_microseconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_latency_microseconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_latency_microseconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_latency_microseconds': 'kubelet.runtime.operations.duration',
+    'kubelet_docker_operations_latency_microseconds': 'kubelet.docker.operations.duration',
 }
 
 NEW_1_14_SUMMARIES = {}
 
 TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
+    'kubelet_pod_start_duration_seconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_worker_duration_seconds': 'kubelet.pod.worker.duration',
+    'kubelet_pod_worker_start_duration_seconds': 'kubelet.pod.worker.start.duration',
+    'kubelet_runtime_operations_duration_seconds': 'kubelet.runtime.operations.duration',
 }
+
+DEFAULT_MAX_DEPTH = 10
+DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
+DEFAULT_ENABLED_GAUGES = [
+    'memory.cache',
+    'memory.usage',
+    'memory.swap',
+    'memory.working_set',
+    'memory.rss',
+    'filesystem.usage',
+]
+DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
 log = logging.getLogger('collector')
 
 
-class ExpiredPodFilter(object):
-    """
-    Allows to filter old pods out of the podlist by providing a decoding hook
-    """
-
-    def __init__(self, cutoff_date):
-        self.expired_count = 0
-        self.cutoff_date = cutoff_date
-
-    def json_hook(self, obj):
-        # Not a pod (hook is called for all objects)
-        if 'metadata' not in obj or 'status' not in obj:
-            return obj
-
-        # Quick exit for running/pending containers
-        pod_phase = obj.get('status', {}).get('phase')
-        if pod_phase in ["Running", "Pending"]:
-            return obj
-
-        # Filter out expired terminated pods, based on container finishedAt time
-        expired = True
-        for ctr in obj['status'].get('containerStatuses', []):
-            if "terminated" not in ctr.get("state", {}):
-                expired = False
-                break
-            finishedTime = ctr["state"]["terminated"].get("finishedAt")
-            if not finishedTime:
-                expired = False
-                break
-            if parse_rfc3339(finishedTime) > self.cutoff_date:
-                expired = False
-                break
-        if not expired:
-            return obj
-
-        # We are ignoring this pod
-        self.expired_count += 1
-        return None
-
-
-class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, CadvisorScraper, SummaryScraperMixin):
+class KubeletCheck(
+    CadvisorPrometheusScraperMixin,
+    OpenMetricsBaseCheck,
+    CadvisorScraper,
+    SummaryScraperMixin,
+    KubeletBase,
+):
     """
     Collect metrics from Kubelet.
     """
@@ -177,6 +156,22 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         inst = instances[0] if instances else None
 
         cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
+
+        if len(inst.get('ignore_metrics', {})) > 0:
+            # Add entries from configuration to ignore_metrics in the cadvisor collector.
+            cadvisor_instance['ignore_metrics'].extend(
+                m for m in inst.get('ignore_metrics', {}) if m not in cadvisor_instance['ignore_metrics']
+            )
+
+        # configuring the collection of some of the metrics (via the cadvisor or the summary endpoint)
+        self.max_depth = inst.get('max_depth', DEFAULT_MAX_DEPTH)
+        enabled_gauges = inst.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
+        self.enabled_gauges = ["{0}.{1}".format(self.NAMESPACE, x) for x in enabled_gauges]
+        enabled_rates = inst.get('enabled_rates', DEFAULT_ENABLED_RATES)
+        self.enabled_rates = ["{0}.{1}".format(self.NAMESPACE, x) for x in enabled_rates]
+        pod_level_metrics = inst.get('pod_level_metrics', DEFAULT_POD_LEVEL_METRICS)
+        self.pod_level_metrics = ["{0}.{1}".format(self.NAMESPACE, x) for x in pod_level_metrics]
+
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
         generic_instances = [cadvisor_instance, kubelet_instance]
         super(KubeletCheck, self).__init__(name, init_config, generic_instances)
@@ -242,7 +237,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         )
         return kubelet_instance
 
-    def _create_pod_tags_by_pvc(self, pods):
+    def _create_pod_tags_by_pvc(self, pod_list):
         """
         Return a map, e.g.
             {
@@ -252,7 +247,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         that can be used to add pod tags to associated volume metrics
         """
         pod_tags_by_pvc = defaultdict(set)
-        for pod in pods['items']:
+        pods = pod_list.get('items', [])
+        for pod in pods:
             # get kubernetes namespace of PVC
             kube_ns = pod.get('metadata', {}).get('namespace')
             if not kube_ns:
@@ -294,7 +290,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
-            raise CheckException("Unable to detect the kubelet URL automatically.")
+            raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -361,58 +357,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         # Free up memory
         self.pod_list = None
         self.pod_list_utils = None
-
-    def perform_kubelet_query(self, url, verbose=True, timeout=10, stream=False):
-        """
-        Perform and return a GET request against kubelet. Support auth and TLS validation.
-        """
-        with disable_warnings_ctx(InsecureRequestWarning, disable=not self.kubelet_credentials.verify()):
-            return requests.get(
-                url,
-                timeout=timeout,
-                verify=self.kubelet_credentials.verify(),
-                cert=self.kubelet_credentials.cert_pair(),
-                headers=self.kubelet_credentials.headers(url),
-                params={'verbose': verbose},
-                stream=stream,
-            )
-
-    def retrieve_pod_list(self):
-        try:
-            cutoff_date = self._compute_pod_expiration_datetime()
-            with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
-                if cutoff_date:
-                    f = ExpiredPodFilter(cutoff_date)
-                    pod_list = json.load(r.raw, object_hook=f.json_hook)
-                    pod_list['expired_count'] = f.expired_count
-                    if pod_list.get("items") is not None:
-                        # Filter out None items from the list
-                        pod_list['items'] = [p for p in pod_list['items'] if p is not None]
-                else:
-                    pod_list = json.load(r.raw)
-
-            if pod_list.get("items") is None:
-                # Sanitize input: if no pod are running, 'items' is a NoneObject
-                pod_list['items'] = []
-            return pod_list
-        except Exception as e:
-            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s', self.pod_list_url, e)
-            return None
-
-    @staticmethod
-    def _compute_pod_expiration_datetime():
-        """
-        Looks up the agent's kubernetes_pod_expiration_duration option and returns either:
-          - None if expiration is disabled (set to 0)
-          - A (timezone aware) datetime object to compare against
-        """
-        try:
-            seconds = int(get_config("kubernetes_pod_expiration_duration"))
-            if seconds == 0:  # Expiration disabled
-                return None
-            return datetime.utcnow().replace(tzinfo=UTC) - timedelta(seconds=seconds)
-        except (ValueError, TypeError):
-            return None
 
     def _retrieve_node_spec(self):
         """
@@ -501,7 +445,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         pods_tag_counter = defaultdict(int)
         containers_tag_counter = defaultdict(int)
-        for pod in pods['items']:
+        for pod in pods.get('items', []):
             # Containers reporting
             containers = pod.get('status', {}).get('containerStatuses', [])
             has_container_running = False
@@ -539,7 +483,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     def _report_container_spec_metrics(self, pod_list, instance_tags):
         """Reports pod requests & limits by looking at pod specs."""
-        for pod in pod_list['items']:
+        for pod in pod_list.get('items', []):
             pod_name = pod.get('metadata', {}).get('name')
             pod_phase = pod.get('status', {}).get('phase')
             if self._should_ignore_pod(pod_name, pod_phase):
@@ -587,7 +531,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         if pod_list.get('expired_count'):
             self.gauge(self.NAMESPACE + '.pods.expired', pod_list.get('expired_count'), tags=instance_tags)
 
-        for pod in pod_list['items']:
+        for pod in pod_list.get('items', []):
             pod_name = pod.get('metadata', {}).get('name')
             pod_uid = pod.get('metadata', {}).get('uid')
 

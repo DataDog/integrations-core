@@ -1,0 +1,42 @@
+{
+    "title": "Gearman - Metrics",
+    "description": "An overview of your Gearman metrics",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:gearman.running{$scope}"
+                    },
+                    {
+                        "q": "sum:gearman.queued{$scope}"
+                    },
+                    {
+                        "q": "sum:gearman.workers{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Gearman - Tasks and workers"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:gearman.unique_tasks{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Gearman - Unique tasks"
+            }
+        }
+    ]
+}

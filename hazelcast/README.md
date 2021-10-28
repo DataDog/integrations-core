@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Hazelcast][1].
+This check monitors [Hazelcast][1] v4.0+.
 
 ## Setup
 
@@ -13,9 +13,12 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -99,6 +102,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 5. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -112,6 +118,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "hazelcast", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -149,9 +158,14 @@ Represents the state of the Hazelcast Management Center as indicated by its heal
 
 Hazelcast does not include any events.
 
+### Service Checks
+
+See [service_checks.json][14] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
 
 [1]: https://hazelcast.org
 [2]: https://docs.datadoghq.com/agent/
@@ -166,3 +180,4 @@ Need help? Contact [Datadog support][5].
 [11]: https://docs.datadoghq.com/agent/docker/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/assets/service_checks.json

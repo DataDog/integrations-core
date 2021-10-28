@@ -14,3 +14,11 @@ def set_default_driver_conf():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
         # `freetds` is shipped with the Docker Agent.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+    else:
+        # required when using pyodbc with FreeTDS on Ubuntu 18.04
+        # see https://stackoverflow.com/a/22988748/1258743
+        os.environ.setdefault('TDSVER', '8.0')
+
+
+def construct_use_statement(database):
+    return 'use [{}]'.format(database)

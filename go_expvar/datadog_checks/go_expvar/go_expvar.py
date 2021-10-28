@@ -130,11 +130,11 @@ class GoExpvar(AgentCheck):
         self.parse_expvar_data(data, tags, metrics, max_metrics, namespace)
 
     def parse_expvar_data(self, data, tags, metrics, max_metrics, namespace):
-        '''
+        """
         Report all the metrics based on the configuration in instance
         If a metric is not well configured or is not present in the payload,
         continue processing metrics but log the information to the info page
-        '''
+        """
         count = 0
         for metric in metrics:
             path = metric.get(PATH)
@@ -170,7 +170,14 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s", actual_path, value)
+                    if isinstance(value, dict):
+                        self.log.warning(
+                            "Path %s is a mapping; specify a more specific path to report a value: %s",
+                            actual_path,
+                            value,
+                        )
+                    else:
+                        self.log.warning("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:
@@ -193,7 +200,7 @@ class GoExpvar(AgentCheck):
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):
-        '''
+        """
         Allow to retrieve content nested inside a several layers deep dict/list
 
         Examples: -content: {
@@ -219,7 +226,7 @@ class GoExpvar(AgentCheck):
                   -keys: ["key1", "key2", "*", "value"]
                     would return:
                         [(["key1", "key2", "1", "value"], 72), (["key1", "key2", "0", "value"], 42)]
-        '''
+        """
 
         if traversed_path is None:
             traversed_path = []

@@ -1,0 +1,281 @@
+{
+  "title": "Hyper-V",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:hyperv.hypervisor_logical_processor.total_run_time{$scope}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">",
+                "value": 80,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 80,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "custom_links": [],
+        "title": "Logical Processor Total Runtime %",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 19,
+        "y": 38,
+        "width": 23,
+        "height": 11
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:hyperv.hypervisor_virtual_processor.total_run_time{$scope} by {instance}, 100, 'last', 'desc')",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">",
+                "value": 80,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<=",
+                "value": 80,
+                "palette": "white_on_green"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "VMs by Virtual Processor Runtime",
+        "title_size": "13",
+        "title_align": "left",
+        "time": {
+          "live_span": "1m"
+        }
+      },
+      "layout": {
+        "x": 1,
+        "y": 50,
+        "width": 41,
+        "height": 14
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:hyperv.hypervisor_logical_processor.total_run_time{$scope}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "CPU Usage by Physical Host",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 43,
+        "y": 38,
+        "width": 61,
+        "height": 26
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:hyperv.hypervisor_virtual_processor.total_run_time{$scope} by {instance}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "min": "0",
+          "max": "100"
+        },
+        "title": "CPU Usage by VM",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 43,
+        "y": 19,
+        "width": 61,
+        "height": 18
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "count:hyperv.hypervisor_logical_processor.guest_run_time{$scope,!instance:_total}",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "Instance Count",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "1m"
+        },
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 1,
+        "y": 38,
+        "width": 17,
+        "height": 11
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "image",
+        "url": "https://s25966.pcdn.co/hyper-v/wp-content/uploads/2017/12/5B5EFCA7-DF8C-4123-AF48-FA67F883AD2B.jpeg",
+        "sizing": "zoom"
+      },
+      "layout": {
+        "x": 1,
+        "y": 3,
+        "width": 41,
+        "height": 15
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:hyperv.dynamic_memory_balancer.available_memory{$scope}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "title": "Average Available Memory (bytes)",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 43,
+        "y": 3,
+        "width": 26,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "hostmap",
+        "requests": {
+          "fill": {
+            "q": "avg:hyperv.hypervisor_logical_processor.guest_run_time{*} by {host}"
+          }
+        },
+        "custom_links": [],
+        "title": "CPU Usage by Physical Host",
+        "title_size": "16",
+        "title_align": "left",
+        "no_metric_hosts": false,
+        "no_group_hosts": true,
+        "group": [],
+        "style": {
+          "palette": "green_to_orange",
+          "palette_flip": false
+        }
+      },
+      "layout": {
+        "x": 1,
+        "y": 19,
+        "width": 41,
+        "height": 18
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:hyperv.dynamic_memory_balancer.available_memory{$scope}, 10, 'mean', 'asc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Least Available Memory by Host",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 70,
+        "y": 3,
+        "width": 34,
+        "height": 15
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "scope",
+      "default": "*",
+      "prefix": null
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 30273
+}

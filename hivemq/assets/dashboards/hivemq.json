@@ -1,837 +1,881 @@
 {
-  "board_title": "HiveMQ Overview",
-  "read_only": false,
-  "description": "The default dashboard for monitoring HiveMQ brokers including connections, subscriptions, and messages.",
-  "created": "2020-07-07T18:59:17.091896+00:00",
-  "new_id": "6wx-fj2-7rr",
-  "modified": "2020-07-07T19:00:39.807147+00:00",
-  "created_by": {
-    "disabled": false,
-    "handle": "jimmy.caputo@datadoghq.com",
-    "name": "Jimmy Caputo",
-    "title": null,
-    "is_admin": false,
-    "role": null,
-    "access_role": "st",
-    "verified": true,
-    "email": "jimmy.caputo@datadoghq.com",
-    "icon": "https://secure.gravatar.com/avatar/82006bfcbc5cabfd12c9717b0a1c63fc?s=48&d=retro"
-  },
-  "template_variables": [
-    {
-      "default": "*",
-      "prefix": "host",
-      "name": "host"
-    }
-  ],
-  "widgets": [
-    {
-      "sizing": "zoom",
-      "y": -13,
-      "width": 17,
-      "url": "/static/images/saas_logos/bot/hivemq@2x.png",
-      "x": 0,
-      "type": "image",
-      "height": 6
-    },
-    {
-      "title_align": "center",
-      "title_size": 16,
-      "title": true,
-      "tags": [
-        "*"
-      ],
-      "title_text": "Connected Nodes",
-      "height": 11,
-      "width": 17,
-      "group_by": [],
-      "y": 7,
-      "x": 0,
-      "type": "check_status",
-      "check": "hivemq.can_connect",
-      "grouping": "cluster"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Current Connections",
-      "height": 6,
-      "tile_def": {
-        "viz": "query_value",
-        "requests": [
-          {
-            "q": "sum:hivemq.networking.connections.current{$host}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "autoscale": true,
-        "precision": 0
-      },
-      "width": 17,
-      "y": 7,
-      "x": 26,
-      "type": "query_value"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Incoming Messages",
-      "height": 6,
-      "tile_def": {
-        "custom_links": [],
-        "autoscale": true,
-        "custom_unit": "/s",
-        "precision": 0,
-        "viz": "query_value",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.incoming.total.count{$host}.as_rate()",
-            "aggregator": "avg"
-          }
-        ]
-      },
-      "width": 18,
-      "y": 7,
-      "x": 110,
-      "type": "query_value"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Outgoing Messages",
-      "height": 6,
-      "tile_def": {
-        "custom_links": [],
-        "autoscale": true,
-        "custom_unit": "/s",
-        "precision": 0,
-        "viz": "query_value",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.outgoing.total.count{$host}.as_rate()",
-            "aggregator": "avg"
-          }
-        ]
-      },
-      "width": 17,
-      "y": 7,
-      "x": 144,
-      "type": "query_value"
-    },
-    {
-      "font_size": "18",
-      "width": 33,
-      "tick_pos": "50%",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "bgcolor": "vivid_yellow",
-      "html": "**Connections**",
-      "y": 0,
-      "x": 18,
-      "tick": true,
-      "type": "note"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Ungraceful Disconnects",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.networking.connections_closed.ungraceful.count{$host} by {host}.as_count()",
-            "style": {
-              "palette": "warm",
-              "width": "normal",
-              "type": "solid"
+    "title": "HiveMQ Overview",
+    "description": "The default dashboard for monitoring HiveMQ brokers including connections, subscriptions, and messages.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/hivemq_small.svg",
+                "sizing": "zoom"
             },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 32,
-      "x": 18,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Connections",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.networking.connections.current{$host} by {host}",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "area"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 49,
-      "x": 18,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Current Subscriptions",
-      "height": 6,
-      "tile_def": {
-        "viz": "query_value",
-        "requests": [
-          {
-            "q": "sum:hivemq.subscriptions.overall.current{$host}.as_count()",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "autoscale": true,
-        "precision": 0
-      },
-      "width": 17,
-      "y": 7,
-      "x": 60,
-      "type": "query_value"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Graceful Disconnects",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.networking.connections_closed.graceful.count{$host} by {host}.as_count()",
-            "style": {
-              "palette": "grey",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 82,
-      "x": 18,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "font_size": "18",
-      "width": 33,
-      "tick_pos": "50%",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "bgcolor": "vivid_yellow",
-      "html": "**Subscriptions**",
-      "y": 0,
-      "x": 52,
-      "tick": true,
-      "type": "note"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Incoming Message per Second",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.incoming.total.count{$host} by {host}.as_rate()",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "line"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 49,
-      "x": 86,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Outgoing Message per Second",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.outgoing.total.count{$host} by {host}.as_rate()",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "line"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 65,
-      "x": 86,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Incoming Connect Messages",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.incoming.connect.count{$host} by {host}.as_count()",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 65,
-      "x": 18,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Messages Dropped",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.dropped.count{$host} by {host}.as_count()",
-            "style": {
-              "palette": "warm",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 32,
-      "x": 86,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "% Messages Dropped by Reason",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
-            "style": {
-              "palette": "warm",
-              "width": "normal",
-              "type": "solid"
-            },
-            "type": "area",
-            "metadata": {
-              "(sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())": {
-                "alias": "Internal Error"
-              },
-              "(sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())": {
-                "alias": "MQTT Packet Too Large"
-              },
-              "(sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())": {
-                "alias": "QoS 0 Memory Exceeded"
-              },
-              "(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())": {
-                "alias": "Client Message Queue Full"
-              },
-              "(sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())": {
-                "alias": "QoS 0 Channel Not Writable"
-              }
+            "layout": {
+                "x": 0,
+                "y": -13,
+                "width": 17,
+                "height": 6
             }
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "max": "100"
-        }
-      },
-      "width": 33,
-      "y": 16,
-      "x": 154,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "font_size": "18",
-      "width": 100,
-      "tick_pos": "50%",
-      "tick_edge": "bottom",
-      "text_align": "center",
-      "height": 5,
-      "bgcolor": "vivid_yellow",
-      "html": "**Messages**",
-      "y": 0,
-      "x": 87,
-      "tick": true,
-      "type": "note"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Retained Messages",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.retained.current{$host} by {host}",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "check_status",
+                "title": "Connected Nodes",
+                "title_size": "16",
+                "title_align": "center",
+                "check": "hivemq.can_connect",
+                "grouping": "cluster",
+                "group_by": [],
+                "tags": [
+                    "*"
+                ]
             },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 65,
-      "x": 120,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Subscriptions",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.subscriptions.overall.current{$host} by {host}.as_count()",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 17,
+                "height": 11
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections.current{$host}",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Current Connections",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
             },
-            "type": "area"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 49,
-      "x": 52,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Subscribe Request per Second",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.incoming.subscribe.count{$host} by {host}.as_rate()",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 26,
+                "y": 7,
+                "width": 17,
+                "height": 8
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.total.count{$host}.as_rate()",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Incoming Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "custom_unit": "/s",
+                "precision": 0
             },
-            "type": "line"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 65,
-      "x": 52,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Unsubscribe Request per Second",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.incoming.unsubscribe.count{$host} by {host}.as_rate()",
-            "style": {
-              "palette": "grey",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 110,
+                "y": 7,
+                "width": 18,
+                "height": 8
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.outgoing.total.count{$host}.as_rate()",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Outgoing Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "custom_unit": "/s",
+                "precision": 0
             },
-            "type": "line"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 82,
-      "x": 52,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Messages w/out Subscribers ",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.publish.without_matching_subscribers{$host} by {host}.as_count()",
-            "style": {
-              "palette": "warm",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 144,
+                "y": 7,
+                "width": 17,
+                "height": 8
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "note",
+                "content": "**Connections**",
+                "background_color": "vivid_yellow",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
             },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 32,
-      "x": 52,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Queued Messages",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.queued.count{$host} by {host}",
-            "style": {
-              "palette": "cool",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 18,
+                "y": 0,
+                "width": 33,
+                "height": 5
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections_closed.ungraceful.count{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Ungraceful Disconnects",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
             },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
-        }
-      },
-      "width": 33,
-      "y": 49,
-      "x": 120,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Expired Messages",
-      "height": 14,
-      "tile_def": {
-        "viz": "timeseries",
-        "requests": [
-          {
-            "q": "sum:hivemq.messages.expired_messages{$host} by {host}.as_count()",
-            "style": {
-              "palette": "warm",
-              "width": "normal",
-              "type": "solid"
+            "layout": {
+                "x": 18,
+                "y": 32,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections.current{$host} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Connections",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
             },
-            "type": "bars"
-          }
-        ],
-        "custom_links": [],
-        "yaxis": {
-          "scale": "linear",
-          "min": "auto",
-          "max": "auto",
-          "label": "",
-          "includeZero": true
+            "layout": {
+                "x": 18,
+                "y": 49,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.subscriptions.overall.current{$host}.as_count()",
+                        "aggregator": "last"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Current Subscriptions",
+                "title_size": "16",
+                "title_align": "left",
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 60,
+                "y": 7,
+                "width": 17,
+                "height": 8
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections_closed.graceful.count{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "grey",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Graceful Disconnects",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 18,
+                "y": 82,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "note",
+                "content": "**Subscriptions**",
+                "background_color": "vivid_yellow",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 52,
+                "y": 0,
+                "width": 33,
+                "height": 5
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.total.count{$host} by {host}.as_rate()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Incoming Message per Second",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 86,
+                "y": 49,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.outgoing.total.count{$host} by {host}.as_rate()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Outgoing Message per Second",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 86,
+                "y": 65,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.connect.count{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Incoming Connect Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 18,
+                "y": 65,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.dropped.count{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Messages Dropped",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 86,
+                "y": 32,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()), (sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                        "metadata": [
+                            {
+                                "expression": "(sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                                "alias_name": "Internal Error"
+                            },
+                            {
+                                "expression": "(sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                                "alias_name": "MQTT Packet Too Large"
+                            },
+                            {
+                                "expression": "(sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                                "alias_name": "QoS 0 Memory Exceeded"
+                            },
+                            {
+                                "expression": "(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                                "alias_name": "Client Message Queue Full"
+                            },
+                            {
+                                "expression": "(sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()*100)/(sum:hivemq.messages.dropped.queue_full.count{$host}.as_count()+sum:hivemq.messages.dropped.not_writable.count{$host}.as_count()+sum:hivemq.messages.dropped.internal_error.count{$host}.as_count()+sum:hivemq.messages.dropped.mqtt_packet_too_large.count{$host}.as_count()+sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{$host}.as_count())",
+                                "alias_name": "QoS 0 Channel Not Writable"
+                            }
+                        ],
+                        "display_type": "area",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "max": "100"
+                },
+                "title": "% Messages Dropped by Reason",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 154,
+                "y": 16,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "note",
+                "content": "**Messages**",
+                "background_color": "vivid_yellow",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 87,
+                "y": 0,
+                "width": 100,
+                "height": 5
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.retained.current{$host} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Retained Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 120,
+                "y": 65,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.subscriptions.overall.current{$host} by {host}.as_count()",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Subscriptions",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 52,
+                "y": 49,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.subscribe.count{$host} by {host}.as_rate()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Subscribe Request per Second",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 52,
+                "y": 65,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.unsubscribe.count{$host} by {host}.as_rate()",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "grey",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Unsubscribe Request per Second",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 52,
+                "y": 82,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.publish.without_matching_subscribers{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Messages w/out Subscribers ",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 52,
+                "y": 32,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.queued.count{$host} by {host}",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Queued Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 120,
+                "y": 49,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.expired_messages{$host} by {host}.as_count()",
+                        "display_type": "bars",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Expired Messages",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false
+            },
+            "layout": {
+                "x": 120,
+                "y": 32,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:hivemq.networking.connections_closed.ungraceful.count{$host} by {host}.as_count().rollup(sum), 10, 'sum', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Ungraceful Disconnects - Top Host",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 18,
+                "y": 16,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 25,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:hivemq.publish.without_matching_subscribers{$host} by {host}.as_count().rollup(sum), 10, 'sum', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Messages w/out Subscribers - Top Host",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 52,
+                "y": 16,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:hivemq.messages.dropped.count{$host} by {host}.as_count(), 10, 'mean', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Messages Dropped - Top Host",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 86,
+                "y": 16,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:hivemq.messages.expired_messages{$host} by {host}.as_count(), 10, 'mean', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Expired Messages - Top Host",
+                "title_size": "16",
+                "title_align": "left"
+            },
+            "layout": {
+                "x": 120,
+                "y": 16,
+                "width": 33,
+                "height": 16
+            }
+        },
+        {
+            "id": 28,
+            "definition": {
+                "type": "note",
+                "content": "**Dropped Message Reason Explanations:**\n\n**Client Message Queue Full**   \nClient's message queue was full when another message for that client arrived. Clients may be consuming too slow or have unstable connections.\n\n**QoS 0 Memory Exceeded**  \nBroker-wide memory for queueing Quality of Service 0 messages has been exceeded. Clients may be consuming too slow or have unstable connections.\n\n**QoS Channel Not Writable**\nSocket of the receiving client could not be written to. Caused by a client not reading fast enough.\n\n**Maximum Packet Size Exceeded**\nMessage is larger than maximum size set by receiving client. Coordination between sending and receiving clients needs tuning.\n\n**Internal Error**\nUnexpected problem. Check the HiveMQ logs for details.\n",
+                "background_color": "orange",
+                "font_size": "14",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top"
+            },
+            "layout": {
+                "x": 154,
+                "y": 34,
+                "width": 33,
+                "height": 40
+            }
         }
-      },
-      "width": 33,
-      "y": 32,
-      "x": 120,
-      "type": "timeseries",
-      "legend": false
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Ungraceful Disconnects - Top Host",
-      "height": 14,
-      "tile_def": {
-        "viz": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:hivemq.networking.connections_closed.ungraceful.count{$host} by {host}.as_count().rollup(sum), 10, 'sum', 'desc')",
-            "conditional_formats": [
-              {
-                "palette": "white_on_yellow",
-                "value": "0",
-                "comparator": ">"
-              }
-            ]
-          }
-        ],
-        "custom_links": []
-      },
-      "width": 33,
-      "y": 16,
-      "x": 18,
-      "type": "toplist"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Messages w/out Subscribers - Top Host",
-      "height": 14,
-      "tile_def": {
-        "viz": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:hivemq.publish.without_matching_subscribers{$host} by {host}.as_count().rollup(sum), 10, 'sum', 'desc')",
-            "conditional_formats": [
-              {
-                "palette": "white_on_yellow",
-                "value": "1",
-                "comparator": ">"
-              }
-            ]
-          }
-        ],
-        "custom_links": []
-      },
-      "width": 33,
-      "y": 16,
-      "x": 52,
-      "type": "toplist"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Messages Dropped - Top Host",
-      "height": 14,
-      "tile_def": {
-        "viz": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:hivemq.messages.dropped.count{$host} by {host}.as_count(), 10, 'mean', 'desc')",
-            "conditional_formats": [
-              {
-                "palette": "white_on_yellow",
-                "value": "1",
-                "comparator": ">"
-              }
-            ]
-          }
-        ],
-        "custom_links": []
-      },
-      "width": 33,
-      "y": 16,
-      "x": 86,
-      "type": "toplist"
-    },
-    {
-      "title_size": 16,
-      "title": true,
-      "title_align": "left",
-      "title_text": "Expired Messages - Top Host",
-      "height": 14,
-      "tile_def": {
-        "viz": "toplist",
-        "requests": [
-          {
-            "q": "top(sum:hivemq.messages.expired_messages{$host} by {host}.as_count(), 10, 'mean', 'desc')",
-            "conditional_formats": [
-              {
-                "palette": "white_on_yellow",
-                "value": "1",
-                "comparator": ">"
-              }
-            ]
-          }
-        ],
-        "custom_links": []
-      },
-      "width": 33,
-      "y": 16,
-      "x": 120,
-      "type": "toplist"
-    },
-    {
-      "font_size": "14",
-      "width": 33,
-      "tick_pos": "50%",
-      "tick_edge": "top",
-      "text_align": "left",
-      "height": 40,
-      "bgcolor": "orange",
-      "html": "**Dropped Message Reason Explanations:**\n\n**Client Message Queue Full**   \nClient's message queue was full when another message for that client arrived. Clients may be consuming too slow or have unstable connections.\n\n**QoS 0 Memory Exceeded**  \nBroker-wide memory for queueing Quality of Service 0 messages has been exceeded. Clients may be consuming too slow or have unstable connections.\n\n**QoS Channel Not Writable**\nSocket of the receiving client could not be written to. Caused by a client not reading fast enough.\n\n**Maximum Packet Size Exceeded**\nMessage is larger than maximum size set by receiving client. Coordination between sending and receiving clients needs tuning.\n\n**Internal Error**\nUnexpected problem. Check the HiveMQ logs for details.\n",
-      "y": 34,
-      "x": 154,
-      "tick": true,
-      "type": "note"
-    }
-  ],
-  "id": 66017
+    ],
+    "template_variables": [
+        {
+            "name": "host",
+            "default": "*",
+            "prefix": "host"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 30331
 }

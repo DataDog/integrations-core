@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "6.24.0",
+        "integration": "Azure IoT Edge",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "azure.iot_edge.edge_agent.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Edge Agent health",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.24.0",
+        "integration": "Azure IoT Edge",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "azure.iot_edge.edge_hub.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Edge Hub health",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise."
+    }
+]

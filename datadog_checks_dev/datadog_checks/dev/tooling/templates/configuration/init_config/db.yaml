@@ -1,0 +1,15 @@
+- name: global_custom_queries
+  description: |
+    See `custom_queries` defined below.
+
+    Global custom queries can be applied to all instances using the
+    `use_global_custom_queries` setting at the instance level.
+  value:
+    type: array
+    items:
+      type: object
+    display_default: null
+    example:
+      - query: <QUERY>
+        columns: <COLUMNS>
+        tags: <TAGS>

@@ -1,10 +1,51 @@
 # CHANGELOG - mesos_master
 
-## 1.9.0 / 2020-06-29
+## 2.1.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.13.1 / 2021-06-11 / Agent 7.30.0
+
+* [Fixed] Fix master leader detection after 307. See [#9500](https://github.com/DataDog/integrations-core/pull/9500).
+* [Added] Add runtime configuration validation. See [#8955](https://github.com/DataDog/integrations-core/pull/8955).
+
+## 1.13.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add log support. See [#8717](https://github.com/DataDog/integrations-core/pull/8717).
+
+## 1.12.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.12.0 / 2020-11-06 / Agent 7.24.0
+
+* [Added] Update HTTP config docs to describe dcos_auth token reader. See [#7953](https://github.com/DataDog/integrations-core/pull/7953).
+
+## 1.11.0 / 2020-10-31
+
+* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+
+## 1.10.0 / 2020-09-21 / Agent 7.23.0
+
+* [Added] Add RequestsWrapper option to support UTF-8 for basic auth. See [#7441](https://github.com/DataDog/integrations-core/pull/7441).
+* [Added] Add config specs. See [#7379](https://github.com/DataDog/integrations-core/pull/7379).
+
+## 1.9.1 / 2020-08-10 / Agent 7.22.0
+
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
+## 1.9.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
 
-## 1.8.0 / 2020-05-17
+## 1.8.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
@@ -12,21 +53,21 @@
 
 * [Fixed] Handle missing role metrics for mesos_master. See [#6422](https://github.com/DataDog/integrations-core/pull/6422).
 
-## 1.7.1 / 2020-04-04
+## 1.7.1 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.7.0 / 2020-01-13
+## 1.7.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Submit version metadata. See [#5216](https://github.com/DataDog/integrations-core/pull/5216).
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-## 1.6.0 / 2019-10-11
+## 1.6.0 / 2019-10-11 / Agent 6.15.0
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-## 1.5.1 / 2019-08-28
+## 1.5.1 / 2019-08-28 / Agent 6.14.0
 
 * [Fixed] Fix mesos_master service check. See [#4452](https://github.com/DataDog/integrations-core/pull/4452).
 
@@ -35,15 +76,15 @@
 * [Added] Add requests wrapper to mesos_master. See [#4221](https://github.com/DataDog/integrations-core/pull/4221).
 * [Added] Add support for /state and /roles endpoints. See [#4053](https://github.com/DataDog/integrations-core/pull/4053).
 
-## 1.4.0 / 2019-05-14
+## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3538](https://github.com/DataDog/integrations-core/pull/3538).
 
-## 1.3.0 / 2019-02-18
+## 1.3.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Support Python 3. See [#2873](https://github.com/DataDog/integrations-core/pull/2873).
 
-## 1.2.1 / 2018-09-04
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
 

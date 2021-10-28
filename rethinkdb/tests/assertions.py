@@ -6,6 +6,7 @@ from typing import Set
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rethinkdb.types import Instance
 
 from .common import (
@@ -52,7 +53,7 @@ def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK, di
         aggregator.assert_service_check(service_check, status, count=count, tags=tags)
 
 
-def assert_metrics(aggregator, is_proxy, disconnected_servers=None):
+def assert_metrics(aggregator, is_proxy=False, disconnected_servers=None):
     # type: (AggregatorStub, bool, Set[ServerName]) -> None
     if disconnected_servers is None:
         disconnected_servers = set()
@@ -63,6 +64,9 @@ def assert_metrics(aggregator, is_proxy, disconnected_servers=None):
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_jobs_metrics(aggregator, is_proxy=is_proxy)
     _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def _assert_config_metrics(aggregator, disconnected_servers):
@@ -123,7 +127,7 @@ def _assert_server_status_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
     for metric, typ in SERVER_STATUS_METRICS:
         for server in SERVERS:
-            tags = TAGS + ['server:{}'.format(server)]
+            tags = TAGS + ['server:{}'.format(server)] + FORMATTED_SERVER_TAGS[server]
             count = 0 if server in disconnected_servers else 1
             aggregator.assert_metric(metric, metric_type=typ, count=count, tags=tags)
 

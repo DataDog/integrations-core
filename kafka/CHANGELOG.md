@@ -1,47 +1,94 @@
 # CHANGELOG - kafka
 
-## 2.1.1 / 2020-06-29
+## 2.10.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 2.9.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 2.8.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+
+## 2.7.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Added session metrics. See [#9183](https://github.com/DataDog/integrations-core/pull/9183). Thanks [DingGGu](https://github.com/DingGGu).
+* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
+* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+
+## 2.6.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8941](https://github.com/DataDog/integrations-core/pull/8941).
+
+## 2.5.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 2.5.0 / 2021-01-25 / Agent 7.26.0
+
+* [Added] Add version verification for datadog-checks-base. See [#8255](https://github.com/DataDog/integrations-core/pull/8255).
+
+## 2.4.0 / 2020-12-11 / Agent 7.25.0
+
+* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+
+## 2.3.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
+
+## 2.2.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Use consistent formatting for boolean values. See [#7405](https://github.com/DataDog/integrations-core/pull/7405).
+
+## 2.2.0 / 2020-08-10 / Agent 7.22.0
+
+* [Added] Add config specs. See [#7271](https://github.com/DataDog/integrations-core/pull/7271).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
+## 2.1.1 / 2020-06-29 / Agent 7.21.0
 
 * [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
 
-## 2.1.0 / 2020-05-17
+## 2.1.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 2.0.3 / 2020-04-04
+## 2.0.3 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 * [Fixed] Fix metric name for e2e test. See [#5985](https://github.com/DataDog/integrations-core/pull/5985).
 
-## 2.0.2 / 2019-10-11
+## 2.0.2 / 2019-10-11 / Agent 6.15.0
 
 * [Fixed] Fix the missing Kafka producer metrics. See [#4737](https://github.com/DataDog/integrations-core/pull/4737). Thanks [Epokhe](https://github.com/Epokhe).
 
-## 2.0.1 / 2019-08-24
+## 2.0.1 / 2019-08-24 / Agent 6.14.0
 
 * [Fixed] Treat `kafka.producer.compression_rate` as a ratio. See [#4293](https://github.com/DataDog/integrations-core/pull/4293).
 
-## 2.0.0 / 2019-06-01
+## 2.0.0 / 2019-06-01 / Agent 6.12.0
 
 * [Changed] Fix unit type of `kafka.request.produce.time.avg` & `kafka.request.produce.time.99percentile`. See [#3834](https://github.com/DataDog/integrations-core/pull/3834).
 
-## 1.4.0 / 2019-02-18
+## 1.4.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Add extra Kafka broker metrics. See [#2484](https://github.com/DataDog/integrations-core/pull/2484). Thanks [jalaziz](https://github.com/jalaziz).
 
-## 1.3.0 / 2019-01-04
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Add Per Topic IncomingMessages metric for Kafka.. See [#2732][1].
 
-## 1.2.1 / 2018-11-30
+## 1.2.1 / 2018-11-30 / Agent 6.8.0
 
 * [Fixed] Updated kafka.producer.record_error_rate to gauge. See [#2253][2].
 
-## 1.2.0 / 2018-10-12
+## 1.2.0 / 2018-10-12 / Agent 6.6.0
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][3].
 
-## 1.1.1 / 2018-09-04
+## 1.1.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][4].
 

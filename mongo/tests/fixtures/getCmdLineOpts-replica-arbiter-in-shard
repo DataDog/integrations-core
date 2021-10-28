@@ -1,0 +1,52 @@
+{
+    "argv": [
+        "/opt/bitnami/mongodb/bin/mongod",
+        "--config=/opt/bitnami/mongodb/conf/mongodb.conf"
+    ],
+    "parsed": {
+        "config": "/opt/bitnami/mongodb/conf/mongodb.conf",
+        "net": {
+            "bindIp": "*",
+            "ipv6": false,
+            "port": 27017,
+            "unixDomainSocket": {
+                "enabled": true,
+                "pathPrefix": "/opt/bitnami/mongodb/tmp"
+            }
+        },
+        "processManagement": {
+            "fork": false,
+            "pidFilePath": "/opt/bitnami/mongodb/tmp/mongodb.pid"
+        },
+        "replication": {
+            "enableMajorityReadConcern": true,
+            "replSetName": "mongo-mongodb-sharded-shard-0"
+        },
+        "security": {
+            "authorization": "disabled",
+            "keyFile": "/opt/bitnami/mongodb/conf/keyfile"
+        },
+        "setParameter": {
+            "enableLocalhostAuthBypass": "true"
+        },
+        "sharding": {
+            "clusterRole": "shardsvr"
+        },
+        "storage": {
+            "dbPath": "/bitnami/mongodb/data/db",
+            "directoryPerDB": false,
+            "journal": {
+                "enabled": true
+            }
+        },
+        "systemLog": {
+            "destination": "file",
+            "logAppend": true,
+            "logRotate": "reopen",
+            "path": "/opt/bitnami/mongodb/logs/mongodb.log",
+            "quiet": false,
+            "verbosity": 0
+        }
+    },
+    "ok": 1.0
+}

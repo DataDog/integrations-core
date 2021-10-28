@@ -4,6 +4,10 @@
 
 from __future__ import division
 
+from datadog_checks.base.utils.common import ensure_unicode
+
+from .utils import calculate_elapsed_time
+
 try:
     import pymqi
 except ImportError:
@@ -54,6 +58,8 @@ def pcf_metrics():
     return {
         'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
         'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+        'last_put_time': get_last_put_time,
+        'last_get_time': get_last_get_time,
     }
 
 
@@ -123,6 +129,27 @@ def channel_stats_metrics():
 def queue_stats_metrics():
     return {
         'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
+        'q_max_depth': (pymqi.CMQCFC.MQIAMO_Q_MAX_DEPTH, GAUGE),
+        'put_fail_count': (pymqi.CMQCFC.MQIAMO_PUTS_FAILED, COUNT),
+        'get_fail_count': (pymqi.CMQCFC.MQIAMO_GETS_FAILED, COUNT),
+        'put1_fail_count': (pymqi.CMQCFC.MQIAMO_PUT1S_FAILED, COUNT),
+        'browse_fail_count': (pymqi.CMQCFC.MQIAMO_BROWSES_FAILED, COUNT),
+        'non_queued_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_NOT_QUEUED, COUNT),
+        'expired_msg_count': (pymqi.CMQCFC.MQIAMO_MSGS_EXPIRED, COUNT),
+        'purge_count': (pymqi.CMQCFC.MQIAMO_MSGS_PURGED, COUNT),
+        # These metrics are returned as a list of two values.
+        # Index 0 = Contains the value for non-persistent messages
+        # Index 1 = Contains the value for persistent messages
+        # https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.5.0/com.ibm.mq.mon.doc/q037510_.htm#q037510___q037510_2
+        #
+        'avg_q_time': (pymqi.CMQCFC.MQIAMO64_AVG_Q_TIME, GAUGE),
+        'put_count': (pymqi.CMQCFC.MQIAMO_PUTS, COUNT),
+        'get_count': (pymqi.CMQCFC.MQIAMO_GETS, COUNT),
+        'browse_bytes': (pymqi.CMQCFC.MQIAMO64_BROWSE_BYTES, GAUGE),
+        'browse_count': (pymqi.CMQCFC.MQIAMO_BROWSES, COUNT),
+        'get_bytes': (pymqi.CMQCFC.MQIAMO64_GET_BYTES, COUNT),
+        'put_bytes': (pymqi.CMQCFC.MQIAMO64_PUT_BYTES, COUNT),
+        'put1_count': (pymqi.CMQCFC.MQIAMO_PUT1S, COUNT),
     }
 
 
@@ -137,3 +164,23 @@ def depth_percent(queue_info):
     depth_as_percent = depth_fraction * 100
 
     return depth_as_percent
+
+
+def get_last_put_time(qm_timezone, queue_info):
+    last_put_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_DATE)
+    last_put_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_PUT_TIME)
+
+    if not last_put_datestamp or not last_put_timestamp:
+        return
+
+    return calculate_elapsed_time(ensure_unicode(last_put_datestamp), ensure_unicode(last_put_timestamp), qm_timezone)
+
+
+def get_last_get_time(qm_timezone, queue_info):
+    last_get_datestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_DATE)
+    last_get_timestamp = queue_info.get(pymqi.CMQCFC.MQCACF_LAST_GET_TIME)
+
+    if not last_get_datestamp or not last_get_timestamp:
+        return
+
+    return calculate_elapsed_time(ensure_unicode(last_get_datestamp), ensure_unicode(last_get_timestamp), qm_timezone)

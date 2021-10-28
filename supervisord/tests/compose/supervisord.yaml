@@ -5,3 +5,5 @@ services:
     image: datadog/docker-library:supervisord_${SUPERVISOR_VERSION}
     ports:
       - "19001:19001"
+    volumes:
+      - ${DD_LOG_1}:/supervisor/supervisord.log

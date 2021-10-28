@@ -59,6 +59,20 @@ def total_time_to_temporal_percent(total_time, scale=MILLISECOND):
     # At this point we have a number that will be no greater than 1 when compared to the last run.
     #
     # To turn it into a percentage we multiply by 100.
+    #
+    # Example:
+    #
+    # Say we have 2 moments in time T, tracking a monotonically increasing value X in milliseconds,
+    # and the difference between each T is the default check run interval (15s).
+    #
+    # T1 = 100, X1 = 2,000 / 1,000 * 100 = 200
+    # T2 = 115, X2 = 5,000 / 1,000 * 100 = 500
+    #
+    # See: https://github.com/DataDog/datadog-agent/blob/7.25.x/pkg/metrics/rate.go#L37
+    #
+    # V = (X2 - X1) / (T2 - T1) = (500 - 200) / (115 - 100) = 20%
+    #
+    # which is correct because 3000 ms = 3s and 3s of 15s is 20%
     return total_time / scale * 100
 
 

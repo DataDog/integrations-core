@@ -1,0 +1,9 @@
+# All files generated during test E2E TLS certs generation are private, and expire after 30 days.
+# They should all be ignored.
+certs/
+csr/
+intermediateCerts/
+newcerts/
+private/
+index*
+serial*

@@ -17,6 +17,15 @@ def test_check(aggregator, check):
         aggregator.assert_metric_has_tag(metric, common.EXPECTED_TAG)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_check_no_irq(aggregator, check):
+    check.check(deepcopy(common.INSTANCE))
+
+    for metric in common.EXPECTED_BASE_METRICS:
+        aggregator.assert_metric_has_tag(metric, common.EXPECTED_TAG)
+
+
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)

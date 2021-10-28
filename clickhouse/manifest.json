@@ -23,6 +23,9 @@
   "is_public": true,
   "integration_id": "clickhouse",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"
     },
@@ -30,6 +33,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "clickhouse"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

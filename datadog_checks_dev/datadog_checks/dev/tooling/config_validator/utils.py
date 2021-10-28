@@ -68,16 +68,14 @@ def is_blank(line):
 
 
 def is_exactly_indented(line, indent):
-    """Returns true if the line has the expected indentation. Empty line has no indentation
-    """
+    """Returns true if the line has the expected indentation. Empty line has no indentation"""
     if is_blank(line):
         return False
     return get_indent(line) == indent
 
 
 def is_at_least_indented(line, indent):
-    """Returns true if the line has at least the expected indentation. Empty line has no indentation
-    """
+    """Returns true if the line has at least the expected indentation. Empty line has no indentation"""
     if is_blank(line):
         return False
     return get_indent(line) >= indent

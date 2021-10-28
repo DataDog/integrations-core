@@ -1,6 +1,27 @@
 # CHANGELOG - twemproxy
 
-## 1.7.1 / 2020-07-03
+## 1.11.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.10.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add log support for Twemproxy. See [#9066](https://github.com/DataDog/integrations-core/pull/9066).
+* [Fixed] Reflect default port in config. See [#9217](https://github.com/DataDog/integrations-core/pull/9217).
+
+## 1.9.0 / 2021-04-19 / Agent 7.28.0
+
+* [Added] Add runtime configuration validation. See [#8999](https://github.com/DataDog/integrations-core/pull/8999).
+
+## 1.8.1 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.8.0 / 2020-10-31 / Agent 7.24.0
+
+* [Added] Add config spec. See [#7709](https://github.com/DataDog/integrations-core/pull/7709).
+
+## 1.7.1 / 2020-07-03 / Agent 7.21.0
 
 * [Fixed] Don't collect version if metadata is not enabled. See [#7010](https://github.com/DataDog/integrations-core/pull/7010).
 
@@ -8,24 +29,24 @@
 
 * [Added] Collect version metadata. See [#6899](https://github.com/DataDog/integrations-core/pull/6899).
 
-## 1.6.0 / 2020-05-17
+## 1.6.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-## 1.5.0 / 2020-01-13
+## 1.5.0 / 2020-01-13 / Agent 7.17.0
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 
-## 1.4.0 / 2019-05-14
+## 1.4.0 / 2019-05-14 / Agent 6.12.0
 
 * [Added] Adhere to code style. See [#3577](https://github.com/DataDog/integrations-core/pull/3577).
 
-## 1.3.0 / 2019-01-04
+## 1.3.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Refactor Twemproxy tests and add E2E. See [#2820][1].
 * [Added] Support Python 3. See [#2817][2].
 
-## 1.2.1 / 2018-09-04
+## 1.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 

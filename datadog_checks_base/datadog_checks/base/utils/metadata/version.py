@@ -8,6 +8,7 @@ from ..common import exclude_undefined_keys
 # https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 SEMVER_PATTERN = re.compile(
     r"""
+    v?
     (?P<major>0|[1-9]\d*)
     \.
     (?P<minor>0|[1-9]\d*)

@@ -8,8 +8,9 @@ import sys
 import mock
 import pytest
 
+from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials, urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod, urljoin
+from datadog_checks.kubelet import PodListUtils, get_pod_by_uid, is_static_pending_pod
 
 from .test_kubelet import mock_from_file
 
@@ -88,6 +89,33 @@ def test_filter_staticpods(monkeypatch):
         )
         is True
     )
+
+
+def test_is_namespace_excluded(monkeypatch):
+    c_is_excluded = mock.Mock(return_value=False)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+
+    pods = json.loads(mock_from_file('pods.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # Test namespace=None
+    c_is_excluded.reset_mock()
+    assert pod_list_utils.is_namespace_excluded(None) is False
+    c_is_excluded.assert_not_called()
+
+    # Test excluded namespace
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = True
+    assert pod_list_utils.is_namespace_excluded('an_excluded_namespace') is True
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with('', '', 'an_excluded_namespace')
+
+    # Test non-excluded namespace
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = False
+    assert pod_list_utils.is_namespace_excluded('a_non_excluded_namespace') is False
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with('', '', 'a_non_excluded_namespace')
 
 
 def test_pod_by_uid():

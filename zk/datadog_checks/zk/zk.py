@@ -8,7 +8,7 @@ this check will report three other states:
 
     `down`: the check cannot connect to zookeeper
     `inactive`: the zookeeper instance has lost connection to the cluster
-    `unknown`: an unexpected error has occured in this check
+    `unknown`: an unexpected error has occurred in this check
 
 States can be accessed through the gauge `zookeeper.instances.<state>,
 through the set `zookeeper.instances`, or through the `mode:<state>` tag.
@@ -72,7 +72,7 @@ if PY3:
 
 
 class ZKConnectionFailure(Exception):
-    """ Raised when we are unable to connect or get the output of a command. """
+    """Raised when we are unable to connect or get the output of a command."""
 
     pass
 
@@ -120,10 +120,13 @@ class ZookeeperCheck(AgentCheck):
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
+        self.use_tls = is_affirmative(self.instance.get('use_tls', False))
 
     def check(self, _):
         # Send a service check based on the `ruok` response.
         # Set instance status to down if not ok.
+        status = None
+        message = None
         try:
             ruok_out = self._send_command('ruok')
         except ZKConnectionFailure:
@@ -140,9 +143,10 @@ class ZookeeperCheck(AgentCheck):
             ruok = ruok_out.readline()
             if ruok == 'imok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.WARNING
-            message = u'Response from the server: %s' % ruok
+                message = u'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -176,7 +180,7 @@ class ZookeeperCheck(AgentCheck):
             if self.expected_mode:
                 if mode == self.expected_mode:
                     status = AgentCheck.OK
-                    message = u"Server is in %s mode" % mode
+                    message = None
                 else:
                     status = AgentCheck.CRITICAL
                     message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
@@ -218,36 +222,40 @@ class ZookeeperCheck(AgentCheck):
         gauges[mode] = 1
         for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
-            self.gauge(gauge_name, v)
+            self.gauge(gauge_name, v, tags=self.base_tags)
 
-    def _send_command(self, command):
-        buf = StringIO()
+    @staticmethod
+    def _get_data(sock, command):
         chunk_size = 1024
         max_reads = 10000
-        # try-finally and try-except to stay compatible with python 2.4
-        with closing(socket.socket()) as sock:
-            sock.settimeout(self.timeout)
-            try:
-                # Connect to the zk client port and send the stat command
-                sock.connect((self.host, self.port))
-                sock.sendall(ensure_bytes(command))
+        buf = StringIO()
+        sock.sendall(ensure_bytes(command))
+        # Read the response into a StringIO buffer
+        chunk = ensure_unicode(sock.recv(chunk_size))
+        buf.write(chunk)
+        num_reads = 1
 
-                # Read the response into a StringIO buffer
-                chunk = ensure_unicode(sock.recv(chunk_size))
-                buf.write(chunk)
-                num_reads = 1
-
-                while chunk:
-                    if num_reads > max_reads:
-                        # Safeguard against an infinite loop
-                        raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
-                    chunk = ensure_unicode(sock.recv(chunk_size))
-                    buf.write(chunk)
-                    num_reads += 1
-            except (socket.timeout, socket.error):
-                raise ZKConnectionFailure()
-
+        while chunk:
+            if num_reads > max_reads:
+                # Safeguard against an infinite loop
+                raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
+            chunk = ensure_unicode(sock.recv(chunk_size))
+            buf.write(chunk)
+            num_reads += 1
         return buf
+
+    def _send_command(self, command):
+        try:
+            with closing(socket.create_connection((self.host, self.port))) as sock:
+                sock.settimeout(self.timeout)
+                if self.use_tls:
+                    context = self.get_tls_context()
+                    with closing(context.wrap_socket(sock, server_hostname=self.host)) as ssock:
+                        return self._get_data(ssock, command)
+                else:
+                    return self._get_data(sock, command)
+        except (socket.timeout, socket.error) as exc:
+            raise ZKConnectionFailure(exc)  # Include `exc` message for PY2.
 
     def parse_stat(self, buf):
         """
@@ -309,7 +317,7 @@ class ZookeeperCheck(AgentCheck):
             _, value = buf.readline().split(':')
             metrics.append(ZKMetric('zookeeper.connections', int(value.strip())))
         else:
-            # If the zk version doesnt explicitly give the Connections val,
+            # If the zk version doesn't explicitly give the Connections val,
             # use the value we computed from the client list.
             metrics.append(ZKMetric('zookeeper.connections', connections))
 

@@ -8,20 +8,33 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.utils import get_profile_definition, recursively_expand_base_profiles
+from datadog_checks.snmp.utils import (
+    _get_profile_name,
+    _is_abstract_profile,
+    _iter_default_profile_file_paths,
+    get_profile_definition,
+    recursively_expand_base_profiles,
+)
 
 from . import common
 from .metrics import (
     ADAPTER_IF_COUNTS,
     CCCA_ROUTER_GAUGES,
     CIE_METRICS,
+    COS_COUNTS,
+    COS_RATES,
     CPU_METRICS,
+    DCU_COUNTS,
     DISK_GAUGES,
     DRS_GAUGES,
+    FIREWALL_COUNTS,
     FRU_METRICS,
+    IDRAC_SYSTEM_STATUS_GAUGES,
+    IF_BANDWIDTH_USAGE,
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
+    IF_SCALAR_GAUGE,
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
@@ -41,15 +54,19 @@ from .metrics import (
     MEMORY_METRICS,
     PEER_GAUGES,
     PEER_RATES,
+    POWEREDGE_SYSTEM_STATUS_GAUGES,
     PROBE_GAUGES,
-    SYSTEM_STATUS_GAUGES,
+    SCU_COUNTS,
     TCP_COUNTS,
     TCP_GAUGES,
     UDP_COUNTS,
+    USER_FIREWALL,
+    VIRTUAL_CHASSIS_COUNTS,
+    VIRTUAL_CHASSIS_RATES,
     VOLTAGE_GAUGES,
 )
 
-pytestmark = common.python_autodiscovery_only
+pytestmark = common.snmp_integration_only
 
 
 def test_load_profiles(caplog):
@@ -63,6 +80,35 @@ def test_load_profiles(caplog):
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
         assert "table doesn't have a 'metric_tags' section" not in caplog.text
         caplog.clear()
+
+
+def test_profile_hierarchy():
+    """
+    * Only concrete profiles MUST inherit from '_base.yaml'.
+    * Only concrete profiles MUST define a `sysobjectid` field.
+    """
+    errors = []
+    compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+        definition = get_profile_definition({'definition_file': path})
+        extends = definition.get('extends', [])
+        sysobjectid = definition.get('sysobjectid')
+
+        if _is_abstract_profile(name):
+            if '_base.yaml' in extends and name not in compat_base_profiles:
+                errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
+            if sysobjectid is not None:
+                errors.append("'{}': mixin wrongly defines a `sysobjectid`".format(name))
+        else:
+            if '_base.yaml' not in extends:
+                errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
+            if sysobjectid is None:
+                errors.append("'{}': concrete profile must define a `sysobjectid`".format(name))
+
+    if errors:
+        pytest.fail('\n'.join(sorted(errors)))
 
 
 def run_profile_check(recording_name, profile_name=None):
@@ -122,7 +168,11 @@ def test_compat_cisco_base_profiles(definition_file, equivalent_definition):
 def test_cisco_voice(aggregator):
     run_profile_check('cisco_icm')
 
-    tags = ['snmp_profile:cisco_icm', 'snmp_host:test'] + common.CHECK_TAGS
+    tags = [
+        'snmp_profile:cisco_icm',
+        'snmp_host:test',
+        'device_vendor:cisco',
+    ] + common.CHECK_TAGS
 
     resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU"]
 
@@ -206,8 +256,8 @@ def test_cisco_voice(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
-    profile = "f5-big-ip"
-    run_profile_check('f5', profile)
+    profile = 'f5-big-ip'
+    run_profile_check(profile)
 
     gauges = [
         'sysStatMemoryTotal',
@@ -250,8 +300,23 @@ def test_f5(aggregator):
         'sysMultiHostCpuIowait',
     ]
 
-    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
-    tags = ['snmp_profile:' + profile, 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    interfaces = [
+        ('1.0', 'desc2'),
+        ('mgmt', 'desc1'),
+        ('/Common/internal', 'desc5'),
+        ('/Common/http-tunnel', 'desc3'),
+        ('/Common/socks-tunnel', 'desc4'),
+    ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
+    tags = [
+        'snmp_profile:' + profile,
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_vendor:f5',
+    ]
     tags += common.CHECK_TAGS
 
     common.assert_common_metrics(aggregator, tags)
@@ -263,24 +328,33 @@ def test_f5(aggregator):
     for metric in cpu_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
-    for interface in interfaces:
-        interface_tags = ['interface:{}'.format(interface)] + tags
+
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for interface, desc in interfaces:
+        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
             )
         for metric in IF_RATES:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
             )
-    for metric in IF_GAUGES:
-        for interface in interfaces:
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric(
+                    'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+                )
+
+        for metric in IF_GAUGES:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric),
                 metric_type=aggregator.GAUGE,
-                tags=['interface:{}'.format(interface)] + tags,
+                tags=interface_tags,
                 count=1,
             )
+
     for version in ['ipv4', 'ipv6']:
         ip_tags = ['ipversion:{}'.format(version)] + tags
         for metric in IP_COUNTS:
@@ -295,17 +369,13 @@ def test_f5(aggregator):
     for server in servers:
         server_tags = tags + ['server:{}'.format(server)]
         for metric in LTM_VIRTUAL_SERVER_GAUGES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1)
         for metric in LTM_VIRTUAL_SERVER_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1
             )
         for metric in LTM_VIRTUAL_SERVER_RATES:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1)
 
     nodes = ['node1', 'node2', 'node3']
     for node in nodes:
@@ -354,13 +424,19 @@ def test_f5(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
-    run_profile_check('network', profile)
+    run_profile_check(profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    for interface in ['eth0', 'eth1']:
-        tags = ['interface:{}'.format(interface)] + common_tags
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    interfaces = [
+        ('eth0', 'kept'),
+        ('eth1', 'their forward oxen'),
+    ]
+    for interface, if_desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -369,6 +445,8 @@ def test_router(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -399,21 +477,37 @@ def test_router(aggregator):
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
-    instance['community_string'] = 'f5'
+    instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
     init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
-    common_tags = ['snmp_profile:router', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    interfaces = [
+        ('1.0', 'desc2'),
+        ('mgmt', 'desc1'),
+        ('/Common/internal', 'desc5'),
+        ('/Common/http-tunnel', 'desc3'),
+        ('/Common/socks-tunnel', 'desc4'),
+    ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
+    common_tags = [
+        'snmp_profile:router',
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+    ]
     common_tags.extend(common.CHECK_TAGS)
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for interface, desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -422,6 +516,9 @@ def test_f5_router(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + common_tags
         for metric in IP_COUNTS:
@@ -436,21 +533,45 @@ def test_f5_router(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
     profile = "cisco-3850"
-    run_profile_check('3850', profile)
+    run_profile_check(profile)
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
-    common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:' + profile]
+    common_tags = common.CHECK_TAGS + [
+        'snmp_host:Cat-3850-4th-Floor.companyname.local',
+        'snmp_profile:' + profile,
+        'device_vendor:cisco',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    aliases = {
+        'Gi1/0/24': 'LWAP-example',
+        'Gi1/0/33': 'switchboard console',
+        'Gi1/0/38': 'Mitel Console',
+        'Gi1/1/3': 'Link to Switch',
+        'Gi2/0/13': 'AP01',
+        'Gi2/0/14': 'AP02',
+        'Gi2/0/15': 'AP03',
+        'Gi2/0/16': 'AP04',
+        'Gi2/0/17': 'AP05',
+        'Gi2/0/18': 'AP06',
+        'Gi2/1/4': 'Link to Switch',
+    }
+
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        alias = aliases.get(interface, '')
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(alias)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
@@ -489,15 +610,19 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    for source in range(1, 3):
-        env_tags = ['power_source:{}'.format(source)]
+    power_supplies = [
+        (1, 'Switch 1 - Power Supply B, NotExist'),
+        (1, 'Switch 2 - Power Supply B, NotExist'),
+        (2, 'Switch 1 - Power Supply A, Normal'),
+        (2, 'Switch 2 - Power Supply A, Normal'),
+    ]
+    for source, descr in power_supplies:
+        env_tags = ['power_source:{}'.format(source), 'power_status_descr:{}'.format(descr)]
         aggregator.assert_metric(
             'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
-    )
+    aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
@@ -545,7 +670,11 @@ def test_cisco_3850(aggregator):
 def test_meraki_cloud_controller(aggregator):
     run_profile_check('meraki-cloud-controller')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:meraki-cloud-controller', 'snmp_host:dashboard.meraki.com']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:meraki-cloud-controller',
+        'snmp_host:dashboard.meraki.com',
+        'device_vendor:meraki',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -572,6 +701,9 @@ def test_meraki_cloud_controller(aggregator):
     for metric in IF_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
+    for metric in IF_BANDWIDTH_USAGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -581,7 +713,7 @@ def test_idrac(aggregator):
     run_profile_check('idrac')
 
     interfaces = ['eth0', 'en1']
-    common_tags = common.CHECK_TAGS + ['snmp_profile:idrac']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:idrac', 'device_vendor:dell']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -594,29 +726,56 @@ def test_idrac(aggregator):
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common_tags
-        for gauge in SYSTEM_STATUS_GAUGES:
+        for gauge in IDRAC_SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    powers = ['supply1', 'supply2']
-    for power in powers:
-        tags = ['supply_name:{}'.format(power)] + common_tags
+
+    tag_mappings = [
+        ('supply1', '13', 'forward their oxen acted acted'),
+        ('supply2', '16', 'quaintly but acted'),
+    ]
+    for name, number, fqdd in tag_mappings:
+        tags = [
+            'supply_name:{}'.format(name),
+            'enclosure_power_supply_number:{}'.format(number),
+            'enclosure_power_supply_fqdd:{}'.format(fqdd),
+        ] + common_tags
         aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
     disks = ['disk1', 'disk2']
     for disk in disks:
         tags = ['disk_name:{}'.format(disk)] + common_tags
         for gauge in DISK_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    batteries = ['battery1', 'battery2']
-    for battery_name in batteries:
-        tags = ['battery_name:{}'.format(battery_name)] + common_tags
-        aggregator.assert_metric('snmp.{}'.format("batteryState"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    tag_mappings = [
+        ('battery1', 'but but acted driving driving'),
+        ('battery2', 'oxen acted Jaded quaintly kept forward quaintly forward Jaded'),
+    ]
 
-    controllers = ['controller1', 'controller2']
-    for controller in controllers:
-        tags = ['controller_name:{}'.format(controller)] + common_tags
-        aggregator.assert_metric(
-            'snmp.{}'.format("controllerRollUpStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
-        )
+    for name, fqdd in tag_mappings:
+        tags = [
+            'battery_name:{}'.format(name),
+            'battery_fqdd:{}'.format(fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.batteryState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        (
+            'controller1',
+            '4',
+            'quaintly kept acted acted but acted zombies quaintly forward',
+            'quaintly zombies acted driving oxen',
+        ),
+        ('controller2', '21', 'acted', 'driving quaintly'),
+    ]
+    for name, number, pci_slot, fqdd in tag_mappings:
+        tags = [
+            'controller_name:{}'.format(name),
+            'controller_number:{}'.format(number),
+            'controller_pci_slot:{}'.format(pci_slot),
+            'controller_fqdd:{}'.format(fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.controllerRollUpStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     devices = ['device1', 'device2']
     indexes = ['10', '20']
@@ -641,29 +800,216 @@ def test_idrac(aggregator):
             'snmp.{}'.format("networkDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
         )
 
-    indexes = ['3', '31']
-    for index in indexes:
-        tags = ['chassis_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric('snmp.{}'.format("systemBIOSStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    tag_mappings = [('3', '26'), ('31', '19')]
+    for chassis_index, bios_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'system_bios_index:{}'.format(bios_index),
+        ] + common_tags
+        aggregator.assert_metric('snmp.systemBIOSStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    indexes = ['9', '18']
-    probe_types = ['26', '26']
-    for index, probe_type in zip(indexes, probe_types):
-        tags = ['chassis_index:{}'.format(index), 'probe_type:{}'.format(probe_type)] + common_tags
+    tag_mappings = [('9', '26', '28'), ('18', '26', '4')]
+    for chassis_index, probe_type, probe_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'probe_type:{}'.format(probe_type),
+            'amperage_probe_index:{}'.format(probe_index),
+        ] + common_tags
         for gauge in PROBE_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    indexes = ['12', '22']
-    probe_types = ['6', '3']
-    for index, probe_type in zip(indexes, probe_types):
-        tags = ['chassis_index:{}'.format(index), 'probe_type:{}'.format(probe_type)] + common_tags
+    tag_mappings = [('12', '6', '15'), ('22', '3', '19')]
+    for chassis_index, probe_type, probe_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'probe_type:{}'.format(probe_type),
+            'voltage_probe_index:{}'.format(probe_index),
+        ] + common_tags
         for gauge in VOLTAGE_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    tag_mappings = [
+        ('18', '23', 'Jaded oxen driving zombies acted oxen'),
+        ('29', '21', 'kept zombies oxen kept driving forward oxen'),
+    ]
+    for chassis_index, intrusion_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'intrusion_index:{}'.format(intrusion_index),
+            'intrusion_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('12', '14', 'zombies quaintly forward acted quaintly acted Jaded zombies'),
+        ('22', '22', 'acted quaintly their Jaded oxen forward forward'),
+    ]
+    for chassis_index, power_usage_index, power_usage_entity_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'power_usage_index:{}'.format(power_usage_index),
+            'power_usage_entity_name:{}'.format(power_usage_entity_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('20', '31', 'quaintly but oxen Jaded driving'),
+        ('21', '13', 'kept kept their but quaintly kept quaintly driving'),
+    ]
+    for chassis_index, battery_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'system_battery_index:{}'.format(battery_index),
+            'system_battery_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.systemBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.systemBatteryReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('1', '19', 'driving oxen forward'),
+        ('6', '31', 'their Jaded quaintly but but their quaintly kept acted'),
+    ]
+    for chassis_index, cooling_unit_index, cooling_unit_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'cooling_unit_index:{}'.format(cooling_unit_index),
+            'cooling_unit_name:{}'.format(cooling_unit_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.coolingUnitRedundancyStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingUnitStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('8', '11', '9', 'acted', 'acted'),
+        ('19', '3', '10', 'acted oxen but zombies driving acted Jaded', 'quaintly kept'),
+    ]
+    for chassis_index, device_name, device_type, location_name, cooling_device_fqdd in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'cooling_device_name:{}'.format(device_name),
+            'cooling_device_type:{}'.format(device_type),
+            'cooling_device_location_name:{}'.format(location_name),
+            'cooling_device_fqdd:{}'.format(cooling_device_fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.coolingDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingDeviceReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingDeviceDiscreteReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('7', '28', '2', 'quaintly their but forward acted acted kept Jaded forward'),
+        ('15', '28', '2', 'but driving quaintly kept Jaded'),
+    ]
+    for chassis_index, probe_index, probe_type, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'temperature_probe_index:{}'.format(probe_index),
+            'temperature_probe_type:{}'.format(probe_type),
+            'temperature_probe_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.temperatureProbeStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.temperatureProbeReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric(
+            'snmp.temperatureProbeDiscreteReading', metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+
+    tag_mappings = [
+        ('4', '24', 'but oxen forward', 'their forward oxen'),
+        (
+            '19',
+            '1',
+            'but driving oxen but driving oxen oxen oxen forward',
+            'zombies quaintly Jaded but Jaded driving acted forward',
+        ),
+    ]
+    for chassis_index, device_index, brand_name, device_fqdd in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'processor_device_index:{}'.format(device_index),
+            'processor_device_brand_name:{}'.format(brand_name),
+            'processor_device_fqdd:{}'.format(device_fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.processorDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.processorDeviceMaximumSpeed', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.processorDeviceCurrentSpeed', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.processorDeviceVoltage', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('3', '11', 'driving zombies oxen driving kept Jaded driving'),
+        (
+            '18',
+            '21',
+            'kept kept',
+        ),
+    ]
+    for chassis_index, status_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'processor_device_status_index:{}'.format(status_index),
+            'processor_device_status_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.processorDeviceStatusStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.processorDeviceStatusReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('2', '11', 'but kept Jaded'),
+        (
+            '8',
+            '3',
+            'quaintly quaintly oxen oxen kept kept their acted forward',
+        ),
+    ]
+    for chassis_index, fru_index, fru_fqdd in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'fru_index:{}'.format(fru_index),
+            'fru_fqdd:{}'.format(fru_fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('2', 'driving quaintly kept Jaded forward but forward kept', 'Jaded but Jaded their'),
+        (
+            '8',
+            'zombies quaintly kept kept but quaintly forward quaintly oxen',
+            'oxen acted their their forward but Jaded zombies oxen',
+        ),
+    ]
+    for disk_number, disk_name, disk_fqdd in tag_mappings:
+        tags = [
+            'virtual_disk_number:{}'.format(disk_number),
+            'virtual_disk_name:{}'.format(disk_name),
+            'virtual_disk_fqdd:{}'.format(disk_fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.virtualDiskState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.virtualDiskSizeInMB', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.virtualDiskComponentStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.virtualDiskT10PIStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('2', '27'),
+        (
+            '83',
+            '86',
+        ),
+    ]
+    for chassis_index, psu_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'drs_psu_index:{}'.format(psu_index),
+        ] + common_tags
+        aggregator.assert_metric('snmp.drsWattsReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.drsAmpsReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.drsKWhCumulative', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
     indexes = ['29', '22']
     device_types = ['26', '4']
-    for index, device_type in zip(indexes, device_types):
-        tags = ['chassis_index:{}'.format(index), 'device_type:{}'.format(device_type)] + common_tags
+    device_indexes = ['4', '21']
+    for index, device_type, device_index in zip(indexes, device_types, device_indexes):
+        tags = [
+            'chassis_index:{}'.format(index),
+            'device_type:{}'.format(device_type),
+            'device_index:{}'.format(device_index),
+        ] + common_tags
         aggregator.assert_metric(
             'snmp.{}'.format("memoryDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
         )
@@ -672,25 +1018,32 @@ def test_idrac(aggregator):
         aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
-    run_profile_check('cisco_nexus', profile)
+    run_profile_check(profile)
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
-    common_tags = common.CHECK_TAGS + ['snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:' + profile]
+    common_tags = common.CHECK_TAGS + [
+        'snmp_host:Nexus-eu1.companyname.managed',
+        'snmp_profile:' + profile,
+        'device_vendor:cisco',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -699,6 +1052,8 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -737,18 +1092,20 @@ def test_cisco_nexus(aggregator):
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
-    )
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
-    aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.cswStackPortOperStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['interface:GigabitEthernet1/0/1'],
+    )
+
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
@@ -791,13 +1148,10 @@ def test_dell_poweredge(aggregator):
 
     memory_device_gauges = ['memoryDeviceStatus', 'memoryDeviceFailureModes']
 
-    idrac_gauges = (
-        ['batteryState', 'controllerRollUpStatus', 'pCIDeviceStatus', 'systemSlotStatus', 'systemBIOSStatus']
-        + VOLTAGE_GAUGES
-        + PROBE_GAUGES
-    )
-
-    common_tags = common.CHECK_TAGS + ['snmp_profile:dell-poweredge']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:dell-poweredge',
+        'device_vendor:dell',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -813,9 +1167,22 @@ def test_dell_poweredge(aggregator):
         for metric in power_supply_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
-    indexes = [13]
-    for index in indexes:
-        tags = ['chassis_index:18', 'index:{}'.format(index)] + common_tags
+    tag_mappings = [
+        ('14', '8', '2', 'but their forward oxen oxen'),
+        ('18', '13', '16', 'acted Jaded kept kept but quaintly quaintly zombies'),
+        ('21', '13', '1', 'kept oxen oxen forward'),
+        ('22', '4', '3', 'but but oxen zombies quaintly quaintly but Jaded'),
+        ('23', '23', '3', 'kept driving driving Jaded zombies forward quaintly zombies but'),
+        ('24', '10', '3', 'acted their kept forward forward'),
+        ('25', '17', '1', 'oxen their their oxen'),
+    ]
+    for chassis_index, probe_index, probe_type, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'index:{}'.format(probe_index),
+            'temperature_probe_type:{}'.format(probe_type),
+            'temperature_probe_location_name:{}'.format(location_name),
+        ] + common_tags
         for metric in temperature_probe_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
@@ -851,32 +1218,169 @@ def test_dell_poweredge(aggregator):
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
-    # IDRAC
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common_tags
-        for gauge in SYSTEM_STATUS_GAUGES:
-            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    powers = ['supply1', 'supply2']
-    for power in powers:
-        tags = ['supply_name:{}'.format(power)] + common_tags
-        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
-    disks = ['disk1', 'disk2']
-    for disk in disks:
-        tags = ['disk_name:{}'.format(disk)] + common_tags
-        for gauge in DISK_GAUGES:
+        for gauge in POWEREDGE_SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for gauge in idrac_gauges:
-        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE)
+    tag_mappings = [
+        ('3', '17', 'zombies kept their quaintly but'),
+        ('6', '19', 'zombies'),
+    ]
+    for chassis_index, battery_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'battery_index:{}'.format(battery_index),
+            'battery_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.batteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.batteryReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('3', '26'), ('31', '19')]
+    for chassis_index, bios_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'system_bios_index:{}'.format(bios_index),
+        ] + common_tags
+        aggregator.assert_metric('snmp.systemBIOSStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('9', '26', '28'), ('18', '26', '4')]
+    for chassis_index, probe_type, probe_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'probe_type:{}'.format(probe_type),
+            'amperage_probe_index:{}'.format(probe_index),
+        ] + common_tags
+        for gauge in PROBE_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('12', '6', '15'), ('22', '3', '19')]
+    for chassis_index, probe_type, probe_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'probe_type:{}'.format(probe_type),
+            'voltage_probe_index:{}'.format(probe_index),
+        ] + common_tags
+        for gauge in VOLTAGE_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('18', '23', 'Jaded oxen driving zombies acted oxen'),
+        ('29', '21', 'kept zombies oxen kept driving forward oxen'),
+    ]
+    for chassis_index, intrusion_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'intrusion_index:{}'.format(intrusion_index),
+            'intrusion_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('12', '14', 'zombies quaintly forward acted quaintly acted Jaded zombies'),
+        ('22', '22', 'acted quaintly their Jaded oxen forward forward'),
+    ]
+    for chassis_index, power_usage_index, power_usage_entity_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'power_usage_index:{}'.format(power_usage_index),
+            'power_usage_entity_name:{}'.format(power_usage_entity_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('1', '19', 'driving oxen forward'),
+        ('6', '31', 'their Jaded quaintly but but their quaintly kept acted'),
+    ]
+    for chassis_index, cooling_unit_index, cooling_unit_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'cooling_unit_index:{}'.format(cooling_unit_index),
+            'cooling_unit_name:{}'.format(cooling_unit_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.coolingUnitRedundancyStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingUnitStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('8', '11', '9', 'acted'),
+        ('19', '3', '10', 'acted oxen but zombies driving acted Jaded'),
+    ]
+    for chassis_index, device_name, device_type, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'cooling_device_name:{}'.format(device_name),
+            'cooling_device_type:{}'.format(device_type),
+            'cooling_device_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.coolingDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingDeviceReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.coolingDeviceDiscreteReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('3', '11', 'driving zombies oxen driving kept Jaded driving'),
+        (
+            '18',
+            '21',
+            'kept kept',
+        ),
+    ]
+    for chassis_index, status_index, location_name in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'processor_device_status_index:{}'.format(status_index),
+            'processor_device_status_location_name:{}'.format(location_name),
+        ] + common_tags
+        aggregator.assert_metric('snmp.processorDeviceStatusStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.processorDeviceStatusReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('2', '11'),
+        (
+            '8',
+            '3',
+        ),
+    ]
+    for chassis_index, fru_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'fru_index:{}'.format(fru_index),
+        ] + common_tags
+        aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [
+        ('2', '11'),
+        (
+            '8',
+            '3',
+        ),
+    ]
+    for chassis_index, fru_index in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'fru_index:{}'.format(fru_index),
+        ] + common_tags
+        aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('19', 'their kept kept zombies kept zombies their'), ('21', 'zombies their')]
+    for index, slot in tag_mappings:
+        tags = ['slot_name:{}'.format(slot), 'chassis_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.systemSlotStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('2', 'driving oxen oxen but'), ('7', 'kept but Jaded oxen quaintly Jaded zombies')]
+    for index, descr_name in tag_mappings:
+        tags = ['device_descr_name:{}'.format(descr_name), 'chassis_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.pCIDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
     profile = "hp-ilo4"
-    run_profile_check('hp_ilo4', profile)
+    run_profile_check(profile)
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -937,7 +1441,7 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'device_vendor:hp']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -981,14 +1485,43 @@ def test_hp_ilo4(aggregator):
         for metric in phys_adapter_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    drive_counts = [
+        "cpqDaPhyDrvUsedReallocs",
+        "cpqDaPhyDrvRefHours",
+        "cpqDaPhyDrvHardReadErrs",
+        "cpqDaPhyDrvRecvReadErrs",
+        "cpqDaPhyDrvHardWriteErrs",
+        "cpqDaPhyDrvRecvWriteErrs",
+        "cpqDaPhyDrvHSeekErrs",
+        "cpqDaPhyDrvSeekErrs",
+    ]
+    drive_gauges = [
+        "cpqDaPhyDrvStatus",
+        "cpqDaPhyDrvFactReallocs",
+        "cpqDaPhyDrvSpinupTime",
+        "cpqDaPhyDrvSize",
+        "cpqDaPhyDrvSmartStatus",
+        "cpqDaPhyDrvCurrentTemperature",
+    ]
+    drive_idx = [(0, 2), (0, 28), (8, 31), (9, 24), (9, 28), (10, 17), (11, 4), (12, 20), (18, 22), (23, 2)]
+    for drive_cntrl_idx, drive_index in drive_idx:
+        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common_tags
+        for metric in drive_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in drive_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
 def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant', 'device_vendor:hp']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1084,8 +1617,13 @@ def test_proliant(aggregator):
         for metric in drive_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for interface in ['eth0', 'eth1']:
-        if_tags = ['interface:{}'.format(interface)] + common_tags
+    interfaces = [
+        ('eth0', 'quaintly zombies quaintly forward'),
+        ('eth1', 'quaintly but quaintly quaintly'),
+    ]
+
+    for interface, desc in interfaces:
+        if_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
@@ -1095,6 +1633,8 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
         for metric in IF_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+        for metric in IF_BANDWIDTH_USAGE:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     mem_boards = ['11', '12']
@@ -1128,6 +1668,7 @@ def test_proliant(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1155,12 +1696,24 @@ def test_generic_host_resources(aggregator):
     for metric in sys_metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
-    aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
-    aggregator.assert_metric('snmp.hrStorageSize', count=2)
-    aggregator.assert_metric('snmp.hrStorageUsed', count=2)
-    aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=2)
+    storages = [
+        ('1.3.6.1.2.1.25.2.1.3', 'oxen their driving forward quaintly'),
+        ('1.3.6.1.2.1.25.2.1.4', 'quaintly driving Jaded forward their quaintly zombies'),
+    ]
+    for storage_type, storage_desc in storages:
+        tags = common_tags + ['storagetype:{}'.format(storage_type), 'storagedesc:{}'.format(storage_desc)]
+        aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageSize', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageUsed', count=1, tags=tags)
+        aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=1, tags=tags)
 
-    aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
+    processors = [
+        '1.3.6.1.3.81.16',
+        '1.3.6.1.3.95.73.140.186.121.144.199',
+    ]
+    for proc in processors:
+        tags = common_tags + ['processorid:{}'.format(proc)]
+        aggregator.assert_metric('snmp.hrProcessorLoad', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -1168,9 +1721,12 @@ def test_generic_host_resources(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
     profile = "palo-alto"
-    run_profile_check('pan-common', profile)
+    run_profile_check(profile)
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:' + profile,
+        'device_vendor:paloaltonetworks',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1213,11 +1769,26 @@ def test_palo_alto(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_cisco_asa_all(aggregator):
+    profile = "cisco-asa"
+    assert_cisco_asa(aggregator, profile)
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_asa_5525(aggregator):
     profile = "cisco-asa-5525"
-    run_profile_check('cisco_asa_5525', profile)
+    assert_cisco_asa(aggregator, profile)
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'snmp_host:kept']
+
+def assert_cisco_asa(aggregator, profile):
+
+    run_profile_check(profile)
+
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:' + profile,
+        'snmp_host:kept',
+        'device_vendor:cisco',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1244,6 +1815,9 @@ def test_cisco_asa_5525(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     for metric in IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
+    for metric in IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
@@ -1287,16 +1861,13 @@ def test_cisco_asa_5525(aggregator):
             tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
-    )
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
-        )
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1355,26 +1926,27 @@ def test_cisco_asa_5525(aggregator):
 def test_cisco_csr(aggregator):
     run_profile_check('cisco-csr1000v')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:cisco-csr1000v',
+        'device_vendor:cisco',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
-    tags = ['neighbor:244.12.239.177'] + common_tags
-    for metric in PEER_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
-
-    for metric in PEER_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
+    _check_bgp4(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
 def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:checkpoint-firewall']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:checkpoint-firewall',
+        'device_vendor:checkpoint',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1437,7 +2009,7 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1478,7 +2050,7 @@ def test_arista(aggregator):
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba', 'device_vendor:aruba']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1539,7 +2111,7 @@ def test_aruba(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
     profile = "chatsworth_pdu"
-    run_profile_check('chatsworth', profile)
+    run_profile_check(profile)
 
     # Legacy global tags are applied to all metrics
     legacy_global_tags = [
@@ -1548,7 +2120,7 @@ def test_chatsworth(aggregator):
         'legacy_pdu_name:legacy-name1',
         'legacy_pdu_version:1.2.3',
     ]
-    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile]
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile, 'device_vendor:chatsworth']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1614,7 +2186,7 @@ def test_chatsworth(aggregator):
         aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=line_tags, count=1)
 
     for branch in [1, 17]:
-        branch_tags = common_tags + ['branch_id:{}'.format(branch)]
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name1']
         aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
@@ -1623,6 +2195,16 @@ def test_chatsworth(aggregator):
             'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
         )
         aggregator.assert_metric('snmp.cpiPduBranchStatus', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
+        )
+
+    for branch in [1]:
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name2']
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+
         aggregator.assert_metric(
             'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
         )
@@ -1642,7 +2224,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1654,6 +2236,7 @@ def test_isilon(aggregator):
         'cluster_name:testcluster1',
         'node_name:node1',
         'node_type:1',
+        'device_vendor:dell',
     ]
 
     cluster_rates = [
@@ -1719,6 +2302,9 @@ def test_isilon(aggregator):
     aggregator.assert_metric('snmp.ifsUsedBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
     aggregator.assert_metric('snmp.ifsTotalBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
 
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_apc_ups(aggregator):
@@ -1729,6 +2315,7 @@ def test_apc_ups(aggregator):
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
+        'device_vendor:apc',
     ]
 
     tags = common.CHECK_TAGS + profile_tags
@@ -1774,6 +2361,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
     )
+    aggregator.assert_metric('snmp.upsBasicStateOutputState.On', 1, metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -1781,7 +2369,10 @@ def test_apc_ups(aggregator):
 def test_fortinet_fortigate(aggregator):
     run_profile_check('fortinet-fortigate')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:fortinet-fortigate']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:fortinet-fortigate',
+        'device_vendor:fortinet',
+    ]
 
     common_gauge_metrics = [
         'fgSysCpuUsage',
@@ -1864,7 +2455,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1874,6 +2465,7 @@ def test_netapp(aggregator):
     profile_tags = [
         'snmp_profile:netapp',
         'snmp_host:example-datacenter.company',
+        'device_vendor:netapp',
     ]
 
     common_tags = common.CHECK_TAGS + profile_tags
@@ -1978,7 +2570,11 @@ def test_netapp(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_catalyst(aggregator):
     run_profile_check('cisco-catalyst')
-    common_tags = common.CHECK_TAGS + ['snmp_host:catalyst-6000.example', 'snmp_profile:cisco-catalyst']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_host:catalyst-6000.example',
+        'snmp_profile:cisco-catalyst',
+        'device_vendor:cisco',
+    ]
 
     sensors = [5, 9]
     for sensor in sensors:
@@ -1997,5 +2593,199 @@ def test_cisco_catalyst(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
-    aggregator.assert_metric('snmp.devices_monitored', count=1)
+    common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
+@pytest.mark.usefixtures("dd_environment")
+def test_juniper_ex(aggregator, file):
+    run_profile_check(file, 'juniper-ex')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:juniper-ex',
+        'device_vendor:juniper-networks',
+    ]
+    _check_juniper_virtual_chassis(aggregator, common_tags)
+    _check_juniper_dcu(aggregator, common_tags)
+    _check_juniper_cos(aggregator, common_tags)
+    _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+@pytest.mark.parametrize("file", ["juniper-mx", "juniper-mx-variation"])
+@pytest.mark.usefixtures("dd_environment")
+def test_juniper_mx(aggregator, file):
+    run_profile_check(file, 'juniper-mx')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:juniper-mx',
+        'device_vendor:juniper-networks',
+    ]
+    _check_juniper_virtual_chassis(aggregator, common_tags)
+    _check_juniper_firewall(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+@pytest.mark.parametrize("file", ["juniper-srx", "juniper-srx-variation"])
+@pytest.mark.usefixtures("dd_environment")
+def test_juniper_srx(aggregator, file):
+    run_profile_check(file, 'juniper-srx')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:juniper-srx',
+        'device_vendor:juniper-networks',
+    ]
+    _check_juniper_userfirewall(aggregator, common_tags)
+    _check_juniper_dcu(aggregator, common_tags)
+    _check_juniper_scu(aggregator, common_tags)
+    _check_bgp4(aggregator, common_tags)
+    common.assert_common_metrics(aggregator, common_tags)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+def _check_juniper_scu(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting scu
+    """
+    scu_tags = [
+        ['address_family:1', 'interface:kept but'],
+        ['address_family:1', 'interface:quaintly driving oxen their zombies oxen acted acted'],
+        ['address_family:1', 'interface:but forward kept but their driving oxen quaintly acted'],
+    ]
+    for metric in SCU_COUNTS:
+        for tags in scu_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + tags, count=1
+            )
+
+
+def _check_juniper_userfirewall(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting userfirewall (user auth)
+    """
+    userfirewall_tags = [
+        ['ldap_domain_name:Mycroft Holmes', 'ldap_host:brother'],
+        ['ldap_domain_name:Jim Moriarty', 'ldap_host:enemy'],
+    ]
+    for metric in USER_FIREWALL:
+        for tags in userfirewall_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + tags, count=1
+            )
+
+
+def _check_juniper_dcu(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting DCU
+    """
+    dcu_tags = [
+        [
+            'address_family:1',
+            'destination_class_name:their',
+            'interface:quaintly driving oxen their zombies oxen acted acted',
+        ],
+        [
+            'address_family:1',
+            'destination_class_name:acted but forward acted zombies forward',
+            'interface:but forward kept but their driving oxen quaintly acted',
+        ],
+        [
+            'address_family:2',
+            'destination_class_name:oxen Jaded oxen Jaded forward kept quaintly',
+            'interface:kept but',
+        ],
+    ]
+    for decu_metric in DCU_COUNTS:
+        for tags in dcu_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(decu_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + tags, count=1
+            )
+
+
+def _check_juniper_firewall(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting firewall metrics
+    """
+    firewall_tags = [
+        [
+            'counter_name:Jaded oxen kept their driving but kept',
+            'counter_type:4',
+            'firewall_filter_name:their driving quaintly but Jaded oxen',
+        ],
+        [
+            'counter_name:but but but their their their kept kept forward',
+            'counter_type:4',
+            'firewall_filter_name:driving kept acted Jaded zombies kept acted',
+        ],
+    ]
+    for metric in FIREWALL_COUNTS:
+        for tags in firewall_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=common_tags + tags,
+                count=1,
+            )
+
+
+def _check_juniper_virtual_chassis(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting virtual chassis metrics
+    """
+    virtual_chassis_tags = [
+        ['port_name:but driving but'],
+        ['port_name:Jaded forward but oxen quaintly their their'],
+        ['port_name:forward forward driving driving Jaded Jaded'],
+    ]
+
+    for count_and_rate_metric in VIRTUAL_CHASSIS_COUNTS:
+        for tags in virtual_chassis_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count_and_rate_metric),
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=common_tags + tags,
+                count=1,
+            )
+    for rate_metric in VIRTUAL_CHASSIS_RATES:
+        for tags in virtual_chassis_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(rate_metric), metric_type=aggregator.GAUGE, tags=common_tags + tags, count=1
+            )
+
+
+def _check_juniper_cos(aggregator, common_tags):
+    """
+    Shared testing function for Juniper profiles supporting COS metrics
+    """
+    cos_tags = [
+        ['interface:acted oxen oxen forward quaintly kept zombies but oxen', 'queue_number:25'],
+        ['interface:acted kept quaintly acted oxen kept', 'queue_number:50'],
+        ['interface:their', 'queue_number:15'],
+    ]
+    for cos_metric in COS_COUNTS:
+        for tags in cos_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(cos_metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + tags, count=1
+            )
+    for cos_metric in COS_RATES:
+        for tags in cos_tags:
+            aggregator.assert_metric(
+                'snmp.{}'.format(cos_metric), metric_type=aggregator.GAUGE, tags=common_tags + tags, count=1
+            )
+
+
+def _check_bgp4(aggregator, common_tags):
+    """
+    Shared testing function for profiles supporting BGP4 metrics.
+    """
+    tags = ['neighbor:244.12.239.177'] + common_tags
+    for metric in PEER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in PEER_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)

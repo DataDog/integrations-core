@@ -31,7 +31,7 @@ from datadog_checks.snmp.utils import (
 from . import common
 from .utils import mock_profiles_confd_root
 
-pytestmark = [pytest.mark.unit, common.python_autodiscovery_only]
+pytestmark = [pytest.mark.unit, common.snmp_integration_only]
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
@@ -192,6 +192,11 @@ def test_parse_metrics(lcd_mock, caplog):
     column_tag = bar.column_tags[0]
     assert column_tag.column == 'baz'
     assert column_tag.parsed_metric_tag.name == 'test'
+
+    # Invalid extract value pattern
+    metrics = [{"MIB": "foo_mib", "symbol": {"OID": "1.2.3", "name": "hey", "extract_value": "[aa-"}}]
+    with pytest.raises(Exception, match="Failed to compile regular expression"):
+        config.parse_metrics(metrics)
 
 
 def test_ignore_ip_addresses():
@@ -443,10 +448,10 @@ def test_profile_extends():
 
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
-            with open(os.path.join(tmp, 'base.yaml'), 'w') as f:
+            with open(os.path.join(tmp, 'base.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(base))
 
-            with open(os.path.join(tmp, 'profile1.yaml'), 'w') as f:
+            with open(os.path.join(tmp, 'profile1.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(profile1))
 
             definition = {'extends': ['profile1.yaml']}
@@ -472,7 +477,7 @@ def test_default_profiles():
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'profile.yaml')
-            with open(profile_file, 'w') as f:
+            with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()
@@ -487,7 +492,7 @@ def test_profile_override():
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'generic-router.yaml')
-            with open(profile_file, 'w') as f:
+            with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()
@@ -581,3 +586,103 @@ def test_batches(items, size, output):
 def test_batches_size_must_be_strictly_positive(size):
     with pytest.raises(ValueError):
         list(batches([1, 2, 3], size=size))
+
+
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric():
+    instance = common.generate_instance_config([])
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+    results = {
+        'ifHighSpeed': {
+            ('1', '2'): 80,
+        },
+        'ifHCInOctets': {
+            ('1', '2'): 5000000,
+        },
+        'ifHCOutOctets': {
+            ('1', '2'): 1000000,
+        },
+    }
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCInOctets', index, results, tags)
+    # ((5000000 * 8) / (80 * 1000000)) * 100 = 50.0
+    check.rate.assert_called_with('snmp.ifBandwidthInUsage.rate', 50.0, ['foo', 'bar'])
+
+    check.rate = mock.Mock()
+    check.try_submit_bandwidth_usage_metric_if_bandwidth_metric('ifHCOutOctets', index, results, tags)
+    # ((1000000 * 8) / (80 * 1000000)) * 100 = 10.0
+    check.rate.assert_called_with('snmp.ifBandwidthOutUsage.rate', 10.0, ['foo', 'bar'])
+
+
+@pytest.mark.parametrize(
+    "results, metric_name, error_messages",
+    [
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCInOctets',
+            ['missing `ifHCInOctets`'],
+            id="missing ifHCInOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 80,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHCOutOctets`'],
+            id="missing ifHCOutOctets",
+        ),
+        pytest.param(
+            {
+                'ifHighSpeed': {
+                    ('1', '2'): 0,
+                },
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['Zero value at ifHighSpeed, skipping'],
+            id="zero ifHighSpeed",
+        ),
+        pytest.param(
+            {
+                'ifHCInOctets': {
+                    ('1', '2'): 5000000,
+                },
+                'ifHCOutOctets': {
+                    ('1', '2'): 1000000,
+                },
+            },
+            'ifHCOutOctets',
+            ['missing `ifHighSpeed` metric'],
+            id="missing ifHighSpeed",
+        ),
+    ],
+)
+def test_try_submit_bandwidth_usage_metric_if_bandwidth_metric_errors(results, metric_name, error_messages, caplog):
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+
+    index = ('1', '2')
+    tags = ['foo', 'bar']
+
+    check.rate = mock.Mock()
+    with caplog.at_level(logging.DEBUG):
+        check.try_submit_bandwidth_usage_metric_if_bandwidth_metric(metric_name, index, results, tags)
+
+    check.rate.assert_not_called()
+    for msg in error_messages:
+        assert msg in caplog.text

@@ -1,20 +1,41 @@
 # CHANGELOG - Nfsstat
 
-## 1.6.0 / 2020-06-29
+## 1.9.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.8.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 1.7.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add runtime configuration validation. See [#8961](https://github.com/DataDog/integrations-core/pull/8961).
+
+## 1.6.2 / 2021-03-07 / Agent 7.27.0
+
+* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
+* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+
+## 1.6.1 / 2020-09-21 / Agent 7.23.0
+
+* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+
+## 1.6.0 / 2020-06-29 / Agent 7.21.0
 
 * [Added] Avoid logging warnings if AutoFS is enabled. See [#6903](https://github.com/DataDog/integrations-core/pull/6903).
 * [Added] Add specs and use new signature. See [#6780](https://github.com/DataDog/integrations-core/pull/6780).
 
-## 1.5.0 / 2020-05-17
+## 1.5.0 / 2020-05-17 / Agent 7.20.0
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Fix nfsiostat command. See [#6650](https://github.com/DataDog/integrations-core/pull/6650).
 
-## 1.4.2 / 2020-04-04
+## 1.4.2 / 2020-04-04 / Agent 7.19.0
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-## 1.4.1 / 2019-05-30
+## 1.4.1 / 2019-05-30 / Agent 6.12.0
 
 * [Fixed] Fix non-ascii mounted folder name. See [#3805](https://github.com/DataDog/integrations-core/pull/3805).
 
@@ -22,23 +43,23 @@
 
 * [Added] Adhere to code style. See [#3544](https://github.com/DataDog/integrations-core/pull/3544).
 
-## 1.3.0 / 2019-03-29
+## 1.3.0 / 2019-03-29 / Agent 6.11.0
 
 * [Added] Support Python 3. See [#3228](https://github.com/DataDog/integrations-core/pull/3228).
 
-## 1.2.0 / 2019-02-18
+## 1.2.0 / 2019-02-18 / Agent 6.10.0
 
 * [Added] Don't raise Exception when No NFS mounts could be found. See [#3069](https://github.com/DataDog/integrations-core/pull/3069).
 
-## 1.1.0 / 2019-01-04
+## 1.1.0 / 2019-01-04 / Agent 6.9.0
 
 * [Added] Support Python 3. See [#2775][1].
 
-## 1.0.0 / 2018-10-13
+## 1.0.0 / 2018-10-13 / Agent 6.6.0
 
 * [Added] NFSIOStat Check. See [#720][2].
 
-## 0.2.1 / 2018-09-04
+## 0.2.1 / 2018-09-04 / Agent 6.5.0
 
 * [Fixed] Add data files to the wheel package. See [#1727][3].
 
@@ -58,5 +79,5 @@
 [1]: https://github.com/DataDog/integrations-core/pull/2775
 [2]: https://github.com/DataDog/integrations-core/pull/720
 [3]: https://github.com/DataDog/integrations-core/pull/1727
-[4]: 
+[4]: https://github.com/DataDog/integrations-core/pull/974
 [5]: https://github.com/DataDog/integrations-core/issues/720

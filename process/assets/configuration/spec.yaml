@@ -34,7 +34,7 @@ files:
         value:
           type: string
           example: /proc
-          default: null
+          display_default: null
       - template: init_config/default
     - template: instances
       options:
@@ -79,7 +79,7 @@ files:
           If you want to match on a substring within proc.cmdline(), set this to false
           Regex is also supported when this flag is set to `false`.
 
-          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have acces to the full
+          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
           command line of processes running under a different user. This option cannot be used in such cases.
           https://docs.datadoghq.com/integrations/process/#configuration
         value:

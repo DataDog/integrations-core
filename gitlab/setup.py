@@ -27,7 +27,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=11.0.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=15.7.0'
 
 setup(
     name='datadog-gitlab',
@@ -50,8 +50,10 @@ setup(
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
     packages=['datadog_checks.gitlab'],

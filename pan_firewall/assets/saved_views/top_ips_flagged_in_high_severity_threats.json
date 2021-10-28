@@ -1,0 +1,35 @@
+{
+  "name": "Top IPs flagged in high severity threats",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:pan.firewall @type:THREAT @severity:high",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "@type",
+    "@evt.name",
+    "@subtype",
+    "@network.client.geoip.country.name",
+    "@network.destination.ip",
+    "@usr.id",
+    "@http.useragent_details.browser.family",
+    "@network.client.ip"
+  ],
+  "options": {
+    "group_bys": [
+      {
+        "facet": "@network.client.ip"
+      }
+    ],
+    "aggregations": [
+      {
+        "metric": "count",
+        "type": "count"
+      }
+    ],
+    "limit": "250",
+    "order": "top",
+    "widget": "query_table"
+  }
+}

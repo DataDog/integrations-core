@@ -3,21 +3,32 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
+import ssl
 from contextlib import contextmanager
+from copy import deepcopy
+from io import open
 from ipaddress import ip_address, ip_network
 
 import requests
+import requests_unixsocket
+from binary import KIBIBYTE
+from cryptography.x509 import load_der_x509_certificate
+from cryptography.x509.extensions import ExtensionNotFound
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from requests import auth as requests_auth
+from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
 from six import PY2, iteritems, string_types
-from six.moves.urllib.parse import urlparse
-from urllib3.exceptions import InsecureRequestWarning
+from six.moves.urllib.parse import quote, urlparse, urlunparse
+from wrapt import ObjectProxy
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
-from .common import ensure_unicode
+from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .warnings_util import disable_warnings_ctx
+from .network import CertAdapter, closing, create_socket_connection
+from .time import get_timestamp
 
 try:
     from contextlib import ExitStack
@@ -33,6 +44,9 @@ except ImportError:
 requests_aws = None
 requests_kerberos = None
 requests_ntlm = None
+jwt = None
+default_backend = None
+serialization = None
 
 LOGGER = logging.getLogger(__file__)
 
@@ -41,7 +55,13 @@ LOGGER = logging.getLogger(__file__)
 # https://tools.ietf.org/html/rfc2988
 DEFAULT_TIMEOUT = 10
 
+# 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
+# https://www.bittorrent.org/beps/bep_0003.html
+DEFAULT_CHUNK_SIZE = 16
+
 STANDARD_FIELDS = {
+    'allow_redirects': True,
+    'auth_token': None,
     'auth_type': 'basic',
     'aws_host': None,
     'aws_region': None,
@@ -62,6 +82,7 @@ STANDARD_FIELDS = {
     'persist_connections': False,
     'proxy': None,
     'read_timeout': None,
+    'request_size': DEFAULT_CHUNK_SIZE,
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
@@ -70,6 +91,7 @@ STANDARD_FIELDS = {
     'tls_private_key': None,
     'tls_verify': True,
     'timeout': DEFAULT_TIMEOUT,
+    'use_legacy_auth_encoding': True,
     'username': None,
 }
 # For any known legacy fields that may be widespread
@@ -89,6 +111,31 @@ PROXY_SETTINGS_DISABLED = {
 
 KERBEROS_STRATEGIES = {}
 
+UDS_SCHEME = 'unix'
+
+
+class ResponseWrapper(ObjectProxy):
+    def __init__(self, response, default_chunk_size):
+        super(ResponseWrapper, self).__init__(response)
+
+        # See https://github.com/psf/requests/pull/5942
+        self.__default_chunk_size = default_chunk_size
+
+    def iter_content(self, chunk_size=None, decode_unicode=False):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+
+    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def __enter__(self):
+        return self
+
 
 class RequestsWrapper(object):
     __slots__ = (
@@ -101,6 +148,8 @@ class RequestsWrapper(object):
         'options',
         'persist_connections',
         'request_hooks',
+        'auth_token_handler',
+        'request_size',
     )
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
@@ -200,6 +249,8 @@ class RequestsWrapper(object):
 
         auth = AUTH_TYPES[auth_type](config)
 
+        allow_redirects = is_affirmative(config['allow_redirects'])
+
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
         if isinstance(config['tls_ca_cert'], string_types):
@@ -251,6 +302,7 @@ class RequestsWrapper(object):
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
             'verify': verify,
+            'allow_redirects': allow_redirects,
         }
 
         # For manual parsing until `requests` properly handles `no_proxy`
@@ -258,6 +310,8 @@ class RequestsWrapper(object):
 
         # Ignore warnings for lack of SSL validation
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
+
+        self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
@@ -269,10 +323,14 @@ class RequestsWrapper(object):
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
+        # Set up any auth token handlers
+        if config['auth_token'] is not None:
+            self.auth_token_handler = create_auth_token_handler(config['auth_token'])
+        else:
+            self.auth_token_handler = None
+
         # Context managers that should wrap all requests
         self.request_hooks = []
-        if self.ignore_tls_warning:
-            self.request_hooks.append(self.handle_tls_warning)
 
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
@@ -297,6 +355,9 @@ class RequestsWrapper(object):
     def delete(self, url, **options):
         return self._request('delete', url, options)
 
+    def options_method(self, url, **options):
+        return self._request('options', url, options)
+
     def _request(self, method, url, options):
         if self.log_requests:
             self.logger.debug(u'Sending %s request to %s', method.upper(), url)
@@ -310,19 +371,63 @@ class RequestsWrapper(object):
 
         new_options = self.populate_options(options)
 
+        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.warning(u'An unverified HTTPS request is being made to %s', url)
+
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
             new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
+        if is_uds_url(url):
+            persist = True  # UDS support is only enabled on the shared session.
+            url = quote_uds_url(url)
+
+        self.handle_auth_token(method=method, url=url, default_options=self.options)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
-
             if persist:
-                return getattr(self.session, method)(url, **new_options)
+                request_method = getattr(self.session, method)
             else:
-                return getattr(requests, method)(url, **new_options)
+                request_method = getattr(requests, method)
+
+            if self.auth_token_handler:
+                try:
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response.raise_for_status()
+                except Exception as e:
+                    self.logger.debug(u'Renewing auth token, as an error occurred: %s', e)
+                    self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+            else:
+                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+
+            return ResponseWrapper(response, self.request_size)
+
+    def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
+        try:
+            response = request_method(url, **new_options)
+        except SSLError as e:
+            # fetch the intermediate certs
+            parsed_url = urlparse(url)
+            hostname = parsed_url.hostname
+            certs = self.fetch_intermediate_certs(hostname)
+            if not certs:
+                raise e
+            # retry the connection via session object
+            certadapter = CertAdapter(certs=certs)
+            if not persist:
+                session = requests.Session()
+                for option, value in iteritems(self.options):
+                    setattr(session, option, value)
+            else:
+                session = self.session
+            request_method = getattr(session, method)
+            session.mount(url, certadapter)
+            response = request_method(url, **new_options)
+        return response
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options
@@ -335,10 +440,67 @@ class RequestsWrapper(object):
 
         return options
 
-    @contextmanager
-    def handle_tls_warning(self):
-        with disable_warnings_ctx(InsecureRequestWarning, disable=True):
-            yield
+    def fetch_intermediate_certs(self, hostname):
+        # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
+        certs = []
+
+        try:
+            sock = create_socket_connection(hostname)
+        except Exception as e:
+            self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
+            return certs
+
+        with closing(sock):
+            try:
+                context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+                context.verify_mode = ssl.CERT_NONE
+
+                with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
+                    der_cert = secure_sock.getpeercert(binary_form=True)
+            except Exception as e:
+                self.logger.error('Error occurred while getting cert to discover intermediate certificates:', e)
+                return certs
+
+        self.load_intermediate_certs(der_cert, certs)
+        return certs
+
+    def load_intermediate_certs(self, der_cert, certs):
+        # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
+        # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        try:
+            cert = load_der_x509_certificate(der_cert)
+        except Exception as e:
+            self.logger.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
+            return
+
+        try:
+            authority_information_access = cert.extensions.get_extension_for_oid(
+                ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+        except ExtensionNotFound:
+            self.logger.debug(
+                'No Authority Information Access extension found, skipping discovery of intermediate certificates'
+            )
+            return
+
+        for access_description in authority_information_access.value:
+            if access_description.access_method != AuthorityInformationAccessOID.CA_ISSUERS:
+                continue
+
+            uri = access_description.access_location.value
+
+            # Assume HTTP for now
+            try:
+                response = requests.get(uri)  # SKIP_HTTP_VALIDATION
+            except Exception as e:
+                self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+                continue
+            else:
+                intermediate_cert = response.content
+
+            certs.append(intermediate_cert)
+            self.load_intermediate_certs(intermediate_cert, certs)
+        return certs
 
     @property
     def session(self):
@@ -349,12 +511,19 @@ class RequestsWrapper(object):
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+            # Enable Unix Domain Socket (UDS) support.
+            # See: https://github.com/msabramo/requests-unixsocket
+            self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
             # Attributes can't be passed to the constructor
             for option, value in iteritems(self.options):
                 setattr(self._session, option, value)
 
         return self._session
+
+    def handle_auth_token(self, **request):
+        if self.auth_token_handler is not None:
+            self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
@@ -405,6 +574,11 @@ def should_bypass_proxy(url, no_proxy_uris):
     # Returns True if URL should bypass the proxy.
     parsed_uri = urlparse(url).hostname
 
+    if '*' in no_proxy_uris:
+        # A single * character is supported, which matches all hosts, and effectively disables the proxy.
+        # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
     for no_proxy_uri in no_proxy_uris:
         try:
             # If no_proxy_uri is an IP or IP CIDR.
@@ -419,7 +593,13 @@ def should_bypass_proxy(url, no_proxy_uris):
             #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
             # A domain name with a leading "." matches subdomains only.
             #   e.g. ".y.com" matches "x.y.com" but not "y.com".
-            dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+            if no_proxy_uri.startswith((".", "*.")):
+                # Support wildcard subdomain; treat as leading dot "."
+                # e.g. "*.example.domain" as ".example.domain"
+                dot_no_proxy_uri = no_proxy_uri.lstrip("*")
+            else:
+                # Used for matching subdomains.
+                dot_no_proxy_uri = ".{}".format(no_proxy_uri)
             if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
                 return True
     return False
@@ -428,7 +608,10 @@ def should_bypass_proxy(url, no_proxy_uris):
 def create_basic_auth(config):
     # Since this is the default case, only activate when all fields are explicitly set
     if config['username'] and config['password']:
-        return (config['username'], config['password'])
+        if config['use_legacy_auth_encoding']:
+            return config['username'], config['password']
+        else:
+            return ensure_bytes(config['username']), ensure_bytes(config['password'])
 
 
 def create_digest_auth(config):
@@ -493,6 +676,235 @@ AUTH_TYPES = {
     'kerberos': create_kerberos_auth,
     'aws': create_aws_auth,
 }
+
+
+def create_auth_token_handler(config):
+    if not isinstance(config, dict):
+        raise ConfigurationError('The `auth_token` field must be a mapping')
+    elif 'reader' not in config or 'writer' not in config:
+        raise ConfigurationError('The `auth_token` field must define both `reader` and `writer` settings')
+
+    config = deepcopy(config)
+
+    reader_config = config['reader']
+    if not isinstance(reader_config, dict):
+        raise ConfigurationError('The `reader` settings of field `auth_token` must be a mapping')
+
+    writer_config = config['writer']
+    if not isinstance(writer_config, dict):
+        raise ConfigurationError('The `writer` settings of field `auth_token` must be a mapping')
+
+    reader_type = reader_config.pop('type', '')
+    if not isinstance(reader_type, str):
+        raise ConfigurationError('The reader `type` of field `auth_token` must be a string')
+    elif not reader_type:
+        raise ConfigurationError('The reader `type` of field `auth_token` is required')
+    elif reader_type not in AUTH_TOKEN_READERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` reader type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_READERS)))
+        )
+
+    writer_type = writer_config.pop('type', '')
+    if not isinstance(writer_type, str):
+        raise ConfigurationError('The writer `type` of field `auth_token` must be a string')
+    elif not writer_type:
+        raise ConfigurationError('The writer `type` of field `auth_token` is required')
+    elif writer_type not in AUTH_TOKEN_WRITERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` writer type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_WRITERS)))
+        )
+
+    reader = AUTH_TOKEN_READERS[reader_type](reader_config)
+    writer = AUTH_TOKEN_WRITERS[writer_type](writer_config)
+
+    return AuthTokenHandler(reader, writer)
+
+
+class AuthTokenHandler(object):
+    def __init__(self, reader, writer):
+        self.reader = reader
+        self.writer = writer
+
+    def poll(self, **request):
+        token = self.reader.read(**request)
+        if token is not None:
+            self.writer.write(token, **request)
+
+
+class AuthTokenFileReader(object):
+    def __init__(self, config):
+        self._path = config.get('path', '')
+        if not isinstance(self._path, str):
+            raise ConfigurationError('The `path` setting of `auth_token` reader must be a string')
+        elif not self._path:
+            raise ConfigurationError('The `path` setting of `auth_token` reader is required')
+
+        self._pattern = config.get('pattern')
+        if self._pattern is not None:
+            if not isinstance(self._pattern, str):
+                raise ConfigurationError('The `pattern` setting of `auth_token` reader must be a string')
+            else:
+                self._pattern = re.compile(self._pattern)
+                if self._pattern.groups != 1:
+                    raise ValueError(
+                        'The pattern `{}` setting of `auth_token` reader must define exactly one group'.format(
+                            self._pattern.pattern
+                        )
+                    )
+
+        # Cache all updates just in case
+        self._token = None
+
+    def read(self, **request):
+        if self._token is None or 'error' in request:
+            with open(self._path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            if self._pattern is None:
+                self._token = content.strip()
+            else:
+                match = self._pattern.search(content)
+                if not match:
+                    raise ValueError(
+                        'The pattern `{}` does not match anything in file: {}'.format(self._pattern.pattern, self._path)
+                    )
+
+                self._token = match.group(1)
+
+            return self._token
+
+
+class DCOSAuthTokenReader(object):
+    def __init__(self, config):
+        self._login_url = config.get('login_url', '')
+        if not isinstance(self._login_url, str):
+            raise ConfigurationError('The `login_url` setting of DC/OS auth token reader must be a string')
+        elif not self._login_url:
+            raise ConfigurationError('The `login_url` setting of DC/OS auth token reader is required')
+
+        self._service_account = config.get('service_account', '')
+        if not isinstance(self._service_account, str):
+            raise ConfigurationError('The `service_account` setting of DC/OS auth token reader must be a string')
+        elif not self._service_account:
+            raise ConfigurationError('The `service_account` setting of DC/OS auth token reader is required')
+
+        self._private_key_path = config.get('private_key_path', '')
+        if not isinstance(self._private_key_path, str):
+            raise ConfigurationError('The `private_key_path` setting of DC/OS auth token reader must be a string')
+        elif not self._private_key_path:
+            raise ConfigurationError('The `private_key_path` setting of DC/OS auth token reader is required')
+
+        self._expiration = config.get('expiration', 300)  # default to 5 minutes
+        if not isinstance(self._expiration, int):
+            raise ConfigurationError('The `expiration` setting of DC/OS auth token reader must be an integer')
+
+        self._token = None
+
+    def read(self, **request):
+        if self._token is None or 'error' in request:
+            with open(self._private_key_path, 'rb') as f:
+                global default_backend
+                if default_backend is None:
+                    from cryptography.hazmat.backends import default_backend
+
+                global serialization
+                if serialization is None:
+                    from cryptography.hazmat.primitives import serialization
+
+                global jwt
+                if jwt is None:
+                    import jwt
+
+                private_key = serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
+
+                serialized_private = private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+
+                exp = int(get_timestamp() + self._expiration)
+
+                encoded = jwt.encode({'uid': self._service_account, 'exp': exp}, serialized_private, algorithm='RS256')
+
+                headers = {'Content-type': 'application/json'}
+                r = requests.post(
+                    url=self._login_url,
+                    json={'uid': self._service_account, 'token': encoded, 'exp': exp},
+                    headers=headers,
+                    verify=False,
+                )
+                r.raise_for_status()
+
+                self._token = r.json().get('token')
+
+            return self._token
+
+
+class AuthTokenHeaderWriter(object):
+    DEFAULT_PLACEHOLDER = '<TOKEN>'
+
+    def __init__(self, config):
+        self._name = config.get('name', '')
+        if not isinstance(self._name, str):
+            raise ConfigurationError('The `name` setting of `auth_token` writer must be a string')
+        elif not self._name:
+            raise ConfigurationError('The `name` setting of `auth_token` writer is required')
+
+        self._value = config.get('value', self.DEFAULT_PLACEHOLDER)
+        if not isinstance(self._value, str):
+            raise ConfigurationError('The `value` setting of `auth_token` writer must be a string')
+
+        self._placeholder = config.get('placeholder', self.DEFAULT_PLACEHOLDER)
+        if not isinstance(self._placeholder, str):
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer must be a string')
+        elif not self._placeholder:
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer cannot be an empty string')
+        elif self._placeholder not in self._value:
+            raise ConfigurationError(
+                'The `value` setting of `auth_token` writer does not contain the placeholder string `{}`'.format(
+                    self._placeholder
+                )
+            )
+
+    def write(self, token, **request):
+        request['default_options']['headers'][self._name] = self._value.replace(self._placeholder, token, 1)
+
+
+AUTH_TOKEN_READERS = {
+    'file': AuthTokenFileReader,
+    'dcos_auth': DCOSAuthTokenReader,
+}
+AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
+
+
+def is_uds_url(url):
+    # type: (str) -> bool
+    parsed = urlparse(url)
+    return parsed.scheme == UDS_SCHEME
+
+
+def quote_uds_url(url):
+    # type: (str) -> str
+    """
+    Automatically convert an URL like 'unix:///var/run/docker.sock/info' to 'unix://%2Fvar%2Frun%2Fdocker.sock/info'.
+
+    For user experience purposes, since `requests-unixsocket` only accepts the latter form.
+    """
+    parsed = urlparse(url)
+
+    # When passing an UDS path URL, `netloc` is empty and `path` contains everything that's after '://'.
+    # We want to extract the socket path from the URL path, and percent-encode it, and set it as the `netloc`.
+    # For now we assume that UDS paths end in '.sock'. This is by far the most common convention.
+    uds_path_head, has_dot_sock, path = parsed.path.partition('.sock')
+    if not has_dot_sock:
+        return url
+
+    uds_path = '{}.sock'.format(uds_path_head)
+    netloc = quote(uds_path, safe='')
+    parsed = parsed._replace(netloc=netloc, path=path)
+
+    return urlunparse(parsed)
 
 
 # For documentation generation

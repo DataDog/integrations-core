@@ -31,14 +31,17 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
+    },
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",
-      "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview"
+      "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview.json"
     },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "istio"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

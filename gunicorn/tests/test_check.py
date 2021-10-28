@@ -27,6 +27,13 @@ def test_gunicorn_instance(aggregator, setup_gunicorn):
     _assert_metrics(aggregator)
 
 
+def test_no_master_proc(aggregator, setup_gunicorn):
+    instance = {'proc_name': 'no_master_proc'}
+    check = GUnicornCheck(CHECK_NAME, {}, [instance])
+    check.check(instance)
+    aggregator.assert_service_check("gunicorn.is_running", check.CRITICAL)
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE)

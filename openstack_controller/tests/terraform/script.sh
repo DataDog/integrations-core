@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo apt-get install -y python3-dev
 sudo useradd -s /bin/bash -d /opt/stack -m stack
 echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
 cd /opt/stack

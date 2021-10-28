@@ -174,9 +174,10 @@ class VSphereEvent(object):
         )
         self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
         self.payload['event_object'] = get_agg_key(self.raw_event)
-        self.payload['msg_text'] = (
-            "vCenter monitor status changed on this alarm, "
-            "it was {before} and it's now {after}.".format(before=trans_before, after=trans_after)
+        self.payload[
+            'msg_text'
+        ] = "vCenter monitor status changed on this alarm, " "it was {before} and it's now {after}.".format(
+            before=trans_before, after=trans_after
         )
         self.payload['host'] = host_name
         return self.payload

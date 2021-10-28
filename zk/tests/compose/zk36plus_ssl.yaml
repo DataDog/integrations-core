@@ -1,0 +1,21 @@
+version: '3.5'
+
+services:
+  zk:
+    image: "zookeeper:${ZK_VERSION}"
+    ports:
+      - "12181:2181"
+      - "7000:7000"
+      - "8080:8080"
+    volumes:
+      - ./zoo36_ssl.cfg:/conf/zoo.cfg
+      - ./server/sample_keystore.jks:/conf/sample_keystore.jks
+      - ./server/sample_truststore.jks:/conf/sample_truststore.jks
+
+    environment:
+      SERVER_JVMFLAGS: >-
+        -Dzookeeper.serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
+        -Dzookeeper.ssl.keyStore.location=/conf/sample_keystore.jks
+        -Dzookeeper.ssl.keyStore.password=testpass
+        -Dzookeeper.ssl.trustStore.location=/conf/sample_truststore.jks
+        -Dzookeeper.ssl.trustStore.password=testpass

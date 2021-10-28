@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 
 DEFAULT_MAX_CUSTOM_QUERIES = 20
 
@@ -15,16 +16,42 @@ class MySQLConfig(object):
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')
         self.defaults_file = instance.get('defaults_file', '')
-        self.user = instance.get('user', '')
-        self.password = str(instance.get('pass', ''))
-        self.tags = instance.get('tags', [])
+        self.user = instance.get('username', instance.get('user', ''))
+        self.password = str(instance.get('password', instance.get('pass', '')))
+        self.tags = self._build_tags(instance.get('tags', []))
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        replication_channel = self.options.get('replication_channel')
+        if replication_channel:
+            self.tags.append("channel:{0}".format(replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
+        self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
+        self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
+        self.full_statement_text_samples_per_hour_per_query = instance.get(
+            'full_statement_text_samples_per_hour_per_query', 1
+        )
+        self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.min_collection_interval = instance.get('min_collection_interval', 15)
+        obfuscator_options_config = instance.get('obfuscator_options', {}) or {}
+        self.obfuscator_options = {
+            'replace_digits': obfuscator_options_config.get(
+                'replace_digits', obfuscator_options_config.get('quantize_sql_tables', False)
+            )
+        }
         self.configuration_checks()
+
+    def _build_tags(self, custom_tags):
+        tags = list(set(custom_tags)) or []
+
+        rds_tags = rds_parse_tags_from_endpoint(self.host)
+        if rds_tags:
+            tags.extend(rds_tags)
+        return tags
 
     def configuration_checks(self):
         if self.queries or self.max_custom_queries != DEFAULT_MAX_CUSTOM_QUERIES:

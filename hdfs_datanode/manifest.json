@@ -14,7 +14,7 @@
   "metric_prefix": "hdfs.",
   "metric_to_check": "hdfs.datanode.dfs_capacity",
   "name": "hdfs_datanode",
-  "public_title": "Datadog-HDFS Datanode Integration",
+  "public_title": "HDFS Datanode",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
   "supported_os": [
@@ -32,6 +32,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hdfs_datanode"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

@@ -12,11 +12,14 @@ The Harbor check is included in the [Datadog Agent][2] package. No additional in
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][4] for all available configuration options.
 
@@ -24,7 +27,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -45,6 +48,9 @@ _Available for Agent versions >6.0_
    ```
 
 3. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -68,6 +74,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "harbor", "service": "<SERVICE_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `harbor` under the Checks section.
@@ -78,24 +87,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**harbor.can_connect**:<br>
-Returns `OK` if the Harbor API is reachable and authentication is successful, otherwise returns `CRITICAL`.
-
-**harbor.status**:<br>
-Returns `OK` if the specified Harbor component is healthy, otherwise returns `CRITICAL`. Returns `UNKNOWN` with Harbor < 1.5.
-
-**harbor.registry.status**:<br>
-Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Monitors the health of external registries used by Harbor for replication.
-
 ### Events
 
 The Harbor integration does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
+
 
 [1]: https://goharbor.io
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -106,4 +109,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/harbor/metadata.csv
-[10]: https://docs.datadoghq.com/help/
+[10]: https://github.com/DataDog/integrations-core/blob/master/harbor/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

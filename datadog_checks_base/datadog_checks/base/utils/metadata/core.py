@@ -77,9 +77,9 @@ class MetadataManager(object):
                 transformed = transformer(value, options)
             except Exception as e:
                 if is_primitive(value):
-                    self.logger.warning('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
+                    self.logger.debug('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
                 else:
-                    self.logger.warning('Unable to transform `%s` metadata: %s', name, e)
+                    self.logger.debug('Unable to transform `%s` metadata: %s', name, e)
 
                 return
 
@@ -190,7 +190,7 @@ class MetadataManager(object):
                 if is_primitive(value):
                     field_data['value'] = value
                 else:
-                    self.logger.warning(
+                    self.logger.debug(
                         'Skipping metadata submission of non-primitive type `%s` for field `%s` in section `%s`',
                         type(value).__name__,
                         field,

@@ -1,0 +1,280 @@
+{
+    "set": "mongo-mongodb-sharded-configsvr",
+    "date": {
+        "$date": 1603376670611
+    },
+    "myState": 1,
+    "term": 42,
+    "syncingTo": "",
+    "syncSourceHost": "",
+    "syncSourceId": -1,
+    "configsvr": true,
+    "heartbeatIntervalMillis": 2000,
+    "majorityVoteCount": 2,
+    "writeMajorityCount": 2,
+    "optimes": {
+        "lastCommittedOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603376668,
+                    "i": 3
+                }
+            },
+            "t": 42
+        },
+        "lastCommittedWallTime": {
+            "$date": 1603376668294
+        },
+        "readConcernMajorityOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603376668,
+                    "i": 3
+                }
+            },
+            "t": 42
+        },
+        "readConcernMajorityWallTime": {
+            "$date": 1603376668294
+        },
+        "appliedOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603376668,
+                    "i": 3
+                }
+            },
+            "t": 42
+        },
+        "durableOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603376668,
+                    "i": 3
+                }
+            },
+            "t": 42
+        },
+        "lastAppliedWallTime": {
+            "$date": 1603376668294
+        },
+        "lastDurableWallTime": {
+            "$date": 1603376668294
+        }
+    },
+    "lastStableRecoveryTimestamp": {
+        "$timestamp": {
+            "t": 1603376655,
+            "i": 1
+        }
+    },
+    "lastStableCheckpointTimestamp": {
+        "$timestamp": {
+            "t": 1603376655,
+            "i": 1
+        }
+    },
+    "electionCandidateMetrics": {
+        "lastElectionReason": "priorityTakeover",
+        "lastElectionDate": {
+            "$date": 1603358777803
+        },
+        "electionTerm": 42,
+        "lastCommittedOpTimeAtElection": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603358776,
+                    "i": 1
+                }
+            },
+            "t": 41
+        },
+        "lastSeenOpTimeAtElection": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1603358776,
+                    "i": 1
+                }
+            },
+            "t": 41
+        },
+        "numVotesNeeded": 2,
+        "priorityAtElection": 5.0,
+        "electionTimeoutMillis": 10000,
+        "priorPrimaryMemberId": 1,
+        "numCatchUpOps": 0,
+        "newTermStartDate": {
+            "$date": 1603358777836
+        },
+        "wMajorityWriteAvailabilityDate": {
+            "$date": 1603358786696
+        }
+    },
+    "members": [
+        {
+            "_id": 0,
+            "name": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "health": 1.0,
+            "state": 1,
+            "stateStr": "PRIMARY",
+            "uptime": 17942,
+            "optime": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1603376668,
+                        "i": 3
+                    }
+                },
+                "t": 42
+            },
+            "optimeDate": {
+                "$date": 1603376668000
+            },
+            "syncingTo": "",
+            "syncSourceHost": "",
+            "syncSourceId": -1,
+            "infoMessage": "",
+            "electionTime": {
+                "$timestamp": {
+                    "t": 1603358777,
+                    "i": 1
+                }
+            },
+            "electionDate": {
+                "$date": 1603358777000
+            },
+            "configVersion": 3,
+            "self": true,
+            "lastHeartbeatMessage": ""
+        },
+        {
+            "_id": 1,
+            "name": "mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "health": 1.0,
+            "state": 2,
+            "stateStr": "SECONDARY",
+            "uptime": 17928,
+            "optime": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1603376668,
+                        "i": 3
+                    }
+                },
+                "t": 42
+            },
+            "optimeDurable": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1603376668,
+                        "i": 3
+                    }
+                },
+                "t": 42
+            },
+            "optimeDate": {
+                "$date": 1603376668000
+            },
+            "optimeDurableDate": {
+                "$date": 1603376668000
+            },
+            "lastHeartbeat": {
+                "$date": 1603376669736
+            },
+            "lastHeartbeatRecv": {
+                "$date": 1603376670102
+            },
+            "pingMs": 0,
+            "lastHeartbeatMessage": "",
+            "syncingTo": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceHost": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceId": 0,
+            "infoMessage": "",
+            "configVersion": 3
+        },
+        {
+            "_id": 2,
+            "name": "mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "health": 1.0,
+            "state": 2,
+            "stateStr": "SECONDARY",
+            "uptime": 17928,
+            "optime": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1603376668,
+                        "i": 3
+                    }
+                },
+                "t": 42
+            },
+            "optimeDurable": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1603376668,
+                        "i": 3
+                    }
+                },
+                "t": 42
+            },
+            "optimeDate": {
+                "$date": 1603376668000
+            },
+            "optimeDurableDate": {
+                "$date": 1603376668000
+            },
+            "lastHeartbeat": {
+                "$date": 1603376669565
+            },
+            "lastHeartbeatRecv": {
+                "$date": 1603376669564
+            },
+            "pingMs": 0,
+            "lastHeartbeatMessage": "",
+            "syncingTo": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceHost": "mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "syncSourceId": 0,
+            "infoMessage": "",
+            "configVersion": 3
+        }
+    ],
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff000000000000002a"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1603376668,
+            "i": 3
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1603376668,
+                "i": 3
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "0ViML72aWSh27riNUdXRJ1Z7PqY=",
+                "$type": "00"
+            },
+            "keyId": 6857852638906548233
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1603376668,
+            "i": 3
+        }
+    }
+}

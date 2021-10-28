@@ -51,9 +51,12 @@ If Supervisor is running as root, make sure `chmod` or `chown` is set so that no
 
 Reload `supervisord`.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample supervisord.d/conf.yaml][4] for all available configuration options:
 
@@ -76,9 +79,12 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 [Restart the Agent][5] to start sending Supervisor metrics to Datadog.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -86,15 +92,40 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                      |
 | `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `supervisord.d/conf.yaml` file to start collecting your Supervisord Logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: supervisord
+   ```
+
+   Change the `path` parameter value and configure it for your environment.
+   See the [sample supervisord.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `supervisord` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `supervisord` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 
@@ -102,42 +133,24 @@ The Supervisor check does not include any events.
 
 ### Service Checks
 
-**supervisord.can_connect**:
-
-Returns CRITICAL if the Agent cannot connect to the HTTP server or UNIX socket you configured, otherwise OK.
-
-**supervisord.process.status**:
-
-The Agent submits this service check for all child processes of supervisord (if neither `proc_names` nor `proc_regex` is configured) OR a set of child processes (those configured in `proc_names` and/or `proc_regex`), tagging each service check with `supervisord_process:<process_name>`.
-
-This table shows the `supervisord.process.status` that results from each supervisord status:
-
-| supervisord status | supervisord.process.status |
-| ------------------ | -------------------------- |
-| STOPPED            | CRITICAL                   |
-| STARTING           | UNKNOWN                    |
-| RUNNING            | OK                         |
-| BACKOFF            | CRITICAL                   |
-| STOPPING           | CRITICAL                   |
-| EXITED             | CRITICAL                   |
-| FATAL              | CRITICAL                   |
-| UNKNOWN            | UNKNOWN                    |
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Supervisor monitors your processes. Datadog monitors Supervisor.][9]
+- [Supervisor monitors your processes. Datadog monitors Supervisor.][11]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/supervisord/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor

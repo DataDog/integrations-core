@@ -28,6 +28,8 @@ from .utils import register_device_target
 
 local_logger = getLogger(__name__)
 
+SUPPORTED_DEVICE_TAGS = ['vendor']
+
 
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
@@ -63,6 +65,7 @@ class InstanceConfig:
         instance,  # type: dict
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
+        refresh_oids_cache_interval=DEFAULT_REFRESH_OIDS_CACHE_INTERVAL,  # type: int
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
         loader=None,  # type: MIBLoader
@@ -123,6 +126,7 @@ class InstanceConfig:
 
         if ip_address:
             port = int(instance.get('port', 161))
+
             target = register_device_target(
                 ip_address,
                 port,
@@ -158,7 +162,7 @@ class InstanceConfig:
         if tag_oids:
             scalar_oids.extend(tag_oids)
 
-        refresh_interval_sec = instance.get('refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        refresh_interval_sec = instance.get('refresh_oids_cache_interval', refresh_oids_cache_interval)
         self.oid_config = OIDConfig(refresh_interval_sec)
         self.oid_config.add_parsed_oids(scalar_oids=scalar_oids, next_oids=next_oids, bulk_oids=bulk_oids)
 
@@ -182,6 +186,9 @@ class InstanceConfig:
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
 
+        device = profile['definition'].get('device', {})
+        self.add_device_tags(device)
+
         # NOTE: `profile` may contain metrics and metric tags that have already been ingested in this configuration.
         # As a result, multiple copies of metrics/tags will be fetched and submitted to Datadog, which is inefficient
         # and possibly problematic.
@@ -195,6 +202,13 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
+
+    def add_device_tags(self, device):
+        # type: (dict) -> None
+        for device_tag in SUPPORTED_DEVICE_TAGS:
+            tag = device.get(device_tag)
+            if tag:
+                self.tags.append('device_{}:{}'.format(device_tag, tag))
 
     @classmethod
     def get_auth_data(cls, instance):

@@ -18,7 +18,12 @@ JMX metrics exporter is enabled by default, but you may need to choose the port 
 
 For logging, it's strongly suggested to enable [log4j][3] to benefit from a log format with full dates.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `ignite.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ignite performance data. See the [sample ignite.d/conf.yaml][4] for all available configuration options.
 
@@ -57,6 +62,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][7].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
@@ -75,6 +83,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ignite", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-\d{2}\-\d{2}"}}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -86,14 +96,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ignite.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance, otherwise returns `OK`.
-
 ### Events
 
 The Ignite integration does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -112,3 +121,4 @@ Need help? Contact [Datadog support][4].
 [10]: https://docs.datadoghq.com/agent/docker/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/ignite/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/ignite/assets/service_checks.json

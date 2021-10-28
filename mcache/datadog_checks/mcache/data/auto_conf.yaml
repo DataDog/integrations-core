@@ -1,16 +1,25 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - memcached
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param url - string - required
-    ## url used to connect to the memcached instance.
+    ## Url used to connect to the memcached instance.
     #
-  - url: "%%host%%"
+  - url: '%%host%%'
 
     ## @param port - integer - optional - default: 11211
-    ## Port to use when connecting to "url".
+    ## Port to use when connecting to `url`.
     #
-    port: "11211"
+    port: 11211

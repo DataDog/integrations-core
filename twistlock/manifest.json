@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Twistlock Integration",
+  "public_title": "Datadog-Prisma Cloud Compute Edition Integration",
   "categories": [
     "security",
     "log collection",
@@ -28,10 +28,13 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Twistlock": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "twistlock"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

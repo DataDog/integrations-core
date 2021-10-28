@@ -11,11 +11,12 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
-    """ Collect metrics and events from ceph """
+    """Collect metrics and events from ceph"""
 
     DEFAULT_CEPH_CMD = '/usr/bin/ceph'
     DEFAULT_CEPH_CLUSTER = 'ceph'
@@ -41,13 +42,16 @@ class Ceph(AgentCheck):
     ]
     NAMESPACE = 'ceph'
 
+    def __init__(self, name, init_config, instances):
+        super(Ceph, self).__init__(name, init_config, instances)
+        self._octopus = False
+
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
-        ceph_args = []
         if use_sudo:
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
-                raise Exception('The dd-agent user does not have sudo access')
+                raise CheckException('The dd-agent user does not have sudo access')
             ceph_args = 'sudo {}'.format(ceph_cmd)
         else:
             ceph_args = ceph_cmd
@@ -67,14 +71,30 @@ class Ceph(AgentCheck):
             name = cmd.replace(' ', '_')
             raw[name] = res
 
+        mon_map = raw.get('status', {}).get('monmap')
+        if mon_map is None:
+            raise RuntimeError("Could not detect Ceph release series")
+        if 'min_mon_release_name' in mon_map and mon_map['min_mon_release_name'] == 'octopus':
+            self.log.debug("Detected octopus version of ceph...")
+            self._octopus = True
+        else:
+            self._octopus = False
+
         return raw
 
     def _extract_tags(self, raw, instance):
         tags = instance.get('tags', [])
-        if 'mon_status' in raw:
+        fsid = None
+        if self._octopus:
+            fsid = raw['status']['fsid']
+        elif 'mon_status' in raw:
             fsid = raw['mon_status']['monmap']['fsid']
-            tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
             tags.append(self.NAMESPACE + '_mon_state:%s' % raw['mon_status']['state'])
+        else:
+            self.log.debug("Could not find fsid")
+
+        if fsid is not None:
+            tags.append(self.NAMESPACE + '_fsid:%s' % fsid)
 
         return tags
 
@@ -184,11 +204,52 @@ class Ceph(AgentCheck):
                 except KeyError:
                     osdinfo['client_io_rate'].update({'write_bytes_sec': 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery']['misplaced_objects']
+                    self._publish(osdinfo, self.gauge, ['recovery', 'misplaced_objects'], local_tags)
+                except KeyError:
+                    osdinfo['recovery'].update({'misplaced_objects': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery', 'misplaced_objects'], local_tags)
+
+                try:
+                    osdinfo['recovery']['misplaced_total']
+                    self._publish(osdinfo, self.gauge, ['recovery', 'misplaced_total'], local_tags)
+                except KeyError:
+                    osdinfo['recovery'].update({'misplaced_total': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery', 'misplaced_total'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_objects_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_objects_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_objects_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_objects_per_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_bytes_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_bytes_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_bytes_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_bytes_per_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_keys_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_keys_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_keys_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_keys_per_sec'], local_tags)
         except KeyError:
             self.log.debug('Error retrieving osd_pool_stats metrics')
 
         try:
-            osdstatus = raw['status']['osdmap']['osdmap']
+            raw_osdstatus = raw['status']['osdmap']
+            if 'osdmap' in raw_osdstatus:
+                osdstatus = raw_osdstatus['osdmap']
+            else:
+                osdstatus = raw_osdstatus
+
+            self.log.debug("osdmap value: %s", osdstatus)
             self._publish(osdstatus, self.gauge, ['num_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_in_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_up_osds'], tags)
@@ -205,21 +266,29 @@ class Ceph(AgentCheck):
         except KeyError:
             self.log.debug('Error retrieving pgstatus metrics')
 
-        try:
-            num_mons = len(raw['mon_status']['monmap']['mons'])
-            self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
-        except KeyError:
-            self.log.debug('Error retrieving mon_status metrics')
+        if self._octopus:
+            try:
+                num_mons = int(raw['status']['monmap']['num_mons'])
+                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+            except KeyError:
+                self.log.debug('Error retrieving num_mons metric')
+        else:
+            try:
+                num_mons = len(raw['mon_status']['monmap']['mons'])
+                self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
+            except KeyError:
+                self.log.debug('Error retrieving mon_status metrics')
 
-        try:
-            num_mons_active = len(raw['mon_status']['quorum'])
-            self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
-        except KeyError:
-            self.log.debug('Error retrieving mon_status quorum metrics')
+            try:
+                num_mons_active = len(raw['mon_status']['quorum'])
+                self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
+            except KeyError:
+                self.log.debug('Error retrieving mon_status quorum metrics')
 
         try:
             stats = raw['df_detail']['stats']
-            self._publish(stats, self.gauge, ['total_objects'], tags)
+            if not self._octopus:
+                self._publish(stats, self.gauge, ['total_objects'], tags)
             used = float(stats['total_used_bytes'])
             total = float(stats['total_bytes'])
             if total > 0:
@@ -280,12 +349,12 @@ class Ceph(AgentCheck):
                             status = AgentCheck.CRITICAL
                     self.service_check(self.NAMESPACE + '.' + check.lower(), status, tags=tags)
 
-    def check(self, instance):
-        ceph_cmd = instance.get('ceph_cmd') or self.DEFAULT_CEPH_CMD
-        ceph_cluster = instance.get('ceph_cluster') or self.DEFAULT_CEPH_CLUSTER
-        ceph_health_checks = instance.get('collect_service_check_for') or self.DEFAULT_HEALTH_CHECKS
-        custom_tags = instance.get('tags', [])
-        raw = self._collect_raw(ceph_cmd, ceph_cluster, instance)
+    def check(self, _):
+        ceph_cmd = self.instance.get('ceph_cmd') or self.DEFAULT_CEPH_CMD
+        ceph_cluster = self.instance.get('ceph_cluster') or self.DEFAULT_CEPH_CLUSTER
+        ceph_health_checks = self.instance.get('collect_service_check_for') or self.DEFAULT_HEALTH_CHECKS
+        custom_tags = self.instance.get('tags', [])
+        raw = self._collect_raw(ceph_cmd, ceph_cluster, self.instance)
         self._perform_service_checks(raw, custom_tags, ceph_health_checks)
-        tags = self._extract_tags(raw, instance)
+        tags = self._extract_tags(raw, self.instance)
         self._extract_metrics(raw, tags)

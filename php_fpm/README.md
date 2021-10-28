@@ -16,7 +16,12 @@ The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't ne
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample php_fpm.d/conf.yaml][4] for all available configuration options:
 
@@ -59,6 +64,9 @@ Follow the instructions below to configure this check for an Agent running on a 
    ```
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -111,6 +119,9 @@ If your PHP-FPM installation uses unix sockets, you have to use the below syntax
 
 **Note**: With Autodiscovery, if the Agent runs in a separate container/task/pod, it doesn't have access to the Unix sockets file of your FPM pool. It order to address this, run the Agent as a sidecar.
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `php_fpm` under the Checks section.
@@ -127,13 +138,12 @@ The PHP-FPM check does not include any events.
 
 ### Service Checks
 
-`php_fpm.can_ping`:
-
-Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -143,4 +153,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

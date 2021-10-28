@@ -641,7 +641,7 @@ for fixture in FIXTURE_LIST:
 
 
 class FakeSessionWrapper(SessionWrapper):
-    """ This mock:
+    """This mock:
     1. Takes the requested path and replace all special characters to underscore
     2. Fetch the corresponding hash from common.FIXTURE_LIST_FILE_MAP
     3. Returns the corresponding file content

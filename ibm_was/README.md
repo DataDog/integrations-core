@@ -16,7 +16,7 @@ By default, this check collects JDBC, JVM, thread pool, and Servlet Session Mana
 
 The IBM WAS check is included in the [Datadog Agent][4] package.
 
-#### Enable the PerfServlet
+#### Enable the `PerfServlet`
 
 The servlet's .ear file (PerfServletApp.ear) is located in the `<WAS_HOME>/installableApps` directory, where `<WAS_HOME>` is the installation path for WebSphere Application Server.
 
@@ -34,9 +34,12 @@ Once you've made this change, click "Apply" to save the configuration and restar
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -66,6 +69,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
@@ -88,6 +94,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ibm_was", "service": "<SERVICE_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `ibm_was` under the Checks section.
@@ -98,18 +107,17 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][8] for a list of metrics provided by this check.
 
-### Service Checks
-
-**ibm_was.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason, otherwise returns `OK`.
-
 ### Events
 
 IBM WAS does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 [1]: https://www.ibm.com/cloud/websphere-application-platform
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -119,4 +127,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

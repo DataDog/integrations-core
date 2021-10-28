@@ -15,10 +15,11 @@ import requests
 from six import PY2
 
 from datadog_checks.couch import CouchDb
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
-pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
 INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 
@@ -34,6 +35,10 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
+            if row[0] == "couchdb.couchdb.httpd.all_docs_timeouts" and common.COUCH_MAJOR_VERSION == 2:
+                # All remaining metrics are Couchv3 only
+                break
+
             if row[0] == 'metric_name':
                 # skip the header
                 continue
@@ -116,7 +121,11 @@ def _assert_check(aggregator, gauges):
     for gauge in gauges["replication_tasks_gauges"]:
         aggregator.assert_metric(gauge)
 
+    for gauge in gauges["indexing_tasks_gauges"]:
+        aggregator.assert_metric(gauge, at_least=0)
+
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -188,11 +197,15 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for gauge in gauges["erlang_gauges"]:
-            aggregator.assert_metric(gauge)
+    for gauge in gauges["erlang_gauges"]:
+        aggregator.assert_metric(gauge)
 
-        for gauge in gauges["replication_tasks_gauges"]:
-            aggregator.assert_metric(gauge)
+    for gauge in gauges["replication_tasks_gauges"]:
+        aggregator.assert_metric(gauge)
+
+    # Optional indexing metrics
+    for gauge in gauges["indexing_tasks_gauges"]:
+        aggregator.assert_metric(gauge, at_least=0)
 
     for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
@@ -214,6 +227,7 @@ def test_check_without_names(aggregator, gauges):
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('dd_environment')

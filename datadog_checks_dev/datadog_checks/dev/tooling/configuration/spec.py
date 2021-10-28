@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from .constants import OPENAPI_DATA_TYPES
 from .utils import default_option_example, normalize_source_name
 
 
@@ -122,7 +123,11 @@ def options_validator(options, loader, file_name, *sections):
     if sections_display:
         sections_display += ', '
 
+    overrides = {}
+    override_errors = []
+
     option_names_origin = {}
+    hide_template = False
     for option_index, option in enumerate(options, 1):
         if not isinstance(option, dict):
             loader.errors.append(
@@ -134,15 +139,18 @@ def options_validator(options, loader, file_name, *sections):
 
         templates_resolved = False
         while 'template' in option:
-            parameters = {
-                parameter: option.pop(parameter) for parameter in loader.templates.fields if parameter in option
-            }
+            hide_template = option.get('hidden', False)
 
+            overrides.update(option.pop('overrides', {}))
             try:
-                template = loader.templates.load(option.pop('template'), parameters)
+                template = loader.templates.load(option.pop('template'))
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 break
+
+            errors = loader.templates.apply_overrides(template, overrides)
+            if errors:
+                override_errors.append((option_index, errors))
 
             if isinstance(template, dict):
                 template.update(option)
@@ -203,17 +211,26 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        if option_name in option_names_origin:
+        option.setdefault('hidden', hide_template)
+        if not isinstance(option['hidden'], bool):
             loader.errors.append(
-                '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
-                    loader.source,
-                    file_name,
-                    sections_display,
-                    option_index,
-                    option_name,
-                    option_names_origin[option_name],
+                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
+                    loader.source, file_name, sections_display, option_name
                 )
             )
+
+        if option_name in option_names_origin:
+            if not option['hidden']:
+                loader.errors.append(
+                    '{}, {}, {}option #{}: Option name `{}` already used by option #{}'.format(
+                        loader.source,
+                        file_name,
+                        sections_display,
+                        option_index,
+                        option_name,
+                        option_names_origin[option_name],
+                    )
+                )
         else:
             option_names_origin[option_name] = option_index
 
@@ -237,14 +254,6 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(option['required'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `required` must be true or false'.format(
-                    loader.source, file_name, sections_display, option_name
-                )
-            )
-
-        option.setdefault('hidden', False)
-        if not isinstance(option['hidden'], bool):
-            loader.errors.append(
-                '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
@@ -334,23 +343,69 @@ def options_validator(options, loader, file_name, *sections):
                     )
                 )
 
+            option.setdefault('multiple_instances_defined', False)
+            if not isinstance(option['multiple_instances_defined'], bool):
+                loader.errors.append(
+                    '{}, {}, {}{}: Attribute `multiple` must be true or false'.format(
+                        loader.source, file_name, sections_display, option_name
+                    )
+                )
+
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)
 
-
-VALID_TYPES = {
-    'string',
-    'integer',
-    'number',
-    'boolean',
-    'array',
-    'object',
-}
+    # If there are unused overrides, add the associated error messages
+    if overrides:
+        for option_index, errors in override_errors:
+            error_message = '\n'.join(errors)
+            loader.errors.append(
+                f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {error_message}'
+            )
 
 
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
-    if 'type' not in value:
+    if 'anyOf' in value:
+        if 'type' in value:
+            loader.errors.append(
+                '{}, {}, {}{}: Values must contain either a `type` or `anyOf` attribute, not both'.format(
+                    loader.source, file_name, sections_display, option_name
+                )
+            )
+            return
+
+        one_of = value['anyOf']
+        if not isinstance(one_of, list):
+            loader.errors.append(
+                '{}, {}, {}{}: Attribute `anyOf` must be an array'.format(
+                    loader.source, file_name, sections_display, option_name
+                )
+            )
+            return
+        elif len(one_of) == 1:
+            loader.errors.append(
+                '{}, {}, {}{}: Attribute `anyOf` contains a single type, use the `type` attribute instead'.format(
+                    loader.source, file_name, sections_display, option_name
+                )
+            )
+            return
+
+        for i, type_data in enumerate(one_of, 1):
+            if not isinstance(type_data, dict):
+                loader.errors.append(
+                    '{}, {}, {}{}: Type #{} of attribute `anyOf` must be a mapping'.format(
+                        loader.source, file_name, sections_display, option_name, i
+                    )
+                )
+                return
+
+            value_validator(type_data, loader, file_name, sections_display, option_name, depth=depth + 1)
+
+        if not depth and value.get('example') is None:
+            value['example'] = default_option_example(option_name)
+
+        return
+    elif 'type' not in value:
         loader.errors.append(
             '{}, {}, {}{}: Every value must contain a `type` attribute'.format(
                 loader.source, file_name, sections_display, option_name
@@ -591,13 +646,31 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
         if required and set(required).difference(property_names):
             loader.errors.append(
                 '{}, {}, {}{}: All entries in attribute `required` for `type` '
-                '{} must be defined in the`properties` attribute'.format(
+                '{} must be defined in the `properties` attribute'.format(
                     loader.source, file_name, sections_display, option_name, value_type
                 )
             )
+
+        if 'additionalProperties' in value:
+            additional_properties = value['additionalProperties']
+            if additional_properties is True:
+                return
+            elif not isinstance(additional_properties, dict):
+                loader.errors.append(
+                    '{}, {}, {}{}: Attribute `additionalProperties` for `type` {} must be a mapping or set '
+                    'to `true`'.format(loader.source, file_name, sections_display, option_name, value_type)
+                )
+                return
+
+            value_validator(additional_properties, loader, file_name, sections_display, option_name, depth=new_depth)
     else:
         loader.errors.append(
             '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
-                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
+                loader.source,
+                file_name,
+                sections_display,
+                option_name,
+                value_type,
+                ' | '.join(sorted(OPENAPI_DATA_TYPES)),
             )
         )

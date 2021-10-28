@@ -40,24 +40,16 @@ rabbitmqctl set_user_tags datadog monitoring
 
 Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][5] for more information.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
 1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
-
-   ```yaml
-   init_config:
-
-   instances:
-     ## @param rabbit_api_url - string - required
-     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-     ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
-     #
-     - rabbitmq_api_url: http://localhost:15672/api/
-   ```
 
     **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
 
@@ -80,7 +72,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
+3. Edit the `logs` section of your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
    ```yaml
    logs:
@@ -95,6 +87,9 @@ _Available for Agent versions >6.0_
    ```
 
 4. [Restart the Agent][8].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -116,7 +111,10 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": {"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}}` |
+| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": [{"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}]}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -138,11 +136,7 @@ If you require an increase in the number of exchanges, queues, or nodes, contact
 
 ### Service Checks
 
-**rabbitmq.aliveness**:<br>
-The Agent submits this service check for all vhosts (if `vhosts` is not configured) OR a subset of vhosts (those configured in `vhosts`). Each service check is tagged with `vhost:<vhost_name>`. Returns `CRITICAL` if the aliveness check failed, otherwise returns `OK`.
-
-**rabbitmq.status**:<br>
-Returns `CRITICAL` if the Agent cannot connect to RabbitMQ to collect metrics, otherwise returns `OK`.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -152,15 +146,13 @@ Need help? Contact [Datadog support][13].
 
 Additional helpful documentation, links, and articles:
 
-### Datadog Blog
-
-- [Key metrics for RabbitMQ monitoring][14]
-- [Collecting metrics with RabbitMQ monitoring tools][15]
-- [Monitoring RabbitMQ performance with Datadog][16]
+- [Key metrics for RabbitMQ monitoring][15]
+- [Collecting metrics with RabbitMQ monitoring tools][16]
+- [Monitoring RabbitMQ performance with Datadog][17]
 
 ### FAQ
 
-- [Tagging RabbitMQ queues by tag family][17]
+- [Tagging RabbitMQ queues by tag family][18]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
@@ -175,7 +167,8 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/rabbitmq-monitoring
-[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
-[16]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
-[17]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
+[14]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/assets/service_checks.json
+[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring
+[16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
+[17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
+[18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/

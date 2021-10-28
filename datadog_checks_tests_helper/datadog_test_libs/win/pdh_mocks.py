@@ -6,7 +6,6 @@ from collections import defaultdict
 
 import mock
 import pytest
-
 from six import PY3
 from six.moves import winreg
 

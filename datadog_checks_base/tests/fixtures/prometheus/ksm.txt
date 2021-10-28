@@ -1,3 +1,11 @@
+# HELP kube_global_labels Global labels
+# TYPE kube_global_labels gauge
+kube_global_labels{leader="true"} 1
+kube_global_labels{leader="true"} 1
+# HELP kube_local_labels Local labels
+# TYPE kube_local_labels gauge
+kube_local_labels{foo="bar",baz="bar"} 1
+kube_local_labels{foo="bar",baz="bar"} 1
 # HELP kube_daemonset_created Unix creation timestamp
 # TYPE kube_daemonset_created gauge
 kube_daemonset_created{daemonset="dd-agent",namespace="default"} 1.513767115e+09

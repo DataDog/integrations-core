@@ -7,7 +7,8 @@ import pytest
 
 from datadog_checks.dev.utils import ON_WINDOWS, mock_context_manager
 
-from .metrics import CORE_GAUGES, CORE_RATES, UNIX_GAUGES
+from .common import E2E_METADATA
+from .metrics import CORE_COUNTS, CORE_GAUGES, CORE_RATES, UNIX_GAUGES
 from .mocks import (
     MockDiskIOMetrics,
     MockDiskMetrics,
@@ -33,7 +34,7 @@ def psutil_mocks():
 
 @pytest.fixture(scope='session')
 def dd_environment(instance_basic_volume):
-    yield instance_basic_volume
+    yield instance_basic_volume, E2E_METADATA
 
 
 @pytest.fixture(scope='session')
@@ -67,3 +68,8 @@ def gauge_metrics():
 @pytest.fixture(scope='session')
 def rate_metrics():
     return CORE_RATES
+
+
+@pytest.fixture(scope='session')
+def count_metrics():
+    return CORE_COUNTS

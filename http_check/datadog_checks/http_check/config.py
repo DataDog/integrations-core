@@ -28,7 +28,6 @@ Config = namedtuple(
         'instance_ca_certs',
         'weakcipher',
         'check_hostname',
-        'allow_redirects',
         'stream',
     ],
 )
@@ -41,8 +40,8 @@ def from_instance(instance, default_ca_certs=None):
     method = instance.get('method', 'get')
     data = instance.get('data', {})
     tags = instance.get('tags', [])
-    client_cert = instance.get('client_cert')
-    client_key = instance.get('client_key')
+    client_cert = instance.get('tls_cert') or instance.get('client_cert')
+    client_key = instance.get('tls_private_key') or instance.get('client_key')
     http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
     config_headers = instance.get('headers', {})
     default_headers = is_affirmative(instance.get("include_default_headers", True))
@@ -68,7 +67,6 @@ def from_instance(instance, default_ca_certs=None):
     instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     weakcipher = is_affirmative(instance.get('weakciphers', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
-    allow_redirects = is_affirmative(instance.get('allow_redirects', True))
     stream = is_affirmative(instance.get('stream', False))
 
     return Config(
@@ -88,6 +86,5 @@ def from_instance(instance, default_ca_certs=None):
         instance_ca_certs,
         weakcipher,
         check_hostname,
-        allow_redirects,
         stream,
     )

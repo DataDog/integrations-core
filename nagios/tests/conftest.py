@@ -27,6 +27,7 @@ def dd_environment():
             os.path.join(HERE, 'compose', 'docker-compose.yaml'),
             env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
             build=True,
+            mount_logs=True,
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
 

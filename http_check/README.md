@@ -43,7 +43,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `reverse_content_match`          | When `true`, reverses the behavior of the `content_match` option, i.e. the HTTP check reports as DOWN if the string or expression in `content_match` IS found. (default is `false`)                                                              |
 | `username` & `password`          | If your service uses basic authentication, you can provide the username and password here.                                                                                                                                                       |
 | `http_response_status_code`      | A string or Python regular expression for an HTTP status code. This check reports DOWN for any status code that does not match. This defaults to 1xx, 2xx and 3xx HTTP status codes. For example: `401` or `4\d\d`.                              |
-| `include_content`                | When set to `true`, the check includes the first 200 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
+| `include_content`                | When set to `true`, the check includes the first 500 characters of the HTTP response body in notifications. The default value is `false`.                                                                                                        |
 | `collect_response_time`          | By default, the check collects the response time (in seconds) as the metric `network.http.response_time`. To disable, set this value to `false`.                                                                                                 |
 | `tls_verify`                     | Instructs the check to validate the TLS certificate of services when reaching to `url`.                                                                                                                                                          |
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
@@ -74,35 +74,15 @@ The HTTP check does not include any events.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][10] page, not 'Integration'.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
-**`http.can_connect`**:
+To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-Returns `DOWN` when any of the following occur:
-
-- the request to `uri` times out
-- the response code is 4xx/5xx, or it doesn't match the pattern provided in the `http_response_status_code`
-- the response body does _not_ contain the pattern in `content_match`
-- `reverse_content_match` is true and the response body _does_ contain the pattern in `content_match`
-- `uri` contains `https` and `tls_verify` is true, and the SSL connection cannot be validated
-
-Otherwise, returns `UP`.
-
-**`http.ssl_cert`**:
-
-The check returns:
-
-- `DOWN` if the `uri`'s certificate has already expired
-- `CRITICAL` if the `uri`'s certificate expires in less than `days_critical` days
-- `WARNING` if the `uri`'s certificate expires in less than `days_warning` days
-
-Otherwise, returns `UP`.
-
-To disable this check, set `check_certificate_expiration` to false.
+**Note:** To set an alert on these service checks, create a [Network Monitor][11].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -113,5 +93,6 @@ Need help? Contact [Datadog support][11].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
-[10]: https://app.datadoghq.com/monitors#/create
-[11]: https://docs.datadoghq.com/help/
+[10]: https://github.com/DataDog/integrations-core/blob/master/http_check/assets/service_checks.json
+[11]: https://docs.datadoghq.com/monitors/monitor_types/network/?tab=checkalert
+[12]: https://docs.datadoghq.com/help/

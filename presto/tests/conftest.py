@@ -22,7 +22,13 @@ def dd_environment(instance):
 
 def make_query():
     # make a query so that all metrics are emitted in the e2e test
-    conn = prestodb.dbapi.connect(host='localhost', port=8080, user='test', catalog='test', schema='test',)
+    conn = prestodb.dbapi.connect(
+        host='localhost',
+        port=8080,
+        user='test',
+        catalog='test',
+        schema='test',
+    )
     cur = conn.cursor()
     cur.execute('SELECT * FROM system.runtime.nodes')
     cur.fetchall()

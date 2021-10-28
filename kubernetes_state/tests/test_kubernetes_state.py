@@ -26,6 +26,7 @@ METRICS = [
     NAMESPACE + '.node.gpu.cards_capacity',
     NAMESPACE + '.node.gpu.cards_allocatable',
     NAMESPACE + '.nodes.by_condition',
+    NAMESPACE + '.node.by_condition',
     # deployments
     NAMESPACE + '.deployment.replicas',
     NAMESPACE + '.deployment.replicas_available',
@@ -55,6 +56,7 @@ METRICS = [
     NAMESPACE + '.pdb.pods_healthy',
     NAMESPACE + '.pdb.pods_total',
     # pods
+    NAMESPACE + '.pod.count',
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
     NAMESPACE + '.pod.status_phase',
@@ -98,8 +100,6 @@ METRICS = [
     NAMESPACE + '.resourcequota.limits.memory.limit',
     # limitrange
     NAMESPACE + '.limitrange.cpu.default_request',
-    # services
-    NAMESPACE + '.service.count',
     # jobs
     NAMESPACE + '.job.failed',
     NAMESPACE + '.job.succeeded',
@@ -133,6 +133,15 @@ TAGS = {
         'status:unknown',
     ],
     NAMESPACE
+    + '.node.by_condition': [
+        'condition:memorypressure',
+        'condition:diskpressure',
+        'condition:outofdisk',
+        'condition:ready',
+        'status:true',
+        'status:false',
+    ],
+    NAMESPACE
     + '.pod.status_phase': [
         'phase:pending',
         'phase:running',
@@ -142,6 +151,7 @@ TAGS = {
         'namespace:default',
         'namespace:kube-system',
     ],
+    NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
     NAMESPACE
     + '.container.status_report.count.waiting': [
         'reason:containercreating',
@@ -154,16 +164,8 @@ TAGS = {
     ],
     NAMESPACE + '.container.status_report.count.terminated': ['pod:pod2'],
     NAMESPACE + '.persistentvolumeclaim.request_storage': ['storageclass:manual'],
-    NAMESPACE
-    + '.service.count': [
-        'namespace:kube-system',
-        'namespace:default',
-        'type:clusterip',
-        'type:nodeport',
-        'type:loadbalancer',
-    ],
-    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2'],
-    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2'],
+    NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
+    NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2', 'kube_job:hello2'],
     NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
 }
 
@@ -182,6 +184,11 @@ JOINED_METRICS = {
     + '.deployment.rollingupdate.max_unavailable': [
         'label_addonmanager_kubernetes_io_mode:reconcile',
         'deployment:kube-dns',
+    ],
+    NAMESPACE
+    + '.container.status_report.count.waiting': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'pod:registry-creds-hq249',
     ],
 }
 
@@ -257,7 +264,7 @@ def check_with_join_kube_labels(instance):
 
 
 @pytest.fixture
-def check_with_join_standard_tag_labels(instance,):
+def check_with_join_standard_tag_labels(instance):
     instance['join_standard_tags'] = True
     return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 
@@ -270,7 +277,7 @@ def assert_not_all_zeroes(aggregator, metric_name):
 
 
 def resourcequota_was_collected(aggregator):
-    """ The metric name is created dynamically so we just check some exist. """
+    """The metric name is created dynamically so we just check some exist."""
     for m in aggregator.metric_names:
         if '.resourcequota.' in m:
             return True
@@ -357,6 +364,93 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.persistentvolumes.by_phase',
         tags=['storageclass:local-data', 'phase:released', 'optional:tag1'],
         value=0,
+    )
+
+    # services count
+    aggregator.assert_metric(
+        NAMESPACE + '.service.count',
+        tags=['namespace:default', 'type:clusterip', 'optional:tag1'],
+        value=3,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.service.count',
+        tags=['namespace:default', 'type:loadbalancer', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.service.count',
+        tags=['namespace:kube-system', 'type:clusterip', 'optional:tag1'],
+        value=4,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.service.count',
+        tags=['namespace:kube-system', 'type:nodeport', 'optional:tag1'],
+        value=1,
+    )
+
+    # namespaces count
+    aggregator.assert_metric(
+        NAMESPACE + '.namespace.count',
+        tags=['phase:active', 'optional:tag1'],
+        value=4,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.namespace.count',
+        tags=['phase:terminating', 'optional:tag1'],
+        value=0,
+    )
+
+    # replicasets count
+    aggregator.assert_metric(
+        NAMESPACE + '.replicaset.count',
+        tags=['namespace:kube-system', 'owner_kind:deployment', 'owner_name:l7-default-backend', 'optional:tag1'],
+        value=1,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.replicaset.count',
+        tags=['namespace:kube-system', 'owner_kind:deployment', 'owner_name:metrics-server-v0.3.6', 'optional:tag1'],
+        value=1,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.replicaset.count',
+        tags=['namespace:kube-system', 'owner_kind:deployment', 'owner_name:kube-dns-autoscaler', 'optional:tag1'],
+        value=1,
+    )
+
+    # jobs count
+    aggregator.assert_metric(
+        NAMESPACE + '.job.count',
+        tags=['namespace:default', 'owner_kind:cronjob', 'owner_name:a-cronjob', 'optional:tag1'],
+        value=1,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.count',
+        tags=['namespace:default', 'owner_kind:<none>', 'owner_name:<none>', 'optional:tag1'],
+        value=1,
+    )
+
+    # deployments count
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.count',
+        tags=['namespace:kube-system', 'optional:tag1'],
+        value=2,
+    )
+
+    # statefulset count
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:default', 'optional:tag1'],
+        value=2,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.count',
+        tags=['namespace:kube-system', 'optional:tag1'],
+        value=2,
     )
 
     for metric in METRICS:
@@ -508,6 +602,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.statefulset.replicas_ready',
         tags=[
             'statefulset:web',
+            'kube_stateful_set:web',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -523,6 +618,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-job',
+            'kube_job:curl-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -538,6 +634,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
         NAMESPACE + '.job.succeeded',
         tags=[
             'job_name:curl-cron-job',
+            'kube_job:curl-cron-job',
             'kube_namespace:default',
             'namespace:default',
             'optional:tag1',
@@ -552,9 +649,10 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
 def test_join_custom_labels(aggregator, instance, check):
     instance['label_joins'] = {
         'kube_deployment_labels': {
-            'label_to_match': 'deployment',
+            'labels_to_match': ['deployment'],
             'labels_to_get': ['label_addonmanager_kubernetes_io_mode'],
-        }
+        },
+        'kube_pod_labels': {'labels_to_match': ['pod'], 'labels_to_get': ['label_addonmanager_kubernetes_io_mode']},
     }
 
     endpoint = instance['kube_state_url']
@@ -637,12 +735,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -664,12 +762,12 @@ def test_job_counts(aggregator, instance):
     # Test jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=1,
     )
 
@@ -716,7 +814,7 @@ def test_job_counts(aggregator, instance):
     # Test if we now have two as the value for the same job
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded',
-        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'kube_job:test', 'optional:tag1'],
         value=2,
     )
 
@@ -788,15 +886,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=91486.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=926.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1300.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=94412.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1002.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1334.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=540.0,
+        value=574.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

@@ -1,0 +1,54 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+snowflake.storage.storage_bytes.total,gauge,,byte,,The average number of bytes of table storage used including bytes for data currently in Time Travel.,0,snowflake,storage bytes total
+snowflake.storage.stage_bytes.total,gauge,,byte,,The average number of bytes of stage storage used by files in all internal stages.,0,snowflake,stage bytes total
+snowflake.storage.failsafe_bytes.total,gauge,,byte,,The average number of bytes of data in Fail-safe.,0,snowflake,failsafe bytes total
+snowflake.storage.database.storage_bytes,gauge,,byte,,The average number of bytes of database storage used.,0,snowflake,db storage bytes avg
+snowflake.storage.database.failsafe_bytes,gauge,,byte,,The average number of bytes of Fail-safe storage used.,0,snowflake,db failsafe bytes avg
+snowflake.billing.virtual_warehouse.avg,gauge,,unit,,The average overall credits billed per hour for virtual warehouses.,0,snowflake,credits virtual warehouse
+snowflake.billing.virtual_warehouse.sum,gauge,,unit,,The sum of overall credits billed for virtual warehouses.,0,snowflake,credits virtual warehouse
+snowflake.billing.cloud_service.avg,gauge,,unit,,The average overall credits billed per hour for cloud services.,0,snowflake,credits cloud services
+snowflake.billing.cloud_service.sum,gauge,,unit,,The total overall credits billed for cloud services.,0,snowflake,credits cloud services
+snowflake.billing.total_credit.avg,gauge,,unit,,The average overall of credits used per hour for the account. This is the sum of snowflake.billing.cloud_service and snowflake.billing.virtual_warehouses.,0,snowflake,total credits
+snowflake.billing.total_credit.sum,gauge,,unit,,The total overall of credits used for the account. This is the sum of snowflake.billing.cloud_service and snowflake.billing.virtual_warehouses.,0,snowflake,total credits
+snowflake.billing.warehouse.cloud_service.avg,gauge,,unit,,The average credits used per hour for cloud services by warehouse.,0,snowflake,warehouse cloud service credit
+snowflake.billing.warehouse.cloud_service.sum,gauge,,unit,,The total credits used for cloud services by warehouse.,0,snowflake,warehouse cloud service credit
+snowflake.billing.warehouse.virtual_warehouse.avg,gauge,,unit,,The average credits used per hour by warehouse.,0,snowflake,warehouse virtual warehouse credits
+snowflake.billing.warehouse.virtual_warehouse.sum,gauge,,unit,,The total credits used by warehouse.,0,snowflake,warehouse virtual warehouse credits
+snowflake.billing.warehouse.total_credit.avg,gauge,,unit,,The average total number of credits used per hour for the warehouse. NOTE: This value does not take into account adjustments which may be higher than your actual credit consumption.,0,snowflake,warehouse total credits
+snowflake.billing.warehouse.total_credit.sum,gauge,,unit,,The total number of credits used for the warehouse. NOTE: This value does not take into account adjustments which may be higher than your actual credit consumption.,0,snowflake,warehouse total credits
+snowflake.logins.fail.count,count,,error,,Total failed login attempts.,0,snowflake,fail logins
+snowflake.logins.success.count,count,,success,,Total successful login attempts.,0,snowflake,successful logins
+snowflake.logins.total,count,,attempt,,Total number of login attempts.,0,snowflake,total logins
+snowflake.query.executed,gauge,,query,,The average number of queries executed.,0,snowflake,average query executed
+snowflake.query.queued_overload,gauge,,query,,Average number of queries queued because the warehouse was overloaded.,0,snowflake,queries overload
+snowflake.query.queued_provision,gauge,,query,,Average number of queries queued because the warehouse was being provisioned.,0,snowflake,queries provision
+snowflake.query.blocked,gauge,,query,,Average number of queries blocked by a transaction lock.,0,snowflake,blocked queries
+snowflake.query.execution_time,gauge,,millisecond,,Average query execution time.,0,snowflake,exec time query
+snowflake.query.compilation_time,gauge,,millisecond,,Average query compilation time.,0,snowflake,comp time query
+snowflake.query.bytes_scanned,gauge,,byte,,Average query bytes scanned.,0,snowflake,query bytes scanned
+snowflake.query.bytes_written,gauge,,byte,,Average query bytes written.,0,snowflake,query bytes written
+snowflake.query.bytes_deleted,gauge,,byte,,Average query bytes deleted.,0,snowflake,query bytes deleted
+snowflake.data_transfer.bytes.avg,gauge,,byte,,Average bytes transferred.,0,snowflake,data transfer bytes
+snowflake.data_transfer.bytes.sum,gauge,,byte,,Total bytes transferred.,0,snowflake,data transfer bytes
+snowflake.auto_recluster.credits_used.avg,gauge,,unit,,Average credits billed for automatic reclustering.,0,snowflake,auto recluster avg credit
+snowflake.auto_recluster.credits_used.sum,gauge,,unit,,Total credits billed for automatic reclustering.,0,snowflake,auto recluster sum credit
+snowflake.auto_recluster.bytes_reclustered.avg,gauge,,byte,,Average bytes reclustered.,0,snowflake,auto recluster avg bytes
+snowflake.auto_recluster.bytes_reclustered.sum,gauge,,byte,,Total bytes reclustered.,0,snowflake,auto recluster sum bytes
+snowflake.auto_recluster.rows_reclustered.avg,gauge,,row,,Average rows reclustered.,0,snowflake,auto recluster avg rows
+snowflake.auto_recluster.rows_reclustered.sum,gauge,,row,,Total rows reclustered.,0,snowflake,auto recluster avg rows
+snowflake.storage.table.active_bytes.avg,gauge,,byte,,Average bytes owned by (and billed to) this table that are in the active state.,0,snowflake,table active bytes
+snowflake.storage.table.time_travel_bytes.avg,gauge,,byte,,Average bytes owned by (and billed to) this table that are in the Time Travel state.,0,snowflake,table time travel bytes
+snowflake.storage.table.failsafe_bytes.avg,gauge,,byte,,Average bytes owned by (and billed to) this table that are in the Fail-safe state.,0,snowflake,table failsafe bytes
+snowflake.storage.table.retained_bytes.avg,gauge,,byte,,Average bytes owned by (and billed to) this table that are retained after deletion because they are referenced by one or more clones of this table.,0,snowflake,table retained bytes
+snowflake.pipe.credits_used.avg,gauge,,unit,,Average number of credits billed for Snowpipe data loads.,0,snowflake,pipe credits avg
+snowflake.pipe.credits_used.sum,gauge,,unit,,Total number of credits billed for Snowpipe data loads.,0,snowflake,pipe credits sum
+snowflake.pipe.bytes_inserted.avg,gauge,,byte,,Average number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted avg
+snowflake.pipe.bytes_inserted.sum,gauge,,byte,,Total number of bytes loaded from Snowpipe.,0,snowflake,pipe bytes inserted sum
+snowflake.pipe.files_inserted.avg,gauge,,file,,Average number of files loaded from Snowpipe.,0,snowflake,pipe files inserted avg
+snowflake.pipe.files_inserted.sum,gauge,,file,,Total number of files loaded from Snowpipe.,0,snowflake,pipe files inserted sum
+snowflake.replication.credits_used.avg,gauge,,unit,,Average number of credits used for database replication.,0,snowflake,replication credits avg
+snowflake.replication.credits_used.sum,gauge,,unit,,Total number of credits used for database replication.,0,snowflake,replication credits sum
+snowflake.replication.bytes_transferred.avg,gauge,,byte,,Average number of bytes transferred for database replication.,0,snowflake,replication bytes avg
+snowflake.replication.bytes_transferred.sum,gauge,,byte,,Total number of bytes transferred for database replication.,0,snowflake,replication bytes sum
+snowflake.query.bytes_spilled.local,gauge,,byte,,Avg volume of data spilled to local disk.,0,snowflake,bytes spilled local
+snowflake.query.bytes_spilled.remote,gauge,,byte,,Avg volume of data spilled to remote disk.,0,snowflake,bytes spilled remote

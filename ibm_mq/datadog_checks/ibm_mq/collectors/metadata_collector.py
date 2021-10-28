@@ -13,7 +13,8 @@ except ImportError as e:
 
 
 class MetadataCollector(object):
-    def __init__(self, log):
+    def __init__(self, config, log):
+        self.config = config
         self.log = log
 
     def collect_metadata(self, queue_manager):
@@ -22,11 +23,13 @@ class MetadataCollector(object):
             self.log.debug('IBM MQ version: %s', raw_version)
             return raw_version
         except Exception as e:
-            self.log.debug("Version could not be retreived: %s", e)
+            self.log.debug("Version could not be retrieved: %s", e)
             return
 
     def _get_version(self, queue_manager):
-        pcf = pymqi.PCFExecute(queue_manager)
+        pcf = pymqi.PCFExecute(
+            queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+        )
         resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
 
         try:

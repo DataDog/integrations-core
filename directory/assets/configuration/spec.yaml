@@ -1,0 +1,106 @@
+name: Directory
+files:
+- name: directory.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: directory
+      description: |
+        The directory to monitor. On windows, escape back-slashes; otherwise the YAML
+        parser fails (for example, - directory: "C:\\Users\\foo\\Downloads").
+      required: true
+      value:
+        example: <DIRECTORY_PATH>
+        type: string
+    - name: name
+      description: Tag metrics with specified name.
+      value:
+        example: <DIRECTORY>
+        type: string
+    - name: dirtagname
+      description: |
+        The name of the key for the tag used for the directory, the value is the value of "name" (see above).
+        The resulting tag attached is "<dirtagname>:<name>".
+      value:
+        example: <DIRECTORY_TAG_KEY>
+        type: string
+    - name: filetagname
+      description: |
+        The name of the key for the tag used for each file, the value is the filename.
+        The resulting tag is "<filetagname>:<filename>". Only used if filegauges is set to true and if the directory
+        contains 20 or fewer files (including files in sub-directories).
+      value:
+        example: <TAG_KEY_FILENAME>
+        type: string
+    - name: filegauges
+      description: When true stats are an individual gauge per file (max. 20 files) and not a histogram of the whole directory.
+      value:
+        example: false
+        type: boolean
+    - name: pattern
+      description: |
+        the `fnmatch` pattern to use when reading the "directory"'s files.
+        The pattern is matched against the files' absolute paths and relative paths in "directory".
+      value:
+        example: '*'
+        type: string
+    - name: exclude_dirs
+      description: |
+        a list of regular expressions used to exclude directories.
+        For example: node_modules, vendor
+      value:
+        example:
+          - ^__pycache__$
+          - ^build$
+          - ^node_modules$
+          - ^vendor$
+        type: array
+        items:
+          type: string
+    - name: dirs_patterns_full
+      description: |
+        Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
+        Setting this option to `false` excludes any directory in the traversal with the provided name.
+        Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories
+        with the same name aren't all excluded.
+      value:
+        example: false
+        type: boolean
+    - name: recursive
+      description: When true, the stats recurse into directories.
+      value:
+        example: false
+        type: boolean
+    - name: follow_symlinks
+      description: |
+        Follow symlinks when traversing directories.
+        When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops.
+      value:
+        example: true
+        type: boolean
+    - name: stat_follow_symlinks
+      description: |
+        When `true`, the stats are gathered for the files the symlinks is pointing to.
+        When `false`, the stats are gathered for the symlinks themselves.
+      value:
+        example: true
+        type: boolean
+    - name: countonly
+      description: When true the stats only count the number of files matching the pattern.
+      value:
+        example: false
+        type: boolean
+    - name: ignore_missing
+      description: When true the check does not raise an exception on missing or inaccessible directories.
+      value:
+        example: false
+        type: boolean
+    - name: submit_histograms
+      description: Whether or not to submit histograms.
+      value:
+        example: true
+        type: boolean
+    - template: instances/default

@@ -17,7 +17,12 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 ##### Metrics collection
 
@@ -100,6 +105,9 @@ _Available for Agent versions >6.0_
 
 4. [Restart the Agent][4].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
@@ -122,6 +130,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ----------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `marathon` under the Checks section.
@@ -138,12 +149,12 @@ The Marathon check does not include any events.
 
 ### Service Checks
 
-**marathon.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Marathon API to collect metrics, otherwise returns `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -153,4 +164,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/marathon/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

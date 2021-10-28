@@ -4,26 +4,32 @@
 import click
 import yaml
 
+from datadog_checks.dev.tooling.annotations import annotate_error
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
-from ....utils import basepath, file_exists, path_join, read_file, write_file
-from ...utils import (
-    complete_valid_checks,
-    get_config_files,
-    get_config_spec,
-    get_data_directory,
-    get_valid_checks,
-    get_version_string,
-    load_manifest,
+from ....fs import basepath, file_exists, path_join, read_file, write_file
+from ...manifest_utils import Manifest
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_config_files, get_data_directory, get_version_string
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
 )
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
+
+TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -32,24 +38,32 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def config(ctx, check, sync, verbose):
-    """Validate default configuration files."""
+    """Validate default configuration files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
     repo_choice = ctx.obj['repo_choice']
-    if check:
-        checks = [check]
-    elif repo_choice == 'agent':
+    if repo_choice == 'agent':
         checks = ['agent']
     else:
-        checks = sorted(get_valid_checks())
+        checks = process_checks_option(check, source='valid_checks', extend_changed=True)
 
     files_failed = {}
     files_warned = {}
     file_counter = []
 
-    echo_waiting('Validating default configuration files...')
+    echo_waiting(f'Validating default configuration files for {len(checks)} checks...')
     for check in checks:
         check_display_queue = []
 
-        spec_path = get_config_spec(check)
+        manifest = Manifest.load_manifest(check)
+        if not manifest:
+            echo_debug(f"Skipping validation for check: {check}; can't process manifest")
+            continue
+
+        spec_path = manifest.get_config_spec()
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
@@ -68,12 +82,19 @@ def config(ctx, check, sync, verbose):
             source = 'datadog'
             version = None
         else:
-            display_name = load_manifest(check).get('display_name', check)
+            display_name = manifest.get_display_name()
             source = check
             version = get_version_string(check)
 
-        spec = ConfigSpec(read_file(spec_path), source=source, version=version)
+        spec_file = read_file(spec_path)
+        default_temp = validate_default_template(spec_file)
+        spec = ConfigSpec(spec_file, source=source, version=version)
         spec.load()
+
+        if not default_temp:
+            message = "Missing default template in init_config or instances section"
+            check_display_queue.append(lambda **kwargs: echo_failure(message))
+            annotate_error(spec_path, message)
 
         if spec.errors:
             files_failed[spec_path] = True
@@ -82,11 +103,9 @@ def config(ctx, check, sync, verbose):
         else:
             if spec.data['name'] != display_name:
                 files_failed[spec_path] = True
-                check_display_queue.append(
-                    lambda **kwargs: echo_failure(
-                        f"Spec  name `{spec.data['name']}` should be `{display_name}`", **kwargs
-                    )
-                )
+                message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
+                check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
+                annotate_error(spec_path, message)
 
             example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
@@ -104,11 +123,11 @@ def config(ctx, check, sync, verbose):
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
+                            message = f'File `{example_file}` is not in sync, run "ddev validate config -s"'
                             check_display_queue.append(
-                                lambda example_file=example_file, **kwargs: echo_failure(
-                                    f'File `{example_file}` needs to be synced', **kwargs
-                                )
+                                lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
                             )
+                            annotate_error(example_file_path, message)
 
         if check_display_queue or verbose:
             echo_info(f'{check}:')
@@ -139,6 +158,24 @@ def config(ctx, check, sync, verbose):
 
     if files_failed:
         abort()
+
+
+def validate_default_template(spec_file):
+    init_config_default = False
+    instances_default = False
+    if 'template: init_config' not in spec_file or 'template: instances' not in spec_file:
+        # This config spec does not have init_config or instances
+        return True
+
+    for line in spec_file.split('\n'):
+        if any("init_config/{}".format(template) in line for template in TEMPLATES):
+            init_config_default = True
+        if any("instances/{}".format(template) in line for template in TEMPLATES):
+            instances_default = True
+
+        if instances_default and init_config_default:
+            return True
+    return False
 
 
 def validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter):
@@ -176,14 +213,17 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
         # Verify there is an `instances` section
         if 'instances' not in config_data:
             files_failed[config_file] = True
-            file_display_queue.append(lambda: echo_failure('Missing `instances` section', indent=FILE_INDENT))
-
+            message = 'Missing `instances` section'
+            file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+            annotate_error(file_name, message)
         # Verify there is a default instance
         else:
             instances = config_data['instances']
             if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
                 files_failed[config_file] = True
-                file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
+                message = 'No default instance'
+                file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+                annotate_error(file_name, message)
 
         if file_display_queue:
             check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))

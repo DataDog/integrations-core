@@ -1,0 +1,35 @@
+[
+    {
+        "name": "mongodb.replset.optime_lag",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "member:replset-data-0.mongo.default.svc.cluster.local:27017",
+            "replset_name:replset",
+            "replset_state:primary"
+        ]
+    },
+    {
+        "name": "mongodb.replset.optime_lag",
+        "type": 0,
+        "value": 100.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "member:replset-data-1.mongo.default.svc.cluster.local:27017",
+            "replset_name:replset",
+            "replset_state:secondary"
+        ]
+    },
+    {
+        "name": "mongodb.replset.optime_lag",
+        "type": 0,
+        "value": 5.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "member:replset-data-2.mongo.default.svc.cluster.local:27017",
+            "replset_name:replset",
+            "replset_state:secondary"
+        ]
+    }
+]

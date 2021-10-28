@@ -1,0 +1,49 @@
+version: "3"
+services:
+    sqlserver:
+        build:
+            context: ./sql
+            dockerfile: Dockerfile
+            args:
+                - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
+        environment:
+            SA_PASSWORD: "Password123"
+            ACCEPT_EULA: "Y"
+            MSSQL_AGENT_ENABLED: "true"
+            INIT_SCRIPT: "aoag_primary.sql"
+            INIT_WAIT: 30
+        ports:
+            - "1433:1433"
+        container_name: aoag_primary
+        hostname: aoag_primary
+        volumes:
+            - mssql-server-shared:/var/opt/mssql/shared
+            - mssql-server-backup:/var/opt/mssql/backup
+        networks:
+            - sqlaoag
+    sqlserver_2:
+        build:
+            context: ./sql
+            dockerfile: Dockerfile
+            args:
+                - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
+        environment:
+            SA_PASSWORD: "Password123"
+            ACCEPT_EULA: "Y"
+            MSSQL_AGENT_ENABLED: "true"
+            INIT_SCRIPT: "aoag_secondary.sql"
+            INIT_WAIT: 50
+        ports:
+            - "1434:1433"
+        container_name: aoag_secondary
+        hostname: aoag_secondary
+        volumes:
+            - mssql-server-shared:/var/opt/mssql/shared
+            - mssql-server-backup:/var/opt/mssql/backup
+        networks:
+            - sqlaoag
+volumes:
+    mssql-server-shared:
+    mssql-server-backup:
+networks:
+    sqlaoag:

@@ -27,6 +27,7 @@ class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
     def __init__(self, name, init_config, agentConfig, instances=None):
+        self._http_handlers = {}
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 
     def check(self, instance):

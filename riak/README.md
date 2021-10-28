@@ -14,9 +14,12 @@ The Riak check is included in the [Datadog Agent][2] package, so you don't need 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -74,6 +77,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
@@ -96,6 +102,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "riak", "service": "riak", "log_processing_rules": {"type": "multi_line", "name": "new_log_Start_with_date", "pattern": "\d{4}\-\d{2}\-\d{2}"}}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `riak` under the Checks section.
@@ -112,12 +121,12 @@ The Riak check does not include any events.
 
 ### Service Checks
 
-**riak.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -128,4 +137,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
-[10]: https://docs.datadoghq.com/help/
+[10]: https://github.com/DataDog/integrations-core/blob/master/riak/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

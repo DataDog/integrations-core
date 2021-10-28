@@ -1,0 +1,23 @@
+name: Presto
+files:
+- name: presto.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 9999
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/presto/*.log
+      source: presto
+      service: <SERVICE_NAME>
+      log_processing_rules:
+        - type: multi_line
+          name: log_start_with_date
+          pattern: \d{4}-\d{2}-\d{2}

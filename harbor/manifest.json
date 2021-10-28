@@ -24,6 +24,9 @@
   "is_public": true,
   "integration_id": "harbor",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Harbor Overview": "assets/dashboards/overview.json"
     },
@@ -31,6 +34,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "harbor"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

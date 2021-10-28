@@ -1,0 +1,123 @@
+{
+    "title": "System - Btrfs",
+    "description": "An overview of your Btrfs metrics",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.disk.btrfs.total{$scope} by {device}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Btrfs Total Available Space (bytes)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.disk.btrfs.used{$scope} by {device}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Btrfs Used Space (bytes)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.disk.btrfs.free{$scope} by {device}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Btrfs Free Space (bytes)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "avg:system.disk.btrfs.usage{$scope} by {device,usage_type,replication_type}",
+                        "display_type": "line"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Btrfs Usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.disk.btrfs.unallocated{$scope} by {device}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Btrfs Unallocated Space (bytes)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

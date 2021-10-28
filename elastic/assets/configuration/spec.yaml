@@ -52,6 +52,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: slm_stats
+      description: | 
+        Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
+        The user must have `manage_slm` cluster privilege to get these metrics.
+      value:
+        type: boolean
+        example: false
     - name: pshard_graceful_timeout
       description: Continue gracefully if pshard stats TO
       value:
@@ -66,6 +73,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: cat_allocation_stats
+      description: |
+        Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
+        Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
+      value:
+        type: boolean
+        example: false
     - name: admin_forwarder
       description: |
         It is used to signify a URL that includes a context root
@@ -74,6 +88,20 @@ files:
       value:
         type: boolean
         example: false
+    - name: gc_collectors_as_rate
+      description: |
+        Submit `jvm.gc.collectors` metrics as rate.
+        Note: Only for ES versions 0.9.10 or higher.
+      value:
+        type: boolean
+        example: false
+    - name: disable_legacy_cluster_tag
+      description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
+      value:
+        type: boolean
+        display_default: false
+        example: true
+      enabled: true
     - template: instances/default
     - template: instances/http
   - template: logs

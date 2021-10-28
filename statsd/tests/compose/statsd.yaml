@@ -2,7 +2,12 @@ version: '3.5'
 
 services:
   statsd:
-    image: "jolexa/docker-statsd"
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8125:8125"
       - "8126:8126"
+    volumes:
+      - ${DD_LOG_1}:/usr/src/app/statsd.log
+    

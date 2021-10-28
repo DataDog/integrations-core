@@ -18,17 +18,22 @@
   "categories": [
     "containers",
     "network",
-    "security"
+    "security",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
   "integration_id": "cilium",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Cilium Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

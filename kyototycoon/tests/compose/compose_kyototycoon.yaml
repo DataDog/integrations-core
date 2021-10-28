@@ -3,5 +3,8 @@ version: '3.5'
 services:
   kyototycoon-standalone:
     image: "datadog/docker-library:kyototycoon_0_9_56"
+    command: ["-log", "/var/log/ktserver.log"]
+    volumes:
+      - ${DD_LOG_1}:/var/log/ktserver.log
     ports:
       - 1978:1978

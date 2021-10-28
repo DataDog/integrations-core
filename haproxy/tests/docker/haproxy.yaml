@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  haproxy:
+    image: "haproxy:${HAPROXY_VERSION}"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "13834:13834"
+      - "13835:13835"
+      - "8404:8404"

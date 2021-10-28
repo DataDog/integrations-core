@@ -1,4 +1,5 @@
-{license_header}import pytest
+{license_header}
+import pytest
 
 
 @pytest.fixture(scope='session')

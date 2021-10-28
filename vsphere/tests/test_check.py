@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -13,10 +14,9 @@ from tests.legacy.utils import mock_alarm_event
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
-from .common import HERE
+from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
 
 
@@ -53,6 +53,28 @@ def test_historical_metrics(aggregator, dd_run_check, historical_instance):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_instance):
+    """This test does the same check than test_historical_events, but deactivate the option to get datastore cluster
+    folder in metrics tags"""
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    check._config.include_datastore_cluster_folder_tag = False
+    dd_run_check(check)
+
+    fixture_file = os.path.join(HERE, 'fixtures', 'metrics_historical_values.json')
+
+    with open(fixture_file, 'r') as f:
+        data = json.load(f)
+        for metric in data:
+            all_tags = metric.get('tags')
+            if all_tags is not None:
+                # The tag 'vsphere_folder:Datastores' is not supposed to be there anymore!
+                all_tags = [tag for tag in all_tags if tag != 'vsphere_folder:Datastores']
+            aggregator.assert_metric(metric['name'], metric.get('value'), tags=all_tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_events_only(aggregator, events_only_instance):
     check = VSphereCheck('vsphere', {}, [events_only_instance])
@@ -75,9 +97,9 @@ def test_events_only(aggregator, events_only_instance):
 def test_external_host_tags(aggregator, realtime_instance):
     realtime_instance['collect_tags'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    config = VSphereConfig(realtime_instance, MagicMock())
+    config = VSphereConfig(realtime_instance, {}, MagicMock())
     check.api = MockedAPI(config)
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
 
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
@@ -95,9 +117,9 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags]  # json library loads data in unicode, let's convert back to native
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
-    check.config.excluded_host_tags = ['vsphere_host']
+    check._config.excluded_host_tags = ['vsphere_host']
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
     submitted_tags = check.set_external_tags.mock_calls[0].args[0]
@@ -107,7 +129,7 @@ def test_external_host_tags(aggregator, realtime_instance):
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
         ex_tags = [to_string(t) for t in ex_tags if 'vsphere_host:' not in t]
         assert ex_host == sub_host
-        assert ex_tags == sub_tags
+        assert sorted(ex_tags) == sorted(sub_tags)
 
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
@@ -127,20 +149,14 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
     dd_run_check(check)
 
     # Following metrics should match and have instance value tag
+    aggregator.assert_metric('vsphere.cpu.usagemhz.avg', tags=['cpu_core:6', 'vcenter_server:FAKE'])
     aggregator.assert_metric(
-        'vsphere.cpu.usagemhz.avg', tags=['cpu_core:6', 'vcenter_server:FAKE'],
-    )
-    aggregator.assert_metric(
-        'vsphere.cpu.coreUtilization.avg', hostname='10.0.0.104', tags=['cpu_core:16', 'vcenter_server:FAKE'],
+        'vsphere.cpu.coreUtilization.avg', hostname='10.0.0.104', tags=['cpu_core:16', 'vcenter_server:FAKE']
     )
 
     # Following metrics should NOT match and do NOT have instance value tag
-    aggregator.assert_metric(
-        'vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'],
-    )
-    aggregator.assert_metric(
-        'vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'],
-    )
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'])
+    aggregator.assert_metric('vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'])
 
     # None of `vsphere.disk.usage.avg` metrics have instance values for specific metric+resource_type
     # Hence the aggregated metric IS collected
@@ -285,8 +301,8 @@ def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check,
 def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_instance):
     realtime_instance.update({'collect_tags': True})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    config = VSphereConfig(realtime_instance, MagicMock())
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    config = VSphereConfig(realtime_instance, {}, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
     check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
     check.api_rest.smart_connect = MagicMock()
 
@@ -294,6 +310,38 @@ def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_in
     assert tags
     assert check.api_rest.make_batch.call_count == 2
     assert check.api_rest.smart_connect.call_count == 1
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_instance):
+    historical_instance['collect_tags'] = True
+    historical_instance['resource_filters'] = [
+        {
+            'resource': 'cluster',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datacenter:Datacenter2',
+            ],
+        },
+        {
+            'resource': 'datastore',
+            'property': 'tag',
+            'patterns': [
+                r'vsphere_datastore:Datastore 1',
+            ],
+        },
+    ]
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
+
+    aggregator.assert_metric('vsphere.disk.used.latest', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 1', count=1)
+    aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 2', count=0)
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
@@ -352,13 +400,34 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.check_id = 'test:123'
     dd_run_check(check)
+
+    major, minor, patch = VSPHERE_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '6',
-        'version.minor': '7',
-        'version.patch': '0',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
         'version.build': '123456789',
-        'version.raw': '6.7.0+123456789',
+        'version.raw': '{}+123456789'.format(VSPHERE_VERSION),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_specs_start_time(aggregator, dd_run_check, historical_instance):
+    mock_time = dt.datetime.now()
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    check.api.server_time = mock_time
+
+    start_times = []
+    for specs in check.make_query_specs():
+        for spec in specs:
+            start_times.append(spec.startTime)
+
+    assert len(start_times) != 0
+    for start_time in start_times:
+        assert start_time == (mock_time - dt.timedelta(hours=2))

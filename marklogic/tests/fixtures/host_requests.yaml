@@ -1,0 +1,26 @@
+request-default-list:
+  meta:
+    uri: "/manage/v2/requests?host-id=ff0fef449486"
+    current-time: '2020-08-03T15:37:36.37632Z'
+    elapsed-time:
+      units: sec
+      value: 0.014881
+  list-summary:
+    total-requests:
+      units: quantity
+      value: 0
+    update-count:
+      units: quantity
+      value: 0
+    query-count:
+      units: quantity
+      value: 0
+  list-items:
+    list-count:
+      units: quantity
+      value: 0
+  related-views:
+    related-view:
+    - view-type: root
+      view-name: default
+      view-uri: "/manage/v2"

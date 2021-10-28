@@ -6,14 +6,18 @@ from __future__ import division
 from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 from itertools import islice
+from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 
 import requests
+from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.consul.common import (
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.serialization import json
+
+from .common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
     CONSUL_CHECK,
@@ -23,18 +27,61 @@ from datadog_checks.consul.common import (
     SOURCE_TYPE_NAME,
     STATUS_SC,
     STATUS_SEVERITY,
+    THREADS_COUNT,
     ceili,
     distance,
 )
+from .metrics import METRIC_MAP
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
-class ConsulCheck(AgentCheck):
+class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
-        super(ConsulCheck, self).__init__(name, init_config, instances)
+        instance = instances[0]
+        self.url = instance.get('url')
+        if self.url is None:
+            raise ConfigurationError("`url` parameter is required.")
 
-        self.url = self.instance.get('url')
+        # Set the prometheus endpoint configuration
+        self.use_prometheus_endpoint = is_affirmative(instance.get('use_prometheus_endpoint', False))
+        instance.setdefault('prometheus_url', '')
+        if self.use_prometheus_endpoint:
+            # Check that the prometheus and the dogstatsd method are not both configured
+            if self._is_dogstatsd_configured():
+                raise ConfigurationError(
+                    'The DogStatsD method and the Prometheus method are both enabled. Please choose only one.'
+                )
+
+            instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
+
+            if 'headers' not in instance:
+                instance['headers'] = {'X-Consul-Token': instance.get('acl_token')}
+            else:
+                instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
+
+        default_instances = {
+            'consul': {
+                'namespace': 'consul',
+                'metrics': [METRIC_MAP],
+                'send_histograms_buckets': True,
+                'send_distribution_counts_as_monotonic': True,
+                'send_distribution_sums_as_monotonic': True,
+            }
+        }
+
+        super(ConsulCheck, self).__init__(
+            name, init_config, instances, default_instances=default_instances, default_namespace='consul'
+        )
+
+        # Get the scraper_config in the constructor
+        self.scraper_config = self.get_scraper_config(instance)
+
         self.base_tags = self.instance.get('tags', [])
 
         self.single_node_install = is_affirmative(self.instance.get('single_node_install', False))
@@ -51,8 +98,19 @@ class ConsulCheck(AgentCheck):
             self.instance.get('network_latency_checks', self.init_config.get('network_latency_checks'))
         )
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
-        self.service_whitelist = self.instance.get('service_whitelist', self.init_config.get('service_whitelist', []))
+        default_services_include = self.init_config.get(
+            'service_whitelist', self.init_config.get('services_include', [])
+        )
+        self.services_include = self.instance.get(
+            'service_whitelist', self.instance.get('services_include', default_services_include)
+        )
+        self.services_exclude = set(self.instance.get('services_exclude', self.init_config.get('services_exclude', [])))
         self.max_services = self.instance.get('max_services', self.init_config.get('max_services', MAX_SERVICES))
+        self.threads_count = self.instance.get('threads_count', self.init_config.get('threads_count', THREADS_COUNT))
+        if self.threads_count > 1:
+            self.thread_pool = ThreadPool(self.threads_count)
+        else:
+            self.thread_pool = None
 
         self._local_config = None
         self._last_config_fetch_time = None
@@ -66,6 +124,15 @@ class ConsulCheck(AgentCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+
+    def _is_dogstatsd_configured(self):
+        """Check if the agent has a consul dogstatsd profile configured"""
+        dogstatsd_mapper = datadog_agent.get_config('dogstatsd_mapper_profiles')
+        if dogstatsd_mapper:
+            for profile in dogstatsd_mapper:
+                if profile.get('name') == 'consul':
+                    return True
+        return False
 
     def consul_request(self, endpoint):
         url = urljoin(self.url, endpoint)
@@ -92,7 +159,7 @@ class ConsulCheck(AgentCheck):
         else:
             self.service_check(CONSUL_CAN_CONNECT, self.OK, tags=service_check_tags)
 
-        return resp.json()
+        return json.loads(resp.content)
 
     # Consul Config Accessors
     def _get_local_config(self):
@@ -207,24 +274,40 @@ class ConsulCheck(AgentCheck):
 
     def _cull_services_list(self, services):
 
-        if self.service_whitelist:
-            if len(self.service_whitelist) > self.max_services:
-                self.warning('More than %d services in whitelist. Service list will be truncated.', self.max_services)
+        if self.services_include and self.services_exclude:
+            self.warning(
+                'Detected that both services_include and services_exclude options are set.'
+                'Consul check will only consider the exclude list.'
+            )
+            self.services_include = None
 
-            whitelisted_services = [s for s in services if s in self.service_whitelist]
-            services = {s: services[s] for s in whitelisted_services[: self.max_services]}
+        if self.services_include:
+            if len(self.services_include) > self.max_services:
+                self.warning(
+                    'More than %d services in services_include. Service list will be truncated.', self.max_services
+                )
+
+            included_services = [s for s in services if s in self.services_include]
+            services = {s: services[s] for s in included_services[: self.max_services]}
         else:
-            if len(services) <= self.max_services:
-                log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(
-                    len(services)
+            allowed_services = {s: services[s] for s in services if s not in self.services_exclude}
+
+            self.log.debug('Filtered services %s with service services_exclude %s', services, self.services_exclude)
+
+            if len(allowed_services) <= self.max_services:
+                log_line = (
+                    'Consul services_include not defined. Agent will poll for all %s services found',
+                    len(allowed_services),
                 )
                 self.log.debug(log_line)
+                services = allowed_services
             else:
-                log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'.format(
+                log_line = 'Consul services_include not defined. Agent will poll for at most {} services'.format(
                     self.max_services
                 )
                 self.warning(log_line)
-                services = {s: services[s] for s in list(islice(iterkeys(services), 0, self.max_services))}
+
+                services = {s: services[s] for s in list(islice(iterkeys(allowed_services), 0, self.max_services))}
 
         return services
 
@@ -239,6 +322,9 @@ class ConsulCheck(AgentCheck):
         return service_tags
 
     def check(self, _):
+        # The Prometheus endpoint is available since Consul 1.1.0
+        if self.use_prometheus_endpoint:
+            self._check_prometheus_endpoint()
 
         self._check_for_leader_change()
         self._collect_metadata()
@@ -275,7 +361,7 @@ class ConsulCheck(AgentCheck):
                 sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = STATUS_SC.get(check['Status'])
                 if status is None:
-                    status = AgentCheck.UNKNOWN
+                    status = self.UNKNOWN
 
                 if sc_id not in sc:
                     tags = ["check:{}".format(check["CheckID"])]
@@ -296,12 +382,12 @@ class ConsulCheck(AgentCheck):
 
         except Exception as e:
             self.log.error(e)
-            self.service_check(CONSUL_CHECK, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.CRITICAL, tags=service_check_tags)
         else:
-            self.service_check(CONSUL_CHECK, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.OK, tags=service_check_tags)
 
         if self.perform_catalog_checks:
-            # Collect node by service, and service by node counts for a whitelist of services
+            # Collect node by service, and service by node counts for a include list of services
 
             services = self.get_services_in_cluster()
 
@@ -325,92 +411,30 @@ class ConsulCheck(AgentCheck):
             # `consul.catalog.services_count` tagged by node name, service name and status and service tags.
             #   The metric is a gauge whose value is the total number of services sharing the same name, the same node
             #   and the same tags.
+
+            nodes_with_service = {}
+            # Collecting nodes with service in parallel to support cluster with high volume of services
+            # Any code with potential impact on the performance of this check should go here
             for service in services:
-                # For every service in the cluster,
-                # Gauge the following:
-                # `consul.catalog.nodes_up` : # of Nodes registered with that service
-                # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
-                # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
-                # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
-
-                all_service_tags = self._get_service_tags(service, services[service])
-
-                nodes_with_service = self.get_nodes_with_service(service)
-
-                # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
-                node_count_per_status = defaultdict(int)
-
-                for node in nodes_with_service:
-                    # The node_id is n['Node']['Node']
-                    node_id = node.get('Node', {}).get("Node")
-
-                    # An additional service is registered on this node. Bump up the counter
-                    nodes_to_service_status[node_id]["up"] += 1
-
-                    # If there is no Check for the node then Consul and dd-agent consider it up
-                    if 'Checks' not in node:
-                        node_count_per_status['passing'] += 1
-                        node_count_per_status['up'] += 1
-                    else:
-                        found_critical = False
-                        found_warning = False
-                        found_serf_health = False
-
-                        for check in node['Checks']:
-                            if check['CheckID'] == 'serfHealth':
-                                found_serf_health = True
-
-                                # For backwards compatibility, the "up" node_count_per_status is computed
-                                # based on the total # of nodes 'running' as part of the service.
-
-                                # If the serfHealth is `critical` it means the Consul agent isn't even responding,
-                                # and we don't register the node as `up`
-                                if check['Status'] != 'critical':
-                                    node_count_per_status["up"] += 1
-                                    continue
-
-                            if check['Status'] == 'critical':
-                                found_critical = True
-                                break
-                            elif check['Status'] == 'warning':
-                                found_warning = True
-                                # Keep looping in case there is a critical status
-
-                        service_tags_set = frozenset(node.get('Service', {}).get('Tags') or [])
-
-                        # Increment the counters based on what was found in Checks
-                        # `critical` checks override `warning`s, and if neither are found,
-                        # register the node as `passing`
-                        if found_critical:
-                            node_count_per_status['critical'] += 1
-                            nodes_to_service_status[node_id]["critical"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'critical')
-                        elif found_warning:
-                            node_count_per_status['warning'] += 1
-                            nodes_to_service_status[node_id]["warning"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'warning')
-                        else:
-                            if not found_serf_health:
-                                # We have not found a serfHealth check for this node, which is unexpected
-                                # If we get here assume this node's status is "up", since we register it as 'passing'
-                                node_count_per_status['up'] += 1
-
-                            node_count_per_status['passing'] += 1
-                            nodes_to_service_status[node_id]["passing"] += 1
-                            node_status = NodeStatus(node_id, service, service_tags_set, 'passing')
-
-                        nodes_per_service_tag_counts[node_status] += 1
-
-                for status_key in STATUS_SC:
-                    status_value = node_count_per_status[status_key]
-                    self.gauge(
-                        '{}.nodes_{}'.format(CONSUL_CATALOG_CHECK, status_key),
-                        status_value,
-                        tags=main_tags + all_service_tags,
+                if self.thread_pool is None:
+                    nodes_with_service[service] = self.get_nodes_with_service(service)
+                else:
+                    nodes_with_service[service] = self.thread_pool.apply_async(
+                        self.get_nodes_with_service, args=(service,)
                     )
 
+            for service in services:
+                self._submit_service_status(
+                    main_tags,
+                    nodes_per_service_tag_counts,
+                    nodes_to_service_status,
+                    service,
+                    services[service],
+                    nodes_with_service[service] if self.thread_pool is None else nodes_with_service[service].get(),
+                )
+
             for node, service_status in iteritems(nodes_to_service_status):
-                # For every node discovered for whitelisted services, gauge the following:
+                # For every node discovered for included services, gauge the following:
                 # `consul.catalog.services_up` : Total services registered on node
                 # `consul.catalog.services_passing` : Total passing services on node
                 # `consul.catalog.services_warning` : Total warning services on node
@@ -440,6 +464,92 @@ class ConsulCheck(AgentCheck):
 
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)
+
+    def _submit_service_status(
+        self,
+        main_tags,
+        nodes_per_service_tag_counts,
+        nodes_to_service_status,
+        service,
+        service_tags,
+        nodes_with_service,
+    ):
+        # For every service in the cluster,
+        # Gauge the following:
+        # `consul.catalog.nodes_up` : # of Nodes registered with that service
+        # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
+        # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
+        # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
+        all_service_tags = self._get_service_tags(service, service_tags)
+        # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
+        node_count_per_status = defaultdict(int)
+        for node in nodes_with_service:
+            # The node_id is n['Node']['Node']
+            node_id = node.get('Node', {}).get("Node")
+
+            # An additional service is registered on this node. Bump up the counter
+            nodes_to_service_status[node_id]["up"] += 1
+
+            # If there is no Check for the node then Consul and dd-agent consider it up
+            if 'Checks' not in node:
+                node_count_per_status['passing'] += 1
+                node_count_per_status['up'] += 1
+            else:
+                found_critical = False
+                found_warning = False
+                found_serf_health = False
+
+                for check in node['Checks']:
+                    if check['CheckID'] == 'serfHealth':
+                        found_serf_health = True
+
+                        # For backwards compatibility, the "up" node_count_per_status is computed
+                        # based on the total # of nodes 'running' as part of the service.
+
+                        # If the serfHealth is `critical` it means the Consul agent isn't even responding,
+                        # and we don't register the node as `up`
+                        if check['Status'] != 'critical':
+                            node_count_per_status["up"] += 1
+                            continue
+
+                    if check['Status'] == 'critical':
+                        found_critical = True
+                        break
+                    elif check['Status'] == 'warning':
+                        found_warning = True
+                        # Keep looping in case there is a critical status
+
+                service_tags_set = frozenset(node.get('Service', {}).get('Tags') or [])
+
+                # Increment the counters based on what was found in Checks
+                # `critical` checks override `warning`s, and if neither are found,
+                # register the node as `passing`
+                if found_critical:
+                    node_count_per_status['critical'] += 1
+                    nodes_to_service_status[node_id]["critical"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'critical')
+                elif found_warning:
+                    node_count_per_status['warning'] += 1
+                    nodes_to_service_status[node_id]["warning"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'warning')
+                else:
+                    if not found_serf_health:
+                        # We have not found a serfHealth check for this node, which is unexpected
+                        # If we get here assume this node's status is "up", since we register it as 'passing'
+                        node_count_per_status['up'] += 1
+
+                    node_count_per_status['passing'] += 1
+                    nodes_to_service_status[node_id]["passing"] += 1
+                    node_status = NodeStatus(node_id, service, service_tags_set, 'passing')
+
+                nodes_per_service_tag_counts[node_status] += 1
+        for status_key in STATUS_SC:
+            status_value = node_count_per_status[status_key]
+            self.gauge(
+                '{}.nodes_{}'.format(CONSUL_CATALOG_CHECK, status_key),
+                status_value,
+                tags=main_tags + all_service_tags,
+            )
 
     def _get_coord_datacenters(self):
         return self.consul_request('/v1/coordinate/datacenters')
@@ -480,17 +590,23 @@ class ConsulCheck(AgentCheck):
 
         # Intra-datacenter
         nodes = self._get_coord_nodes()
-        if len(nodes) == 1:
+        num_nodes = len(nodes)
+        if num_nodes == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
-            for node in nodes:
+            known_distances = {}
+            for i, node in enumerate(nodes):
                 node_name = node['Node']
-                latencies = []
-                for other in nodes:
-                    other_name = other['Node']
-                    if node_name == other_name:
-                        continue
-                    latencies.append(distance(node, other))
+
+                # Initialize with pre-computed distances
+                latencies = [known_distances[(x, x + 1)] for x in range(i)]
+
+                # Calculate the distance between the current node and nodes that have not yet been seen
+                for n in range(i + 1, num_nodes):
+                    latency = distance(node, nodes[n])
+                    latencies.append(latency)
+                    known_distances[(i, n)] = latency
+
                 latencies.sort()
                 n = len(latencies)
                 half_n = n // 2
@@ -530,3 +646,23 @@ class ConsulCheck(AgentCheck):
         self.log.debug("Agent version is `%s`", agent_version)
         if agent_version:
             self.set_metadata('version', agent_version)
+
+    def _check_prometheus_endpoint(self):
+        try:
+            self.process(self.scraper_config)
+        # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
+        except ValueError as e:
+            self.log.warning(
+                "This Consul version probably does not support the prometheus endpoint. "
+                "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                str(e),
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                self.log.warning(
+                    "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
+                    "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                    str(e),
+                )
+            else:
+                raise

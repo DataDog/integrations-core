@@ -7,7 +7,7 @@ from collections import defaultdict
 import requests
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
@@ -23,6 +23,14 @@ class Envoy(AgentCheck):
         super(Envoy, self).__init__(name, init_config, instances)
         self.unknown_metrics = defaultdict(int)
         self.unknown_tags = defaultdict(int)
+
+        self.custom_tags = self.instance.get('tags', [])
+        self.caching_metrics = self.instance.get('cache_metrics', True)
+
+        self.collect_server_info = self.instance.get('collect_server_info', True)
+        self.stats_url = self.instance.get('stats_url')
+        if self.stats_url is None:
+            raise ConfigurationError('Envoy configuration setting `stats_url` is required')
 
         included_metrics = set(
             re.sub(r'^envoy\\?\.', '', s, 1)
@@ -42,39 +50,29 @@ class Envoy(AgentCheck):
         self.excluded_metrics_cache = set()
 
         self.caching_metrics = None
+        self.parse_unknown_metrics = is_affirmative(self.instance.get('parse_unknown_metrics', False))
+        self.disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
 
-    def check(self, instance):
-        custom_tags = instance.get('tags', [])
-        try:
-            stats_url = instance['stats_url']
-        except KeyError:
-            msg = 'Envoy configuration setting `stats_url` is required'
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
-            self.log.error(msg)
-            return
-
-        if self.caching_metrics is None:
-            self.caching_metrics = instance.get('cache_metrics', True)
-
-        self._collect_metadata(stats_url)
+    def check(self, _):
+        self._collect_metadata()
 
         try:
-            response = self.http.get(stats_url)
+            response = self.http.get(self.stats_url)
         except requests.exceptions.Timeout:
             timeout = self.http.options['timeout']
-            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(stats_url, timeout)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
+            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(self.stats_url, timeout)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=self.custom_tags)
             self.log.exception(msg)
             return
         except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Envoy endpoint `{}`'.format(stats_url)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
+            msg = 'Error accessing Envoy endpoint `{}`'.format(self.stats_url)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=self.custom_tags)
             self.log.exception(msg)
             return
 
         if response.status_code != 200:
-            msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(stats_url, response.status_code)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
+            msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(self.stats_url, response.status_code)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=self.custom_tags)
             self.log.warning(msg)
             return
 
@@ -91,7 +89,11 @@ class Envoy(AgentCheck):
                 continue
 
             try:
-                metric, tags, method = parse_metric(envoy_metric)
+                metric, tags, method = parse_metric(
+                    envoy_metric,
+                    retry=self.parse_unknown_metrics,
+                    disable_legacy_cluster_tag=self.disable_legacy_cluster_tag,
+                )
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `%s`', envoy_metric)
@@ -105,7 +107,7 @@ class Envoy(AgentCheck):
                     self.unknown_tags[tag] += 1
                 continue
 
-            tags.extend(custom_tags)
+            tags.extend(self.custom_tags)
 
             try:
                 value = int(value)
@@ -116,7 +118,7 @@ class Envoy(AgentCheck):
                 for metric, value in parse_histogram(metric, value):
                     self.gauge(metric, value, tags=tags)
 
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=custom_tags)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.custom_tags)
 
     def included_metrics(self, metric):
         if self.caching_metrics:
@@ -147,9 +149,12 @@ class Envoy(AgentCheck):
             return True
 
     @AgentCheck.metadata_entrypoint
-    def _collect_metadata(self, stats_url):
+    def _collect_metadata(self):
+        if not self.collect_server_info:
+            self.log.debug("Skipping server info collection because collect_server_info was disabled")
+            return
         # From http://domain/thing/stats to http://domain/thing/server_info
-        server_info_url = urljoin(stats_url, 'server_info')
+        server_info_url = urljoin(self.stats_url, 'server_info')
         raw_version = None
 
         try:

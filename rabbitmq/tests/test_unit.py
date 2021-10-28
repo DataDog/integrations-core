@@ -124,9 +124,9 @@ def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggre
         (
             "legacy auth config",
             {'rabbitmq_user': 'legacy_foo', 'rabbitmq_pass': 'legacy_bar'},
-            {'auth': ('legacy_foo', 'legacy_bar')},
+            {'auth': (b'legacy_foo', b'legacy_bar')},
         ),
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': (b'new_foo', b'new_bar')}),
         ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
         ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
     ],
@@ -142,7 +142,13 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
         check.check(config)
 
         http_wargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_wargs.update(expected_http_kwargs)
 

@@ -24,7 +24,6 @@ EXPECTED_METRICS = [
     "ceph.num_pgs",
     "ceph.num_mons",
     "ceph.aggregate_pct_used",
-    "ceph.total_objects",
     "ceph.num_objects",
     "ceph.read_bytes",
     "ceph.write_bytes",
@@ -34,6 +33,11 @@ EXPECTED_METRICS = [
     "ceph.write_op_per_sec",
     "ceph.num_near_full_osds",
     "ceph.num_full_osds",
+    "ceph.misplaced_objects",
+    "ceph.misplaced_total",
+    "ceph.recovering_objects_per_sec",
+    "ceph.recovering_bytes_per_sec",
+    "ceph.recovering_keys_per_sec",
     # "ceph.osd.pct_used",  # Not send or ceph luminous and above
 ]
 

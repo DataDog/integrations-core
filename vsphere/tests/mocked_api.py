@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime as dt
 import json
 import os
 import re
@@ -9,7 +10,7 @@ from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
 from six import iteritems
-from tests.common import HERE
+from tests.common import HERE, VSPHERE_VERSION
 
 from datadog_checks.vsphere.api import VersionInfo
 
@@ -28,15 +29,16 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.server_time = dt.datetime.now()
 
-    def check_health(self):
-        return True
+    def get_current_time(self):
+        return self.server_time
 
     def get_version(self):
         about = MagicMock(
-            version='6.7.0',
+            version=VSPHERE_VERSION,
             build='123456789',
-            fullName='VMware vCenter Server 6.7.0 build-14792544',
+            fullName='VMware vCenter Server {} build-14792544'.format(VSPHERE_VERSION),
             apiType='VirtualCenter',
         )
         return VersionInfo(about)
@@ -69,8 +71,7 @@ class MockedAPI(object):
         for _, props in iteritems(self.infrastructure_data):
             if 'runtime.host_moid' in props:
                 hosts = [m for m, p in iteritems(self.infrastructure_data) if p['name'] == props['runtime.host_moid']]
-                assert len(hosts) == 1
-                props['runtime.host'] = hosts[0]
+                props['runtime.host'] = hosts[0] if hosts else object()
                 del props['runtime.host_moid']
 
     def smart_connect(self):
@@ -131,7 +132,9 @@ class MockResponse(Response):
         return self.json_data
 
 
-def mock_http_rest_api(method, url, *args, **kwargs):
+def mock_http_rest_api_v6(method, url, *args, **kwargs):
+    if '/api/' in url:
+        return MockResponse({}, 404)
     if method == 'get':
         if re.match(r'.*/category/id:.*$', url):
             parts = url.split('_')
@@ -166,7 +169,10 @@ def mock_http_rest_api(method, url, *args, **kwargs):
     elif method == 'post':
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
-            return MockResponse({"value": "dummy-token"}, 200,)
+            return MockResponse(
+                {"value": "dummy-token"},
+                200,
+            )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockResponse(
                 {
@@ -178,4 +184,53 @@ def mock_http_rest_api(method, url, *args, **kwargs):
                 },
                 200,
             )
+    raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))
+
+
+def mock_http_rest_api_v7(method, url, *args, **kwargs):
+    if method == 'get':
+        if re.match(r'.*/category/.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                {
+                    'name': 'my_cat_name_{}'.format(num),
+                    'description': 'VM category description',
+                    'id': 'cat_id_{}'.format(num),
+                    'used_by': [],
+                    'cardinality': 'SINGLE',
+                },
+                200,
+            )
+
+        elif re.match(r'.*/tagging/tag/.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                {
+                    'category_id': 'cat_id_{}'.format(num),
+                    'name': 'my_tag_name_{}'.format(num),
+                    'description': '',
+                    'id': 'tag_id_{}'.format(num),
+                    'used_by': [],
+                },
+                200,
+            )
+    elif method == 'post':
+        assert kwargs['headers']['Content-Type'] == 'application/json'
+        if re.match(r'.*/session$', url):
+            return MockResponse(
+                "dummy-token",
+                200,
+            )
+        elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
+            return MockResponse(
+                [
+                    {'tag_ids': ['tag_id_1', 'tag_id_2'], 'object_id': {'id': 'VM4-4-1', 'type': 'VirtualMachine'}},
+                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'NFS-Share-1', 'type': 'Datastore'}},
+                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': '10.0.0.104-1', 'type': 'HostSystem'}},
+                ],
+                200,
+            )
+
     raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))

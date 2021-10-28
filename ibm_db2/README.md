@@ -68,9 +68,12 @@ Now if you run `get dbm cfg`, you should see the following:
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -104,6 +107,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
@@ -126,6 +132,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ibm_db2", "service": "<SERVICE_NAME>", "log_processing_rules": {"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])"}}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][9] and look for `ibm_db2` under the Checks section.
@@ -136,27 +145,23 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**ibm_db2.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored IBM Db2 database, otherwise returns `OK`.
-
-**ibm_db2.status**:<br>
-Returns `CRITICAL` if the monitored IBM Db2 database is quiesced, `WARNING` for quiesce-pending or rollforwards, otherwise returns `OK`.
-
 ### Events
 
 - `ibm_db2.tablespace_state_change` is triggered whenever the state of a tablespace changes.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Monitor IBM DB2 with Datadog][12]
+- [Monitor IBM DB2 with Datadog][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
@@ -168,5 +173,6 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
+[11]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help/
+[13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog

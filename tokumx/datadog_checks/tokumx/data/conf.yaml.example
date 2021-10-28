@@ -19,7 +19,7 @@ instances:
     #
   - server: mongodb://localhost:27017
 
-    ## @param ssl - boolean - optional - default: False
+    ## @param ssl - boolean - optional - default: false
     ## Optional SSL parameters, see
     ## https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
     ## for more details

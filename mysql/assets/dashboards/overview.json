@@ -1,0 +1,150 @@
+{
+    "title": "MySQL - Overview",
+    "description": "This dashboard brings together key metrics from your MySQL servers so you can spot excessive numbers of [slow queries](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/#query-performance) and quickly identify any resource constraints that may be impacting performance. Further reading on MySQL monitoring:\n\n- [Datadog's guide to key metrics for MySQL](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/)\n\n- [How to collect MySQL metrics using built-in tools](https://www.datadoghq.com/blog/collecting-mysql-statistics-and-metrics/)\n\n- [How to monitor MySQL using Datadog](https://www.datadoghq.com/blog/mysql-monitoring-with-datadog/)\n\n- [Datadog's MySQL integration docs](https://docs.datadoghq.com/integrations/mysql/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:mysql.net.connections{$scope}"
+                    },
+                    {
+                        "q": "sum:mysql.net.max_connections{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL connections"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:mysql.innodb.data_reads{$scope}"
+                    },
+                    {
+                        "q": "sum:mysql.innodb.data_writes{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL reads and writes (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:mysql.innodb.os_log_fsyncs{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL fsync op count (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:mysql.performance.slow_queries{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL slow queries"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "rate(sum:mysql.performance.table_locks_waited{$scope})"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL locking rate (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "mysql.performance.user_time{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "MySQL CPU time (per sec)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.load.1{$scope}"
+                    },
+                    {
+                        "q": "system.load.5{$scope}"
+                    },
+                    {
+                        "q": "system.load.15{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System load"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "system.cpu.idle{$scope}, system.cpu.system{$scope}, system.cpu.iowait{$scope}, system.cpu.user{$scope}, system.cpu.stolen{$scope}, system.cpu.guest{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "CPU usage (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "max:system.cpu.iowait{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "I/O wait (%)"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.mem.usable{$scope},sum:system.mem.total{$scope}-sum:system.mem.usable{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "System memory"
+            }
+        },
+        {
+            "definition": {
+                "requests": [
+                    {
+                        "q": "sum:system.net.bytes_rcvd{$scope}"
+                    },
+                    {
+                        "q": "sum:system.net.bytes_sent{$scope}"
+                    }
+                ],
+                "type": "timeseries",
+                "title": "Network traffic (per sec)"
+            }
+        }
+    ]
+}

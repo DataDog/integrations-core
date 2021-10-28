@@ -12,13 +12,19 @@ The Kube_metrics_server check is included in the [Datadog Agent][2] package. No 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `kube_metrics_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_metrics_server performance data. See the [sample kube_metrics_server.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -29,6 +35,9 @@ For containerized environments, see the [Kubernetes Autodiscovery Integration Te
 | `<INTEGRATION_NAME>` | `kube_metrics_server `                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                        |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "https://%%host%%:443/metrics"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### SSL
 
@@ -50,19 +59,18 @@ If your endpoint is secured, additional configuration is required:
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-### Service Checks
-
-`kube_metrics_server.prometheus.health`:
-
-Returns CRITICAL if the Agent cannot reach the metrics endpoints.
-
 ### Events
 
 kube_metrics_server does not include any events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
+
 
 [1]: https://github.com/kubernetes-incubator/metrics-server
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
@@ -71,4 +79,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

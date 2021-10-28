@@ -55,24 +55,32 @@ class IIS(PDHBaseCheck):
         self._remaining_data = {namespace: set() for namespace, _ in self._expected_data}
 
     def check(self, _):
-        if self.refresh_counters:
-            for counter, values in list(iteritems(self._missing_counters)):
-                self._make_counters(self.instance_hash, ([counter], values))
-
+        self.do_refresh_counters()
         self.reset_remaining_data()
 
         for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
-                counter_values = counter.get_all_values()
+                counter_values = self.get_counter_values(counter)
             except Exception as e:
                 self.log.error("Failed to get_all_values %s %s: %s", inst_name, dd_name, e)
                 continue
 
             try:
-                if counter._class_name == 'Web Service':
+                if counter.english_class_name == 'Web Service':
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
-                elif counter._class_name == 'APP_POOL_WAS':
+                elif counter.english_class_name == 'APP_POOL_WAS':
                     self.collect_app_pools(dd_name, metric_func, counter, counter_values)
+                else:
+                    self.log.debug(
+                        "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
+                    )
+                    for instance_name, val in iteritems(counter_values):
+                        tags = list(self._tags.get(self.instance_hash, []))
+
+                        if not counter.is_single_instance():
+                            tag = "instance:{}".format(instance_name)
+                            tags.append(tag)
+                        metric_func(dd_name, val, tags)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
@@ -93,6 +101,13 @@ class IIS(PDHBaseCheck):
                 # Collect all if not selected
                 and self._sites
             ):
+                self.log.debug(
+                    "Skipping site metric %s: single instance: %s, site name: %s, counter: %s",
+                    dd_name,
+                    str(is_single_instance),
+                    site_name,
+                    str(counter),
+                )
                 continue
 
             tags = self._get_tags(namespace, site_name, is_single_instance)
@@ -122,6 +137,13 @@ class IIS(PDHBaseCheck):
                 # Collect all if not selected
                 and self._app_pools
             ):
+                self.log.debug(
+                    "Skipping app pool metric %s: single instance: %s, site name: %s, counter: %s",
+                    dd_name,
+                    str(is_single_instance),
+                    app_pool_name,
+                    str(counter),
+                )
                 continue
 
             tags = self._get_tags(namespace, app_pool_name, is_single_instance)

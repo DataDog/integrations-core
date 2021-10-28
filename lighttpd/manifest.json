@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Lighttpd",
@@ -30,8 +31,16 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "lighttpd": "assets/dashboards/lighttpd_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "lighttpd"
+    },
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "lighttpd_processes": "assets/saved_views/lighttpd_processes.json"
+    }
   }
 }

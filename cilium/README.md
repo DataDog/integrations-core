@@ -40,7 +40,12 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
 
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
@@ -48,7 +53,7 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 2. [Restart the Agent][5].
 
-##### Log Collection
+##### Log collection
 
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
@@ -65,13 +70,16 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
      # (...)
    ```
 
-2. Mount the Docker socket to the Datadog Agent as done in [this manifest][9] or mount the `/var/log/pods` directory if you are not using Docker.
+2. Mount the Docker socket to the Datadog Agent as done in [this manifest][6] or mount the `/var/log/pods` directory if you are not using Docker.
 
 3. [Restart the Agent][5].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -83,43 +91,45 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "cilium-agent", "service": "cilium-agent"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `cilium` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `cilium` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of all metrics provided by this integration.
-
-### Service Checks
-
-`cilium.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+See [metadata.csv][9] for a list of all metrics provided by this integration.
 
 ### Events
 
 Cilium does not include any events.
 
+### Service Checks
+
+See [service_checks.json][10] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][11].
 
 [1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/
-[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
+[7]: https://docs.datadoghq.com/agent/kubernetes/log/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

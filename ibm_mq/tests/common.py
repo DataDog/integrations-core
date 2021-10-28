@@ -5,7 +5,12 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+
+# Ignore missing library to not require it for e2e
+try:
+    from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
+except ImportError:
+    COUNT = GAUGE = ''
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
@@ -18,13 +23,16 @@ PASSWORD = 'passw0rd'
 
 QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
+CHANNEL_SSL = 'PYMQI.SSL.SVRCONN'
+SSL_CLIENT_LABEL = 'client'
+SSL_CYPHER_SPEC = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
 
 QUEUE = 'DEV.QUEUE.1'
 
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
-MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
-MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_VERSION = int(os.environ.get('IBM_MQ_VERSION', '9'))
+MQ_COMPOSE_VERSION = os.environ.get('IBM_MQ_COMPOSE_VERSION', '')
 MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
 IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
@@ -44,6 +52,22 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
     'collect_statistics_metrics': True,
+}
+
+INSTANCE_SSL = {
+    'channel': CHANNEL_SSL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'ssl_auth': 'yes',
+    'ssl_cipher_spec': SSL_CYPHER_SPEC,
+    'ssl_key_repository_location': '/opt/pki/keys/client',
+    'ssl_certificate_label': SSL_CLIENT_LABEL,
 }
 
 INSTANCE_METADATA = {
@@ -114,7 +138,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'docker_volumes': ['{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
@@ -156,7 +180,10 @@ QUEUE_METRICS = [
 ]
 
 QUEUE_STATUS_METRICS = [
+    ('ibm_mq.queue.oldest_message_age', GAUGE),
     ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+    ('ibm_mq.queue.last_get_time', GAUGE),
+    ('ibm_mq.queue.last_put_time', GAUGE),
 ]
 
 CHANNEL_METRICS = [
@@ -196,6 +223,27 @@ CHANNEL_STATS_METRICS = [
 
 QUEUE_STATS_METRICS = [
     ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+    ('ibm_mq.stats.queue.q_max_depth', GAUGE),
+    ('ibm_mq.stats.queue.put_fail_count', COUNT),
+    ('ibm_mq.stats.queue.get_fail_count', COUNT),
+    ('ibm_mq.stats.queue.put1_fail_count', COUNT),
+    ('ibm_mq.stats.queue.browse_fail_count', COUNT),
+    ('ibm_mq.stats.queue.non_queued_msg_count', COUNT),
+    ('ibm_mq.stats.queue.expired_msg_count', COUNT),
+    ('ibm_mq.stats.queue.purge_count', COUNT),
+]
+
+# These are Queue Stat metrics that return a list containing both persistent and non-persistent metrics
+# These metrics have an extra tag for `persistent`.
+QUEUE_STATS_LIST_METRICS = [
+    ('ibm_mq.stats.queue.avg_q_time', GAUGE),
+    ('ibm_mq.stats.queue.put_count', COUNT),
+    ('ibm_mq.stats.queue.get_count', COUNT),
+    ('ibm_mq.stats.queue.browse_bytes', GAUGE),
+    ('ibm_mq.stats.queue.browse_count', COUNT),
+    ('ibm_mq.stats.queue.get_bytes', COUNT),
+    ('ibm_mq.stats.queue.put_bytes', COUNT),
+    ('ibm_mq.stats.queue.put1_count', COUNT),
 ]
 
 if IS_CLUSTER:
@@ -230,6 +278,7 @@ OPTIONAL_METRICS = [
 # stats metrics are not always present at each check run
 OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
 OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_LIST_METRICS)
 
 
 def assert_all_metrics(aggregator):

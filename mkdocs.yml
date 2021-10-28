@@ -13,9 +13,9 @@ theme:
   name: material
   language: en
   features:
-    - tabs
+    - navigation.tabs
     # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
-    # - instant
+    # - navigation.instant
   palette:
     scheme: slate
     primary: deep purple
@@ -29,14 +29,16 @@ theme:
   logo: assets/images/logo.svg
 
 nav:
-  - Home: index.md
-  - Setup: setup.md
-  - Testing: testing.md
-  - E2E: e2e.md
+  - Home:
+    - About: index.md
+    - Setup: setup.md
+    - Testing: testing.md
+    - E2E: e2e.md
   - Base Package:
     - About: base/about.md
     - Basics: base/basics.md
     - HTTP: base/http.md
+    - TLS/SSL: base/tls.md
     - Databases: base/databases.md
     - Prometheus: base/prometheus.md
     - Metadata: base/metadata.md
@@ -57,9 +59,11 @@ nav:
     - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
+    - Config models: meta/config-models.md
     - Status: meta/status.md
   - Tutorials:
     - JMX:
+      - tutorials/jmx/integration.md
       - tutorials/jmx/tools.md
     - SNMP:
       - tutorials/snmp/introduction.md
@@ -67,10 +71,12 @@ nav:
       - tutorials/snmp/how-to.md
       - tutorials/snmp/profile-format.md
       - tutorials/snmp/sim-format.md
+      - tutorials/snmp/tools.md
     - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
+    - Windows Event Log: architecture/win32_event_log.md
   - Process:
     - Integration release: process/integration-release.md
     - Agent release:
@@ -107,7 +113,7 @@ markdown_extensions:
   - markdown.extensions.tables:
   - markdown.extensions.toc:
       permalink: true
-      toc_depth: "2-6"
+  - markdown.extensions.attr_list:  # https://github.com/DataDog/mkdocs-click#full-command-path-headers
   # Extra
   - mkdocs-click:
   - mkpatcher:

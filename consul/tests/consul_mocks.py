@@ -12,10 +12,10 @@ MOCK_CONFIG_DISABLE_SERVICE_TAG = {
     'disable_legacy_service_tag': True,
 }
 
-MOCK_CONFIG_SERVICE_WHITELIST = {
+MOCK_CONFIG_SERVICE_INCLUDE_LIST = {
     'url': 'http://localhost:8500',
     'catalog_checks': True,
-    'service_whitelist': ['service_{}'.format(k) for k in range(70)],
+    'services_include': ['service_{}'.format(k) for k in range(70)],
 }
 
 MOCK_CONFIG_LEADER_CHECK = {'url': 'http://localhost:8500', 'catalog_checks': True, 'new_leader_checks': True}
@@ -279,6 +279,33 @@ def mock_get_coord_nodes():
             },
         },
     ]
+
+
+def mock_get_coord_nodes_benchmark(num_nodes):
+    nodes = []
+    for i in range(num_nodes):
+        nodes.append(
+            {
+                "Node": "host-{}".format(i),
+                "Coord": {
+                    "Vec": [
+                        0.007682993877165208,
+                        0.002411059340215172,
+                        0.0016420746641640123,
+                        0.0037411046929292906,
+                        0.004541946058965728,
+                        0.0032195622863890523,
+                        -0.0039447666794166095,
+                        -0.0021767019427297815,
+                    ],
+                    "Error": 0.28019529748212335,
+                    "Adjustment": -9.966407036439966e-05,
+                    "Height": 0.00011777098790169723,
+                },
+            }
+        )
+
+    return nodes
 
 
 def mock_get_health_check(_):

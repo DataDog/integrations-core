@@ -1,4 +1,5 @@
-{license_header}from datadog_checks.dev import get_docker_hostname, get_here, load_jmx_config
+{license_header}
+from datadog_checks.dev import get_docker_hostname, get_here, load_jmx_config
 
 HERE = get_here()
 HOST = get_docker_hostname()

@@ -7,6 +7,13 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
+DDTRACE_OPTIONS_LIST = [
+    'DD_TAGS',
+    'DD_TRACE*',
+    'DD_SERVICE',
+    'DD_AGENT_HOST',
+    'DD_ENV',
+]
 E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
@@ -28,7 +35,12 @@ JMX_TO_INAPP_TYPES = {
 
 
 def e2e_active():
-    return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
+    return (
+        E2E_SET_UP in os.environ
+        or E2E_TEAR_DOWN in os.environ
+        or E2E_PARENT_PYTHON in os.environ
+        or any(ev.startswith(E2E_ENV_VAR_PREFIX) for ev in os.environ)
+    )
 
 
 def e2e_testing():
@@ -92,14 +104,19 @@ def format_config(config):
     return config
 
 
-def replay_check_run(agent_collector, stub_aggregator):
+def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
+        inventories = collector.get('inventories')
         runner = collector.get('runner', {})
         check_id = runner.get('CheckID', '')
         check_name = runner.get('CheckName', '')
 
+        if inventories:
+            for metadata in inventories.values():
+                for meta_key, meta_val in metadata.items():
+                    stub_agent.set_check_metadata(check_name, meta_key, meta_val)
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
                 raw_metric_type = data['type']
@@ -124,7 +141,16 @@ def replay_check_run(agent_collector, stub_aggregator):
             )
 
         if runner.get('LastError'):
-            errors.extend(json.loads(runner['LastError']))
+            try:
+                new_errors = json.loads(runner['LastError'])
+            except json.decoder.JSONDecodeError:
+                new_errors = [
+                    {
+                        'message': str(runner['LastError']),
+                        'traceback': '',
+                    }
+                ]
+            errors.extend(new_errors)
     if errors:
         raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
 

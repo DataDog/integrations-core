@@ -10,7 +10,7 @@ echo "realm: ${KRB5_REALM}"
 set -x
 
 ## Load principals into cache
-kinit -kt ${KRB5_KEYTAB} ${KRB5_SVC}/${HOSTNAME}.${DOMAIN}@${KRB5_REALM} -V
+kinit -kt ${KRB5_KEYTAB} ${SERVICE_NAME}@${KRB5_REALM} -V
 echo ${KRB5_PASS} | kinit user/nokeytab@${KRB5_REALM} -c ${KRB5_CCNAME}/tkt_nokeytab -V
 
 ## List principals in cache

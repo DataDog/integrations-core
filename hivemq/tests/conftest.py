@@ -16,7 +16,7 @@ from . import common
 def dd_environment():
     compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
     with docker_run(
-        compose_file, mount_logs=True, conditions=[CheckDockerLogs(compose_file, ['Started HiveMQ in'], matches='all')],
+        compose_file, mount_logs=True, conditions=[CheckDockerLogs(compose_file, ['Started HiveMQ in'], matches='all')]
     ):
         config = load_jmx_config()
         config['instances'] = [common.INSTANCE]

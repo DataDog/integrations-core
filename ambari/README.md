@@ -12,11 +12,14 @@ The Ambari check is included in the [Datadog Agent][2] package. No additional in
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][3] for all available configuration options.
 
@@ -60,6 +63,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][4].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
@@ -81,6 +87,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                                                                                                                                                                             |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ambari", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date","pattern":"\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])"}}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -104,22 +113,18 @@ If service metrics collection is enabled with `collect_service_metrics` this int
 
 See [metadata.csv][8] for a list of all metrics provided by this integration.
 
-### Service Checks
-
-**ambari.can_connect**:<br>
-Returns `OK` if the cluster is reachable, otherwise returns `CRITICAL`.
-
-**ambari.state**:<br>
-Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
-or `CRITICAL` if the service is uninstalled or stopped.
-
 ### Events
 
 Ambari does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://ambari.apache.org
 [2]: https://docs.datadoghq.com/agent/
@@ -129,4 +134,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ambari/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/ambari/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

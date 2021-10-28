@@ -1,0 +1,394 @@
+{
+  "title": "Kubernetes NGINX Ingress Controller - Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:nginx_ingress.nginx.connections.current{*}",
+            "aggregator": "last"
+          }
+        ],
+        "custom_links": [],
+        "title": "Current connections",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 25,
+        "y": 1,
+        "width": 15,
+        "height": 13
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.connections.total{*} by {state}.as_rate()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg connections by state",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 1,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.requests.total{*} by {controller_pod}.as_rate()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg requests by controller pod",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 88,
+        "y": 1,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.process.count{*} by {controller_pod}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg nginx process by controller pod",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 33,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.bytes.write{*} by {controller_pod}.as_count(), avg:nginx_ingress.nginx.bytes.read{*} by {controller_pod}.as_count()",
+            "metadata": [
+              {
+                "expression": "avg:nginx_ingress.nginx.bytes.write{*} by {controller_pod}.as_count()",
+                "alias_name": "reads"
+              },
+              {
+                "expression": "avg:nginx_ingress.nginx.bytes.read{*} by {controller_pod}.as_count()",
+                "alias_name": "writes"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg reads/writes by controller pod",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 88,
+        "y": 33,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.cpu.time{*} by {controller_pod}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg CPU by controller pod",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 41,
+        "y": 17,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.nginx.mem.resident{*} by {controller_pod}, avg:nginx_ingress.nginx.mem.virtual{*} by {controller_pod}",
+            "metadata": [
+              {
+                "expression": "avg:nginx_ingress.nginx.mem.resident{*} by {controller_pod}",
+                "alias_name": "RSS"
+              },
+              {
+                "expression": "avg:nginx_ingress.nginx.mem.virtual{*} by {controller_pod}",
+                "alias_name": "Virtual"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg memory usage by controller pod",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 88,
+        "y": 17,
+        "width": 46,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.controller.cpu.time{*}.as_count()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg CPU",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 37,
+        "y": 55,
+        "width": 48,
+        "height": 17
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.controller.mem.resident{*}, avg:nginx_ingress.controller.mem.virtual{*}",
+            "metadata": [
+              {
+                "expression": "avg:nginx_ingress.controller.mem.resident{*}",
+                "alias_name": "RSS"
+              },
+              {
+                "expression": "avg:nginx_ingress.controller.mem.virtual{*}",
+                "alias_name": "Virtual"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Avg memory usage",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 86,
+        "y": 55,
+        "width": 48,
+        "height": 17
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:nginx_ingress.controller.reload.success{*}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "title": "Reloads",
+        "title_size": "16",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 24,
+        "y": 55,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:nginx_ingress.nginx.connections.current{*} by {state}",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Current connections by state",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 1,
+        "y": 16,
+        "width": 39,
+        "height": 13
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/logos/nginx-ingress-controller_small.svg",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 1,
+        "y": 1,
+        "width": 23,
+        "height": 13
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "image",
+        "url": "https://static.datadoghq.com/static/images/screenboard/integrations/kubernetes.jpg",
+        "sizing": "fit"
+      },
+      "layout": {
+        "x": 2,
+        "y": 55,
+        "width": 21,
+        "height": 11
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "free_text",
+        "text": "Controller",
+        "color": "#4d4d4d",
+        "font_size": "auto",
+        "text_align": "left"
+      },
+      "layout": {
+        "x": 2,
+        "y": 66,
+        "width": 21,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 258
+}

@@ -108,3 +108,4 @@ For other high-level overviews of SNMP, see:
 
 - [How SNMP Works (Youtube)](https://www.youtube.com/watch?v=2IXP0TkwNJU)
 - [SNMP (Wikipedia)](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)
+- [Tutorials: Internet Management and SNMP (YouTube)](https://www.youtube.com/playlist?list=PL4j_fCKQ7Bso1wGplcaF2pcDGeLVCuKHU) (In-depth videos about SNMP architecture, MIBs, protocol data structures, security models, monitoring code examples, etc.)

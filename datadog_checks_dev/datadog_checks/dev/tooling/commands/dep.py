@@ -1,50 +1,25 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
+import asyncio
+from collections import defaultdict
 
 import click
+import orjson
+from aiohttp import request
+from aiomultiprocess import Pool
+from packaging.markers import InvalidMarker, Marker
+from packaging.specifiers import SpecifierSet
 
-from ...utils import write_file_lines
-from ..constants import REQUIREMENTS_IN, get_agent_requirements, get_root
-from ..requirements import Package, make_catalog, read_packages, resolve_requirements
-from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from ...fs import read_file_lines, write_file_lines
+from ..constants import get_agent_requirements
+from ..dependencies import read_agent_dependencies, read_check_dependencies
+from ..utils import get_check_req_file, get_valid_checks
+from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
+from .validate.licenses import extract_classifier_value
 
-
-def display_package_changes(pre_packages, post_packages, indent=''):
-    """
-    Print packages that've been added, removed or changed
-    """
-    # use package name to determine what's changed
-    pre_package_names = {p.name: p for p in pre_packages}
-    post_package_names = {p.name: p for p in post_packages}
-
-    added = set(post_package_names.keys()) - set(pre_package_names.keys())
-    removed = set(pre_package_names.keys()) - set(post_package_names.keys())
-    changed_maybe = set(pre_package_names.keys()) & set(post_package_names.keys())
-
-    changed = []
-    for package_name in sorted(changed_maybe):
-        if pre_package_names[package_name] != post_package_names[package_name]:
-            changed.append((pre_package_names[package_name], post_package_names[package_name]))
-
-    if not (added or removed or changed):
-        echo_info(f'{indent}No changes')
-
-    if added:
-        echo_success(f'{indent}Added packages:')
-        for package_name in sorted(added):
-            echo_info(f'{indent}    {post_package_names[package_name]}')
-
-    if removed:
-        echo_failure(f'{indent}Removed packages:')
-        for package_name in sorted(removed):
-            echo_info(f'{indent}    {pre_package_names[package_name]}')
-
-    if changed:
-        echo_warning(f'{indent}Changed packages:')
-        for pre, post in changed:
-            echo_info(f'{indent}    {pre} -> {post}')
+# Dependencies to ignore when update dependencies
+IGNORED_DEPS = {'psycopg2-binary'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -52,48 +27,11 @@ def dep():
     pass
 
 
-@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Resolve dependencies for any number of checks')
-@click.argument('checks', nargs=-1, required=True)
-@click.option('--lazy', '-l', is_flag=True, help='Do not attempt to upgrade transient dependencies')
-@click.option('--quiet', '-q', is_flag=True)
-def resolve(checks, lazy, quiet):
-    """Resolve transient dependencies for any number of checks.
-    If you want to do this en masse, put `all`.
-    """
-    root = get_root()
-    if 'all' in checks:
-        checks = os.listdir(root)
-
-    for check_name in sorted(checks):
-        pinned_reqs_file = os.path.join(root, check_name, REQUIREMENTS_IN)
-        resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
-
-        if os.path.isfile(pinned_reqs_file):
-            if not quiet:
-                echo_info(f'Check `{check_name}`:')
-
-            if not quiet:
-                echo_waiting('    Resolving dependencies...')
-
-            pre_packages = read_packages(resolved_reqs_file)
-            result = resolve_requirements(pinned_reqs_file, resolved_reqs_file, lazy=lazy)
-            if result.code:
-                abort(result.stdout + result.stderr)
-
-            if not quiet:
-                post_packages = read_packages(resolved_reqs_file)
-                display_package_changes(pre_packages, post_packages, indent='    ')
-
-
 @dep.command(context_settings=CONTEXT_SETTINGS, short_help='Pin a dependency for all checks that require it')
 @click.argument('package')
 @click.argument('version')
-@click.argument('checks', nargs=-1)
 @click.option('--marker', '-m', help='Environment marker to use')
-@click.option('--resolve', '-r', 'resolving', is_flag=True, help='Resolve transient dependencies')
-@click.option('--lazy', '-l', is_flag=True, help='Do not attempt to upgrade transient dependencies when resolving')
-@click.option('--quiet', '-q', is_flag=True)
-def pin(package, version, checks, marker, resolving, lazy, quiet):
+def pin(package, version, marker):
     """Pin a dependency for all checks that require it. This can
     also resolve transient dependencies.
 
@@ -101,46 +39,53 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
     specify an unlimited number of additional checks to apply the
     pin for via arguments.
     """
-    root = get_root()
-    package_name = package.lower()
-    version = version.lower()
+    if marker is not None:
+        try:
+            marker = Marker(marker)
+        except InvalidMarker as e:
+            abort(f'Invalid marker: {e}')
 
-    for check_name in sorted(os.listdir(root)):
-        pinned_reqs_file = os.path.join(root, check_name, REQUIREMENTS_IN)
-        resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
+    dependencies, errors = read_check_dependencies()
 
-        if os.path.isfile(pinned_reqs_file):
-            pinned_packages = {package.name: package for package in read_packages(pinned_reqs_file)}
-            if package not in pinned_packages and check_name not in checks:
+    if errors:
+        for error in errors:
+            echo_failure(error)
+
+        abort()
+
+    package = package.lower()
+    if package not in dependencies:
+        abort(f'Unknown package: {package}')
+
+    files_to_update = defaultdict(list)
+    files_updated = 0
+
+    versions = dependencies[package]
+    for dependency_definitions in versions.values():
+        for dependency_definition in dependency_definitions:
+            files_to_update[dependency_definition.file_path].append(dependency_definition)
+
+    for file_path, dependency_definitions in sorted(files_to_update.items()):
+        old_lines = read_file_lines(file_path)
+
+        new_lines = old_lines.copy()
+
+        for dependency_definition in dependency_definitions:
+            requirement = dependency_definition.requirement
+            if marker != requirement.marker:
                 continue
 
-            if resolving:
-                pre_packages = list(read_packages(resolved_reqs_file))
-            else:
-                pre_packages = list(pinned_packages.values())
+            requirement.specifier = SpecifierSet(f'=={version}')
+            new_lines[dependency_definition.line_number] = f'{requirement}\n'
 
-            if not quiet:
-                echo_info(f'Check `{check_name}`:')
+        if new_lines != old_lines:
+            files_updated += 1
+            write_file_lines(file_path, new_lines)
 
-            if version == 'none':
-                del pinned_packages[package_name]
-            else:
-                pinned_packages[package_name] = Package(package_name, version, marker)
+    if not files_updated:
+        abort('No dependency definitions to update')
 
-            package_list = sorted(pinned_packages.values())
-            write_file_lines(pinned_reqs_file, (f'{package}\n' for package in package_list))
-
-            if not quiet:
-                echo_waiting('    Resolving dependencies...')
-
-            if resolving:
-                result = resolve_requirements(pinned_reqs_file, resolved_reqs_file, lazy=lazy)
-                if result.code:
-                    abort(result.stdout + result.stderr)
-
-            if not quiet:
-                post_packages = read_packages(resolved_reqs_file if resolving else pinned_reqs_file)
-                display_package_changes(pre_packages, post_packages, indent='    ')
+    echo_info(f'Files updated: {files_updated}')
 
 
 @dep.command(
@@ -148,20 +93,203 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 )
 def freeze():
     """Combine all dependencies for the Agent's static environment."""
-    echo_waiting('Verifying collected packages...')
-    catalog, errors = make_catalog()
+    dependencies, errors = read_check_dependencies()
+
     if errors:
         for error in errors:
             echo_failure(error)
+
         abort()
 
     static_file = get_agent_requirements()
 
     echo_info(f'Static file: {static_file}')
 
-    pre_packages = list(read_packages(static_file))
+    data = sorted(
+        (
+            (dependency_definition.name, str(dependency_definition.requirement).lower())
+            for versions in dependencies.values()
+            for dependency_definitions in versions.values()
+            for dependency_definition in dependency_definitions
+        ),
+        key=lambda d: d[0],
+    )
+    lines = sorted(set(f'{d[1]}\n' for d in data))
 
-    catalog.write_packages(static_file)
+    write_file_lines(static_file, lines)
 
-    post_packages = list(read_packages(static_file))
-    display_package_changes(pre_packages, post_packages)
+
+@dep.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Update integrations' dependencies so that they match the Agent's static environment",
+)
+def sync():
+    all_agent_dependencies, errors = read_agent_dependencies()
+
+    if errors:
+        for error in errors:
+            echo_failure(error)
+        abort()
+
+    files_updated = 0
+    checks = sorted(get_valid_checks())
+    for check_name in checks:
+        check_dependencies, check_errors = read_check_dependencies(check=check_name)
+
+        if check_errors:
+            for error in check_errors:
+                echo_failure(error)
+            abort()
+
+        deps_to_update = {
+            check_dependency_definition: agent_dep_version
+            for check_dependency_name, check_dependency_definitions in check_dependencies.items()
+            for version, dependency_definitions in check_dependency_definitions.items()
+            for check_dependency_definition in dependency_definitions
+            for agent_dep_version, agent_dependency_definitions in all_agent_dependencies[check_dependency_name].items()
+            for agent_dependency_definition in agent_dependency_definitions
+            # look for the dependency with the same marker and name since the version can be different
+            if check_dependency_definition.same_name_marker(agent_dependency_definition)
+            and version != agent_dep_version
+        }
+
+        if deps_to_update:
+            files_updated += 1
+            check_req_file = get_check_req_file(check_name)
+            old_lines = read_file_lines(check_req_file)
+            new_lines = old_lines.copy()
+
+            for dependency_definition, new_version in deps_to_update.items():
+                dependency_definition.requirement.specifier = new_version
+                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+            write_file_lines(check_req_file, new_lines)
+
+    if not files_updated:
+        echo_info('All dependencies synced.')
+
+    echo_info(f'Files updated: {files_updated}')
+
+
+async def get_version_data(url):
+    async with request('GET', url) as response:
+        try:
+            info = orjson.loads(await response.read())['info']
+        except Exception as e:
+            raise type(e)(f'Error processing URL {url}: {e}')
+        else:
+            return (
+                info['name'],
+                info['version'],
+                {
+                    extract_classifier_value(c)
+                    for c in info['classifiers']
+                    if c.startswith('Programming Language :: Python ::')
+                },
+            )
+
+
+async def scrape_version_data(urls):
+    package_data = defaultdict(lambda: {'version': '', 'classifiers': set()})
+
+    async with Pool() as pool:
+        async for package_name, package_version, version_classifiers in pool.map(get_version_data, urls):
+            data = package_data[package_name]
+            if package_version:
+                data['version'] = package_version
+
+            data['classifiers'].update(version_classifiers)
+
+    return package_data
+
+
+def is_version_compatible(marker, supported_versions):
+    """
+    Determines if any of the given versions are compatible with the given marker
+    """
+    os_markers = ['darwin', 'win32', 'linux', 'aix']
+    is_compatible = False
+
+    if marker is None:
+        # manually set marker since if there's none the dependency should work on all environments
+        marker = Marker('python_version > "2.0"')
+
+    if len(supported_versions) == 0:
+        # if there are no classifiers then assume it works on all Python versions
+        is_compatible = True
+
+    for python_version in supported_versions:
+        has_match = False
+
+        for os in os_markers:
+            env = {'python_version': python_version, 'sys_platform': os}
+            # override system python version and sys platform to evaluate whether the version is compatible
+            has_match = marker.evaluate(environment=env)
+            is_compatible = is_compatible or has_match
+
+    return is_compatible
+
+
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Automatically check for dependency updates')
+@click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
+@click.option(
+    '--check-python-classifiers',
+    '-s',
+    is_flag=True,
+    help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
+    NOTE: Some packages may not have proper classifiers.""",
+)
+@click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
+def updates(sync, check_python_classifiers, batch_size):
+
+    all_agent_dependencies, errors = read_agent_dependencies()
+
+    api_urls = []
+    for package in all_agent_dependencies.keys():
+        api_urls.append(f'https://pypi.org/pypi/{package}/json')
+
+    package_data = asyncio.run(scrape_version_data(api_urls))
+    package_data = {
+        package_name.lower().replace('_', '-'): package_info for package_name, package_info in package_data.items()
+    }
+
+    deps_to_update = {
+        agent_dependency_definition: package_data[package]['version']
+        for package, package_dependency_definitions in all_agent_dependencies.items()
+        if package not in IGNORED_DEPS
+        for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
+        for agent_dependency_definition in agent_dependency_definitions
+        if str(agent_dep_version)[2:] != package_data[package]['version']
+        and (
+            not check_python_classifiers
+            or is_version_compatible(
+                agent_dependency_definition.requirement.marker,
+                package_data[package]['classifiers'],
+            )
+        )
+    }
+
+    if sync:
+        static_file = get_agent_requirements()
+        if deps_to_update:
+            deps_updated = 0
+            old_lines = read_file_lines(static_file)
+            new_lines = old_lines.copy()
+
+            for dependency_definition, new_version in deps_to_update.items():
+                dependency_definition.requirement.specifier = f'=={new_version}'
+                new_lines[dependency_definition.line_number] = f'{dependency_definition.requirement}\n'
+
+                deps_updated += 1
+                if batch_size is not None and deps_updated >= batch_size:
+                    break
+
+            write_file_lines(static_file, new_lines)
+            echo_info(f'Updated {deps_updated} dependencies in `agent_requirements.in`')
+    else:
+        if deps_to_update:
+            echo_failure(f"{len(deps_to_update.keys())} Dependencies are out of sync:")
+            for dependency_definition, version in deps_to_update.items():
+                echo_failure(f"Dependency {dependency_definition.requirement} can be updated to version {version}")
+        else:
+            echo_info('All dependencies are up to date')

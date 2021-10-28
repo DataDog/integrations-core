@@ -66,17 +66,15 @@ The RiackCS check does not include any events.
 
 ### Service Checks
 
-**riakcs.can_connect**:
-
-Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts][10] about it.
+To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts][11] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riakcs/images/riakcs_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -86,5 +84,6 @@ To get a better idea of how (or why) to monitor Riak CS performance and availabi
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv
 [8]: https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability
+[9]: https://github.com/DataDog/integrations-core/blob/master/riakcs/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability

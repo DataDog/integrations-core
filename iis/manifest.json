@@ -22,8 +22,18 @@
   "type": "check",
   "integration_id": "iis",
   "assets": {
-    "monitors": {},
-    "dashboards": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "monitors": {
+      "[IIS] Anomalous amount of requests for site: {{site.name}}": "assets/monitors/req.json",
+      "[IIS] Increase of not found error per second for site: {{site.name}}": "assets/monitors/err.json",
+      "[IIS] Increase of locked error per second for site: {{site.name}}": "assets/monitors/lock.json"
+    },
+    "dashboards": {
+      "iis": "assets/dashboards/iis_dashboard.json",
+      "IIS-Overview": "assets/dashboards/iis_overview.json"
+    },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
       "5xx_errors": "assets/saved_views/5xx_errors.json",
@@ -34,6 +44,7 @@
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "iis"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

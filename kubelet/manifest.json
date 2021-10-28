@@ -7,7 +7,7 @@
   "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.2.0",
+  "manifest_version": "1.0.0",
   "metric_prefix": "kubernetes.",
   "metric_to_check": "kubernetes.cpu.usage.total",
   "name": "kubelet",
@@ -25,6 +25,7 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
   }
 }

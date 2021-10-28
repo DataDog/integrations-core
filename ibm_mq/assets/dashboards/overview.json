@@ -1,0 +1,605 @@
+{
+  "title": "IBM MQ - Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.depth_current{$host,$queue_manager,$queue,$channel} by {queue}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 17,
+        "y": 25,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.depth_low_event{$host,$queue_manager,$queue,$channel}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 41,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.depth_max{$host,$queue_manager,$queue,$channel} by {queue_manager}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 115,
+        "y": 25,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.depth_max_event{$host,$queue_manager,$queue,$channel}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 115,
+        "y": 41,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.depth_percent{$host,$queue_manager,$queue,$channel} by {queue}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 25,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.input_open_option{$host,$queue_manager,$queue,$channel}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 66,
+        "y": 57,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.retention_interval{$host,$queue_manager,$queue,$channel}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 115,
+        "y": 57,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.service_interval{$host,$queue_manager,$queue,$channel}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 17,
+        "y": 41,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "check_status",
+        "title": "MQ Connection",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "ibm_mq.can_connect",
+        "grouping": "check",
+        "group": "channel:dev.admin.svrconn,host:localhost,port:1414,queue_manager:qm1,host:mq.sahni.info",
+        "group_by": [],
+        "tags": []
+      },
+      "layout": {
+        "x": 1,
+        "y": 22,
+        "width": 14,
+        "height": 12
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "check_status",
+        "title": "Queue Managers",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "ibm_mq.queue_manager",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": [
+          "$host",
+          "$queue_manager"
+        ]
+      },
+      "layout": {
+        "x": 1,
+        "y": 48,
+        "width": 14,
+        "height": 12
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/logos/ibm-mq_large.svg",
+        "sizing": "zoom"
+      },
+      "layout": {
+        "x": 1,
+        "y": 1,
+        "width": 15,
+        "height": 14
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "note",
+        "content": "Service Checks",
+        "background_color": "gray",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 16,
+        "height": 5
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:ibm_mq.queue.depth_current{$queue_manager,$channel,$host,$queue} by {queue}, 10, 'last', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Messages per Queue",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 31,
+        "y": 1,
+        "width": 43,
+        "height": 23
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue.max_message_length{$queue_manager,$channel,$host,$queue} by {queue_manager}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "title": "Max Message Length",
+        "title_size": "13",
+        "title_align": "left",
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 1,
+        "y": 61,
+        "width": 14,
+        "height": 10
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "top(avg:ibm_mq.queue.depth_high_event{$queue_manager,$queue,$channel,$host} by {queue}, 10, 'mean', 'desc')",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 17,
+        "y": 57,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:ibm_mq.queue.depth_percent{$host,$queue_manager,$channel,$queue} by {queue}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Queue Usage (%)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "live_span": "1m"
+        }
+      },
+      "layout": {
+        "x": 75,
+        "y": 1,
+        "width": 43,
+        "height": 23
+      }
+    },
+    {
+      "id": 16,
+      "definition": {
+        "type": "check_status",
+        "title": "Queues",
+        "title_size": "16",
+        "title_align": "center",
+        "check": "ibm_mq.queue",
+        "grouping": "cluster",
+        "group_by": [
+          "queue"
+        ],
+        "tags": [
+          "$host",
+          "$queue_manager",
+          "$queue"
+        ]
+      },
+      "layout": {
+        "x": 1,
+        "y": 35,
+        "width": 14,
+        "height": 12
+      }
+    },
+    {
+      "id": 17,
+      "definition": {
+        "type": "note",
+        "content": "This dashboard provides an example overview of some of the metrics to monitor for IBM MQ",
+        "background_color": "yellow",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 17,
+        "y": 1,
+        "width": 13,
+        "height": 17
+      }
+    },
+    {
+      "id": 18,
+      "definition": {
+        "type": "note",
+        "content": "Queue Stats",
+        "background_color": "gray",
+        "font_size": "24",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      },
+      "layout": {
+        "x": 163,
+        "y": 2,
+        "width": 12,
+        "height": 21
+      }
+    },
+    {
+      "id": 19,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:ibm_mq.queue.oldest_message_age{$host,$queue,$queue_manager,$channel} by {queue}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "Oldest Message Age (s)",
+        "title_size": "13",
+        "title_align": "left",
+        "time": {
+          "live_span": "1m"
+        }
+      },
+      "layout": {
+        "x": 119,
+        "y": 1,
+        "width": 43,
+        "height": 23
+      }
+    },
+    {
+      "id": 20,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ibm_mq.queue_manager.dist_lists{$channel,$queue_manager,$host,$queue} by {queue_manager}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 17,
+        "y": 74,
+        "width": 47,
+        "height": 19
+      }
+    },
+    {
+      "id": 21,
+      "definition": {
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:ibm_mq.queue_manager.max_msg_list{$channel,$queue_manager,$host,$queue} by {queue_manager}, 10, 'mean', 'desc')",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "custom_links": [],
+        "title": "",
+        "title_size": "16",
+        "title_align": "left"
+      },
+      "layout": {
+        "x": 66,
+        "y": 74,
+        "width": 47,
+        "height": 19
+      }
+    },
+    {
+      "id": 22,
+      "definition": {
+        "type": "note",
+        "content": "Queue Managers",
+        "background_color": "gray",
+        "font_size": "24",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "right"
+      },
+      "layout": {
+        "x": 4,
+        "y": 74,
+        "width": 12,
+        "height": 19
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "default": "*",
+      "prefix": "host"
+    },
+    {
+      "name": "queue_manager",
+      "default": "*",
+      "prefix": "queue_manager"
+    },
+    {
+      "name": "queue",
+      "default": "*",
+      "prefix": "queue"
+    },
+    {
+      "name": "channel",
+      "default": "*",
+      "prefix": "channel"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 262
+}

@@ -25,11 +25,17 @@
   "type": "check",
   "integration_id": "openldap",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "OpenLDAP Overview": "assets/dashboards/openldap_overview.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "openldap"
-    }
+    },
+    "metrics_metadata": "metadata.csv"
   }
 }

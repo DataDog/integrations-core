@@ -1,7 +1,8 @@
 {
   "categories": [
     "monitoring",
-    "notification"
+    "notification",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Nagios",
@@ -10,6 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "nagios.",
+  "metric_to_check": "nagios.host.rta",
   "name": "nagios",
   "process_signatures": [
     "nagios"
@@ -25,9 +27,18 @@
   "type": "check",
   "integration_id": "nagios",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "nagios"
+    },
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "nagios_processes": "assets/saved_views/nagios_processes.json"
+    }
   }
 }

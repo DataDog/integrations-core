@@ -38,7 +38,6 @@ files:
           type: string
         example:
           - cluster\.(in|out)\..*
-        default: None
     - name: excluded_metrics
       description: |
         Excludes metrics using regular expressions.
@@ -58,13 +57,34 @@ files:
           type: string
         example:
           - ^http\..*
-        default: None
     - name: cache_metrics
       description: |
         Results are cached by default to decrease CPU utilization, at
         the expense of some memory. Disable by setting this to false.
       value:
         type: boolean
+        example: true
+    - name: parse_unknown_metrics
+      description: |
+        Attempt parsing of metrics that are unknown and will otherwise be skipped.
+      value:
+        type: boolean
+        example: false
+    - name: collect_server_info
+      description: |
+        Collect Envoy version by accessing the `/server_info` endpoint.
+        Disable this if this endpoint is not reachable by the agent.
+      value:
+        type: boolean
+        example: true
+    - name: disable_legacy_cluster_tag
+      description: |
+        Enable to stop submitting the tags `cluster_name` and `virtual_cluster_name`,
+        which has been renamed to `envoy_cluster` and `virtual_envoy_cluster`.
+      enabled: true
+      value:
+        type: boolean
+        display_default: false
         example: true
     - template: instances/default
     - template: instances/http

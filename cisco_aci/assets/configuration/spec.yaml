@@ -16,10 +16,10 @@ files:
     options:
     - name: aci_url
       required: true
-      description: Url to query to gather metrics.
+      description: URL to query to gather metrics.
       value:
         type: string
-        example: localhost
+        example: http://localhost
       display_priority: 10
     - name: pwd
       required: true
@@ -30,7 +30,7 @@ files:
         type: string
     - name: tenant
       description: |
-        List of tenants to collect data from
+        List of tenants to collect metrics data from.
       value:
         type: array
         items:
@@ -86,6 +86,12 @@ files:
         If you want to keep the cert in a separate file, enter the file path here
       value:
         type: string
+    - name: appcenter
+      description: |
+        Whether appcenter user certificates are being used.
+      value:
+        type: boolean
+        example: False
     - template: instances/http
       overrides:
         username.display_priority: 9
@@ -107,9 +113,7 @@ files:
         aws_region.hidden: true
         aws_host.hidden: true
         aws_service.hidden: true
-    - template: instances/tags
-    - template: instances/service
-    - template: instances/global
+    - template: instances/default
       overrides:
-        min_collection_interval.value.default: 15
+        min_collection_interval.value.display_default: 15
         min_collection_interval.value.example: 180

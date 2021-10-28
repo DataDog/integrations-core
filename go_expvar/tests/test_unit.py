@@ -106,7 +106,7 @@ def test_go_expvar_mocked(go_expvar_mock, check, aggregator):
         )
     for count in CHECK_COUNT:
         aggregator.assert_metric(
-            count.format(common.CHECK_NAME), count=1, metric_type=aggregator.MONOTONIC_COUNT, tags=shared_tags,
+            count.format(common.CHECK_NAME), count=1, metric_type=aggregator.MONOTONIC_COUNT, tags=shared_tags
         )
 
     aggregator.assert_all_metrics_covered()
@@ -213,3 +213,14 @@ def test_alias_tag_path(go_expvar_mock, check, aggregator):
     shared_tags = ['expvar_url:{0}'.format(common.URL_WITH_PATH)]
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.0.key"])
     aggregator.assert_metric("array.dict.key", count=1, tags=shared_tags + ["path:array.1.key"])
+
+
+@pytest.mark.unit
+def test_warn_with_bad_path(go_expvar_mock, caplog, check, aggregator):
+    mock_config = {
+        "expvar_url": common.URL_WITH_PATH,
+        "metrics": [{"path": "memstats"}],
+    }
+    check.check(mock_config)
+
+    assert 'Path memstats is a mapping; specify a more specific path to report a value' in caplog.text

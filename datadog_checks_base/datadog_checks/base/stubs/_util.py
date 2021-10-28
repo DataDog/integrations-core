@@ -10,7 +10,7 @@ class SubprocessOutputEmptyError(Exception):
     pass
 
 
-def subprocess_output(command, raise_on_empty_output):
+def subprocess_output(command, raise_on_empty_output, env=None):
     """
     This is a stub to allow a check requiring `Popen` to run without an Agent (e.g. during tests or development),
     it's not supposed to be used anywhere outside the `datadog_checks.utils` package.
@@ -20,7 +20,7 @@ def subprocess_output(command, raise_on_empty_output):
     # docs warn that the data read is buffered in memory. They suggest not to
     # use subprocess.PIPE if the data size is large or unlimited.
     with tempfile.TemporaryFile() as stdout_f, tempfile.TemporaryFile() as stderr_f:
-        proc = subprocess.Popen(command, stdout=stdout_f, stderr=stderr_f)
+        proc = subprocess.Popen(command, stdout=stdout_f, stderr=stderr_f, env=env)
         proc.wait()
         stderr_f.seek(0)
         err = stderr_f.read()
@@ -28,6 +28,9 @@ def subprocess_output(command, raise_on_empty_output):
         output = stdout_f.read()
 
     if not output and raise_on_empty_output:
-        raise SubprocessOutputEmptyError("get_subprocess_output expected output but had none.")
+        msg = "expected subprocess output but had none."
+        if err:
+            msg += " Error: {}".format(str(err))
+        raise SubprocessOutputEmptyError(msg)
 
     return output, err, proc.returncode

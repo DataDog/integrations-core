@@ -1,0 +1,153 @@
+forest-storage-list:
+  meta:
+    current-time: '2020-05-02T00:22:33.708375Z'
+    elapsed-time:
+      units: sec
+      value: 0.012201
+    uri: /manage/v2/forests?view=storage
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: list
+      view-uri: /manage/v2/forests
+  relations:
+    relation-group:
+    - relation:
+      - idref: '10261592349936198357'
+        nameref: App-Services
+        uriref: /manage/v2/databases/App-Services?view=status
+      - idref: '7270878263307013543'
+        nameref: Documents
+        uriref: /manage/v2/databases/Documents?view=status
+      - idref: '17715529819917516497'
+        nameref: Extensions
+        uriref: /manage/v2/databases/Extensions?view=status
+      - idref: '6433301014062360520'
+        nameref: Fab
+        uriref: /manage/v2/databases/Fab?view=status
+      - idref: '4645248220841139930'
+        nameref: Last-Login
+        uriref: /manage/v2/databases/Last-Login?view=status
+      - idref: '17818991752830625914'
+        nameref: Meters
+        uriref: /manage/v2/databases/Meters?view=status
+      - idref: '6936286237663608015'
+        nameref: Modules
+        uriref: /manage/v2/databases/Modules?view=status
+      - idref: '3957750258337655548'
+        nameref: Schemas
+        uriref: /manage/v2/databases/Schemas?view=status
+      - idref: '725771928932274544'
+        nameref: Security
+        uriref: /manage/v2/databases/Security?view=status
+      - idref: '8579326365454133269'
+        nameref: Triggers
+        uriref: /manage/v2/databases/Triggers?view=status
+      relation-count:
+        units: quantity
+        value: 10
+      typeref: databases
+    - relation:
+      - idref: '9614261020922107465'
+        nameref: 26f962ec5443
+        uriref: /manage/v2/hosts/26f962ec5443?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: hosts
+  storage-list-items:
+    storage-host:
+    - locations:
+        location:
+        - capacity:
+            units: '%'
+            value: '98.25175'
+          device-space:
+            units: MB
+            value: 1134
+          forest-reserve:
+            units: MB
+            value: 20
+          forest-size:
+            units: MB
+            value: 10
+          large-data-size:
+            units: MB
+            value: 0
+          location-forests:
+            location-forest:
+            - disk-size:
+                units: MB
+                value: 8
+              idref: '9587943635595974971'
+              nameref: App-Services
+              relation-id: '10261592349936198357'
+              uriref: /manage/v2/forests/App-Services?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '16432829063228140680'
+              nameref: Documents
+              relation-id: '7270878263307013543'
+              uriref: /manage/v2/forests/Documents?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '1734136458884541932'
+              nameref: Extensions
+              relation-id: '17715529819917516497'
+              uriref: /manage/v2/forests/Extensions?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '17357483631506654578'
+              nameref: Fab
+              relation-id: '6433301014062360520'
+              uriref: /manage/v2/forests/Fab?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '3674269176556456706'
+              nameref: Last-Login
+              relation-id: '4645248220841139930'
+              uriref: /manage/v2/forests/Last-Login?view=status
+            - disk-size:
+                units: MB
+                value: 1
+              idref: '10607054817847962887'
+              nameref: Meters
+              relation-id: '17818991752830625914'
+              uriref: /manage/v2/forests/Meters?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '9575981178809949288'
+              nameref: Modules
+              relation-id: '6936286237663608015'
+              uriref: /manage/v2/forests/Modules?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '868218461567003688'
+              nameref: Schemas
+              relation-id: '3957750258337655548'
+              uriref: /manage/v2/forests/Schemas?view=status
+            - disk-size:
+                units: MB
+                value: 1
+              idref: '5279551105645884758'
+              nameref: Security
+              relation-id: '725771928932274544'
+              uriref: /manage/v2/forests/Security?view=status
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '15616040811356121157'
+              nameref: Triggers
+              relation-id: '8579326365454133269'
+              uriref: /manage/v2/forests/Triggers?view=status
+          path: /var/opt/MarkLogic
+          remaining-space:
+            units: MB
+            value: 1114
+      relation-id: '9614261020922107465'

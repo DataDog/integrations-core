@@ -5,7 +5,8 @@
   "categories": [
     "web",
     "network",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "PowerDNS Recursor",
@@ -31,9 +32,20 @@
   "type": "check",
   "integration_id": "powerdns",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "powerdns": "assets/dashboards/powerdns_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "powerdns"
+    },
+    "metrics_metadata": "metadata.csv",
+    "saved_views": {
+      "powerdns_processes": "assets/saved_views/powerdns_processes.json"
+    }
   }
 }

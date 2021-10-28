@@ -8,6 +8,12 @@ from .config import is_affirmative
 from .errors import ConfigurationError
 from .utils.common import ensure_bytes, ensure_unicode, to_native_string, to_string
 
+# Python 3+
+try:
+    from .checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
+except ImportError:
+    OpenMetricsBaseCheckV2 = None
+
 # Windows-only
 try:
     from .checks.win import PDHBaseCheck
@@ -25,6 +31,7 @@ __all__ = [
     'AgentCheck',
     'KubeLeaderElectionBaseCheck',
     'OpenMetricsBaseCheck',
+    'OpenMetricsBaseCheckV2',
     'PDHBaseCheck',
     'ConfigurationError',
     'ensure_bytes',

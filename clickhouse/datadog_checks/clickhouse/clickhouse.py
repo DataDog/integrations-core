@@ -21,7 +21,7 @@ class ClickhouseCheck(AgentCheck):
         self._server = self.instance.get('server', '')
         self._port = self.instance.get('port')
         self._db = self.instance.get('db', 'default')
-        self._user = self.instance.get('user', 'default')
+        self._user = self.instance.get('username', self.instance.get('user', 'default'))
         self._password = self.instance.get('password', '')
         self._connect_timeout = float(self.instance.get('connect_timeout', 10))
         self._read_timeout = float(self.instance.get('read_timeout', 10))
@@ -80,6 +80,8 @@ class ClickhouseCheck(AgentCheck):
         return self._client.connection.ping()
 
     def connect(self):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
         if self._client is not None:
             self.log.debug('Clickhouse client already exists. Pinging Clickhouse Server.')
             try:
@@ -106,8 +108,7 @@ class ClickhouseCheck(AgentCheck):
                 sync_request_timeout=self._connect_timeout,
                 compression=self._compression,
                 secure=self._tls_verify,
-                # Don't pollute the Agent logs
-                settings={'calculate_text_stack_trace': False},
+                settings={},
                 # Make every client unique for server logs
                 client_name='datadog-{}'.format(self.check_id),
             )

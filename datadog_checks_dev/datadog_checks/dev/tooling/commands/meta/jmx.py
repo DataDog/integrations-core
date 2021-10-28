@@ -19,8 +19,7 @@ def jmx():
 @click.pass_context
 def query_endpoint(ctx, host, port, domain):
     import jpype
-    from jpype import java
-    from jpype import javax
+    from jpype import java, javax
 
     url = "service:jmx:rmi:///jndi/rmi://{}:{}/jmxrmi".format(host, port)
     jpype.startJVM(convertStrings=False)

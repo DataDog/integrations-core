@@ -6,10 +6,10 @@ from collections import deque
 from copy import deepcopy
 
 import toml
-from appdirs import user_data_dir
 from atomicwrites import atomic_write
+from platformdirs import user_data_dir
 
-from ..utils import ensure_parent_dir_exists, file_exists, read_file
+from ..fs import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', '')
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
@@ -39,6 +39,7 @@ DEFAULT_CONFIG = {
         'core': os.path.join('~', 'dd', 'integrations-core'),
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
+        'marketplace': os.path.join('~', 'dd', 'marketplace'),
     },
     'agents': {
         'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},

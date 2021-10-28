@@ -8,15 +8,18 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don’t need to install anything else on your JBoss/WildFly host.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don't need to install anything else on your JBoss/WildFly host.
 
 ### Configuration
 
 This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, visit the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -55,6 +58,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][8].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -70,6 +76,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see t
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "jboss_wildfly", "service": "<SERVICE_NAME>"}` |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -87,12 +96,12 @@ The JBoss/WildFly integration does not include any events.
 
 ### Service Checks
 
-**jboss.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored JBoss/WildFly instance, otherwise returns `OK`.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
+
 
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
@@ -106,3 +115,4 @@ Need help? Contact [Datadog support][5].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/assets/service_checks.json

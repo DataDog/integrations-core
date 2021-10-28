@@ -15,12 +15,13 @@ ESInstanceConfig = namedtuple(
         'pshard_graceful_to',
         'node_name_as_host',
         'cluster_stats',
+        'slm_stats',
         'index_stats',
         'service_check_tags',
-        'health_tags',
         'tags',
         'url',
         'pending_task_stats',
+        'cat_allocation_stats',
     ],
 )
 
@@ -38,10 +39,12 @@ def from_instance(instance):
     node_name_as_host = is_affirmative(instance.get('node_name_as_host', False))
     index_stats = is_affirmative(instance.get('index_stats', False))
     cluster_stats = is_affirmative(instance.get('cluster_stats', False))
+    slm_stats = is_affirmative(instance.get('slm_stats', False))
     if 'is_external' in instance:
         cluster_stats = is_affirmative(instance.get('is_external', False))
     pending_task_stats = is_affirmative(instance.get('pending_task_stats', True))
     admin_forwarder = is_affirmative(instance.get('admin_forwarder', False))
+    cat_allocation_stats = is_affirmative(instance.get('cat_allocation_stats', False))
 
     # Support URLs that have a path in them from the config, for
     # backwards-compatibility.
@@ -66,11 +69,12 @@ def from_instance(instance):
         pshard_graceful_to=pshard_graceful_to,
         node_name_as_host=node_name_as_host,
         cluster_stats=cluster_stats,
+        slm_stats=slm_stats,
         index_stats=index_stats,
         service_check_tags=service_check_tags,
-        health_tags=[],
         tags=tags,
         url=url,
         pending_task_stats=pending_task_stats,
+        cat_allocation_stats=cat_allocation_stats,
     )
     return config

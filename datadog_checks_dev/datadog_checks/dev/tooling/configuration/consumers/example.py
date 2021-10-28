@@ -37,19 +37,26 @@ def construct_yaml(obj, **kwargs):
 
 
 def value_type_string(value):
-    value_type = value['type']
-    if value_type == 'object':
-        return 'mapping'
-    elif value_type == 'array':
-        item_type = value['items']['type']
-        if item_type == 'object':
-            return 'list of mappings'
-        elif item_type == 'array':
-            return 'list of lists'
-        else:
-            return f'list of {item_type}s'
+    if 'anyOf' in value:
+        return ' or '.join(value_type_string(type_data) for type_data in value['anyOf'])
     else:
-        return value_type
+        value_type = value['type']
+        if value_type == 'object':
+            return 'mapping'
+        elif value_type == 'array':
+            items = value['items']
+            if 'anyOf' in items:
+                return f'(list of {value_type_string(items)})'
+            else:
+                item_type = items['type']
+                if item_type == 'object':
+                    return 'list of mappings'
+                elif item_type == 'array':
+                    return 'list of lists'
+                else:
+                    return f'list of {item_type}s'
+        else:
+            return value_type
 
 
 def option_enabled(option):
@@ -112,11 +119,14 @@ def write_option(option, writer, indent='', start_list=False):
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if 'default' in value:
-                default = value['default']
-                if default is not None:
-                    if type(default) is str:
+            if 'display_default' in value:
+                default = value['display_default']
+                default_type = type(default)
+                if default is not None and str(default).lower() != 'none':
+                    if default_type is str:
                         writer.write(' - default: ', default)
+                    elif default_type is bool:
+                        writer.write(' - default: ', 'true' if default else 'false')
                     else:
                         writer.write(' - default: ', repr(default))
             else:
@@ -145,7 +155,8 @@ def write_option(option, writer, indent='', start_list=False):
                     if isinstance(item, str):
                         compacted_item = construct_yaml(item, default_flow_style=True, default_style='"')
                     else:
-                        compacted_item = construct_yaml(item, default_flow_style=True)
+                        # Compact examples should stay on one line to prevent weird line wraps.
+                        compacted_item = construct_yaml(item, default_flow_style=True, width=float('inf'))
 
                     option_yaml_lines.append(f'- {compacted_item.strip()}')
 
@@ -170,25 +181,14 @@ def write_option(option, writer, indent='', start_list=False):
 
         if 'options' in option:
             multiple = option['multiple']
-            options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
-            next_indent = indent + '    '
-            writer.write(indent, option_name, ':', '\n')
-            if options:
-                for i, opt in enumerate(options):
-                    if opt['hidden']:
-                        continue
+            multiple_instances_defined = option.get('multiple_instances_defined')
 
-                    writer.write('\n')
-                    if i == 0 and multiple:
-                        if option_enabled(opt):
-                            write_option(opt, writer, next_indent, start_list=True)
-                        else:
-                            writer.write(next_indent[:-2], '-\n')
-                            write_option(opt, writer, next_indent)
-                    else:
-                        write_option(opt, writer, next_indent)
-            elif multiple:
-                writer.write('\n', next_indent[:-2], '- {}\n')
+            writer.write(indent, option_name, ':', '\n')
+            if multiple and multiple_instances_defined:
+                for instance in option['options']:
+                    write_sub_option(instance, writer, indent, multiple, include_top_description=True)
+            else:
+                write_sub_option(option, writer, indent, multiple)
 
         # For sections that prefer to document everything in the description, like `logs`
         else:
@@ -204,6 +204,30 @@ def write_option(option, writer, indent='', start_list=False):
                     writer.write(example_indent)
 
                 writer.write(line, '\n')
+
+
+def write_sub_option(option, writer, indent, multiple, include_top_description=False):
+    options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
+    next_indent = indent + '    '
+
+    if options:
+        for i, opt in enumerate(options):
+            if opt['hidden']:
+                continue
+
+            writer.write('\n')
+            if i == 0 and multiple:
+                if include_top_description and option.get('description'):
+                    write_description(option, writer, next_indent, 'option')
+                if option_enabled(opt):
+                    write_option(opt, writer, next_indent, start_list=True)
+                else:
+                    writer.write(next_indent[:-2], '-\n')
+                    write_option(opt, writer, next_indent)
+            else:
+                write_option(opt, writer, next_indent)
+    elif multiple:
+        writer.write('\n', next_indent[:-2], '- {}\n')
 
 
 class ExampleConsumer(object):

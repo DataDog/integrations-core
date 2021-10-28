@@ -40,8 +40,7 @@ INCORRECTLY_INDENTED_COMMENT_REGEX = "^ *##(.*)$"
 
 
 class ParamProperties:
-    """Class to represent a parameter declared using the '@param' annotation
-    """
+    """Class to represent a parameter declared using the '@param' annotation"""
 
     def __init__(self, var_name, type_name, required=True, default_value=None):
         self.var_name = var_name
@@ -128,8 +127,7 @@ class ConfigBlock:
 
     @classmethod
     def parse_from_strings(cls, start, config_lines, indent, errors):
-        """Main method used to parse a block starting at line 'start' with a given indentation.
-        """
+        """Main method used to parse a block starting at line 'start' with a given indentation."""
         idx = start
 
         # Let's first check if the block is a simple comment. If so, let's return and go to the next block
@@ -359,7 +357,7 @@ def _is_comment(start, config_lines, indent, errors):
     idx = start
     end = len(config_lines)
     if "## @param" in config_lines[idx]:
-        # If wee see @param, no matter how correctly formatted it is, we expect it to be a param declaration
+        # If we see @param, no matter how correctly formatted it is, we expect it to be a param declaration
         return False
 
     while idx < end:
@@ -368,7 +366,7 @@ def _is_comment(start, config_lines, indent, errors):
             idx += 1
             continue
         elif is_blank(current_line):
-            # End of bloc with only ## comments, the whole block is indeed only a comment
+            # End of block with only ## comments, the whole block is indeed only a comment
             return True
         elif re.match(INCORRECTLY_INDENTED_COMMENT_REGEX, current_line):
             # This is still a comment but incorrectly indented

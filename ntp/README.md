@@ -8,7 +8,9 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 - Metric delays
 - Gaps in graphs of metrics
 
-Default NTP servers reached:
+By default, the check will detect which cloud provider the agent is running on and use the private
+NTP server of that cloud provider if available. If no cloud provider is detected, the agent will
+default to the NTP servers below:
 
 - `0.datadog.pool.ntp.org`
 - `1.datadog.pool.ntp.org`
@@ -43,13 +45,11 @@ The NTP check does not include any events.
 
 ### Service Checks
 
-`ntp.in_sync`:
-
-Returns `CRITICAL` if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise `OK`.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -57,5 +57,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[7]: https://github.com/DataDog/integrations-core/blob/master/ntp/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

@@ -8,12 +8,12 @@ import yaml
 from six import string_types
 
 try:
-    from yaml import CSafeLoader as yLoader
     from yaml import CSafeDumper as yDumper
+    from yaml import CSafeLoader as yLoader
 except ImportError:
     # On source install C Extensions might have not been built
-    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
     from yaml import SafeDumper as yDumper  # noqa, imported from here elsewhere
+    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
 
 log = logging.getLogger(__name__)
 
@@ -112,6 +112,26 @@ def get_stream_name(stream):
         return realpath(stream.name)
     else:
         return "<file>"
+
+
+def yaml_load_force_loader(stream, Loader):
+    """Override the default monkey patch for this call"""
+    log.debug(
+        "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+    )
+    if pyyaml_load is None:
+        return yaml.load(stream, Loader)
+    return pyyaml_load(stream, Loader)
+
+
+def yaml_load_all_force_loader(stream, Loader):
+    """Override the default monkey patch for this call"""
+    log.debug(
+        "`%s` YAML loader is used instead of the default one, please make sure it is safe to do so", Loader.__name__
+    )
+    if pyyaml_load_all is None:
+        return yaml.load_all(stream, Loader)
+    return pyyaml_load_all(stream, Loader)
 
 
 def monkey_patch_pyyaml():

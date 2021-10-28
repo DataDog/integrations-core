@@ -14,9 +14,12 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -55,6 +58,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][6].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 ##### Metric collection
@@ -87,6 +93,9 @@ JMXFetch
       status : OK
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ## Data Collected
 
 ### Metrics
@@ -102,6 +111,10 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 
 HiveMQ does not include any events.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
@@ -116,3 +129,4 @@ Need help? Contact [Datadog support][5].
 [8]: https://docs.datadoghq.com/agent/docker/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/hivemq/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/hivemq/assets/service_checks.json

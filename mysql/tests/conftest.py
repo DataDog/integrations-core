@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 
 import mock
@@ -12,18 +13,20 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
 
+logger = logging.getLogger(__name__)
+
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e():
+def config_e2e(instance_basic):
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [instance_basic],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -63,13 +66,21 @@ def dd_environment(config_e2e):
                 CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
                 populate_database,
             ],
+            attempts=2,
+            attempts_wait=10,
         ):
             yield config_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session')
-def instance_basic(config_e2e):
-    return config_e2e['instances'][0]
+def instance_basic():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'disable_generic_tags': 'true',
+    }
 
 
 @pytest.fixture
@@ -79,6 +90,7 @@ def instance_complex():
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
+        'disable_generic_tags': 'true',
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -112,6 +124,7 @@ def instance_custom_queries():
         'pass': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
         'custom_queries': [
             {
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
@@ -127,7 +140,7 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
 
 
 @pytest.fixture(scope='session')
@@ -150,31 +163,112 @@ def version_metadata():
     }
 
 
+def _init_datadog_sample_collection(conn):
+    logger.debug("initializing datadog sample collection")
+    cur = conn.cursor()
+    cur.execute("CREATE DATABASE datadog")
+    cur.execute("GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO 'dog'@'%'")
+    cur.execute("GRANT EXECUTE on `datadog`.*  TO 'dog'@'%'")
+    _create_explain_procedure(conn, "datadog")
+    _create_explain_procedure(conn, "mysql")
+    _create_enable_consumers_procedure(conn)
+
+
+def _create_explain_procedure(conn, schema):
+    logger.debug("creating explain procedure in schema=%s", schema)
+    cur = conn.cursor()
+    cur.execute(
+        """
+    CREATE PROCEDURE {schema}.explain_statement(IN query TEXT)
+        SQL SECURITY DEFINER
+    BEGIN
+        SET @explain := CONCAT('EXPLAIN FORMAT=json ', query);
+        PREPARE stmt FROM @explain;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END;
+    """.format(
+            schema=schema
+        )
+    )
+    if schema != 'datadog':
+        cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
+    cur.close()
+
+
+def _create_enable_consumers_procedure(conn):
+    logger.debug("creating enable_events_statements_consumers procedure")
+    cur = conn.cursor()
+    cur.execute(
+        """
+        CREATE PROCEDURE datadog.enable_events_statements_consumers()
+            SQL SECURITY DEFINER
+        BEGIN
+            UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%';
+        END;
+    """
+    )
+    cur.close()
+
+
 def init_master():
+    logger.debug("initializing master")
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
     _add_dog_user(conn)
+    _add_bob_user(conn)
+    _init_datadog_sample_collection(conn)
+
+
+@pytest.fixture
+def root_conn():
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+    yield conn
+    conn.close()
 
 
 def init_slave():
+    logger.debug("initializing slave")
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
 def _add_dog_user(conn):
     cur = conn.cursor()
-    cur.execute("CREATE USER 'dog'@'%' IDENTIFIED BY 'dog';")
-    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
-        cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%';")
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 5;")
-    else:
-        cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%' WITH MAX_USER_CONNECTIONS 5;")
-    cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%';")
+    cur.execute("SELECT count(*) FROM mysql.user WHERE User = 'dog' and Host = '%'")
+    if cur.fetchone()[0] == 0:
+        # gracefully handle retries due to partial failure later on
+        cur.execute("CREATE USER 'dog'@'%' IDENTIFIED BY 'dog'")
+    cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
+    cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
+    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
+    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
+        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
+    else:
+        cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
+        cur.execute("FLUSH PRIVILEGES")
+
+
+def _add_bob_user(conn):
+    cur = conn.cursor()
+    cur.execute("CREATE USER 'bob'@'%' IDENTIFIED BY 'bob'")
+    cur.execute("GRANT USAGE on *.* to 'bob'@'%'")
+
+
+@pytest.fixture
+def bob_conn():
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='bob', password='bob')
+    yield conn
+    conn.close()
 
 
 def populate_database():
+    logger.debug("populating database")
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
 
     cur = conn.cursor()
+
     cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
     cur.execute("USE testdb;")
@@ -182,7 +276,9 @@ def populate_database():
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Alice',25);")
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Bob',20);")
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
+    cur.execute("GRANT SELECT ON testdb.users TO 'bob'@'%';")
     cur.close()
+    _create_explain_procedure(conn, "testdb")
 
 
 def _wait_for_it_script():

@@ -1,0 +1,854 @@
+{
+    "author_name": "Datadog",
+    "description": "",
+    "layout_type": "free",
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "host",
+            "prefix": null
+        }
+    ],
+    "title": "JBoss WildFly",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "white",
+                "content": "Using this dashboard, you can get a high-level view of your JBoss/WildFly metrics related to transactions, undertow, and prepared statement cache. \n\nTo learn more about our JBoss/WildFly integration, see:\n\n- [Our official integration documentation](https://docs.datadoghq.com/integrations/jboss_wildfly/?tab=host).\n\n\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n\n\n",
+                "font_size": "14",
+                "show_tick": false,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 0,
+            "layout": {
+                "height": 31,
+                "width": 30,
+                "x": 1,
+                "y": 14
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Basic Activity Monitor",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 1,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 33,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Transactions Summary",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 2,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 105,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Prepared Statement Cache",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 4,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 33,
+                "y": 24
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.jdbc_connections.count{$host}"
+                    }
+                ],
+                "title": "Open connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 6,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 33,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:jboss.jdbc_preparedstatementcache.hit{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Statement cache hit",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 12,
+            "layout": {
+                "height": 15,
+                "width": 33,
+                "x": 33,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# JVM Memory Usage",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 13,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 33,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "avg:jvm.heap_memory_max{$host}, avg:jvm.heap_memory{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Heap memory usage",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "min": "0"
+                }
+            },
+            "id": 15,
+            "layout": {
+                "height": 15,
+                "width": 70,
+                "x": 33,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "q": "per_minute(sum:jvm.gc.cms.count{$host})",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "GC count per minute",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 18,
+            "layout": {
+                "height": 15,
+                "width": 70,
+                "x": 33,
+                "y": 69
+            }
+        },
+        {
+            "definition": {
+                "sizing": "fit",
+                "type": "image",
+                "url": "/static/images/logos/jboss-wildfly_large.svg"
+            },
+            "id": 31,
+            "layout": {
+                "height": 12,
+                "width": 30,
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "avg:jboss.jdbc_connections.active{$host}"
+                    }
+                ],
+                "title": "Active connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 6255252301649020,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 51,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_yellow",
+                                "value": 0
+                            }
+                        ],
+                        "q": "avg:jboss.jdbc_connections.idle{$host}"
+                    }
+                ],
+                "title": "Idle connections",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 2688447242432478,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 69,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
+                        "q": "avg:jboss.jdbc_connections.request_wait{$host}"
+                    }
+                ],
+                "title": "Requests waiting",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 6186988537985180,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 87,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.transactions.count{$host}"
+                    }
+                ],
+                "title": "Transactions created",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 2791214579697316,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 105,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.transactions.committed{$host}"
+                    }
+                ],
+                "title": "Transactions committed",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 5449323594138856,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 123,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.transactions.inflight{$host}"
+                    }
+                ],
+                "title": "Transactions inflight",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 7119537115441230,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 141,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.transactions.timed_out{$host}"
+                    }
+                ],
+                "title": "Transactions timed out",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4935384136600366,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 159,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "content": "# Undertow Summary",
+                "font_size": "16",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 997530893504614,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 105,
+                "y": 24
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:jboss.jdbc_preparedstatementcache.miss{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Statement cache miss",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 1281631854900690,
+            "layout": {
+                "height": 15,
+                "width": 35,
+                "x": 68,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.undertow_session.created{$host}"
+                    }
+                ],
+                "title": "Sessions created",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 644641803616872,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 105,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "q": "avg:jboss.undertow_session.active{$host}"
+                    }
+                ],
+                "title": "Active sessions",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 400179441048528,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 123,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
+                        "q": "avg:jboss.undertow_session.rejected{$host}"
+                    }
+                ],
+                "title": "Sessions rejected",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 8030828069762924,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 141,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.undertow_session.expired{$host}"
+                    }
+                ],
+                "title": "Sessions expired",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 1882749592325446,
+            "layout": {
+                "height": 15,
+                "width": 16,
+                "x": 159,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:jboss.undertow_listener.bytes_sent{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Bytes sent",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8298885592182998,
+            "layout": {
+                "height": 15,
+                "width": 33,
+                "x": 105,
+                "y": 69
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:jboss.undertow_listener.bytes_received{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Bytes received",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 8361641475693096,
+            "layout": {
+                "height": 15,
+                "width": 35,
+                "x": 140,
+                "y": 69
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Undertow Listener",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5387633604967128,
+            "layout": {
+                "height": 5,
+                "width": 70,
+                "x": 105,
+                "y": 46
+            }
+        },
+        {
+            "definition": {
+                "autoscale": true,
+                "custom_unit": "ns",
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:jboss.undertow_listener.processing_time{$host}"
+                    }
+                ],
+                "title": "Processing time",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "query_value"
+            },
+            "id": 4943716129451984,
+            "layout": {
+                "height": 15,
+                "width": 33,
+                "x": 105,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "legend_size": "0",
+                "markers": [],
+                "requests": [
+                    {
+                        "display_type": "line",
+                        "on_right_yaxis": false,
+                        "q": "avg:jboss.undertow_listener.request_count{$host}",
+                        "style": {
+                            "line_type": "solid",
+                            "line_width": "normal",
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "show_legend": false,
+                "title": "Requests served",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "id": 5361640182171124,
+            "layout": {
+                "height": 15,
+                "width": 35,
+                "x": 140,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "JBoss/Wildfly (and your servlets) rely on having enough available memory to operate efficiently, so it\u2019s important to also keep track of the memory usage of your JVM.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5021725266236704,
+            "layout": {
+                "height": 11,
+                "width": 30,
+                "x": 1,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "A sudden spike in garbage collection count could indicate a memory leak.\n",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "right",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5445132788287032,
+            "layout": {
+                "height": 7,
+                "width": 30,
+                "x": 1,
+                "y": 69
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "content": "Listeners are responsible for translating requests to responses to clients. \n\nThis section can be used to monitor the performance of your listeners and understand the throughput and processing times for the server.",
+                "font_size": "14",
+                "show_tick": true,
+                "text_align": "left",
+                "tick_edge": "left",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 5322338467237458,
+            "layout": {
+                "height": 13,
+                "width": 32,
+                "x": 177,
+                "y": 52
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:jboss_wildfly",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 4331835511855062,
+            "layout": {
+                "height": 36,
+                "width": 47,
+                "x": 177,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "content": "Logs",
+                "font_size": "18",
+                "show_tick": false,
+                "text_align": "center",
+                "tick_edge": "bottom",
+                "tick_pos": "50%",
+                "type": "note"
+            },
+            "id": 6209271648640872,
+            "layout": {
+                "height": 5,
+                "width": 47,
+                "x": 177,
+                "y": 1
+            }
+        }
+    ]
+}

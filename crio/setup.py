@@ -24,7 +24,7 @@ def get_dependencies():
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=15.4.0'
 
 
 setup(

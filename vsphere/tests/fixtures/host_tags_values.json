@@ -8,6 +8,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -21,6 +22,7 @@
                 "vsphere_folder:Datacenters",
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -84,6 +86,20 @@
         }
     ],
     [
+        "VM-on-fake-host",
+        {
+            "vsphere": [
+                "vsphere_host:unknown",
+                "vsphere_folder:Datacenters",
+                "vsphere_datacenter:Datacenter2",
+                "vsphere_folder:vm",
+                "vsphere_folder:Discovered virtual machine",
+                "vsphere_type:vm",
+                "vcenter_server:FAKE"
+            ]
+        }
+    ],
+    [
         "VM3-1",
         {
             "vsphere": [
@@ -92,6 +108,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -106,6 +123,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -119,6 +137,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -133,6 +152,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -147,6 +167,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -161,6 +182,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -175,6 +197,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -189,6 +212,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -203,6 +227,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -217,6 +242,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -231,6 +257,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -245,6 +272,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -259,6 +287,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -273,6 +302,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -287,6 +317,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -301,6 +332,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "my_cat_name_1:my_tag_name_1",
                 "my_cat_name_2:my_tag_name_2",
@@ -317,6 +349,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -331,6 +364,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -345,6 +379,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -359,6 +394,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]
@@ -373,6 +409,7 @@
                 "vsphere_datacenter:Datacenter2",
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
+                "vsphere_cluster:Cluster2",
                 "vsphere_type:vm",
                 "vcenter_server:FAKE"
             ]

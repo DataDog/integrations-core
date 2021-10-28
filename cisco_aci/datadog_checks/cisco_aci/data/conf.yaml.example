@@ -49,9 +49,9 @@ init_config:
 instances:
 
     ## @param aci_url - string - required
-    ## Url to query to gather metrics.
+    ## URL to query to gather metrics.
     #
-  - aci_url: localhost
+  - aci_url: http://localhost
 
     ## @param username - string - required
     ## Authentication can use either a user auth or a certificate.
@@ -66,7 +66,7 @@ instances:
     pwd: <PWD>
 
     ## @param tenant - list of strings - optional
-    ## List of tenants to collect data from
+    ## List of tenants to collect metrics data from.
     #
     # tenant:
     #   - <TENANT_1>
@@ -119,10 +119,15 @@ instances:
     #
     # cert_key_path: <CERT_KEY_PATH>
 
+    ## @param appcenter - boolean - optional - default: false
+    ## Whether appcenter user certificates are being used.
+    #
+    # appcenter: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
     ## The SOCKS protocol is also supported, for example:
@@ -149,6 +154,39 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
 
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
@@ -226,6 +264,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -235,6 +278,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

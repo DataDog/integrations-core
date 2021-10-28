@@ -1,0 +1,110 @@
+[
+    {
+        "name": "dd.custom.mongo.query_a.amount",
+        "type": 2,
+        "value": 350.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:abc1",
+            "status_tag:A"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.query_a.amount",
+        "type": 2,
+        "value": 100.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:xyz1",
+            "status_tag:A"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.query_a.amount",
+        "type": 2,
+        "value": 50.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:abc1",
+            "status_tag:D"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.query_a.el",
+        "type": 2,
+        "value": 13.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:abc1",
+            "status_tag:A"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.query_a.el",
+        "type": 2,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:abc1",
+            "status_tag:D"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.count",
+        "type": 0,
+        "value": 70.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.aggregate.total",
+        "type": 2,
+        "value": 375.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test2",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:abc1"
+        ]
+    },
+    {
+        "name": "dd.custom.mongo.aggregate.total",
+        "type": 2,
+        "value": 125.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test2",
+            "tag1:val1",
+            "tag2:val2",
+            "collection:orders",
+            "cluster_id:xyz1"
+        ]
+    }
+]

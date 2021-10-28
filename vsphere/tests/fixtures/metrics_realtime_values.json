@@ -10743,6 +10743,7 @@
         "value": 20.0,
         "tags": [
             "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
             "vsphere_datacenter:Datacenter2",
             "vsphere_folder:Datacenters",
             "vsphere_folder:Discovered virtual machine",
@@ -10756,6 +10757,7 @@
         "value": 2.0,
         "tags": [
             "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
             "vsphere_datacenter:Datacenter2",
             "vsphere_folder:Datacenters",
             "vsphere_folder:Discovered virtual machine",
@@ -10769,6 +10771,7 @@
         "value": 1.0,
         "tags": [
             "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
             "vsphere_datacenter:Datacenter2",
             "vsphere_folder:Datacenters",
             "vsphere_folder:vm",

@@ -1,6 +1,7 @@
-{license_header}import pytest
+{license_header}
+import pytest
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield {{}}, {{'use_jmx': True}}

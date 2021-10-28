@@ -19,7 +19,7 @@ IS_RETHINKDB_2_3 = RAW_VERSION.startswith('2.3.')
 
 HOST = get_docker_hostname()
 
-TAGS = ['env:testing']
+TAGS = ['rethinkdb_env:testing']
 
 # Servers.
 # NOTE: server information is tightly coupled to the Docker Compose setup.
@@ -169,7 +169,12 @@ SERVER_STATUS_METRICS = (
 )  # type: Tuple[Tuple[str, int], ...]
 
 JOBS_METRICS = (
-    ('rethinkdb.system_jobs.jobs', AggregatorStub.GAUGE, 1, ['job_type:query'],),
+    (
+        'rethinkdb.system_jobs.jobs',
+        AggregatorStub.GAUGE,
+        1,
+        ['job_type:query'],
+    ),
 )  # type: Tuple[Tuple[str, int, int, List[str]], ...]
 
 CURRENT_ISSUES_METRICS = (

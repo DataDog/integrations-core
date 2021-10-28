@@ -1,0 +1,968 @@
+{
+    "title": "HAProxy - Overview",
+    "description": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.session.current{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.session.limit{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Frontend Sessions",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 55,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:haproxy.backend.response.time{$scope}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 500,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 350,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 351,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Response Time",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 62,
+                "width": 16,
+                "height": 7
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "max:haproxy.backend.queue.current{$scope}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 5,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Queue",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 47,
+                "width": 16,
+                "height": 6
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.count_per_status{*} by {status}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "HAProxy Servers by Status",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "2d"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 18,
+                "y": 81,
+                "width": 108,
+                "height": 15
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.bytes.in_rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.bytes.out_rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Frontend Network Traffic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 18,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.bytes.in_rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    },
+                    {
+                        "q": "sum:haproxy.backend.bytes.out_rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Network Traffic",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 18,
+                "y": 30,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.session.pct{$scope}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 90,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 80,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 79,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Front Sessions %",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 16,
+                "height": 7
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.session.pct{$scope}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 90,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 80,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 80,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Back Sessions %",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 39,
+                "width": 16,
+                "height": 7
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "outliers(avg:haproxy.backend.response.time{$scope} by {host}, 'dbscan', 1.5)",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "orange"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "markers": [
+                    {
+                        "value": "y < 350",
+                        "display_type": "ok dashed",
+                        "label": "target < 350 ms"
+                    },
+                    {
+                        "value": "y > 500",
+                        "display_type": "error solid",
+                        "label": "error > 500 ms"
+                    }
+                ],
+                "title": "Average Backend Response Time by Host (ms)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 129,
+                "y": 30,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "(avg:haproxy.frontend.response.2xx{$scope}/ (avg:haproxy.frontend.response.4xx{$scope} + avg:haproxy.frontend.response.3xx{$scope} + avg:haproxy.frontend.response.2xx{$scope})) * 100",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 80,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 80,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Front 2xx %",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 16,
+                "height": 8
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "(avg:haproxy.backend.response.2xx{$scope}/ (avg:haproxy.backend.response.4xx{$scope} + avg:haproxy.backend.response.3xx{$scope} + avg:haproxy.backend.response.2xx{$scope})) * 100",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 80,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 80,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Back 2xx %",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1m"
+                },
+                "autoscale": true,
+                "precision": 2,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 16,
+                "height": 8
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.requests.rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Frontend Requests/second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 129,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.session.current{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.backend.session.limit{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Sessions",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 55,
+                "y": 30,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.session.rate{$scope}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Frontend Sessions/second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 92,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:haproxy.backend.session.rate{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Sessions/second",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 92,
+                "y": 30,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.response.3xx{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.response.3xx{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "3xx Response Codes (F&B)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 18,
+                "y": 64,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.response.4xx{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.response.4xx{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "4xx Codes (F&B)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 55,
+                "y": 64,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.errors.resp_rate{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.errors.req_rate{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Errors (F&B)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 129,
+                "y": 64,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.warnings.retr_rate{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.backend.warnings.redis_rate{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Retries and Redispatches",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 55,
+                "y": 47,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:haproxy.backend.connect.time{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "markers": [
+                    {
+                        "value": "y = 5",
+                        "display_type": "error dashed",
+                        "label": "Danger Zone"
+                    }
+                ],
+                "title": "Time to Connect to Backend (in ms)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 18,
+                "y": 47,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.errors.con_rate{$scope}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 1,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Connection Errors",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 54,
+                "width": 16,
+                "height": 7
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:haproxy.backend.queue.time{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Average Queue Time",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 92,
+                "y": 47,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.response.5xx{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.response.5xx{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "5xx Codes (F&B)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 92,
+                "y": 64,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "note",
+                "content": "Frontend Metrics",
+                "background_color": "yellow",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top"
+            },
+            "layout": {
+                "x": 18,
+                "y": 17,
+                "width": 120,
+                "height": 5
+            }
+        },
+        {
+            "id": 24,
+            "definition": {
+                "type": "note",
+                "content": "Backend Metrics",
+                "background_color": "blue",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 18,
+                "y": 22,
+                "width": 120,
+                "height": 5
+            }
+        },
+        {
+            "id": 25,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/haproxy_large.svg",
+                "sizing": "zoom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 16,
+                "height": 12
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "note",
+                "content": "Shared\nMetrics",
+                "background_color": "white",
+                "font_size": "18",
+                "text_align": "left",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 70,
+                "width": 14,
+                "height": 24
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.backend.denied.req_rate{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.backend.denied.resp_rate{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Backend Denials",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 129,
+                "y": 47,
+                "width": 36,
+                "height": 15
+            }
+        },
+        {
+            "id": 28,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:haproxy.frontend.denied.req_rate{$scope}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "sum:haproxy.frontend.denied.resp_rate{$scope}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Frontend Denials",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 166,
+                "y": 0,
+                "width": 36,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": null
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 28
+}

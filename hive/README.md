@@ -37,7 +37,12 @@ The Hive check is included in the [Datadog Agent][2] package. No additional inst
 
    Then restart the HiveServer2 or the Hive Metastore. Hive Metastore and HiveServer2 cannot share the same JMX connection.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
+
+To configure this check for an Agent running on a host:
 
 Follow now the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
@@ -78,6 +83,9 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][7].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
@@ -96,6 +104,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "hive", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-\d{2}\-\d{2}"}}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][11] and look for `Hive` under the Checks section.
@@ -106,14 +117,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**hive.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, otherwise returns `OK`.
-
 ### Events
 
 The Hive check does not include any events.
+
+### Service Checks
+
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -131,3 +141,4 @@ Need help? Contact [Datadog support][6].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/hive/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/hive/assets/service_checks.json
