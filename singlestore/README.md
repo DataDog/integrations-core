@@ -88,7 +88,7 @@ partial -->
 **Log collection is not supported for this site.**
 {{< /site-region >}}
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -100,13 +100,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `singlestore` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `singlestore` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 
 ### Events
@@ -115,11 +115,11 @@ The SingleStore integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 
 [1]: https://www.singlestore.com/
@@ -127,8 +127,8 @@ Need help? Contact [Datadog support][9].
 [3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/DataDog/integrations-core/blob/master/singlestore/datadog_checks/singlestore/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/singlestore/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/singlestore/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[6]: https://docs.datadoghq.com/agent/kubernetes/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/singlestore/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/singlestore/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

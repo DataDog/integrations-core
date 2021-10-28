@@ -163,17 +163,17 @@ See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][11] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Monitor IBM DB2 with Datadog][12]
+- [Monitor IBM DB2 with Datadog][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
@@ -185,6 +185,6 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
-[13]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json
+[11]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json
+[12]: https://docs.datadoghq.com/help/
+[13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog

@@ -73,9 +73,9 @@ partial -->
 
     See the [sample mesos_master.d/conf.yaml][3] for all available configuration options.
 
-3. [Restart the Agent][8].
+3. [Restart the Agent][4].
 
-See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+See [Datadog's documentation][5] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
 ### Validation
 
@@ -85,7 +85,7 @@ In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -93,23 +93,22 @@ The Mesos-master check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][10] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-- [Installing Datadog on Mesos with DC/OS][7]
+- [Installing Datadog on Mesos with DC/OS][9]
 
 [1]: https://docs.datadoghq.com/integrations/mesos/#mesos-slave-integration
 [2]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
 [3]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
-[5]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/deploy-datadog-dcos
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-[10]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/assets/service_checks.json
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/kubernetes/log/
+[6]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/
+[9]: https://www.datadoghq.com/blog/deploy-datadog-dcos

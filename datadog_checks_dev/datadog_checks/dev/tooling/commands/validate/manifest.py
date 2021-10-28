@@ -7,7 +7,7 @@ import os
 import click
 
 from ....fs import file_exists, read_file, write_file
-from ...annotations import annotate_display_queue, annotate_error
+from ...annotations import annotate_display_queue, annotate_error, annotate_warning
 from ...constants import get_root
 from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
@@ -72,6 +72,16 @@ def manifest(ctx, check, fix):
                 for msg_type, messages in validator.result.messages.items():
                     for message in messages:
                         display_queue.append((message_methods[msg_type], message))
+
+            # Check is_public only for changed checks or specific check for reduced verbosity
+            is_public = decoded.get("is_public")
+            if not is_public and check != 'all':
+                message = (
+                    f"{check_name}: `is_public` is disabled, set to `True` "
+                    f"if you want the integration documentation to be published."
+                )
+                echo_warning(message)
+                annotate_warning(manifest_file, message)
 
             if file_failures > 0:
                 failed_checks += 1

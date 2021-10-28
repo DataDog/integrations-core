@@ -122,18 +122,18 @@ The HDFS-datanode check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][14] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Hadoop architectural overview][10]
-- [How to monitor Hadoop metrics][11]
-- [How to collect Hadoop metrics][12]
-- [How to monitor Hadoop with Datadog][13]
+- [Hadoop architectural overview][11]
+- [How to monitor Hadoop metrics][12]
+- [How to collect Hadoop metrics][13]
+- [How to monitor Hadoop with Datadog][14]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -143,9 +143,9 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[11]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
-[14]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/assets/service_checks.json
+[9]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/hadoop-architecture-overview
+[12]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
+[13]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
+[14]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog

@@ -153,9 +153,16 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 
 @not_windows_ci
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    'service_check_enabled, default_count, extra_count',
+    [(True, 4, 1), (False, 0, 0)],
+)
 @pytest.mark.usefixtures('dd_environment')
-def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_autodiscovery):
+def test_autodiscovery_db_service_checks(
+    aggregator, dd_run_check, instance_autodiscovery, service_check_enabled, default_count, extra_count
+):
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
+    instance_autodiscovery['autodiscovery_db_service_check'] = service_check_enabled
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
 
@@ -167,12 +174,18 @@ def test_autodiscovery_db_service_checks(aggregator, dd_run_check, instance_auto
     )
 
     # verify all databses in autodiscovery have a service check
-    for database in instance_autodiscovery['autodiscovery_include']:
-        aggregator.assert_service_check(
-            'sqlserver.database.can_connect',
-            tags=['db:{}'.format(database), 'optional:tag1', 'sqlserver_host:localhost,1433'],
-            status=SQLServer.OK,
-        )
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect',
+        count=default_count,
+        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        status=SQLServer.OK,
+    )
+    aggregator.assert_service_check(
+        'sqlserver.database.can_connect',
+        count=extra_count,
+        tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        status=SQLServer.OK,
+    )
 
 
 @not_windows_ci
@@ -290,8 +303,8 @@ def test_load_static_information(aggregator, dd_run_check, instance_docker):
 
 @windows_ci
 @pytest.mark.integration
-def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_sql2017_defaults):
-    check = SQLServer(CHECK_NAME, init_config, [instance_sql2017_defaults])
+def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_sql_defaults):
+    check = SQLServer(CHECK_NAME, init_config, [instance_sql_defaults])
     dd_run_check(check)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')

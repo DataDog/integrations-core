@@ -133,11 +133,11 @@ The Riak check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][11] for a list of service checks provided by this integration.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png
@@ -149,5 +149,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://github.com/DataDog/integrations-core/blob/master/riak/assets/service_checks.json
+[10]: https://github.com/DataDog/integrations-core/blob/master/riak/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

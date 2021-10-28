@@ -21,10 +21,10 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
 
-1. Follow the [Oracle Instant Client installation for Linux][14].
+1. Follow the [Oracle Instant Client installation for Linux][2].
 
 2. Verify the following:
-    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][4].
+    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][3].
 
         After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
     
@@ -45,25 +45,20 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
        unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
        unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
        ```
-[14]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
-[4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-1. Follow the [Oracle Windows installation guide][17] to configure your Oracle Instant Client.
+1. Follow the [Oracle Windows installation guide][4] to configure your Oracle Instant Client.
 
 2. Verify the following:
-    - The [Microsoft Visual Studio 2017 Redistributable][16] or the appropriate version is installed for the Oracle Instant Client.
+    - The [Microsoft Visual Studio 2017 Redistributable][5] or the appropriate version is installed for the Oracle Instant Client.
 
-    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][4] are installed.
+    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][3] are installed.
 
     - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`).
 
-[16]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
-[17]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
-[4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -76,8 +71,8 @@ Java 8 or higher is required on your system for JPype, one of the libraries used
 
 Once it is installed, complete the following steps: 
 
-1. [Download the JDBC Driver][2] JAR file.
-2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
+1. [Download the JDBC Driver][6] JAR file.
+2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][7]).
 
 #### Datadog user creation
 
@@ -136,7 +131,7 @@ GRANT SELECT ON gv_$sysmetric TO c##datadog CONTAINER=ALL;
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
+1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][7] for all available configuration options.
 
    ```yaml
    init_config:
@@ -164,11 +159,8 @@ To configure this check for an Agent running on a host:
       password: <PASSWORD>
    ```
 
-2. [Restart the Agent][8].
+2. [Restart the Agent][9].
 
-[3]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 
 #### Only custom queries
 
@@ -212,7 +204,7 @@ instances:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                     |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -220,14 +212,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "username":"datadog", "password":"<PASSWORD>"}` |
 
-[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `oracle` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `oracle` under the Checks section.
 
 ## Custom query
 
@@ -269,7 +260,7 @@ is what the following example configuration would become:
     - tester:oracle
 ```
 
-See the [sample oracle.d/conf.yaml][3] for all available configuration options.
+See the [sample oracle.d/conf.yaml][7] for all available configuration options.
 
 ### Example
 
@@ -333,13 +324,13 @@ SQL> select blocking_session,username,osuser, sid, serial#, wait_class, seconds_
 where blocking_session is not NULL order by blocking_session;
 ```
 
-3. Once configured, you can create a [monitor][13] based on `oracle.custom_query.locks` metrics.
+3. Once configured, you can create a [monitor][12] based on `oracle.custom_query.locks` metrics.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][11] for a list of metrics provided by this integration.
+See [metadata.csv][13] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -347,7 +338,7 @@ The Oracle Database check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][18] for a list of service checks provided by this integration.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -390,11 +381,11 @@ The structure of the directory should look similar:
 ```
 
 ##### Linux
-- See further Linux installation documentation on [Oracle][14].
+- See further Linux installation documentation on [Oracle][2].
 
 ##### Windows
 - Verify the Microsoft Visual Studio <YEAR> Redistributable requirement is met for your version. See the [Windows downloads page][15] for more details.
-- See further Windows installation documentation on [Oracle][17].
+- See further Windows installation documentation on [Oracle][4].
 
 
 #### JDBC driver (Linux only)
@@ -422,23 +413,21 @@ Ensure the displayed output matches the correct value.
       sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print("JAVA_HOME:{}".format(os.environ.get("JAVA_HOME")))"
     ```
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][16].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
-[2]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-[3]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
-[4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
-[5]: http://upstart.ubuntu.com/cookbook/#environment-variables
-[6]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[12]: https://docs.datadoghq.com/help/
-[13]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
-[14]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[2]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[4]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[5]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+[6]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+[7]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
+[8]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[12]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
+[13]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
 [15]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
-[16]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
-[17]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
-[18]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
+[16]: https://docs.datadoghq.com/help/

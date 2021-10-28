@@ -31,7 +31,8 @@ Ensure that you have configured the following:
         Revert the changes and rerun `ddev dep updates --sync` with the `--check-python-classifiers` flag if there are many CI failures on your PR. Running it with the flag will not update a dependency to the newest version if the python classifiers do not match the marker. Although sometimes classifiers are inaccurate on PyPI and could miss a version update, using the flag does reduce errors overall.
 
 2. Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
-3. Check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green.
+3. Manually run and fix if needed the [base package dependency check build](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52).
+4. Check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green.
 
 
 ## Freeze

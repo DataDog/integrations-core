@@ -87,7 +87,7 @@ To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][15] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][6] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["apache"]'
@@ -104,9 +104,9 @@ LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/serv
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][16].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][7].
 
-Then, set [Log Integrations][17] as Docker labels:
+Then, set [Log Integrations][8] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source": "apache", "service": "<SERVICE_NAME>"}]'
@@ -121,7 +121,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][18] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][19].
+Set [Autodiscovery Integrations Templates][9] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][10].
 
 ```yaml
 apiVersion: v1
@@ -151,9 +151,9 @@ spec:
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][20].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][11].
 
-Then, set [Log Integrations][21] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][22].
+Then, set [Log Integrations][8] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][12].
 
 ```yaml
 apiVersion: v1
@@ -177,7 +177,7 @@ To configure this check for an Agent running on ECS:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][23] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][6] as Docker labels on your application container:
 
 ```json
 {
@@ -202,9 +202,9 @@ Set [Autodiscovery Integrations Templates][23] as Docker labels on your applicat
 partial -->
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][13].
 
-Then, set [Log Integrations][25] as Docker labels:
+Then, set [Log Integrations][8] as Docker labels:
 
 ```json
 {
@@ -223,13 +223,13 @@ Then, set [Log Integrations][25] as Docker labels:
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `apache` under the Checks section.
+[Run the Agent's status subcommand][14] and look for `apache` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][15] for a list of metrics provided by this check.
 
 ### Events
 
@@ -237,7 +237,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][26] for a list of service checks provided by this integration.
+See [service_checks.json][16] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -245,40 +245,35 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][4] (include your login credentials if applicable).
 
-- [Apache SSL certificate issues][10]
+- [Apache SSL certificate issues][17]
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [Deploying and configuring Datadog with CloudFormation][11]
-- [Monitoring Apache web server performance][12]
-- [How to collect Apache performance metrics][13]
-- [How to monitor Apache web server with Datadog][14]
+- [Deploying and configuring Datadog with CloudFormation][18]
+- [Monitoring Apache web server performance][19]
+- [How to collect Apache performance metrics][20]
+- [How to monitor Apache web server with Datadog][21]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
 [2]: https://docs.datadoghq.com/agent/
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: https://docs.datadoghq.com/agent/kubernetes/log/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
-[10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues/
-[11]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation
-[12]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
-[13]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
-[14]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog
-[15]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[16]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
-[17]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[18]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
-[19]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[20]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[21]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[22]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
-[23]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-[25]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[26]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json
+[6]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[7]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[8]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[13]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[15]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
+[16]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json
+[17]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues/
+[18]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation
+[19]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
+[20]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
+[21]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog

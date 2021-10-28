@@ -125,11 +125,11 @@ IBM WAS does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][10] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 [1]: https://www.ibm.com/cloud/websphere-application-platform
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -139,5 +139,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/assets/service_checks.json
+[9]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
