@@ -136,6 +136,7 @@ files:
         Rate mappings. DO NOT EDIT unless you know what you're doing.
         See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
         for the definitive list
+      enabled: true
       value:
         type: array
         items:
