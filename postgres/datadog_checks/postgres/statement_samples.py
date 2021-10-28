@@ -608,7 +608,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # Only send an event if we are configured to do so, and
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_activity_event
-        if elapsed_s < self._activity_coll_interval and not self._activity_coll_enabled:
+        if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
             return False
         return True
 

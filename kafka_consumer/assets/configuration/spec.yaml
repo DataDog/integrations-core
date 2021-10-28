@@ -111,7 +111,6 @@ files:
         value:
           type: boolean
           example: false
-      - template: instances/default
       - name: security_protocol
         description: |
           Protocol used to communicate with brokers.
@@ -150,41 +149,12 @@ files:
           type: string
           example: localhost
           display_default: null
-      - name: ssl_check_hostname
-        description: |
-          Flag to configure whether SSL handshake should verify that the
-          certificate matches the broker’s hostname.
-        display_default: true
-        value:
-          type: boolean
-          example: true
-      - name: ssl_cafile
-        description: Filename of CA file path to use in certificate verification.
-        value:
-          type: string
-          example: <CA_FILE_PATH>
-      - name: ssl_certfile
-        description: |
-          Filename path of file in PEM format containing the client certificate,
-          as well as any CA certificates needed to establish the certificate’s authenticity.
-        value:
-          type: string
-          example: <CERT_FILE_PATH>
-      - name: ssl_keyfile
-        description: Optional filename containing the client private key.
-        value:
-          type: string
-          example: <KEY_FILE_PATH>
-      - name: ssl_password
-        description: Password to be used when loading the certificate chain.
-        value:
-          type: string
-          example: <PASSWORD>
-      - name: ssl_crlfile
+      - template: instances/tls
+      - name: tls_crlfile
         description: |
           Filename path containing the CRL to check for certificate expiration.
           By default, no CRL check is done. When providing a file, only the leaf certificate
-          will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
+          will be checked against this CRL.
         value:
           type: string
           example: <SSL_FILE_PATH>
@@ -198,6 +168,7 @@ files:
         value:
           type: integer
           example: 30
+      - template: instances/default
       - name: zk_connect_str
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets

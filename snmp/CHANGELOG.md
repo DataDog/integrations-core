@@ -1,5 +1,21 @@
 # CHANGELOG - snmp
 
+## 5.4.2 / 2021-10-07
+
+* [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).
+
+## 5.4.1 / 2021-10-06
+
+* [Fixed] Remove python only mention from check discovery props. See [#10352](https://github.com/DataDog/integrations-core/pull/10352).
+
+## 5.4.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Add autodiscovery integration configs. See [#10079](https://github.com/DataDog/integrations-core/pull/10079).
+* [Added] Add autodiscovery_subnet tag to discovered_devices_count metric. See [#10072](https://github.com/DataDog/integrations-core/pull/10072).
+* [Fixed] Better naming for testing environments. See [#10070](https://github.com/DataDog/integrations-core/pull/10070).
+* [Fixed] Bump base package requirement. See [#10078](https://github.com/DataDog/integrations-core/pull/10078).
+
 ## 5.3.0 / 2021-08-22 / Agent 7.31.0
 
 * [Added] Add `ifNumber` to `_generic-if.yaml`. See [#9875](https://github.com/DataDog/integrations-core/pull/9875).

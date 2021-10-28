@@ -115,11 +115,11 @@ The Druid check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][13].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
@@ -133,5 +133,5 @@ Need help? Contact [Datadog support][12].
 [9]: https://druid.apache.org/docs/latest/operations/including-extensions.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
-[12]: https://docs.datadoghq.com/help/
-[13]: https://github.com/DataDog/integrations-core/blob/master/druid/assets/service_checks.json
+[12]: https://github.com/DataDog/integrations-core/blob/master/druid/assets/service_checks.json
+[13]: https://docs.datadoghq.com/help/
