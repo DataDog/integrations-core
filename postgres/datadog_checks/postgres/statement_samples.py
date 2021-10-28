@@ -1,3 +1,4 @@
+import copy
 import re
 import time
 from enum import Enum
@@ -49,6 +50,19 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     SELECT * FROM {pg_stat_activity_view}
     WHERE coalesce(TRIM(query), '') != ''
     AND query_start IS NOT NULL
+    {extra_filters}
+""",
+).strip()
+
+PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT application_name, state, usename, count(*) as connections
+    FROM {pg_stat_activity_view}
+    WHERE client_port IS NOT NULL
+    {extra_filters}
+    GROUP BY application_name, state, usename
 """,
 ).strip()
 
@@ -90,6 +104,7 @@ class DBExplainError(Enum):
 
 
 DEFAULT_COLLECTION_INTERVAL = 1
+DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 
 
 class PostgresStatementSamples(DBMAsyncJob):
@@ -117,8 +132,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self._activity_last_query_start = None
         self._tags_no_db = None
+        self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
@@ -148,6 +163,16 @@ class PostgresStatementSamples(DBMAsyncJob):
             ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
         )
 
+        self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
+        # activity events cannot be reported more often than regular samples
+        self._activity_coll_interval = max(
+            self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
+            collection_interval,
+        )
+        self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
+        # Keep track of last time we sent an activity event
+        self._time_since_last_activity_event = 0
+
     def _dbtags(self, db, *extra_tags):
         """
         Returns the default instance tags with the initial "db" tag replaced with the provided tag
@@ -159,41 +184,39 @@ class PostgresStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
-    def _get_new_pg_stat_activity(self):
+    def _get_active_connections(self):
         start_time = time.time()
-        query = PG_STAT_ACTIVITY_QUERY.format(pg_stat_activity_view=self._config.pg_stat_activity_view)
-        params = ()
-        if self._config.dbstrict:
-            query = query + " AND datname = %s"
-            params = params + (self._config.dbname,)
-        else:
-            query = query + " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
-            params = params + tuple(self._config.ignore_databases)
-        if self._activity_last_query_start:
-            query = query + " AND query_start > %s"
-            params = params + (self._activity_last_query_start,)
+        extra_filters, params = self._get_extra_filters_and_params()
+        query = PG_ACTIVE_CONNECTIONS_QUERY.format(
+            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
+        )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
-        self._check.histogram(
-            "dd.postgres.get_new_pg_stat_activity.time",
-            (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
+
+        self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
+        self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
+        return [dict(row) for row in rows]
+
+    def _get_new_pg_stat_activity(self):
+        start_time = time.time()
+        extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
+        query = PG_STAT_ACTIVITY_QUERY.format(
+            pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        self._check.histogram(
-            "dd.postgres.get_new_pg_stat_activity.rows",
-            len(rows),
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
+        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+        self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
-    def _filter_valid_statement_rows(self, rows):
+    def _filter_and_normalize_statement_rows(self, rows):
         insufficient_privilege_count = 0
         total_count = 0
+        normalized_rows = []
         for row in rows:
             total_count += 1
             if not row['datname']:
@@ -206,7 +229,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 continue
             if self._activity_last_query_start is None or row['query_start'] > self._activity_last_query_start:
                 self._activity_last_query_start = row['query_start']
-            yield row
+            normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
             self._log.warning(
                 "Insufficient privilege for %s/%s queries when collecting from %s.", self._config.pg_stat_activity_view
@@ -217,6 +240,53 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
+        return normalized_rows
+
+    def _normalize_row(self, row):
+        normalized_row = dict(copy.copy(row))
+        obfuscated_statement = None
+        try:
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
+            normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
+        except Exception as e:
+            self._log.debug("Failed to obfuscate statement: %s", e)
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+        normalized_row['statement'] = obfuscated_statement
+        return normalized_row
+
+    def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
+        extra_filters = ""
+        params = ()
+        if self._config.dbstrict:
+            extra_filters = " AND datname = %s"
+            params = params + (self._config.dbname,)
+        else:
+            extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
+            params = params + tuple(self._config.ignore_databases)
+        if filter_stale_idle_conn and self._activity_last_query_start:
+            # do not re-read old idle connections
+            extra_filters = extra_filters + " AND NOT (query_start < %s AND state = 'idle')"
+            params = params + (self._activity_last_query_start,)
+        return extra_filters, params
+
+    def _report_check_hist_metrics(self, start_time, row_len, method_name):
+        self._check.histogram(
+            "dd.postgres.{}.time".format(method_name),
+            (time.time() - start_time) * 1000,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.histogram(
+            "dd.postgres.{}.rows".format(method_name),
+            row_len,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
@@ -225,12 +295,22 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_statement_samples(self):
         start_time = time.time()
         rows = self._get_new_pg_stat_activity()
-        rows = self._filter_valid_statement_rows(rows)
-        events = self._explain_pg_stat_activity(rows)
+        rows = self._filter_and_normalize_statement_rows(rows)
+        event_samples = self._collect_plans(rows)
         submitted_count = 0
-        for e in events:
+        for e in event_samples:
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
+
+        if self._report_activity_event():
+            active_connections = self._get_active_connections()
+            activity_event = self._create_activity_event(rows, active_connections)
+            self._check.database_monitoring_query_activity(
+                json.dumps(activity_event, default=default_json_event_encoding)
+            )
+            self._check.histogram(
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self._tags
+            )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -256,6 +336,17 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+
+    @staticmethod
+    def _to_active_session(row):
+        if row['state'] is not None and row['state'] != 'idle':
+            # Create an active_row, for each session by
+            # 1. Removing all null key/value pairs and the original query
+            # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
+            active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+            if row['statement'] is None:
+                active_row['statement'] = "ERROR: failed to obfuscate"
+            return active_row
 
     def _can_explain_statement(self, obfuscated_statement):
         if obfuscated_statement.startswith('SELECT {}'.format(self._explain_function)):
@@ -385,21 +476,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             return error_response
 
     def _collect_plan_for_statement(self, row):
-        try:
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'], self._obfuscate_options)
-        except Exception as e:
-            self._log.debug("Failed to obfuscate statement: %s", e)
-            self._check.count(
-                "dd.postgres.statement_samples.error",
-                1,
-                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            return None
-
         # limit the rate of explains done to the database
-        query_signature = compute_sql_signature(obfuscated_statement)
-        cache_key = (row['datname'], query_signature)
+        cache_key = (row['datname'], row['query_signature'])
         if not self._explained_statements_ratelimiter.acquire(cache_key):
             return None
 
@@ -409,7 +487,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
-            row['datname'], row['query'], obfuscated_statement, query_signature
+            row['datname'], row['query'], row['statement'], row['query_signature']
         )
         collection_errors = None
         if explain_err_code:
@@ -424,7 +502,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
-        statement_plan_sig = (query_signature, plan_signature)
+        statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._db_hostname,
@@ -446,11 +524,11 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "signature": plan_signature,
                         "collection_errors": collection_errors,
                     },
-                    "query_signature": query_signature,
-                    "resource_hash": query_signature,
+                    "query_signature": row['query_signature'],
+                    "resource_hash": row['query_signature'],
                     "application": row.get('application_name', None),
                     "user": row['usename'],
-                    "statement": obfuscated_statement,
+                    "statement": row['statement'],
                     "query_truncated": self._get_truncation_state(
                         self._get_track_activity_query_size(), row['query']
                     ).value,
@@ -470,12 +548,15 @@ class PostgresStatementSamples(DBMAsyncJob):
                         event['timestamp'] = get_timestamp(row['state_change']) * 1000
             return event
 
-    def _explain_pg_stat_activity(self, rows):
+    def _collect_plans(self, rows):
+        events = []
         for row in rows:
             try:
+                if row['statement'] is None:
+                    continue
                 event = self._collect_plan_for_statement(row)
                 if event:
-                    yield event
+                    events.append(event)
             except Exception:
                 self._log.exception(
                     "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
@@ -486,6 +567,50 @@ class PostgresStatementSamples(DBMAsyncJob):
                     tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
+        return events
+
+    def _create_activity_event(self, rows, active_connections):
+        self._time_since_last_activity_event = time.time()
+        active_sessions = []
+        for row in rows:
+            active_row = self._to_active_session(row)
+            if active_row:
+                active_sessions.append(active_row)
+        if len(active_sessions) > self._activity_max_rows:
+            active_sessions = self._truncate_activity_rows(active_sessions, self._activity_max_rows)
+        event = {
+            "host": self._db_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "postgres",
+            "dbm_type": "activity",
+            "collection_interval": self._activity_coll_interval,
+            "ddtags": self._tags_no_db,
+            "timestamp": time.time() * 1000,
+            "postgres_activity": active_sessions,
+            "postgres_connections": active_connections,
+        }
+        return event
+
+    def _truncate_activity_rows(self, rows, row_limit):
+        # sort first one transaction age, and then second on query age
+        rows.sort(key=lambda r: (self._sort_key(r), r['query_start']))
+        return rows[0:row_limit]
+
+    def _sort_key(self, row):
+        # xact_start is not always set in the activity row
+        # as we filter out null values first
+        if 'xact_start' in row:
+            return row['xact_start']
+        # otherwise primarily sort on query_start, which will always be set.
+        return row['query_start']
+
+    def _report_activity_event(self):
+        # Only send an event if we are configured to do so, and
+        # don't report more often than the configured collection interval
+        elapsed_s = time.time() - self._time_since_last_activity_event
+        if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
+            return False
+        return True
 
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))

@@ -85,6 +85,20 @@ instances:
     #
     # prometheus_metrics_path: /metrics
 
+    ## @param boto_config - mapping - optional
+    ## Specify additional configuration options for the botocore Config object.
+    ##
+    ## Note: Configuration values set in your AWS config file can be singularly overwritten
+    ## through the use of a Config object.
+    ## https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+    #
+    # boto_config:
+    #   proxies_config:
+    #     proxy_client_cert: /path/of/certificate
+    #     proxy_ca_bundle: path/to/ca/bundle
+    #     proxy_use_forwarding_for_https: false
+    #   signature_version: s3v4
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -249,11 +263,6 @@ instances:
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
     # cache_shared_labels: true
-
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-    #
-    # request_size: 16
 
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -552,6 +561,11 @@ instances:
     ## The read timeout for accessing services. Defaults to `timeout`.
     #
     # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

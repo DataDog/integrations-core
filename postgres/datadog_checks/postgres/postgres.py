@@ -13,7 +13,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, RelationsManager
+from datadog_checks.postgres.relationsmanager import BLOAT_METRICS, RELATION_METRICS, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -316,6 +316,8 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             metric_scope.extend(RELATION_METRICS)
+            if self._config.collect_bloat_metrics:
+                metric_scope.extend([BLOAT_METRICS])
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -373,6 +375,14 @@ class PostgreSql(AgentCheck):
                 args['port'] = self._config.port
             if self._config.query_timeout:
                 args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+            if self._config.ssl_cert:
+                args['sslcert'] = self._config.ssl_cert
+            if self._config.ssl_root_cert:
+                args['sslrootcert'] = self._config.ssl_root_cert
+            if self._config.ssl_key:
+                args['sslkey'] = self._config.ssl_key
+            if self._config.ssl_password:
+                args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True)

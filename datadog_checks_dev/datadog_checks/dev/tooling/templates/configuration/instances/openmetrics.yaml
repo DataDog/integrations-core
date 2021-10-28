@@ -10,7 +10,7 @@
     The namespace to be prepended to all metrics.
   value:
     type: string
-    pattern: '\w+'
+    pattern: '\w*'
 - name: raw_metric_prefix
   description: |
     A prefix that will be removed from all exposed metric names, if present.
@@ -279,12 +279,6 @@
   value:
     type: boolean
     example: true
-- name: request_size
-  description: |
-    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
-  value:
-    example: 16
-    type: number
 - name: raw_line_filters
   description: |
     A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`

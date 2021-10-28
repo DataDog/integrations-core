@@ -65,11 +65,13 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     min_collection_interval: Optional[float]
     ntlm_domain: Optional[str]
+    only_custom_queries: Optional[bool]
     password: str
     password_hashed: Optional[bool]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
     statistics_components: Optional[Sequence[str]]

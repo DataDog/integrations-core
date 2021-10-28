@@ -1,9 +1,8 @@
 #
-# At the time of writing (Sept 24 2021), this was the latest version of these
+# At the time of writing (October 28 2021), this was the latest version of these
 # libraries.
 #
-tuf==0.17.0; python_version < "3.0"
-tuf==0.18.1; python_version > "3.0"
+tuf==0.19.0; python_version > "3.0"
 in-toto==1.0.1; python_version < "3.0"
 in-toto==1.1.1; python_version > "3.0"
 #

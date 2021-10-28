@@ -10,6 +10,7 @@ from mock import patch
 
 from datadog_checks.dev import LazyFunction, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
@@ -123,20 +124,6 @@ def get_docker_compose_file():
     return os.path.join(HERE, 'compose', harbor_folder, 'docker-compose.yml')
 
 
-class MockResponse:
-    def __init__(self, json_or_text, status_code):
-        self.json_or_text = json_or_text
-        self.status_code = status_code
-        self.text = json_or_text
-        self.content = json_or_text
-        self.json = lambda: self.json_or_text
-        self.links = []
-
-    def raise_for_status(self):
-        if self.status_code >= 400:
-            raise requests.HTTPError("[MockedResponse] Status code is {}".format(self.status_code))
-
-
 def mocked_requests(_, *args, **kwargs):
     def match(url, *candidates_url):
         for c in candidates_url:
@@ -145,26 +132,26 @@ def mocked_requests(_, *args, **kwargs):
         return False
 
     if match(args[0], LOGIN_PRE_1_7_URL, LOGIN_URL):
-        return MockResponse(None, 200)
+        return MockResponse()
     elif match(args[0], HEALTH_URL) and HARBOR_VERSION >= VERSION_1_8:
-        return MockResponse(HEALTH_FIXTURE, 200)
+        return MockResponse(json_data=HEALTH_FIXTURE)
     elif match(args[0], PING_URL):
-        return MockResponse("Pong", 200)
+        return MockResponse('Pong')
     elif match(args[0], CHARTREPO_HEALTH_URL) and HARBOR_VERSION >= VERSION_1_6:
-        return MockResponse(CHARTREPO_HEALTH_FIXTURE, 200)
+        return MockResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
     elif match(args[0], PROJECTS_URL):
-        return MockResponse(PROJECTS_FIXTURE, 200)
+        return MockResponse(json_data=PROJECTS_FIXTURE)
     elif match(args[0], REGISTRIES_PRE_1_8_URL, REGISTRIES_URL):
         if HARBOR_VERSION >= VERSION_1_8:
-            return MockResponse(REGISTRIES_FIXTURE, 200)
-        return MockResponse(REGISTRIES_PRE_1_8_FIXTURE, 200)
+            return MockResponse(json_data=REGISTRIES_FIXTURE)
+        return MockResponse(json_data=REGISTRIES_PRE_1_8_FIXTURE)
     elif match(args[0], REGISTRIES_PING_PRE_1_8_URL, REGISTRIES_PING_URL):
-        return MockResponse(None, 200)
+        return MockResponse()
     elif match(args[0], VOLUME_INFO_URL):
         if HARBOR_VERSION < VERSION_2_2:
-            return MockResponse(VOLUME_INFO_PRE_2_2_FIXTURE, 200)
-        return MockResponse(VOLUME_INFO_FIXTURE, 200)
+            return MockResponse(json_data=VOLUME_INFO_PRE_2_2_FIXTURE)
+        return MockResponse(json_data=VOLUME_INFO_FIXTURE)
     elif match(args[0], SYSTEM_INFO_URL):
-        return MockResponse(SYSTEM_INFO_FIXTURE, 200)
+        return MockResponse(json_data=SYSTEM_INFO_FIXTURE)
 
-    return MockResponse(None, 404)
+    return MockResponse(status_code=404)

@@ -47,7 +47,7 @@ V2_TO_V1_MAP = JSONDict(
         "/assets/integration": {},
         "/assets/integration/source_type_name": "/display_name",
         "/assets/integration/configuration": {},
-        "/assets/integration/configuration/spec": SKIP_IF_FOUND,
+        "/assets/integration/configuration/spec": "/assets/configuration/spec",
         "/assets/integration/events": {},
         "/assets/integration/events/creates_events": "/creates_events",
         "/assets/integration/metrics": {},
@@ -168,23 +168,30 @@ def migrate(ctx, integration, to_version):
         else:
             final_value = val
 
+        # We need to remove any of the underlying "assets" that are just an empty dictionary
+        if key in ["/assets/dashboards", "/assets/monitors", "/assets/saved_views"] and not final_value:
+            continue
+
         if final_value is not None:
             migrated_manifest.set_path(key, final_value)
 
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list
     migrated_manifest.set_path("/classifier_tags", TODO_FILL_IN)
-    migrated_manifest.set_path("/assets/integration/configuration/spec", TODO_FILL_IN)
 
     # Retrieve and map all categories from other fields
     classifier_tags = []
     supported_os = loaded_manifest.get_path("/supported_os")
     for os in supported_os:
-        classifier_tags.append(OS_TO_CLASSIFIER_TAGS.get(os.lower()))
+        os_tag = OS_TO_CLASSIFIER_TAGS.get(os.lower())
+        if os_tag:
+            classifier_tags.append(os_tag)
 
     categories = loaded_manifest.get_path("/categories")
     for category in categories:
-        classifier_tags.append(CATEGORIES_TO_CLASSIFIER_TAGS.get(category.lower()))
+        category_tag = CATEGORIES_TO_CLASSIFIER_TAGS.get(category.lower())
+        if category_tag:
+            classifier_tags.append(category_tag)
 
     # Write the manifest back to disk
     migrated_manifest.set_path("/classifier_tags", classifier_tags)
