@@ -45,7 +45,7 @@ def dd_environment():
             CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
             # Create connectors
             WaitFor(create_connectors),
-            CheckDockerLogs('connect', 'Finished commitOffsets successfully'),
+            CheckDockerLogs('connect', 'Source task finished initialization and start'),
         ],
     ):
         yield CHECK_CONFIG, {'use_jmx': True}
