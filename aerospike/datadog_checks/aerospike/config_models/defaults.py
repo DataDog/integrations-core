@@ -24,6 +24,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_host(field, value):
+    return 'localhost'
+
+
 def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -42,6 +46,10 @@ def instance_namespaces(field, value):
 
 def instance_password(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_port(field, value):
+    return 3000
 
 
 def instance_service(field, value):

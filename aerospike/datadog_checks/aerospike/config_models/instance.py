@@ -21,13 +21,13 @@ class InstanceConfig(BaseModel):
     datacenters: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    host: str
+    host: Optional[str]
     metrics: Optional[Sequence[str]]
     min_collection_interval: Optional[float]
     namespace_metrics: Optional[Sequence[str]]
     namespaces: Optional[Sequence[str]]
     password: Optional[str]
-    port: int
+    port: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
