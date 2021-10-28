@@ -142,14 +142,13 @@ instances:
     # bearer_token_path: <TOKEN_PATH>
 
     ## @param ignore_metrics - list of strings - optional
-    ## A list of metrics to ignore, use the "*" wildcard can be used to match multiple metric names.
+    ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
+    ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
     #
     # ignore_metrics:
     #   - <IGNORED_METRIC_NAME>
-    #   - <PREFIX_*>
-    #   - <*_SUFFIX>
-    #   - <PREFIX_*_SUFFIX>
-    #   - <*_SUBSTRING_*>
+    #   - <SUBSTRING_*>
+    #   - <*_SUBSTRING>
 
     ## @param ignore_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label key and values are ignored.
@@ -438,6 +437,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 10
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 10
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -447,6 +451,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

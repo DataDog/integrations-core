@@ -177,7 +177,7 @@ def test_consul_request(aggregator, instance, mocker):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -187,7 +187,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
@@ -196,7 +195,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-api",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
@@ -204,7 +202,6 @@ def test_service_checks(aggregator):
     expected_tags = [
         "consul_datacenter:dc1",
         "check:server-api",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
@@ -216,7 +213,6 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-status-empty",
         "consul_service_id:server-empty",
-        "service:server-empty",
         "consul_service:server-empty",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
@@ -501,7 +497,13 @@ def test_config(test_case, extra_config, expected_http_kwargs, mocker):
         check.check(None)
 
         http_wargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('/v1/status/leader', **http_wargs)

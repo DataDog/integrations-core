@@ -20,6 +20,7 @@ LAB_INSTANCE = {
     'collection_type': 'both',
     'use_legacy_check_version': False,
     'collect_metric_instance_values': True,
+    'empty_default_hostname': True,
     'ssl_verify': False,
     'collect_tags': True,
     'collect_events': True,

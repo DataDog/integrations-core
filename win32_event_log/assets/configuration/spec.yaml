@@ -47,6 +47,10 @@ files:
         example: normal
     - template: init_config/default
   - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the others.
+        Everything under this section is sent as events.
     options:
     - name: path
       description: |
@@ -103,6 +107,10 @@ files:
           - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
           - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
 
+          /\ WARNING /\
+          Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
+          Because of this, you may need to split the ID filtering into multiple instances.
+          
         For advanced and more granular filtering, define a `query`.
 
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -294,7 +302,7 @@ files:
         Note: This is only used when `legacy_mode` is set to `true`.
       value:
         type: string
-        example: <REMOTE_HOSNAME>
+        example: <REMOTE_HOSTNAME>
         display_default: localhost
     - name: log_file
       description: |
@@ -328,9 +336,10 @@ files:
         type: array
         items:
           type: string
+        display_default:
+          - information
         example:
           - information
-        display_default: information
     - name: event_id
       description: |
         The `event_id` filter instructs the check to only capture events
@@ -371,7 +380,8 @@ files:
         type: array
         items:
           type: string
-        display_default: Message
+        display_default:
+          - Message
         example:
           - Message
     - template: instances/default

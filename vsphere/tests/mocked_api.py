@@ -71,8 +71,7 @@ class MockedAPI(object):
         for _, props in iteritems(self.infrastructure_data):
             if 'runtime.host_moid' in props:
                 hosts = [m for m, p in iteritems(self.infrastructure_data) if p['name'] == props['runtime.host_moid']]
-                assert len(hosts) == 1
-                props['runtime.host'] = hosts[0]
+                props['runtime.host'] = hosts[0] if hosts else object()
                 del props['runtime.host_moid']
 
     def smart_connect(self):

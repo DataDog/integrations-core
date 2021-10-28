@@ -16,6 +16,7 @@ boto,PyPI,MIT,Mitch Garnaat
 boto3,PyPI,Apache-2.0,Amazon Web Services
 botocore,PyPI,Apache-2.0,Amazon Web Services
 cachetools,PyPI,MIT,Thomas Kemmer
+check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
 clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
@@ -27,6 +28,7 @@ dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
 flup,PyPI,BSD-3-Clause,Allan Saddi
 flup-py3,PyPI,BSD-3-Clause,Allan Saddi
+foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
 immutables,PyPI,Apache-2.0,MagicStack Inc
@@ -90,3 +92,4 @@ typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivsk
 uptime,PyPI,BSD-2-Clause,Koen Crolla
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
+wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

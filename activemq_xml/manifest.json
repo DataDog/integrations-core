@@ -31,7 +31,9 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {},
+    "logs": {
+      "source": "activemq"
+    },
     "metrics_metadata": "metadata.csv"
   }
 }

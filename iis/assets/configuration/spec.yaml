@@ -48,7 +48,7 @@ files:
       value:
         example: false
         type: boolean
-    - template: instances/pdh
+    - template: instances/pdh_legacy
       overrides:
           host.required: true
           host.display_priority: 2

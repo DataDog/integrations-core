@@ -1,5 +1,18 @@
 # CHANGELOG - postfix
 
+## 1.10.1 / 2021-10-05
+
+* [Fixed] Fix config example. See [#10337](https://github.com/DataDog/integrations-core/pull/10337).
+
+## 1.10.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Change directory parameter to optional. See [#10051](https://github.com/DataDog/integrations-core/pull/10051).
+
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Add runtime configuration validation. See [#8970](https://github.com/DataDog/integrations-core/pull/8970).
+
 ## 1.8.4 / 2021-04-19 / Agent 7.28.0
 
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

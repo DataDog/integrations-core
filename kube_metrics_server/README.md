@@ -59,18 +59,18 @@ If your endpoint is secured, additional configuration is required:
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**kube_metrics_server.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
-
 ### Events
 
 kube_metrics_server does not include any events.
 
+### Service Checks
+
+See [service_checks.json][8] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
+
 
 [1]: https://github.com/kubernetes-incubator/metrics-server
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
@@ -79,4 +79,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

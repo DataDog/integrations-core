@@ -296,6 +296,12 @@
   value:
     type: number
   description: The read timeout for accessing services. Defaults to `timeout`.
+- name: request_size
+  description: |
+    The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  value:
+    example: 16
+    type: number
 - name: log_requests
   value:
     example: false
@@ -306,3 +312,8 @@
     example: false
     type: boolean
   description: Whether or not to persist cookies and use connection pooling for increased performance.
+- name: allow_redirects
+  value:
+    example: true
+    type: boolean
+  description: Whether or not to allow URL redirection. 

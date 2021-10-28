@@ -16,6 +16,8 @@ IGNITE_VERSION = os.environ.get('IGNITE_VERSION', '')
 IS_PRE_2_9 = False if not IGNITE_VERSION else parse_version(IGNITE_VERSION) < parse_version('2.9')
 
 GAUGES = [
+    'ignite.total_allocated_size',
+    'ignite.total_allocated_pages',
     'ignite.cache.offheap_miss_percentage',
     'ignite.jobs.wait_time.maximum',
     'ignite.cache.size',
@@ -212,8 +214,6 @@ MONOTONIC_COUNTS = [
     "ignite.sent_messages",
     "ignite.threads.completed_tasks",
     "ignite.threads.tasks",
-    "ignite.total_allocated_pages",
-    "ignite.total_allocated_size",
     "ignite.total_executed_tasks",
     "ignite.total_started_threads",
     "ignite.transaction.committed",

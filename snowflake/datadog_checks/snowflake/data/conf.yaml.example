@@ -51,10 +51,10 @@ instances:
     #
   - account: <ACCOUNT>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## Login name for the user.
     #
-    user: <USER>
+    username: <USER>
 
     ## @param password - string - required
     ## Password for the user
@@ -145,6 +145,12 @@ instances:
     #   - snowflake.storage
     #   - snowflake.logins
 
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
@@ -218,3 +224,9 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true

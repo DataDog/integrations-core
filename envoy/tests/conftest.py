@@ -4,10 +4,12 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import FLAVOR, INSTANCES
+from .common import DOCKER_DIR, FIXTURE_DIR, FLAVOR, INSTANCES
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DOCKER_DIR = os.path.join(HERE, 'docker')
+
+@pytest.fixture(scope='session')
+def fixture_path():
+    yield lambda name: os.path.join(FIXTURE_DIR, name)
 
 
 @pytest.fixture(scope='session')

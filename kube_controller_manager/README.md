@@ -32,22 +32,23 @@ exposed in container-as-a-service clusters.
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
-### Service Checks
-
-**kube_controller_manager.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
-
 ### Events
 
 The Kubernetes Controller Manager check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][6] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
+
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/datadog_checks/kube_controller_manager/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/metadata.csv
-[6]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/

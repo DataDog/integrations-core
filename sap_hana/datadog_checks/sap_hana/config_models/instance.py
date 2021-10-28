@@ -28,9 +28,12 @@ class InstanceConfig(BaseModel):
 
     batch_size: Optional[int]
     custom_queries: Optional[Sequence[CustomQuery]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
+    only_custom_queries: Optional[bool]
     password: str
+    persist_db_connections: Optional[bool]
     port: Optional[int]
     server: str
     service: Optional[str]

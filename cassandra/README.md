@@ -28,13 +28,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 To configure this check for an Agent running on a host:
 
-##### Metric Collection
+##### Metric collection
 
 1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
 
-##### Log Collection
+##### Log collection
 
 _Available for Agent versions >6.0_
 
@@ -105,8 +105,7 @@ The Cassandra check does not include any events.
 
 ### Service Checks
 
-**cassandra.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance, otherwise returns `OK`.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -114,9 +113,9 @@ Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-- [How to monitor Cassandra performance metrics][13]
-- [How to collect Cassandra metrics][14]
-- [Monitoring Cassandra with Datadog][15]
+- [How to monitor Cassandra performance metrics][14]
+- [How to collect Cassandra metrics][15]
+- [Monitoring Cassandra with Datadog][16]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -130,6 +129,7 @@ Need help? Contact [Datadog support][4].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv
-[13]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[14]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[15]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[13]: https://github.com/DataDog/integrations-core/blob/master/cassandra/assets/service_checks.json
+[14]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
+[15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
+[16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog

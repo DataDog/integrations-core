@@ -39,9 +39,11 @@ DASHBOARD_NOT_POSSIBLE = {
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
 INTEGRATION_LOGS_NOT_POSSIBLE = {
+    'avi_vantage',  # TODO: requires submitting logs via the agent
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',
+    'datadog_checks_dependency_provider',
     'datadog_checks_downloader',
     'directory',  # OS
     'dns_check',  # not a specific service
@@ -50,6 +52,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'go-metro',  # for agent 5 only
     'go_expvar',  # its a go package
     'http_check',  # Its not a service
+    'ibm_i',  # remote connection
     'linux_proc_extras',
     'ntp',  # the integration is for a remote ntp server
     'openmetrics',  # base class

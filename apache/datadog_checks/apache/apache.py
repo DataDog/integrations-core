@@ -5,7 +5,8 @@ import re
 
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.errors import CheckException
 
 
 class Apache(AgentCheck):
@@ -59,19 +60,26 @@ class Apache(AgentCheck):
         super(Apache, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-    def check(self, instance):
-        if 'apache_status_url' not in instance:
-            raise Exception("Missing 'apache_status_url' in Apache config")
+    def check(self, _):
+        if 'apache_status_url' not in self.instance:
+            raise ConfigurationError("Missing 'apache_status_url' in Apache config")
 
-        url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-        tags = instance.get('tags', [])
+        url = self.assumed_url.get(self.instance['apache_status_url'], self.instance['apache_status_url'])
+        tags = self.instance.get('tags', [])
+        disable_generic_tags = self.instance.get('disable_generic_tags', False)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         apache_host = parsed_url.hostname
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
-        service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
+        service_check_tags = [
+            'host:%s' % apache_host,
+            'apache_host:%s' % apache_host,
+            'port:%s' % apache_port,
+        ] + tags
+        if disable_generic_tags:
+            service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d',
@@ -130,15 +138,15 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
-                self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
+            if self.assumed_url.get(self.instance['apache_status_url']) is None and url[-5:] != '?auto':
+                self.assumed_url[self.instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
-                self.check(instance)
+                self.check(self.instance)
                 return
             else:
-                raise Exception(
-                    ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
-                    % instance['apache_status_url']
+                raise CheckException(
+                    "No metrics were fetched for this instance. Make sure that %s is the proper url."
+                    % self.instance['apache_status_url']
                 )
 
         if not version_submitted:

@@ -109,21 +109,18 @@ _Available for Agent versions >6.0_
 
 See [metadata.csv][11] for a list of metrics provided by this check.
 
-### Service Checks
-
-**druid.process.can_connect**:<br>
-Returns `CRITICAL` if the check cannot connect to Druid process. Returns `OK` otherwise.
-
-**druid.process.health**:<br>
-Returns `CRITICAL` if Druid process is not healthy. Returns `OK` otherwise.
-
 ### Events
 
 The Druid check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][12] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][13].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
@@ -136,4 +133,5 @@ Need help? Contact [Datadog support][12].
 [9]: https://druid.apache.org/docs/latest/operations/including-extensions.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
-[12]: https://docs.datadoghq.com/help/
+[12]: https://github.com/DataDog/integrations-core/blob/master/druid/assets/service_checks.json
+[13]: https://docs.datadoghq.com/help/

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 from .metrics import METRIC_MAP, TYPE_OVERRIDES
@@ -20,7 +21,13 @@ class LinkerdCheck(OpenMetricsBaseCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if not PY2 and 'openmetrics_endpoint' in instance:
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
             # TODO: when we drop Python 2 move this import up top
             from .check import LinkerdCheckV2
 

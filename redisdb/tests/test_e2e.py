@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from . import common
@@ -14,10 +15,10 @@ pytestmark = pytest.mark.e2e
 
 
 def assert_common_metrics(aggregator):
-    tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
+    base_tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382']
 
-    aggregator.assert_service_check('redis.can_connect', status=Redis.OK, tags=tags)
-
+    aggregator.assert_service_check('redis.can_connect', status=Redis.OK, tags=base_tags)
+    tags = base_tags + ['redis_role:master']
     aggregator.assert_metric('redis.mem.fragmentation_ratio', count=2, tags=tags)
     aggregator.assert_metric('redis.rdb.bgsave', count=2, tags=tags)
     aggregator.assert_metric('redis.aof.last_rewrite_time', count=2, tags=tags)
@@ -77,7 +78,7 @@ def test_e2e_v_3_2(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
 
-    aggregator.assert_all_metrics_covered()
+    assert_all(aggregator)
 
 
 @pytest.mark.skipif(os.environ.get('REDIS_VERSION') != '4.0', reason='Test for redisdb v4.0')
@@ -97,7 +98,7 @@ def test_e2e_v_4_0(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
     aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
 
-    aggregator.assert_all_metrics_covered()
+    assert_all(aggregator)
 
 
 @pytest.mark.skipif(os.environ.get('REDIS_VERSION') != 'latest', reason='Test for the latest redisdb version')
@@ -122,10 +123,22 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
 
-    aggregator.assert_all_metrics_covered()
+    # Optional slowlog metrics
+    aggregator.assert_metric('redis.slowlog.micros.95percentile', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.avg', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.count', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.max', at_least=0)
+    aggregator.assert_metric('redis.slowlog.micros.median', at_least=0)
+
+    assert_all(aggregator)
 
 
 def assert_non_cloud_metrics(aggregator, tags):
     """Certain metrics cannot be collected in cloud environments due to disabled commands"""
     aggregator.assert_metric('redis.net.connections', count=2, tags=tags + ['source:unknown'])
     aggregator.assert_metric('redis.net.maxclients', count=2, tags=tags)
+
+
+def assert_all(aggregator):
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

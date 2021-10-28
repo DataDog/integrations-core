@@ -7,6 +7,7 @@ import click
 import yaml
 
 from ...console import CONTEXT_SETTINGS
+from .constants import MIB_SOURCE_URL
 
 
 def fetch_mib(mib, source_url):
@@ -37,7 +38,7 @@ def fetch_mib(mib, source_url):
 @click.argument('profile_path')
 @click.option(
     '--mib_source_url',
-    default='https://raw.githubusercontent.com/projx/snmp-mibs/master/@mib@',
+    default=MIB_SOURCE_URL,
     help='Source url to fetch missing MIBS',
 )
 @click.pass_context

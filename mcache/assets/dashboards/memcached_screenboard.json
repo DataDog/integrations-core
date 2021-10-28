@@ -875,6 +875,10 @@
         ]
       },
       "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 4,
         "is_column_break": true
       }
     },

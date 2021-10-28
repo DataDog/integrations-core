@@ -1,5 +1,16 @@
 # CHANGELOG - cisco_aci
 
+## 1.16.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.15.1 / 2021-08-22 / Agent 7.31.0
+
+* [Fixed] Fix typos in log lines. See [#9907](https://github.com/DataDog/integrations-core/pull/9907).
+
 ## 1.15.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Upgrade cryptography to 3.4.6 on Python 3. See [#8764](https://github.com/DataDog/integrations-core/pull/8764).
