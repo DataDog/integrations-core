@@ -1,5 +1,5 @@
 {
-  "display_name": "OpenStack Controller",
+  "display_name": "Openstack_controller",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "openstack_controller",
