@@ -132,7 +132,6 @@ files:
   - template: init_config
     options:
     - name: mappings
-      required: true
       description: |
         Rate mappings. DO NOT EDIT unless you know what you're doing.
         See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml

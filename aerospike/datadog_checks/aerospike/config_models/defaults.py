@@ -4,6 +4,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_mappings(field, value):
+    return get_default_field_value(field, value)
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 

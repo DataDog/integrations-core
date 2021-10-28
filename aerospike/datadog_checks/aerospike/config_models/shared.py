@@ -17,7 +17,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    mappings: Sequence[str]
+    mappings: Optional[Sequence[str]]
     service: Optional[str]
 
     @root_validator(pre=True)
