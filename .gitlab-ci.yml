@@ -123,6 +123,7 @@ validate-agent-build:
       else
         echo "A pipeline was not triggered, skipping this job."
       fi
+
   tags: [ "runner:main" ]
 
 notify-slack:
