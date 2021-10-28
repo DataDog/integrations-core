@@ -67,9 +67,9 @@ def test_check_with_url(instance_with_url, aggregator, datadog_agent):
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
+def test_check_e2e(dd_agent_check, instance_with_url):
     # run the check
-    aggregator = dd_agent_check(instance, rate=True)
+    aggregator = dd_agent_check(instance_with_url, rate=True)
     version = common.get_version_from_env()
     assert_metric_coverage(version, aggregator)
 
