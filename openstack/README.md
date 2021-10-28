@@ -151,20 +151,20 @@ The OpenStack check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][12] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][9] about it.
+To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][10] about it.
 
 See also these other Datadog blog posts:
 
-- [Install OpenStack in two commands for dev and test][10]
-- [OpenStack: host aggregates, flavors, and availability zones][11]
+- [Install OpenStack in two commands for dev and test][11]
+- [OpenStack: host aggregates, flavors, and availability zones][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -173,8 +173,8 @@ See also these other Datadog blog posts:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
-[10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
-[11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
-[12]: https://github.com/DataDog/integrations-core/blob/master/openstack/assets/service_checks.json
+[8]: https://github.com/DataDog/integrations-core/blob/master/openstack/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/openstack-monitoring-nova
+[11]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
+[12]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones

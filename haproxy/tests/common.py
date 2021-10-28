@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from sys import maxsize
 
 import pytest
 from packaging import version
@@ -15,7 +16,7 @@ HAPROXY_VERSION_RAW = os.getenv('HAPROXY_VERSION', 'latest')
 
 HAPROXY_VERSION_IS_LATEST = HAPROXY_VERSION_RAW.endswith('latest')
 if HAPROXY_VERSION_IS_LATEST:
-    HAPROXY_VERSION = version.parse('latest')
+    HAPROXY_VERSION = version.parse(str(maxsize))
 else:
     HAPROXY_VERSION = version.parse(HAPROXY_VERSION_RAW)
 ENDPOINT_PROMETHEUS = 'http://{}:8404/metrics'.format(HOST)

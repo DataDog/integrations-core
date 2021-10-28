@@ -39,13 +39,6 @@ class TestNamespace:
         with pytest.raises(Exception, match='^Setting `namespace` must be a string$'):
             dd_run_check(check, extract_message=True)
 
-    def test_missing(self, dd_run_check):
-        check = get_check({'openmetrics_endpoint': 'test'})
-        check.__NAMESPACE__ = ''
-
-        with pytest.raises(Exception, match='^Setting `namespace` is required$'):
-            dd_run_check(check, extract_message=True)
-
 
 class TestRawMetricPrefix:
     def test_not_string(self, dd_run_check):

@@ -2,7 +2,8 @@
 # At the time of writing (Jan 30 2020), this was the latest version of these
 # libraries.
 #
-tuf==0.17.0
+tuf==0.17.0; python_version < "3.0"
+tuf==0.19.0; python_version > "3.0"
 in-toto==1.0.1
 #
 # Make sure TUF and in-toto use the same version of this library, which they

@@ -13,12 +13,12 @@ from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIB
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator):
+def test_integration(aggregator, dd_run_check):
     """
     Collect ActiveMQ metrics
     """
     check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
-    check.check(CONFIG)
+    dd_run_check(check)
 
     _test_check(aggregator)
 

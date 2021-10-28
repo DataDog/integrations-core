@@ -109,6 +109,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             'by doing `ddev config set dd_api_key`.'
         )
 
+    dd_site = org.get('site')
     dd_url = org.get('dd_url')
     log_url = org.get('log_url')
 
@@ -175,6 +176,11 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
 
+        # Enable logs agent by default if the environment is mounting logs, see:
+        # https://github.com/DataDog/integrations-core/pull/5346
+        if key.startswith('DDEV_E2E_ENV_TEMP_DIR_DD_LOG_'):
+            env_vars.setdefault('DD_LOGS_ENABLED', 'true')
+
     if dogstatsd:
         env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
         env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
@@ -219,6 +225,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         metadata,
         agent_build,
         api_key,
+        dd_site,
         dd_url,
         log_url,
         python,

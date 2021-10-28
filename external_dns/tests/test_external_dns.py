@@ -10,13 +10,13 @@ from .common import CHECK_NAME
 
 
 @pytest.mark.usefixtures('mock_external_dns')
-def test_external_dns(aggregator, instance):
+def test_external_dns(aggregator, dd_run_check, instance):
     """
     Testing external_dns
     """
 
     c = ExternalDNSCheck('external_dns', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     for metric in DEFAULT_METRICS.values():
         metric = '{}.{}'.format(CHECK_NAME, metric)

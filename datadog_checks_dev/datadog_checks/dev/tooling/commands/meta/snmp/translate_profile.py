@@ -6,9 +6,8 @@ import os
 import click
 import yaml
 
-from datadog_checks.dev.tooling.commands.meta.snmp.constants import MIB_SOURCE_URL
-
 from ...console import CONTEXT_SETTINGS
+from .constants import MIB_SOURCE_URL
 
 
 def fetch_mib(mib, source_url):
