@@ -81,7 +81,7 @@ route:
   repeat_interval: 3h
 ```
 
-**Note**: This endpoint only accepts a single event in the payload at a time.
+**Note**: This endpoint accepts only one event in the payload at a time.
 
 2. Restart the Prometheus and Alertmanager services.
 ```
