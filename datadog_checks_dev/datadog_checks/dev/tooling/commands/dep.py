@@ -27,7 +27,7 @@ IGNORED_DEPS = {
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
-SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib[crypto,pynacl]'}
+SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -242,7 +242,7 @@ def is_version_compatible(marker, supported_versions):
 @click.option('--sync', '-s', is_flag=True, help='Update the `agent_requirements.in` file')
 @click.option(
     '--check-python-classifiers',
-    '-s',
+    '-c',
     is_flag=True,
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
@@ -254,7 +254,7 @@ def updates(sync, check_python_classifiers, ignore_security_deps, batch_size):
     dont_update_deps = copy.deepcopy(IGNORED_DEPS)
     if ignore_security_deps:
         sec_deps = copy.deepcopy(SECURITY_DEPS)
-        dont_update_deps.union(sec_deps)
+        dont_update_deps = dont_update_deps.union(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
