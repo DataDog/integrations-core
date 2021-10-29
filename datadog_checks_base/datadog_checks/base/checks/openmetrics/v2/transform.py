@@ -29,11 +29,8 @@ class MetricTransformer:
       histogram_buckets_as_distributions: true
 
     ```
-    Agent 7 Signature:
-
-        MetricTransformer(name, check, config)
-
     """
+
     def __init__(self, check, config):
         """
         The base class for metric type transformation.

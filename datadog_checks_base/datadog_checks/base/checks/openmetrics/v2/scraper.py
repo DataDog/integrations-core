@@ -37,10 +37,6 @@ class OpenMetricsScraper:
       hostname_label: dummy
     ```
 
-    Agent 7 Signature:
-
-        OpenMetricsScraper(check, config)
-
     """
 
     SERVICE_CHECK_HEALTH = 'openmetrics.health'

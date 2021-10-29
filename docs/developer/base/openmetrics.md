@@ -10,7 +10,7 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
 
 ::: datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2
     rendering:
-      heading_level: 4
+      heading_level: 3
     selection:
       members:
         - __init__
@@ -22,7 +22,7 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
 All functionality is exposed by the `OpenMetricsScraper` class.
 ::: datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper
     rendering:
-      heading_level: 4
+      heading_level: 3
     selection:
       members:
         - __init__
@@ -41,14 +41,7 @@ All functionality is exposed by the `OpenMetricsScraper` class.
 All functionality is exposed by the `MetricTransformer` class.
 ::: datadog_checks.base.checks.openmetrics.v2.transform.MetricTransformer
     rendering:
-      heading_level: 4
-    selection:
-      members:
-        - __init__
-        - get
-        - compile_transformer
-        - skip_native_metric
-        - normalize_metric_config
+      heading_level: 3
 
 ## Options
 
