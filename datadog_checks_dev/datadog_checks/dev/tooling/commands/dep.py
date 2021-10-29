@@ -19,7 +19,11 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from .validate.licenses import extract_classifier_value
 
 # Dependencies to ignore when update dependencies
-IGNORED_DEPS = {'psycopg2-binary'}
+IGNORED_DEPS = {
+    'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
+    'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
+    'flup',  # https://github.com/DataDog/integrations-core/pull/1997
+}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
