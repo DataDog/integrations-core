@@ -25,9 +25,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
       - bar
       - foo
     ```
-    Agent 7 Signature:
-
-        OpenMetricsBaseCheckV2(name, init_config, instances)
 
     """
 
