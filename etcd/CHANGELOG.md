@@ -1,10 +1,19 @@
 # CHANGELOG - etcd
 
-## 2.7.1 / 2021-07-12
+## 2.8.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8913](https://github.com/DataDog/integrations-core/pull/8913).
+* [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9578](https://github.com/DataDog/integrations-core/pull/9578).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 2.7.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] etcd signature. See [#9551](https://github.com/DataDog/integrations-core/pull/9551).
 
-## 2.7.0 / 2021-05-28
+## 2.7.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
 

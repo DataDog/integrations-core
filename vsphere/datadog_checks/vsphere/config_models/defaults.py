@@ -29,7 +29,7 @@ def instance_collect_attributes(field, value):
 
 
 def instance_collect_events(field, value):
-    return 'depends on collection_type value'
+    return get_default_field_value(field, value)
 
 
 def instance_collect_events_only(field, value):
@@ -37,7 +37,7 @@ def instance_collect_events_only(field, value):
 
 
 def instance_collect_per_instance_filters(field, value):
-    return 'none'
+    return get_default_field_value(field, value)
 
 
 def instance_collect_tags(field, value):
@@ -50,6 +50,10 @@ def instance_collection_level(field, value):
 
 def instance_collection_type(field, value):
     return 'realtime'
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_excluded_host_tags(field, value):
@@ -65,7 +69,7 @@ def instance_max_historical_metrics(field, value):
 
 
 def instance_metric_filters(field, value):
-    return 'all metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_metrics_per_query(field, value):
@@ -85,7 +89,7 @@ def instance_refresh_metrics_metadata_cache_interval(field, value):
 
 
 def instance_resource_filters(field, value):
-    return 'no filter'
+    return get_default_field_value(field, value)
 
 
 def instance_rest_api_options(field, value):

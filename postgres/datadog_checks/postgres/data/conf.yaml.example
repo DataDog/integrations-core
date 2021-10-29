@@ -77,13 +77,42 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional
+    ## @param ssl_root_cert - string - optional - default: false
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: /home/datadog/server-ca.pem
+
+    ## @param ssl_cert - string - optional - default: false
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: /home/datadog/client-cert.pem
+
+    ## @param ssl_key - string - optional - default: false
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: /home/datadog/client-key.pem
+
+    ## @param ssl_password - string - optional - default: false
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: ssl_key_password
+
+    ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
     ## Cancelled queries won't log any metrics.
     #
-    # query_timeout: 1000
+    # query_timeout: 5000
 
     ## @param relations - (list of string or mapping) - optional
     ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -152,6 +181,23 @@ instances:
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
     # collect_default_database: false
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
+
+    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## Collect metrics about WAL file age.
+    ## NOTE: You must be running the check local to your database if you want to enable this option.
+    #
+    # collect_wal_metrics: false
+
+    ## @param data_directory - string - optional - default: /usr/local/pgsql/data
+    ## The data directory of your postgres installation
+    ## Required when collecting WAL metrics.
+    #
+    # data_directory: /usr/local/pgsql/data
 
     ## @param tag_replication_role - boolean - optional - default: false
     ## Tag metrics and checks with `replication_role:<master|standby>`.
@@ -258,16 +304,37 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
+    ## Configure collection of query activity
+    #
+    query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
+        ## query_samples configured collection_interval.
+        #
+        # collection_interval: 10
+
+        ## @param payload_row_limit - number - optional - default: 3500
+        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## than the maximum rows set, then the top N longest running transactions will be reported.
+        #
+        # payload_row_limit: 3500
+
     ## Configure how the SQL obfuscator behaves.
     #
     obfuscator_options:
 
-        ## @param quantize_sql_tables - boolean - optional - default: false
-        ## Set to `true` to perform quantization on your SQL tables.
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
         ##
         ## Note that this option only applies when `dbm` is enabled.
         #
-        # quantize_sql_tables: false
+        # replace_digits: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -298,13 +365,18 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## The integration will stop sending server tag as is reduntant with host tag
+    #
+    disable_generic_tags: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

@@ -135,7 +135,6 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
         else config.get('repo', 'core')
     )
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
@@ -156,6 +155,7 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
             # Repo choices use the integration repo name without the `integrations-` prefix
             config['repo_choice'] = os.path.basename(root).replace('integrations-', '')
 
+    config['repo_name'] = REPO_CHOICES.get(config['repo_choice'], config['repo_choice'])
     set_root(root)
     return message
 
@@ -218,15 +218,18 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
+def get_extra_license_files():
+    for path in os.listdir(get_root()):
+        if not file_exists(get_manifest_file(path)):
+            continue
+        extra_license_file = os.path.join(get_root(), path, '3rdparty-extra-LICENSE.csv')
+        if file_exists(extra_license_file):
+            yield extra_license_file
+
+
 def get_metadata_file(check_name):
     path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
     return os.path.join(get_root(), check_name, path)
-
-
-def get_eula_from_manifest(check_name):
-    path = load_manifest(check_name).get('terms', {}).get('eula', '')
-    path = os.path.join(get_root(), check_name, *path.split('/'))
-    return path, file_exists(path)
 
 
 def get_jmx_metrics_file(check_name):
@@ -259,12 +262,8 @@ def get_config_file(check_name):
     return os.path.join(get_data_directory(check_name), 'conf.yaml.example')
 
 
-def get_config_spec(check_name):
-    if check_name == 'agent':
-        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
-    else:
-        path = load_manifest(check_name).get('assets', {}).get('configuration', {}).get('spec', '')
-        return os.path.join(get_root(), check_name, *path.split('/'))
+def get_check_req_file(check_name):
+    return os.path.join(get_root(), check_name, 'requirements.in')
 
 
 def get_default_config_spec(check_name):
@@ -298,8 +297,12 @@ def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
 
+def get_codeowners_file():
+    return os.path.join(get_root(), '.github', 'CODEOWNERS')
+
+
 def get_codeowners():
-    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    codeowners_file = get_codeowners_file()
     contents = read_file_lines(codeowners_file)
     return contents
 
@@ -401,6 +404,24 @@ def read_metadata_rows(metadata_file):
 
         for line_no, row in enumerate(reader, 2):
             yield line_no, row
+
+
+def read_license_file_rows(license_file):
+    """
+    Iterate over the rows of a `3rdparty-extra-LICENSE.csv` or `LICENSE-3rdparty.csv` file.
+    """
+    with io.open(license_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        f.seek(0)
+        reader = csv.DictReader(f, delimiter=',')
+
+        # Read header
+        reader._fieldnames = reader.fieldnames
+
+        for line_no, row in enumerate(reader, 2):
+            # return the original line because it will be needed to append to the original file
+            line = lines[line_no - 1]
+            yield line_no, row, line
 
 
 def read_readme_file(check_name):
@@ -520,6 +541,8 @@ def has_e2e(check):
 
 def has_process_signature(check):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -547,6 +570,8 @@ def has_recommended_monitor(check):
 
 def _has_asset_in_manifest(check, asset):
     manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
     try:
         with open(manifest_file) as f:
             manifest = json.loads(f.read())
@@ -631,8 +656,9 @@ def find_legacy_signature(check):
     for path, _, files in os.walk(get_check_directory(check)):
         for f in files:
             if f.endswith('.py'):
-                with open(os.path.join(path, f)) as test_file:
+                file_path = os.path.join(path, f)
+                with open(file_path) as test_file:
                     for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return str(f), num
+                            return file_path, num + 1
     return None

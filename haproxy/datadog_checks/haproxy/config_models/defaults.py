@@ -24,6 +24,10 @@ def instance_active_tag(field, value):
     return False
 
 
+def instance_allow_redirects(field, value):
+    return True
+
+
 def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
@@ -74,6 +78,10 @@ def instance_connect_timeout(field, value):
 
 def instance_count_status_by_service(field, value):
     return True
+
+
+def instance_disable_generic_tags(field, value):
+    return False
 
 
 def instance_disable_legacy_service_tag(field, value):
@@ -198,6 +206,10 @@ def instance_proxy(field, value):
 
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_request_size(field, value):
+    return 10
 
 
 def instance_send_distribution_buckets(field, value):

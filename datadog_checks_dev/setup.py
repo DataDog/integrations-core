@@ -24,6 +24,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     "contextlib2; python_version < '3.0'",
     'coverage>=5.0.3',
+    'flaky',
     'mock',
     'psutil',
     'PyYAML==5.4.1',
@@ -74,6 +75,7 @@ setup(
             'atomicwrites',
             'beautifulsoup4>=4.9.3',
             'click~=8.0',
+            'codespell',
             'colorama',
             'datamodel-code-generator~=0.11.4',
             'docker-compose>=1.25',

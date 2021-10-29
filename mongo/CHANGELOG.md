@@ -1,6 +1,19 @@
 # CHANGELOG - mongo
 
-## 2.5.0 / 2021-07-12
+## 2.7.1 / 2021-10-25
+
+* [Fixed] Load CA certs if SSL is enabled and CA certs are not passed in the configurations. See [#10377](https://github.com/DataDog/integrations-core/pull/10377).
+
+## 2.7.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Add runtime configuration validation. See [#8957](https://github.com/DataDog/integrations-core/pull/8957).
+
+## 2.6.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Support collection-agnostic aggregations for custom queries. See [#9857](https://github.com/DataDog/integrations-core/pull/9857).
+
+## 2.5.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Bump pymongo to 3.8. See [#9557](https://github.com/DataDog/integrations-core/pull/9557).
 * [Fixed] Update description of the `hosts` config parameter. See [#9542](https://github.com/DataDog/integrations-core/pull/9542).

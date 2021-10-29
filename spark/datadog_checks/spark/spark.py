@@ -221,7 +221,6 @@ class SparkCheck(AgentCheck):
                 SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address] + tags,
-                message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
     def _get_master_address(self):
@@ -316,7 +315,6 @@ class SparkCheck(AgentCheck):
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -365,7 +363,6 @@ class SparkCheck(AgentCheck):
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -400,7 +397,6 @@ class SparkCheck(AgentCheck):
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -416,7 +412,6 @@ class SparkCheck(AgentCheck):
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps

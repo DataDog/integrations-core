@@ -16,6 +16,10 @@ def instance_collect_activity_metrics(field, value):
     return False
 
 
+def instance_collect_bloat_metrics(field, value):
+    return False
+
+
 def instance_collect_count_metrics(field, value):
     return True
 
@@ -32,8 +36,16 @@ def instance_collect_function_metrics(field, value):
     return False
 
 
+def instance_collect_wal_metrics(field, value):
+    return False
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_data_directory(field, value):
+    return '/usr/local/pgsql/data'
 
 
 def instance_dbm(field, value):
@@ -45,6 +57,10 @@ def instance_dbname(field, value):
 
 
 def instance_dbstrict(field, value):
+    return False
+
+
+def instance_disable_generic_tags(field, value):
     return False
 
 
@@ -80,6 +96,10 @@ def instance_port(field, value):
     return 5432
 
 
+def instance_query_activity(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_query_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -89,7 +109,7 @@ def instance_query_samples(field, value):
 
 
 def instance_query_timeout(field, value):
-    return get_default_field_value(field, value)
+    return 5000
 
 
 def instance_relations(field, value):
@@ -101,6 +121,22 @@ def instance_service(field, value):
 
 
 def instance_ssl(field, value):
+    return False
+
+
+def instance_ssl_cert(field, value):
+    return False
+
+
+def instance_ssl_key(field, value):
+    return False
+
+
+def instance_ssl_password(field, value):
+    return False
+
+
+def instance_ssl_root_cert(field, value):
     return False
 
 

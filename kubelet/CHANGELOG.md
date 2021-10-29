@@ -1,6 +1,13 @@
 # CHANGELOG - kubelet
 
-## 7.0.0 / 2021-05-28
+## 7.1.0 / 2021-10-04
+
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Apply namespace exclusion rules before reporting network metrics. See [#10237](https://github.com/DataDog/integrations-core/pull/10237).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Don't call the tagger for pods not running. See [#10030](https://github.com/DataDog/integrations-core/pull/10030).
+
+## 7.0.0 / 2021-05-28 / Agent 7.29.0
 
 * [Changed] Increase default scraping time from 15s to 20s. See [#9193](https://github.com/DataDog/integrations-core/pull/9193).
 

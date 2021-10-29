@@ -10,6 +10,7 @@ import pyperclip
 
 from ....ci import running_on_ci
 from ....fs import dir_exists, file_exists, path_join
+from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
@@ -108,6 +109,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
             'by doing `ddev config set dd_api_key`.'
         )
 
+    dd_site = org.get('site')
     dd_url = org.get('dd_url')
     log_url = org.get('log_url')
 
@@ -139,7 +141,12 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    fallback = os.getenv('DDEV_E2E_AGENT', legacy_fallback)
+    # DDEV_E2E_AGENT_PY2 overrides DDEV_E2E_AGENT when starting a Python 2 environment
+    if python == 2 and os.getenv('DDEV_E2E_AGENT_PY2'):
+        fallback = os.getenv('DDEV_E2E_AGENT_PY2')
+
+    agent_ver = agent or fallback
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
         # TODO: remove this legacy fallback lookup in any future major version bump
@@ -168,6 +175,11 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     env_vars = dict(ev.split('=', 1) for ev in env_vars)
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
+
+        # Enable logs agent by default if the environment is mounting logs, see:
+        # https://github.com/DataDog/integrations-core/pull/5346
+        if key.startswith('DDEV_E2E_ENV_TEMP_DIR_DD_LOG_'):
+            env_vars.setdefault('DD_LOGS_ENABLED', 'true')
 
     if dogstatsd:
         env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
@@ -213,6 +225,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         metadata,
         agent_build,
         api_key,
+        dd_site,
         dd_url,
         log_url,
         python,
@@ -242,6 +255,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         stop_environment(check, env, metadata=metadata)
         environment.remove_config()
         abort()
+
+    if ON_WINDOWS and python < 3:
+        time.sleep(10)
+
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])

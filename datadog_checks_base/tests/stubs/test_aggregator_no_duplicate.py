@@ -169,14 +169,6 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
             ],
             True,
         ),
-        (
-            "duplicate metric with different values",
-            [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="aaa"),
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="bbb"),
-            ],
-            True,
-        ),
     ],
 )
 def test_assert_no_duplicate_service_checks_cases(aggregator, case_name, service_checks, expect_assertion_error):

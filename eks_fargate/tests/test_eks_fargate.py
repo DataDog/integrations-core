@@ -18,7 +18,7 @@ def mock_from_file(fname):
         return f.read()
 
 
-def test_eksfargate(monkeypatch, aggregator):
+def test_eksfargate(dd_run_check, monkeypatch, aggregator):
     with EnvVars(
         {
             KUBELET_NODE_ENV_VAR: 'fargate-foo',
@@ -27,7 +27,7 @@ def test_eksfargate(monkeypatch, aggregator):
         instance = {'tags': ['foo:bar']}
         check = EksFargateCheck('eks_fargate', {}, [instance])
         monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-        check.check(instance)
+        dd_run_check(check)
         aggregator.assert_metric(
             check.NAMESPACE + '.pods.running',
             value=1,
@@ -43,7 +43,7 @@ def test_eksfargate(monkeypatch, aggregator):
         )
 
 
-def test_not_eksfargate(monkeypatch, aggregator):
+def test_not_eksfargate(dd_run_check, monkeypatch, aggregator):
     with EnvVars(
         {
             KUBELET_NODE_ENV_VAR: 'foo',
@@ -52,7 +52,7 @@ def test_not_eksfargate(monkeypatch, aggregator):
         instance = {}
         check = EksFargateCheck('eks_fargate', {}, [instance])
         monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-        check.check(instance)
+        dd_run_check(check)
         assert check.NAMESPACE + '.pods.running' not in aggregator._metrics
         assert check.NAMESPACE + '.cpu.capacity' not in aggregator._metrics
         assert check.NAMESPACE + '.memory.capacity' not in aggregator._metrics

@@ -1,3 +1,4 @@
+import glob
 from os.path import join
 
 import yaml
@@ -13,10 +14,14 @@ def initialize_path(directory):
     path = []
     path.append('./')
 
-    path.append(get_default_snmp_profiles_path())
-
     if directory:
-        path.append(directory)
+        if isinstance(directory, tuple):
+            for dir in directory:
+                path.append(dir)
+        elif isinstance(directory, str):
+            path.append(directory)
+    else:
+        path.append(get_default_snmp_profiles_path())
 
     return path
 
@@ -50,8 +55,32 @@ def exist_profile_in_path(profile_name, path):
     return False
 
 
+def get_profile(profile_name, line=True):
+    file_contents = None
+    if isfile(profile_name):
+        try:
+            with open(profile_name) as f:
+                if line:
+                    file_contents = yaml.load(f.read(), Loader=SafeLineLoader)
+                else:
+                    file_contents = yaml.safe_load(f.read())
+        except YAMLError:
+            file_contents = None
+    return file_contents
+
+
 def get_default_snmp_profiles_path():
     return join(get_root(), 'snmp', 'datadog_checks', 'snmp', 'data', 'profiles')
+
+
+def get_all_profiles_directory(directory):
+    profiles = []
+    if isinstance(directory, tuple):
+        for dir in directory:
+            profiles.extend(glob.glob(join(dir, "*.yaml")))
+    elif isinstance(directory, str):
+        profiles = glob.glob(join(directory, "*.yaml"))
+    return profiles
 
 
 class SafeLineLoader(SafeLoader):

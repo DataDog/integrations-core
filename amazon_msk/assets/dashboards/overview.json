@@ -2,6 +2,7 @@
     "author_name": "Datadog",
     "description": "## Amazon MSK (Agent) Overview\n\nThis is an example Amazon MSK dashboard demonstrating the metrics that the integration collects.",
     "layout_type": "ordered",
+    "reflow_type": "fixed",
     "template_variables": [
         {
             "default": "*",
@@ -486,8 +487,12 @@
             },
             "id": 8770755938983262,
             "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 7,
                 "is_column_break": true
-            }
+              }
         },
         {
             "definition": {

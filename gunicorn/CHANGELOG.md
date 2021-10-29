@@ -1,6 +1,14 @@
 # CHANGELOG - gunicorn
 
-## 1.15.0 / 2021-05-28
+## 2.1.0 / 2021-10-04
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 1.15.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Add runtime configuration validation. See [#8923](https://github.com/DataDog/integrations-core/pull/8923).
 

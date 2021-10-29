@@ -1,6 +1,6 @@
 # CHANGELOG - dns_check
 
-## 2.0.1 / 2021-07-12
+## 2.0.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Use agent 8 signature. See [#9544](https://github.com/DataDog/integrations-core/pull/9544).
 

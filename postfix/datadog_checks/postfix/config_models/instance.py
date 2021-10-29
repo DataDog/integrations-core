@@ -18,10 +18,11 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     config_directory: Optional[str]
-    directory: str
+    directory: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     min_collection_interval: Optional[float]
-    queues: Sequence[str]
+    queues: Optional[Sequence[str]]
     service: Optional[str]
     tags: Optional[Sequence[str]]
 
