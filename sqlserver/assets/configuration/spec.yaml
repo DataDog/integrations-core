@@ -207,7 +207,8 @@ files:
         example: "<CONNECTION_STRING>"
     - name: dbm
       description: |
-        Set to `true` to enable the Database Monitoring beta.
+        Set to `true` to enable Database Monitoring.
+        Reach out to your Customer Success Manager to request access to the beta.
       value:
         type: boolean
         example: false
