@@ -53,7 +53,7 @@ VALID_TLS_CONFIG_FOR_TEST = {
     'tls_ca_cert': os.path.join(HERE, 'compose/client', 'ca_cert.pem'),
     'tls_cert': os.path.join(HERE, 'compose/client', 'cert.pem'),
     'tls_private_key_password': 'testpass',
-    'tls_validate_hostname': "false"
+    # 'tls_validate_hostname': "false"
 }
 
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
