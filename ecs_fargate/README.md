@@ -53,8 +53,9 @@ The instructions below show you how to configure the task using the [AWS CLI too
 12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][6] as the value. _If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][7]._
 13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
 14. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
-15. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][8].
-16. Click **Create** to create the task definition.
+15. (Windows Only) Select "C:\" as the working directory.
+16. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][8].
+17. Click **Create** to create the task definition.
 
 ##### AWS CLI
 
