@@ -254,7 +254,7 @@ def updates(sync, check_python_classifiers, ignore_security_deps, batch_size):
     dont_update_deps = copy.deepcopy(IGNORED_DEPS)
     if ignore_security_deps:
         sec_deps = copy.deepcopy(SECURITY_DEPS)
-        dont_update_deps.add(sec_deps)
+        dont_update_deps.union(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
