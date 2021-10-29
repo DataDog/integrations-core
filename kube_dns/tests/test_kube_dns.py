@@ -7,8 +7,10 @@ import os
 
 import mock
 import pytest
+import requests
 
 # project
+from datadog_checks.base import AgentCheck
 from datadog_checks.kube_dns import KubeDNSCheck
 
 customtag = "custom:tag"
@@ -80,3 +82,27 @@ class TestKubeDNS:
         name = self.NAMESPACE + ".request_duration.seconds.sum"
         aggregator.assert_metric(name)
         aggregator.assert_metric(name, tags=['custom:tag', 'system:reverse'])
+
+    def test_service_check_ok(self, monkeypatch):
+        instance_tags = [customtag]
+
+        check = KubeDNSCheck(self.CHECK_NAME, {}, [instance])
+
+        monkeypatch.setattr(check, 'service_check', mock.Mock())
+
+        calls = [
+            mock.call(self.NAMESPACE + '.up', AgentCheck.OK, tags=instance_tags),
+            mock.call(self.NAMESPACE + '.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
+        ]
+
+        # successful health check
+        with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+            check._perform_service_check(instance)
+
+        # failed health check
+        raise_error = mock.Mock()
+        raise_error.side_effect = requests.HTTPError('health check failed')
+        with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+            check._perform_service_check(instance)
+
+        check.service_check.assert_has_calls(calls)

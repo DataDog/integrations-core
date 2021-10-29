@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "agent_version": "6.0.0",
+        "integration": "Kube Proxy",
+        "check": "kubeproxy.up",
+        "groups": [],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Kube Proxy health",
+        "description": "Returns `CRITICAL` if Kube Proxy is not healthy."
+    }
+]

@@ -2,7 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base import OpenMetricsBaseCheck
+import re
+
+import requests
+
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
+from datadog_checks.base.utils.http import RequestsWrapper
+
+KUBE_METRICS_SERVER_NAMESPACE = "kube_metrics_server"
 
 COUNTERS = {
     'authenticated_user_requests': 'authenticated_user.requests',
@@ -85,8 +92,6 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    KUBE_METRICS_SERVER_NAMESPACE = "kube_metrics_server"
-
     def __init__(self, name, init_config, instances):
         super(KubeMetricsServerCheck, self).__init__(
             name,
@@ -94,15 +99,65 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             instances,
             default_instances={
                 "kube_metrics_server": {
-                    'namespace': self.KUBE_METRICS_SERVER_NAMESPACE,
+                    'namespace': KUBE_METRICS_SERVER_NAMESPACE,
                     'metrics': [COUNTERS, HISTOGRAMS, SUMMARIES, GAUGES, GO_METRICS],
                     'ignore_metrics': IGNORED_METRICS,
                 }
             },
-            default_namespace=self.KUBE_METRICS_SERVER_NAMESPACE,
+            default_namespace=KUBE_METRICS_SERVER_NAMESPACE,
         )
+
+        if instances is not None:
+            for instance in instances:
+                url = instance.get('health_url')
+                prometheus_url = instance.get('prometheus_url')
+
+                if url is None and re.search(r'/metrics$', prometheus_url):
+                    url = re.sub(r'/metrics$', '/livez', prometheus_url)
+
+                instance['health_url'] = url
 
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
         self.process(scraper_config)
+
+        self._perform_service_check(instance)
+
+    def _perform_service_check(self, instance):
+        url = instance.get('health_url')
+        if url is None:
+            return
+
+        tags = instance.get("tags", [])
+        service_check_name = KUBE_METRICS_SERVER_NAMESPACE + '.up'
+        http_handler = self._healthcheck_http_handler(instance, url)
+
+        try:
+            response = http_handler.get(url)
+            response.raise_for_status()
+            self.service_check(service_check_name, AgentCheck.OK, tags=tags)
+        except requests.exceptions.RequestException as e:
+            message = str(e)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
+
+    def _healthcheck_http_handler(self, instance, endpoint):
+        if endpoint in self._http_handlers:
+            return self._http_handlers[endpoint]
+
+        config = {}
+        config['tls_cert'] = instance.get('ssl_cert', None)
+        config['tls_private_key'] = instance.get('ssl_private_key', None)
+        config['tls_verify'] = instance.get('ssl_verify', True)
+        config['tls_ignore_warning'] = instance.get('ssl_ignore_warning', False)
+        config['tls_ca_cert'] = instance.get('ssl_ca_cert', None)
+
+        if config['tls_ca_cert'] is None:
+            config['tls_ignore_warning'] = True
+            config['tls_verify'] = False
+
+        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        return http_handler
