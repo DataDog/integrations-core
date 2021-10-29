@@ -213,7 +213,7 @@ jmx_metrics:
         partition: $2
       attribute:
         Value:
-          alias: confluent.$domain.$name.log_size
+          alias: confluent.$domain.log_size
           metric_type: gauge
 
   # Kafka Broker Log Metrics (Yammer Metric Timer)
