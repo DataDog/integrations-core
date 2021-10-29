@@ -44,7 +44,7 @@ def dd_environment():
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
             CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
-            # Create connectors
+            # Create connectors 
             WaitFor(create_connectors),
             CheckDockerLogs('connect', 'Source task finished initialization and start'),
         ],
