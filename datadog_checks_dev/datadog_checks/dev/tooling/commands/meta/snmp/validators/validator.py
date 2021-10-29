@@ -259,9 +259,7 @@ class TableColumnHasTagValidator(ProfileValidator):
 
     def validate(self, profile, path):
         file_contents = find_profile_in_path(profile, path)
-        metrics = {}
-        if file_contents.get('metrics'):
-            metrics = file_contents.get('metrics')
+        metrics = file_contents.get('metrics', {})
         for metric in metrics:
             if metric.get('table'):
                 if not metric.get('metric_tags'):
@@ -273,7 +271,7 @@ class TableColumnHasTagValidator(ProfileValidator):
                     if not all_metric_tags_are_valid:
                         self.fail(
                             "metric_tables defined in lines {} are not valid. \
-                        \nmetric_tags defined does not contains neither option 'column' nor 'index'".format(
+                        \nmetric_tags must have 'column' or 'index' value".format(
                                 lines
                             )
                         )
