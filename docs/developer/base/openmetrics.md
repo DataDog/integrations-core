@@ -6,8 +6,6 @@ OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics for
 
 ## Interface
 
-All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
-
 ::: datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2
     rendering:
       heading_level: 3
@@ -19,7 +17,6 @@ All functionality is exposed by the `OpenMetricsBaseCheckV2` class.
 
 ## Scrapers
 
-All functionality is exposed by the `OpenMetricsScraper` class.
 ::: datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper
     rendering:
       heading_level: 3
@@ -38,8 +35,7 @@ All functionality is exposed by the `OpenMetricsScraper` class.
         - submit_health_check
 
 ## Transformers
-All functionality is exposed by the `MetricTransformer` class.
-::: datadog_checks.base.checks.openmetrics.v2.transform.MetricTransformer
+::: datadog_checks.base.checks.openmetrics.v2.transform.Transformers
     rendering:
       heading_level: 3
 
