@@ -333,7 +333,9 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Metrics
 
-See [metadata.csv][35] for a list of metrics provided by this integration.
+This integration works on Linux and Windows, but some metrics are OS dependent. All the metrics exposed when running on Windows are also exposed on Linux, but there are some metrics that are only available on Linux.
+
+See [metadata.csv][35] for a list of metrics provided by this integration. It also specifies which ones are Linux-only.
 
 ### Events
 
