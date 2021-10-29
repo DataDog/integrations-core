@@ -21,9 +21,31 @@ from .transform import MetricTransformer
 
 
 class OpenMetricsScraper:
+    """
+    OpenMetricsScraper is a class that can be used to override the default scraping behavior for OpenMetricsBaseCheckV2.
+
+    Minimal example configuration:
+
+    ```yaml
+    - openmetrics_endpoint: http://example.com/endpoint
+      namespace: "foobar"
+      metrics:
+      - bar
+      - foo
+      raw_metric_prefix: "test"
+      telemetry: "true"
+      hostname_label: node
+    ```
+
+    """
+
     SERVICE_CHECK_HEALTH = 'openmetrics.health'
 
     def __init__(self, check, config):
+        """
+        The base class for any scraper overrides.
+        """
+
         self.config = config
 
         # Save a reference to the check instance
@@ -187,6 +209,10 @@ class OpenMetricsScraper:
         self.has_successfully_executed = False
 
     def scrape(self):
+        """
+        Execute a scrape, and for each metric collected, transform the metric.
+        """
+
         runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
 
         for metric in self.consume_metrics():
@@ -199,6 +225,10 @@ class OpenMetricsScraper:
         self.has_successfully_executed = True
 
     def consume_metrics(self):
+        """
+        Yield the processed metrics and filter out excluded metrics.
+        """
+
         metric_parser = self.parse_metrics()
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -213,6 +243,10 @@ class OpenMetricsScraper:
             yield metric
 
     def parse_metrics(self):
+        """
+        Get the line streamer and yield processed metrics.
+        """
+
         line_streamer = self.stream_connection_lines()
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
@@ -228,6 +262,10 @@ class OpenMetricsScraper:
             yield metric
 
     def generate_sample_data(self, metric):
+        """
+        Yield a sample of processed data.
+        """
+
         label_normalizer = get_label_normalizer(metric.type)
 
         for sample in metric.samples:
@@ -268,11 +306,19 @@ class OpenMetricsScraper:
             yield sample, tags, hostname
 
     def stream_connection_lines(self):
+        """
+        Yield the connection line.
+        """
+
         with self.get_connection() as connection:
             for line in connection.iter_lines(decode_unicode=True):
                 yield line
 
     def filter_connection_lines(self, line_streamer):
+        """
+        Filter connection lines in the line streamer.
+        """
+
         for line in line_streamer:
             if self.raw_line_filter.search(line):
                 self.submit_telemetry_number_of_ignored_lines()
@@ -280,6 +326,10 @@ class OpenMetricsScraper:
                 yield line
 
     def get_connection(self):
+        """
+        Send a request to scrape metrics. Return the response or throw an exception.
+        """
+
         try:
             response = self.send_request()
         except Exception as e:
@@ -303,13 +353,25 @@ class OpenMetricsScraper:
                 return response
 
     def send_request(self, **kwargs):
+        """
+        Send an HTTP GET request to the `openmetrics_endpoint` value.
+        """
+
         kwargs['stream'] = True
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):
+        """
+        Set dynamic tags.
+        """
+
         self.tags = tuple(chain(self.static_tags, tags))
 
     def submit_health_check(self, status, **kwargs):
+        """
+        If health service check is enabled, send an `openmetrics.health` service check.
+        """
+
         if self.enable_health_service_check:
             self.service_check(self.SERVICE_CHECK_HEALTH, status, tags=self.static_tags, **kwargs)
 
