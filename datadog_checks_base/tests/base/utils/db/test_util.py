@@ -8,7 +8,29 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter, DBMAsyncJob, RateLimitingTTLCache
+from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, DBMAsyncJob, RateLimitingTTLCache, resolve_db_host
+
+
+@pytest.mark.parametrize(
+    "db_host, agent_hostname, want",
+    [
+        (None, "agent_hostname", "agent_hostname"),
+        ("localhost", "agent_hostname", "agent_hostname"),
+        ("127.0.0.1", "agent_hostname", "agent_hostname"),
+        ("192.0.2.1", "agent_hostname", "192.0.2.1"),
+        ("socket.gaierror", "agent_hostname", "agent_hostname"),
+        ("greater-than-or-equal-to-64-characters-causes-unicode-error-----", "agent_hostname", "agent_hostname"),
+        ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
+        ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+    ],
+)
+def test_resolve_db_host(db_host, agent_hostname, want):
+    datadog_agent.set_hostname(agent_hostname)
+    assert resolve_db_host(db_host) == want
+    datadog_agent.reset_hostname()
 
 
 def test_constant_rate_limiter():

@@ -20,6 +20,10 @@ def instance_dirtagname(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -65,6 +69,10 @@ def instance_service(field, value):
 
 
 def instance_stat_follow_symlinks(field, value):
+    return True
+
+
+def instance_submit_histograms(field, value):
     return True
 
 

@@ -1,6 +1,10 @@
 # CHANGELOG - ceph
 
-## 2.4.1 / 2021-07-12
+## 2.5.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8892](https://github.com/DataDog/integrations-core/pull/8892).
+
+## 2.4.1 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] ceph agent 8 signature. See [#9520](https://github.com/DataDog/integrations-core/pull/9520).
 

@@ -95,7 +95,7 @@ ddev validate config
 ```
 This verifies that the config specs for all integrations are valid by enforcing our configuration spec [schema](config-specs.md#schema). The most common failure at this validation stage is some version of `File <INTEGRATION_SPEC> needs to be synced.` To resolve this issue, you can run `ddev validate config --sync`
 
-If you see failures regarding formatting or missing parameters, see our [config spec](config-specs.md#schema) documentation for more details on how to construc configuration specs.
+If you see failures regarding formatting or missing parameters, see our [config spec](config-specs.md#schema) documentation for more details on how to construct configuration specs.
 
 ### Dashboard definition files
 

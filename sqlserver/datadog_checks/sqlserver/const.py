@@ -28,6 +28,7 @@ AUTODISCOVERY_QUERY = "select name from sys.databases"
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
 SERVICE_CHECK_NAME = 'sqlserver.can_connect'
+DATABASE_SERVICE_CHECK_NAME = 'sqlserver.database.can_connect'
 
 # Default performance table metrics - Database Instance level
 # datadog metric name, counter name, instance name

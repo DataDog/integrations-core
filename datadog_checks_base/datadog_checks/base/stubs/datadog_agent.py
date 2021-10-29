@@ -18,9 +18,10 @@ class DatadogAgentStub(object):
         self._metadata = {}
         self._cache = {}
         self._config = self.get_default_config()
+        self._hostname = 'stubbed.hostname'
 
     def get_default_config(self):
-        return {'enable_metadata_collection': True}
+        return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
 
     def reset(self):
         self._metadata.clear()
@@ -39,7 +40,13 @@ class DatadogAgentStub(object):
         assert len(self._metadata) == count
 
     def get_hostname(self):
-        return 'stubbed.hostname'
+        return self._hostname
+
+    def set_hostname(self, hostname):
+        self._hostname = hostname
+
+    def reset_hostname(self):
+        self._hostname = 'stubbed.hostname'
 
     def get_config(self, config_option):
         return self._config.get(config_option, '')

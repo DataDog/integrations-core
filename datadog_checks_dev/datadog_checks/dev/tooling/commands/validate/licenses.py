@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import os
 from collections import defaultdict
 
 import click
@@ -12,6 +13,7 @@ from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
+from ...annotations import annotate_error
 from ...constants import get_agent_requirements, get_license_attribution_file
 from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
@@ -123,7 +125,7 @@ def format_attribution_line(package_name, license_id, package_copyright):
     return f'{package_name},PyPI,{license_id},{package_copyright}\n'
 
 
-def extract_license_classifier(classifier):
+def extract_classifier_value(classifier):
     return classifier.split(' :: ')[-1]
 
 
@@ -146,7 +148,7 @@ async def get_data(url):
                 info['name'],
                 info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
                 info['license'],
-                {extract_license_classifier(c) for c in info['classifiers'] if c.startswith('License ::')},
+                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
 
 
@@ -162,7 +164,7 @@ async def scrape_license_data(urls):
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
-                    data['classifiers'].add(extract_license_classifier(package_license))
+                    data['classifiers'].add(extract_classifier_value(package_license))
                 else:
                     data['licenses'].append(package_license)
 
@@ -190,6 +192,7 @@ def validate_extra_licenses():
                 errors = True
                 any_errors = True
                 echo_failure(f"{license_file}:{line_no} Has the wrong amount of columns")
+                annotate_error(license_file, "Contains the wrong amount of columns", line=line_no)
                 continue
 
             # all headers exist, no invalid headers
@@ -199,10 +202,12 @@ def validate_extra_licenses():
                 invalid_headers = all_keys.difference(ALL_HEADERS)
                 if invalid_headers:
                     echo_failure(f'{license_file}:{line_no} Invalid column {invalid_headers}')
+                    annotate_error(license_file, f"Detected invalid column {invalid_headers}", line=line_no)
 
                 missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     echo_failure(f'{license_file}:{line_no} Missing columns {missing_headers}')
+                    annotate_error(license_file, f"Detected missing columns {invalid_headers}", line=line_no)
 
                 errors = True
                 any_errors = True
@@ -212,6 +217,7 @@ def validate_extra_licenses():
                 errors = True
                 any_errors = True
                 echo_failure(f'{license_file}:{line_no} Invalid license type {license_type}')
+                annotate_error(license_file, f"Detected invalid license type {license_type}", line=line_no)
                 continue
             if not errors:
                 lines.append(line)
@@ -232,9 +238,15 @@ def licenses(ctx, sync):
         abort('Out of sync, run again with the --sync flag')
 
     packages = defaultdict(set)
-    for line in read_file_lines(agent_requirements_file):
-        requirement = Requirement(line.strip())
-        packages[requirement.name].add(str(requirement.specifier)[2:])
+    for i, line in enumerate(read_file_lines(agent_requirements_file)):
+        try:
+            requirement = Requirement(line.strip())
+            packages[requirement.name].add(str(requirement.specifier)[2:])
+        except Exception as e:
+            rel_file = os.path.basename(agent_requirements_file)
+            line = i + 1
+            annotate_error(agent_requirements_file, str(e).split(":")[1], line=line)
+            echo_failure(f"Detected error in {rel_file}:{line} {e}")
 
     api_urls = []
     for package, versions in packages.items():

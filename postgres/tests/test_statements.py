@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime
 import re
 import time
 from collections import Counter
@@ -36,8 +37,9 @@ SAMPLE_QUERIES = [
     ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
 
-
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
+
+DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
@@ -99,7 +101,9 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 
 @pytest.mark.parametrize("dbstrict", [True, False])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
-def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view):
+def test_statement_metrics(
+    aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view, datadog_agent
+):
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
@@ -141,11 +145,14 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
+    assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_dbm_metrics_tags = {'foo:bar', 'server:{}'.format(HOST), 'port:{}'.format(PORT)}
+    expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
+    assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
@@ -174,6 +181,7 @@ def test_statement_metrics(aggregator, integration_check, dbm_instance, dbstrict
         matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
         assert len(matching) == 1
         fqt_event = matching[0]
+        assert fqt_event['ddagentversion'] == datadog_agent.get_version()
         assert fqt_event['ddsource'] == "postgres"
         assert fqt_event['db']['statement'] == expected_query
         assert fqt_event['postgres']['datname'] == dbname
@@ -244,13 +252,13 @@ def dbm_instance(pg_instance):
     pg_instance['min_collection_interval'] = 1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
     return pg_instance
 
 
 def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags'] + [
-        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(dbm_instance['dbname']),
     ]
@@ -270,6 +278,79 @@ def test_get_db_explain_setup_state(integration_check, dbm_instance, dbname, exp
     check._connect()
     db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
     assert db_explain_error == expected_db_explain_error
+
+
+failed_explain_test_repeat_count = 5
+
+
+@pytest.mark.parametrize(
+    "query,expected_error_tag,explain_function_override,expected_fail_count",
+    [
+        ("select * from fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        ("select * from fake_schema.fake_table", "error:explain-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
+        (
+            "select * from pg_settings where name = $1",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            None,
+            1,
+        ),
+        (
+            "select * from pg_settings where name = 'this query is truncated' limi",
+            "error:explain-<class 'psycopg2.errors.SyntaxError'>",
+            None,
+            1,
+        ),
+        (
+            "select * from persons",
+            "error:explain-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "datadog.explain_statement_noaccess",
+            failed_explain_test_repeat_count,
+        ),
+    ],
+)
+def test_failed_explain_handling(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+    expected_error_tag,
+    explain_function_override,
+    expected_fail_count,
+):
+    dbname = "datadog_test"
+    if explain_function_override:
+        dbm_instance['query_samples']['explain_function'] = explain_function_override
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # run check so all internal state is correctly initialized
+    check.check(dbm_instance)
+
+    # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
+    aggregator.reset()
+
+    db_explain_error, err = check.statement_samples._get_db_explain_setup_state(dbname)
+    assert db_explain_error is None
+    assert err is None
+
+    for _ in range(failed_explain_test_repeat_count):
+        check.statement_samples._run_explain_safe(dbname, query, query, query)
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
+        expected_error_tag,
+    ]
+
+    aggregator.assert_metric(
+        # even though we tried to explain the query multiple times, only a single error was registered, showing
+        # that the cached error response was used
+        'dd.postgres.statement_samples.error',
+        count=expected_fail_count,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
@@ -354,13 +435,13 @@ def test_statement_samples_collect(
     expected_error_tag,
     expected_collection_errors,
     expected_statement_truncated,
+    datadog_agent,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     check = integration_check(dbm_instance)
     check._connect()
 
     tags = dbm_instance['tags'] + [
-        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(dbname),
     ]
@@ -395,7 +476,11 @@ def test_statement_samples_collect(
 
         if expected_error_tag:
             assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
-            aggregator.assert_metric("dd.postgres.statement_samples.error", tags=tags + [expected_error_tag])
+            aggregator.assert_metric(
+                "dd.postgres.statement_samples.error",
+                tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
+                hostname='stubbed.hostname',
+            )
         else:
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
@@ -405,6 +490,7 @@ def test_statement_samples_collect(
 
         # validate the events to ensure we've provided an explanation for not providing an exec plan
         for event in matching:
+            assert event['ddagentversion'] == datadog_agent.get_version()
             if event['db']['plan']['definition'] is None:
                 assert event['db']['plan']['collection_errors'] == expected_collection_errors
             else:
@@ -412,6 +498,275 @@ def test_statement_samples_collect(
 
     finally:
         conn.close()
+
+
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize(
+    "user,password,dbname,query,arg,expected_out,expected_keys,expected_conn_out",
+    [
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "SELECT city FROM pg_sleep(3), persons WHERE city = %s",
+            "hello",
+            {
+                'datname': 'datadog_test',
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'query_signature': 'd9193c18a6f372d8',
+                'statement': "SELECT city FROM pg_sleep(3), persons WHERE city = 'hello'",
+            },
+            ["xact_start", "query_start", "pid", "client_port", "client_addr"],
+            {
+                'usename': 'bob',
+                'state': 'idle in transaction',
+                'application_name': '',
+                'connections': 1,
+            },
+        ),
+    ],
+)
+def test_activity_snapshot_collection(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_activity_view,
+    user,
+    password,
+    dbname,
+    query,
+    arg,
+    expected_out,
+    expected_keys,
+    expected_conn_out,
+):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # the simple query protocol, sending the whole query as a plain string to postgres.
+    # if a client is using the extended query protocol with prepare then the query would appear as
+    # leave connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    try:
+        # turn off auto commit so we can manage transactions manually
+        # this should allow us to catch queries in the 'idle in transaction' state
+        conn.autocommit = False
+        conn.cursor().execute(query, (arg,))
+        check.check(dbm_instance)
+        dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
+
+        event = dbm_activity_event[0]
+        assert event['host'] == "stubbed.hostname"
+        assert event['ddsource'] == "postgres"
+        assert event['dbm_type'] == "activity"
+        assert event['ddagentversion'] == datadog_agent.get_version()
+        assert len(event['postgres_activity']) > 0
+        # find bob's query.
+        bobs_query = None
+        for query_json in event['postgres_activity']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_query = query_json
+        assert bobs_query is not None
+
+        for key in expected_out:
+            assert expected_out[key] == bobs_query[key]
+        for val in expected_keys:
+            assert val in bobs_query
+
+        assert 'query' not in bobs_query
+
+        expected_tags = dbm_instance['tags'] + [
+            'port:{}'.format(PORT),
+        ]
+
+        # check postgres_connections are set
+        assert len(event['postgres_connections']) > 0
+        # find bob's connections.
+        bobs_conns = None
+        for query_json in event['postgres_connections']:
+            if 'usename' in query_json and query_json['usename'] == "bob":
+                bobs_conns = query_json
+        assert bobs_conns is not None
+
+        for key in expected_conn_out:
+            assert expected_conn_out[key] == bobs_conns[key]
+
+        assert event['ddtags'] == expected_tags
+
+    finally:
+        conn.close()
+
+
+def new_time():
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def old_time():
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+def very_old_time():
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+
+
+@pytest.mark.parametrize(
+    "active_rows,expected_users",
+    [
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'xact_start': new_time(),
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'xact_start': very_old_time(),
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["veryoldbob", "oldbob"],
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'oldbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'veryoldbob',
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["veryoldbob", "oldbob"],
+        ),
+        (
+            [
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'newbob',
+                    'query_start': new_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxbob',
+                    'xact_start': old_time(),
+                    'query_start': old_time(),
+                },
+                {
+                    'datname': 'datadog_test',
+                    'usename': 'sameoldtxboblongquery',
+                    'xact_start': old_time(),
+                    'query_start': very_old_time(),
+                },
+            ],
+            ["sameoldtxboblongquery", "sameoldtxbob"],
+        ),
+    ],
+)
+def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, expected_users):
+    check = integration_check(dbm_instance)
+    check._connect()
+    # set row limit to be 2
+    truncated_rows = check.statement_samples._truncate_activity_rows(active_rows, 2)
+    assert len(truncated_rows) == 2
+    # assert what is returned is sorted in the correct order
+    assert truncated_rows[0]['usename'] == expected_users[0]
+    assert truncated_rows[1]['usename'] == expected_users[1]
+
+
+@pytest.mark.parametrize(
+    "query,expected_err_tag,expected_explain_err_code,expected_err",
+    [
+        (
+            "select * from fake_table",
+            "error:explain-<class 'psycopg2.errors.UndefinedTable'>",
+            DBExplainError.database_error,
+            "<class 'psycopg2.errors.UndefinedTable'>",
+        ),
+        (
+            "select * from pg_settings where name = $1",
+            "error:explain-<class 'psycopg2.errors.UndefinedParameter'>",
+            DBExplainError.database_error,
+            "<class 'psycopg2.errors.UndefinedParameter'>",
+        ),
+        (
+            "SELECT city as city0, city as city1, city as city2, city as city3, "
+            "city as city4, city as city5, city as city6, city as city7, city as city8, city as city9, "
+            "city as city10, city as city11, city as city12, city as city13, city as city14, city as city15, "
+            "city as city16, city as city17, city as city18, city as city19, city as city20, city as city21, "
+            "city as city22, city as city23, city as city24, city as city25, city as city26, city as city27, "
+            "city as city28, city as city29, city as city30, city as city31, city as city32, city as city33, "
+            "city as city34, city as city35, city as city36, city as city37, city as city38, city as city39, "
+            "city as city40, city as city41, city as city42, city as city43, city as city44, city as city45, "
+            "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
+            "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
+            "city as city58, city as city59, city as city60, city as city61 "
+            "FROM persons WHERE city = 123",
+            "error:explain-{}".format(DBExplainError.query_truncated),
+            DBExplainError.query_truncated,
+            "track_activity_query_size=1024",
+        ),
+    ],
+)
+def test_statement_run_explain_errors(
+    integration_check,
+    dbm_instance,
+    aggregator,
+    query,
+    expected_err_tag,
+    expected_explain_err_code,
+    expected_err,
+):
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    check.check(dbm_instance)
+    _, explain_err_code, err = check.statement_samples._run_explain_safe("datadog_test", query, query, query)
+
+    assert explain_err_code == expected_explain_err_code
+    assert err == expected_err
+
+    expected_tags = dbm_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
+        expected_err_tag,
+    ]
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_samples.error',
+        count=1,
+        tags=expected_tags,
+        hostname='stubbed.hostname',
+    )
 
 
 @pytest.mark.parametrize("dbstrict", [True, False])
@@ -467,22 +822,39 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
 
 
 @pytest.mark.parametrize("db_user", ["datadog", "datadog_no_catalog"])
-def test_load_query_max_text_size(aggregator, integration_check, dbm_instance, db_user):
+def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["username"] = db_user
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_query_max_text_size(check.db)
+    check._load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['error:load-track-activity-query-size'],
+            tags=_expected_dbm_instance_tags(dbm_instance)
+            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
+            hostname='stubbed.hostname',
         )
     else:
         assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
-def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance, bob_conn):
+def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
+    dbm_instance["username"] = "datadog"
+    dbm_instance["dbname"] = "postgres"
+    check = integration_check(dbm_instance)
+    assert not check.pg_settings, "pg_settings should not have been initialized yet"
+    check._connect()
+    check._get_db(dbm_instance["dbname"])
+    assert "track_activity_query_size" in check.pg_settings
+    check.pg_settings["test_key"] = True
+    check._get_db(dbm_instance["dbname"])
+    assert (
+        "test_key" in check.pg_settings
+    ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
+
+
+def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
     dbm_instance['query_samples']['collection_interval'] = collection_interval
@@ -498,6 +870,25 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
+    # test the activity collection loop rate limit
+    collection_interval = 0.1
+    activity_interval = 0.2  # double the main loop
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['collection_interval'] = activity_interval
+    dbm_instance['query_samples']['run_sync'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_activity_collections = int(1 / activity_interval * sleep_time) + 1
+    check.cancel()
+    activity_metrics = aggregator.metrics("dd.postgres.collect_activity_snapshot.time")
+    assert max_activity_collections / 2.0 <= len(activity_metrics) <= max_activity_collections
+
+
+@pytest.mark.skip(reason='debugging flaky test (2021-09-03)')
 def test_statement_samples_unique_plans_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
     # tests rate limiting ingestion of samples per unique (query, plan)
     cache_max_size = 10
@@ -580,7 +971,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
-            "dd.postgres.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.postgres.async_job.cancel",
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -604,7 +996,10 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
         tags=_expected_dbm_instance_tags(dbm_instance)
-        + ['job:query-samples', "error:database-<class 'psycopg2.errors.UndefinedTable'>"],
+        + [
+            'job:query-samples',
+            "error:database-<class 'psycopg2.errors.UndefinedTable'>",
+        ],
     )
 
 
@@ -704,9 +1099,11 @@ def test_statement_metrics_database_errors(
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
-        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
+        'agent_hostname:stubbed.hostname',
         expected_error_tag,
     ]
 
-    aggregator.assert_metric('dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags)
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )

@@ -1,6 +1,14 @@
 # CHANGELOG - Kube_controller_manager
 
-## 1.9.0 / 2021-07-12
+## 2.0.1 / 2021-08-25 / Agent 7.31.0
+
+* [Fixed] Correctly use SSL options for health checks. See [#9977](https://github.com/DataDog/integrations-core/pull/9977).
+
+## 2.0.0 / 2021-08-22
+
+* [Changed] Add service check for K8s API Server components. See [#9773](https://github.com/DataDog/integrations-core/pull/9773).
+
+## 1.9.0 / 2021-07-12 / Agent 7.30.0
 
 * [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9575](https://github.com/DataDog/integrations-core/pull/9575).
 

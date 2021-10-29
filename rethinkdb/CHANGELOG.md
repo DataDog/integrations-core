@@ -1,6 +1,10 @@
 # CHANGELOG - RethinkDB
 
-## 1.3.3 / 2021-07-07
+## 2.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Removed] Remove documentation specifications. See [#9763](https://github.com/DataDog/integrations-core/pull/9763).
+
+## 1.3.3 / 2021-07-07 / Agent 7.30.0
 
 * [Fixed] Use agent 8 signature. See [#9649](https://github.com/DataDog/integrations-core/pull/9649).
 

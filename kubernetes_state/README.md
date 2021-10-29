@@ -33,11 +33,11 @@ The Kubernetes-state check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -45,5 +45,5 @@ Need help? Contact [Datadog support][6].
 [3]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/datadog_checks/kubernetes_state/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/assets/service_checks.json
+[6]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/

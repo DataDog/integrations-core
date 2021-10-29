@@ -1,99 +1,118 @@
-## WARNING: This configuration files is for SNMP v1, v2 and v3
-## Check carefully all variables depending of your SNMP version.
+## WARNING: This configuration file is for SNMP v1, v2, and v3.
+## Check all variables depending on your SNMP version.
 ##
-## NOTE: See SNMP integration setup guide and examples at https://docs.datadoghq.com/network_monitoring/devices/setup
-
+## NOTE: See SNMP integration setup guide and examples in the Datadog documentation:
+##       https://docs.datadoghq.com/network_monitoring/devices/setup
+#
 init_config:
 
-  ## @param loader - string - optional - default: python
-  ## Check loader to use for all instances. Available loaders:
-  ## - core: (recommended) will use new corecheck SNMP integration (faster and lower mem usage)
-  ## - python: will use legacy python SNMP integration
-  #
-  loader: core
+    ## @param loader - string - optional - default: python
+    ## Check loader to use for all instances. Available loaders:
+    ## - core: (recommended) Uses new corecheck SNMP integration (faster and lower memory usage)
+    ## - python: Uses the legacy python SNMP integration
+    #
+    loader: core
 
-  ## @param oid_batch_size - integer - optional - default: 10 (python), 60 (core)
-  ## The number of OIDs handled by each batch. Increasing this number improves performance but
-  ## uses more resources.
-  #
-  # oid_batch_size: 10
+    ## @param oid_batch_size - integer - optional - default: 10
+    ## The number of OIDs handled by each batch. Increasing this number improves performance but
+    ## uses more resources.
+    ##
+    ## In corecheck, the default value depends on the version of the agent.
+    ## Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
+    #
+    # oid_batch_size: 10
 
-  ## @param global_metrics - list of elements - optional
-  ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-  ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-  ##
-  ## Single scalar metrics and table metrics can be defined in this section.
-  ## Details on how to define metrics can be found here:
-  ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
-  #
-  #
-  # global_metrics:
-  #   - OID: 1.3.6.1.2.1.6.5.0
-  #     name: tcpPassiveOpens
-  #   - OID: 1.3.6.1.2.1.6.5.0
-  #     name: tcpPassiveOpens
-  #     metric_tags:
-  #       - TCP
+    ## @param global_metrics - list of mappings - optional
+    ## Specify global_metrics you want to monitor by using MIBS for counter and gauge.
+    ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
+    ##
+    ## Single scalar metrics and table metrics can be defined in this section.
+    ## Details on how to define metrics can be found in the documentation:
+    ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+    #
+    # global_metrics:
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #   - OID: 1.3.6.1.2.1.6.5.0
+    #     name: tcpPassiveOpens
+    #     metric_tags:
+    #     - TCP
 
-  ## @param profiles - object - optional
-  ## Specify profiles to be able to reference a set of metrics by name.
-  ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with a profile, whereas definition inlines
-  ## it directly here.
-  ## When using a profile present on the profiles directory of the
-  ## configuration, you can directly pass the filename.
-  ## By default, it loads all the profiles installed in the python package and
-  ## in the configuration directory, if the file doesn't start with an underscore.
-  #
-  # profiles:
-  #   f5-big-ip:
-  #     definition_file: f5-big-ip.yaml
-  #   router:
-  #     definition_file: generic-router.yaml
-  #   [...]
+    ## @param profiles - mapping - optional
+    ## Specify profiles to be able to reference a set of metrics by name.
+    ## Either `definition_file` or `definition` must be defined.
+    ## `definition_file` points to a file with a profile, and `definition` inlines
+    ## it directly.
+    ## When using a profile present on the profiles directory of the
+    ## configuration, you can directly pass the filename.
+    ## By default, if the file doesn't start with an underscore, it loads all of the profiles
+    ## installed in the python package and in the configuration directory.
+    #
+    # profiles:
+    #   f5-big-ip:
+    #     definition_file: f5-big-ip.yaml
+    #   router:
+    #     definition_file: generic-router.yaml
 
-  ## @param refresh_oids_cache_interval - integer - optional - default: 0
-  ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
-  ## the cache is refreshed.
-  ## This option works best when `oid_batch_size` is set to 128 or 256.
-  ## This is useful to improve performance when fetching metrics from large tables.
-  ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
-  ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
-  ## The caching is disabled if the interval is set to `0` (default).
-  ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
-  ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
-  ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
-  ##         the OIDs will be refreshed only according to the refresh interval.
-  ## Only available using python SNMP integration
-  #
-  # refresh_oids_cache_interval: 3600
+    ## @param refresh_oids_cache_interval - integer - optional - default: 0
+    ## Note: Beta feature, only available using python SNMP integration.
+    ## Set this option to enable caching of OIDs. The value is the number of seconds before the
+    ## the cache is refreshed.
+    ## This option works best when `oid_batch_size` is set to 128 or 256.
+    ## This is useful to improve performance when fetching metrics from large tables.
+    ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+    ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
+    ## The caching is disabled if the interval is set to `0` (default).
+    ## Note: If some tables rows are dynamic, new rows are only fetched every refresh interval.
+    ##         - This means new OIDs are also only picked up every refresh interval.
+    ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+    ##         the OIDs are refreshed only according to the refresh interval.
+    #
+    # refresh_oids_cache_interval: 3600
 
-  ## @param optimize_mib_memory_usage - boolean - optional - default: false
-  ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
-  ## MIB information. This shares internal MIB data across instances.
-  ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
-  ## Only available using python SNMP integration
-  #
-  # optimize_mib_memory_usage: false
+    ## @param optimize_mib_memory_usage - boolean - optional - default: false
+    ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
+    ## MIB information. This shares internal MIB data across instances.
+    ## Note: This strategy may impact MIB resolution.
+    ## Only available using python SNMP integration.
+    #
+    # optimize_mib_memory_usage: false
 
-  ## @param mibs_folder - string - optional
-  ## Specify an additional folder for your custom mib files (python format).
-  ## Only available using python SNMP integration
-  #
-  # mibs_folder: /path/to/your/mibs/folder
+    ## @param mibs_folder - string - optional
+    ## Specify an additional folder for your custom MIB files (python format).
+    ## Only available using python SNMP integration.
+    #
+    # mibs_folder: <MIBS_FOLDER>
 
-  ## @param ignore_nonincreasing_oid - boolean - optional - default: false
-  ## Set to true to ignore non increasing oid.
-  ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
-  ## Only available using python SNMP integration
-  #
-  # ignore_nonincreasing_oid: false
+    ## @param ignore_nonincreasing_oid - boolean - optional - default: false
+    ## Set to true to ignore non increasing OID.
+    ## See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
+    ## Only available using python SNMP integration.
+    #
+    # ignore_nonincreasing_oid: false
 
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
+
   -
     ## @param ip_address - string - optional
     ## The IP address of the device to monitor.
-    ## One of ip_address and network_address must be provided.
+    ## Either `ip_address` or `network_address` must be provided.
     #
     # ip_address: <IP_ADDRESS>
 
@@ -104,9 +123,10 @@ instances:
 
     ## @param community_string - string - optional
     ## Only useful for SNMP v1 & v2.
-    ## Enclose the community string with single quote like below (to avoid special character being interpreted).
+    ## Enclose the community string with single quotes to avoid special characters being interpreted. For instance:
+    ## community_string: 'public'
     #
-    # community_string: 'public'
+    # community_string: <COMMUNITY_STRING>
 
     ## @param snmp_version - integer - optional - default: 2
     ## If you are using SNMP v1 set snmp_version to 1
@@ -124,78 +144,72 @@ instances:
     #
     # retries: 5
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
     ## @param loader - string - optional - default: python
     ## Check loader to use. Available loaders:
-    ## - core: (recommended) will use new corecheck SNMP integration
-    ## - python: will use legacy python SNMP integration
+    ## - core: (recommended) Uses new corecheck SNMP integration
+    ## - python: Uses legacy python SNMP integration
     #
-    # loader: core
+    loader: core
 
-    ## @param oid_batch_size - integer - optional - default: 60 (core)
+    ## @param oid_batch_size - integer - optional - default: 10
     ## The number of OIDs handled by each batch. Increasing this number improves performance but
     ## uses more resources.
     ## Only available for corecheck implementation (`loader: core`).
+    ##
+    ## In corecheck, the default value depends on the version of the agent.
+    ## Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
     #
     # oid_batch_size: 10
 
     ## @param user - string - optional
-    ## USERNAME to connect to your SNMP devices.
+    ## Username to connect to your SNMP devices.
     ## SNMP v3 specific configuration
     #
     # user: <USERNAME>
 
     ## @param authProtocol - string - optional
     ## Authentication type to use when connecting to your SNMP devices.
-    ## It can be one of: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
-    ## Default to MD5 when `authKey` is specified.
-    ## SNMP v3 specific configuration
+    ## Valid types: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
+    ## Defaults to MD5 when `authKey` is specified.
+    ## SNMP v3 specific configuration.
     #
     # authProtocol: <AUTHENTICATION_PROTOCOL>
 
     ## @param authKey - string - optional
     ## Authentication key to use with your Authentication type.
-    ## SNMP v3 specific configuration
+    ## SNMP v3 specific configuration.
     #
     # authKey: <AUTHENTICATION_TYPE_KEY>
 
     ## @param privProtocol - string - optional
     ## Privacy type to use when connecting to your SNMP devices.
-    ## It can be one of: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
-    ## Default to DES when `privKey` is specified.
-    ## SNMP v3 specific configuration
+    ## Valid types: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
+    ## Defaults to DES when `privKey` is specified.
+    ## SNMP v3 specific configuration.
     #
     # privProtocol: <PRIVACY_TYPE>
 
     ## @param privKey - string - optional
     ## Privacy type key to use with your Privacy type.
-    ## SNMP v3 specific configuration
+    ## SNMP v3 specific configuration.
     #
     # privKey: <PRIVACY_TYPE_KEY>
 
     ## @param context_engine_id - string - optional
+    ## (Optional SNMP v3-only parameter)
     ## ID of your context engine; typically unneeded.
-    ## (optional SNMP v3-only parameter)
-    ## SNMP v3 specific configuration
+    ## SNMP v3 specific configuration.
     #
     # context_engine_id: <CONTEXT_ENGINE_ID>
 
     ## @param context_name - string - optional
     ## Name of your context (optional SNMP v3-only parameter).
-    ## SNMP v3 specific configuration
+    ## SNMP v3 specific configuration.
     #
     # context_name: <CONTEXT_NAME>
 
     ## @param use_global_metrics - boolean - optional - default: true
-    ## Whether or not global_metrics should be included for this instance.
+    ## Whether or not `global_metrics` should be included for this instance.
     #
     # use_global_metrics: true
 
@@ -204,13 +218,14 @@ instances:
     #
     # profile: <PROFILE_NAME>
 
-    ## @param metrics - list of elements - optional
+    ## @param metrics - list of mappings - optional
     ## Specify metrics you want to monitor.
-    ## metrics set here will override global_metrics set in the init_config section if use_global_metrics is set to false.
-    ## Otherwise, they will be used in addition of global_metrics.
+    ## Metrics set here will override `global_metrics` set in the `init_config` section
+    ## if `use_global_metrics` is set to false.
+    ## Otherwise, they will be used in addition to `global_metrics`.
     ##
     ## Single scalar metrics and table metrics can be defined in this section.
-    ## Details on how to define metrics can be found here:
+    ## Details on how to define metrics can be found in the documentation:
     ## https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
     #
     # metrics:
@@ -219,34 +234,31 @@ instances:
     #   - OID: 1.3.6.1.2.1.6.5.0
     #     name: tcpPassiveOpens
     #     metric_tags:
-    #       - TCP
+    #     - TCP
 
-    ## @param metric_tags - list of elements - optional
+    ## @param metric_tags - list of mappings - optional
     ## Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
     ## Regular expressions can be used to separate the resulting value into several tags, or get a
     ## substring using the regular Python engine: https://docs.python.org/3/library/re.html
     #
     # metric_tags:
-    #  - OID: 1.3.6.1.2.1.1.5.0
-    #    symbol: sysName
-    #    tag: snmp_host
-    #  - # With regular expression matching
-    #    OID: 1.3.6.1.2.1.1.5.0
-    #    symbol: sysName
-    #    match: (.*)-(.*)
-    #    tags:
-    #        host: \2
-    #        device_type: \1
+    #   - OID: 1.3.6.1.2.1.1.5.0
+    #     symbol: sysName
+    #     tag: snmp_host
+    #   - OID: 1.3.6.1.2.1.1.5.0
+    #     symbol: sysName
+    #     match: (.*)-(.*)
+    #     tags:
+    #       host: \2
+    #       device_type: \1
 
     ## @param network_address - string - optional
     ## The network address of the devices to scan for monitor.
-    ## Only available using python SNMP integration
     #
-    # network_address: <NETWORK_ADRESS>
+    # network_address: <NETWORK_ADDRESS>
 
-    ## @param ignored_ip_addresses - list of string - optional
+    ## @param ignored_ip_addresses - list of strings - optional
     ## A list of IP addresses to ignore when scanning the network.
-    ## Only available using python SNMP integration
     #
     # ignored_ip_addresses:
     #   - <IP_ADDRESS_1>
@@ -254,37 +266,41 @@ instances:
 
     ## @param discovery_interval - integer - optional - default: 3600
     ## Interval between 2 discovery starts, in seconds.
-    ## Only available using python SNMP integration
     #
     # discovery_interval: 3600
 
     ## @param discovery_allowed_failures - integer - optional - default: 3
-    ## Number of times a discovered host can fail before we remove it from the discovered list.
-    ## Only available using python SNMP integration
+    ## Number of times a discovered host can fail before it is removed from the discovered list.
     #
     # discovery_allowed_failures: 3
 
     ## @param workers - integer - optional - default: 5
-    ## Number of workers used for check when using discovery.
-    ## Only available using python SNMP integration
+    ## Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
     #
     # workers: 5
 
+    ## @param discovery_workers - integer - optional - default: 5
+    ## Number of workers used to discover new devices.
+    ## Only available using corecheck SNMP integration.
+    #
+    # discovery_workers: 5
+
     ## @param enforce_mib_constraints - boolean - optional - default: true
-    ## If set to false we will not check the values returned meet the MIB constraints.
-    ## Only available using python SNMP integration
+    ## If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
+    ## Only available using python SNMP integration.
     #
     # enforce_mib_constraints: true
 
     ## @param bulk_threshold - integer - optional - default: 0
     ## The number of symbols in each table that triggers a BULK request.
     ## Only relevant for SNMP > 1.
-    ## Only available using python SNMP integration
+    ## Only available using python SNMP integration.
     #
     # bulk_threshold: 0
 
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
-    ## (beta feature) Set this option to enable caching of OIDs. The value is the number of seconds before the
+    ## Note: Beta feature, only available using python SNMP integration.
+    ## Set this option to enable caching of OIDs. The value is the number of seconds before the
     ## the cache is refreshed.
     ## This option works best when `oid_batch_size` is set to 128 or 256.
     ## This is useful to improve performance when fetching metrics from large tables.
@@ -292,10 +308,45 @@ instances:
     ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
     ## The caching is disabled if the interval is set to `0` (default).
     ##
-    ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
-    ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
+    ## Note: If some tables rows are dynamic, new rows are only fetched at every refresh interval.
+    ##         - This means new OIDs are only picked up when OIDs are refreshed according to the refresh interval.
     ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
-    ##         the OIDs will be refreshed only according to the refresh interval.
-    ## Only available using python SNMP integration
+    ##         the OIDs are refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
+
+    ## @param namespace - string - optional - default: default
+    ## Namespace can be used to disambiguate devices with same IPs.
+    ## Changing namespace will cause devices being recreated in NDM app.
+    ## Only available using corecheck SNMP integration with `loader: core` config.
+    #
+    # namespace: default
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

@@ -2,6 +2,11 @@
 #
 init_config:
 
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -60,6 +65,12 @@ instances:
     #
     # timeout: <TIMEOUT>
 
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
@@ -99,6 +110,11 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:<INTEGRATION>
+
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
 
     ## @param use_tls - boolean - optional - default: false
     ## Instructs the SAP HANA integration to connect using TLS.

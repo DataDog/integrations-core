@@ -14,8 +14,10 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
+
+from .version_utils import V9_4
 
 try:
     import datadog_agent
@@ -34,6 +36,10 @@ SELECT {cols}
   {filters}
   LIMIT {limit}
 """
+
+# Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
+PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
+PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
@@ -110,9 +116,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
-        self._obfuscate_options = to_native_string(
-            json.dumps({'quantize_sql_tables': self._config.obfuscator_options.get('quantize_sql_tables', False)})
-        )
+        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.full_statement_text_cache_max_size,
@@ -149,12 +153,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._stat_column_cache = col_names
         return col_names
 
-    def _db_hostname_cached(self):
-        if self._db_hostname:
-            return self._db_hostname
-        self._db_hostname = resolve_db_host(self._config.host)
-        return self._db_hostname
-
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
@@ -179,12 +177,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             for row in rows:
                 row['query'] = row['query'][0:200]
             payload = {
-                'host': self._db_hostname_cached(),
+                'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
                 'postgres_rows': rows,
                 'postgres_version': self._payload_pg_version(),
+                'ddagentversion': datadog_agent.get_version(),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
         except Exception:
@@ -203,7 +202,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
                     1,
-                    tags=self._tags + ["error:database-missing_pg_stat_statements_required_columns"],
+                    tags=self._tags
+                    + [
+                        "error:database-missing_pg_stat_statements_required_columns",
+                    ]
+                    + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
                 )
                 return []
 
@@ -241,12 +245,44 @@ class PostgresStatementMetrics(DBMAsyncJob):
             else:
                 self._log.warning("Unable to collect statement metrics because of an error running queries: %s", e)
 
-            self._check.count("dd.postgres.statement_metrics.error", 1, tags=self._tags + [error_tag])
+            self._check.count(
+                "dd.postgres.statement_metrics.error",
+                1,
+                tags=self._tags + [error_tag] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
 
             return []
 
+    def _emit_pg_stat_statements_metrics(self):
+        query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                query,
+            )
+            count = 0
+            if rows:
+                count = rows[0][0]
+            self._check.count(
+                "postgresql.pg_stat_statements.max",
+                self._check.pg_settings.get("pg_stat_statements.max", 0),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.count(
+                "postgresql.pg_stat_statements.count",
+                count,
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
+
     def _collect_metrics_rows(self):
         rows = self._load_pg_stat_statements()
+        if rows:
+            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:
@@ -255,7 +291,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        self._check.gauge('dd.postgres.queries.query_rows_raw', len(rows))
+        self._check.gauge(
+            'dd.postgres.queries.query_rows_raw',
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         return rows
 
     def _normalize_queries(self, rows):
@@ -287,7 +328,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ]
             yield {
                 "timestamp": time.time() * 1000,
-                "host": self._db_hostname_cached(),
+                "host": self._check.resolved_hostname,
+                "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

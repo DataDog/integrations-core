@@ -55,14 +55,15 @@ class AirflowCheck(AgentCheck):
     def _submit_healthy_metrics_stable(self, resp, tags):
         metadb_status = resp.get('metadatabase', {}).get('status')
         scheduler_status = resp.get('scheduler', {}).get('status')
-        message = "Metadatabase is {} and scheduler is {}".format(metadb_status, scheduler_status)
 
         if metadb_status == AIRFLOW_STABLE_STATUS_OK and scheduler_status == AIRFLOW_STABLE_STATUS_OK:
             health_status = AgentCheck.OK
+            self.service_check('airflow.healthy', health_status, tags=tags)
         else:
             health_status = AgentCheck.CRITICAL
+            message = "Metadatabase is {} and scheduler is {}".format(metadb_status, scheduler_status)
+            self.service_check('airflow.healthy', health_status, tags=tags, message=message)
 
-        self.service_check('airflow.healthy', health_status, tags=tags, message=message)
         self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
 
     def _parse_config(self):

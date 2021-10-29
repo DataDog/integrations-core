@@ -52,6 +52,10 @@ def instance_collection_type(field, value):
     return 'realtime'
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_excluded_host_tags(field, value):
     return []
 

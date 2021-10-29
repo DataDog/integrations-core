@@ -2,6 +2,11 @@
 #
 metrics:
 - MIB: IF-MIB
+  symbol:
+    OID: 1.3.6.1.2.1.2.1.0
+    name: ifNumber
+
+- MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.2.2
     name: ifTable

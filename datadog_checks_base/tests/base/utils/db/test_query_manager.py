@@ -33,10 +33,10 @@ class TestQueryCompilation:
         with pytest.raises(ValueError, match='^field `query` for test query is required$'):
             query_manager.compile_queries()
 
-    def test_query_not_string(self):
-        query_manager = create_query_manager({'name': 'test query', 'query': 5})
+    def test_custom_query_not_string(self):
+        query_manager = create_query_manager({'name': 'custom query #1', 'query': {'query': 'example'}})
 
-        with pytest.raises(ValueError, match='^field `query` for test query must be a string$'):
+        with pytest.raises(ValueError, match='^field `query` for custom query #1 must be a string$'):
             query_manager.compile_queries()
 
     def test_no_columns(self):

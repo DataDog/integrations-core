@@ -24,6 +24,10 @@ def instance_consumer_groups(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_disable_generic_tags(field, value):
+    return False
+
+
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -76,36 +80,36 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_cafile(field, value):
+def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_certfile(field, value):
+def instance_tls_ca_cert(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_check_hostname(field, value):
+def instance_tls_cert(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_crlfile(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_private_key(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_private_key_password(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_validate_hostname(field, value):
     return True
 
 
-def instance_ssl_context(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_crlfile(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_keyfile(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
+def instance_tls_verify(field, value):
+    return True
 
 
 def instance_zk_connect_str(field, value):

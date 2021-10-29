@@ -47,7 +47,9 @@ class ChannelMetricCollector(object):
     def get_pcf_channel_metrics(self, queue_manager):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
-            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
             # Don't warn if no messages, see:
@@ -89,7 +91,9 @@ class ChannelMetricCollector(object):
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
-            pcf = pymqi.PCFExecute(queue_manager, convert=self.config.convert_endianness)
+            pcf = pymqi.PCFExecute(
+                queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+            )
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
         except pymqi.MQMIError as e:

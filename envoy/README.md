@@ -12,7 +12,7 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 #### Istio
 
-If you are using Envoy as part of [Istio][3], to access Envoy's [admin endpoint][4] you need to set Istio's [proxyAdminPort][5].
+If you are using Envoy as part of [Istio][3], be sure to use the appropriate [Envoy admin endpoint][4] for the `stats_url`.
 
 #### Standard
 
@@ -33,7 +33,7 @@ admin:
 
 ##### Secured stats endpoint
 
-Create a listener/vhost that routes to the admin endpoint (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
+Create a listener/vhost that routes to the [admin endpoint][5] (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
 
 Here's an example config (from [this gist][6]):
 
@@ -109,7 +109,7 @@ To configure this check for an Agent running on a host:
       - stats_url: http://localhost:80/stats
     ```
 
-2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
+2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
 3. [Restart the Agent][9].
 
 ###### Metric filtering
@@ -207,7 +207,7 @@ The Envoy check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][16] for a list of service checks provided by this integration.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -218,13 +218,13 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 **Note**: Envoy version data will not be collected.
 
-Need help? Contact [Datadog support][15].
+Need help? Contact [Datadog support][16].
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://istio.io
-[4]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-[5]: https://istio.io/docs/reference/config
+[4]: https://istio.io/latest/docs/ops/deployment/requirements/#ports-used-by-istio
+[5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [6]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
@@ -234,5 +234,5 @@ Need help? Contact [Datadog support][15].
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
-[15]: https://docs.datadoghq.com/help/
-[16]: https://github.com/DataDog/integrations-core/blob/master/envoy/assets/service_checks.json
+[15]: https://github.com/DataDog/integrations-core/blob/master/envoy/assets/service_checks.json
+[16]: https://docs.datadoghq.com/help/

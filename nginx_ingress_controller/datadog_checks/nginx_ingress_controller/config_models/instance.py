@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -66,6 +67,7 @@ class InstanceConfig(BaseModel):
     bearer_token_path: Optional[str]
     collect_nginx_histograms: Optional[bool]
     connect_timeout: Optional[float]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
     extra_headers: Optional[Mapping[str, Any]]
@@ -95,6 +97,7 @@ class InstanceConfig(BaseModel):
     prometheus_url: str
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     send_distribution_buckets: Optional[bool]
     send_distribution_counts_as_monotonic: Optional[bool]
     send_distribution_sums_as_monotonic: Optional[bool]

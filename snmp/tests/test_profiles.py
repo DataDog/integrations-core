@@ -34,6 +34,7 @@ from .metrics import (
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
+    IF_SCALAR_GAUGE,
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
@@ -65,7 +66,7 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-pytestmark = common.python_autodiscovery_only
+pytestmark = common.snmp_integration_only
 
 
 def test_load_profiles(caplog):
@@ -327,6 +328,9 @@ def test_f5(aggregator):
     for metric in cpu_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
+
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for interface, desc in interfaces:
         interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
         for metric in IF_COUNTS:
@@ -425,6 +429,8 @@ def test_router(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     interfaces = [
         ('eth0', 'kept'),
         ('eth1', 'their forward oxen'),
@@ -498,6 +504,8 @@ def test_f5_router(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface, desc in interfaces:
         tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
         for metric in IF_COUNTS:
@@ -550,6 +558,8 @@ def test_cisco_3850(aggregator):
         'Gi2/1/4': 'Link to Switch',
     }
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface in interfaces:
         alias = aliases.get(interface, '')
         tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(alias)] + common_tags
@@ -1026,6 +1036,8 @@ def test_cisco_nexus(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)

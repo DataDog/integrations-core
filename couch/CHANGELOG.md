@@ -1,6 +1,17 @@
 # CHANGELOG - couch
 
-## 3.13.3 / 2021-07-12
+## 4.1.0 / 2021-10-04
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 4.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 3.13.3 / 2021-07-12 / Agent 7.30.0
 
 * [Fixed] Use Agent 8 signature. See [#9522](https://github.com/DataDog/integrations-core/pull/9522).
 

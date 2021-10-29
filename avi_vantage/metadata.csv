@@ -50,7 +50,7 @@ avi_vantage.l7_client.avg_waf_rejected,gauge,15,transaction,second,Average numbe
 avi_vantage.l7_client.pct_get_reqs,gauge,15,percent,,Number of HTTP GET requests as a percentage of total requests received.,0,avi_vantage,
 avi_vantage.l7_client.pct_post_reqs,gauge,15,percent,,Number of HTTP POST requests as a percentage of total requests received.,0,avi_vantage,
 avi_vantage.l7_client.pct_response_errors,gauge,15,percent,,Percent of 4xx and 5xx responses,0,avi_vantage,
-avi_vantage.l7_client.pct_waf_attacks,gauge,15,percent,,Malicious transactions (attacks) identified by WAF as the pecentage  of total requests received.,0,avi_vantage,
+avi_vantage.l7_client.pct_waf_attacks,gauge,15,percent,,Malicious transactions (attacks) identified by WAF as the percentage  of total requests received.,0,avi_vantage,
 avi_vantage.l7_client.pct_waf_disabled,gauge,15,percent,,Transactions bypassing WAF as the percentage of total requests received.,0,avi_vantage,
 avi_vantage.l7_client.sum_application_response_time,gauge,15,second,,Total time taken by server to respond to request.,0,avi_vantage,
 avi_vantage.l7_client.sum_client_data_transfer_time,gauge,15,second,,Average client data transfer time computed by adding response latencies across all HTTP requests.,0,avi_vantage,

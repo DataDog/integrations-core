@@ -1,6 +1,6 @@
 # CHANGELOG - Kube Metrics Server
 
-## 1.3.0 / 2021-05-28
+## 1.3.0 / 2021-05-28 / Agent 7.29.0
 
 * [Added] Support 0.4.0 metrics server renamed metric names. See [#9202](https://github.com/DataDog/integrations-core/pull/9202). Thanks [eatwithforks](https://github.com/eatwithforks).
 

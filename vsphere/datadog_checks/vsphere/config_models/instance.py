@@ -65,6 +65,7 @@ class RestApiOptions(BaseModel):
     class Config:
         allow_mutation = False
 
+    allow_redirects: Optional[bool]
     auth_token: Optional[AuthToken]
     auth_type: Optional[str]
     aws_host: Optional[str]
@@ -86,6 +87,7 @@ class RestApiOptions(BaseModel):
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
+    request_size: Optional[float]
     skip_proxy: Optional[bool]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
@@ -112,6 +114,7 @@ class InstanceConfig(BaseModel):
     collect_tags: Optional[bool]
     collection_level: Optional[int]
     collection_type: Optional[str]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: bool
     excluded_host_tags: Optional[Sequence[str]]
     host: str

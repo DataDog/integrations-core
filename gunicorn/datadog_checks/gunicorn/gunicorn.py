@@ -41,7 +41,7 @@ class GUnicornCheck(AgentCheck):
         return {"psutil": psutil.__version__}
 
     def check(self, instance):
-        """ Collect metrics for the given gunicorn instance. """
+        """Collect metrics for the given gunicorn instance."""
         self.log.debug("Running instance: %s", instance)
         custom_tags = instance.get('tags', [])
 
@@ -60,8 +60,12 @@ class GUnicornCheck(AgentCheck):
 
             # if no workers are running, alert CRITICAL, otherwise OK
             msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
-            status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
             tags = ['app:' + proc_name] + custom_tags
+            if working == 0 and idle == 0:
+                status = AgentCheck.CRITICAL
+            else:
+                status = AgentCheck.OK
+                msg = None
 
             self.service_check(self.IS_RUNNING_SVC, status, tags=tags, message=msg)
 
@@ -129,7 +133,7 @@ class GUnicornCheck(AgentCheck):
         return working, idle
 
     def _get_master_proc_by_name(self, name):
-        """ Return a psutil process for the master gunicorn process with the given name. """
+        """Return a psutil process for the master gunicorn process with the given name."""
         master_name = GUnicornCheck._get_master_proc_name(name)
         master_procs = []
         for p in psutil.process_iter():
@@ -143,7 +147,7 @@ class GUnicornCheck(AgentCheck):
 
     @staticmethod
     def _get_master_proc_name(name):
-        """ Return the name of the master gunicorn process for the given proc name. """
+        """Return the name of the master gunicorn process for the given proc name."""
         # Here's an example of a process list for a gunicorn box with name web1
         # root     22976  0.1  0.1  60364 13424 ?        Ss   19:30   0:00 gunicorn: master [web1]
         # web      22984 20.7  2.3 521924 176136 ?       Sl   19:30   1:58 gunicorn: worker [web1]
@@ -159,7 +163,7 @@ class GUnicornCheck(AgentCheck):
             self.set_metadata('version', raw_version)
 
     def _get_version(self):
-        """ Get version from `gunicorn --version` """
+        """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)

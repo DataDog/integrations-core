@@ -14,7 +14,7 @@ MESSAGE_METHODS = {'success': echo_success, 'warning': echo_warning, 'failure': 
 
 @click.command("validate-profile", short_help="Validate SNMP profiles", context_settings=CONTEXT_SETTINGS)
 @click.option('-f', '--file', help="Path to a profile file to validate")
-@click.option('-d', '--directory', help="Path to a directory of profiles to validate")
+@click.option('-d', '--directory', multiple=True, help="Path to a directory of profiles to validate")
 @click.option('-v', '--verbose', help="Increase verbosity of error messages", is_flag=True)
 def validate_profile(file, directory, verbose):
     path = initialize_path(directory)
@@ -76,7 +76,7 @@ def show_report(report):
     if report['failed']:
         echo_failure("FAILED")
     else:
-        echo_success("Successfuly validated")
+        echo_success("Successfully validated")
 
     for display_func, message in report['messages']:
         display_func(message)

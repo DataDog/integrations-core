@@ -18,6 +18,7 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     global_custom_queries: Optional[Sequence[Mapping[str, Any]]]
+    persist_db_connections: Optional[bool]
     service: Optional[str]
 
     @root_validator(pre=True)
