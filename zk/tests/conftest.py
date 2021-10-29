@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
 
@@ -149,7 +149,7 @@ def dd_environment(get_instance):
     else:
         condition = [condition_non_tls]
 
-    with docker_run(compose_file, conditions=condition):
+    with docker_run(compose_file, conditions=condition, sleep=5):
         yield get_instance, {
             'docker_volumes': [
                 '{}:/conf/private_key.pem'.format(private_key),
