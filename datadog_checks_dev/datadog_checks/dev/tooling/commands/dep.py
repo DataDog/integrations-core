@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import copy
 from collections import defaultdict
 
 import click
@@ -24,6 +25,9 @@ IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
 }
+
+# Dependencies for the downloader that are security-related and should be updated separately from the others
+SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib[crypto,pynacl]'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -243,8 +247,14 @@ def is_version_compatible(marker, supported_versions):
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
 )
+@click.option('--ignore-security-deps', '-d', is_flag=True, help="Don't attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
-def updates(sync, check_python_classifiers, batch_size):
+def updates(sync, check_python_classifiers, ignore_security_deps, batch_size):
+
+    dont_update_deps = copy.deepcopy(IGNORED_DEPS)
+    if ignore_security_deps:
+        sec_deps = copy.deepcopy(SECURITY_DEPS)
+        dont_update_deps.add(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -260,7 +270,7 @@ def updates(sync, check_python_classifiers, batch_size):
     deps_to_update = {
         agent_dependency_definition: package_data[package]['version']
         for package, package_dependency_definitions in all_agent_dependencies.items()
-        if package not in IGNORED_DEPS
+        if package not in dont_update_deps
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
         if str(agent_dep_version)[2:] != package_data[package]['version']
