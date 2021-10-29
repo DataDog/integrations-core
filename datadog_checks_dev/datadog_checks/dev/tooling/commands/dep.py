@@ -247,12 +247,12 @@ def is_version_compatible(marker, supported_versions):
     help="""Only flag a dependency as needing an update if the newest version has python classifiers matching the marker.
     NOTE: Some packages may not have proper classifiers.""",
 )
-@click.option('--ignore-security-deps', '-d', is_flag=True, help="Don't attempt to update security dependencies")
+@click.option('--include-security-deps', '-i', is_flag=True, help="Attempt to update security dependencies")
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
-def updates(sync, check_python_classifiers, ignore_security_deps, batch_size):
+def updates(sync, check_python_classifiers, include_security_deps, batch_size):
 
     dont_update_deps = copy.deepcopy(IGNORED_DEPS)
-    if ignore_security_deps:
+    if not include_security_deps:
         sec_deps = copy.deepcopy(SECURITY_DEPS)
         dont_update_deps = dont_update_deps.union(sec_deps)
 
