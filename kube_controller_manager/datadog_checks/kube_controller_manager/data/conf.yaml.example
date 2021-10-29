@@ -56,37 +56,37 @@ instances:
     # leader_election: true
 
     ## @param leader_election_kind - string - optional - default: auto
-    ## Kind of object to look at for the leader election.
-    ## Can be:
+    ## The kind of object to look at for the leader election.
+    ## Options:
     ##   * auto
     ##   * lease
     ##   * endpoints
     ##   * configmap
-    ## auto makes the check try lease first and fallback to endpoints if lease isn't available
+    ## The `auto` option makes the check try `lease` first and fallback to endpoints if `lease` isn't available.
     #
     # leader_election_kind: auto
 
     ## @param health_url - string - optional - default: http://localhost:10252/healthz
-    ## URL for the kube-controller-manager health endpoint.
+    ## The URL for the kube-controller-manager health endpoint.
     #
     # health_url: http://localhost:10252/healthz
 
     ## @param ignore_deprecated - boolean - optional - default: false
-    ## Filter deprecated metrics from the kube-controller-manager  /metrics endpoints payload
+    ## Filter deprecated metrics from the kube-controller-manager /metrics endpoints payload.
     #
     # ignore_deprecated: false
 
     ## @param extra_queues - list of strings - optional
-    ## Monitor additional queues, in addition to the default ones
-    ## NOTE: `{WorkQueueName}_*` metrics were deprecated in Kubernetes 1.14 
-    ## in favor of `workqueue_*` metrics
+    ## Monitor additional queues, in addition to the default ones.
+    ## **NOTE**: `{WorkQueueName}_*` metrics were deprecated in Kubernetes v1.14 
+    ## in favor of `workqueue_*` metrics.
     #
     # extra_queues:
     #   - <NAME1>
     #   - <NAME2>
 
     ## @param extra_limiters - list of strings - optional
-    ## Monitor additional rate limiters, in addition to the default ones
+    ## Monitor additional rate limiters, in addition to the default ones.
     #
     # extra_limiters:
     #   - <NAME1>

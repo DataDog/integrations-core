@@ -16,8 +16,8 @@ instances:
 
     ## @param possible_prometheus_urls - list of strings - optional
     ## The URLs to try to get your application metrics that are exposed by Prometheus.
-    ## The check will try each URLs in the list and will use the first working one.
-    ## One of possible_prometheus_urls or prometheus_url parameter is required.
+    ## The check tries each URL in the list and uses the first working one.
+    ## The `possible_prometheus_urls` or `prometheus_url` parameter is required.
     #
   - possible_prometheus_urls:
       - https://%%host%%:10257/metrics
@@ -27,7 +27,7 @@ instances:
 
     ## @param prometheus_url - string - optional - default: http://%%host%%:10252/metrics
     ## The URL where your application metrics are exposed by Prometheus.
-    ## One of possible_prometheus_urls or prometheus_url parameter is required.
+    ## The `possible_prometheus_urls` or `prometheus_url` parameter is required.
     #
     # prometheus_url: http://%%host%%:10252/metrics
 

@@ -15,33 +15,33 @@ files:
         example: true
     - name: leader_election_kind
       description: |
-        Kind of object to look at for the leader election.
-        Can be:
+        The kind of object to look at for the leader election.
+        Options:
           * auto
           * lease
           * endpoints
           * configmap
-        auto makes the check try lease first and fallback to endpoints if lease isn't available
+        The `auto` option makes the check try `lease` first and fallback to endpoints if `lease` isn't available.
       value:
         type: string
         example: auto
     - name: health_url
       description: |
-        URL for the kube-controller-manager health endpoint.
+        The URL for the kube-controller-manager health endpoint.
       value:
         type: string
         example: http://localhost:10252/healthz
     - name: ignore_deprecated
       description: |
-        Filter deprecated metrics from the kube-controller-manager  /metrics endpoints payload
+        Filter deprecated metrics from the kube-controller-manager /metrics endpoints payload.
       value:
         type: boolean
         example: false
     - name: extra_queues
       description: |
-        Monitor additional queues, in addition to the default ones
-        NOTE: `{WorkQueueName}_*` metrics were deprecated in Kubernetes 1.14 
-        in favor of `workqueue_*` metrics
+        Monitor additional queues, in addition to the default ones.
+        **NOTE**: `{WorkQueueName}_*` metrics were deprecated in Kubernetes v1.14 
+        in favor of `workqueue_*` metrics.
       value:
         type: array
         items:
@@ -51,7 +51,7 @@ files:
           - <NAME2>
     - name: extra_limiters
       description: |
-        Monitor additional rate limiters, in addition to the default ones
+        Monitor additional rate limiters, in addition to the default ones.
       value:
         type: array
         items:
@@ -78,8 +78,8 @@ files:
       required: false
       description: |
         The URLs to try to get your application metrics that are exposed by Prometheus.
-        The check will try each URLs in the list and will use the first working one.
-        One of possible_prometheus_urls or prometheus_url parameter is required.
+        The check tries each URL in the list and uses the first working one.
+        The `possible_prometheus_urls` or `prometheus_url` parameter is required.
       enabled: true
       value:
         type: array
@@ -91,15 +91,13 @@ files:
           - http://%%host%%:10252/metrics
           - http://localhost:10252/metrics
     - name: prometheus_url
-      required: false
       description: |
         The URL where your application metrics are exposed by Prometheus.
-        One of possible_prometheus_urls or prometheus_url parameter is required.
+        The `possible_prometheus_urls` or `prometheus_url` parameter is required.
       value:
         example: http://%%host%%:10252/metrics
         type: string
     - name: bearer_token_auth
-      required: false
       description: |
         Used if you are using RBACs and need the Agent to authenticate
         against the APIServer to retrieve metrics.
