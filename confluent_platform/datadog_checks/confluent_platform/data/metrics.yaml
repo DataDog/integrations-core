@@ -207,10 +207,10 @@ jmx_metrics:
       domain: kafka.log
       bean:
         # Log flush rate and time.
-        - kafka.log:type=Log,name=Size,topic=(.*),partition=(.*)
+        - kafka.log:type=Log,name=Size,topic=(?:.*\\.topic\\.)([a-z-]+[0-9]),partition=(?:.*\\.partition\\.)([0-9]+)(?:.*)
       tags:
         topic: $1
-        partition: $2 
+        partition: $2
       attribute:
         Value:
           alias: confluent.$domain.$name.log_size
