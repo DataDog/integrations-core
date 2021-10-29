@@ -13,7 +13,31 @@ DEFAULT_METRIC_TYPE = 'native'
 
 
 class MetricTransformer:
+    """
+    MetricTransformer is used by OpenMetricsScraper to modify the metric type of collected OpenMetrics data.
+
+    Minimal example configuration:
+
+    ```yaml
+    instances:
+    - openmetrics_endpoint: http://example.com/endpoint
+      namespace: "foobar"
+      metrics:
+      - bar
+      - foo
+      collect_counters_with_distributions: true
+      histogram_buckets_as_distributions: true
+
+    ```
+    Agent 7 Signature:
+
+        MetricTransformer(name, check, config)
+
+    """
     def __init__(self, check, config):
+        """
+        The base class for metric type transformation.
+        """
         self.check = check
         self.logger = check.log
         self.cache_metric_wildcards = is_affirmative(config.get('cache_metric_wildcards', True))
@@ -56,6 +80,10 @@ class MetricTransformer:
                     raise_from(type(e)(error), None)
 
     def get(self, metric):
+        """
+        Get the transformer based on metric patterns.
+        """
+
         metric_name = metric.name
 
         transformer_data = self.transformer_data.get(metric_name)
@@ -80,6 +108,10 @@ class MetricTransformer:
         self.logger.debug('Skipping metric `%s` as it is not defined in `metrics`', metric_name)
 
     def compile_transformer(self, config):
+        """
+        Compile the transformer based on config options.
+        """
+
         metric_name = config.pop('name')
         if not isinstance(metric_name, str):
             raise TypeError('field `name` must be a string')
@@ -95,6 +127,10 @@ class MetricTransformer:
         return metric_type, factory(self.check, metric_name, config, self.global_options)
 
     def skip_native_metric(self, metric):
+        """
+        Return true if the metric type is unsupported, false otherwise.
+        """
+
         if metric.type == 'unknown':
             self.logger.debug('Metric `%s` has no type, so you must define one in the `metrics` setting', metric.name)
             return True
@@ -110,6 +146,10 @@ class MetricTransformer:
 
     @staticmethod
     def normalize_metric_config(check_config):
+        """
+        Normalize the metric configuration or raise an exception if input types are incorrect.
+        """
+
         config = {}
         for option_name in ('metrics', 'extra_metrics'):
             option_config = check_config.get(option_name, [])
