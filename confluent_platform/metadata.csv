@@ -14,7 +14,7 @@ confluent.kafka.cluster.partition.under_min_isr,gauge,,,,Number of partitions wh
 confluent.kafka.server.broker_topic_metrics.bytes_in_per_sec,gauge,,byte,,Total bytes in per topic,0,confluent_platform,bytes in per sec
 confluent.kafka.server.broker_topic_metrics.bytes_out_per_sec,gauge,,byte,,Total bytes out per topic,0,confluent_platform,bytes out per sec
 confluent.kafka.server.broker_topic_metrics.messages_in_per_sec,gauge,,byte,,Total messages in per topic,0,confluent_platform,messages in per sec
-confluent.kafka.server.broker_topic_metrics.messages_out_per_sec,gauge,,byte,,Total messages out per topic,0,confluent_platform,messages in per sec
+confluent.kafka.server.broker_topic_metrics.messages_out_per_sec,gauge,,byte,,Total messages out per topic,0,confluent_platform,messages out per sec
 confluent.kafka.server.broker_topic_metrics.produce_message_conversions_per_sec,gauge,,byte,,Total messages converted at production per topic,0,confluent_platform,produce messages conv per sec
 confluent.kafka.server.broker_topic_metrics.fetch_message_conversions_per_sec,gauge,,byte,,Total messages converted at production per topic,0,confluent_platform,fetch message conv per sec
 confluent.kafka.server.topic.bytes_in_per_sec.rate,gauge,,byte,second,Aggregate incoming byte rate.,0,confluent_platform,topic bytes in
