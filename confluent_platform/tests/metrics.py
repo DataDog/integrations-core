@@ -91,12 +91,12 @@ BROKER_METRICS = [
     'confluent.kafka.server.topic.messages_in_per_sec.rate',
     'confluent.kafka.server.topic.total_fetch_requests_per_sec.rate',
     'confluent.kafka.server.topic.total_produce_requests_per_sec.rate',
-    'confluent.kafka.server.broker_topic_metrics.BytesInPerSec',
-    'confluent.kafka.server.broker_topic_metrics.BytesOutPerSec',
-    'confluent.kafka.server.broker_topic_metrics.MessagesInPerSec',
-    'confluent.kafka.server.broker_topic_metrics.MessagesOutPerSec',
-    'confluent.kafka.server.broker_topic_metrics.ProduceMessageConversionsPerSec',
-    'confluent.kafka.server.broker_topic_metrics.FetchMessageConversionsPerSec',
+    'confluent.kafka.server.broker_topic_metrics.bytes_in_per_sec',
+    'confluent.kafka.server.broker_topic_metrics.bytes_out_per_sec',
+    'confluent.kafka.server.broker_topic_metrics.messages_in_per_sec',
+    'confluent.kafka.server.broker_topic_metrics.messages_out_per_sec',
+    'confluent.kafka.server.broker_topic_metrics.produce_message_conversions_per_sec',
+    'confluent.kafka.server.broker_topic_metrics.fetch_message_conversions_per_sec',
     'confluent.kafka.log.Log.Size.log_size',
 ]
 
