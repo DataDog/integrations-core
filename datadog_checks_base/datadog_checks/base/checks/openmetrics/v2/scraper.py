@@ -34,7 +34,7 @@ class OpenMetricsScraper:
       - foo
       raw_metric_prefix: "test"
       telemetry: "true"
-      hostname_label: dummy
+      hostname_label: node
     ```
 
     """
