@@ -12,7 +12,10 @@ from datadog_checks.ecs_fargate import FargateCheck
 HERE = get_here()
 INSTANCE_TAGS = ['foo:bar']
 
-EXPECTED_CONTAINER_METRICS = [
+LINUX_STATS_FIXTURE = 'stats_linux.json'
+WINDOWS_STATS_FIXTURE = 'stats_windows.json'
+
+EXPECTED_CONTAINER_METRICS_LINUX = [
     'ecs.fargate.io.ops.write',
     'ecs.fargate.io.bytes.write',
     'ecs.fargate.io.ops.read',
@@ -36,7 +39,16 @@ EXPECTED_CONTAINER_METRICS = [
     'ecs.fargate.mem.max_usage',
 ]
 
-EXTRA_EXPECTED_CONTAINER_METRICS = [
+EXPECTED_CONTAINER_METRICS_WINDOWS = [
+    'ecs.fargate.cpu.user',
+    'ecs.fargate.cpu.system',
+    'ecs.fargate.cpu.usage',
+    'ecs.fargate.cpu.limit',
+    'ecs.fargate.mem.usage',
+    'ecs.fargate.mem.max_usage',
+]
+
+EXTRA_EXPECTED_CONTAINER_METRICS_LINUX = [
     'ecs.fargate.cpu.limit',
     'ecs.fargate.mem.hierarchical_memory_limit',
     'ecs.fargate.mem.hierarchical_memsw_limit',
@@ -52,11 +64,20 @@ EXTRA_NETWORK_METRICS = [
 ]
 
 
-def mocked_requests_get(*args, **kwargs):
+def mocked_requests_get_linux(*args, **kwargs):
     if args[0].endswith("/metadata"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats.json'))
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE))
+    else:
+        return MockResponse(status_code=404)
+
+
+def mocked_requests_get_windows(*args, **kwargs):
+    if args[0].endswith("/metadata"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
+    elif args[0].endswith("/stats"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', WINDOWS_STATS_FIXTURE))
     else:
         return MockResponse(status_code=404)
 
