@@ -14,9 +14,6 @@ DEFAULT_METRIC_TYPE = 'native'
 
 class MetricTransformer:
     def __init__(self, check, config):
-        """
-        The base class for metric type transformation.
-        """
         self.check = check
         self.logger = check.log
         self.cache_metric_wildcards = is_affirmative(config.get('cache_metric_wildcards', True))
@@ -141,6 +138,9 @@ class MetricTransformer:
 
 
 def get_native_transformer(check, metric_name, modifiers, global_options):
+    """
+    Uses whatever the endpoint describes as the metric type in the first occurrence.
+    """
     transformer = None
 
     def native(metric, sample_data, runtime_data):
@@ -154,6 +154,9 @@ def get_native_transformer(check, metric_name, modifiers, global_options):
 
 
 def get_native_dynamic_transformer(check, metric_name, modifiers, global_options):
+    """
+    Uses whatever the endpoint describes as the metric type.
+    """
     cached_transformers = {}
 
     def native_dynamic(metric, sample_data, runtime_data):
