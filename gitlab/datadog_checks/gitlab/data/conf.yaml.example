@@ -89,6 +89,14 @@ instances:
     #
     # send_distribution_sums_as_monotonic: false
 
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether or not to enable heruistic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until entire
+    ## response was received.
+    #
+    # use_process_start_time: false
+
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded
     #

@@ -130,6 +130,7 @@ class InstanceConfig(BaseModel):
     type_overrides: Optional[Mapping[str, Any]]
     url: Optional[str]
     use_legacy_auth_encoding: Optional[bool]
+    use_process_start_time: Optional[bool]
     use_prometheus: Optional[bool]
     username: Optional[str]
 
