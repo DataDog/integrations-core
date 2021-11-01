@@ -377,7 +377,7 @@ class OpenMetricsScraperMixin(object):
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
         # Whether or not to enable flushing of the first value of monotonic counts
-        config['_successfully_executed'] = False
+        config['_flush_first_value'] = False
 
         # Whether to use process_start_time_seconds to decide if counter-like values should  be flushed
         # on first scrape.
@@ -547,7 +547,7 @@ class OpenMetricsScraperMixin(object):
         counter_buffer = []
         agent_start_time = None
         process_start_time = None
-        if not scraper_config['_successfully_executed'] and scraper_config['use_process_start_time']:
+        if not scraper_config['_flush_first_value'] and scraper_config['use_process_start_time']:
             agent_start_time = datadog_agent.get_process_start_time()
 
         for metric in self.scrape_metrics(scraper_config):
@@ -565,12 +565,12 @@ class OpenMetricsScraperMixin(object):
         if agent_start_time and process_start_time and agent_start_time < process_start_time:
             # If agent was started before the process, we assume counters were started recently from zero,
             # and thus we can compute the rates.
-            scraper_config['_successfully_executed'] = True
+            scraper_config['_flush_first_value'] = True
 
         for metric in counter_buffer:
             self.process_metric(metric, scraper_config, metric_transformers=transformers)
 
-        scraper_config['_successfully_executed'] = True
+        scraper_config['_flush_first_value'] = True
 
     def transform_metadata(self, metric, scraper_config):
         labels = metric.samples[0][self.SAMPLE_LABELS]
@@ -880,7 +880,7 @@ class OpenMetricsScraperMixin(object):
                         val,
                         tags=tags,
                         hostname=custom_hostname,
-                        flush_first_value=scraper_config['_successfully_executed'],
+                        flush_first_value=scraper_config['_flush_first_value'],
                     )
                 elif metric.type == "rate":
                     self.rate(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
@@ -895,7 +895,7 @@ class OpenMetricsScraperMixin(object):
                             val,
                             tags=tags,
                             hostname=custom_hostname,
-                            flush_first_value=scraper_config['_successfully_executed'],
+                            flush_first_value=scraper_config['_flush_first_value'],
                         )
         elif metric.type == "histogram":
             self._submit_gauges_from_histogram(metric_name, metric, scraper_config)
@@ -941,7 +941,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
@@ -952,7 +952,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             else:
                 try:
@@ -999,7 +999,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
@@ -1012,7 +1012,7 @@ class OpenMetricsScraperMixin(object):
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    flush_first_value=scraper_config['_successfully_executed'],
+                    flush_first_value=scraper_config['_flush_first_value'],
                 )
             elif scraper_config['send_histograms_buckets'] and sample[self.SAMPLE_NAME].endswith("_bucket"):
                 if scraper_config['send_distribution_buckets']:
@@ -1027,7 +1027,7 @@ class OpenMetricsScraperMixin(object):
                         val,
                         tags=tags,
                         hostname=custom_hostname,
-                        flush_first_value=scraper_config['_successfully_executed'],
+                        flush_first_value=scraper_config['_flush_first_value'],
                     )
 
     def _compute_bucket_hash(self, tags):
@@ -1123,7 +1123,7 @@ class OpenMetricsScraperMixin(object):
             True,
             hostname,
             tags,
-            flush_first_value=scraper_config['_successfully_executed'],
+            flush_first_value=scraper_config['_flush_first_value'],
         )
 
     def _submit_distribution_count(
