@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
 
     adoprovider: Optional[str]
     ao_database: Optional[str]
+    autodiscovery_db_service_check: Optional[bool]
     autodiscovery_exclude: Optional[Sequence[str]]
     autodiscovery_include: Optional[Sequence[str]]
     availability_group: Optional[str]

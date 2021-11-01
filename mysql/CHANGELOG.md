@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 6.1.1 / 2021-10-26
+
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
+
 ## 6.1.0 / 2021-10-04
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).

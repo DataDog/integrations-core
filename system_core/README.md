@@ -43,11 +43,11 @@ The System Core check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][9] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/system_core/images/syscoredash.png
@@ -57,5 +57,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://github.com/DataDog/integrations-core/blob/master/system_core/assets/service_checks.json
+[8]: https://github.com/DataDog/integrations-core/blob/master/system_core/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

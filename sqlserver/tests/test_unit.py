@@ -21,19 +21,19 @@ from .utils import windows_ci
 pytestmark = pytest.mark.unit
 
 
-def test_get_cursor(instance_sql2017):
+def test_get_cursor(instance_sql):
     """
     Ensure we don't leak connection info in case of a KeyError when the
     connection pool is empty or the params for `get_cursor` are invalid.
     """
-    check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
+    check = SQLServer(CHECK_NAME, {}, [instance_sql])
     check.initialize_connection()
     with pytest.raises(SQLConnectionError):
         check.connection.get_cursor('foo')
 
 
-def test_missing_db(instance_sql2017, dd_run_check):
-    instance = copy.copy(instance_sql2017)
+def test_missing_db(instance_sql, dd_run_check):
+    instance = copy.copy(instance_sql)
     instance['ignore_missing_database'] = False
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         with pytest.raises(ConfigurationError):
@@ -50,7 +50,7 @@ def test_missing_db(instance_sql2017, dd_run_check):
 
 @mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
 @mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
-def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
+def test_db_exists(get_cursor, mock_connect, instance_sql, dd_run_check):
     Row = namedtuple('Row', 'name,collation_name')
     db_results = [
         Row('master', 'SQL_Latin1_General_CP1_CI_AS'),
@@ -66,7 +66,7 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
     mock_results.__iter__.return_value = db_results
     get_cursor.return_value = mock_results
 
-    instance = copy.copy(instance_sql2017)
+    instance = copy.copy(instance_sql)
     # make sure check doesn't try to add metrics
     instance['stored_procedure'] = 'fake_proc'
 
@@ -191,17 +191,17 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
+def test_check_local(aggregator, dd_run_check, init_config, instance_sql):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
+    expected_tags = instance_sql.get('tags', []) + ['sqlserver_host:{}'.format(LOCAL_SERVER), 'db:master']
     assert_metrics(aggregator, expected_tags)
 
 
 @windows_ci
 @pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
-def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql2017, adoprovider):
-    instance = copy.deepcopy(instance_sql2017)
+def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql, adoprovider):
+    instance = copy.deepcopy(instance_sql)
     instance['adoprovider'] = adoprovider
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
