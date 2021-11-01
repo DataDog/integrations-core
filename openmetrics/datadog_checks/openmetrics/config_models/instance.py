@@ -160,6 +160,7 @@ class InstanceConfig(BaseModel):
     type_overrides: Optional[Mapping[str, Any]]
     use_latest_spec: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
+    use_process_start_time: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)
