@@ -53,7 +53,7 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
          - connection_security_policy
     ```
    
-**Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][4] also has a list of suggested labels to exclude.
+**Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][8] also has a list of suggested labels to exclude.
 
 
    Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
