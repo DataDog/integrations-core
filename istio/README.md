@@ -33,7 +33,7 @@ To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the f
     init_config:
     
     instances:
-      - use_openmetrics: true  # This will enable Openmetrics V2 version of the integration
+      - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
       - istiod_endpoint: http://istiod.istio-system:15014/metrics
       - istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
         exclude_labels:
