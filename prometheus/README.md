@@ -88,7 +88,6 @@ Need help? Contact [Datadog support][6].
 - [Introducing Prometheus support for Datadog Agent 6][7]
 - [Configuring a Prometheus Check][8]
 - [Writing a custom Prometheus Check][9]
-- [Prometheus Alertmanager Documentation] [11]
 
 [1]: https://docs.datadoghq.com/integrations/openmetrics/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
