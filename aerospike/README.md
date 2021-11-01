@@ -14,7 +14,7 @@ If you use an older Aerospike server version, it is still possible to monitor it
 
 ### Installation
 
-The Aerospike check is included in the Datadog Agent package.
+The Aerospike check is included in the [Datadog Agent][9] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -113,3 +113,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://app.datadoghq.com/account/settings#agent
