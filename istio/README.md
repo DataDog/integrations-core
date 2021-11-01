@@ -68,7 +68,7 @@ OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updat
 Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][20].
 
 <div class="alert alert-warning">
-<b>Important Note</b>: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
+<b>Important Note</b>: If you have multiple instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
 </div>
 
 ##### Disable sidecar injection for Datadog Agent pods
@@ -127,12 +127,11 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### Invalid Chunk Length
-If you see the following error on OpenMetricsV1:
+### Invalid chunk length
+If you see the following error on OpenMetricsV1, update to Python 3 and Agent 7.33.x:
 ```python
 Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
 ```
-Please make sure to update to Python 3 and Agent 7.33.x.
 
 
 Need help? Contact [Datadog support][17].
