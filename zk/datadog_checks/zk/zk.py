@@ -374,7 +374,10 @@ class ZookeeperCheck(AgentCheck):
                     key, tag_name, tag_val, value = m.groups()
                     tags.append('{}:{}'.format(tag_name, tag_val))
                 else:
-                    key, value = line.split()
+                    try:
+                        key, value = line.split()
+                    except ValueError as e:
+                        self.log.warning("Unexpected 'mntr' output:%s - Error:%s", line, e)
 
                 if key == "zk_server_state":
                     mode = value.lower()
@@ -395,8 +398,8 @@ class ZookeeperCheck(AgentCheck):
 
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type, tags))
 
-            except ValueError:
-                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
+            except ValueError as e:
+                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value, str(e))
 
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)

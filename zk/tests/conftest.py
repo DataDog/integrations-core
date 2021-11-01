@@ -6,7 +6,9 @@ import sys
 import time
 from copy import deepcopy
 
+import mock
 import pytest
+from six import StringIO
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
@@ -156,3 +158,17 @@ def dd_environment(get_instance):
                 '{}:/conf/ca_cert.pem'.format(ca_cert),
             ]
         }
+
+
+@pytest.fixture()
+def mock_mntr_output():
+
+    buffer = StringIO()
+    f_name = os.path.join(HERE, 'fixtures', 'mntr_metrics')
+    with open(f_name) as f:
+        data = f.read()
+        buffer.write(data)
+        buffer.seek(0)
+
+    with mock.patch('datadog_checks.zk.zk.ZookeeperCheck._send_command', return_value=(data)):
+        yield

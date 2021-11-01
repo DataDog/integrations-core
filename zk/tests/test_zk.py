@@ -78,6 +78,15 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     aggregator.assert_metric(mname, value=1, count=1, tags=["mytag"])
 
 
+def test_parse_replica_mntr(aggregator, mock_mntr_output, get_test_instance):
+    def mntr_side_effect(command):
+        if command == "mntr":
+            return mock_mntr_output
+
+    check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
+    check._send_command = mock.MagicMock(side_effect=mntr_side_effect)
+
+
 def test_metadata(datadog_agent, get_test_instance):
     check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
 
