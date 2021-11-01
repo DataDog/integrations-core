@@ -97,7 +97,7 @@ BROKER_METRICS = [
     'confluent.kafka.server.broker_topic_metrics.MessagesOutPerSec',
     'confluent.kafka.server.broker_topic_metrics.ProduceMessageConversionsPerSec',
     'confluent.kafka.server.broker_topic_metrics.FetchMessageConversionsPerSec',
-    'confluent.kafka.log.Log.Size.log_size',
+    'confluent.kafka.log.Size',
 ]
 
 CONNECT_METRICS = [
