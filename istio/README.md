@@ -127,6 +127,14 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
+### Invalid Chunk Length
+If you see the following error on OpenMetricsV1:
+```python
+Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
+```
+Please make sure to update to Python 3 and Agent 7.33.x.
+
+
 Need help? Contact [Datadog support][17].
 
 ## Further Reading
