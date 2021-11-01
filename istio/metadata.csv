@@ -1,27 +1,27 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-istio.mesh.request.count,count,,request,,"The number of requests. This metric is sent as gauge by default in OpenMetrics V1",0,istio,request count
-istio.mesh.request.duration.count,count,,request,,"Count of request durations. This metric is as gauge by default in OpenMetrics V1",0,istio,request durations count
-istio.mesh.request.duration.sum,count,,millisecond,,"Sum of request durations. This metric is sent as gauge by default in OpenMetrics V1",0,istio,request durations sum
-istio.mesh.request.size.count,gauge,,request,,Count of request sizes,0,istio,request sizes count
-istio.mesh.request.size.sum,count,,request,,"Sum of request sizes. This metric is sent as gauge by default in OpenMetrics V1",0,istio,request sizes sum
-istio.mesh.response.size.count,count,,response,,"Count of response sizes. This metric is sent as gauge by default in OpenMetrics V1",0,istio,response sizes count
-istio.mesh.response.size.sum,count,,response,,"Sum of response sizes. This metric is sent as gauge by default in OpenMetrics V1",0,istio,response sizes sum
+istio.mesh.request.count,count,,request,,"[OpenMetrics V1 and V2 and Istio v1.1+] The number of requests. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,request count
+istio.mesh.request.duration.count,count,,request,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of request durations. This metric is as gauge by default in OpenMetrics V1.",0,istio,request durations count
+istio.mesh.request.duration.sum,count,,millisecond,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of request durations. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,request durations sum
+istio.mesh.request.size.count,count,,request,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of request sizes. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,request sizes count
+istio.mesh.request.size.sum,count,,request,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of request sizes. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,request sizes sum
+istio.mesh.response.size.count,count,,response,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of response sizes. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,response sizes count
+istio.mesh.response.size.sum,count,,response,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of response sizes. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,response sizes sum
 istio.mixer.adapter.dispatch_count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Total number of adapter dispatches handled by Mixer",0,istio,number of adapter dispatches
-istio.mixer.adapter.dispatch_duration.count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of durations for adapter dispatches handled by Mixer",0,istio,
-istio.mixer.adapter.dispatch_duration.sum,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of durations for adapter dispatches handled by Mixer",0,istio,
+istio.mixer.adapter.dispatch_duration.count,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of durations for adapter dispatches handled by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.adapter.dispatch_duration.sum,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of durations for adapter dispatches handled by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
 istio.mixer.adapter.old_dispatch_count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Total number of adapter dispatches handled by Mixer.",0,istio,
-istio.mixer.adapter.old_dispatch_duration.count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of times for adapter dispatches handled by Mixer.",0,istio,
-istio.mixer.adapter.old_dispatch_duration.sum,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of times for adapter dispatches handled by Mixer.",0,istio,
-istio.mixer.config.resolve_actions.count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of actions resolved by Mixer.",0,istio,
-istio.mixer.config.resolve_actions.sum,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of actions resolved by Mixer.",0,istio,
+istio.mixer.adapter.old_dispatch_duration.count,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of times for adapter dispatches handled by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.adapter.old_dispatch_duration.sum,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of times for adapter dispatches handled by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.config.resolve_actions.count,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of actions resolved by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.config.resolve_actions.sum,count,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of actions resolved by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
 istio.mixer.config.resolve_count,gauge,,operation,,"[OpenMetrics V1 and V2 and Istio v1.1+] Number of config resolves handled by mixer",0,istio,config resolves
-istio.mixer.config.resolve_duration.count,gauge,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Seconds per config resolve",0,istio,seconds per config resolve
-istio.mixer.config.resolve_duration.sum,gauge,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of times for config resolves handled by Mixer.",0,istio,
-istio.mixer.config.resolve_rules.count,gauge,,item,,"[OpenMetrics V1 and V2 and Istio v1.1+] Number of rules resolved by mixer",0,istio,rules resolved
-istio.mixer.config.resolve_rules.sum,gauge,,item,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of rules resolved by Mixer.",0,istio,
-istio.mixer.go.gc_duration_seconds.count,gauge,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations.",0,istio,
+istio.mixer.config.resolve_duration.count,count,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Seconds per config resolve. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,seconds per config resolve
+istio.mixer.config.resolve_duration.sum,count,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of times for config resolves handled by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.config.resolve_rules.count,count,,item,,"[OpenMetrics V1 and V2 and Istio v1.1+] Number of rules resolved by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,rules resolved
+istio.mixer.config.resolve_rules.sum,count,,item,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of rules resolved by Mixer. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
+istio.mixer.go.gc_duration_seconds.count,count,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
 istio.mixer.go.gc_duration_seconds.quantile,gauge,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Quantile of the GC invocation durations.",0,istio,
-istio.mixer.go.gc_duration_seconds.sum,gauge,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations.",0,istio,
+istio.mixer.go.gc_duration_seconds.sum,count,,second,,"[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.",0,istio,
 istio.mixer.go.goroutines,gauge,,thread,,"[OpenMetrics V1 and V2 and Istio v1.1+] Number of goroutines that currently exist.",0,istio,
 istio.mixer.go.info,gauge,,,,"[OpenMetrics V1 and V2 and Istio v1.1+] Information about the Go environment.",0,istio,
 istio.mixer.go.memstats.alloc_bytes,gauge,,byte,,"[OpenMetrics V1 and V2 and Istio v1.1+] Number of bytes allocated and still in use.",0,istio,
@@ -50,8 +50,8 @@ istio.mixer.go.memstats.stack_sys_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and 
 istio.mixer.go.memstats.sys_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of bytes obtained from system,0,istio,
 istio.mixer.go.threads,gauge,,thread,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of OS threads created.,0,istio,
 istio.mixer.grpc.server.handled_total,gauge,,request,,"[OpenMetrics V1 and V2 and Istio v1.1+] Total number of fully handled requests, with responses",0,istio,
-istio.mixer.grpc.server.handling_seconds.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
-istio.mixer.grpc.server.handling_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
+istio.mixer.grpc.server.handling_seconds.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of response latency (seconds) of gRPC that had been application-level handled by the server. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.mixer.grpc.server.handling_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of response latency (seconds) of gRPC that had been application-level handled by the server. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.mixer.grpc.server.msg_received_total,gauge,,message,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of RPC stream messages received on the server.,0,istio,
 istio.mixer.grpc.server.msg_sent_total,gauge,,message,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of messages sent,0,istio,
 istio.mixer.grpc.server.started_total,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of RPCs started on the server.,0,istio,
@@ -77,9 +77,9 @@ istio.mixer.mcp_sink.reconnections,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.
 istio.mixer.mcp_sink.request_acks_total,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.1+] The number of request acks received by the source.,0,istio,
 istio.mixer.runtime.dispatches_total,gauge,,operation,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
 istio.mixer.runtime.dispatch_duration_seconds,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Duration in seconds for adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
-istio.pilot.go.gc_duration_seconds.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations.,0,istio,
+istio.pilot.go.gc_duration_seconds.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.pilot.go.gc_duration_seconds.quantile,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Quantile of the GC invocation durations.,0,istio,
-istio.pilot.go.gc_duration_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations.,0,istio,
+istio.pilot.go.gc_duration_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.pilot.go.goroutines,gauge,,thread,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of goroutines that currently exist.,0,istio,
 istio.pilot.go.info,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Information about the Go environment.,0,istio,
 istio.pilot.go.memstats.alloc_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of bytes allocated and still in use.,0,istio,
@@ -127,8 +127,8 @@ istio.pilot.mcp_sink.recv_failures_total,count,,,,[OpenMetrics V1 and V2 and Ist
 istio.pilot.mcp_sink.request_acks_total,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] The number of request acks received by the source.,0,istio,
 istio.pilot.no_ip,gauge,,,,"[OpenMetrics V1 and V2 and Istio v1.1+] Pods not found in the endpoint table, possibly invalid.",-1,istio,
 istio.pilot.proxy_convergence_time,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Delay between config change and all proxies converging.,0,istio,
-istio.pilot.proxy_convergence_time.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the delay between config change and all proxies converging.,0,istio,
-istio.pilot.proxy_convergence_time.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of entries of pilot.proxy_convergence_time.,0,istio,
+istio.pilot.proxy_convergence_time.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the delay between config change and all proxies converging. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.pilot.proxy_convergence_time.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of entries of pilot.proxy_convergence_time. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.pilot.rds_expired_nonce,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of RDS messages with an expired nonce.,0,istio,
 istio.pilot.services,gauge,,,[OpenMetrics V1 and V2 and Istio v1.1+] Total services known to pilot.,0,istio,
 istio.pilot.total_xds_internal_errors,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Total number of internal XDS errors in pilot.,-1,istio,
@@ -146,9 +146,9 @@ istio.pilot.xds.rds_reject,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Pilo
 istio.pilot.xds.lds_reject,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Pilot rejected LDS.,0,istio,
 istio.pilot.xds.eds_reject,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Pilot rejected EDS.,0,istio,
 istio.pilot.xds.cds_reject,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Pilot rejected CDS.,0,istio,
-istio.galley.go.gc_duration_seconds.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations.,0,istio,
+istio.galley.go.gc_duration_seconds.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.galley.go.gc_duration_seconds.quantile,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Quantile of the GC invocation durations.,0,istio,
-istio.galley.go.gc_duration_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations.,0,istio,
+istio.galley.go.gc_duration_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.galley.go.goroutines,gauge,,thread,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of goroutines that currently exist.,0,istio,
 istio.galley.go.info,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Information about the Go environment.,0,istio,
 istio.galley.go.memstats.alloc_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of bytes allocated and still in use.,0,istio,
@@ -210,9 +210,9 @@ istio.citadel.server.csr_count,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] 
 istio.citadel.server.csr_parsing_err_count,count,,error,,[OpenMetrics V1 and V2 and Istio v1.1+] The number of errors occurred when parsing the CSR.,-1,istio,
 istio.citadel.server.id_extraction_err_count,count,,error,,[OpenMetrics V1 and V2 and Istio v1.1+] The number of errors occurred when extracting the ID from CSR.,-1,istio,
 istio.citadel.server.success_cert_issuance_count,count,,,,[OpenMetrics V1 and V2 and Istio v1.1+] The number of certificates issuances that have succeeded.,1,istio,
-istio.citadel.go.gc_duration_seconds.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations.,0,istio,
+istio.citadel.go.gc_duration_seconds.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Count of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.citadel.go.gc_duration_seconds.quantile,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Quantile of the GC invocation durations.,0,istio,
-istio.citadel.go.gc_duration_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations.,0,istio,
+istio.citadel.go.gc_duration_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.1+] Sum of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.citadel.go.goroutines,gauge,,thread,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of goroutines that currently exist.,0,istio,
 istio.citadel.go.info,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.1+] Information about the Go environment.,0,istio,
 istio.citadel.go.memstats.alloc_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.1+] Number of bytes allocated and still in use.,0,istio,
@@ -253,18 +253,18 @@ istio.pilot.conflict.outbound_listener.http_over_https,gauge,,,,[OpenMetrics V1 
 istio.pilot.inbound_updates,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of updates received by pilot,0,istio,
 istio.pilot.k8s.cfg_events,count,,event,,[OpenMetrics V1 and V2 and Istio v1.5+] Events from k8s config,0,istio,
 istio.pilot.k8s.reg_events,count,,event,,[OpenMetrics V1 and V2 and Istio v1.5+] Events from k8s registry,0,istio,
-istio.pilot.proxy_queue_time.count,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of observation for when proxy is in a push queue before being dequeued,0,istio,
-istio.pilot.proxy_queue_time.sum,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of observed values for when proxy is in a push queue before being dequeued,0,istio,
+istio.pilot.proxy_queue_time.count,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of observation for when proxy is in a push queue before being dequeued. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.pilot.proxy_queue_time.sum,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of observed values for when proxy is in a push queue before being dequeued. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.pilot.push.triggers,count,,event,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of times a push was triggered,0,istio,
 istio.pilot.xds.eds_all_locality_endpoints,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Network endpoints for each cluster (across all localities) as of last push. Zero endpoints is an error,0,istio,
-istio.pilot.xds.push.time.count,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of observation of total time Pilot takes a push,0,istio,
-istio.pilot.xds.push.time.sum,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of observed values of total time Pilot takes a push,0,istio,
+istio.pilot.xds.push.time.count,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of observation of total time Pilot takes a push. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.pilot.xds.push.time.sum,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of observed values of total time Pilot takes a push. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.sidecar_injection.requests_total,count,,request,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of sidecar injection requests,0,istio,
 istio.sidecar_injection.success_total,count,,request,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of successful sidecar injection requests,0,istio,
 istio.sidecar_injection.failure_total,count,,request,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of failed sidecar injection requests,0,istio,
 istio.sidecar_injection.skip_total,count,,request,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of skipped sidecar injection requests,0,istio,
-istio.mesh.request.duration.milliseconds.sum,gauge,,millisecond,,[OpenMetrics V1 and V2 and Istio v1.5+] Total sum of observed values for duration of requests in ms,0,istio,
-istio.mesh.request.duration.milliseconds.count,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total count of observed values for duration of requests,0,istio,
+istio.mesh.request.duration.milliseconds.sum,count,,millisecond,,[OpenMetrics V1 and V2 and Istio v1.5+] Total sum of observed values for duration of requests in ms. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.mesh.request.duration.milliseconds.count,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total count of observed values for duration of requests. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.mesh.tcp.connections_closed.total,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total closed connections,0,istio,
 istio.mesh.tcp.connections_opened.total,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total opened connections,0,istio,
 istio.mesh.tcp.received_bytes.total,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.5+] Size of total bytes received during request in case of a TCP connection,0,istio,
@@ -283,14 +283,14 @@ istio.mesh.tcp.send_bytes.total.total,count,,byte,,[OpenMetrics V1 and V2 and Is
 istio.mesh.request.duration.count.total,count,,request,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of request durations as monotonic count,0,istio,request durations count total
 istio.mesh.request.duration.sum.total,count,,millisecond,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of request durations as monotonic count,0,istio,request durations sum total
 istio.grpc.server.handled_total,count,,,,"[OpenMetrics V1 and V2 and Istio v1.5+] Total number of RPCs completed on the server, regardless of success or failure.",0,istio,
-istio.grpc.server.handling_seconds.count,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Response latency of gRPC that had been application-level handled by the server.,0,istio,
-istio.grpc.server.handling_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Response latency of gRPC that had been application-level handled by the server.,0,istio,
+istio.grpc.server.handling_seconds.count,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Response latency of gRPC that had been application-level handled by the server. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
+istio.grpc.server.handling_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Response latency of gRPC that had been application-level handled by the server. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.grpc.server.msg_received_total,count,,message,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of RPC stream messages received on the server.,0,istio,
 istio.grpc.server.msg_sent_total,count,,message,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of gRPC stream messages sent by the server.,0,istio,
 istio.grpc.server.started_total,count,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Total number of RPCs started on the server.,0,istio,
-istio.go.gc_duration_seconds.count,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of the GC invocation durations.,0,istio,
+istio.go.gc_duration_seconds.count,count,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Count of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.go.gc_duration_seconds.quantile,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Quantile of the GC invocation durations.,0,istio,
-istio.go.gc_duration_seconds.sum,gauge,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of the GC invocation durations.,0,istio,
+istio.go.gc_duration_seconds.sum,count,,second,,[OpenMetrics V1 and V2 and Istio v1.5+] Sum of the GC invocation durations. This metric is sent as gauge by default in OpenMetrics V1.,0,istio,
 istio.go.goroutines,gauge,,thread,,[OpenMetrics V1 and V2 and Istio v1.5+] Number of goroutines that currently exist.,0,istio,
 istio.go.info,gauge,,,,[OpenMetrics V1 and V2 and Istio v1.5+] Information about the Go environment.,0,istio,
 istio.go.memstats.alloc_bytes,gauge,,byte,,[OpenMetrics V1 and V2 and Istio v1.5+] Number of bytes allocated and still in use.,0,istio,
