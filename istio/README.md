@@ -65,7 +65,7 @@ In OpenMetrics V2, metrics are submitted more accurately by default and behave c
 
 OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updates include native metric types support, improved configuration, and custom metric types.
 
-Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][23].
+Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][20].
 
 <div class="alert alert-warning">
 <b>Important Note</b>: If you have multiple existing instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data will fluctuate in the Datadog app.
@@ -156,3 +156,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/help/
 [18]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
 [19]: https://www.datadoghq.com/blog/istio-metrics/
+[20]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
