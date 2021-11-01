@@ -26,6 +26,11 @@ MOCK_LEGACY_MESH_INSTANCE = {
     'use_openmetrics': False,
 }
 
+MOCK_V2_MESH_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': True,
+}
+
 MOCK_V2_ISTIOD_INSTANCE = {
     'istiod_endpoint': 'http://localhost:8080/metrics',
     'use_openmetrics': True,
