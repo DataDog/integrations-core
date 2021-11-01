@@ -36,7 +36,7 @@
             "id": 5476438101081174,
             "definition": {
               "type": "note",
-              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
+              "content": "#### Further reading on the NGINX integration:\n- [Datadog's guide to  key NGINX metrics](https://www.datadoghq.com/blog/how-to-monitor-nginx/)\n- [Collecting metrics with NGINX monitoring tool](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/)\n- [How to monitor NGINX with Datadog](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/)\n- [Datadog's NGINX integration docs](https://docs.datadoghq.com/integrations/nginx/?tab=host#)\n[If you're using NGINX Plus, check out our docs here](https://docs.datadoghq.com/integrations/nginx/?tab=host#nginx-plus)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
