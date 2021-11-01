@@ -28,6 +28,7 @@ def create_connectors():
             "tasks.max": "1",
         },
     }
+
     requests.post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
 
 
@@ -38,14 +39,14 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Monitored service is now ready'),
+            CheckDockerLogs('broker', 'Creating topic _confluent_balancer_partition_samples'),
             # Kafka Schema Registry
             CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
             CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
             # Create connectors
             WaitFor(create_connectors),
-            CheckDockerLogs('connect', 'Finished commitOffsets successfully'),
+            CheckDockerLogs('connect', 'Source task finished initialization and start'),
         ],
     ):
         yield CHECK_CONFIG, {'use_jmx': True}
