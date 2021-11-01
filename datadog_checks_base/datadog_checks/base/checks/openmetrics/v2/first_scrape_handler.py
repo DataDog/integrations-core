@@ -21,6 +21,6 @@ def first_scrape_handler(metrics, runtime_data, agent_start_time):
         yield metric
 
     if process_start_time is not None and agent_start_time is not None and process_start_time > agent_start_time:
-        runtime_data['has_successfully_executed'] = True
+        runtime_data['flush_first_value'] = True
 
     yield from metrics_buffer

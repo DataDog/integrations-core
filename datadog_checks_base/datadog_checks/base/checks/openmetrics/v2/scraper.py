@@ -192,10 +192,10 @@ class OpenMetricsScraper:
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
         # Used for monotonic counts
-        self.has_successfully_executed = False
+        self.flush_first_value = False
 
     def scrape(self):
-        runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
+        runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
         for metric in self.consume_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
@@ -204,11 +204,11 @@ class OpenMetricsScraper:
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
-        self.has_successfully_executed = True
+        self.flush_first_value = True
 
     def consume_metrics(self, runtime_data):
         metric_parser = self.parse_metrics()
-        if not self.has_successfully_executed and self.use_process_start_time:
+        if not self.flush_first_value and self.use_process_start_time:
             metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
