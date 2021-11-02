@@ -175,7 +175,7 @@ class PgBouncer(AgentCheck):
         db = self._get_connection()
         regex = r'\d+\.\d+\.\d+'
         with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
-            cursor.execute('SHOW VERSION;')
+            cursor.execute('SHOW SERVER_VERSION;')
             if db.notices:
                 data = db.notices[0]
             else:
