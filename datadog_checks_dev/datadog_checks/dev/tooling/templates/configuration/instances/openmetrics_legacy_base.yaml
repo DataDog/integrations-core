@@ -119,10 +119,10 @@
     type: boolean
 - name: use_process_start_time
   description: |
-    Whether or not to enable heruistic for reporting counter values on the first scrape. When true,
+    Whether to enable heuristic for reporting counter values on the first scrape. When true,
     the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
-    initial value can be assumed for counters. This requires keeping metrics in memory until entire
-    response was received.
+    initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    response is received.
   value:
     example: false
     type: boolean
