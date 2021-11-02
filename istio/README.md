@@ -128,10 +128,16 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Invalid chunk length
-If you see the following error on OpenMetricsV1, update to Python 3 and Agent 7.33.x:
-```python
-Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
-```
+If you see the following error on OpenMetricsBaseCheck (V1) implementation of Istio (Istio integration version `3.13.0` or older):
+
+    ```python
+      Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
+      InvalidChunkLength(got length b'', 0 bytes read))
+    ```
+
+You can use the Openmetrics V2 implementation of the Istio integration to resolve this error.
+
+Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See above Configuration section on enabling Openmetrics V2.
 
 
 Need help? Contact [Datadog support][17].
