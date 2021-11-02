@@ -10,7 +10,6 @@ services:
       - 7002:7002
     volumes:
       - ${PROPERTIES_DIR}:/u01/oracle/properties
-      - ./config.xml:/u01/oracle/user_projects/domains/domain1/config/config.xml
     environment:
       JAVA_OPTIONS: >-
         -Dcom.sun.management.jmxremote
