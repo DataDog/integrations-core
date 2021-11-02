@@ -38,11 +38,11 @@ The Kubernetes Controller Manager check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager
@@ -50,5 +50,5 @@ Need help? Contact [Datadog Support][6].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/assets/service_checks.json
+[6]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/

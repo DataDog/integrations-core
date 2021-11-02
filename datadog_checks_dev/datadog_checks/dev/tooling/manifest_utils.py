@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from ..fs import file_exists
+from ..fs import file_exists, path_join
 from .commands.console import abort
 from .constants import get_root
 from .datastructures import JSONDict
@@ -72,6 +72,9 @@ class ManifestV1:
         self._manifest_json = JSONDict(manifest_json)
         self.version = V1
 
+    def add_dashboard(self, title, file_name):
+        self._manifest_json['assets']['dashboards'][title] = f'assets/dashboards/{file_name}'
+
     def get_path(self, path):
         return self._manifest_json.get(path)
 
@@ -86,6 +89,9 @@ class ManifestV1:
 
     def get_metric_prefix(self):
         return self._manifest_json['metric_prefix']
+
+    def get_dashboards_location(self):
+        return path_join(get_root(), self._check_name, 'assets', 'dashboards')
 
     def get_eula_from_manifest(self):
         path = self._manifest_json['terms']['eula']
@@ -118,6 +124,9 @@ class ManifestV2:
         self._manifest_json = JSONDict(manifest_json)
         self.version = V2
 
+    def add_dashboard(self, title, file_name):
+        self._manifest_json['assets']['dashboards'][title] = f'assets/dashboards/{file_name}'
+
     def get_path(self, path):
         return self._manifest_json.get(path)
 
@@ -132,6 +141,9 @@ class ManifestV2:
 
     def get_metric_prefix(self):
         return self._manifest_json.get_path("/assets/integration/metrics/prefix") or ''
+
+    def get_dashboards_location(self):
+        return path_join(get_root(), self._check_name, 'assets', 'dashboards')
 
     def get_eula_from_manifest(self):
         path = self._manifest_json['legal_terms']['eula']

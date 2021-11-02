@@ -90,6 +90,16 @@ files:
       value:
         type: integer
         example: 3600
+    - name: autodiscovery_db_service_check
+      description: |
+        When enabled with database autodiscovery, attempts to connect to the list of
+        autodiscovered databases and submits a service check that signifies whether
+        the agent can connect to that database or not.
+      enabled: true
+      value:
+        type: boolean
+        example: false
+        display_default: true
     - name: include_ao_metrics
       description: |
         Include AlwaysOn availability group metrics.

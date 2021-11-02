@@ -25,6 +25,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.mark.unit
+def test_no_config(aggregator, dd_run_check):
+    instance = {}
+    check = FargateCheck('ecs_fargate', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=[], count=1)
+
+
+@pytest.mark.unit
 def test_failing_check(check, aggregator, dd_run_check):
     """
     Testing fargate metadata endpoint error.
