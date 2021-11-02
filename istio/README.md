@@ -141,6 +141,49 @@ You can use the Openmetrics V2 implementation of the Istio integration to resolv
 Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section on enabling Openmetrics V2.
 
 
+### Using the generic Openmetrics Integration in an Istio deployment
+
+If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][20] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
+
+To ensure that your Openmetrics configuration is not redundantly collecting metrics, either:
+
+1. Use specific metric matching in the `metrics` configuration option
+2. If you use `*` value for `metrics`, then at minimum, consider including the following optional options to exclude metrics already collected by istio and Envoy inegrations.
+
+#### Openmetrics V2 configuration
+
+```text
+## Every instance is scheduled independent of the others.
+#
+instances:
+
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    metrics: [*]
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
+    #
+    exclude_metrics:
+      - istio_*
+      - envoy_*
+
+```
+
+#### Openmetrics V1 configuration (Legacy)
+
+```yaml
+instances:
+  - prometheus_url: <PROMETHEUS_URL>
+    metrics:
+      - *
+    ignore_metrics:
+      - istio_*
+      - envoy_*
+```
+
 Need help? Contact [Datadog support][17].
 
 ## Further Reading
@@ -170,4 +213,5 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/help/
 [18]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
 [19]: https://www.datadoghq.com/blog/istio-metrics/
-[20]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
+[20]: https://docs.datadoghq.com/integrations/openmetrics/
+[21]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
