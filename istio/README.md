@@ -156,8 +156,51 @@ To ensure that your Openmetrics configuration is not redundantly collecting metr
 ## Every instance is scheduled independent of the others.
 #
 instances:
+  -
+    ## @param openmetrics_endpoint - string - optional
+    ## The URL exposing metrics in the OpenMetrics format.
+    #
+    openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
 
-  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    ## @param metrics - (list of string or mapping) - required
+    ## This list defines which metrics to collect from the `openmetrics_endpoint`.
+    ## Metrics may be defined in 3 ways:
+    ##
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
+    ##
+    ##      metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
+    ##
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
+    ##
+    ##           metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
+    ##
+    ##           metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
+    ##
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+    ##
+    ## Regular expressions may be used to match the exposed metric names, for example:
+    ##
+    ##   metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
+    #
     metrics: [*]
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
