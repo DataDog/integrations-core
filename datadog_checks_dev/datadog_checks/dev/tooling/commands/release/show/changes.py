@@ -82,7 +82,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
                 echo_debug(f'Found change {current_changelog_type}')
                 applicable_changelog_types.append(current_changelog_type)
             else:
-                echo_debug(f'Found no-change change for PR {pr_num}, skipping')
+                echo_debug(f'Found no-changelog change for PR {pr_num}, skipping')
         else:
             echo_success(payload.get('title'))
             echo_info(f" * Url: {payload.get('html_url')}")
