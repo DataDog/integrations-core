@@ -138,7 +138,7 @@ If you see the following error on OpenMetricsBaseCheck (V1) implementation of Is
 
 You can use the Openmetrics V2 implementation of the Istio integration to resolve this error.
 
-Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See above Configuration section on enabling Openmetrics V2.
+Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section on enabling Openmetrics V2.
 
 
 Need help? Contact [Datadog support][17].
