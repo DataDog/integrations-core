@@ -8,7 +8,7 @@ files:
       - template: init_config/default
   - template: instances
     options:
-    - name: url
+    - name: urls
       required: true
       description: The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
       value:
