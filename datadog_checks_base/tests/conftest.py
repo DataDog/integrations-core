@@ -115,6 +115,7 @@ def uds_path():
                 'UDS_FILENAME': uds_filename,
             },
             conditions=[WaitFor(lambda: os.path.exists(uds_path))],
+            attempts=2,
         ):
             yield uds_path
 
