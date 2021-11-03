@@ -128,7 +128,10 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.12124.1.12.1.1.3
           name: quotaID
-metric_tags:
+
+# Rename `metric_tags` to `tags`
+# `tags` are used for metadata, metrics and service checks.
+tags:
   - tag: cluster_name
     OID: 1.3.6.1.4.1.12124.1.1.1.0
     symbol: clusterName
