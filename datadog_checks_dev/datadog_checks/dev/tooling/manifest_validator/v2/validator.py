@@ -42,8 +42,10 @@ class TileDescriptionValidator(BaseManifestValidator):
         # The description for V2 manifests should not be longer than 70 characters to avoid being
         # cut off or shortened on the UI
         tile_description = decoded.get_path(self.DESCRIPTION_PATH)
-        if len(tile_description) > self.MAX_DESCRIPTION_LENGTH:
-            output = f'  The tile description should be no longer than {self.MAX_DESCRIPTION_LENGTH} characters.'
+        current_length = len(tile_description)
+        if current_length > self.MAX_DESCRIPTION_LENGTH:
+            output = f'  The tile description is {current_length} characters long. It should be no longer than \
+{self.MAX_DESCRIPTION_LENGTH} characters.'
             self.fail(output)
 
 
