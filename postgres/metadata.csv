@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-postgresql.connections,gauge,,connection,,The number of active connections to this database.,0,postgres,conns
+postgresql.connections,gauge,,connection,,"The number of active connections to this database. If you have Database Monitoring enabled, this metric is tagged with state, app, db and user",0,postgres,conns
 postgresql.commits,gauge,,transaction,second,The number of transactions that have been committed in this database.,0,postgres,commits
 postgresql.rollbacks,gauge,,transaction,second,The number of transactions that have been rolled back in this database.,-1,postgres,rollbacks
 postgresql.disk_read,gauge,,block,second,The number of disk blocks read in this database.,0,postgres,disk read
@@ -78,9 +78,9 @@ postgresql.queries.local_blks_dirtied,count,,block,,"Total number of local block
 postgresql.queries.local_blks_written,count,,block,,"Total number of local blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries local blocks written
 postgresql.queries.temp_blks_read,count,,block,,"Total number of temp blocks read per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks read
 postgresql.queries.temp_blks_written,count,,block,,"Total number of temp blocks written per normalized query, database, and user. (DBM only)",0,postgres,postgres queries temp blocks written
-postgresql.queries.duration.max,gauge,,,,The age of the longest running query per user, db, app and host (DBM only).,0,postgres,postgres queries duration max
-postgresql.queries.duration.sum,gauge,,,,The sum of the age of all running queries per user, db, app and host (DBM only).,0,postgres,postgres queries duration sum
-postgresql.transactions.duration.max,gauge,,,,The age of the longest running transaction per user, db, app and host (DBM only).,0,postgres,postgres transactions duration max
-postgresql.transactions.duration.sum,gauge,,,,The sum of the age of all running transactions per user, db, app and host (DBM only),0,postgres,postgres transactions duration sum
+postgresql.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db, app and host. (DBM only)",0,postgres,postgres queries duration max
+postgresql.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db, app and host. (DBM only)",0,postgres,postgres queries duration sum
+postgresql.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db, app and host. (DBM only)",0,postgres,postgres transactions duration max
+postgresql.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db, app and host. (DBM only)",0,postgres,postgres transactions duration sum
 postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file.,0,postgres,wal age
 postgresql.function.calls,rate,,,,The number of calls made to a function.,0,postgres,postgres_function_calls
