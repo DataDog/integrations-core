@@ -19,6 +19,7 @@ EXPECTED_CONTAINER_METRICS = [
     'ecs.fargate.io.bytes.read',
     'ecs.fargate.cpu.user',
     'ecs.fargate.cpu.system',
+    'ecs.fargate.cpu.usage',
     'ecs.fargate.cpu.percent',
     'ecs.fargate.mem.cache',
     'ecs.fargate.mem.active_file',
@@ -56,6 +57,15 @@ def mocked_requests_get(*args, **kwargs):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats.json'))
+    else:
+        return MockResponse(status_code=404)
+
+
+def mocked_requests_get_sys_delta(*args, **kwargs):
+    if args[0].endswith("/metadata"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
+    elif args[0].endswith("/stats"):
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats_wrong_system_delta.json'))
     else:
         return MockResponse(status_code=404)
 

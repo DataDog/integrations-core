@@ -25,6 +25,7 @@ DEFAULT_METRICS = {
     'cluster_checks_updating_stats_duration_seconds': 'cluster_checks.updating_stats_duration_seconds',
     'datadog_requests': 'datadog.requests',
     'external_metrics': 'external_metrics',
+    'external_metrics_datadog_metrics': 'external_metrics.datadog_metrics',
     'external_metrics_delay_seconds': 'external_metrics.delay_seconds',
     'external_metrics_processed_value': 'external_metrics.processed_value',
     'go_goroutines': 'go.goroutines',

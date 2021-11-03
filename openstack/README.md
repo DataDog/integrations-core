@@ -1,12 +1,10 @@
 # Openstack Integration
 
-<div class="alert alert-warning">
-<b>Important Note</b>: This integration only applies to OpenStack versions 12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13 and above (containerized OpenStack) please use the <a href="https://docs.datadoghq.com/integrations/openstack_controller/">OpenStack Controller integration.</a>
-</div>
-
 ![OpenStack default dashboard][1]
 
 ## Overview
+
+**Note**: This integration only applies to OpenStack v12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13+ (containerized OpenStack), use the [OpenStack Controller integration][13].
 
 Get metrics from OpenStack service in real time to:
 
@@ -178,3 +176,4 @@ See also these other Datadog blog posts:
 [10]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [11]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [12]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
+[13]: https://docs.datadoghq.com/integrations/openstack_controller

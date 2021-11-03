@@ -1,10 +1,8 @@
 # Agent Check: Openstack Controller
 
-<div class="alert alert-warning">
-<b>Important Note</b>: This integration only applies to OpenStack versions 13 and above (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack) please use the <a href="https://docs.datadoghq.com/integrations/openstack/">OpenStack integration.</a>
-</div>
-
 ## Overview
+
+**Note**: This integration only applies to OpenStack v13+ (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), use the [OpenStack integration][8].
 
 This check monitors [OpenStack][1] from the controller node.
 
@@ -12,7 +10,7 @@ This check monitors [OpenStack][1] from the controller node.
 
 ### Installation
 
-The OpenStack Controller check is included in the [Datadog Agent][8] package, so you do not need to install anything else on your server.
+The OpenStack Controller check is included in the [Datadog Agent][9] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -102,4 +100,5 @@ Need help? Contact [Datadog support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [6]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
 [7]: https://docs.datadoghq.com/help/
-[8]: https://app.datadoghq.com/account/settings#agent
+[8]: https://docs.datadoghq.com/integrations/openstack/
+[9]: https://app.datadoghq.com/account/settings#agent
