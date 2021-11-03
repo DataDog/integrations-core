@@ -217,6 +217,7 @@ def test_alias_tag_path(go_expvar_mock, check, aggregator):
 
 @pytest.mark.unit
 def test_warn_with_bad_path(go_expvar_mock, caplog, check, aggregator):
+    caplog.set_level(logging.DEBUG)
     mock_config = {
         "expvar_url": common.URL_WITH_PATH,
         "metrics": [{"path": "memstats"}],

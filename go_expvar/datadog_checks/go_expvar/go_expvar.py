@@ -171,13 +171,11 @@ class GoExpvar(AgentCheck):
                     float(value)
                 except (TypeError, ValueError):
                     if isinstance(value, dict):
-                        self.log.warning(
-                            "Path %s is a mapping; specify a more specific path to report a value: %s",
-                            actual_path,
-                            value,
+                        self.log.debug(
+                            "Path %s is a mapping; specify a more specific path to report a value", actual_path
                         )
                     else:
-                        self.log.warning("Unreportable value for path %s: %s", actual_path, value)
+                        self.log.debug("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:
