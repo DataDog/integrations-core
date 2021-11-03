@@ -51,7 +51,7 @@ openssl req -x509 -newkey rsa:4096 \
             -days 365
 ```
 
-This generates a `private.key` and `cert.pem` file for the client. While you are prompted to input the server name, organizational unit, organization, locality, state, and country code, you only need to input the server name. Enter `localhost` for the server name.
+This generates a `private_key.pem` and `cert.pem` file for the client. While you are prompted to input the server name, organizational unit, organization, locality, state, and country code, you only need to input the server name. Enter `localhost` for the server name.
 
 ## Import client cert into server `truststore`
 
