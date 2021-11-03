@@ -377,7 +377,8 @@ class ZookeeperCheck(AgentCheck):
                     try:
                         key, value = line.split()
                     except Exception as e:
-                        self.log.warning("Unexpected 'mntr' output:%s - Error:%s", line, e)
+                        self.log.debug("Unexpected 'mntr' output: %s - Error:%s", line, str(e))
+                        continue
 
                 if key == "zk_server_state":
                     mode = value.lower()
