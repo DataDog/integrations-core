@@ -3,13 +3,15 @@ version: "3"
 services:
   weblogic-admin-server:
     build: .
-    image: '14110-domain-with-app'
     hostname: wlsadmin
     ports:
-      - 7001:7001
-      - 7002:7002
+      - '7001:7001'
+      - '7002:7002'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
     volumes:
-      - ${PROPERTIES_DIR}:/u01/oracle/properties
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
     environment:
       JAVA_OPTIONS: >-
         -Dcom.sun.management.jmxremote
@@ -21,12 +23,15 @@ services:
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
   weblogic-managed-server-1:
     build: .
-    image: '14110-domain-with-app'
+    hostname: ms1
     ports:
-      - 8001:8001
-      - 7003:7003
+      - '8001:8001'
+      - '7003:7003'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
     volumes:
-      - ${PROPERTIES_DIR}:/u01/oracle/properties
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
     environment:
       JAVA_OPTIONS: >-
         -Dcom.sun.management.jmxremote
@@ -40,12 +45,15 @@ services:
     command: 'startManagedServer.sh'
   weblogic-managed-server-2:
     build: .
-    image: '14110-domain-with-app'
+    hostname: ms2
     ports:
-      - 8002:8001
-      - 7004:7004
+      - '8002:8001'
+      - '7004:7004'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
     volumes:
-      - ${PROPERTIES_DIR}:/u01/oracle/properties
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
     environment:
       JAVA_OPTIONS: >-
         -Dcom.sun.management.jmxremote
