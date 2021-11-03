@@ -16,12 +16,18 @@ The Disk check is enabled by default, and the Agent collects metrics on all loca
 
 #### Note for Windows hosts
 There are three scenarios where the Disk check can be used:
+
 1. Monitoring physical drives
+
 Monitoring physical drives that are represented by a disk letter (e.g. C:\, D:\ etc...) is supported out of the box by the Disk check without any special consideration.
-3. Monitoring nested mount points
+
+2. Monitoring nested mount points
+
 Monitoring mounted folders within a filessytem requires Administrator permissions. That's because the underlying Windows function call is [FindFirstVolumeMountPointW][9] which requires the caller to have administrative permissions.
 To collect those metrics without granting Administrator permissions to the Agent, use the [PDH check][4] to collect mount point metrics from the corresponding perf counters.
-5. Monitoring file shares
+
+3. Monitoring file shares
+
 Collecting mount point metrics for file shares on Windows is only supported by using the `create_mounts` option in the configuration.
 On Windows, each mounted folder is only visible to the user who mounted the share.
 The `create_mounts` option thus allows the Agent to create the mount points to monitor in the context of the Agent's user.
