@@ -18,8 +18,10 @@ EXPECTED_METRICS = [
     'system.net.bytes_rcvd',
     'system.net.bytes_sent',
     'system.net.packets_in.count',
+    'system.net.packets_in.drop',
     'system.net.packets_in.error',
     'system.net.packets_out.count',
+    'system.net.packets_out.drop',
     'system.net.packets_out.error',
 ]
 

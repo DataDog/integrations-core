@@ -266,8 +266,10 @@ class Network(AgentCheck):
             'bytes_rcvd',
             'bytes_sent',
             'packets_in.count',
+            'packets_in.drop',
             'packets_in.error',
             'packets_out.count',
+            'packets_out.drop',
             'packets_out.error',
         ]
         for m in expected_metrics:
@@ -450,8 +452,10 @@ class Network(AgentCheck):
                     'bytes_rcvd': self._parse_value(x[0]),
                     'bytes_sent': self._parse_value(x[8]),
                     'packets_in.count': self._parse_value(x[1]),
+                    'packets_in.drop': self._parse_value(x[3]),
                     'packets_in.error': self._parse_value(x[2]) + self._parse_value(x[3]),
                     'packets_out.count': self._parse_value(x[9]),
+                    'packets_out.drop': self._parse_value(x[11]),
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics, custom_tags)
@@ -696,8 +700,10 @@ class Network(AgentCheck):
                         'bytes_rcvd': self._parse_value(x[-5]),
                         'bytes_sent': self._parse_value(x[-2]),
                         'packets_in.count': self._parse_value(x[-7]),
+                        'packets_in.drop': 0,
                         'packets_in.error': self._parse_value(x[-6]),
                         'packets_out.count': self._parse_value(x[-4]),
+                        'packets_out.drop': 0,
                         'packets_out.error': self._parse_value(x[-3]),
                     }
                     self._submit_devicemetrics(iface, metrics, custom_tags)
@@ -871,7 +877,7 @@ class Network(AgentCheck):
                 continue
 
             # Add it to this interface's list of metrics.
-            metrics = metrics_by_interface.get(iface, {})
+            metrics = metrics_by_interface.get(iface, {'packets_in.drop': 0, 'packets_out.drop': 0})
             metrics[ddname] = self._parse_value(cols[1])
             metrics_by_interface[iface] = metrics
 
@@ -916,8 +922,10 @@ class Network(AgentCheck):
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
                 'packets_in.count': counters.packets_recv,
+                'packets_in.drop': counters.dropin,
                 'packets_in.error': counters.errin,
                 'packets_out.count': counters.packets_sent,
+                'packets_out.drop': counters.dropout,
                 'packets_out.error': counters.errout,
             }
             self._submit_devicemetrics(iface, metrics, tags)
