@@ -14,7 +14,7 @@ Additionally, [Amazon EKS Managed Node Groups][2] and [Amazon EKS on AWS Outpost
 
 ### Metric collection
 
-Monitoring EKS requires that you set up the Datadog integrations for one of the following integrations along with integrations for any other AWS services you're running with EKS, such as [ELB][7].
+Monitoring EKS requires that you set up one of the following Datadog integrations along with integrations for any other AWS services you're running with EKS, such as [ELB][7].
 
 - [Kubernetes][4]
 - [AWS][5]
