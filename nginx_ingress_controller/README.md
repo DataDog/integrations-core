@@ -8,7 +8,7 @@ This check monitors the kubernetes [NGINX Ingress Controller][1].
 
 ### Installation
 
-The `nginx-ingress-controller` check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
+The `nginx-ingress-controller` check is included in the [Datadog Agent][9] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -103,3 +103,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://app.datadoghq.com/account/settings#agent

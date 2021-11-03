@@ -8,7 +8,7 @@ Monitor your [Consul Connect][1] Envoy sidecar proxies with the [Datadog Envoy I
 
 ### Installation
 
-Install the Datadog Agent on your services running Consul Connect and follow the [Configuration](#configuration) instructions for your appropriate environment.
+Install the [Datadog Agent][15] on your services running Consul Connect and follow the [Configuration](#configuration) instructions for your appropriate environment.
 
 ### Configuration
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -82,3 +82,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metrics
 [13]: https://docs.datadoghq.com/integrations/envoy/?tab=host#service-checks
 [14]: https://docs.datadoghq.com/help/
+[15]: https://app.datadoghq.com/account/settings#agent

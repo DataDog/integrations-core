@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Citrix Hypervisor check is included in the [Datadog Agent][2] package.
+The Citrix Hypervisor check is included in the [Datadog Agent][10] package.
 No additional installation is needed on your server.  
 The recommended way to monitor Citrix hypervisors is to install one Datadog Agent on each hypervisor.
 
@@ -79,3 +79,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://app.datadoghq.com/account/settings#agent

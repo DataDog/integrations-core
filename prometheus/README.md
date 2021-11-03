@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Prometheus check is packaged with the Agent starting version 6.1.0.
+The Prometheus check is packaged with the [Agent][10] starting version 6.1.0.
 
 ### Configuration
 
@@ -99,3 +99,4 @@ Need help? Contact [Datadog support][6].
 [7]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [8]: https://docs.datadoghq.com/agent/prometheus/
 [9]: https://docs.datadoghq.com/developers/prometheus/
+[10]: https://app.datadoghq.com/account/settings#agent

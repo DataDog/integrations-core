@@ -11,7 +11,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The GlusterFS check is included in the [Datadog Agent][2] package.
+The GlusterFS check is included in the [Datadog Agent][11] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -112,3 +112,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://app.datadoghq.com/account/settings#agent

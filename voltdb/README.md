@@ -128,7 +128,7 @@ Need help? Contact [Datadog support][10].
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://voltdb.com
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/voltdb/datadog_checks/voltdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php

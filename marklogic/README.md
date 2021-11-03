@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The MarkLogic check is included in the [Datadog Agent][2] package.
+The MarkLogic check is included in the [Datadog Agent][13] package.
 No additional installation is needed on your server.
 
 #### Prepare MarkLogic
@@ -126,3 +126,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://github.com/DataDog/integrations-core/blob/master/marklogic/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/marklogic/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help
+[13]: https://app.datadoghq.com/account/settings#agent

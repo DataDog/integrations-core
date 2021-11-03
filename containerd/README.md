@@ -8,7 +8,7 @@ This check monitors the Containerd container runtime.
 
 ### Installation
 
-Containerd is a core Agent 6 check. You must configure Containerd in both `datadog.yaml` and `containerd.d/conf.yaml`.
+Containerd is a core [Agent 6][6] check. You must configure Containerd in both `datadog.yaml` and `containerd.d/conf.yaml`.
 
 In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Containerd. In `containerd.d/conf.yaml`, configure the check instance settings (such as `filters`) for the events.
 
@@ -123,3 +123,4 @@ Need help? Contact [Datadog support][2].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/containerd/metadata.csv
 [5]: https://github.com/DataDog/integrations-core/blob/master/containerd/assets/service_checks.json
+[6]: https://app.datadoghq.com/account/settings#agent

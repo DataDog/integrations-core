@@ -10,7 +10,7 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 ### Installation
 
-The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
+The Apache check is packaged with the [Datadog Agent][22]. To start gathering your Apache metrics and logs, you need to:
 
 1. [Install the Agent][2] on your Apache servers.
 
@@ -253,3 +253,4 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
 [20]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog
+[22]: https://app.datadoghq.com/account/settings#agent

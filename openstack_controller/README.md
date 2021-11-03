@@ -12,7 +12,7 @@ This check monitors [OpenStack][1] from the controller node.
 
 ### Installation
 
-The OpenStack Controller check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
+The OpenStack Controller check is included in the [Datadog Agent][8] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -102,3 +102,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [6]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
 [7]: https://docs.datadoghq.com/help/
+[8]: https://app.datadoghq.com/account/settings#agent

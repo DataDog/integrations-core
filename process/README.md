@@ -11,7 +11,7 @@ The Process Check lets you:
 
 ### Installation
 
-The Process Check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
+The Process Check is included in the [Datadog Agent][10] package, so you don't need to install anything else on your server.
 
 ### Configuration
 
@@ -99,3 +99,4 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [7]: https://github.com/DataDog/integrations-core/blob/master/process/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/process-check-monitoring
+[10]: https://app.datadoghq.com/account/settings#agent

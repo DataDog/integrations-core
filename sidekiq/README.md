@@ -10,7 +10,7 @@ This integration monitors [Sidekiq][1] through [Dogstatsd][2]. It collects metri
 
 ### Installation
 
-The Sidekiq integration is packaged with the [Datadog Agent][4].
+The Sidekiq integration is packaged with the [Datadog Agent][12].
 No additional installation is needed on your server.
 
 ### Configuration
@@ -125,3 +125,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
 [10]: https://github.com/mperham/sidekiq/wiki/Logging#log-file
 [11]: https://docs.datadoghq.com/help/
+[12]: https://app.datadoghq.com/account/settings#agent

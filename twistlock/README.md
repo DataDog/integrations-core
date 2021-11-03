@@ -8,7 +8,7 @@
 
 ### Installation
 
-The Prisma Cloud Compute Edition check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
+The Prisma Cloud Compute Edition check is included in the [Datadog Agent][13] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -159,3 +159,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/twistlock/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
+[13]: https://app.datadoghq.com/account/settings#agent

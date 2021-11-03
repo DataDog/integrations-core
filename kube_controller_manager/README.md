@@ -10,7 +10,7 @@ This check monitors the [Kubernetes Controller Manager][1], part of the Kubernet
 
 ### Installation
 
-The Kubernetes Controller Manager check is included in the [Datadog Agent][2] package, so you do not
+The Kubernetes Controller Manager check is included in the [Datadog Agent][8] package, so you do not
 need to install anything else on your server.
 
 ### Configuration
@@ -52,3 +52,4 @@ Need help? Contact [Datadog Support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/metadata.csv
 [6]: https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/assets/service_checks.json
 [7]: https://docs.datadoghq.com/help/
+[8]: https://app.datadoghq.com/account/settings#agent

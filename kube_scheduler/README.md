@@ -10,7 +10,7 @@ This check monitors [Kubernetes Scheduler][1], part of the Kubernetes control pl
 
 ### Installation
 
-The Kubernetes Scheduler check is included in the [Datadog Agent][2] package.
+The Kubernetes Scheduler check is included in the [Datadog Agent][10] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -63,3 +63,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://app.datadoghq.com/account/settings#agent
