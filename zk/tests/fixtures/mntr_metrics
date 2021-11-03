@@ -499,4 +499,4 @@ zk_avg_clickhouse_write_per_namespace	186.0622
 zk_min_clickhouse_write_per_namespace	11
 zk_max_clickhouse_write_per_namespace	1614
 zk_cnt_clickhouse_write_per_namespace	4813506
-zk_sum_clickhouse_write_per_namespace	895611723"""
+zk_sum_clickhouse_write_per_namespace	895611723
