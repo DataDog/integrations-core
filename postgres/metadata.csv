@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-postgresql.connections,gauge,,connection,,"The number of active connections to this database. If you have DBM enabled, this metric is tagged with state, app, db and user",0,postgres,conns
+postgresql.connections,gauge,,connection,,"The number of active connections to this database. If DBM is enabled, this metric is tagged with state, app, db and user",0,postgres,conns
 postgresql.commits,gauge,,transaction,second,The number of transactions that have been committed in this database.,0,postgres,commits
 postgresql.rollbacks,gauge,,transaction,second,The number of transactions that have been rolled back in this database.,-1,postgres,rollbacks
 postgresql.disk_read,gauge,,block,second,The number of disk blocks read in this database.,0,postgres,disk read
