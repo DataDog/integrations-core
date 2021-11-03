@@ -182,20 +182,30 @@ class FargateCheck(AgentCheck):
             cpu_stats = container_stats.get('cpu_stats', {})
             prev_cpu_stats = container_stats.get('precpu_stats', {})
 
-            value_system = cpu_stats.get('system_cpu_usage')
+            value_system = cpu_stats.get('cpu_usage', {}).get('usage_in_kernelmode')
             if value_system is not None:
-                self.gauge('ecs.fargate.cpu.system', value_system, tags)
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
+
+            value_user = cpu_stats.get('cpu_usage', {}).get('usage_in_usermode')
+            if value_user is not None:
+                self.rate('ecs.fargate.cpu.user', value_user, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value_total is not None:
-                self.gauge('ecs.fargate.cpu.user', value_total, tags)
+                self.rate('ecs.fargate.cpu.usage', value_total, tags)
 
+            available_cpu = cpu_stats.get('system_cpu_usage')
+            preavailable_cpu = prev_cpu_stats.get('system_cpu_usage')
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
-            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
 
-            if prevalue_system is not None and prevalue_total is not None:
+            if (
+                available_cpu is not None
+                and preavailable_cpu is not None
+                and value_total is not None
+                and prevalue_total is not None
+            ):
                 cpu_delta = float(value_total) - float(prevalue_total)
-                system_delta = float(value_system) - float(prevalue_system)
+                system_delta = float(available_cpu) - float(preavailable_cpu)
             else:
                 cpu_delta = 0.0
                 system_delta = 0.0
