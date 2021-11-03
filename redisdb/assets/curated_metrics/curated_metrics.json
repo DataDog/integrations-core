@@ -1,0 +1,16 @@
+{
+    "cpu": [
+        "redis.cpu.sys",
+        "redis.cpu.sys_children",
+        "redis.cpu.user",
+        "redis.cpu.user_children",
+        "redis.command.calls"
+    ],
+    "memory": [
+        "redis.mem.rss",
+        "redis.mem.maxmemory",
+        "redis.mem.overhead",
+        "redis.mem.peak",
+        "redis.keys"
+    ]
+}

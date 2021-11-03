@@ -49,6 +49,7 @@
     "logs": {
       "source": "redis"
     },
-    "metrics_metadata": "metadata.csv"
+    "metrics_metadata": "metadata.csv",
+    "curated_metrics": "assets/curated_metrics/curated_metrics.json"
   }
 }
