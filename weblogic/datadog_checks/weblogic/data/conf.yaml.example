@@ -7,10 +7,20 @@ init_config:
     #
     is_jmx: true
 
-    ## @param collect_default_metrics - boolean - required
+    ## @param collect_default_metrics - boolean - optional - default: false
     ## Whether or not the check should collect all default metrics.
     #
     collect_default_metrics: true
+
+    ## @param new_gc_metrics - boolean - optional - default: false
+    ## Set to true to use better metric names for garbage collection metrics.
+    ## jvm.gc.cms.count   => jvm.gc.minor_collection_count
+    ##                       jvm.gc.major_collection_count
+    ## jvm.gc.parnew.time => jvm.gc.minor_collection_time
+    ##                       jvm.gc.major_collection_time
+    ## The default value is false to ensure backward compatibility.
+    #
+    new_gc_metrics: true
 
     ## @param service_check_prefix - string - optional
     ## Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
@@ -68,12 +78,18 @@ instances:
     ## This requires the JDK to be installed and the path to tools.jar to be set below.
     ## Note: It needs to be set when process_name_regex parameter is set
     ## e.g. .*process_name.*
+    ##
+    ## Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    ## This option is supported in Java 8 and below.
     #
     # process_name_regex: <PROCESS_NAME_REGEX>
 
     ## @param tools_jar_path - string - optional
-    ## The tool.jar path to be used with the `process_name_regex` parameter,
+    ## The tools.jar path to be used with the `process_name_regex` parameter,
     ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ##
+    ## Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    ## This option is supported in Java 8 and below.
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
@@ -132,6 +148,11 @@ instances:
     ## will give up on that connection and retry.
     #
     # rmi_client_timeout: 15000
+
+    ## @param collect_default_jvm_metrics - boolean - optional - default: true
+    ## Configures the collection of default JVM metrics.
+    #
+    # collect_default_jvm_metrics: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
