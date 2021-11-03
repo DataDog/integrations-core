@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Important Note**: This integration only applies to OpenStack versions 13 and above (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), please use the [OpenStack integration][8].
+**Note**: This integration only applies to OpenStack v13+ (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), use the [OpenStack integration][8].
 
 This check monitors [OpenStack][1] from the controller node.
 
