@@ -92,7 +92,7 @@ LABEL "com.datadoghq.ad.instances"='[{"apache_status_url": "http://%%host%%/serv
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][7].
 
 Then, set [Log Integrations][8] as Docker labels:
 
@@ -133,7 +133,7 @@ spec:
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 Then, set [Log Integrations][8] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][12].
 
@@ -178,7 +178,7 @@ Set [Autodiscovery Integrations Templates][6] as Docker labels on your applicati
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][13].
 
 Then, set [Log Integrations][8] as Docker labels:
 
