@@ -23,7 +23,7 @@ Monitoring physical drives that are represented by a disk letter (e.g. C:\, D:\ 
 
 2. Monitoring nested mount points
 
-Monitoring mounted folders within a filesystem requires Administrator permissions. That's because the underlying Windows function call is [FindFirstVolumeMountPoint][9] which requires the caller to have administrative permissions.
+Monitoring mounted folders within a filesystem requires Administrator permissions. That's because the underlying Windows function call [FindFirstVolumeMountPoint][9] requires administrative permissions.
 To collect those metrics without granting Administrator permissions to the Agent, use the [PDH check][4] to collect mount point metrics from the corresponding perf counters.
 
 3. Monitoring file shares
