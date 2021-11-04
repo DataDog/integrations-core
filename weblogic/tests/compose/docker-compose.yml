@@ -6,7 +6,7 @@ services:
     hostname: wlsadmin
     ports:
       - '7001:7001'
-      - '7002:7002'
+      - '9090:9090'
     healthcheck:
       test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
       interval: 10s
@@ -17,8 +17,8 @@ services:
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.ssl=false
-        -Dcom.sun.management.jmxremote.port=7002
-        -Dcom.sun.management.jmxremote.rmi.port=7002
+        -Dcom.sun.management.jmxremote.port=9090
+        -Dcom.sun.management.jmxremote.rmi.port=9090
         -Djava.rmi.server.hostname=0.0.0.0
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
   weblogic-managed-server-1:
@@ -26,7 +26,7 @@ services:
     hostname: ms1
     ports:
       - '8001:8001'
-      - '7003:7003'
+      - '9091:9091'
     healthcheck:
       test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
       interval: 10s
@@ -37,8 +37,8 @@ services:
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.ssl=false
-        -Dcom.sun.management.jmxremote.port=7003
-        -Dcom.sun.management.jmxremote.rmi.port=7003
+        -Dcom.sun.management.jmxremote.port=9091
+        -Dcom.sun.management.jmxremote.rmi.port=9091
         -Djava.rmi.server.hostname=0.0.0.0
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
       MANAGED_SERV_NAME: managed-server1
@@ -48,7 +48,7 @@ services:
     hostname: ms2
     ports:
       - '8002:8001'
-      - '7004:7004'
+      - '9092:9092'
     healthcheck:
       test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
       interval: 10s
@@ -59,8 +59,8 @@ services:
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.ssl=false
-        -Dcom.sun.management.jmxremote.port=7004
-        -Dcom.sun.management.jmxremote.rmi.port=7004
+        -Dcom.sun.management.jmxremote.port=9092
+        -Dcom.sun.management.jmxremote.rmi.port=9092
         -Djava.rmi.server.hostname=0.0.0.0
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
       MANAGED_SERV_NAME: managed-server2

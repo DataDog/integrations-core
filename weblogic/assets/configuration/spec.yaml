@@ -1,4 +1,4 @@
-name: weblogic
+name: Weblogic
 files:
 - name: weblogic.yaml
   options:
@@ -8,3 +8,6 @@ files:
   - template: instances
     options:
     - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 9090
