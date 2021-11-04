@@ -97,9 +97,27 @@ def create_user():
         ]
     )
 
+    run_docker_command(
+        [
+            'yum',
+            '-y',
+            'install',
+            'sudo',
+        ]
+    )
+
+    run_docker_command(
+        [
+            'yum',
+            '-y',
+            'install',
+            'nano',
+        ]
+    )
+
     return 'Grant succeeded.' in output.stdout
 
 
 def run_docker_command(command):
-    cmd = ['docker', 'exec', CONTAINER_NAME] + command
+    cmd = ['docker', 'exec', '-u', 'root', CONTAINER_NAME] + command
     return run_command(cmd, capture=True, check=True)
