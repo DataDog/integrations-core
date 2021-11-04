@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The VoltDB check is included in the [Datadog Agent][2] package.
+The VoltDB check is included in the [Datadog Agent][11] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -128,7 +128,7 @@ Need help? Contact [Datadog support][10].
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://voltdb.com
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/voltdb/datadog_checks/voltdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
@@ -137,3 +137,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://app.datadoghq.com/account/settings#agent
