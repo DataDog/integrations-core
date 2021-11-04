@@ -33,7 +33,9 @@ class DNSCheck(AgentCheck):
         resolved_as = self.instance.get('resolves_as', '')
         if resolved_as and self.record_type not in ['A', 'CNAME', 'MX']:
             raise ConfigurationError('"resolves_as" can currently only support A, CNAME and MX records')
-        self.resolves_as_ips = [x.strip().lower() for x in resolved_as.split(',')]  # type: List[str]
+        self.resolves_as_ips = (
+            [x.strip().lower() for x in resolved_as.split(',')] if resolved_as else []
+        )  # type: List[str]
 
         self.base_tags = self.instance.get('tags', []) + [
             'resolved_hostname:{}'.format(self.hostname),
