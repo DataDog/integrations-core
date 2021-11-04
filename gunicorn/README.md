@@ -17,7 +17,7 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 
 ### Installation
 
-The Datadog Agent's Gunicorn check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Gunicorn servers.
+The Datadog Agent's Gunicorn check is included in the [Datadog Agent][14] package, so you don't need to install anything else on your Gunicorn servers.
 
 The Gunicorn check requires your Gunicorn app's Python environment to have the [`setproctitle`][3] package; without it, the Datadog Agent will always report that it cannot find a `gunicorn` master process (and hence, cannot find workers, either). Install the `setproctitle` package in your app's Python environment if you want to collect the `gunicorn.workers` metric.
 
@@ -154,7 +154,7 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 - [Monitor Gunicorn performance with Datadog][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [3]: https://pypi.python.org/pypi/setproctitle
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example
@@ -166,3 +166,4 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 [11]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/assets/service_checks.json
 [13]: https://www.datadoghq.com/blog/monitor-gunicorn-performance
+[14]: https://app.datadoghq.com/account/settings#agent
