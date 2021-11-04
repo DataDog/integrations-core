@@ -14,7 +14,7 @@ pytestmark = [
 ]
 
 
-test_use_process_start_time_data = """\
+test_use_process_start_time_data = """
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
 # TYPE go_memstats_alloc_bytes_total counter
 go_memstats_alloc_bytes_total 9.339544592e+09

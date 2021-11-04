@@ -2844,7 +2844,7 @@ def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
     aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
 
 
-test_use_process_start_time_data = """\
+test_use_process_start_time_data = """
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
 # TYPE go_memstats_alloc_bytes_total counter
 go_memstats_alloc_bytes_total 9.339544592e+09
@@ -2940,7 +2940,7 @@ def test_use_process_start_time(
 
     check = mocked_openmetrics_check_factory(instance)
     test_data = _make_test_use_process_start_time_data(process_start_time)
-    check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
+    check.poll = mock.MagicMock(return_value=MockResponse(test_data, text_content_type))
 
     for _ in range(0, 5):
         aggregator.reset()
