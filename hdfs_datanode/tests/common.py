@@ -33,7 +33,7 @@ EXPECTED_METRICS = [
     'hdfs.datanode.num_blocks_cached',
     'hdfs.datanode.num_failed_volumes',
     'hdfs.datanode.num_blocks_failed_to_cache',
-    'hdfs.datanode.num_blocks_failed_to_uncache',
+    # 'hdfs.datanode.num_blocks_failed_to_uncache', metric is flakey in 3.1.3
 ]
 
 HDFS_DATANODE_CONFIG = {'instances': [{'hdfs_datanode_jmx_uri': DATANODE_URI, 'tags': list(CUSTOM_TAGS)}]}
@@ -61,7 +61,7 @@ HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.num_blocks_cached': 0,
     'hdfs.datanode.num_failed_volumes': 0,
     'hdfs.datanode.num_blocks_failed_to_cache': 0,
-    'hdfs.datanode.num_blocks_failed_to_uncache': 0,
+    # 'hdfs.datanode.num_blocks_failed_to_uncache': 0, metric is flakey in 3.1.3
 }
 
 HDFS_DATANODE_METRIC_TAGS = ['datanode_url:{}'.format(DATANODE_URI)]
