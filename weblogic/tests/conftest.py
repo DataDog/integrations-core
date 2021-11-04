@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import load_jmx_config
 
@@ -28,8 +28,8 @@ def setup_weblogic():
 def dd_environment(instance):
     properties_dir = os.path.join(HERE, 'weblogic', 'properties')
     compose_file = os.path.join(HERE, 'docker-compose.yml')
-    setup_weblogic()
-    with docker_run(compose_file, env_vars={'PROPERTIES_DIR': properties_dir}):
+    WaitFor(setup_weblogic())
+    with docker_run(compose_file, env_vars={'PROPERTIES_DIR': properties_dir}, build=True):
         yield instance, {'use_jmx': True}
 
 

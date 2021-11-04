@@ -2,7 +2,9 @@ import pytest
 
 from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from .metrics import METRICS
+
 
 @pytest.mark.e2e
 def test(dd_agent_check):

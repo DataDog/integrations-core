@@ -2,20 +2,17 @@
 #
 #Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
-# ORACLE DOCKERFILES PROJECT
-# --------------------------
-# This Dockerfile extends the Oracle WebLogic image by creating a sample domain.
-#
-# Util scripts are copied into the image enabling users to plug NodeManager
-# automatically into the AdminServer running on another container.
+# ADAPTED FROM THE ORACLE DOCKERFILES PROJECT
+# -------------------------------------------
+# https://github.com/oracle/docker-images/tree/main/OracleWebLogic/samples
+
+# This Dockerfile extends the Oracle WebLogic image by creating a sample domain and deploys a sample application.
 #
 # Pull base image
 # ---------------
-FROM container-registry.oracle.com/middleware/weblogic:14.1.1.0-11 as wls_base
+ARG WEBLOGIC_VERSION
 
-# Maintainer
-# ----------
-MAINTAINER Monica Riccelli <monica.riccelli@oracle.com>
+FROM container-registry.oracle.com/middleware/weblogic:${WEBLOGIC_VERSION} as wls_base
 
 ARG APPLICATION_NAME="${APPLICATION_NAME:-sample}"
 ARG APPLICATION_PKG="${APPLICATION_PKG:-archive.zip}"

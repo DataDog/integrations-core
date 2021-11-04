@@ -2,7 +2,10 @@ version: "3"
 
 services:
   weblogic-admin-server:
-    build: .
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
     hostname: wlsadmin
     ports:
       - '7001:7001'
@@ -22,7 +25,10 @@ services:
         -Djava.rmi.server.hostname=0.0.0.0
         -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
   weblogic-managed-server-1:
-    build: .
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
     hostname: ms1
     ports:
       - '8001:8001'
@@ -44,7 +50,10 @@ services:
       MANAGED_SERV_NAME: managed-server1
     command: 'startManagedServer.sh'
   weblogic-managed-server-2:
-    build: .
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
     hostname: ms2
     ports:
       - '8002:8001'
