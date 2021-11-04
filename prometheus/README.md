@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Prometheus check is packaged with the [Agent][10] starting version 6.1.0.
+The Prometheus check is packaged with the [Datadog Agent][10] starting version 6.1.0.
 
 ### Configuration
 

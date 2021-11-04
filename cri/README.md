@@ -8,7 +8,7 @@ This check monitors a Container Runtime Interface
 
 ### Installation
 
-CRI is a core [Agent 6][5] check and thus need to be configured in both in `datadog.yaml` and with `cri.d/conf.yaml`.
+CRI is a core [Datadog Agent][5] check and thus need to be configured in both in `datadog.yaml` and with `cri.d/conf.yaml`.
 
 In `datadog.yaml` you will need to configure your `cri_socket_path` for the agent to query your current CRI (you can also configure default timeouts) and in `cri.d/conf.yaml` you can configure the check instance settings such as `collect_disk` if your CRI (such as `containerd`) reports disk usage metrics.
 
