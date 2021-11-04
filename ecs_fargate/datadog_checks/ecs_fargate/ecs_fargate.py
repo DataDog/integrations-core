@@ -198,6 +198,7 @@ class FargateCheck(AgentCheck):
             preavailable_cpu = prev_cpu_stats.get('system_cpu_usage')
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
 
+            # This is always false on Windows because the available cpu is not exposed
             if (
                 available_cpu is not None
                 and preavailable_cpu is not None
@@ -210,6 +211,7 @@ class FargateCheck(AgentCheck):
                 cpu_delta = 0.0
                 system_delta = 0.0
 
+            # Not reported on Windows
             active_cpus = float(cpu_stats.get('online_cpus', 0.0))
 
             cpu_percent = 0.0
@@ -270,7 +272,15 @@ class FargateCheck(AgentCheck):
             # I/O metrics
             for blkio_cat, metric_name in iteritems(IO_METRICS):
                 read_counter = write_counter = 0
-                for blkio_stat in container_stats.get("blkio_stats", {}).get(blkio_cat, []):
+
+                blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
+                # In Windows is always "None" (string), so don't report anything
+                if blkio_stats == 'None':
+                    continue
+                elif blkio_stats is None:
+                    blkio_stats = []
+
+                for blkio_stat in blkio_stats:
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:

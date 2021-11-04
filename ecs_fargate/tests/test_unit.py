@@ -12,14 +12,16 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 from .conftest import (
-    EXPECTED_CONTAINER_METRICS,
-    EXTRA_EXPECTED_CONTAINER_METRICS,
+    EXPECTED_CONTAINER_METRICS_LINUX,
+    EXPECTED_CONTAINER_METRICS_WINDOWS,
+    EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
     EXTRA_NETWORK_METRICS,
     INSTANCE_TAGS,
     mocked_get_tags,
     mocked_is_excluded,
-    mocked_requests_get,
+    mocked_requests_get_linux,
     mocked_requests_get_sys_delta,
+    mocked_requests_get_windows,
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -60,11 +62,11 @@ def test_invalid_response_check(check, aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check(check, aggregator, dd_run_check):
+def test_successful_check_linux(check, aggregator, dd_run_check):
     """
-    Testing successful fargate check.
+    Testing successful fargate check on Linux.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
+    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_linux):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -112,17 +114,67 @@ def test_successful_check(check, aggregator, dd_run_check):
     ]
 
     extra_expected_metrics_for_container = [
-        EXTRA_EXPECTED_CONTAINER_METRICS,
-        EXTRA_EXPECTED_CONTAINER_METRICS,
+        EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
+        EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         [],  # pause container get fewer metrics
     ]
 
     for i in range(2):
         tags = common_tags + container_tags[i]
-        for metric in EXPECTED_CONTAINER_METRICS:
+        for metric in EXPECTED_CONTAINER_METRICS_LINUX:
             aggregator.assert_metric(metric, count=1, tags=tags)
         for metric in extra_expected_metrics_for_container[i]:
             aggregator.assert_metric(metric, count=1, tags=tags)
+
+    for metric in EXTRA_NETWORK_METRICS:
+        aggregator.assert_metric(metric, count=1)  # 1 network interfaces
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+def test_successful_check_windows(check, aggregator, dd_run_check):
+    """
+    Testing successful fargate check on Windows.
+    """
+    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_windows):
+        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
+            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+                dd_run_check(check)
+
+    aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
+
+    # This test is similar to the Linux one, but there's only 1 container
+    # instead of 3, so the tags part is a bit simpler.
+
+    common_tags = INSTANCE_TAGS + [
+        # Tagger
+        'cluster_name:pierrem-test-fargate',
+        'task_family:redis-datadog',
+        'task_version:1',
+        # Compat
+        'ecs_cluster:pierrem-test-fargate',
+        'ecs_task_family:redis-datadog',
+        'ecs_task_version:1',
+    ]
+
+    container_tags = [
+        # Tagger
+        "docker_image:datadog/docker-dd-agent:latest",
+        "image_name:datadog/docker-dd-agent",
+        "short_image:docker-dd-agent",
+        "image_tag:latest",
+        "ecs_container_name:dd-agent",
+        "container_id:e8d4a9a20a0d931f8f632ec166b3f71a6ff00450aa7e99607f650e586df7d068",
+        "container_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601",
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+        # Compat
+        'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601',
+    ]
+
+    tags = common_tags + container_tags
+    for metric in EXPECTED_CONTAINER_METRICS_WINDOWS:
+        aggregator.assert_metric(metric, count=1, tags=tags)
 
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
@@ -183,14 +235,14 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     ]
 
     extra_expected_metrics_for_container = [
-        EXTRA_EXPECTED_CONTAINER_METRICS,
-        EXTRA_EXPECTED_CONTAINER_METRICS,
+        EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
+        EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         [],  # pause container get fewer metrics
     ]
 
     for i in range(2):
         tags = common_tags + container_tags[i]
-        for metric in EXPECTED_CONTAINER_METRICS:
+        for metric in EXPECTED_CONTAINER_METRICS_LINUX:
             aggregator.assert_metric(metric, count=1, tags=tags)
         for metric in extra_expected_metrics_for_container[i]:
             aggregator.assert_metric(metric, count=1, tags=tags)
