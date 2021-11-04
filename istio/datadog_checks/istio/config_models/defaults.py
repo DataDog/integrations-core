@@ -264,5 +264,9 @@ def instance_use_openmetrics(field, value):
     return False
 
 
+def instance_use_process_start_time(field, value):
+    return False
+
+
 def instance_username(field, value):
     return get_default_field_value(field, value)
