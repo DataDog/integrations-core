@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import dns.resolver
 
@@ -44,7 +44,7 @@ class DNSCheck(AgentCheck):
             self.base_tags.append('resolved_as:{}'.format(resolved_as))
 
     def _get_resolver(self):
-        # type: () -> (dns.resolver.Resolver, str)
+        # type: () -> dns.resolver.Resolver
         # Fetches the conf and creates a resolver accordingly
         resolver = dns.resolver.Resolver()  # type: dns.resolver.Resolver
 
@@ -75,9 +75,9 @@ class DNSCheck(AgentCheck):
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
-                answer = resolver.query(self.hostname, rdtype=self.record_type)
+                answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
                 assert answer.rrset.items[0].to_text()
-                if self.resolves_as:
+                if self.resolves_as_ips:
                     self._check_answer(answer)
 
             response_time = get_precise_time() - t0
@@ -98,7 +98,7 @@ class DNSCheck(AgentCheck):
             self.report_as_service_check(AgentCheck.OK)
 
     def _check_answer(self, answer):
-        # type: (Any, str) -> None
+        # type: (dns.resolver.Answer) -> None
         number_of_results = len(answer.rrset.items)
 
         assert len(self.resolves_as_ips) == number_of_results
