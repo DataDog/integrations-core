@@ -5,7 +5,7 @@ import socket
 
 from datadog_checks.base import PerfCountersBaseCheck
 
-SERVER = socket.gethostname()
+SERVER = socket.gethostname().lower()
 GLOBAL_TAGS = ('server:{}'.format(SERVER),)
 
 

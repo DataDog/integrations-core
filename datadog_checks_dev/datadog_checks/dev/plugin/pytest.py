@@ -237,7 +237,7 @@ def dd_save_state():
 def dd_default_hostname():
     import socket
 
-    return socket.gethostname()
+    return socket.gethostname().lower()
 
 
 @pytest.fixture
