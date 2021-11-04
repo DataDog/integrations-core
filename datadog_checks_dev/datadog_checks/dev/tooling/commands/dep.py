@@ -251,10 +251,10 @@ def is_version_compatible(marker, supported_versions):
 @click.option('--batch-size', '-b', type=int, help='The maximum number of dependencies to upgrade if syncing')
 def updates(sync, check_python_classifiers, include_security_deps, batch_size):
 
-    dont_update_deps = copy.deepcopy(IGNORED_DEPS)
+    ignore_deps = copy.deepcopy(IGNORED_DEPS)
     if not include_security_deps:
         sec_deps = copy.deepcopy(SECURITY_DEPS)
-        dont_update_deps = dont_update_deps.union(sec_deps)
+        ignore_deps = ignore_deps.union(sec_deps)
 
     all_agent_dependencies, errors = read_agent_dependencies()
 
@@ -270,7 +270,7 @@ def updates(sync, check_python_classifiers, include_security_deps, batch_size):
     deps_to_update = {
         agent_dependency_definition: package_data[package]['version']
         for package, package_dependency_definitions in all_agent_dependencies.items()
-        if package not in dont_update_deps
+        if package not in ignore_deps
         for agent_dep_version, agent_dependency_definitions in package_dependency_definitions.items()
         for agent_dependency_definition in agent_dependency_definitions
         if str(agent_dep_version)[2:] != package_data[package]['version']
