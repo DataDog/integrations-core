@@ -29,6 +29,18 @@ def create_connectors():
         },
     }
 
+    data_sink = {
+        "name": "filesink-internal",
+        "config": {
+            "name": "local-file-sink",
+            "connector.class": "FileStreamSink",
+            "tasks.max": "1",
+            "file": "/tmp/test.sink.txt",
+            "topics": "pageviews",
+        },
+    }
+
+    requests.post('http://localhost:8083/connectors', data=json.dumps(data_sink), headers=headers)
     requests.post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
 
 
