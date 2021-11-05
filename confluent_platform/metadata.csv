@@ -47,7 +47,7 @@ confluent.kafka.controller.global_topic_count,gauge,,,,global topic count,0,conf
 confluent.kafka.controller.global_partition_count,gauge,,,,global partition count,0,confluent_platform,partition count
 confluent.kafka.log.log_flush_rate_and_time_ms.rate,gauge,,millisecond,,Log flush rate.,0,confluent_platform,log flush rate
 confluent.kafka.log.log_flush_rate_and_time_ms.avg,gauge,,millisecond,,Log flush rate avg.,0,confluent_platform,log flush avg
-confluent.kafka.log.Size,gauge,,byte,,log size per topic,0,confluent_platform,log per topic
+confluent.kafka.log.size,gauge,,byte,,log size per topic,0,confluent_platform,log per topic
 confluent.kafka.network.request.total_time_ms.rate,gauge,,millisecond,,Total time in ms to serve the specified request (rate).,0,confluent_platform,net req tot rate
 confluent.kafka.network.request.total_time_ms.avg,gauge,,millisecond,,Total time in ms to serve the specified request (avg).,0,confluent_platform,net req tot avg
 confluent.kafka.network.request.total_time_ms.50percentile,gauge,,millisecond,,Total time in ms to serve the specified request (50percentile).,0,confluent_platform,net req tot 50p

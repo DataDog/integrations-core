@@ -91,7 +91,7 @@ BROKER_METRICS = [
     'confluent.kafka.server.topic.messages_in_per_sec.rate',
     'confluent.kafka.server.topic.total_fetch_requests_per_sec.rate',
     'confluent.kafka.server.topic.total_produce_requests_per_sec.rate',
-    'confluent.kafka.log.Size',
+    'confluent.kafka.log.size',
 ]
 
 CONNECT_METRICS = [
