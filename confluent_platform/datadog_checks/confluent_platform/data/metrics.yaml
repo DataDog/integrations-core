@@ -692,7 +692,7 @@ jmx_metrics:
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka\.connect:type=connector-metrics,connector=.*
+        - kafka.connect:type=connector-metrics,connector=.*
       tags:
         connector: $1
       attribute:
