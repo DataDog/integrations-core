@@ -83,7 +83,7 @@ NOT_TILES = [
     'wmi_check',
 ]
 
-CHECK_LINKS = f"""\
+CHECK_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -95,7 +95,7 @@ CHECK_LINKS = f"""\
 [9]: https://docs.datadoghq.com/help/
 """
 
-LOGS_LINKS = f"""\
+LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -103,7 +103,7 @@ LOGS_LINKS = f"""\
 [5]: https://github.com/DataDog/integrations-core/blob/master/logs/assets/service_checks.json
 """
 
-JMX_LINKS = f"""\
+JMX_LINKS = """\
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/jmx/datadog_checks/jmx/data/conf.yaml.example
@@ -114,7 +114,7 @@ JMX_LINKS = f"""\
 [8]: https://github.com/DataDog/integrations-core/blob/master/jmx/assets/service_checks.json
 """
 
-SNMP_TILE_LINKS = f"""\
+SNMP_TILE_LINKS = """\
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp_tile/assets/service_checks.json
@@ -122,7 +122,7 @@ SNMP_TILE_LINKS = f"""\
 [5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 """
 
-TILE_LINKS = f"""\
+TILE_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/help/

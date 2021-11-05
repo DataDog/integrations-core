@@ -14,9 +14,8 @@ from ..fs import (
     write_file,
     write_file_binary,
 )
-from .utils import get_license_header, kebab_case_name, normalize_package_name
-
 from .constants import integration_type_links
+from .utils import get_license_header, kebab_case_name, normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
