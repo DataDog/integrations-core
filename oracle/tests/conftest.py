@@ -87,6 +87,25 @@ def dd_environment():
 
 
 def create_user():
+    run_docker_command_as_root(
+        [
+            'yum',
+            '-y',
+            'install',
+            'sudo',
+        ]
+    )
+
+    run_docker_command_as_root(
+        [
+            'sudo',
+            'yum',
+            '-y',
+            'install',
+            'nano',
+        ]
+    )
+
     output = run_docker_command(
         [
             '/u01/app/oracle/product/12.2.0/dbhome_1/bin/sqlplus',
@@ -97,27 +116,13 @@ def create_user():
         ]
     )
 
-    run_docker_command(
-        [
-            'yum',
-            '-y',
-            'install',
-            'sudo',
-        ]
-    )
-
-    run_docker_command(
-        [
-            'yum',
-            '-y',
-            'install',
-            'nano',
-        ]
-    )
-
     return 'Grant succeeded.' in output.stdout
 
 
 def run_docker_command(command):
-    cmd = ['docker', 'exec', '-u', 'root', CONTAINER_NAME] + command
+    cmd = ['docker', 'exec', CONTAINER_NAME] + command
+    return run_command(cmd, capture=True, check=True)
+
+def run_docker_command_as_root(command):
+    cmd = ['docker', 'exec', '-u', '0', CONTAINER_NAME] + command
     return run_command(cmd, capture=True, check=True)
