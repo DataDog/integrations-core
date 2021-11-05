@@ -206,7 +206,7 @@ jmx_metrics:
   - include:
       domain: kafka.log
       bean:
-        # Log size
+        # Log size, only shows after segment roll
         - kafka.log:type=Log,name=Size,topic=([-.\w]+),partition=([0-9]+)
       tags:
         topic: $1
