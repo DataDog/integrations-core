@@ -16,6 +16,8 @@ from ..fs import (
 )
 from .utils import get_license_header, kebab_case_name, normalize_package_name
 
+from .constants import integration_type_links
+
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
 SIMPLE_NAME = r'^\w+$'
@@ -27,7 +29,7 @@ def get_valid_templates():
     return sorted(templates)
 
 
-def construct_template_fields(integration_name, repo_choice, **kwargs):
+def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
 
@@ -42,7 +44,7 @@ To install the {integration_name} check on your host:
 
 2. Run `ddev release build {normalized_integration_name}` to build the package.
 
-3. [Download the Datadog Agent](https://app.datadoghq.com/account/settings#agent).
+3. [Download the Datadog Agent][2].
 
 4. Upload the build artifact to any host with an Agent and
  run `datadog-agent integration install -w
@@ -61,7 +63,7 @@ To install the {integration_name} check on your host:
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
-        integration_links = "test"
+        integration_links = integration_type_links.get(integration_type)
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
@@ -84,7 +86,7 @@ To install the {integration_name} check on your host:
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
         tox_base_dep = datadog_checks_base_req
-        integration_links=''
+        integration_links = integration_type_links.get(integration_type)
     config = {
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
