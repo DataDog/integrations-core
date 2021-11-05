@@ -61,6 +61,7 @@ To install the {integration_name} check on your host:
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
+        integration_links = "test"
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
@@ -73,6 +74,7 @@ To install the {integration_name} check on your host:
         support_type = 'partner'
         test_dev_dep = 'datadog-checks-dev'
         tox_base_dep = datadog_checks_base_req
+        integration_links = ''
     else:
         check_name = normalized_integration_name
         author = 'U.N. Owen'
@@ -82,6 +84,7 @@ To install the {integration_name} check on your host:
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
         tox_base_dep = datadog_checks_base_req
+        integration_links=''
     config = {
         'author': author,
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
@@ -97,6 +100,7 @@ To install the {integration_name} check on your host:
         'support_type': support_type,
         'test_dev_dep': test_dev_dep,
         'tox_base_dep': tox_base_dep,
+        'integration_links': integration_links,
     }
     config.update(kwargs)
 
