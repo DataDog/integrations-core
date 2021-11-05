@@ -25,7 +25,7 @@ Ensure that you have configured the following:
     * Run `ddev dep updates --sync --check-python-classifiers --batch-size 10`
     * Run `ddev dep sync`
     * Create a PR with the updated dependencies
-    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that change.
+    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency that is causing the error to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that particular dependency bump.
 
     If the first PR process does not take long, feel free to try another batch of updates and repeat the above process. Overall, this step is not mandatory but it is important to keep our dependencies up to date.
     
