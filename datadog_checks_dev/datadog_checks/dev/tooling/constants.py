@@ -83,7 +83,7 @@ NOT_TILES = [
     'wmi_check',
 ]
 
-CORE_CHECK = f"""\
+CHECK_LINKS = f"""\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -95,7 +95,7 @@ CORE_CHECK = f"""\
 [9]: https://docs.datadoghq.com/help/
 """
 
-CORE_LOGS = f"""\
+LOGS_LINKS = f"""\
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -103,7 +103,7 @@ CORE_LOGS = f"""\
 [5]: https://github.com/DataDog/integrations-core/blob/master/logs/assets/service_checks.json
 """
 
-CORE_JMX = f"""\
+JMX_LINKS = f"""\
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/jmx/datadog_checks/jmx/data/conf.yaml.example
@@ -114,7 +114,7 @@ CORE_JMX = f"""\
 [8]: https://github.com/DataDog/integrations-core/blob/master/jmx/assets/service_checks.json
 """
 
-CORE_SNMP_TILE = f"""\
+SNMP_TILE_LINKS = f"""\
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp_tile/assets/service_checks.json
@@ -122,18 +122,18 @@ CORE_SNMP_TILE = f"""\
 [5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 """
 
-CORE_TILE = f"""\
+TILE_LINKS = f"""\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/help/
 """
 
 integration_type_links = {
-    'check': CORE_CHECK,
-    'logs': CORE_LOGS,
-    'jmx': CORE_JMX,
-    'snmp_tile': CORE_SNMP_TILE,
-    'tile': CORE_TILE,
+    'check': CHECK_LINKS,
+    'logs': LOGS_LINKS,
+    'jmx': JMX_LINKS,
+    'snmp_tile': SNMP_TILE_LINKS,
+    'tile': TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,
