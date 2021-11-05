@@ -666,7 +666,7 @@ jmx_metrics:
   - include:
       domain: kafka.connect
       bean_regex:
-        - kafka\.connect:type=connect_metrics,client-id=.*
+        - kafka.connect:type=connect-metrics,client-id=.*
       attribute:
         outgoing-byte-rate: 
           # Rate of outgoing bytes
