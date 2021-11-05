@@ -39,6 +39,25 @@ Some options can be set globally in `init_config` (with `instances` taking prece
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-openmetrics-legacy] and [init_config][config-spec-template-init-config-openmetrics-legacy] sections.
 
+### Config changes between OpenMetrics V1 and V2
+There were config option changes between OpenMetrics V1 and V2, so please check if any updated OpenMetrics instances use deprecated options and update accordingly.
+
+
+| OpenMetricsV1               | OpenMetricsV2                        |
+|-----------------------------|--------------------------------------|
+| `ignore_metrics`            | `exclude_metrics`                    |
+| `prometheus_metrics_prefix` | `raw_metric_prefix`                  |
+| `health_service_check`      | `enable_health_service_check`        |
+| `labels_mapper`             | `labels_rename`                      |
+| `label_joins`               | `share_labels`*                      |
+| `send_histograms_buckets`   | `collect_histogram_buckets`          |
+| `send_distribution_buckets` | `histogram_buckets_as_distributions` |
+
+Note that the `type_overrides` option is incorporated in the `metrics` option now. This `metrics` option defines the list of which metrics to collect from the `openmetrics_endpoint`, and it can be used to remap the names and types of exposed metrics as well as use regular expression to match exposed metrics.
+
+In addition to `share_labels` being used to join labels with a 1:1 mapping, it can take other parameters for sharing. More information can be found in the [conf.yaml.exmaple][conf-yaml-example-share-labels].
+
+
 All [HTTP options](../base/http.md#options) are also supported.
 
 
