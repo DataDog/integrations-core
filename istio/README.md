@@ -143,79 +143,32 @@ Note: you must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Confi
 
 ### Using the generic Openmetrics Integration in an Istio deployment
 
-If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][20] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
+If Istio proxy sidecar injection is enabled, monitoring other Prometheus metrics via the [Openmetrics integration][21] with the same metrics endpoint as `istio_mesh_endpoint` can result in high custom metrics usage and duplicated metric collection.
 
 To ensure that your Openmetrics configuration does not redundantly collect metrics, either:
 
 1. Use specific metric matching in the `metrics` configuration option, or
 2. If you use `*` value for `metrics`, consider using the following options to exclude metrics already collected by the Istio and Envoy integrations.
 
-#### Openmetrics V2 configuration
+#### Openmetrics V2 configuration with generic metric collection
 
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if configuring the Openmetrics V2 (`openmetrics_endpoint` enabled).
+ 
 ```yaml
 ## Every instance is scheduled independent of the others.
 #
 instances:
-  -
-    ## @param openmetrics_endpoint - string - optional
-    ## The URL exposing metrics in the OpenMetrics format.
-    #
-    openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-
-    ## @param metrics - (list of string or mapping) - required
-    ## This list defines which metrics to collect from the `openmetrics_endpoint`.
-    ## Metrics may be defined in 3 ways:
-    ##
-    ## 1. If the item is a string, then it represents the exposed metric name, and
-    ##    the sent metric name will be identical. For example:
-    ##
-    ##      metrics:
-    ##      - <METRIC_1>
-    ##      - <METRIC_2>
-    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
-    ##
-    ##      a. If a value is a string, then it represents the sent metric name. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
-    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
-    ##         The `name` represents the sent metric name, and the `type` represents how
-    ##         the metric should be handled, overriding any type information the endpoint
-    ##         may provide. For example:
-    ##
-    ##           metrics:
-    ##           - <EXPOSED_METRIC_1>:
-    ##               name: <SENT_METRIC_1>
-    ##               type: <METRIC_TYPE_1>
-    ##           - <EXPOSED_METRIC_2>:
-    ##               name: <SENT_METRIC_2>
-    ##               type: <METRIC_TYPE_2>
-    ##
-    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
-    ##
-    ## Regular expressions may be used to match the exposed metric names, for example:
-    ##
-    ##   metrics:
-    ##   - ^network_(ingress|egress)_.+
-    ##   - .+:
-    ##       type: gauge
-    #
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
     metrics: [*]
-    ## @param exclude_metrics - list of strings - optional
-    ## A list of metrics to exclude, with each entry being either
-    ## the exact metric name or a regular expression.
-    ## In order to exclude all metrics but the ones matching a specific filter,
-    ## you can use a negative lookahead regex like:
-    ##   - ^(?!foo).*$
-    #
     exclude_metrics:
       - istio_*
       - envoy_*
 
 ```
 
-#### Openmetrics V1 configuration (Legacy)
+#### Openmetrics V1 configuration (Legacy) with generic metric collection
+
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if configuring the Openmetrics V2 (`openmetrics_endpoint` enabled).
 
 ```yaml
 instances:
