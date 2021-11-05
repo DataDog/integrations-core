@@ -49,3 +49,19 @@ For complete documentation on every option, see the associated templates for the
 
 This OpenMetrics implementation is the updated version of the original Prometheus/OpenMetrics implementation. 
 The [docs for the deprecated implementation](../legacy/prometheus.md) are still available as a reference.
+
+### Config changes between OpenMetrics V1 and V2
+There were config option changes between OpenMetrics V1 and V2, so please check if any updated OpenMetrics instances use deprecated options and update accordingly.
+
+Note that the `type_overrides` option is incorporated in the `metrics` option now.
+
+| OpenMetricsV1               | OpenMetricsV2                        |
+|-----------------------------|--------------------------------------|
+| `ignore_metrics`            | `exclude_metrics`                    |
+| `prometheus_metrics_prefix` | `raw_metric_prefix`                  |
+| `health_service_check`      | `enable_health_service_check`        |
+| `labels_mapper`             | `labels_rename`                      |
+| `label_joins`               | `share_labels`                       |
+| `send_histograms_buckets`   | `collect_histogram_buckets`          |
+| `send_distribution_buckets` | `histogram_buckets_as_distributions` |
+
