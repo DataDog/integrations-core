@@ -52,6 +52,7 @@ def kerberos():
                 'WEBPORT': webserver_port,
             },
             conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
+            attempts=2,
         ):
             yield common_config
 
