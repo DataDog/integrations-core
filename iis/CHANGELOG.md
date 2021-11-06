@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.13.0 / 2021-10-04
+
+* [Added] Add runtime configuration validation. See [#8938](https://github.com/DataDog/integrations-core/pull/8938).
+
 ## 2.12.0 / 2021-08-02 / Agent 7.31.0
 
 * [Added] Submit unknown iis counters. See [#9807](https://github.com/DataDog/integrations-core/pull/9807).

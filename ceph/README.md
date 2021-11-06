@@ -14,12 +14,12 @@ Enable the Datadog-Ceph integration to:
 
 ### Installation
 
-The Ceph check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Ceph servers.
+The Ceph check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Ceph servers.
 
 ### Configuration
 
-Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
-See the [sample ceph.d/conf.yaml][5] for all available configuration options:
+Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
+See the [sample ceph.d/conf.yaml][4] for all available configuration options:
 
 ```yaml
 init_config:
@@ -55,7 +55,7 @@ _Available for Agent versions >6.0_
        service: "<APPLICATION_NAME>"
    ```
 
-3. [Restart the Agent][10].
+3. [Restart the Agent][5].
 
 ### Validation
 
@@ -67,7 +67,7 @@ _Available for Agent versions >6.0_
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-**Note**: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
+**Note**: If you are running Ceph luminous or later, the `ceph.osd.pct_used` metric is not included.
 
 ### Events
 
@@ -75,23 +75,23 @@ The Ceph check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][11] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-- [Monitor Ceph: From node status to cluster-wide performance][9]
+- [Monitor Ceph: From node status to cluster-wide performance][10]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/monitor-ceph-datadog
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[11]: https://github.com/DataDog/integrations-core/blob/master/ceph/assets/service_checks.json
+[8]: https://github.com/DataDog/integrations-core/blob/master/ceph/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/monitor-ceph-datadog

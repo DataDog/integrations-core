@@ -14,7 +14,7 @@
   "metric_prefix": "hdfs.",
   "metric_to_check": "hdfs.namenode.capacity_used",
   "name": "hdfs_namenode",
-  "public_title": "Datadog-HDFS Namenode Integration",
+  "public_title": "HDFS Namenode",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
   "supported_os": [
@@ -28,7 +28,9 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hdfs_namenode"

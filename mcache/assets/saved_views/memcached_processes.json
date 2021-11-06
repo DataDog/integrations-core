@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:mcache"
-      ]
+      "query_filter": "integration:mcache",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -151,9 +151,7 @@ We provide an easy way to utilize [log collection][integration-log-collection] w
      - ${DD_LOG_2}:/usr/local/apache2/logs/error_log
      ```
 
-1. When [starting](cli.md#ddev-env-start) the environment, pass `-e DD_LOGS_ENABLED=true` to activate the Logs Agent.
-
-1. To send logs to a custom url, pass `-e DD_LOGS_CONFIG_LOGS_DD_URL=[CUSTOM_URL]:[CUSTOM_PORT]` when [starting](cli.md#ddev-env-start) the environment
+1. To send logs to a custom URL, set `log_url` for the configured [organization](configuration.md#organization).
 
 ## Reference
 

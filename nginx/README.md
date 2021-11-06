@@ -215,7 +215,7 @@ To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-Set [Autodiscovery Integration Templates][19] as Docker labels on your application container:
+Set [Autodiscovery Integration Templates][8] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["nginx"]'
@@ -228,9 +228,9 @@ LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/ng
 #### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][17].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][9].
 
-Then, set [Log Integrations][18] as Docker labels:
+Then, set [Log Integrations][10] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
@@ -245,7 +245,7 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][8] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][20].
+Set [Autodiscovery Integrations Templates][11] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][12].
 
 ```yaml
 apiVersion: v1
@@ -277,9 +277,9 @@ spec:
 #### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][21].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
 
-Then, set [Log Integrations][22] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][23].
+Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
 
 ```yaml
 apiVersion: v1
@@ -301,7 +301,7 @@ To configure this check for an Agent running on ECS:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][8] as Docker labels on your application container:
 
 ```json
 {
@@ -322,9 +322,9 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][24].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][15].
 
-Then, set [Log Integrations][22] as Docker labels:
+Then, set [Log Integrations][10] as Docker labels:
 
 ```yaml
 {
@@ -343,13 +343,13 @@ Then, set [Log Integrations][22] as Docker labels:
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `nginx` under the Checks section.
+[Run the Agent's status subcommand][16] and look for `nginx` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][11] for a full list of provided metrics by this integration.
+See [metadata.csv][17] for a full list of provided metrics by this integration.
 
 Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
 
@@ -381,21 +381,21 @@ The NGINX check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][25] for a list of service checks provided by this integration.
+See [service_checks.json][18] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-- [Why do my logs not have the expected timestamp?][12]
+- [Why do my logs not have the expected timestamp?][19]
 
-Need help? Contact [Datadog support][13].
+Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor NGINX][14]
-- [How to collect NGINX metrics][15]
-- [How to monitor NGINX with Datadog][16]
+- [How to monitor NGINX][21]
+- [How to collect NGINX metrics][22]
+- [How to monitor NGINX with Datadog][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
 [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
@@ -404,21 +404,19 @@ Additional helpful documentation, links, and articles:
 [5]: https://nginx.org/en/docs/http/ngx_http_api_module.html
 [6]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[12]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
-[13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
-[17]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
-[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[20]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[21]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[22]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[23]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
-[24]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-[25]: https://github.com/DataDog/integrations-core/blob/master/nginx/assets/service_checks.json
+[8]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[9]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[15]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[16]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[17]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
+[18]: https://github.com/DataDog/integrations-core/blob/master/nginx/assets/service_checks.json
+[19]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
+[20]: https://docs.datadoghq.com/help/
+[21]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[22]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[23]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
