@@ -49,7 +49,7 @@ def files_changed(include_uncommitted=True):
     """
     with chdir(get_root()):
         # Use `--name-status` to include moved files
-        name_status_result = run_command('git diff --name-status master...', capture='out')
+        name_status_result = run_command('git diff --name-status origin/master...', capture='out')
 
     name_status_lines = name_status_result.stdout.splitlines()
 

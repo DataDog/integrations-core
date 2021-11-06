@@ -567,9 +567,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param disable_generic_tags - boolean - optional - default: true
-    ## Replaces generic tag such as `server` with `avi_vantage_server` to avoid getting it mixed with
-    ## other integratons tags.
-    #
-    # disable_generic_tags: true

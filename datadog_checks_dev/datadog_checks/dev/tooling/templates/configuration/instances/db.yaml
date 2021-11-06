@@ -1,3 +1,10 @@
+- name: only_custom_queries
+  description: |
+    Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    Only metrics specified in `custom_queries` will be collected.
+  value:
+    type: boolean
+    example: false
 - name: use_global_custom_queries
   description: |
     How `global_custom_queries` should be used for this instance. There are 3 options:

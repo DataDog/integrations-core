@@ -8,12 +8,26 @@ class CheckException(Exception):
     Generic base class for errors coming from checks
     """
 
-    pass
-
 
 class ConfigurationError(CheckException):
     """
     The configuration file is invalid
     """
 
-    pass
+
+class ConfigTypeError(ConfigurationError):
+    """
+    The configuration file defines incorrect types
+    """
+
+
+class ConfigValueError(ConfigurationError):
+    """
+    The configuration file defines invalid values
+    """
+
+
+class ConfigMissingError(ConfigurationError):
+    """
+    The configuration file is missing settings
+    """

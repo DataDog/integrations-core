@@ -43,6 +43,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',
+    'datadog_checks_dependency_provider',
     'datadog_checks_downloader',
     'directory',  # OS
     'dns_check',  # not a specific service
