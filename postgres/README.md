@@ -2,8 +2,6 @@
 
 ![PostgreSQL Graph][1]
 
-<div class="alert alert-info">This page describes the Postgres agent integration; if you are looking for the Database Monitoring (DBM) product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
-
 ## Overview
 
 Get metrics from PostgreSQL in real time to:
@@ -12,6 +10,8 @@ Get metrics from PostgreSQL in real time to:
 - Received notifications about PostgreSQL failovers and events.
 
 ## Setup
+
+<div class="alert alert-info">This page describes the Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -366,7 +366,7 @@ Some of the metrics listed below require additional configuration, see the [samp
 
 See [metadata.csv][20] for a list of metrics provided by this integration.
 
-For Agent version `7.32.0` and later, if you have Database Monitoring enabled, the `postgresql.connections` metric is tagged with `state`, `app`, and `user`.
+For Agent version `7.32.0` and later, if you have Database Monitoring enabled, the `postgresql.connections` metric is tagged with `state`, `app`, `db` and `user`.
 
 ### Events
 

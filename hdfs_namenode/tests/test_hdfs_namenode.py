@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 from six import iteritems
 
@@ -60,15 +61,16 @@ def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     major, minor, patch = HDFS_RAW_VERSION.split('.')
 
     version_metadata = {
-        'version.raw': HDFS_RAW_VERSION,
+        'version.raw': mock.ANY,
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
+        'version.build': mock.ANY,
     }
 
     datadog_agent.assert_metadata(CHECK_ID, version_metadata)
-    datadog_agent.assert_metadata_count(5)
+    datadog_agent.assert_metadata_count(6)
 
 
 def test_auth(aggregator, dd_run_check, mocked_auth_request):

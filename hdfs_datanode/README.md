@@ -18,19 +18,6 @@ The HDFS DataNode check is included in the [Datadog Agent][3] package, so you do
 
 ### Configuration
 
-#### Prepare the node
-
-1. The Agent collects metrics from the DataNode's JMX remote interface. The interface is disabled by default, enable it by setting the following option in `hadoop-env.sh` (usually found in $HADOOP_HOME/conf):
-
-   ```conf
-   export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote
-     -Dcom.sun.management.jmxremote.authenticate=false
-     -Dcom.sun.management.jmxremote.ssl=false
-     -Dcom.sun.management.jmxremote.port=50075 $HADOOP_DATANODE_OPTS"
-   ```
-
-2. Restart the DataNode process to enable the JMX interface.
-
 #### Connect the Agent
 
 <!-- xxx tabs xxx -->
@@ -53,9 +40,9 @@ To configure this check for an Agent running on a host:
      ##
      ## The hostname and port can be found in the hdfs-site.xml conf file under
      ## the property dfs.datanode.http.address
-     ## https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
+     ## https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
      #
-     - hdfs_datanode_jmx_uri: http://localhost:50075
+     - hdfs_datanode_jmx_uri: http://localhost:9864
    ```
 
 2. [Restart the Agent][6].
@@ -67,11 +54,11 @@ To configure this check for an Agent running on a host:
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                |
-| -------------------- | ---------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `hdfs_datanode`                                      |
-| `<INIT_CONFIG>`      | blank or `{}`                                        |
-| `<INSTANCE_CONFIG>`  | `{"hdfs_datanode_jmx_uri": "http://%%host%%:50075"}` |
+| Parameter            | Value                                               |
+| -------------------- | --------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `hdfs_datanode`                                     |
+| `<INIT_CONFIG>`      | blank or `{}`                                       |
+| `<INSTANCE_CONFIG>`  | `{"hdfs_datanode_jmx_uri": "http://%%host%%:9864"}` |
 
 #### Log collection
 

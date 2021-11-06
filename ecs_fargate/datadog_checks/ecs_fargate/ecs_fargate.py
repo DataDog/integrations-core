@@ -182,24 +182,36 @@ class FargateCheck(AgentCheck):
             cpu_stats = container_stats.get('cpu_stats', {})
             prev_cpu_stats = container_stats.get('precpu_stats', {})
 
-            value_system = cpu_stats.get('system_cpu_usage')
+            value_system = cpu_stats.get('cpu_usage', {}).get('usage_in_kernelmode')
             if value_system is not None:
-                self.gauge('ecs.fargate.cpu.system', value_system, tags)
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
+
+            value_user = cpu_stats.get('cpu_usage', {}).get('usage_in_usermode')
+            if value_user is not None:
+                self.rate('ecs.fargate.cpu.user', value_user, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value_total is not None:
-                self.gauge('ecs.fargate.cpu.user', value_total, tags)
+                self.rate('ecs.fargate.cpu.usage', value_total, tags)
 
+            available_cpu = cpu_stats.get('system_cpu_usage')
+            preavailable_cpu = prev_cpu_stats.get('system_cpu_usage')
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
-            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
 
-            if prevalue_system is not None and prevalue_total is not None:
+            # This is always false on Windows because the available cpu is not exposed
+            if (
+                available_cpu is not None
+                and preavailable_cpu is not None
+                and value_total is not None
+                and prevalue_total is not None
+            ):
                 cpu_delta = float(value_total) - float(prevalue_total)
-                system_delta = float(value_system) - float(prevalue_system)
+                system_delta = float(available_cpu) - float(preavailable_cpu)
             else:
                 cpu_delta = 0.0
                 system_delta = 0.0
 
+            # Not reported on Windows
             active_cpus = float(cpu_stats.get('online_cpus', 0.0))
 
             cpu_percent = 0.0
@@ -260,7 +272,15 @@ class FargateCheck(AgentCheck):
             # I/O metrics
             for blkio_cat, metric_name in iteritems(IO_METRICS):
                 read_counter = write_counter = 0
-                for blkio_stat in container_stats.get("blkio_stats", {}).get(blkio_cat, []):
+
+                blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
+                # In Windows is always "None" (string), so don't report anything
+                if blkio_stats == 'None':
+                    continue
+                elif blkio_stats is None:
+                    blkio_stats = []
+
+                for blkio_stat in blkio_stats:
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:

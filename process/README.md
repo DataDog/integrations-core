@@ -17,9 +17,10 @@ The Process Check is included in the [Datadog Agent][1] package, so you don't ne
 
 Unlike many checks, the Process Check doesn't monitor anything useful by default. You must configure which processes you want to monitor, and how.
 
+
 1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][2] for all available configuration options:
 
-  ```yaml
+```yaml
   init_config:
 
   instances:
@@ -39,7 +40,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
           search_string:
             - ssh
             - sshd
-   ```
+```
 
     Some process metrics require either running the Datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the Datadog collector as `root`, the `try_sudo` option lets the Process Check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work:
 

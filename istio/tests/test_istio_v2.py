@@ -4,6 +4,7 @@
 import pytest
 from six import PY2
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.istio import Istio
 
 from . import common
@@ -21,6 +22,8 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
 
     for metric in common.ISTIOD_V2_METRICS:
         aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -36,6 +39,27 @@ def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     for metric in common.V2_MESH_METRICS:
         aggregator.assert_metric(metric)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
+def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
+    """
+    Test proxy mesh check for V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+    instance = common.MOCK_V2_MESH_INSTANCE
+    instance['exclude_labels'] = common.CONFIG_EXCLUDE_LABELS
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    for metric in common.V2_MESH_METRICS:
+        aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -53,6 +77,7 @@ def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     for metric in common.V2_MESH_METRICS + common.V2_MESH_COUNTER_GAUGE:
         aggregator.assert_metric(metric)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -78,21 +103,3 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-
-
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
-    """
-    Test proxy mesh check for V2 implementation
-    """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
-    instance = common.MOCK_V2_MESH_INSTANCE
-    instance['exclude_labels'] = common.CONFIG_EXCLUDE_LABELS
-    check = Istio(common.CHECK_NAME, {}, [instance])
-    dd_run_check(check)
-
-    for metric in common.V2_MESH_METRICS:
-        aggregator.assert_metric(metric)
-
-    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS)
-    aggregator.assert_all_metrics_covered()
