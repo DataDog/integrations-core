@@ -53,7 +53,7 @@ def instance_db_exclude(field, value):
 
 
 def instance_db_include(field, value):
-    return 'all'
+    return get_default_field_value(field, value)
 
 
 def instance_disable_generic_tags(field, value):
