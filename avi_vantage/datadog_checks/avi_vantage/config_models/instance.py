@@ -96,7 +96,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w+')
+    namespace: Optional[str] = Field(None, regex='\\w*')
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
     openmetrics_endpoint: Optional[str]

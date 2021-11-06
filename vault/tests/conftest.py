@@ -16,7 +16,6 @@ from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
 from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
-from .utils import get_client_token_path, set_client_token_path
 
 
 @pytest.fixture(scope='session')
@@ -32,10 +31,10 @@ def global_tags():
 
 
 @pytest.fixture(scope='session')
-def instance():
+def instance(dd_get_state):
     def get_instance():
         inst = INSTANCES['main'].copy()
-        inst['client_token_path'] = get_client_token_path()
+        inst['client_token_path'] = dd_get_state('client_token_path')
         return inst
 
     return get_instance
@@ -56,7 +55,7 @@ def e2e_instance():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(e2e_instance, dd_save_state):
     with TempDir('vault-jwt') as jwt_dir, TempDir('vault-sink') as sink_dir:
         token_file = os.path.join(sink_dir, 'token')
 
@@ -72,7 +71,7 @@ def dd_environment(e2e_instance):
             sleep=10,
             mount_logs=True,
         ):
-            set_client_token_path(token_file)
+            dd_save_state('client_token_path', token_file)
 
             yield e2e_instance, {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
 

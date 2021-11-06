@@ -1,4 +1,8 @@
-FROM mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+ARG SQLSERVER_IMAGE_TAG
+
+FROM mcr.microsoft.com/mssql/server:${SQLSERVER_IMAGE_TAG}
+
+USER root
 
 EXPOSE 1433
 EXPOSE 2500

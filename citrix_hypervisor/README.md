@@ -16,15 +16,15 @@ The recommended way to monitor Citrix hypervisors is to install one Datadog Agen
 
 #### Datadog User
 
-The Citrix Hypervisor integration requires a user with at least [`read-only`](https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html) access to monitor the service.
+The Citrix Hypervisor integration requires a user with at least [`read-only`][3] access to monitor the service.
 
 ### Configuration
 
 #### Host
 
-1. Edit the `citrix_hypervisor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Citrix Hypervisor performance data. See the [sample citrix_hypervisor.d/conf.yaml][3] for all available configuration options.
+1. Edit the `citrix_hypervisor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Citrix Hypervisor performance data. See the [sample citrix_hypervisor.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][5].
 
 #### Log collection
 
@@ -43,19 +43,19 @@ _Available for Agent versions >6.0_
       path: /var/log/xensource.log
       source: citrix_hypervisor
     ```
-    Change the `path` value and configure it for your environment. See the [sample `citrix_hypervisor.d/conf.yaml` file][3] for all available configuration options.
+    Change the `path` value and configure it for your environment. See the [sample `citrix_hypervisor.d/conf.yaml` file][4] for all available configuration options.
 
-3. [Restart the Agent][4].
+3. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `citrix_hypervisor` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `citrix_hypervisor` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 
@@ -63,18 +63,19 @@ The Citrix Hypervisor integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.citrix.com/products/citrix-hypervisor/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/datadog_checks/citrix_hypervisor/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/metadata.csv
-[7]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/assets/service_checks.json
-[8]: https://docs.datadoghq.com/help/
+[3]: https://docs.citrix.com/en-us/xencenter/7-1/rbac-roles.html
+[4]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/datadog_checks/citrix_hypervisor/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

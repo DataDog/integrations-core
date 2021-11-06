@@ -4,15 +4,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import time
-import warnings
 from collections import defaultdict
 
 from requests.exceptions import RequestException
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from six import iteritems
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'
@@ -174,12 +172,6 @@ class RabbitMQ(AgentCheck):
             base_url = 'http://' + base_url
             parsed_url = urlparse(base_url)
 
-        suppress_warning = False
-        if not self.http.options['verify'] and parsed_url.scheme == 'https':
-            # Only allow suppressing the warning if not ssl_verify
-            suppress_warning = self.http.ignore_tls_warning
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.', base_url)
-
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
             EXCHANGE_TYPE: int(instance.get('max_detailed_exchanges', MAX_DETAILED_EXCHANGES)),
@@ -202,17 +194,12 @@ class RabbitMQ(AgentCheck):
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
-        return base_url, max_detailed, specified, custom_tags, suppress_warning, collect_nodes
+        return base_url, max_detailed, specified, custom_tags, collect_nodes
 
-    def _collect_metadata(self, base_url):
-        # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
-        # overview endpoint returns a json with rabbit version in rabbitmq_version field.
-        overview_url = urljoin(base_url, 'overview')
-        overview_response = self._get_data(overview_url)
-
-        # the response is has unicode in it so converting to a string below
-        version = str(overview_response['rabbitmq_version'])
+    def _collect_metadata(self, overview_response):
+        version = to_native_string(overview_response['rabbitmq_version'])
         if version:
+            # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
             self.set_metadata('version', version)
             self.log.debug("found rabbitmq version %s", version)
         else:
@@ -230,59 +217,51 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, custom_tags, suppress_warning, collect_node_metrics = self._get_config(
-            instance
-        )
+        base_url, max_detailed, specified, custom_tags, collect_node_metrics = self._get_config(instance)
         try:
-            with warnings.catch_warnings():
-                vhosts = self._get_vhosts(instance, base_url)
-                self.cached_vhosts[base_url] = vhosts
-                # this collects and sets versioning metadata
-                self._collect_metadata(base_url)
-                limit_vhosts = []
-                if self._limit_vhosts(instance):
-                    limit_vhosts = vhosts
+            vhosts = self._get_vhosts(instance, base_url)
+            self.cached_vhosts[base_url] = vhosts
+            limit_vhosts = []
+            if self._limit_vhosts(instance):
+                limit_vhosts = vhosts
 
-                # Suppress warnings from urllib3 only if ssl_verify is set to False and ssl_warning is set to False
-                if suppress_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
+            self.get_overview_stats(base_url, custom_tags)
 
-                # Generate metrics from the status API.
+            # Generate metrics from the status API.
+            self.get_stats(
+                instance,
+                base_url,
+                EXCHANGE_TYPE,
+                max_detailed[EXCHANGE_TYPE],
+                specified[EXCHANGE_TYPE],
+                limit_vhosts,
+                custom_tags,
+            )
+            self.get_stats(
+                instance,
+                base_url,
+                QUEUE_TYPE,
+                max_detailed[QUEUE_TYPE],
+                specified[QUEUE_TYPE],
+                limit_vhosts,
+                custom_tags,
+            )
+            if collect_node_metrics:
                 self.get_stats(
                     instance,
                     base_url,
-                    EXCHANGE_TYPE,
-                    max_detailed[EXCHANGE_TYPE],
-                    specified[EXCHANGE_TYPE],
+                    NODE_TYPE,
+                    max_detailed[NODE_TYPE],
+                    specified[NODE_TYPE],
                     limit_vhosts,
                     custom_tags,
                 )
-                self.get_stats(
-                    instance,
-                    base_url,
-                    QUEUE_TYPE,
-                    max_detailed[QUEUE_TYPE],
-                    specified[QUEUE_TYPE],
-                    limit_vhosts,
-                    custom_tags,
-                )
-                if collect_node_metrics:
-                    self.get_stats(
-                        instance,
-                        base_url,
-                        NODE_TYPE,
-                        max_detailed[NODE_TYPE],
-                        specified[NODE_TYPE],
-                        limit_vhosts,
-                        custom_tags,
-                    )
-                self.get_overview_stats(base_url, custom_tags)
 
-                self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
+            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
 
-                # Generate a service check from the aliveness API. In the case of an invalid response
-                # code or unparsable JSON this check will send no data.
-                self._check_aliveness(base_url, vhosts, custom_tags)
+            # Generate a service check from the aliveness API. In the case of an invalid response
+            # code or unparsable JSON this check will send no data.
+            self._check_aliveness(base_url, vhosts, custom_tags)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
@@ -549,6 +528,7 @@ class RabbitMQ(AgentCheck):
 
     def get_overview_stats(self, base_url, custom_tags):
         data = self._get_data(urljoin(base_url, "overview"))
+        self._collect_metadata(data)
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
     def _get_metrics(self, data, object_type, custom_tags):

@@ -396,5 +396,5 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /opt/couchbase/var/lib/couchbase/logs/*.log
+#     path: /opt/couchbase/var/lib/couchbase/logs/couchdb.log
 #     source: couchbase

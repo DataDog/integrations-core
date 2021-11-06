@@ -125,7 +125,7 @@ def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_c
 
 
 def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
-    """ Gauge ref submission """
+    """Gauge ref submission"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['_dry_run'] = False
     check.process_metric(ref_gauge, mocked_prometheus_scraper_config)
@@ -134,7 +134,7 @@ def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_promet
 
 
 def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Metric absent from the metrics_mapper """
+    """Metric absent from the metrics_mapper"""
     filtered_gauge = GaugeMetricFamily(
         'process_start_time_seconds', 'Start time of the process since unix epoch in seconds.'
     )
@@ -181,7 +181,7 @@ def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_co
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes',
         'Virtual memory size in bytes.',
@@ -211,7 +211,7 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
 def test_submit_gauge_with_labels_and_hostname_override(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -247,7 +247,7 @@ def test_submit_gauge_with_labels_and_hostname_override(
 def test_submit_gauge_with_labels_and_hostname_override_empty_label(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain empty label_to_hostname """
+    """submitting metrics that contain empty label_to_hostname"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -270,7 +270,7 @@ def test_submit_gauge_with_labels_and_hostname_override_empty_label(
 def test_submit_gauge_with_labels_and_hostname_already_overridden(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
     )
@@ -316,7 +316,7 @@ def test_labels_not_added_as_tag_once_for_each_metric(
 def test_submit_gauge_with_custom_tags(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge
 ):
-    """ Providing custom tags should add them as is on the gauge call """
+    """Providing custom tags should add them as is on the gauge call"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
     mocked_prometheus_scraper_config['_metric_tags'] = ['foo:bar']
@@ -1678,7 +1678,7 @@ def test_ignore_metrics_multiple_wildcards(
 
 
 def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
     )
@@ -1698,7 +1698,7 @@ def test_gauge_with_ignore_label_wildcard(aggregator, mocked_prometheus_check, m
 
 
 def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node', 'worker_name']
     )
@@ -1729,7 +1729,7 @@ def test_gauge_with_ignore_label_value(aggregator, mocked_prometheus_check, mock
 
 
 def test_gauge_with_invalid_ignore_label_value(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ submitting metrics that contain labels should result in tags on the gauge call """
+    """submitting metrics that contain labels should result in tags on the gauge call"""
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['worker', 'node']
     )
@@ -1832,7 +1832,7 @@ def test_match_metrics_multiple_wildcards(
 
 
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join on text format """
+    """Tests label join on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2219,7 +2219,7 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
 
 
 def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join GC on text format """
+    """Tests label join GC on text format"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2277,7 +2277,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
 
 def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join missconfigured label is ignored """
+    """Tests label join missconfigured label is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2316,7 +2316,7 @@ def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_
 
 
 def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join on non existing matching label is ignored """
+    """Tests label join on non existing matching label is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2339,7 +2339,7 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
 def test_label_join_metric_not_existing(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get
 ):
-    """ Tests label join on non existing metric is ignored """
+    """Tests label join on non existing metric is ignored"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2360,7 +2360,7 @@ def test_label_join_metric_not_existing(
 
 
 def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2436,7 +2436,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
 
 def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2463,7 +2463,7 @@ def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_promet
 
 
 def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
-    """ Tests label join and hostname override on a metric """
+    """Tests label join and hostname override on a metric"""
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
@@ -2490,7 +2490,7 @@ def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prom
 
 
 def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Tests endpoint health service check OK """
+    """Tests endpoint health service check OK"""
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2507,7 +2507,7 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
 
 
 def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    """ Tests endpoint health service check failing """
+    """Tests endpoint health service check failing"""
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2578,7 +2578,7 @@ def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_che
 def test_filter_metrics(
     aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
 ):
-    """ Tests label join GC on text format """
+    """Tests label join GC on text format"""
     check = mocked_filter_openmetrics_check
     mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
     mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {

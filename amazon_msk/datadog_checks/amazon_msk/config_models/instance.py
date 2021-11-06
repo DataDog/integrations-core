@@ -67,6 +67,7 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str]
     aws_region: Optional[str]
     aws_service: Optional[str]
+    boto_config: Optional[Mapping[str, Any]]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     cluster_arn: str
@@ -97,7 +98,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w+')
+    namespace: Optional[str] = Field(None, regex='\\w*')
     node_exporter_port: Optional[int]
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]

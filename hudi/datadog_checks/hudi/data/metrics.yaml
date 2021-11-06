@@ -1,0 +1,303 @@
+# Default metrics collected by this check. You should not have to modify this.
+jmx_metrics:
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalCreateTime,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.create_time
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.commitTime,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.action.commit_time
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.duration,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.action.duration
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalBytesWritten,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.bytes_written
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalCompactedRecordsUpdated,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.compacted_records_updated
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalCreateTime,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count 
+          alias: hudi.action.create_time
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalFilesInsert,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.files_inserted
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalFilesUpdate,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.files_updated
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalInsertRecordsWritten,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.insert_records_written
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalLogFilesCompacted,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.log_files_compacted
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalLogFilesSize,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.log_files_size
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalPartitionsWritten,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.partitions_written
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalRecordsWritten,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.records_written
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalScanTime,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.scan_time
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalUpdateRecordsWritten,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.update_records_written
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(commit|deltacommit|replacecommit|compaction)\.totalUpsertTime,type=gauges
+      attribute:
+        Value:
+          metric_type: monotonic_count
+          alias: hudi.action.upsert_time
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.index\.(.*?)\.duration,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.index.command.duration
+      tags:
+        table_name: $1
+        command: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(clean|finalize|rollback)\.duration,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.$2.duration
+      tags:
+        table_name: $1
+        action: $2
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.(clean|rollback)\.numFilesDeleted,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.action.files_deleted
+      tags:
+        table_name: $1
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.finalize\.numFilesFinalized,type=gauges
+      attribute:
+        Value:
+          metric_type: gauge
+          alias: hudi.finalize.files_finalized
+      tags:
+        table_name: $1
+      exclude_tags:
+        - name
+  - include:
+      domain: metrics
+      bean_regex:
+        - metrics:name=(.*?)\.timer\.(.*?),type=timers
+      exclude_tags:
+        - name
+      tags:
+        table_name: $1
+        action: $2
+      attribute:
+        50thPercentile:
+          alias: hudi.action.time.50th_percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: hudi.action.time.75th_percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hudi.action.time.95th_percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: hudi.action.time.98th_percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: hudi.action.time.99th_percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: hudi.action.time.999th_percentile
+          metric_type: gauge
+        Count:
+          alias: hudi.action.time.count
+          metric_type: monotonic_count
+        Max:
+          alias: hudi.action.time.max
+          metric_type: gauge
+        Mean:
+          alias: hudi.action.time.mean
+          metric_type: gauge
+        Min:
+          alias: hudi.action.time.min
+          metric_type: gauge
+        StdDev:
+          alias: hudi.action.time.std_dev
+          metric_type: gauge

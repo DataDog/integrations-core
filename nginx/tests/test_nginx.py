@@ -21,7 +21,7 @@ def test_connect(check, instance, aggregator):
     check = check(instance)
     check.check(instance)
     aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
-    extra_tags = ['host:{}'.format(HOST), 'port:{}'.format(PORT)]
+    extra_tags = ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
     aggregator.assert_service_check('nginx.can_connect', tags=TAGS + extra_tags)
 
 
@@ -73,6 +73,7 @@ def test_metadata_plus(_, aggregator, check, datadog_agent):
     instance = {
         'nginx_status_url': 'dummy_url',
         'use_plus_api': True,
+        'disable_generic_tags': True,
     }
 
     nginx_check = check(instance)
