@@ -1,10 +1,8 @@
 # Agent Check: Openstack Controller
 
-<div class="alert alert-warning">
-<b>Important Note</b>: This integration only applies to OpenStack versions 13 and above (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack) please use the <a href="https://docs.datadoghq.com/integrations/openstack/">OpenStack integration.</a>
-</div>
-
 ## Overview
+
+**Note**: This integration only applies to OpenStack v13+ (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), use the [OpenStack integration][8].
 
 This check monitors [OpenStack][1] from the controller node.
 
@@ -69,7 +67,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
        source: openstack
    ```
 
-    Change the `path` parameter value and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][7] for all available configuration options.
+    Change the `path` parameter value and configure them for your environment. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options.
    
 
 ### Validation
@@ -88,11 +86,11 @@ OpenStack Controller does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][6] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 
 [1]: https://www.openstack.org
@@ -100,6 +98,6 @@ Need help? Contact [Datadog support][6].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
-[8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
+[6]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
+[7]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/integrations/openstack/

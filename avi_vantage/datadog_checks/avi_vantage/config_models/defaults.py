@@ -65,7 +65,7 @@ def instance_connect_timeout(field, value):
 
 
 def instance_disable_generic_tags(field, value):
-    return True
+    return False
 
 
 def instance_empty_default_hostname(field, value):

@@ -36,14 +36,11 @@ def get_expected_metrics():
             expected_metrics = json.load(f)
 
         if endpoint is None:
-            endpoint = 'https://34.123.32.255/'
+            return expected_metrics
 
         transformed_expected_metrics = []
         for metric in expected_metrics:
-            tags = [
-                t.replace('https://34.123.32.255/', endpoint).replace('server:', 'avi_vantage_server:')
-                for t in metric['tags']
-            ]
+            tags = [t.replace('https://34.123.32.255/', endpoint) for t in metric['tags']]
             transformed_expected_metrics.append(
                 {"name": metric['name'], "type": metric['type'], "value": metric['value'], "tags": tags}
             )
