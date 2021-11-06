@@ -116,6 +116,14 @@ def instance_persist_connections(field, value):
     return False
 
 
+def instance_ping_reply(field, value):
+    return 'pong'
+
+
+def instance_ping_url(field, value):
+    return 'http://localhost/ping'
+
+
 def instance_proxy(field, value):
     return get_default_field_value(field, value)
 
@@ -134,6 +142,10 @@ def instance_service(field, value):
 
 def instance_skip_proxy(field, value):
     return False
+
+
+def instance_status_url(field, value):
+    return 'http://localhost/status'
 
 
 def instance_tags(field, value):
@@ -166,6 +178,10 @@ def instance_tls_use_host_header(field, value):
 
 def instance_tls_verify(field, value):
     return True
+
+
+def instance_use_fastcgi(field, value):
+    return False
 
 
 def instance_use_legacy_auth_encoding(field, value):

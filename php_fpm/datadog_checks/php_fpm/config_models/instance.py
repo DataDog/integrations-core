@@ -58,14 +58,14 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
-    ping_reply: str
-    ping_url: str
+    ping_reply: Optional[str]
+    ping_url: Optional[str]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     request_size: Optional[float]
     service: Optional[str]
     skip_proxy: Optional[bool]
-    status_url: str
+    status_url: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
@@ -74,7 +74,7 @@ class InstanceConfig(BaseModel):
     tls_private_key: Optional[str]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
-    use_fastcgi: bool
+    use_fastcgi: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     username: Optional[str]
 
