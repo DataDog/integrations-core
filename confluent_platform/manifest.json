@@ -31,7 +31,10 @@
     "dashboards": {
       "Confluent Platform Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "[Confluent Platform] Unclean leader election": "assets/monitors/unclean_leader_election.json",
+      "[Confluent Platform] Unused topic partition": "assets/monitors/unused_partition.json"
+    },
     "saved_views": {},
     "service_checks": "assets/service_checks.json",
     "logs": {

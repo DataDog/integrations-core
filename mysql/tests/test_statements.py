@@ -34,6 +34,7 @@ DEFAULT_FQ_SUCCESS_QUERY = "SELECT * FROM information_schema.TABLES"
 @pytest.fixture
 def dbm_instance(instance_complex):
     instance_complex['dbm'] = True
+    instance_complex['disable_generic_tags'] = False
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     # set a very small collection interval so the tests go fast
@@ -65,6 +66,7 @@ def stop_orphaned_threads():
 @pytest.mark.unit
 @pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, statement_samples_enabled):
     # test to make sure we continue to support the old key
     for k in statement_samples_keys:
@@ -90,6 +92,7 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 )
 @pytest.mark.parametrize("default_schema", [None, "testdb"])
 @pytest.mark.parametrize("aurora_replication_role", [None, "writer", "reader"])
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics(
     aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
 ):
@@ -167,6 +170,7 @@ def _obfuscate_sql(query, options=None):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instance, datadog_agent):
     query_one = 'select * from information_schema.processlist where state in (\'starting\')'
     query_two = 'select * from information_schema.processlist where state in (\'starting\', \'Waiting on empty queue\')'
@@ -269,6 +273,7 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
     ],
 )
 @pytest.mark.parametrize("aurora_replication_role", ["reader"])
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_collect(
     aggregator,
     dd_run_check,
@@ -391,6 +396,7 @@ def test_statement_samples_collect(
         ('invalid_schema', 'select * from fake_table', False, 3, 3, 1),
     ],
 )
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_failed_explain_handling(
     aggregator,
     dd_run_check,
@@ -434,6 +440,7 @@ def test_statement_samples_failed_explain_handling(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_main_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test rate limiting of the main collection loop
     collection_interval = 0.2
@@ -451,6 +458,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, dd_run_check, 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bob_conn, dbm_instance):
     # test unique sample ingestion rate limiting
     cache_max_size = 20
@@ -493,6 +501,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     # confirm that async jobs stop on their own after the check has not been run for a while
     dbm_instance['query_samples']['run_sync'] = False
@@ -512,6 +521,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
@@ -537,6 +547,7 @@ def _expected_dbm_instance_tags(dbm_instance):
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
@@ -557,6 +568,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
     # clear out any events from previous test runs
     dbm_instance['query_samples']['events_statements_table'] = 'events_statements_history_long'
@@ -571,6 +583,7 @@ def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
@@ -583,6 +596,7 @@ def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, d
 @pytest.mark.parametrize(
     "events_statements_enable_procedure", ["datadog.enable_events_statements_consumers", "invalid_proc"]
 )
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_conn, events_statements_enable_procedure):
     dbm_instance['query_samples']['events_statements_enable_procedure'] = events_statements_enable_procedure
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])

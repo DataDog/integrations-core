@@ -93,6 +93,13 @@ instances:
     #
     # database_autodiscovery_interval: 3600
 
+    ## @param autodiscovery_db_service_check - boolean - optional - default: true
+    ## When enabled with database autodiscovery, attempts to connect to the list of
+    ## autodiscovered databases and submits a service check that signifies whether
+    ## the agent can connect to that database or not.
+    #
+    autodiscovery_db_service_check: false
+
     ## @param include_ao_metrics - boolean - optional - default: false
     ## Include AlwaysOn availability group metrics.
     #
@@ -188,10 +195,37 @@ instances:
     #
     # connection_string: <CONNECTION_STRING>
 
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable the Database Monitoring beta.
+    #
+    # dbm: false
+
+    ## Configure collection of query metrics
+    #
+    query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
+        ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
+        ## for *every* check instance. Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
     # command_timeout: 5
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -283,6 +317,12 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
 
 ## Log Section
 ##

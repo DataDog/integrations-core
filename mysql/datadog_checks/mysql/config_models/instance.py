@@ -96,6 +96,7 @@ class InstanceConfig(BaseModel):
     max_custom_queries: Optional[int]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]
+    only_custom_queries: Optional[bool]
     options: Optional[Options]
     password: Optional[str]
     port: Optional[float]
