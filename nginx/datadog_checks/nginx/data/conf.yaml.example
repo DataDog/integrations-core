@@ -405,6 +405,12 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)

@@ -216,6 +216,9 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hudi
+      displayName: Hudi
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux

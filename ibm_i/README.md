@@ -17,7 +17,7 @@ No additional installation is needed on your server.
 
 The IBM i check uses the IBM i ODBC driver to connect remotely to the IBM i host. 
 
-Download the driver from the [IBM i Access - Client Solutions][9] page. Click on `Downloads for IBM i Access Client Solutions` and login to gain access to the downloads page.
+Download the driver from the [IBM i Access - Client Solutions][3] page. Click on `Downloads for IBM i Access Client Solutions` and login to gain access to the downloads page.
 
 Choose the `ACS App Pkg` package for your platform, such as `ACS Linux App Pkg` for Linux hosts. Download the package and follow the installation instructions to install the driver.
 
@@ -46,20 +46,20 @@ The name of the IBM i ODBC driver is needed to configure the IBM i check.
 
 #### IBM i check
 
-1. Edit the `ibm_i.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM i performance data. See the [sample ibm_i.d/conf.yaml][3] for all available configuration options.
+1. Edit the `ibm_i.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your IBM i performance data. See the [sample ibm_i.d/conf.yaml][4] for all available configuration options.
    Use the driver name from the `obdcinst.ini` file.
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `ibm_i` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `ibm_i` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -71,14 +71,14 @@ The IBM i check does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][9].
 
 [1]: https://www.ibm.com/it-infrastructure/power/os/ibm-i
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/metadata.csv
-[7]: https://docs.datadoghq.com/help/
+[3]: https://www.ibm.com/support/pages/ibm-i-access-client-solutions
+[4]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_i/datadog_checks/ibm_i/assets/service_checks.json
-[9]: https://www.ibm.com/support/pages/ibm-i-access-client-solutions
+[9]: https://docs.datadoghq.com/help/

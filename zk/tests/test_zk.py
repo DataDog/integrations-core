@@ -39,6 +39,7 @@ def test_check(aggregator, dd_environment, get_test_instance, caplog):
 
     # Test metrics
     common.assert_stat_metrics(aggregator)
+    common.assert_latency_metrics(aggregator)
     common.assert_mntr_metrics_by_version(aggregator, skipped_metrics)
 
     common.assert_service_checks_ok(aggregator)

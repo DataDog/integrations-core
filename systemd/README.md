@@ -75,11 +75,11 @@ The Systemd check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][10] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://www.freedesktop.org/wiki/Software/systemd/
@@ -88,6 +88,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[9]: https://github.com/coreos/go-systemd
-[10]: https://github.com/DataDog/integrations-core/blob/master/systemd/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/systemd/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

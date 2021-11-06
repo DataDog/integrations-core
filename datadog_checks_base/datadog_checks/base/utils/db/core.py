@@ -66,6 +66,7 @@ class QueryManager(object):
         self.hostname = hostname  # type: str
         self.logger = self.check.log
 
+        only_custom_queries = is_affirmative(self.check.instance.get('only_custom_queries', False))  # type: bool
         custom_queries = list(self.check.instance.get('custom_queries', []))  # type: List[str]
         use_global_custom_queries = self.check.instance.get('use_global_custom_queries', True)  # type: str
 
@@ -79,11 +80,18 @@ class QueryManager(object):
         ):
             custom_queries = self.check.init_config.get('global_custom_queries', [])
 
+        # Override statement queries if only running custom queries
+        if only_custom_queries:
+            self.queries = []
+
         # Deduplicate
         for i, custom_query in enumerate(iter_unique(custom_queries), 1):
             query = Query(custom_query)
             query.query_data.setdefault('name', 'custom query #{}'.format(i))
             self.queries.append(query)
+
+        if len(self.queries) == 0:
+            self.logger.warning('QueryManager initialized with no query')
 
     def compile_queries(self):
         """This method compiles every `Query` object."""

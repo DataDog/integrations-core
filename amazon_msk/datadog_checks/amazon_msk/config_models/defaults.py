@@ -48,6 +48,10 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_boto_config(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_cache_metric_wildcards(field, value):
     return True
 

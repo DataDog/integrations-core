@@ -72,6 +72,7 @@ CONNECTION_POOL_METRICS = (
     'proxysql.pool.bytes_data_sent',
     'proxysql.pool.bytes_data_recv',
     'proxysql.pool.latency_ms',
+    'proxysql.pool.latency_us',
 )
 
 USER_TAGS_METRICS = (
