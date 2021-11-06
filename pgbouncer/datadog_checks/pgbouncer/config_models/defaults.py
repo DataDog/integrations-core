@@ -8,6 +8,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_database_url(field, value):
+    return 'postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require'
+
+
 def instance_disable_generic_tags(field, value):
     return False
 

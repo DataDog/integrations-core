@@ -17,7 +17,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    database_url: str
+    database_url: Optional[str]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     host: Optional[str]
