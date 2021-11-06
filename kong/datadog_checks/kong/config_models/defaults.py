@@ -144,6 +144,10 @@ def instance_kerberos_principal(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_kong_status_url(field, value):
+    return 'http://localhost:8001/status/'
+
+
 def instance_log_requests(field, value):
     return False
 
@@ -166,6 +170,10 @@ def instance_non_cumulative_histogram_buckets(field, value):
 
 def instance_ntlm_domain(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_openmetrics_endpoint(field, value):
+    return 'http://localhost:8001/metrics'
 
 
 def instance_password(field, value):
