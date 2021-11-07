@@ -64,7 +64,7 @@ jmx_metrics:
         - kafka\.server:type=BrokerTopicMetrics,name=ProduceMessageConversionsPerSec,topic=.*
         - kafka\.server:type=BrokerTopicMetrics,name=FetchMessageConversionsPerSec,topic=.*
       tags:
-        topic: $1
+        topic: $0
       attribute:
         MeanRate:
           alias: confluent.$domain.broker_topic_metrics.$name
@@ -158,10 +158,10 @@ jmx_metrics:
       domain: kafka.network
       bean_regex:
         # Request rate.
-        - kafka.network:type=RequestMetrics,name=RequestsPerSec,request=(.*),version=(.*)
+        - kafka.network:type=RequestMetrics,name=RequestsPerSec(?:,request=([-.\w]+),(?:,partition=)(.*)
       tags:
-        request: $1
-        version: $2
+        request: $0
+        version: $1
       attribute:
         Count:
           alias: confluent.$domain.request.$name.rate
@@ -207,10 +207,10 @@ jmx_metrics:
       domain: kafka.log
       bean:
         # Log size, only shows after segment roll
-        - kafka.log:type=Log,name=Size,topic=([-.\w]+),partition=([0-9]+)
+        - kafka.log:type=Log,name=Size(?:,topic=)([-.\w]+)(?:,partition=)([0-9]+)
       tags:
-        topic: $1
-        partition: $2
+        topic: $0
+        partition: $1
       attribute:
         Value:
           alias: confluent.$domain.size
@@ -694,7 +694,7 @@ jmx_metrics:
       bean_regex:
         - kafka.connect:type=connector-metrics,connector=.*
       tags:
-        connector: $1
+        connector: $0
       attribute:
         connector-type:
           # Type of connector: source|sink (string)
@@ -1243,7 +1243,7 @@ jmx_metrics:
       bean_regex: 
         - io.confluent.ksql.metrics:type=_confluent-ksql-engine-query-stats,ksql_service_id=(.*)
       tags:
-        ksql_service_id: $1
+        ksql_service_id: $0
       attribute:
         bytes-consumed-total:
           # Number of bytes consumed across all queries.
