@@ -158,7 +158,7 @@ jmx_metrics:
       domain: kafka.network
       bean_regex:
         # Request rate.
-        - kafka.network:type=RequestMetrics,name=RequestsPerSec(?:,request=([-.\w]+),(?:,partition=)(.*)
+        - kafka.network:type=RequestMetrics,name=RequestsPerSec(?:,request=)([-.\w]+)(?:,partition=)(.*)
       tags:
         request: $0
         version: $1
@@ -205,7 +205,7 @@ jmx_metrics:
   # Kafka Broker Log Metrics (Yammer Metric Regex)
   - include:
       domain: kafka.log
-      bean:
+      bean_regex:
         # Log size, only shows after segment roll
         - kafka.log:type=Log,name=Size(?:,topic=)([-.\w]+)(?:,partition=)([0-9]+)
       tags:
@@ -698,16 +698,26 @@ jmx_metrics:
       attribute:
         connector-type:
           # Type of connector: source|sink (string)
+          metric_type: gauge
           alias: confluent.$domain.connector_metrics.connector_type
         connector-class:
           # Class of connector (string)
+          metric_type: gauge
           alias: confluent.$domain.connector_metrics.connector_class
         connector-version: 
           # Version of the connector (string)
+          metric_type: gauge
           alias: confluent.$domain.connector_metrics.connector_version
         status:
           # Status of the connector (string)
+          metric_type: gauge
           alias: confluent.$domain.connector_metrics.status
+          values:
+                "unassigned": 0
+                "running": 1
+                "paused": 2
+                "falied": 3
+                "destroyed": 4
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
