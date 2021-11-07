@@ -17,6 +17,7 @@ METRICS = {
     'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
     'etcd_object_counts': 'etcd_object_counts',
     'etcd_request_duration_seconds': 'etcd_request_duration_seconds',
+    'etcd_db_total_size_in_bytes': 'etcd.db.total_size',
     'apiserver_registered_watchers': 'registered_watchers',
     'apiserver_request_duration_seconds': 'request_duration_seconds',
     'apiserver_request_latencies': 'request_latencies',
