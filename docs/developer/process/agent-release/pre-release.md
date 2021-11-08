@@ -25,17 +25,17 @@ Ensure that you have configured the following:
     * Run `ddev dep updates --sync --check-python-classifiers --batch-size 10`
     * Run `ddev dep sync`
     * Create a PR with the updated dependencies
-    * If CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency that is causing the error to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that particular dependency bump.
+    * If the CI is failing and there are compatibility reasons, investigate the errors. You may have to add the dependency that is causing the error to the set of [IGNORED_DEPS](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py) and revert that particular dependency bump.
 
-    If the first PR process does not take long, feel free to try another batch of updates and repeat the above process. Overall, this step is not mandatory but it is important to keep our dependencies up to date.
+    If the first PR process does not take long, try another batch of updates and repeat the above process. Overall, this step is not mandatory but it is important to keep our dependencies up to date.
     
     !!! note
-        It is recommended to run `ddev dep updates --sync` with the `--check-python-classifiers` flag. Running it with this flag will not update a dependency to the newest version if the python classifiers do not match the marker. Yet, sometimes classifiers are inaccurate on PyPI and running it with this flag could miss a version update. Feel free to omit this flag if you want to ensure that you are not missing any available updates.
+        It is recommended to run `ddev dep updates --sync` with the `--check-python-classifiers` flag. Running it with this flag does not update a dependency to the newest version if the Python classifiers do not match the marker. Yet, sometimes classifiers are inaccurate on PyPI and running it with this flag could miss a version update. Omit this flag to ensure you are not missing any available updates.
 
-2. _The week of freeze_: update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to latest versions (except if comments say otherwise) via PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
+2. _The week of freeze_: Update [style dependencies](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py) to the latest versions (except if comments say otherwise) with a PR. Example: `ISORT_DEP`, `BLACK_DEP`, etc.
 3. _The day before freeze_: Communicate to teams that contribute to `integrations-core` that freeze is happening on Friday.
-4. _The day of freeze_: manually run and fix if needed the [base package dependency check build](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52).
-5. _The day of freeze_:, check that the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38) and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green. It is important to make sure CI is in a stable state before freeze.
+4. _The day of freeze_: Manually run and fix the [base package dependency check build](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) as needed.
+5. _The day of freeze_: Check if the [master](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=29), [py2](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=38), and [base_check](https://dev.azure.com/datadoghq/integrations-core/_build?definitionId=52) builds are green. It is important to make sure CI is in a stable state before freeze.
 
 
 ## Freeze
