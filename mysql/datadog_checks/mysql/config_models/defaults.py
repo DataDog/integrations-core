@@ -96,14 +96,6 @@ def instance_ssl(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_additional_status(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_additional_variable(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 

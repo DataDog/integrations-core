@@ -81,24 +81,6 @@ class Ssl(BaseModel):
     key: Optional[str]
 
 
-class AdditionalStatus(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    name: Optional[str]
-    metric_name: Optional[str]
-    type: Optional[str]
-
-
-class AdditionalVariable(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    name: Optional[str]
-    metric_name: Optional[str]
-    type: Optional[str]
-
-
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -124,8 +106,6 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     sock: Optional[str]
     ssl: Optional[Ssl]
-    additional_status: Optional[Sequence[AdditionalStatus]]
-    additional_variable: Optional[Sequence[AdditionalVariable]]
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
     username: Optional[str]
