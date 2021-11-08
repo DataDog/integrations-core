@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "weblogic",
   "metric_prefix": "weblogic.",
-  "metric_to_check": "",
+  "metric_to_check": "weblogic.jvm_runtime.heap_size",
   "creates_events": false,
   "short_description": "Monitor the health and performance of WebLogic Servers.",
   "guid": "7c48d184-c234-4366-b463-46a1faf27f84",

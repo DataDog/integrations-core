@@ -25,6 +25,14 @@ def setup_weblogic():
     run_command("/bin/bash -c '{} {}'".format(setenv_script, domain_properties), check=True)
 
 
+def cleanup_weblogic():
+    run_command(
+        "/bin/bash -c 'rm -rf {} {}'".format(
+            os.path.join(HERE, 'weblogic', 'archive.zip'), os.path.join(HERE, 'weblogic', 'app-archive')
+        )
+    )
+
+
 @pytest.fixture(scope='session', autouse=True)
 @pytest.mark.usefixtures('dd_environment')
 def instance():
@@ -44,6 +52,6 @@ def dd_environment(instance):
     compose_file = os.path.join(HERE, 'docker-compose.yml')
     WaitFor(setup_weblogic())
     with docker_run(
-        compose_file=compose_file, env_vars={'PROPERTIES_DIR': properties_dir}, build=True
+        compose_file=compose_file, env_vars={'PROPERTIES_DIR': properties_dir}, build=True, down=cleanup_weblogic
     ):
         yield instance, {'use_jmx': True}

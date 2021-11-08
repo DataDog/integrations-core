@@ -49,7 +49,6 @@ jmx_metrics:
           alias: weblogic.threadpool_runtime.stuck_thread_count
         Throughput:
           alias: weblogic.threadpool_runtime.throughput
-
   - include:
       domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-.\w]+),Type=JVMRuntime
@@ -69,7 +68,7 @@ jmx_metrics:
       attribute:
         ActiveConnectionsCurrentCount:
           metric_type: gauge
-          alias: weblogic.connector_connection_pool_runtime.active_connections.active_connections_count
+          alias: weblogic.connector_connection_pool_runtime.active_connections_count
         ActiveConnectionsHighCount:
           metric_type: gauge
           alias: weblogic.connector_connection_pool_runtime.active_connections_high_count
@@ -99,6 +98,7 @@ jmx_metrics:
           metric_type: monotonic_count
           alias: weblogic.jms_runtime.jms_servers_total
   - include:
+      domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-.\w]+),Name=([-.\w]+),ApplicationRuntime=([-_.\w]+),Type=WorkManagerRuntime
       attribute:
         CompletedRequests:
@@ -108,6 +108,7 @@ jmx_metrics:
         StuckThreadCount:
           alias: weblogic.work_manager_runtime.stuck_thread_count
   - include:
+      domain: com.bea
       bean_regex: com.bea:ServerRuntime=([-_.\w]+),Name=([\[\-_.\]\w]+),Type=ServerChannelRuntime
       attribute:
         AcceptCount:
