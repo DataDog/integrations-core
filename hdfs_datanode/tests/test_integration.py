@@ -4,6 +4,8 @@
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from . import common
 
 pytestmark = pytest.mark.integration
@@ -18,6 +20,10 @@ def test_check(aggregator, check, dd_run_check, instance):
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
+    for metric in common.OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures("dd_environment")
