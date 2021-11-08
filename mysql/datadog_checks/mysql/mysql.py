@@ -322,6 +322,18 @@ class MySql(AgentCheck):
             metrics.update(replication_metrics)
             self._check_replication_status(results)
 
+        if len(self._config.additional_status) > 0:
+            additional_status_dict = {}
+            for status_dict in self._config.additional_status:
+                additional_status_dict[status_dict["name"]] = (status_dict["metric_name"], status_dict["type"])
+            metrics.update(additional_status_dict)
+
+        if len(self._config.additional_variable) > 0:
+            additional_variable_dict = {}
+            for variable_dict in self._config.additional_variable:
+                additional_variable_dict[variable_dict["name"]] = (variable_dict["metric_name"], variable_dict["type"])
+            metrics.update(additional_variable_dict)
+
         # "synthetic" metrics
         metrics.update(SYNTHETIC_VARS)
         self._compute_synthetic_results(results)
