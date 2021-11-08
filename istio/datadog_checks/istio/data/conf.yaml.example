@@ -195,6 +195,14 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
@@ -249,65 +257,6 @@ instances:
     ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
     #
     # use_latest_spec: false
-
-    ## @param use_process_start_time - boolean - optional - default: false
-    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
-    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
-    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
-    ## response is received.
-    #
-    # use_process_start_time: false
-
-    ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded
-    #
-    exclude_labels:
-      - source_version
-      - destination_version
-      - source_canonical_revision
-      - destination_canonical_revision
-      - source_principal
-      - destination_principal
-      - source_cluster
-      - destination_cluster
-      - source_canonical_service
-      - destination_canonical_service
-      - source_workload_namespace
-      - destination_workload_namespace
-      - request_protocol
-      - connection_security_policy
-
-    ## @param bearer_token_auth - boolean - optional - default: false
-    ## If set to true, adds a bearer token authentication header.
-    ## Note: If bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
-    #
-    # bearer_token_auth: false
-
-    ## @param bearer_token_path - string - optional
-    ## The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
-    ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
-    #
-    # bearer_token_path: <TOKEN_PATH>
-
-    ## @param ignore_metrics - list of strings - optional
-    ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
-    ## The wildcard matching is done via fnmatch, it locates a match anywhere in the string.
-    #
-    # ignore_metrics:
-    #   - <IGNORED_METRIC_NAME>
-    #   - <SUBSTRING_*>
-    #   - <*_SUBSTRING>
-
-    ## @param ignore_metrics_by_labels - mapping - optional
-    ## A mapping of labels where metrics with matching label key and values are ignored.
-    ## Use the "*" wildcard to match all label values.
-    #
-    # ignore_metrics_by_labels:
-    #   <KEY_1>:
-    #   - <LABEL_1>
-    #   - <LABEL_2>
-    #   <KEY_2>:
-    #   - '*'
 
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
