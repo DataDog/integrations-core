@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
+MYSQL_REPLICATION = os.getenv('MYSQL_REPLICATION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
@@ -61,12 +62,7 @@ def dd_environment(config_e2e):
                 'MYSQL_LOGS_PATH': logs_path,
                 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
             },
-            conditions=[
-                WaitFor(init_master, wait=2),
-                WaitFor(init_slave, wait=2),
-                CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
-                populate_database,
-            ],
+            conditions=_get_warmup_conditions(),
             attempts=2,
             attempts_wait=10,
         ):
@@ -275,6 +271,47 @@ def version_metadata():
     }
 
 
+def _get_warmup_conditions():
+    if MYSQL_REPLICATION == 'group':
+        return [
+            CheckDockerLogs('node1', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node2', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            CheckDockerLogs('node3', "X Plugin ready for connections. Bind-address: '::' port: 33060"),
+            init_group_replication,
+            populate_database,
+        ]
+    return [
+        WaitFor(init_master, wait=2),
+        WaitFor(init_slave, wait=2),
+        CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
+        populate_database,
+    ]
+
+
+def init_group_replication():
+    logger.debug("initializing group replication")
+    import time; time.sleep(5)
+    conns = [pymysql.connect(host=common.HOST, port=p, user='root', password='mypass') for p in common.PORTS_GROUP]
+    _add_dog_user(conns[0])
+    _add_bob_user(conns[0])
+
+    cur_primary = conns[0].cursor()
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=1;")
+    cur_primary.execute("create user 'repl'@'%';")
+    cur_primary.execute("GRANT REPLICATION SLAVE ON *.* TO repl@'%';")
+    cur_primary.execute("flush privileges;")
+    cur_primary.execute("change master to master_user='root' for channel 'group_replication_recovery';")
+    cur_primary.execute("START GROUP_REPLICATION;")
+    cur_primary.execute("SET @@GLOBAL.group_replication_bootstrap_group=0;")
+    cur_primary.execute("SELECT * FROM performance_schema.replication_group_members;")
+
+    # Node 2 and 3
+    for c in conns[1:]:
+        cur = c.cursor()
+        cur.execute("change master to master_user='repl' for channel 'group_replication_recovery';")
+        cur.execute("START GROUP_REPLICATION;")
+
+
 def _init_datadog_sample_collection(conn):
     logger.debug("initializing datadog sample collection")
     cur = conn.cursor()
@@ -333,7 +370,7 @@ def init_master():
 
 @pytest.fixture
 def root_conn():
-    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None)
     yield conn
     conn.close()
 
@@ -377,16 +414,16 @@ def bob_conn():
 
 def populate_database():
     logger.debug("populating database")
-    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None)
 
     cur = conn.cursor()
 
     cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
     cur.execute("USE testdb;")
-    cur.execute("CREATE TABLE testdb.users (name VARCHAR(20), age INT);")
-    cur.execute("INSERT INTO testdb.users (name,age) VALUES('Alice',25);")
-    cur.execute("INSERT INTO testdb.users (name,age) VALUES('Bob',20);")
+    cur.execute("CREATE TABLE testdb.users (id INT NOT NULL UNIQUE KEY, name VARCHAR(20), age INT);")
+    cur.execute("INSERT INTO testdb.users (id, name,age) VALUES(1, 'Alice',25);")
+    cur.execute("INSERT INTO testdb.users (id, name,age) VALUES(2, 'Bob',20);")
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.execute("GRANT SELECT ON testdb.users TO 'bob'@'%';")
     cur.close()
@@ -406,7 +443,9 @@ def _mysql_conf_path():
     """
     Return the path to a local MySQL configuration file suited for the current environment.
     """
-    if MYSQL_FLAVOR == 'mysql':
+    if MYSQL_REPLICATION == 'group':
+        filename = 'mysql-group.conf'
+    elif MYSQL_FLAVOR == 'mysql':
         filename = 'mysql.conf'
     elif MYSQL_FLAVOR == 'mariadb':
         filename = 'mariadb.conf'

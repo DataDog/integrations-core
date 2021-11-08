@@ -24,6 +24,7 @@ CHECK_NAME = 'mysql'
 HOST = get_docker_hostname()
 PORT = 13306
 SLAVE_PORT = 13307
+PORTS_GROUP = [13306, 13307, 13308]
 
 USER = 'dog'
 PASS = 'dog'

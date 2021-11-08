@@ -40,6 +40,11 @@ SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_ro
 FROM information_schema.replica_host_status
 WHERE server_id = @@aurora_server_id"""
 
+SQL_GROUP_REPLICATION_MEMBER = """\
+SELECT channel_name, member_state, member_role
+FROM performance_schema.replication_group_members
+WHERE member_id = @@server_uuid"""
+
 
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
