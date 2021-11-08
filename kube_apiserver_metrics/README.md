@@ -26,10 +26,10 @@ annotations:
     '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]'
 ```
 
-Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
+Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s). 
 
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
-See the [sample kube_apiserver_metrics.d/conf.yaml][5] for all available configuration options.
+You must add `cluster_check: true` to your [configuration file][10] when using a static configuration file or ConfigMap to configure cluster checks. See the [sample kube_apiserver_metrics.d/conf.yaml][5] for all available configuration options.
 
 By default the Agent running the check tries to get the service account bearer token to authenticate against the APIServer. If you are not using RBACs, set `bearer_token_auth` to `false`.
 
@@ -66,3 +66,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/metadata.csv
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#set-up-cluster-checks
