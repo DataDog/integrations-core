@@ -11,7 +11,7 @@ from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_rele
 from ...git import get_current_branch, git_commit
 from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module
 from ...utils import complete_valid_checks, get_bump_function, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 from . import changelog
 from .show import changes
 
@@ -118,6 +118,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, a
                     abort(f'Current version is {cur_version}, cannot bump to {version}')
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
+            echo_debug(f'Current version: {cur_version}. Changes: {changelog_types}')
             if not changelog_types:
                 echo_warning(f'No changes for {check}, skipping...')
                 continue

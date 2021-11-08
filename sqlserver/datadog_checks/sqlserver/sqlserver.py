@@ -84,6 +84,7 @@ class SQLServer(AgentCheck):
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.autodiscovery_db_service_check = is_affirmative(self.instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
@@ -205,7 +206,7 @@ class SQLServer(AgentCheck):
 
         if is_default:
             self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
-        if self.autodiscovery:
+        if self.autodiscovery and self.autodiscovery_db_service_check:
             self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
@@ -508,7 +509,7 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
-            if self.autodiscovery:
+            if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
                         self.connection.check_database_conns(db_name)

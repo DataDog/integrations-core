@@ -1,5 +1,9 @@
 # CHANGELOG - ProxySQL
 
+## 3.3.0 / 2021-11-02
+
+* [Added] Add pool.latency_us and correct unit for pool.latency_ms. See [#10335](https://github.com/DataDog/integrations-core/pull/10335).
+
 ## 3.2.0 / 2021-10-04
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).

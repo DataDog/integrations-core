@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) Edge devices via standard containers.
+[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) Edge devices using standard containers.
 
 Use the Datadog-Azure IoT Edge integration to collect metrics and health status from IoT Edge devices.
 

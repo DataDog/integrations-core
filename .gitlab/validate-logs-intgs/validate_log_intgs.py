@@ -50,7 +50,6 @@ EXCEPTIONS = {
     'openshift': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from openshift environment but there is no pipeline
     'pan_firewall': [ERR_NOT_DEFINED_WEB_UI], # The integration doesn't emit metric
     'pivotal_pks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Using kubernetes pipeline
-    'win32_event_log': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # win32_event_log is about log collection but we don't collect win32_event_log logs
 }
 
 
