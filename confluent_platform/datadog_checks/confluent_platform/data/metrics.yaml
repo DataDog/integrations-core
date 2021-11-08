@@ -158,10 +158,9 @@ jmx_metrics:
       domain: kafka.network
       bean_regex:
         # Request rate.
-        - kafka.network:type=RequestMetrics,name=RequestsPerSec(?:,request=)([-.\w]+)(?:,partition=)(.*)
+        - kafka.network:type=RequestMetrics,name=RequestsPerSec,request=(.*)
       tags:
         request: $0
-        version: $1
       attribute:
         Count:
           alias: confluent.$domain.request.$name.rate
