@@ -83,6 +83,30 @@ instances:
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
 
+    ## @param additional_status - list of mappings
+    ## Set this parameter to collect mysql status exclude STATUS_VARS and OPTIONAL_STATUS_VARS of const
+    ##
+    ## name : mysql status name on "SHOW GLOBAL STATUS"
+    ## metric : datadog metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_status:
+    #   - name: innodb_rows_read
+    #     metric_name: mysql.innodb.rows_read
+    #     type: rate
+
+    ## @param additional_variable - list of mappings
+    ## Set this parameter to collect mysql variable exclude VARIABLES_VARS and another VARS of const
+    ##
+    ## name : mysql variable name on "SHOW GLOBAL VARIABLES"
+    ## metric : datadog metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_variable:
+    #   - name: long_query_time
+    #     metric_name: mysql.performance.long_query_time
+    #     type: gauge
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
