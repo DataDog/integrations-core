@@ -95,7 +95,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def check(self, instance):
         if self.kube_apiserver_config is None:
-            self.kube_apiserver_config = self.get_scraper_config(instance)
+            self.kube_apiserver_config = self.get_scraper_config(self.instance)
 
         if not self.kube_apiserver_config['metrics_mapper']:
             url = self.kube_apiserver_config['prometheus_url']
