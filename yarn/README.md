@@ -136,7 +136,7 @@ Need help? Contact [Datadog support][11].
 [4]: https://github.com/DataDog/integrations-core/blob/master/yarn/datadog_checks/yarn/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: 
+[7]: https://docs.datadoghq.com/agent/docker/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/yarn/assets/service_checks.json
