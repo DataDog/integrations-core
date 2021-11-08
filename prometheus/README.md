@@ -63,7 +63,7 @@ Prometheus Alertmanager alerts are automatically sent to your Datadog event stre
 The Prometheus check does not include any service checks.
 
 ## Prometheus Alertmanager
-Send Prometheus Alertmanager alerts in the event stream.
+Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager sends all alerts simultaneously to the configured webhook. To see alerts in Datadog, you must configure your instance of Alertmanager to send alerts one at a time. You can add a group-by parameter under `route` to have alerts grouped by the actual name of the alert rule.
 
 ### Setup
 1. Edit the Alertmanager configuration file, `alertmanager.yml`, to include the following:
@@ -73,7 +73,16 @@ receivers:
   webhook_configs: 
   - send_resolved: true
     url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 5m
+  receiver: datadog
+  repeat_interval: 3h
 ```
+
+**Note**: This endpoint accepts only one event in the payload at a time.
+
 2. Restart the Prometheus and Alertmanager services.
 ```
 sudo systemctl restart prometheus.service alertmanager.service
