@@ -20,7 +20,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Prometheus check is packaged with the [Datadog Agent][10] starting version 6.1.0.
+The Prometheus check is packaged with the [Datadog Agent][4] starting version 6.1.0.
 
 ### Configuration
 
@@ -36,7 +36,7 @@ Each instance is at least composed of:
 
 When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
 
-More advanced settings (ssl, labels joining, custom tags,...) are documented in the [sample prometheus.d/conf.yaml][4]
+More advanced settings (ssl, labels joining, custom tags,...) are documented in the [sample prometheus.d/conf.yaml][5]
 
 Due to the nature of this integration, it's possible to submit a high number of custom metrics to Datadog. To provide users control over the maximum number of metrics sent in the case of configuration errors or input changes, the check has a default limit of 2000 metrics. If needed, this limit can be increased by setting the option `max_returned_metrics` in the `prometheus.d/conf.yaml` file.
 
@@ -44,7 +44,7 @@ If `send_monotonic_counter: True`, the Agent sends the deltas of the values in q
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `prometheus` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `prometheus` under the Checks section.
 
 ## Data Collected
 
@@ -81,21 +81,21 @@ sudo systemctl restart prometheus.service alertmanager.service
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 ## Further Reading
 
-- [Introducing Prometheus support for Datadog Agent 6][7]
-- [Configuring a Prometheus Check][8]
-- [Writing a custom Prometheus Check][9]
+- [Introducing Prometheus support for Datadog Agent 6][8]
+- [Configuring a Prometheus Check][9]
+- [Writing a custom Prometheus Check][10]
 
 [1]: https://docs.datadoghq.com/integrations/openmetrics/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [3]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
-[4]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
-[8]: https://docs.datadoghq.com/agent/prometheus/
-[9]: https://docs.datadoghq.com/developers/prometheus/
-[10]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings#agent
+[5]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
+[9]: https://docs.datadoghq.com/agent/prometheus/
+[10]: https://docs.datadoghq.com/developers/prometheus/
