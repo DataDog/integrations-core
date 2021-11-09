@@ -93,7 +93,7 @@ def test__get_connection_jdbc(check, dd_run_check, aggregator):
         assert check._cached_connection == con
 
     jdb.connect.assert_called_with(
-        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
+        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=xe)))', ['system', 'oracle'], None
     )
     aggregator.assert_service_check("oracle.can_connect", check.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check("oracle.can_query", check.OK, count=1, tags=expected_tags)

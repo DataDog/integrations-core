@@ -35,6 +35,11 @@ instances:
     #
     service_name: <SERVICE_NAME>
 
+    ## @param protocol - string - optional - default: TCP
+    ## The protocol to connect to the Oracle Database Server.
+    #
+    # protocol: TCP
+
     ## @param username - string - required
     ## The username for the Datadog user account.
     #

@@ -21,7 +21,6 @@ except ImportError as e:
     jpype = None
     JDBC_IMPORT_ERROR = e
 
-
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
@@ -30,7 +29,7 @@ class Oracle(AgentCheck):
     __NAMESPACE__ = 'oracle'
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
-    JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@//{}/{}"
+    JDBC_CONNECTION_STRING = "jdbc:oracle:thin:@{}"
 
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
@@ -41,6 +40,7 @@ class Oracle(AgentCheck):
         self._user = self.instance.get('username') or self.instance.get('user')
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
+        self._protocol = self.instance.get("protocol", "TCP")
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._tags = self.instance.get('tags') or []
         self._service_check_tags = ['server:{}'.format(self._server)]
@@ -79,7 +79,7 @@ class Oracle(AgentCheck):
             prefix = query.get('metric_prefix')
             if prefix and prefix != self.__NAMESPACE__:
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
-                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
+                    prefix = prefix[len(self.__NAMESPACE__) + 1:]
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag':
                         column['name'] = '{}.{}'.format(prefix, column['name'])
@@ -164,10 +164,15 @@ class Oracle(AgentCheck):
         except Exception:
             self._connection_errors += 1
             raise ConfigurationError('server needs to be in the <HOST>:<PORT> format, "%s"" provided' % self._server)
-        return cx_Oracle.makedsn(host, port, service_name=self._service)
+
+        # TODO: Add a new custom DSN address config option? This would have more configurability
+        dsn = f"""(DESCRIPTION=(ADDRESS=(PROTOCOL={self._protocol})(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={self._service})))"""
+        self.log.error(dsn)
+
+        return dsn
 
     def _jdbc_connect(self):
-        connect_string = self.JDBC_CONNECTION_STRING.format(self._server, self._service)
+        connect_string = self.JDBC_CONNECTION_STRING.format(self._get_dsn())
         try:
             if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
                 jpype.attachThreadToJVM()

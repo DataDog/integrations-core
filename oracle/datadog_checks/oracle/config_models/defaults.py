@@ -36,6 +36,10 @@ def instance_only_custom_queries(field, value):
     return False
 
 
+def instance_protocol(field, value):
+    return 'TCP'
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 

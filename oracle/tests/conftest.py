@@ -87,6 +87,8 @@ def dd_environment():
 
 
 def create_user():
+
+    # TODO: remove after testing
     run_docker_command_as_root(
         [
             'yum',
@@ -103,6 +105,16 @@ def create_user():
             '-y',
             'install',
             'nano',
+        ]
+    )
+
+    run_docker_command_as_root(
+        [
+            'sudo',
+            'yum',
+            '-y',
+            'install',
+            'java-1.8.0-openjdk-devel',
         ]
     )
 

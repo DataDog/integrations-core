@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: str
+    protocol: Optional[str]
     server: str
     service: Optional[str]
     service_name: str

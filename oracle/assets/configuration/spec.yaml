@@ -21,6 +21,12 @@ files:
       required: true
       value:
         type: string
+    - name: protocol
+      description: |
+        The protocol to connect to the Oracle Database Server.
+      value:
+        type: string
+        example: TCP
     - name: username
       description: The username for the Datadog user account.
       required: true
