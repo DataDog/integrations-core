@@ -40,6 +40,8 @@ Ensure that you have configured the following:
 At midnight (EDT/EST) on the Friday before QA week we freeze, at which point the release manager will release
 all integrations with pending changes then branch off. If no new PRs are active at the end of business hours (EDT/EST), try to make the initial [release](#release) then, so that the QA process can start on the next Monday morning. 
 
+The release manager will initiate code freeze of the `integrations-core` repo using the [mergefreeze](https://datadoghq.atlassian.net/wiki/spaces/agent/pages/2255421890/mergefreeze) Github App by clicking the `Freeze now` button. The mergefreeze app will add a failing `mergefreeze` CI check on all PRs targeting the protected branch, preventing them from being merged by non-admin users.
+
 ### Release
 
 1. Make a pull request to release [any new integrations](../integration-release.md#new-integrations), then merge it and pull `master`
