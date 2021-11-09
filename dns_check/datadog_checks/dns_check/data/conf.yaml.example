@@ -18,11 +18,12 @@ init_config:
 #
 instances:
 
-    ## @param name - string - required
+  -
+    ## @param name - string - optional
     ## Name of your DNS check instance.
     ## To create multiple DNS checks, create multiple instances with unique names.
     #
-  - name: <INSTANCE_NAME>
+    # name: <INSTANCE_NAME>
 
     ## @param hostname - string - required
     ## Hostname to resolve.
