@@ -323,6 +323,7 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
     "instance_host,split_host,split_port",
     [
         ("localhost,1433,some-typo", "localhost", "1433"),
+        ("localhost, 1433,some-typo", "localhost", "1433"),
         ("localhost,1433", "localhost", "1433"),
         ("localhost", "localhost", None),
     ],

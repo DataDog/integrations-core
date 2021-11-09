@@ -133,7 +133,7 @@ class SQLServer(AgentCheck):
         """
         if not host:
             return host, None
-        host_split = host.split(',')
+        host_split = [s.strip() for s in host.split(',')]
         if len(host_split) == 1:
             return host_split[0], None
         if len(host_split) == 2:
