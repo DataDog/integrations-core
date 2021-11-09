@@ -70,15 +70,15 @@ No additional installation is needed on your server.
              worker: "$1"
     ```
 
-4. [Restart the Agent][4].
+4. [Restart the Agent][8].
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
-The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][9] for custom metric inspiration.
+The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][10] for custom metric inspiration.
 
 ### Log collection
 
@@ -98,9 +98,9 @@ The Sidekiq integration also allows custom metrics, see the [Sidekiq documentati
           service: <SERVICE>
     ```
 
-     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [see the Sidekiq documentation on more details about logs][10].
+     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [see the Sidekiq documentation on more details about logs][11].
 
-3. [Restart the Agent][4].
+3. [Restart the Agent][8].
 
 ### Service Checks
 
@@ -112,16 +112,17 @@ Sidekiq does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 [1]: https://sidekiq.org/
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://github.com/DataDog/dogstatsd-ruby
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/mperham/sidekiq/wiki/Pro-Metrics
 [6]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[8]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
-[9]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
-[10]: https://github.com/mperham/sidekiq/wiki/Logging#log-file
-[11]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
+[10]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
+[11]: https://github.com/mperham/sidekiq/wiki/Logging#log-file
+[12]: https://docs.datadoghq.com/help/

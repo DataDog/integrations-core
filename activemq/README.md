@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
+The ActiveMQ check collects metrics for brokers, queues, producers, consumers, and more.
 
 **Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metadata.csv][1] for a list of metrics provided by this integration.
 
@@ -14,7 +14,7 @@ The ActiveMQ check collects metrics for brokers and queues, producers and consum
 
 The Agent's ActiveMQ check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your ActiveMQ nodes.
 
-The check collects metrics via JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][4]. We recommend using an Oracle-provided JVM.
+The check collects metrics through JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][4]. Datadog recommends using an Oracle-provided JVM.
 
 ### Configuration
 
@@ -100,7 +100,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][11].
 
 | Parameter      | Value                                                  |
 | -------------- | ------------------------------------------------------ |
@@ -117,7 +117,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Metrics
 
-See [metadata.csv][1] for a list of metrics provided by this integration.  Metrics associated with ActiveMQ Artemis flavor have `artemis` in their metric name, all others are reported for ActiveMQ "classic".
+See [metadata.csv][1] for a list of metrics provided by this integration. Metrics associated with ActiveMQ Artemis flavor have `artemis` in their metric name, all others are reported for ActiveMQ "classic".
 
 ### Events
 
@@ -148,7 +148,7 @@ Additional helpful documentation, links, and articles:
 [8]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/metrics.yaml
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[11]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/

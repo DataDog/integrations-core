@@ -97,7 +97,7 @@ def instance_log_requests(field, value):
 
 
 def instance_min_collection_interval(field, value):
-    return 15
+    return 20
 
 
 def instance_ntlm_domain(field, value):
