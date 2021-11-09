@@ -24,6 +24,10 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_name(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_nameserver(field, value):
     return get_default_field_value(field, value)
 

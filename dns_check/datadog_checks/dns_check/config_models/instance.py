@@ -21,7 +21,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     hostname: str
     min_collection_interval: Optional[float]
-    name: str
+    name: Optional[str]
     nameserver: Optional[str]
     nameserver_port: Optional[int]
     record_type: Optional[str]
