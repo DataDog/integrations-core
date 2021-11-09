@@ -127,10 +127,35 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+    def split_sqlserver_host_port(self, host):
+        """
+        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+        """
+        if not host:
+            return host, None
+        host_split = host.split(',')
+        if len(host_split) == 1:
+            return host_split[0], None
+        if len(host_split) == 2:
+            return host_split
+        # else len > 2
+        s_host, s_port = host_split[0:2]
+        self.log.warning(
+            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+            host,
+            s_host,
+            s_port,
+        )
+        return s_host, s_port
+
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self.instance.get('host'))
+        if self._resolved_hostname is None:
+            if self.dbm_enabled:
+                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                self._resolved_hostname = resolve_db_host(host)
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     def load_static_information(self):
