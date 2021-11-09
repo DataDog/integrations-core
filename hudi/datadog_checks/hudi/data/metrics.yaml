@@ -266,7 +266,7 @@ jmx_metrics:
         - name
       tags:
         table_name: $1
-        action_name: $2
+        action: $2
       attribute:
         50thPercentile:
           alias: hudi.action.time.50th_percentile

@@ -67,7 +67,7 @@ _Available for Agent versions >6.0_
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-**Note**: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
+**Note**: If you are running Ceph luminous or later, the `ceph.osd.pct_used` metric is not included.
 
 ### Events
 
