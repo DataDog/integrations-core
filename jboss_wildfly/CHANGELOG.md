@@ -1,6 +1,6 @@
 # CHANGELOG - JBoss/WildFly
 
-## 1.7.0 / 2021-10-04
+## 1.7.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8940](https://github.com/DataDog/integrations-core/pull/8940).
 * [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).

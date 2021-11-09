@@ -7,7 +7,7 @@
 * [Fixed] Remove duplicate names from the list of sql-server metrics to collect. See [#10334](https://github.com/DataDog/integrations-core/pull/10334). Thanks [pedroreys](https://github.com/pedroreys).
 * [Changed] Stop sending FCI metrics when not available. See [#10395](https://github.com/DataDog/integrations-core/pull/10395).
 
-## 5.0.2 / 2021-10-26
+## 5.0.2 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Upgrade datadog checks base to 23.1.5 in sqlserver integration. See [#10468](https://github.com/DataDog/integrations-core/pull/10468).
 

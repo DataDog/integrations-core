@@ -1,6 +1,6 @@
 # CHANGELOG - Twistlock
 
-## 2.1.0 / 2021-10-04
+## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
 * [Added] Upgrade python-dateutil to 2.8.2. See [#10206](https://github.com/DataDog/integrations-core/pull/10206).
