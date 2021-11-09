@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.12.1 / 2021-10-04
+## 2.12.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] Bump minimum base package. See [#10325](https://github.com/DataDog/integrations-core/pull/10325).
 

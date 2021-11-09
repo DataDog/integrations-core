@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 6.1.1 / 2021-10-26
+## 6.1.1 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
 

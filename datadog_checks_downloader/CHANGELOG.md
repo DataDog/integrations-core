@@ -1,6 +1,6 @@
 # CHANGELOG - Datadog Checks Downloader
 
-## 3.4.1 / 2021-10-19
+## 3.4.1 / 2021-10-19 / Agent 7.32.0
 
 * [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
 
