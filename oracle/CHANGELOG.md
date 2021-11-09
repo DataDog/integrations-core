@@ -1,6 +1,6 @@
 # CHANGELOG - oracle
 
-## 3.5.0 / 2021-10-04
+## 3.5.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
 * [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
