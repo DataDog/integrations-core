@@ -1,6 +1,6 @@
 # Mesos_master Check
 
-This check collects metrics for Mesos masters. If you are looking for the the metrics for Mesos slave, see the [Mesos Slave Integration documentation][1].
+This check collects metrics for Mesos masters. If you are looking for the metrics for Mesos slave, see the [Mesos Slave Integration documentation][1].
 
 ![Mesos master Dashboard][2]
 

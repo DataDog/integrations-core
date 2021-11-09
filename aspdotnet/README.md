@@ -29,7 +29,7 @@ partial -->
 
 ASP.NET uses IIS logging. Follow the [setup instructions for IIS][5] in order to view logs related to ASP.NET requests and failures. 
 
-Unhandled 500 level exceptions and events related to your ASP.NET application can be viewed via the Windows Application EventLog. 
+Unhandled 500 level exceptions and events related to your ASP.NET application can be viewed with the Windows Application EventLog.
 
 ### Validation
 

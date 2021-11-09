@@ -34,6 +34,7 @@ METRICS = [
     'datadog.rate_limit_queries.reset',
     'datadog.requests',
     'external_metrics',
+    'external_metrics.datadog_metrics',
     'external_metrics.delay_seconds',
     'external_metrics.processed_value',
     'go.goroutines',

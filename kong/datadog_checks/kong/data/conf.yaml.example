@@ -45,15 +45,16 @@ init_config:
 #
 instances:
 
-    ## @param kong_status_url - string - required
+  -
+    ## @param kong_status_url - string - optional - default: http://localhost:8001/status/
     ## URL where Kong exposes its status.
     #
-  - kong_status_url: http://localhost:8001/status/
+    # kong_status_url: http://localhost:8001/status/
 
-    ## @param openmetrics_endpoint - string - required
+    ## @param openmetrics_endpoint - string - optional - default: http://localhost:8001/metrics
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    openmetrics_endpoint: http://localhost:8001/metrics
+    # openmetrics_endpoint: http://localhost:8001/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.

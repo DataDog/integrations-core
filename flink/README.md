@@ -124,6 +124,7 @@ Flink does not include any events.
 
 Need help? Contact [Datadog support][12].
 
+
 [1]: https://flink.apache.org/
 [2]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
@@ -136,4 +137,3 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
-

@@ -94,7 +94,7 @@ partial -->
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                                                                                                                                                                             |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ This integration collects for every host in every cluster the following system m
 - network
 - process
 
-If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted service component the metrics with headers in the white list.
+If service metrics collection is enabled with `collect_service_metrics` this integration collects for each included service component the metrics with headers in the inclusion list.
 
 ### Metrics
 
@@ -139,7 +139,7 @@ Need help? Contact [Datadog support][10].
 
 
 [1]: https://ambari.apache.org
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/

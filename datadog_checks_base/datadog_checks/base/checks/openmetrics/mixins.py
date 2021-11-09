@@ -244,9 +244,13 @@ class OpenMetricsScraperMixin(object):
         # Rename bucket "le" label to "upper_bound"
         config['labels_mapper']['le'] = 'upper_bound'
 
-        # `exclude_labels` is an array of labels names to exclude. Those labels
+        # `exclude_labels` is an array of label names to exclude. Those labels
         # will just not be added as tags when submitting the metric.
         config['exclude_labels'] = default_instance.get('exclude_labels', []) + instance.get('exclude_labels', [])
+
+        # `include_labels` is an array of label names to include. If these labels are not in
+        # the `exclude_labels` list, then they are added as tags when submitting the metric.
+        config['include_labels'] = default_instance.get('include_labels', []) + instance.get('include_labels', [])
 
         # `type_overrides` is a dictionary where the keys are prometheus metric names
         # and the values are a metric type (name as string) to use instead of the one
@@ -1113,8 +1117,9 @@ class OpenMetricsScraperMixin(object):
         _tags.extend(scraper_config['_metric_tags'])
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
-                tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
+                if label_name in scraper_config['include_labels'] or len(scraper_config['include_labels']) == 0:
+                    tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
+                    _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )
