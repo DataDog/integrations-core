@@ -262,16 +262,7 @@ class Network(AgentCheck):
         metric_tags = [] if tags is None else tags[:]
         metric_tags.append('device:{}'.format(iface))
 
-        expected_metrics = [
-            'bytes_rcvd',
-            'bytes_sent',
-            'packets_in.count',
-            'packets_in.drop',
-            'packets_in.error',
-            'packets_out.count',
-            'packets_out.drop',
-            'packets_out.error',
-        ]
+        expected_metrics = self._get_expected_metrics()
         for m in expected_metrics:
             assert m in vals_by_metric
         assert len(vals_by_metric) == len(expected_metrics)
@@ -281,6 +272,24 @@ class Network(AgentCheck):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
+
+    def _get_expected_metrics(self):
+        expected_metrics = [
+            'bytes_rcvd',
+            'bytes_sent',
+            'packets_in.count',
+            'packets_in.error',
+            'packets_out.count',
+            'packets_out.error',
+        ]
+        if Platform.is_linux() or Platform.is_windows():
+            expected_metrics.extend(
+                [
+                    'packets_in.drop',
+                    'packets_out.drop',
+                ]
+            )
+        return expected_metrics
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):

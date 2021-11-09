@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import get_here
 
 HERE = get_here()
@@ -18,12 +19,18 @@ EXPECTED_METRICS = [
     'system.net.bytes_rcvd',
     'system.net.bytes_sent',
     'system.net.packets_in.count',
-    'system.net.packets_in.drop',
     'system.net.packets_in.error',
     'system.net.packets_out.count',
-    'system.net.packets_out.drop',
     'system.net.packets_out.error',
 ]
+
+if Platform.is_linux() or Platform.is_windows():
+    EXPECTED_METRICS.extend(
+        [
+            'system.net.packets_in.drop',
+            'system.net.packets_out.drop',
+        ]
+    )
 
 E2E_EXPECTED_METRICS = EXPECTED_METRICS + [
     "system.net.tcp4.closing",
