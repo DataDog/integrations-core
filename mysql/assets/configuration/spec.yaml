@@ -116,7 +116,7 @@ files:
               The following fields are supported:
 
               name : mysql status name on "SHOW GLOBAL STATUS"
-              metric : datadog metric name
+              metric_name : datadog metric name
               type : gauge | rate | count | ...
             value:
               type: array
@@ -134,7 +134,7 @@ files:
               The following fields are supported:
 
               name : mysql variable name on "SHOW GLOBAL VARIABLES"
-              metric : datadog metric name
+              metric_name : datadog metric name
               type : gauge | rate | count | ...
             value:
               type: array
