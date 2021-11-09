@@ -1033,7 +1033,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Webhooks controller reconcile successes per minute by pod name",
                 "type": "timeseries",
                 "yaxis": {
@@ -1087,7 +1086,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Secrets controller reconcile successes per minute by pod name",
                 "type": "timeseries",
                 "yaxis": {
@@ -1141,7 +1139,7 @@
                         ],
                         "formulas": [
                             {
-                                "formula": "default_zero(query1)"
+                                "formula": "default_zero(query1) + default_zero(query2)"
                             }
                         ],
                         "queries": [
@@ -1150,11 +1148,18 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:datadog.cluster_agent.external_metrics{valid:true,$cluster,$namespace,$leader}"
+                            },
+                            {
+                                "aggregator": "last",
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:true,$cluster,$namespace,$leader}"
                             }
                         ],
                         "response_format": "scalar"
                     }
                 ],
+                "time": {},
                 "title": "Valid external metrics",
                 "title_align": "left",
                 "title_size": "16",
@@ -1183,7 +1188,7 @@
                         ],
                         "formulas": [
                             {
-                                "formula": "default_zero(query1)"
+                                "formula": "default_zero(query1) + default_zero(query2)"
                             }
                         ],
                         "queries": [
@@ -1192,11 +1197,18 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "sum:datadog.cluster_agent.external_metrics{valid:false,$cluster,$namespace,$leader}"
+                            },
+                            {
+                                "aggregator": "last",
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:false,$cluster,$namespace,$leader}"
                             }
                         ],
                         "response_format": "scalar"
                     }
                 ],
+                "time": {},
                 "title": "Invalid external metrics",
                 "title_align": "left",
                 "title_size": "16",
@@ -1246,7 +1258,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Webhooks controller reconcile errors per minute by pod name",
                 "type": "timeseries",
                 "yaxis": {
@@ -1300,7 +1311,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Secrets controller reconcile errors per minute by pod name",
                 "type": "timeseries",
                 "yaxis": {
@@ -1335,6 +1345,9 @@
                         "formulas": [
                             {
                                 "formula": "query1"
+                            },
+                            {
+                                "formula": "query2"
                             }
                         ],
                         "queries": [
@@ -1342,6 +1355,11 @@
                                 "data_source": "metrics",
                                 "name": "query1",
                                 "query": "avg:datadog.cluster_agent.external_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "avg:datadog.cluster_agent.external_metrics.datadog_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
                             }
                         ],
                         "response_format": "timeseries",
@@ -1353,6 +1371,7 @@
                     }
                 ],
                 "show_legend": true,
+                "time": {},
                 "title": "External metrics by namespace",
                 "title_align": "left",
                 "title_size": "16",
@@ -1409,7 +1428,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Successful mutation attempts per minute by type",
                 "type": "timeseries",
                 "yaxis": {
@@ -1463,7 +1481,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Mutation errors by type and reason",
                 "type": "timeseries",
                 "yaxis": {
@@ -1601,7 +1618,6 @@
                     }
                 ],
                 "show_legend": true,
-                "time": {},
                 "title": "Failed mutation attempts by type per minute",
                 "type": "timeseries",
                 "yaxis": {
@@ -1659,7 +1675,6 @@
                         "response_format": "scalar"
                     }
                 ],
-                "time": {},
                 "title": "Certificate validity - hours left",
                 "type": "query_value"
             },
