@@ -4,8 +4,8 @@
   "metric_prefix": "container.",
   "metric_to_check": "container.uptime",
   "name": "container",
-  "short_description": "Track all your container metrics with Datadog",
-  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128c",
+  "short_description": "Track your container metrics with Datadog",
+  "guid": "39d40858-0d56-4623-bd1d-864790d0c894",
   "support": "core",
   "supported_os": [
     "linux",
@@ -16,7 +16,7 @@
     "containers"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "display_name": "Container",
   "creates_events": true,
   "integration_id": "container",
