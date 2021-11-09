@@ -84,6 +84,23 @@ def test_plus_api_v3(check, instance, aggregator):
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
 
+def test_plus_api_v7(check, instance, aggregator):
+    instance = deepcopy(instance)
+    instance['use_plus_api'] = True
+    instance['use_plus_api_stream'] = True
+    instance['plus_api_version'] = 7
+    check = check(instance)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
+    check.check(instance)
+
+    total = 0
+    for m in aggregator.metric_names:
+        print(m)
+        total += len(aggregator.metrics(m))
+
+    assert total == 1187
+
+
 def test_nest_payload(check):
     check = check({})
     keys = ["foo", "bar"]

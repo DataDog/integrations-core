@@ -47,6 +47,10 @@ PLUS_API_V3_STREAM_ENDPOINTS = {
     "stream/zone_sync": ["stream", "zone_sync"],
 }
 
+PLUS_API_V7_ENDPOINTS = {
+    "http/limit_reqs": ["http", "limit_reqs"],
+}
+
 TAGGED_KEYS = {
     'caches': 'cache',
     'server_zones': 'server_zone',
@@ -106,7 +110,8 @@ class Nginx(AgentCheck):
 
             if use_plus_api_stream:
                 plus_api_chain_list = chain(
-                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(plus_api_version)
+                    self._get_plus_api_endpoints(plus_api_version),
+                    self._get_plus_api_stream_endpoints(plus_api_version),
                 )
             else:
                 plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
@@ -215,6 +220,12 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
+    def _get_plus_api_endpoints(self, plus_api_version):
+        endpoints = iteritems(PLUS_API_ENDPOINTS)
+        if int(plus_api_version) >= 7:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V7_ENDPOINTS))
+        return endpoints
+
     def _get_plus_api_stream_endpoints(self, plus_api_version):
         endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
         if int(plus_api_version) >= 3:
@@ -309,7 +320,6 @@ class Nginx(AgentCheck):
         Recursively flattens the nginx json object. Returns the following: [(metric_name, value, tags)]
         """
         output = []
-
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
             if 'server' in val and val['server']:
