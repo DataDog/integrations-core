@@ -29,7 +29,7 @@ kubernetes.memory.working_set,gauge,,byte,,Current working set in bytes - this i
 kubernetes.memory.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),-1,kubernetes,k8s.mem.cache
 kubernetes.memory.rss,gauge,,byte,,Size of RSS in bytes,-1,kubernetes,k8s.mem.rss
 kubernetes.memory.swap,gauge,,byte,,The amount of swap currently used by by processes in this cgroup,-1,kubernetes,k8s.mem.swap
-kubernetes.memory.usage_pct,gauge,,fraction,,The percentage of memory used,-1,kubernetes,k8s.mem.used_pct
+kubernetes.memory.usage_pct,gauge,,fraction,,The percentage of memory used per pod (memory limit must be set),-1,kubernetes,k8s.mem.used_pct
 kubernetes.memory.sw_in_use,gauge,,fraction,,The percentage of swap space used,-1,kubernetes,k8s.mem.sw_in_use
 kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubernetes,k8s.net.rx
 kubernetes.network.rx_dropped,gauge,,packet,second,The amount of rx packets dropped per second,-1,kubernetes,k8s.net.rx.drop

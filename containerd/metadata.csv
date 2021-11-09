@@ -26,14 +26,14 @@ containerd.cpu.throttled.periods,rate,,nanosecond,,The total cpu throttled time,
 containerd.cpu.system,rate,,nanosecond,,The total cpu time,0,containerd,cpu_system
 containerd.cpu.total,rate,,nanosecond,,The total cpu time,0,containerd,cpu_total
 containerd.cpu.user,rate,,nanosecond,,The total user cpu time,0,containerd,cpu_user
-containerd.blkio.merged_recursive,rate,,,,The blkio io merged recursive,0,containerd,io_merged_recursive
-containerd.blkio.queued_recursive,rate,,,,The blkio io queued recursive,0,containerd,io_queued_recursive
-containerd.blkio.sectors_recursive,rate,,,,The blkio io sectors recursive,0,containerd,io_sectors_recursive
-containerd.blkio.service_recursive_byte,rate,,byte,,The blkio io service byte recursive,0,containerd, blkio_service_byte_recursive
-containerd.blkio.time_recursive,rate,,nanosecond,,The blkio io time recursive,0,containerd,io_sectors_recursive
-containerd.blkio.serviced_recursive,rate,,,,The blkio io serviced recursive,0,containerd,io_serviced_recursive
-containerd.blkio.wait_time_recursive,rate,,nanosecond,,The blkio io wait time recursive,0,containerd,io_wait_time_recursive
-containerd.blkio.service_time_recursive,rate,,,,The blkio io service time recursive,0,containerd,io service time recursive
+containerd.blkio.merged_recursive,rate,,,,The total number of bios/requests merged into requests belonging to this cgroup,0,containerd,io_merged_recursive
+containerd.blkio.queued_recursive,rate,,,,The total number of requests queued up at any given instant for this cgroup,0,containerd,io_queued_recursive
+containerd.blkio.sectors_recursive,rate,,,,The number of sectors transferred to/from disk by the group,0,containerd,io_sectors_recursive
+containerd.blkio.service_recursive_byte,rate,,byte,,The number of bytes transferred to/from the disk by the group.,0,containerd, blkio_service_byte_recursive
+containerd.blkio.time_recursive,rate,,nanosecond,,The disk time allocated to cgroup per device in milliseconds,0,containerd,io_sectors_recursive
+containerd.blkio.serviced_recursive,rate,,,,The number of IOs (bio) issued to the disk by the group,0,containerd,io_serviced_recursive
+containerd.blkio.wait_time_recursive,rate,,nanosecond,,The total amount of time the IOs for this cgroup spent waiting in the scheduler queues for service,0,containerd,io_wait_time_recursive
+containerd.blkio.service_time_recursive,rate,,,,The total amount of time between request dispatch and request completion for the IOs done by this cgroup,0,containerd,io service time recursive
 containerd.image.size,gauge,,byte,,The size of the container image,0,containerd,image size
 containerd.proc.open_fds,gauge,,file,,The number of open file descriptors,0,containerd,open_fds
 containerd.uptime,gauge,,second,,Time since the container was started,0,containerd,uptime
