@@ -1,6 +1,6 @@
 # CHANGELOG - gitlab
 
-## 4.6.1 / 2021-10-05
+## 4.6.1 / 2021-10-05 / Agent 7.32.0
 
 * [Fixed] Fix config example. See [#10338](https://github.com/DataDog/integrations-core/pull/10338).
 

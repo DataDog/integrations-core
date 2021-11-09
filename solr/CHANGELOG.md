@@ -1,6 +1,6 @@
 # CHANGELOG - solr
 
-## 1.10.0 / 2021-10-04
+## 1.10.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8984](https://github.com/DataDog/integrations-core/pull/8984).
 

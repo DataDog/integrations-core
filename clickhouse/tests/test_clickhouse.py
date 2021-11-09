@@ -104,4 +104,6 @@ def test_version_metadata(instance, datadog_agent, dd_run_check):
     check.check_id = 'test:123'
     dd_run_check(check)
 
-    datadog_agent.assert_metadata('test:123', {'version.scheme': 'calver', 'version.year': CLICKHOUSE_VERSION})
+    datadog_agent.assert_metadata(
+        'test:123', {'version.scheme': 'calver', 'version.year': CLICKHOUSE_VERSION.split(".")[0]}
+    )

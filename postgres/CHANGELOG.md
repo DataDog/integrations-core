@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 11.0.0 / 2021-10-26
+## 11.0.0 / 2021-10-26 / Agent 7.32.0
 
 * [Fixed] Fix bug in PG activity collection interval logic. See [#10487](https://github.com/DataDog/integrations-core/pull/10487).
 * [Fixed] Upgrade datadog checks base to 23.1.5. See [#10466](https://github.com/DataDog/integrations-core/pull/10466).
