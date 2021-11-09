@@ -1,1 +1,2 @@
-dnspython==2.1.0
+dnspython==1.16.0; python_version < "3.0"
+dnspython==2.1.0; python_version > "3.0"
