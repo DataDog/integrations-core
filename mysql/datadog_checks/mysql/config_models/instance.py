@@ -85,6 +85,8 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    additional_status: Optional[Sequence[Mapping[str, Any]]]
+    additional_variable: Optional[Sequence[Mapping[str, Any]]]
     charset: Optional[str]
     connect_timeout: Optional[float]
     custom_queries: Optional[Sequence[CustomQuery]]
