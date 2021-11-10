@@ -39,7 +39,7 @@ class InstanceConfig(BaseModel):
     server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    timeout: Optional[int]
+    timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
     tls_private_key: Optional[str]

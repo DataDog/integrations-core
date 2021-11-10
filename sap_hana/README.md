@@ -74,7 +74,9 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 #### Dependencies
 
-The [hdbcli][10] client library is supported but must be installed manually for licensing reasons. This is the recommended way to interface with SAP HANA since it is the only officially maintained library.
+Although not required, it is recommended that the [hdbcli][10] client library be installed since it is the only officially maintained library and supports many new features.
+
+The installation must be performed manually for licensing reasons.
 
 ##### Unix
 

@@ -22,3 +22,4 @@ if os.environ.get('USE_PROPRIETARY_LIBRARY') == 'true':
     E2E_METADATA['start_commands'] = ['pip install hdbcli==2.10.15']
 
 requires_legacy_library = pytest.mark.skipif(USING_HDBCLI, reason='Requires pyhdb')
+requires_proprietary_library = pytest.mark.skipif(not USING_HDBCLI, reason='Requires hdbcli')

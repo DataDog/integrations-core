@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.sap_hana import SapHanaCheck
 from datadog_checks.sap_hana.connection import HanaConnection
 
-from .common import requires_legacy_library
+from .common import requires_legacy_library, requires_proprietary_library
 
 pytestmark = pytest.mark.unit
 
@@ -192,3 +192,24 @@ def test_persisted_db_connection(
     else:
         assert expected_message in caplog.text
     assert check._persist_db_connections == persist
+
+
+@requires_proprietary_library
+def test_connection_properties(instance):
+    instance = instance.copy()
+    instance['connection_properties'] = {'key': 'hdbuserid', 'sslUseDefaultTrustStore': False, 'foo': ['bar', 'baz']}
+    check = SapHanaCheck('sap_hana', {}, [instance])
+
+    with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+        check.get_connection()
+        m.assert_called_once_with(
+            address=instance['server'],
+            port=instance['port'],
+            user=instance['username'],
+            password=instance['password'],
+            communicationTimeout=10000,
+            nodeConnectTimeout=10000,
+            key='hdbuserid',
+            sslUseDefaultTrustStore=False,
+            foo=['bar', 'baz'],
+        )
