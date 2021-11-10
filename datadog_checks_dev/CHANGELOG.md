@@ -14,9 +14,9 @@
 * [Added] Add new validation to warn on bad style. See [#10430](https://github.com/DataDog/integrations-core/pull/10430).
 * [Fixed] Fix location of config. See [#10590](https://github.com/DataDog/integrations-core/pull/10590).
 * [Fixed] Update README templates. See [#10564](https://github.com/DataDog/integrations-core/pull/10564).
-* [Fixed] Update ignored deps  . See [#10516](https://github.com/DataDog/integrations-core/pull/10516).
+* [Fixed] Update ignored deps. See [#10516](https://github.com/DataDog/integrations-core/pull/10516).
 * [Fixed] Fix ddev dash export for manifest v2. See [#10503](https://github.com/DataDog/integrations-core/pull/10503).
-* [Fixed] Update checks that does not make sense to have logs. See [#10366](https://github.com/DataDog/integrations-core/pull/10366).
+* [Fixed] Update checks that do not make sense to have logs. See [#10366](https://github.com/DataDog/integrations-core/pull/10366).
 * [Fixed] Fix description of jmx options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
 
 ## 15.1.0 / 2021-10-15
