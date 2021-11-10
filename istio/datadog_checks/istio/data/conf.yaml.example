@@ -195,6 +195,14 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
