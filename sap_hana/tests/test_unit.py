@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import certifi
 import mock
 import pytest
 
@@ -195,21 +196,71 @@ def test_persisted_db_connection(
 
 
 @requires_proprietary_library
-def test_connection_properties(instance):
-    instance = instance.copy()
-    instance['connection_properties'] = {'key': 'hdbuserid', 'sslUseDefaultTrustStore': False, 'foo': ['bar', 'baz']}
-    check = SapHanaCheck('sap_hana', {}, [instance])
+class TestConnectionProperties:
+    def test_default(self, instance):
+        check = SapHanaCheck('sap_hana', {}, [instance])
 
-    with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
-        check.get_connection()
-        m.assert_called_once_with(
-            address=instance['server'],
-            port=instance['port'],
-            user=instance['username'],
-            password=instance['password'],
-            communicationTimeout=10000,
-            nodeConnectTimeout=10000,
-            key='hdbuserid',
-            sslUseDefaultTrustStore=False,
-            foo=['bar', 'baz'],
-        )
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address=instance['server'],
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=10000,
+                nodeConnectTimeout=10000,
+            )
+
+    def test_defined(self, instance):
+        instance = instance.copy()
+        instance['timeout'] = 5
+        instance['connection_properties'] = {
+            'address': 'foobar',
+            'nodeConnectTimeout': 1234,
+            'key': 'hdbuserid',
+            'sslUseDefaultTrustStore': False,
+            'foo': ['bar', 'baz'],
+        }
+        check = SapHanaCheck('sap_hana', {}, [instance])
+
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address='foobar',
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=5000,
+                nodeConnectTimeout=1234,
+                key='hdbuserid',
+                sslUseDefaultTrustStore=False,
+                foo=['bar', 'baz'],
+            )
+
+    def test_tls(self, instance):
+        instance = instance.copy()
+        instance['use_tls'] = True
+        instance['connection_properties'] = {
+            'key': 'hdbuserid',
+            'sslUseDefaultTrustStore': False,
+            'foo': ['bar', 'baz'],
+        }
+        check = SapHanaCheck('sap_hana', {}, [instance])
+
+        with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
+            check.get_connection()
+            m.assert_called_once_with(
+                address=instance['server'],
+                port=instance['port'],
+                user=instance['username'],
+                password=instance['password'],
+                communicationTimeout=10000,
+                nodeConnectTimeout=10000,
+                encrypt=True,
+                sslHostNameInCertificate=instance['server'],
+                sslSNIHostname=instance['server'],
+                sslTrustStore=certifi.where(),
+                key='hdbuserid',
+                sslUseDefaultTrustStore=False,
+                foo=['bar', 'baz'],
+            )
