@@ -1,5 +1,12 @@
 # CHANGELOG - TLS
 
+## 2.6.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+
 ## 2.5.0 / 2021-05-27 / Agent 7.28.1
 
 * [Added] Add runtime configuration validation. See [#8996](https://github.com/DataDog/integrations-core/pull/8996).

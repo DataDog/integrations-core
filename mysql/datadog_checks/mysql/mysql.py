@@ -7,7 +7,7 @@ from __future__ import division
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -108,7 +108,7 @@ class MySql(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self._config.dbm_enabled:
+        if self._resolved_hostname is None and (self._config.dbm_enabled or self.disable_generic_tags):
             self._resolved_hostname = resolve_db_host(self._config.host)
         return self._resolved_hostname
 
@@ -204,10 +204,7 @@ class MySql(AgentCheck):
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
         if self._config.mysql_sock != '':
-            self.service_check_tags = [
-                'server:{0}'.format(self._config.mysql_sock),
-                'port:unix_socket',
-            ] + self._config.tags
+            self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
         else:
             connection_args.update({'host': self._config.host})
@@ -216,12 +213,20 @@ class MySql(AgentCheck):
             connection_args.update({'port': self._config.port})
         return connection_args
 
-    @contextmanager
-    def _connect(self):
+    def _service_check_tags(self, server=None):
+        # type: (Optional[str]) -> List[str]
+        if server is None:
+            server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
-            'server:{0}'.format((self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host)),
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
         ] + self._config.tags
+        if not self.disable_generic_tags:
+            service_check_tags.append('server:{0}'.format(server))
+        return service_check_tags
+
+    @contextmanager
+    def _connect(self):
+        service_check_tags = self._service_check_tags()
         db = None
         try:
             connect_args = self._get_connection_args()
@@ -538,19 +543,20 @@ class MySql(AgentCheck):
             # At last, get mysql cpu data out of psutil or procfs
 
             try:
-                ucpu, scpu = None, None
                 if PSUTIL_AVAILABLE:
+                    self.log.debug("psutil is available, attempting to collect mysql.performance.* metrics")
                     proc = psutil.Process(pid)
 
                     ucpu = proc.cpu_times()[0]
                     scpu = proc.cpu_times()[1]
 
-                if ucpu and scpu:
-                    self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
-                    # should really be system_time
-                    self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
-                    self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
-
+                    if ucpu and scpu:
+                        self.rate("mysql.performance.user_time", ucpu, tags=tags, hostname=self.resolved_hostname)
+                        # should really be system_time
+                        self.rate("mysql.performance.kernel_time", scpu, tags=tags, hostname=self.resolved_hostname)
+                        self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags, hostname=self.resolved_hostname)
+                else:
+                    self.log.debug("psutil is not available, will not collect mysql.performance.* metrics")
             except Exception:
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
 

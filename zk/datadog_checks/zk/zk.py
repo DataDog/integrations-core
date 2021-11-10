@@ -72,7 +72,7 @@ if PY3:
 
 
 class ZKConnectionFailure(Exception):
-    """ Raised when we are unable to connect or get the output of a command. """
+    """Raised when we are unable to connect or get the output of a command."""
 
     pass
 

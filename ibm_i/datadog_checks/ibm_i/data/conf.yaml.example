@@ -19,6 +19,11 @@ instances:
     #
     # system: <SYSTEM>
 
+    ## @param hostname - string - optional
+    ## Hostname used for this instance's metrics. If unset, HOST_NAME from SYSIBMADM.ENV_SYS_INFO will be used.
+    #
+    # hostname: <HOSTNAME>
+
     ## @param username - string - optional
     ## The user profile name used to authenticate to the system.
     #

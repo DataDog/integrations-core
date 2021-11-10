@@ -140,7 +140,7 @@ def test_dbm_async_job_run_sync(aggregator):
 def test_dbm_async_job_rate_limit(aggregator):
     # test the main collection loop rate limit
     rate_limit = 10
-    sleep_time = 1
+    sleep_time = 0.9  # just below what the rate limit should hit to buffer before cancelling the loop
 
     job = TestJob(AgentCheck(), rate_limit=rate_limit)
     job.run_job_loop([])

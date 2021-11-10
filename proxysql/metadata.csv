@@ -56,6 +56,7 @@ proxysql.pool.queries,gauge,,query,second,The number of queries routed towards t
 proxysql.pool.bytes_data_sent,gauge,,byte,second,The amount of data sent to the backend.,0,proxysql,connection_pool_bytes_sent
 proxysql.pool.bytes_data_recv,gauge,,byte,second,The amount of data received from the backend.,0,proxysql,connection_pool_bytes_received
 proxysql.pool.latency_ms,gauge,,millisecond,,"The current ping time as reported from Monitor.",-1,proxysql,connection_pool_backend_latency
+proxysql.pool.latency_us,gauge,,microsecond,,"The current ping time as reported from Monitor.",-1,proxysql,connection_pool_backend_latency
 proxysql.memory.sqlite3_memory_bytes,gauge,,byte,,Memory used by the embedded SQLite.,0,proxysql,sqlite_memory
 proxysql.memory.jemalloc_resident,gauge,,byte,,Bytes in physically resident data pages mapped by the allocator.,0,proxysql,jemalloc_resident_memory
 proxysql.memory.jemalloc_active,gauge,,byte,,Bytes in pages allocated by the application.,0,proxysql,jemalloc_active_memory

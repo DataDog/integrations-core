@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-import datetime
-
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -36,8 +33,6 @@ class CiscoACICheck(AgentCheck):
         self.tagger = CiscoTags(log=self.log)
 
     def check(self, _):
-        self.log.info("Starting Cisco Check")
-        start = datetime.datetime.utcnow()
         aci_url = self.instance.get('aci_url')
         aci_urls = self.instance.get('aci_urls', [])
         if aci_url:
@@ -146,11 +141,6 @@ class CiscoACICheck(AgentCheck):
         self.set_external_tags(self.get_external_host_tags())
 
         api.close()
-        end = datetime.datetime.utcnow()
-        log_line = "finished running Cisco Check"
-        if _is_affirmative(self.instance.get('report_timing', False)):
-            log_line += ", took {}".format(end - start)
-        self.log.info(log_line)
 
     def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
         if instance is None:
