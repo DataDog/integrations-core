@@ -105,6 +105,8 @@ CPU, memory, block I/O, or huge page table metrics are collected out of the box.
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
+This integration works on Linux and Windows, but some metrics are OS dependent. Look at `metadata.csv` for the list of OS dependent metrics. 
+ 
 ### Events
 
 The Containerd check can collect events. Use `filters` to select the relevant events. Refer to the [sample containerd.d/conf.yaml][2] to have more details.
