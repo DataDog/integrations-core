@@ -1,6 +1,6 @@
 # CHANGELOG - openstack
 
-## 1.11.1 / 2021-10-04
+## 1.11.1 / 2021-10-04 / Agent 7.32.0
 
 * [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
 

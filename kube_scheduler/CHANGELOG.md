@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## 2.1.1 / 2021-10-08
+## 2.1.1 / 2021-10-08 / Agent 7.32.0
 
 * [Fixed] fix kube scheduler config. See [#10382](https://github.com/DataDog/integrations-core/pull/10382).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - hdfs_namenode
 
-## 2.1.0 / 2021-10-04
+## 2.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8928](https://github.com/DataDog/integrations-core/pull/8928).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).

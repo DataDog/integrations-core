@@ -270,9 +270,9 @@ kind: Pod
 metadata:
   name: mysql
   annotations:
-    ad.datadoghq.com/nginx.check_names: '["mysql"]'
-    ad.datadoghq.com/nginx.init_configs: '[{}]'
-    ad.datadoghq.com/nginx.instances: |
+    ad.datadoghq.com/mysql.check_names: '["mysql"]'
+    ad.datadoghq.com/mysql.init_configs: '[{}]'
+    ad.datadoghq.com/mysql.instances: |
       [
         {
           "server": "%%host%%", 

@@ -1,6 +1,6 @@
 # CHANGELOG - twemproxy
 
-## 1.11.0 / 2021-10-04
+## 1.11.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 

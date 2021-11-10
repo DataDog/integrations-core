@@ -1,6 +1,6 @@
 # CHANGELOG - etcd
 
-## 2.8.0 / 2021-10-04
+## 2.8.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8913](https://github.com/DataDog/integrations-core/pull/8913).
 * [Added] Fix auto-discovery for latest versions on Kubernetes. See [#9578](https://github.com/DataDog/integrations-core/pull/9578).
