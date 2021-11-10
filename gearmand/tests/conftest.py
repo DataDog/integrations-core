@@ -15,7 +15,7 @@ from .common import CHECK_NAME, HERE, INSTANCE
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(compose_file, sleep=20, mount_logs=True):
+    with docker_run(compose_file, sleep=60, mount_logs=True):
         yield INSTANCE
 
 
@@ -24,4 +24,4 @@ def check():
     # Lazily import to support E2E on Windows
     from datadog_checks.gearmand import Gearman
 
-    return Gearman(CHECK_NAME, {}, {})
+    return Gearman(CHECK_NAME, {}, [{}])
