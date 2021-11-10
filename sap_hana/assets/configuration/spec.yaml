@@ -33,6 +33,14 @@ files:
         required: true
         value:
           type: string
+      - name: connection_properties
+        description: |
+          When `hdbcli` is installed, this defines the properties of the database connections. Any property
+          defined here overrides any default value set by the check. For more information, see:
+          https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+        value:
+          type: object
+          additionalProperties: true
       - name: use_hana_hostnames
         description: |
           Whether or not to use the hostnames contained in HANA's monitoring

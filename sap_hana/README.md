@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent. 
+This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent.
 
 ## Setup
 
@@ -72,6 +72,22 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    GRANT DD_MONITOR TO <USER>;
    ```
 
+#### Dependencies
+
+The [hdbcli][10] client library is supported but must be installed manually for licensing reasons. This is the recommended way to interface with SAP HANA since it is the only officially maintained library.
+
+##### Unix
+
+```text
+/opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+```
+
+##### Windows
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+```
+
 ### Configuration
 
 1. Edit the `sap_hana.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your sap_hana performance data. See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
@@ -110,3 +126,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://pypi.org/project/hdbcli/

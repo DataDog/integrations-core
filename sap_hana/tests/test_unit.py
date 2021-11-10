@@ -9,6 +9,8 @@ import pytest
 from datadog_checks.sap_hana import SapHanaCheck
 from datadog_checks.sap_hana.connection import HanaConnection
 
+from .common import requires_legacy_library
+
 pytestmark = pytest.mark.unit
 
 
@@ -136,6 +138,7 @@ def test_custom_query_configuration(instance):
     gauge.assert_not_called()
 
 
+@requires_legacy_library
 def test_tls_overwrite():
     """Tests that the connection class correctly overrides the `_open_socket_and_init_protocoll` method.
     The fact that there is a typo in the private method name makes it possible that this could change in the future.
@@ -151,6 +154,7 @@ def test_tls_overwrite():
         tls_context.wrap_socket.assert_called()
 
 
+@requires_legacy_library
 def test_no_tls_overwrite_by_default():
     tls_context = mock.MagicMock(__nonzero__=lambda *args: False, __bool__=lambda *args: False)
     socket = mock.MagicMock()
@@ -163,6 +167,7 @@ def test_no_tls_overwrite_by_default():
         tls_context.wrap_socket.assert_not_called()
 
 
+@requires_legacy_library
 @pytest.mark.parametrize(
     'init_config, instance_config, default_instance, persist',
     [
