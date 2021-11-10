@@ -2850,3 +2850,141 @@ def test_ignore_tags_regex(aggregator, mocked_prometheus_check, ref_gauge):
     check.process_metric(ref_gauge, config)
 
     aggregator.assert_metric('prometheus.process.vm.bytes', tags=wanted_tags, count=1)
+
+
+test_use_process_start_time_data = """\
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 9.339544592e+09
+# HELP skydns_skydns_dns_request_duration_seconds Histogram of the time (in seconds) each request took to resolve.
+# TYPE skydns_skydns_dns_request_duration_seconds histogram
+skydns_skydns_dns_request_duration_seconds_bucket{system="auth",le="10"} 1.359194e+06
+skydns_skydns_dns_request_duration_seconds_bucket{system="auth",le="+Inf"} 1.359194e+06
+skydns_skydns_dns_request_duration_seconds_sum{system="auth"} 44.31446715499896
+skydns_skydns_dns_request_duration_seconds_count{system="auth"} 1.359194e+06
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0.00036825700000000004
+go_gc_duration_seconds{quantile="0.25"} 0.00041007200000000004
+go_gc_duration_seconds{quantile="0.5"} 0.00043824300000000005
+go_gc_duration_seconds{quantile="0.75"} 0.00048369000000000005
+go_gc_duration_seconds{quantile="1"} 0.0025860830000000003
+go_gc_duration_seconds_sum 1.154763349
+go_gc_duration_seconds_count 2351
+"""
+
+
+def _make_test_use_process_start_time_data(process_start_time):
+    test_data = test_use_process_start_time_data
+    if process_start_time:
+        if not test_data.endswith('\n'):
+            test_data += '\n'
+        test_data += "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
+        test_data += "# TYPE process_start_time_seconds gauge\n"
+        for seq, pst in enumerate(process_start_time):
+            label = '{pid="%d"}' % (seq,) if len(process_start_time) > 1 else ""
+            test_data += "process_start_time_seconds%s %f\n" % (
+                label,
+                pst,
+            )
+    return test_data
+
+
+@pytest.mark.parametrize(
+    'use_process_start_time, send_distribution_buckets, expect_first_flush, agent_start_time, process_start_time',
+    [
+        (False, False, False, None, None),
+        (True, False, True, 10, [20]),
+        (True, False, False, 20, [10]),
+        (True, False, False, 10, []),
+        (True, False, True, 10, [20, 30, 40]),
+        (True, False, False, 20, [10, 30, 40]),
+        (False, True, False, None, None),
+        (True, True, True, 10, [20]),
+        (True, True, False, 20, [10]),
+        (True, True, False, 10, []),
+        (True, True, True, 10, [20, 30, 40]),
+        (True, True, False, 20, [10, 30, 40]),
+    ],
+    ids=[
+        "disabled",
+        "enabled, agent is older",
+        "enabled, agent is newer",
+        "enabled, metric n/a",
+        "enabled, many metrics, all newer",
+        "enabled, many metrics, some newer",
+        "with buckets, disabled",
+        "with buckets, enabled, agent is older",
+        "with buckets, enabled, agent is newer",
+        "with buckets, enabled, metric n/a",
+        "with buckets, enabled, many metrics, all newer",
+        "with buckets, enabled, many metrics, some newer",
+    ],
+)
+def test_use_process_start_time(
+    aggregator,
+    datadog_agent,
+    mocked_openmetrics_check_factory,
+    expect_first_flush,
+    send_distribution_buckets,
+    use_process_start_time,
+    process_start_time,
+    agent_start_time,
+):
+    """
+    Test that first sample is flushed or not depending on metric type, agent and server process start times.
+    """
+
+    instance = {
+        "prometheus_url": "xx",
+        "metrics": ["*"],
+        "namespace": "",
+        "send_distribution_counts_as_monotonic": True,
+        "send_distribution_buckets": send_distribution_buckets,
+        "use_process_start_time": use_process_start_time,
+    }
+
+    datadog_agent.set_process_start_time(agent_start_time)
+
+    check = mocked_openmetrics_check_factory(instance)
+    test_data = _make_test_use_process_start_time_data(process_start_time)
+    check.poll = mock.MagicMock(return_value=MockResponse(test_data, headers={'Content-Type': text_content_type}))
+
+    for _ in range(0, 5):
+        aggregator.reset()
+        check.check(instance)
+
+        aggregator.assert_metric(
+            'go_memstats_alloc_bytes_total',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            flush_first_value=expect_first_flush,
+        )
+        aggregator.assert_metric(
+            'go_gc_duration_seconds.count',
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            flush_first_value=expect_first_flush,
+        )
+
+        if send_distribution_buckets:
+            aggregator.assert_histogram_bucket(
+                'skydns_skydns_dns_request_duration_seconds',
+                None,
+                None,
+                None,
+                True,
+                None,
+                None,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
+        else:
+            aggregator.assert_metric(
+                'skydns_skydns_dns_request_duration_seconds.count',
+                metric_type=aggregator.MONOTONIC_COUNT,
+                count=2,
+                flush_first_value=expect_first_flush,
+            )
+
+        expect_first_flush = True

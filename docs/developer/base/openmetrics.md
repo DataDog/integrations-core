@@ -49,3 +49,4 @@ For complete documentation on every option, see the associated templates for the
 
 This OpenMetrics implementation is the updated version of the original Prometheus/OpenMetrics implementation. 
 The [docs for the deprecated implementation](../legacy/prometheus.md) are still available as a reference.
+

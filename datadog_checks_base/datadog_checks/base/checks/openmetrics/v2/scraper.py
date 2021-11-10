@@ -16,8 +16,14 @@ from ....constants import ServiceCheck
 from ....errors import ConfigurationError
 from ....utils.functions import no_op, return_true
 from ....utils.http import RequestsWrapper
+from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class OpenMetricsScraper:
@@ -218,31 +224,34 @@ class OpenMetricsScraper:
             self.parse_metric_families = parse_metric_families
             self.http.options['headers'].setdefault('Accept', 'text/plain')
 
+        self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
+
         # Used for monotonic counts
-        self.has_successfully_executed = False
+        self.flush_first_value = False
 
     def scrape(self):
         """
         Execute a scrape, and for each metric collected, transform the metric.
         """
+        runtime_data = {'flush_first_value': self.flush_first_value, 'static_tags': self.static_tags}
 
-        runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
-
-        for metric in self.consume_metrics():
+        for metric in self.consume_metrics(runtime_data):
             transformer = self.metric_transformer.get(metric)
             if transformer is None:
                 continue
 
             transformer(metric, self.generate_sample_data(metric), runtime_data)
 
-        self.has_successfully_executed = True
+        self.flush_first_value = True
 
-    def consume_metrics(self):
+    def consume_metrics(self, runtime_data):
         """
         Yield the processed metrics and filter out excluded metrics.
         """
 
         metric_parser = self.parse_metrics()
+        if not self.flush_first_value and self.use_process_start_time:
+            metric_parser = first_scrape_handler(metric_parser, runtime_data, datadog_agent.get_process_start_time())
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
 
