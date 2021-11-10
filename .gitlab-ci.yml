@@ -21,8 +21,8 @@ variables:
 stages:
   - build
   - trigger
-  - validate
   - release
+  - validate
   - notify
 
 cache: &slack-cache
