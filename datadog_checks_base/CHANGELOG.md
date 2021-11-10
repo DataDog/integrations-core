@@ -3,18 +3,14 @@
 ## 23.2.0 / 2021-11-10
 
 * [Added] Add option to collect OpenMetrics counters on first scrape. See [#10589](https://github.com/DataDog/integrations-core/pull/10589).
-* [Added] Adds support for include_labels. See [#10493](https://github.com/DataDog/integrations-core/pull/10493).
+* [Added] Add support for OpenMetrics include_labels option. See [#10493](https://github.com/DataDog/integrations-core/pull/10493).
 * [Added] Upgrade psycopg2 on Python 3. See [#10442](https://github.com/DataDog/integrations-core/pull/10442).
 * [Added] Add more utilities. See [#10448](https://github.com/DataDog/integrations-core/pull/10448).
 * [Added] Add support for other logical operators for multiple conditions of the same property. See [#10138](https://github.com/DataDog/integrations-core/pull/10138).
 * [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
-* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
 * [Fixed] Revert "Upgrade psycopg2 on Python 3 (#10442)". See [#10456](https://github.com/DataDog/integrations-core/pull/10456).
 * [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
-* [Fixed] Update tuf to 0.19.0 for python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
 * [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
-* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
-* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
 * [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
 
 ## 23.1.5 / 2021-10-22 / Agent 7.32.0
