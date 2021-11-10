@@ -168,7 +168,7 @@ instances:
 
 #### Openmetrics V1 configuration (Legacy) with generic metric collection
 
-Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if configuring the Openmetrics V2 (`openmetrics_endpoint` enabled).
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if using the Openmetrics V1 configuration (`prometheus_url` enabled).
 
 ```yaml
 instances:
