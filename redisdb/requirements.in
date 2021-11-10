@@ -1,2 +1,2 @@
 redis==3.5.3; python_version < '3.0'
-redis==4.0.0-rc1; python_version > '3.0'
+redis==4.0.0-rc2; python_version > '3.0'
