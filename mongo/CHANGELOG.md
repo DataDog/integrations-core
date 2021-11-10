@@ -1,6 +1,10 @@
 # CHANGELOG - mongo
 
-## 2.7.0 / 2021-10-04
+## 2.7.1 / 2021-10-25
+
+* [Fixed] Load CA certs if SSL is enabled and CA certs are not passed in the configurations. See [#10377](https://github.com/DataDog/integrations-core/pull/10377).
+
+## 2.7.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 * [Added] Add runtime configuration validation. See [#8957](https://github.com/DataDog/integrations-core/pull/8957).

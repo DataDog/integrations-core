@@ -17,6 +17,8 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .version_utils import V9_4
+
 try:
     import datadog_agent
 except ImportError:
@@ -34,7 +36,10 @@ SELECT {cols}
   {filters}
   LIMIT {limit}
 """
-PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements"
+
+# Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
+PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
+PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
 
 DEFAULT_STATEMENTS_LIMIT = 10000
 
@@ -250,10 +255,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return []
 
     def _emit_pg_stat_statements_metrics(self):
+        query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
             rows = self._execute_query(
                 self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
-                PG_STAT_STATEMENTS_COUNT_QUERY,
+                query,
             )
             count = 0
             if rows:

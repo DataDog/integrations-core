@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.13.0 / 2021-10-04
+## 2.13.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8938](https://github.com/DataDog/integrations-core/pull/8938).
 

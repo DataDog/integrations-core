@@ -1,5 +1,9 @@
 # CHANGELOG - Avi Vantage
 
+## 2.0.3 / 2021-10-15 / Agent 7.32.0
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+
 ## 2.0.2 / 2021-10-12
 
 * [Fixed] Bump base package requirements. See [#10390](https://github.com/DataDog/integrations-core/pull/10390).

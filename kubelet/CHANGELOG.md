@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 7.1.0 / 2021-10-04
+## 7.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
 * [Fixed] Apply namespace exclusion rules before reporting network metrics. See [#10237](https://github.com/DataDog/integrations-core/pull/10237).

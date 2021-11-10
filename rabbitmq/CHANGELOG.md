@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 2.2.0 / 2021-09-30
+## 2.2.0 / 2021-09-30 / Agent 7.32.0
 
 * [Added] Minor refactor. See [#10270](https://github.com/DataDog/integrations-core/pull/10270).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).

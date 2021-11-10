@@ -59,12 +59,13 @@ EXPECTED_METRICS = (
         for m in chain(
             TASK_SCHEDULER_METRICS,
             DATABASE_FRAGMENTATION_METRICS,
-            FCI_METRICS,
             DATABASE_MASTER_FILES,
         )
     ]
     + CUSTOM_METRICS
 )
+
+UNEXPECTED_METRICS = FCI_METRICS
 
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
@@ -111,14 +112,14 @@ CUSTOM_QUERY_B = {
 INSTANCE_E2E = INSTANCE_DOCKER.copy()
 INSTANCE_E2E['driver'] = 'FreeTDS'
 
-INSTANCE_SQL2017_DEFAULTS = {
+INSTANCE_SQL_DEFAULTS = {
     'host': LOCAL_SERVER,
     'username': 'sa',
     'password': 'Password12!',
     'disable_generic_tags': True,
 }
-INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
-INSTANCE_SQL2017.update(
+INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
+INSTANCE_SQL.update(
     {
         'connector': 'odbc',
         'driver': '{ODBC Driver 17 for SQL Server}',

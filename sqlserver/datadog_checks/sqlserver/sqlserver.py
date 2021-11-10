@@ -84,6 +84,7 @@ class SQLServer(AgentCheck):
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.autodiscovery_db_service_check = is_affirmative(self.instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
         self.autodiscovery_interval = self.instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
@@ -126,10 +127,35 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+    def split_sqlserver_host_port(self, host):
+        """
+        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
+        """
+        if not host:
+            return host, None
+        host_split = [s.strip() for s in host.split(',')]
+        if len(host_split) == 1:
+            return host_split[0], None
+        if len(host_split) == 2:
+            return host_split
+        # else len > 2
+        s_host, s_port = host_split[0:2]
+        self.log.warning(
+            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
+            host,
+            s_host,
+            s_port,
+        )
+        return s_host, s_port
+
     @property
     def resolved_hostname(self):
-        if self._resolved_hostname is None and self.dbm_enabled:
-            self._resolved_hostname = resolve_db_host(self.instance.get('host'))
+        if self._resolved_hostname is None:
+            if self.dbm_enabled:
+                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                self._resolved_hostname = resolve_db_host(host)
+            else:
+                self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     def load_static_information(self):
@@ -205,7 +231,7 @@ class SQLServer(AgentCheck):
 
         if is_default:
             self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
-        if self.autodiscovery:
+        if self.autodiscovery and self.autodiscovery_db_service_check:
             self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
 
     def _compile_patterns(self):
@@ -508,7 +534,7 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
-            if self.autodiscovery:
+            if self.autodiscovery and self.autodiscovery_db_service_check:
                 for db_name in self.databases:
                     if db_name != self.connection.DEFAULT_DATABASE:
                         self.connection.check_database_conns(db_name)

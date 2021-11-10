@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 15.1.0 / 2021-10-15
+
+* [Added] Annotate manifest validation. See [#10022](https://github.com/DataDog/integrations-core/pull/10022).
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Remove unused MIB_SOURCE_URL and use relative imports. See [#10353](https://github.com/DataDog/integrations-core/pull/10353).
+
+## 15.0.0 / 2021-10-13
+
+* [Changed] Rename legacy PDH config spec. See [#10412](https://github.com/DataDog/integrations-core/pull/10412).
+
 ## 14.5.1 / 2021-10-12
 
 * [Fixed] Update dashboard validation for Manifest V2. See [#10398](https://github.com/DataDog/integrations-core/pull/10398).

@@ -1,6 +1,6 @@
 # CHANGELOG - druid
 
-## 1.7.0 / 2021-10-04
+## 1.7.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add runtime configuration validation. See [#8908](https://github.com/DataDog/integrations-core/pull/8908).
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).

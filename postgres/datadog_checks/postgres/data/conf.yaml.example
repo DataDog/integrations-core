@@ -77,6 +77,35 @@ instances:
     #
     # ssl: 'false'
 
+    ## @param ssl_root_cert - string - optional - default: false
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: /home/datadog/server-ca.pem
+
+    ## @param ssl_cert - string - optional - default: false
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: /home/datadog/client-cert.pem
+
+    ## @param ssl_key - string - optional - default: false
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: /home/datadog/client-key.pem
+
+    ## @param ssl_password - string - optional - default: false
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: ssl_key_password
+
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
@@ -152,6 +181,11 @@ instances:
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
     # collect_default_database: false
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
 
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.

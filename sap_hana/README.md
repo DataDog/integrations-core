@@ -14,7 +14,7 @@ The SAP HANA check is included in the [Datadog Agent][2] package.
 
 To query certain views, specific privileges must be granted to the chosen HANA monitoring user. For more information, see [Granting privileges](#granting-privileges).
 
-To learn how to set the port number for HANA tenant, single-tenant, and system databases, see the [Connect to SAP documentation][8].
+To learn how to set the port number for HANA tenant, single-tenant, and system databases, see the [Connect to SAP documentation][3].
 
 ##### User creation
 
@@ -74,19 +74,19 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 ### Configuration
 
-1. Edit the `sap_hana.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your sap_hana performance data. See the [sample sap_hana.d/conf.yaml][3] for all available configuration options.
+1. Edit the `sap_hana.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your sap_hana performance data. See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `sap_hana` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -94,19 +94,19 @@ SAP HANA does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][9] for a list of service checks provided by this integration.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.sap.com/products/hana.html
-[2]: https://docs.datadoghq.com/agent/
-[3]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/datadog_checks/sap_hana/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html
-[9]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/assets/service_checks.json
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html
+[4]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/datadog_checks/sap_hana/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

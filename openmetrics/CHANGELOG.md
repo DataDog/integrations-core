@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.15.2 / 2021-10-15 / Agent 7.32.0
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+
 ## 1.15.1 / 2021-10-08
 
 * [Fixed] Allow entire config templates to be hidden and include Openmetrics legacy config option in models. See [#10348](https://github.com/DataDog/integrations-core/pull/10348).

@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 23.1.5 / 2021-10-22 / Agent 7.32.0
+
+* [Fixed] Fix unintentional limit on dbm instances from ThreadPoolExecutor's default max_workers. See [#10460](https://github.com/DataDog/integrations-core/pull/10460).
+
+## 23.1.4 / 2021-10-19
+
+* [Fixed] Update tuf to 0.19.0 for Python 3. See [#10444](https://github.com/DataDog/integrations-core/pull/10444).
+
+## 23.1.3 / 2021-10-15
+
+* [Fixed] [OpenMetricsV2] Allow empty namespaces. See [#10420](https://github.com/DataDog/integrations-core/pull/10420).
+* [Fixed] Add warning when no query is configured. See [#10336](https://github.com/DataDog/integrations-core/pull/10336).
+
 ## 23.1.2 / 2021-10-05
 
 * [Fixed] Remove `server` from the list of generic tags. See [#10344](https://github.com/DataDog/integrations-core/pull/10344).
@@ -15,6 +28,7 @@
 
 ## 23.0.0 / 2021-09-29
 
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228)
 * [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
 * [Added] Add new function to report dbm-activity events. See [#10223](https://github.com/DataDog/integrations-core/pull/10223).
 * [Changed] DBMAsyncJob send internal metrics as raw. See [#10274](https://github.com/DataDog/integrations-core/pull/10274).

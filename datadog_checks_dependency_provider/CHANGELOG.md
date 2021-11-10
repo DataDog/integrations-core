@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_dependency_provider
 
-## 1.1.0 / 2021-10-04
+## 1.1.0 / 2021-10-04 / Agent 7.32.0
 
 * [Added] Add dependency `foundationdb` version `6.3.18`. See [#10050](https://github.com/DataDog/integrations-core/pull/10050).
 

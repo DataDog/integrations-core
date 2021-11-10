@@ -115,12 +115,12 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_query_monitoring_metrics(aggregator, instance_query, couchbase_container_ip):
+def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couchbase_container_ip):
     """
     Test system vitals metrics (prefixed "couchbase.query.")
     """
-    couchbase = Couchbase('couchbase', {}, instances=[instance_query])
-    couchbase.check(None)
+    couchbase = Couchbase('couchbase', {}, [instance_query])
+    dd_run_check(couchbase)
 
     for mname in QUERY_STATS:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
@@ -128,12 +128,12 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_sync_gateway_metrics(aggregator, instance_sg, couchbase_container_ip):
+def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_container_ip):
     """
     Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
     """
-    couchbase = Couchbase('couchbase', {}, instances=[instance_sg])
-    couchbase.check(None)
+    couchbase = Couchbase('couchbase', {}, [instance_sg])
+    dd_run_check(couchbase)
     db_tags = ['db:sync_gateway'] + CHECK_TAGS
     for mname in SYNC_GATEWAY_METRICS:
         if mname.count('.') > 2:
@@ -146,10 +146,10 @@ def test_sync_gateway_metrics(aggregator, instance_sg, couchbase_container_ip):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(instance_query, datadog_agent):
-    check = Couchbase('couchbase', {}, instances=[instance_query])
+def test_metadata(instance_query, dd_run_check, datadog_agent):
+    check = Couchbase('couchbase', {}, [instance_query])
     check.check_id = 'test:123'
-    check.check(None)
+    dd_run_check(check)
 
     data = check.get_data()
 

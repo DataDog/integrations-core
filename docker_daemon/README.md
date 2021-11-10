@@ -145,25 +145,25 @@ The Docker integration produces the following events:
 
 ### Service Checks
 
-See [service_checks.json][31] for a list of service checks provided by this integration.
+See [service_checks.json][20] for a list of service checks provided by this integration.
 
-**Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][20] and restart the Agent.
+**Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][21] and restart the Agent.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][21].
+Need help? Contact [Datadog support][22].
 
 ## Further Reading
 
-* [Compose and the Datadog Agent][22]
-* [DogStatsD and Docker][23]
-* [The Docker Monitoring Problem][24] (series)
-* [How to Monitor Docker Resource Metrics][25]
-* [How to Collect Docker Metrics][26]
-* [8 Surprising Facts about Real Docker Adoption][27]
-* [Monitor Docker on AWS ECS][28]
-* [Dockerize Datadog][29]
-* [Monitor Docker with Datadog][30]
+* [Compose and the Datadog Agent][23]
+* [DogStatsD and Docker][24]
+* [The Docker Monitoring Problem][25] (series)
+* [How to Monitor Docker Resource Metrics][26]
+* [How to Collect Docker Metrics][27]
+* [8 Surprising Facts about Real Docker Adoption][28]
+* [Monitor Docker on AWS ECS][29]
+* [Dockerize Datadog][30]
+* [Monitor Docker with Datadog][31]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
@@ -185,15 +185,15 @@ Need help? Contact [Datadog support][21].
 [17]: https://hub.docker.com/r/datadog/agent
 [18]: https://docs.datadoghq.com/agent/#cli
 [19]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
-[20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
-[21]: https://docs.datadoghq.com/help
-[22]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
-[23]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
-[24]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
-[25]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics
-[26]: https://www.datadoghq.com/blog/how-to-collect-docker-metrics
-[27]: https://www.datadoghq.com/docker-adoption
-[28]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs
-[29]: https://www.datadoghq.com/blog/docker-performance-datadog
-[30]: https://www.datadoghq.com/blog/monitor-docker-datadog
-[31]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
+[20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
+[21]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
+[22]: https://docs.datadoghq.com/help
+[23]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
+[24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
+[25]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
+[26]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics
+[27]: https://www.datadoghq.com/blog/how-to-collect-docker-metrics
+[28]: https://www.datadoghq.com/docker-adoption
+[29]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs
+[30]: https://www.datadoghq.com/blog/docker-performance-datadog
+[31]: https://www.datadoghq.com/blog/monitor-docker-datadog

@@ -13,13 +13,13 @@ files:
               The HDFS DataNode check retrieves metrics from the HDFS DataNode's JMX
               interface via HTTP(S) (not a JMX remote connection). This check must be installed on a HDFS DataNode. The HDFS
               DataNode JMX URI is composed of the DataNode's hostname and port.
-              
+
               The hostname and port can be found in the hdfs-site.xml conf file under
               the property dfs.datanode.http.address
-              https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
+              https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
             required: true
             value:
-              example: http://localhost:50075
+              example: http://localhost:9864
               type: string
           - template: instances/http
           - template: instances/default
