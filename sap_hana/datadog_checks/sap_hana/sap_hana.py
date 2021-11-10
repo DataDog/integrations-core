@@ -107,16 +107,16 @@ class SapHanaCheck(AgentCheck):
             if self._connection_lost:
                 try:
                     self._conn.close()
-                except OperationalError:
-                    self.log.error("Could not close lost connection.")
+                except OperationalError as e:
+                    self.log.error("Could not close lost connection. %s", e)
                 self._conn = None
                 self._connection_lost = False
             elif not self._persist_db_connections:
                 self.log.debug("Refreshing database connection.")
                 try:
                     self._conn.close()
-                except OperationalError:
-                    self.log.error("Could not close connection.")
+                except OperationalError as e:
+                    self.log.error("Could not close connection. %s", e)
                 self._conn = None
 
     def query_master_database(self):
