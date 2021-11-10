@@ -48,7 +48,7 @@ There are config option changes between OpenMetrics V1 and V2, so check if any u
 | `ignore_metrics`            | `exclude_metrics`                    |
 | `prometheus_metrics_prefix` | `raw_metric_prefix`                  |
 | `health_service_check`      | `enable_health_service_check`        |
-| `labels_mapper`             | `labels_rename`                      |
+| `labels_mapper`             | `rename_labels`                      |
 | `label_joins`               | `share_labels`*                      |
 | `send_histograms_buckets`   | `collect_histogram_buckets`          |
 | `send_distribution_buckets` | `histogram_buckets_as_distributions` |
