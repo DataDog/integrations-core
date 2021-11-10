@@ -104,7 +104,7 @@ instances:
     # pending_task_stats: true
 
     ## @param cat_allocation_stats - boolean - optional - default: false
-    ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 7.2 or higher.
+    ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
     ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
     #
     # cat_allocation_stats: false
@@ -424,6 +424,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -434,13 +439,18 @@ instances:
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event)
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

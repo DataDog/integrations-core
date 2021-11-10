@@ -1,6 +1,81 @@
 # CHANGELOG - mysql
 
-## 3.0.1 / 2021-04-27
+## 6.1.1 / 2021-10-26 / Agent 7.32.0
+
+* [Fixed] Upgrade datadog checks base to 23.1.5. See [#10467](https://github.com/DataDog/integrations-core/pull/10467).
+
+## 6.1.0 / 2021-10-04
+
+* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* [Added] Update dependencies. See [#10228](https://github.com/DataDog/integrations-core/pull/10228).
+* [Added] disable generic tags in mysql. See [#10167](https://github.com/DataDog/integrations-core/pull/10167).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+* [Fixed] Avoid re-explaining queries that cannot be explained. See [#9989](https://github.com/DataDog/integrations-core/pull/9989).
+
+## 6.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add agent version to mysql database monitoring payloads. See [#9916](https://github.com/DataDog/integrations-core/pull/9916).
+* [Added] Add fetching of null row in events_statements_by_digest. See [#9892](https://github.com/DataDog/integrations-core/pull/9892).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Update mysql obfuscator options config. See [#9885](https://github.com/DataDog/integrations-core/pull/9885).
+* [Changed] Send the correct hostname with metrics when DBM is enabled. See [#9878](https://github.com/DataDog/integrations-core/pull/9878).
+
+## 5.0.4 / 2021-07-22 / Agent 7.30.0
+
+* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* [Fixed] Bump `datadog-checks-base` version requirement. See [#9718](https://github.com/DataDog/integrations-core/pull/9718).
+
+## 5.0.3 / 2021-07-16
+
+* [Fixed] Support old executable names. See [#9716](https://github.com/DataDog/integrations-core/pull/9716).
+
+## 5.0.2 / 2021-07-15
+
+* [Fixed] fix incorrect `min_collection_interval` on DBM metrics payload. See [#9695](https://github.com/DataDog/integrations-core/pull/9695).
+
+## 5.0.1 / 2021-07-13
+
+* [Fixed] Fix obfuscator options being converted into bytes rather than string. See [#9676](https://github.com/DataDog/integrations-core/pull/9676).
+
+## 5.0.0 / 2021-07-12
+
+* [Added] Add DBM SQL obfuscator options. See [#9639](https://github.com/DataDog/integrations-core/pull/9639).
+* [Added] Add truncated statement indicator to mysql query sample events. See [#9620](https://github.com/DataDog/integrations-core/pull/9620).
+* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* [Changed] Change DBM `statement` config keys and metric terminology to `query`. See [#9661](https://github.com/DataDog/integrations-core/pull/9661).
+* [Changed] remove execution plan cost extraction. See [#9631](https://github.com/DataDog/integrations-core/pull/9631).
+* [Changed] decouple DBM query metrics interval from check run interval. See [#9658](https://github.com/DataDog/integrations-core/pull/9658).
+* [Changed] DBM statement_samples enabled by default, rename DBM-enabled key. See [#9619](https://github.com/DataDog/integrations-core/pull/9619).
+
+## 4.1.0 / 2021-06-30
+
+* [Added] Provide a reason for not having an execution plan (MySQL). See [#9569](https://github.com/DataDog/integrations-core/pull/9569).
+* [Fixed] Look for mariadbd process for MariaDB 10.5+. See [#9543](https://github.com/DataDog/integrations-core/pull/9543).
+* [Fixed] Fix insufficient rate limiting of statement samples . See [#9585](https://github.com/DataDog/integrations-core/pull/9585).
+
+## 4.0.3 / 2021-06-08 / Agent 7.29.0
+
+* [Fixed] Enable autocommit on all connections. See [#9476](https://github.com/DataDog/integrations-core/pull/9476).
+
+## 4.0.2 / 2021-06-07
+
+* [Fixed] Fix missing replication_role tag on DBM metrics & events. See [#9486](https://github.com/DataDog/integrations-core/pull/9486).
+
+## 4.0.1 / 2021-06-01
+
+* [Fixed] Bump minimum base package requirement. See [#9449](https://github.com/DataDog/integrations-core/pull/9449).
+
+## 4.0.0 / 2021-05-28
+
+* [Added] Adds a `replication_role` tag to metrics emitted from AWS Aurora instances. See [#8282](https://github.com/DataDog/integrations-core/pull/8282).
+* [Fixed] Fix potential erroneous mysql statement metrics on duplicate queries. See [#9253](https://github.com/DataDog/integrations-core/pull/9253).
+* [Changed] Send database monitoring "full query text" events. See [#9397](https://github.com/DataDog/integrations-core/pull/9397).
+* [Changed] Remove `service` event facet. See [#9275](https://github.com/DataDog/integrations-core/pull/9275).
+* [Changed] Send database monitoring query metrics to new intake. See [#9223](https://github.com/DataDog/integrations-core/pull/9223).
+* [Removed] Remove unused query metric limit configuration. See [#9376](https://github.com/DataDog/integrations-core/pull/9376).
+
+## 3.0.1 / 2021-04-27 / Agent 7.28.0
 
 * [Fixed] Account for name change in replica metrics. See [#9230](https://github.com/DataDog/integrations-core/pull/9230).
 

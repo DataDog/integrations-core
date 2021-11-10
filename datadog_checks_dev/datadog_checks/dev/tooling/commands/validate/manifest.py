@@ -6,18 +6,27 @@ import os
 
 import click
 
-from datadog_checks.dev.tooling.manifest_validator.validator import get_all_validators
-
 from ....fs import file_exists, read_file, write_file
+from ...annotations import annotate_display_queue, annotate_error, annotate_warning
 from ...constants import get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ...datastructures import JSONDict
+from ...manifest_validator import get_all_validators
+from ...manifest_validator.constants import V1_STRING
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
-def manifest(ctx, fix):
-    """Validate `manifest.json` files."""
+def manifest(ctx, check, fix):
+    """Validate `manifest.json` files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
     is_marketplace = ctx.obj['repo_choice'] == 'marketplace'
@@ -25,10 +34,13 @@ def manifest(ctx, fix):
     failed_checks = 0
     fixed_checks = 0
     message_methods = {'success': echo_success, 'warning': echo_warning, 'failure': echo_failure, 'info': echo_info}
-    echo_info("Validating all manifest.json files...")
 
-    for check_name in sorted(os.listdir(root)):
-        all_validators = get_all_validators(is_extras, is_marketplace)
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating manifest.json files for {len(checks)} checks ...")
+
+    for check_name in checks:
+        echo_debug(f"Validating manifest.json files for {check_name} ...")
+
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):
@@ -38,14 +50,22 @@ def manifest(ctx, fix):
 
             try:
                 decoded = json.loads(read_file(manifest_file).strip())
+                decoded = JSONDict(decoded)
             except json.JSONDecodeError as e:
                 failed_checks += 1
                 echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
                 echo_failure(f'  invalid json: {e}')
+                annotate_error(manifest_file, f"Invalid json: {e}")
                 continue
 
+            version = decoded.get('manifest_version', V1_STRING)
+            all_validators = get_all_validators(ctx, version, is_extras, is_marketplace)
+
             for validator in all_validators:
+                if validator.skip_if_errors and file_failures > 0:
+                    echo_info(f'Skipping validation {validator} since errors have already been found.')
+                    continue
                 validator.validate(check_name, decoded, fix)
                 file_failures += 1 if validator.result.failed else 0
                 file_fixed += 1 if validator.result.fixed else 0
@@ -53,11 +73,22 @@ def manifest(ctx, fix):
                     for message in messages:
                         display_queue.append((message_methods[msg_type], message))
 
+            # Check is_public only for changed checks or specific check for reduced verbosity
+            is_public = decoded.get("is_public")
+            if not is_public and check != 'all':
+                message = (
+                    f"{check_name}: `is_public` is disabled, set to `True` "
+                    f"if you want the integration documentation to be published."
+                )
+                echo_warning(message)
+                annotate_warning(manifest_file, message)
+
             if file_failures > 0:
                 failed_checks += 1
                 # Display detailed info if file invalid
                 echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
+                annotate_display_queue(manifest_file, display_queue)
                 for display_func, message in display_queue:
                     display_func(message)
             elif not file_fixed:

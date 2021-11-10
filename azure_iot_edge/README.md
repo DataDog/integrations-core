@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) Edge devices via standard containers.
+[Azure IoT Edge][1] is a fully managed service to deploy Cloud workloads to run on Internet of Things (IoT) Edge devices using standard containers.
 
 Use the Datadog-Azure IoT Edge integration to collect metrics and health status from IoT Edge devices.
 
@@ -26,7 +26,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
 1. Configure the **Edge Agent** runtime module as follows:
     - Image version must be `1.0.10` or above.
-    - Under "Create Options", add the following `Labels`. Edit the `com.datadoghq.ad.instances` label as appropriate. See the [sample azure_iot_edge.d/conf.yaml][5] for all available configuration options. See the documentation on [Docker Integrations Autodiscovery][6] for more information on labels-based integration configuration.
+    - Under "Create Options", add the following `Labels`. Edit the `com.datadoghq.ad.instances` label as appropriate. See the [sample azure_iot_edge.d/conf.yaml][4] for all available configuration options. See the documentation on [Docker Integrations Autodiscovery][5] for more information on labels-based integration configuration.
 
         ```json
         "Labels": {
@@ -49,7 +49,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 3. Install and configure the Datadog Agent as a **custom module**:
     - Set the module name. For example: `datadog-agent`.
     - Set the Agent image URI. For example: `datadog/agent:7`.
-    - Under "Environment Variables", configure your `DD_API_KEY`. You may also set extra Agent configuration here (see [Agent Environment Variables][4]).
+    - Under "Environment Variables", configure your `DD_API_KEY`. You may also set extra Agent configuration here (see [Agent Environment Variables][6]).
     - Under "Container Create Options", enter the following configuration based on your device OS. **Note**: `NetworkId` must correspond to the network name set in the device `config.yaml` file.
 
         - Linux:
@@ -111,33 +111,30 @@ Once the Agent has been deployed to the device, [run the Agent's status subcomma
 
 See [metadata.csv][8] for a list of metrics provided by this check.
 
-### Service Checks
-
-**azure.iot_edge.edge_agent.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent is unable to reach the Edge Agent metrics Prometheus endpoint. Returns `OK` otherwise.
-
-**azure.iot_edge.edge_hub.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent is unable to reach the Edge Hub metrics Prometheus endpoint. Returns `OK` otherwise.
-
 ### Events
 
 Azure IoT Edge does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Azure IoT Edge with Datadog][10]
+- [Monitor Azure IoT Edge with Datadog][11]
 
 [1]: https://azure.microsoft.com/en-us/services/iot-edge/
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-portal
-[4]: https://docs.datadoghq.com/agent/guide/environment-variables/
-[5]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/datadog_checks/azure_iot_edge/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/docker/integrations/
+[4]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/datadog_checks/azure_iot_edge/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/docker/integrations/
+[6]: https://docs.datadoghq.com/agent/guide/environment-variables/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/
+[9]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/

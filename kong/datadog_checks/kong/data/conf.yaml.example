@@ -45,15 +45,16 @@ init_config:
 #
 instances:
 
-    ## @param kong_status_url - string - required
+  -
+    ## @param kong_status_url - string - optional - default: http://localhost:8001/status/
     ## URL where Kong exposes its status.
     #
-  - kong_status_url: http://localhost:8001/status/
+    # kong_status_url: http://localhost:8001/status/
 
-    ## @param openmetrics_endpoint - string - required
+    ## @param openmetrics_endpoint - string - optional - default: http://localhost:8001/metrics
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    openmetrics_endpoint: http://localhost:8001/metrics
+    # openmetrics_endpoint: http://localhost:8001/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
@@ -107,6 +108,9 @@ instances:
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
     ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
     #
     # exclude_metrics: []
 
@@ -173,6 +177,13 @@ instances:
     #
     # histogram_buckets_as_distributions: false
 
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
     ## @param share_labels - mapping - optional
     ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
     ## exposed metrics from which to share labels, and the values are mappings that configure the
@@ -203,10 +214,13 @@ instances:
     #
     # share_labels: {}
 
-    ## @param request_size - number - optional - default: 16
-    ## The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for increased performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
-    # request_size: 16
+    # cache_shared_labels: true
 
     ## @param raw_line_filters - list of strings - optional
     ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -229,6 +243,14 @@ instances:
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
     #
     # telemetry: false
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -498,6 +520,11 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
@@ -507,6 +534,11 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -543,7 +575,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

@@ -12,6 +12,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
+from .common import requires_static_version
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +22,12 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def config_e2e():
+def config_e2e(instance_basic):
     logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
-        'instances': [{'host': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'instances': [instance_basic],
         'logs': [
             {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
@@ -66,13 +67,21 @@ def dd_environment(config_e2e):
                 CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
                 populate_database,
             ],
+            attempts=2,
+            attempts_wait=10,
         ):
             yield config_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session')
-def instance_basic(config_e2e):
-    return config_e2e['instances'][0]
+def instance_basic():
+    return {
+        'host': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'disable_generic_tags': 'true',
+    }
 
 
 @pytest.fixture
@@ -82,6 +91,7 @@ def instance_complex():
         'user': common.USER,
         'pass': common.PASS,
         'port': common.PORT,
+        'disable_generic_tags': 'true',
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -115,6 +125,7 @@ def instance_custom_queries():
         'pass': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
+        'disable_generic_tags': 'true',
         'custom_queries': [
             {
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
@@ -130,9 +141,10 @@ def instance_custom_queries():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+    return {'host': common.HOST, 'user': 'unknown', 'pass': common.PASS, 'disable_generic_tags': 'true'}
 
 
+@requires_static_version
 @pytest.fixture(scope='session')
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
@@ -158,6 +170,7 @@ def _init_datadog_sample_collection(conn):
     cur = conn.cursor()
     cur.execute("CREATE DATABASE datadog")
     cur.execute("GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO 'dog'@'%'")
+    cur.execute("GRANT EXECUTE on `datadog`.*  TO 'dog'@'%'")
     _create_explain_procedure(conn, "datadog")
     _create_explain_procedure(conn, "mysql")
     _create_enable_consumers_procedure(conn)
@@ -180,7 +193,8 @@ def _create_explain_procedure(conn, schema):
             schema=schema
         )
     )
-    cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
+    if schema != 'datadog':
+        cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
     cur.close()
 
 
@@ -196,7 +210,6 @@ def _create_enable_consumers_procedure(conn):
         END;
     """
     )
-    cur.execute("GRANT EXECUTE ON PROCEDURE datadog.enable_events_statements_consumers to 'dog'@'%'")
     cur.close()
 
 
@@ -230,6 +243,9 @@ def _add_dog_user(conn):
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
     if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
+    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
+        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
     else:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
@@ -299,7 +315,7 @@ def _mysql_logs_path():
     (which don't support interpolation of environment variables).
     """
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '8.0':
+        if MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return '/opt/bitnami/mysql/logs'
         else:
             return '/var/log/mysql'
@@ -316,7 +332,7 @@ def _mysql_docker_repo():
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
-        elif MYSQL_VERSION == '8.0':
+        elif MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'

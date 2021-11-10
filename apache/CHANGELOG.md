@@ -1,6 +1,18 @@
 # CHANGELOG - apache
 
-## 1.16.0 / 2021-04-19
+## 2.0.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+* [Changed] Add disable generic tags options to apache. See [#10277](https://github.com/DataDog/integrations-core/pull/10277).
+
+## 1.17.0 / 2021-06-09 / Agent 7.30.0
+
+* [Added] Added metrics from the apache scoreboard. See [#9355](https://github.com/DataDog/integrations-core/pull/9355). Thanks [daanleenders](https://github.com/daanleenders).
+
+## 1.16.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add runtime configuration validation. See [#8885](https://github.com/DataDog/integrations-core/pull/8885).
 

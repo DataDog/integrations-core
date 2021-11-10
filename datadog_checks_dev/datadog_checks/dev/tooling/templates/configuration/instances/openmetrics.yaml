@@ -10,7 +10,7 @@
     The namespace to be prepended to all metrics.
   value:
     type: string
-    pattern: '\w+'
+    pattern: '\w*'
 - name: raw_metric_prefix
   description: |
     A prefix that will be removed from all exposed metric names, if present.
@@ -135,6 +135,9 @@
   description: |
     A list of metrics to exclude, with each entry being either
     the exact metric name or a regular expression.
+    In order to exclude all metrics but the ones matching a specific filter,
+    you can use a negative lookahead regex like:
+      - ^(?!foo).*$
   value:
     type: array
     items:
@@ -216,6 +219,14 @@
   value:
     example: false
     type: boolean
+- name: collect_counters_with_distributions
+  description: |
+    Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    `histogram_buckets_as_distributions` option.
+  value:
+    example: false
+    type: boolean
 - name: share_labels
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
@@ -259,12 +270,15 @@
           type: array
           items:
             type: string
-- name: request_size
+- name: cache_shared_labels
   description: |
-    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+    When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    for increased performance.
+
+    Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
   value:
-    example: 16
-    type: number
+    type: boolean
+    example: true
 - name: raw_line_filters
   description: |
     A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -292,5 +306,16 @@
   value:
     example: false
     type: boolean
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

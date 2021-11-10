@@ -1,21 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
+import platform
 
 import pytest
 
 from datadog_checks.istio import Istio
 
-from .common import (
-    CITADEL_METRICS,
-    GALLEY_METRICS,
-    ISTIOD_METRICS,
-    MESH_METRICS,
-    MESH_METRICS_1_4,
-    NEW_MIXER_METRICS,
-    PILOT_METRICS,
-)
+from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS
 
 INTERMITTENT_METRICS = [
     'istio.mesh.request.count',
@@ -24,22 +16,13 @@ INTERMITTENT_METRICS = [
     'istio.pilot.rds_expired_nonce',
 ]
 
-LEGACY_METRICS = MESH_METRICS + MESH_METRICS_1_4 + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS
-
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
-    version = os.environ.get('ISTIO_VERSION')
+def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    metrics = LEGACY_METRICS
-    if version == '1.5.1':
-        metrics = ISTIOD_METRICS
-        aggregator.assert_service_check('istio.prometheus.health', Istio.OK)
-    else:
-        aggregator.assert_service_check('istio.pilot.prometheus.health', Istio.OK)
-        aggregator.assert_service_check('istio.galley.prometheus.health', Istio.OK)
-        aggregator.assert_service_check('istio.citadel.prometheus.health', Istio.OK)
+    metrics = ISTIOD_METRICS
+    aggregator.assert_service_check('istio.prometheus.health', Istio.OK)
 
     for metric in metrics:
         if metric in INTERMITTENT_METRICS:
@@ -47,4 +30,17 @@ def test_e2e(dd_agent_check):
         else:
             aggregator.assert_metric(metric)
 
-    aggregator.assert_all_metrics_covered()
+
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.e2e
+def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+
+    metrics = ISTIOD_V2_METRICS
+    aggregator.assert_service_check('istio.openmetrics.health', Istio.OK)
+
+    for metric in metrics:
+        if metric in INTERMITTENT_METRICS:
+            aggregator.assert_metric(metric, at_least=0)
+        else:
+            aggregator.assert_metric(metric)

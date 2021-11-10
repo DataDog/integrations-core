@@ -23,7 +23,8 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: CentOS/RHEL versions < 8 are not supported.
+**Note**: Kernel version 4.11 or later is required for the OOM Kill check to work.
+In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -64,7 +65,7 @@ The OOM Kill check submits an event for each OOM Kill that includes the killed p
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://docs.datadoghq.com/agent/guide/
+[1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/oom_kill.d/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/helm/charts/tree/master/stable/datadog

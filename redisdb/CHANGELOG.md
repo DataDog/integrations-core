@@ -1,6 +1,26 @@
 # CHANGELOG - redisdb
 
-## 3.4.0 / 2021-04-19
+## 4.2.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 4.1.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add runtime configuration validation. See [#8977](https://github.com/DataDog/integrations-core/pull/8977).
+
+## 4.0.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Make critical service checks more verbose. See [#9280](https://github.com/DataDog/integrations-core/pull/9280).
+* [Fixed] Expand E2E tests to account for restrictions in managed Redis environments. See [#9394](https://github.com/DataDog/integrations-core/pull/9394).
+* [Fixed] Overrides 'SLOWLOG GET' response callback with fixed/upstream version of `parse_slowlog_get`. See [#9459](https://github.com/DataDog/integrations-core/pull/9459).
+* [Fixed] Fix Redis slowlog parsing when no new slowlog entries. See [#9458](https://github.com/DataDog/integrations-core/pull/9458). Thanks [ypisetsky](https://github.com/ypisetsky).
+* [Changed] Remove redis_role tag from service check. See [#9540](https://github.com/DataDog/integrations-core/pull/9540).
+
+## 3.5.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] added recent_max_input_buffer and recent_max_output_buffer. See [#9321](https://github.com/DataDog/integrations-core/pull/9321). Thanks [yonatan-ess](https://github.com/yonatan-ess).
+
+## 3.4.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Report io thread metrics. See [#9018](https://github.com/DataDog/integrations-core/pull/9018). Thanks [jlisam](https://github.com/jlisam).
 * [Added] Support redis 6 cpu metrics. See [#9015](https://github.com/DataDog/integrations-core/pull/9015). Thanks [jlisam](https://github.com/jlisam).

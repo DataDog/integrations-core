@@ -35,7 +35,12 @@ JMX_TO_INAPP_TYPES = {
 
 
 def e2e_active():
-    return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
+    return (
+        E2E_SET_UP in os.environ
+        or E2E_TEAR_DOWN in os.environ
+        or E2E_PARENT_PYTHON in os.environ
+        or any(ev.startswith(E2E_ENV_VAR_PREFIX) for ev in os.environ)
+    )
 
 
 def e2e_testing():

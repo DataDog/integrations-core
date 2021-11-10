@@ -18,7 +18,7 @@ from datadog_checks.tls.tls_remote import TLSRemoteCheck
 
 def test_right_class_is_instantiated(instance_remote_no_server):
     c = TLSCheck('tls', {}, [instance_remote_no_server])
-    assert isinstance(c, TLSRemoteCheck)
+    assert isinstance(c.checker, TLSRemoteCheck)
 
 
 def test_no_server(instance_remote_no_server):

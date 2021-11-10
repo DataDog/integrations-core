@@ -13,14 +13,15 @@ init_config:
 #
 instances:
 
-    ## @param database_url - string - required
+  -
+    ## @param database_url - string - optional - default: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
     ## The PgBouncer stats database URL.
     ##
     ## If the password contains special characters, be sure to escape them using percent encoding.
     ##
     ## See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
     #
-  - database_url: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
+    # database_url: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
 
     ## @param host - string - optional
     ## If `database_url` is not used, set up the host to connect to with the `host` parameter.
@@ -82,7 +83,7 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which integration sent the logs.
 ## encoding - optional - For file specifies the file encoding, default is utf-8, other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.

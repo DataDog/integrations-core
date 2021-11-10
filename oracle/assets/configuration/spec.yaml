@@ -21,7 +21,7 @@ files:
       required: true
       value:
         type: string
-    - name: user
+    - name: username
       description: The username for the Datadog user account.
       required: true
       value:
@@ -38,10 +38,5 @@ files:
       value:
         type: string
         example: <DRIVER_PATH>.jar
-    - name: only_custom_queries
-      description: Set this parameter to `true` if you want to skip default system, process, and tablespace metrics checks.
-      value:
-        type: boolean
-        example: false
     - template: instances/db
     - template: instances/default

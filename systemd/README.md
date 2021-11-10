@@ -11,6 +11,10 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 ### Installation
 
+The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+
+### Configuration
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -18,7 +22,11 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 To configure this check for an Agent running on a host:
 
-The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+1. Edit the `systemd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
+   Agent's configuration directory to start collecting your systemd performance data.
+   See the [sample systemd.d/conf.yaml][3] for all available configuration options.
+
+2. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -35,14 +43,6 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               -e DD_API_KEY=<YOUR_API_KEY> \
               datadog/agent:latest
 ```
-
-### Configuration
-
-1. Edit the `systemd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your systemd performance data.
-   See the [sample systemd.d/conf.yaml][3] for all available configuration options.
-
-2. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -69,24 +69,18 @@ Some metrics are only available from specific version of Systemd:
 - `systemd.service.restart_count` requires Systemd v235
 - `systemd.socket.connection_refused_count` requires Systemd v239
 
-### Service Checks
-
-**systemd.can_connect**:<br>
-Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
-
-**systemd.system.state**:<br>
-Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
-
-**systemd.unit.state**:<br>
-Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other.
-
 ### Events
 
 The Systemd check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][7] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
+
 
 [1]: https://www.freedesktop.org/wiki/Software/systemd/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -94,5 +88,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[9]: https://github.com/coreos/go-systemd
+[7]: https://github.com/DataDog/integrations-core/blob/master/systemd/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/

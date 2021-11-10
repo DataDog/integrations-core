@@ -1,6 +1,12 @@
 # CHANGELOG - Aerospike
 
-## 1.11.0 / 2021-04-06
+## 1.12.0 / 2021-06-22 / Agent 7.30.0
+
+* [Added] Stop using a deprecated method to support newer versions of Aerospike. See [#9566](https://github.com/DataDog/integrations-core/pull/9566).
+* [Added] Upgrade `aerospike` dependency on Python 3. See [#9552](https://github.com/DataDog/integrations-core/pull/9552).
+* [Fixed] Handle command output with erroneous trailing separators. See [#9571](https://github.com/DataDog/integrations-core/pull/9571).
+
+## 1.11.0 / 2021-04-06 / Agent 7.28.0
 
 * [Added] Support XDR metrics for Aerospike Enterprise 5.0+. See [#8696](https://github.com/DataDog/integrations-core/pull/8696).
 

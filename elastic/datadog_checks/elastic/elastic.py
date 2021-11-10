@@ -139,11 +139,17 @@ class ESCheck(AgentCheck):
         try:
             data = self._get_data(self._config.url, send_sc=False)
             raw_version = data['version']['number']
+
             self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
             raw_version = raw_version.split('-')[0]
             version = [int(p) for p in raw_version.split('.')[0:3]]
+            if data['version'].get('distribution', '') == 'opensearch':
+                # Opensearch API is backwards compatible with ES 7.10.0
+                # https://opensearch.org/faq
+                self.log.debug('OpenSearch version %s detected', version)
+                version = [7, 10, 0]
         except AuthenticationError:
             raise
         except Exception as e:
@@ -324,6 +330,8 @@ class ESCheck(AgentCheck):
                 value = xform(value)
             if xtype == "gauge":
                 self.gauge(metric, value, tags=tags, hostname=hostname)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric, value, tags=tags, hostname=hostname)
             else:
                 self.rate(metric, value, tags=tags, hostname=hostname)
         else:
@@ -387,9 +395,10 @@ class ESCheck(AgentCheck):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
-        if version < [7, 2, 0]:
+        if version < [5, 0, 0]:
             self.log.debug(
-                "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
+                "Collecting cat allocation metrics is not supported in version %s. Skipping",
+                '.'.join(str(int) for int in version),
             )
             return
 

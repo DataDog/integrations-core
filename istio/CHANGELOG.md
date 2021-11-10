@@ -1,6 +1,30 @@
 # CHANGELOG - istio
 
-## 3.11.0 / 2021-04-19
+## 3.15.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Allow Kubernetes port forwarding to support any resource. See [#10127](https://github.com/DataDog/integrations-core/pull/10127).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Added] Enable exclude_labels and update documentation. See [#10020](https://github.com/DataDog/integrations-core/pull/10020).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 3.14.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Allow the use of the new OpenMetrics implementation. See [#9588](https://github.com/DataDog/integrations-core/pull/9588).
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+
+## 3.13.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Add more pilot metrics. See [#9337](https://github.com/DataDog/integrations-core/pull/9337). Thanks [hari2192](https://github.com/hari2192).
+* [Fixed] Bump base package requirement. See [#9606](https://github.com/DataDog/integrations-core/pull/9606).
+
+## 3.12.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Fixed] Fix `metrics` option type for legacy OpenMetrics config spec. See [#9318](https://github.com/DataDog/integrations-core/pull/9318). Thanks [jejikenwogu](https://github.com/jejikenwogu).
+
+## 3.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Update defaults for legacy OpenMetrics config spec template. See [#9065](https://github.com/DataDog/integrations-core/pull/9065).
 * [Added] Add runtime configuration validation. See [#8939](https://github.com/DataDog/integrations-core/pull/8939).

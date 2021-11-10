@@ -29,7 +29,6 @@ class OpenMetricsScraperMixin(object):
     # This class is not supposed to be used by itself, it provides scraping behavior but
     # need to be within a check in the end
 
-    REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
     # indexes in the sample tuple of core.Metric
     SAMPLE_NAME = 0
     SAMPLE_LABELS = 1
@@ -245,9 +244,13 @@ class OpenMetricsScraperMixin(object):
         # Rename bucket "le" label to "upper_bound"
         config['labels_mapper']['le'] = 'upper_bound'
 
-        # `exclude_labels` is an array of labels names to exclude. Those labels
+        # `exclude_labels` is an array of label names to exclude. Those labels
         # will just not be added as tags when submitting the metric.
         config['exclude_labels'] = default_instance.get('exclude_labels', []) + instance.get('exclude_labels', [])
+
+        # `include_labels` is an array of label names to include. If these labels are not in
+        # the `exclude_labels` list, then they are added as tags when submitting the metric.
+        config['include_labels'] = default_instance.get('include_labels', []) + instance.get('include_labels', [])
 
         # `type_overrides` is a dictionary where the keys are prometheus metric names
         # and the values are a metric type (name as string) to use instead of the one
@@ -258,7 +261,7 @@ class OpenMetricsScraperMixin(object):
         config['type_overrides'].update(instance.get('type_overrides', {}))
 
         # `_type_override_patterns` is a dictionary where we store Pattern objects
-        # that match metric names as keys, and their corresponding metric type overrrides as values.
+        # that match metric names as keys, and their corresponding metric type overrides as values.
         config['_type_override_patterns'] = {}
 
         with_wildcards = set()
@@ -271,7 +274,7 @@ class OpenMetricsScraperMixin(object):
         for metric in with_wildcards:
             del config['type_overrides'][metric]
 
-        # Some metrics are retrieved from differents hosts and often
+        # Some metrics are retrieved from different hosts and often
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
@@ -317,6 +320,16 @@ class OpenMetricsScraperMixin(object):
 
         # Custom tags that will be sent with each metric
         config['custom_tags'] = instance.get('tags', [])
+
+        # Some tags can be ignored to reduce the cardinality.
+        # This can be useful for cost optimization in containerized environments
+        # when the openmetrics check is configured to collect custom metrics.
+        # Even when the Agent's Tagger is configured to add low-cardinality tags only,
+        # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
+        ignore_tags = instance.get('ignore_tags', default_instance.get('ignore_tags', []))
+        if ignore_tags:
+            ignored_tags_re = compile('|'.join(set(ignore_tags)))
+            config['custom_tags'] = [tag for tag in config['custom_tags'] if not ignored_tags_re.search(tag)]
 
         # Additional tags to be sent with each metric
         config['_metric_tags'] = []
@@ -411,7 +424,7 @@ class OpenMetricsScraperMixin(object):
         """
         if response.encoding is None:
             response.encoding = 'utf-8'
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+        input_gen = response.iter_lines(decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
@@ -733,7 +746,7 @@ class OpenMetricsScraperMixin(object):
                     self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
-            # check for wilcards in transformers
+            # check for wildcards in transformers
             for transformer_name, transformer in iteritems(metric_transformers):
                 if transformer_name.endswith('*') and metric.name.startswith(transformer_name[:-1]):
                     transformer(metric, scraper_config, transformer_name)
@@ -1076,6 +1089,7 @@ class OpenMetricsScraperMixin(object):
             True,
             hostname,
             tags,
+            flush_first_value=scraper_config['_successfully_executed'],
         )
 
     def _submit_distribution_count(
@@ -1103,8 +1117,9 @@ class OpenMetricsScraperMixin(object):
         _tags.extend(scraper_config['_metric_tags'])
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
-                tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
+                if label_name in scraper_config['include_labels'] or len(scraper_config['include_labels']) == 0:
+                    tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
+                    _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )

@@ -8,7 +8,6 @@ from copy import deepcopy
 from itertools import chain
 from math import isinf, isnan
 
-from binary import KIBIBYTE
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
 
@@ -22,9 +21,31 @@ from .transform import MetricTransformer
 
 
 class OpenMetricsScraper:
+    """
+    OpenMetricsScraper is a class that can be used to override the default scraping behavior for OpenMetricsBaseCheckV2.
+
+    Minimal example configuration:
+
+    ```yaml
+    - openmetrics_endpoint: http://example.com/endpoint
+      namespace: "foobar"
+      metrics:
+      - bar
+      - foo
+      raw_metric_prefix: "test"
+      telemetry: "true"
+      hostname_label: node
+    ```
+
+    """
+
     SERVICE_CHECK_HEALTH = 'openmetrics.health'
 
     def __init__(self, check, config):
+        """
+        The base class for any scraper overrides.
+        """
+
         self.config = config
 
         # Save a reference to the check instance
@@ -47,8 +68,6 @@ class OpenMetricsScraper:
         self.namespace = check.__NAMESPACE__ or config.get('namespace', '')
         if not isinstance(self.namespace, str):
             raise ConfigurationError('Setting `namespace` must be a string')
-        elif not self.namespace:
-            raise ConfigurationError('Setting `namespace` is required')
 
         self.raw_metric_prefix = config.get('raw_metric_prefix', '')
         if not isinstance(self.raw_metric_prefix, str):
@@ -82,6 +101,19 @@ class OpenMetricsScraper:
                 raise ConfigurationError(f'Entry #{i} of setting `exclude_labels` must be a string')
 
             self.exclude_labels.add(entry)
+
+        include_labels = config.get('include_labels', [])
+        if not isinstance(include_labels, list):
+            raise ConfigurationError('Setting `include_labels` must be an array')
+        self.include_labels = set()
+        for i, entry in enumerate(include_labels, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError(f'Entry #{i} of setting `include_labels` must be a string')
+            if entry in self.exclude_labels:
+                self.log.debug(
+                    'Label `%s` is set in both `exclude_labels` and `include_labels`. Excluding label.', entry
+                )
+            self.include_labels.add(entry)
 
         self.rename_labels = config.get('rename_labels', {})
         if not isinstance(self.rename_labels, dict):
@@ -144,9 +176,15 @@ class OpenMetricsScraper:
             if not isinstance(entry, str):
                 raise ConfigurationError(f'Entry #{i} of setting `tags` must be a string')
 
-        # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
-        # https://www.bittorrent.org/beps/bep_0003.html
-        self.request_size = int(float(config.get('request_size') or 16) * KIBIBYTE)
+        # Some tags can be ignored to reduce the cardinality.
+        # This can be useful for cost optimization in containerized environments
+        # when the openmetrics check is configured to collect custom metrics.
+        # Even when the Agent's Tagger is configured to add low-cardinality tags only,
+        # some tags can still generate unwanted metric contexts (e.g pod annotations as tags).
+        ignore_tags = config.get('ignore_tags', [])
+        if ignore_tags:
+            ignored_tags_re = re.compile('|'.join(set(ignore_tags)))
+            custom_tags = [tag for tag in custom_tags if not ignored_tags_re.search(tag)]
 
         # These will be applied only to service checks
         self.static_tags = [f'endpoint:{self.endpoint}']
@@ -184,6 +222,10 @@ class OpenMetricsScraper:
         self.has_successfully_executed = False
 
     def scrape(self):
+        """
+        Execute a scrape, and for each metric collected, transform the metric.
+        """
+
         runtime_data = {'has_successfully_executed': self.has_successfully_executed, 'static_tags': self.static_tags}
 
         for metric in self.consume_metrics():
@@ -196,6 +238,10 @@ class OpenMetricsScraper:
         self.has_successfully_executed = True
 
     def consume_metrics(self):
+        """
+        Yield the processed metrics and filter out excluded metrics.
+        """
+
         metric_parser = self.parse_metrics()
         if self.label_aggregator.configured:
             metric_parser = self.label_aggregator(metric_parser)
@@ -210,6 +256,10 @@ class OpenMetricsScraper:
             yield metric
 
     def parse_metrics(self):
+        """
+        Get the line streamer and yield processed metrics.
+        """
+
         line_streamer = self.stream_connection_lines()
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
@@ -225,6 +275,10 @@ class OpenMetricsScraper:
             yield metric
 
     def generate_sample_data(self, metric):
+        """
+        Yield a sample of processed data.
+        """
+
         label_normalizer = get_label_normalizer(metric.type)
 
         for sample in metric.samples:
@@ -246,6 +300,8 @@ class OpenMetricsScraper:
                     break
                 elif label_name in self.exclude_labels:
                     continue
+                elif self.include_labels and label_name not in self.include_labels:
+                    continue
 
                 label_name = self.rename_labels.get(label_name, label_name)
                 tags.append(f'{label_name}:{label_value}')
@@ -265,11 +321,19 @@ class OpenMetricsScraper:
             yield sample, tags, hostname
 
     def stream_connection_lines(self):
+        """
+        Yield the connection line.
+        """
+
         with self.get_connection() as connection:
-            for line in connection.iter_lines(chunk_size=self.request_size, decode_unicode=True):
+            for line in connection.iter_lines(decode_unicode=True):
                 yield line
 
     def filter_connection_lines(self, line_streamer):
+        """
+        Filter connection lines in the line streamer.
+        """
+
         for line in line_streamer:
             if self.raw_line_filter.search(line):
                 self.submit_telemetry_number_of_ignored_lines()
@@ -277,6 +341,10 @@ class OpenMetricsScraper:
                 yield line
 
     def get_connection(self):
+        """
+        Send a request to scrape metrics. Return the response or throw an exception.
+        """
+
         try:
             response = self.send_request()
         except Exception as e:
@@ -300,13 +368,25 @@ class OpenMetricsScraper:
                 return response
 
     def send_request(self, **kwargs):
+        """
+        Send an HTTP GET request to the `openmetrics_endpoint` value.
+        """
+
         kwargs['stream'] = True
         return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):
+        """
+        Set dynamic tags.
+        """
+
         self.tags = tuple(chain(self.static_tags, tags))
 
     def submit_health_check(self, status, **kwargs):
+        """
+        If health service check is enabled, send an `openmetrics.health` service check.
+        """
+
         if self.enable_health_service_check:
             self.service_check(self.SERVICE_CHECK_HEALTH, status, tags=self.static_tags, **kwargs)
 

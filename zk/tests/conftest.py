@@ -89,7 +89,7 @@ def get_conn_failure_config():
         conn_failure_config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     conn_failure_config['port'] = 2182
     conn_failure_config['expected_mode'] = 'down'
-    conn_failure_config['tags'] = []
+    conn_failure_config['tags'] = ["mytag"]
     return conn_failure_config
 
 
@@ -148,7 +148,7 @@ def dd_environment(get_instance):
     else:
         condition = [condition_non_tls]
 
-    with docker_run(compose_file, conditions=condition):
+    with docker_run(compose_file, conditions=condition, sleep=5):
         yield get_instance, {
             'docker_volumes': [
                 '{}:/conf/private_key.pem'.format(private_key),

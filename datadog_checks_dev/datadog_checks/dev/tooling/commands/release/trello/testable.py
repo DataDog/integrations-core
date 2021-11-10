@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, cast
 
 import click
 
@@ -269,6 +269,7 @@ def testable(
             '4': 'Core',
             '5': 'Platform',
             '6': 'Tools and Libraries',
+            '7': 'Database Monitoring',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -284,6 +285,7 @@ def testable(
             '8': 'Integrations',
             '9': 'Infra-Integrations',
             '10': 'Tools and Libraries',
+            '11': 'Database Monitoring',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -292,7 +294,7 @@ def testable(
     options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in options.items())
 
     commit_ids: Set[str] = set()
-    user_config = ctx.obj
+    user_config = cast(Dict[Any, Any], ctx.obj)
     trello = TrelloClient(user_config)
 
     fixed_cards_mover = None
@@ -433,7 +435,8 @@ def testable(
                 echo_info(pr_milestone)
 
             # Ensure Unix lines feeds just in case
-            echo_info(pr_body.strip('\r'), indent=indent)
+            if pr_body:
+                echo_info(pr_body.strip('\r'), indent=indent)
 
             echo_info(options_text)
 

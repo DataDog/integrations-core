@@ -27,6 +27,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     custom_queries: Optional[Sequence[CustomQuery]]
+    disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     jdbc_driver_path: Optional[str]
     min_collection_interval: Optional[float]
@@ -37,7 +38,7 @@ class InstanceConfig(BaseModel):
     service_name: str
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
-    user: str
+    username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

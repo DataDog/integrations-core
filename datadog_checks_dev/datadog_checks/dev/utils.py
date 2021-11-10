@@ -18,12 +18,13 @@ from six.moves.urllib.request import urlopen
 
 from datadog_checks.dev.fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
-from .ci import running_on_ci, running_on_windows_ci  # noqa: F401
+from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
+GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
 def get_tox_env():
@@ -67,6 +68,9 @@ def load_jmx_config():
 
     example_config = yaml.safe_load(read_file(example_config_path))
     metrics_config = yaml.safe_load(read_file(metrics_config_path))
+
+    if example_config['init_config'] is None:
+        example_config['init_config'] = {}
 
     # Avoid having to potentially mount multiple files by putting the default metrics
     # in the user-defined metric location.

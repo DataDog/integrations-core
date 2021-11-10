@@ -26,7 +26,7 @@ def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
 
-    sc_tags = ['host:localhost', 'port:1234']
+    sc_tags = ['apache_host:localhost', 'port:1234']
     aggregator.assert_service_check('apache.can_connect', Apache.CRITICAL, tags=sc_tags)
     assert len(aggregator._metrics) == 0
 
@@ -41,7 +41,7 @@ def test_no_metrics_failure(aggregator, check):
         "No metrics were fetched for this instance. Make sure that http://localhost:18180 " "is the proper url."
     )
 
-    sc_tags = ['host:localhost', 'port:18180']
+    sc_tags = ['apache_host:localhost', 'port:18180']
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
     assert len(aggregator._metrics) == 0
 
@@ -59,7 +59,7 @@ def test_check(aggregator, check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags, count=1)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -76,7 +76,7 @@ def test_check_auto(aggregator, check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags, count=1)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -90,7 +90,7 @@ def test_e2e(dd_agent_check):
     for mname in APACHE_GAUGES + APACHE_RATES:
         aggregator.assert_metric(mname, tags=tags)
 
-    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    sc_tags = ['apache_host:' + HOST, 'port:' + PORT] + tags
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
@@ -177,3 +177,102 @@ def test_full_version_regex(check, version, expected_parts, datadog_agent):
         version_metadata['version.scheme'] = 'semver'
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_scoreboard(aggregator, check):
+    check = check(AUTO_CONFIG)
+    check.check(AUTO_CONFIG)
+
+    tags = AUTO_CONFIG['tags']
+    aggregator.assert_metric('apache.performance.max_workers', tags=tags, value=400)
+    # 'MaxClients 400' is set in httpd.conf
+
+
+@pytest.mark.parametrize(
+    'scoreboard, expected_metrics',
+    [
+        pytest.param(
+            '..._W',
+            {
+                'apache.performance.max_workers': 5,
+                'apache.scoreboard.open_slot': 3,
+                'apache.scoreboard.waiting_for_connection': 1,
+                'apache.scoreboard.sending_reply': 1,
+            },
+            id='simple_scoreboard',
+        ),
+        pytest.param(
+            '_SRWKDCLGI. ',
+            {
+                'apache.performance.max_workers': 12,
+                'apache.scoreboard.waiting_for_connection': 1,
+                'apache.scoreboard.starting_up': 1,
+                'apache.scoreboard.reading_request': 1,
+                'apache.scoreboard.sending_reply': 1,
+                'apache.scoreboard.keepalive': 1,
+                'apache.scoreboard.dns_lookup': 1,
+                'apache.scoreboard.closing_connection': 1,
+                'apache.scoreboard.logging': 1,
+                'apache.scoreboard.gracefully_finishing': 1,
+                'apache.scoreboard.idle_cleanup': 1,
+                'apache.scoreboard.open_slot': 1,
+                'apache.scoreboard.disabled': 1,
+            },
+            id='every_option',
+        ),
+        pytest.param(
+            '',
+            {
+                'apache.performance.max_workers': 0,
+                'apache.scoreboard.waiting_for_connection': 0,
+                'apache.scoreboard.starting_up': 0,
+                'apache.scoreboard.reading_request': 0,
+                'apache.scoreboard.sending_reply': 0,
+                'apache.scoreboard.keepalive': 0,
+                'apache.scoreboard.dns_lookup': 0,
+                'apache.scoreboard.closing_connection': 0,
+                'apache.scoreboard.logging': 0,
+                'apache.scoreboard.gracefully_finishing': 0,
+                'apache.scoreboard.idle_cleanup': 0,
+                'apache.scoreboard.open_slot': 0,
+                'apache.scoreboard.disabled': 0,
+            },
+            id='empty_scoreboard',
+        ),
+        pytest.param(
+            'WWWWWWWWWW__WWWWWWWWWW_WW_WWWWWWW.WWWWW_WW_W_.WW.W........G'
+            '.....................................................................',
+            {
+                'apache.performance.max_workers': 128,
+                'apache.scoreboard.waiting_for_connection': 7,
+                'apache.scoreboard.starting_up': 0,
+                'apache.scoreboard.reading_request': 0,
+                'apache.scoreboard.sending_reply': 40,
+                'apache.scoreboard.keepalive': 0,
+                'apache.scoreboard.dns_lookup': 0,
+                'apache.scoreboard.closing_connection': 0,
+                'apache.scoreboard.logging': 0,
+                'apache.scoreboard.gracefully_finishing': 1,
+                'apache.scoreboard.idle_cleanup': 0,
+                'apache.scoreboard.open_slot': 80,
+                'apache.scoreboard.disabled': 0,
+            },
+            id='real_scoreboard',
+        ),
+    ],
+)
+def test_scoreboard_values(aggregator, check, scoreboard, expected_metrics, datadog_agent):
+    """The default server token is Full. Full results in server info that can include
+    multiple non-Apache version specific information.
+    """
+    check = check({})
+    tags = []
+
+    check._submit_scoreboard(scoreboard, tags)
+
+    for metric, expected_value in expected_metrics.items():
+        aggregator.assert_metric(metric, tags=tags, value=expected_value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_no_duplicate_metrics()

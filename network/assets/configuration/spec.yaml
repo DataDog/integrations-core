@@ -15,7 +15,6 @@ files:
         description: Network check only supports one configured instance
         options:
           - name: collect_connection_state
-            required: true
             description: |
               Set to true to collect connection states for your interfaces
               Note: this will require either the command `ss` from system package `iproute2` or

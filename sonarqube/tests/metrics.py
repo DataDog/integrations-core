@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 
 JMX_METRICS = [
     'sonarqube.server.async_execution.largest_worker_count',
@@ -23,7 +23,7 @@ JMX_METRICS = [
     'sonarqube.server.database.pool_max_wait_millis',
     'sonarqube.server.database.pool_remove_abandoned_timeout_seconds',
 ]
-JMX_METRICS.extend(JVM_E2E_METRICS)
+JMX_METRICS.extend(JVM_E2E_METRICS_NEW)
 
 WEB_METRICS = [
     'sonarqube.complexity.cognitive_complexity',

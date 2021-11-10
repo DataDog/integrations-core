@@ -72,6 +72,7 @@ def dd_environment():
             WaitFor(node_stats),
             WaitFor(bucket_stats),
         ],
+        attempts=2,
     ):
         yield DEFAULT_INSTANCE
 

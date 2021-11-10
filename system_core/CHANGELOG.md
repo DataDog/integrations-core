@@ -1,5 +1,13 @@
 # CHANGELOG - system_core
 
+## 1.11.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+## 1.10.0 / 2021-07-12 / Agent 7.30.0
+
+* [Added] Add runtime configuration validation. See [#8992](https://github.com/DataDog/integrations-core/pull/8992).
+
 ## 1.9.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

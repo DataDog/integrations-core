@@ -9,7 +9,7 @@
 # etcdctl set /services/redis/01 10.10.100.11:6001
 # etcdctl set /services/redis/02 10.10.100.12:6002
 
-FROM ubuntu:14.04
+FROM ubuntu:18.04
 
 ARG TWEMPROXY_VERSION
 ENV DEBIAN_FRONTEND noninteractive

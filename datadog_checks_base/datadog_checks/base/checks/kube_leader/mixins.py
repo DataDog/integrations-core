@@ -34,7 +34,7 @@ class KubeLeaderElectionMixin(object):
         or no record is found. Monitors on the service-check should have
         no-data alerts enabled to account for this.
 
-        The config objet requires the following fields:
+        The config object requires the following fields:
             namespace (prefix for the metrics and check)
             record_kind (leases, endpoints or configmap)
             record_name
@@ -42,7 +42,7 @@ class KubeLeaderElectionMixin(object):
             tags (optional)
 
         It reads the following agent configuration:
-            kubernetes_kubeconfig_path: defaut is to use in-cluster config
+            kubernetes_kubeconfig_path: default is to use in-cluster config
         """
         try:
             record = self._get_record(
@@ -138,6 +138,9 @@ class KubeLeaderElectionMixin(object):
         self.gauge(prefix + ".lease_duration", record.lease_duration, tags)
 
         leader_status = AgentCheck.OK
+        message = record.summary
         if record.seconds_until_renew + record.lease_duration < 0:
             leader_status = AgentCheck.CRITICAL
-        self.service_check(prefix + ".status", leader_status, tags=tags, message=record.summary)
+        if leader_status is AgentCheck.OK:
+            message = None
+        self.service_check(prefix + ".status", leader_status, tags=tags, message=message)

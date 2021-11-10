@@ -19,7 +19,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.snmp_integration_only]
 
 
 def test_command_generator():
@@ -717,7 +717,7 @@ def test_profile_by_file(aggregator):
     instance['profile'] = 'profile1'
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
-        with open(profile_file, 'w') as f:
+        with open(profile_file, 'wb') as f:
             f.write(yaml.safe_dump({'metrics': common.SUPPORTED_METRIC_TYPES}))
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
@@ -904,7 +904,7 @@ def test_discovery(aggregator):
         'snmp_profile:profile1',
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
-    network_tags = ['network:{}'.format(network)]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
 
     instance = {
         'name': 'snmp_conf',
@@ -953,7 +953,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]
-    network_tags = ['network:{}'.format(network)]
+    network_tags = ['network:{}'.format(network), 'autodiscovery_subnet:{}'.format(network)]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
@@ -1217,10 +1217,15 @@ def test_timeout(aggregator, caplog):
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, at_least=1)
     # All metrics but `ifAdminStatus` should still arrive
+    aggregator.assert_metric('snmp.ifNumber', count=1)
     aggregator.assert_metric('snmp.ifInDiscards', count=4)
     aggregator.assert_metric('snmp.ifOutDiscards', count=4)
     aggregator.assert_metric('snmp.ifInErrors', count=4)
     aggregator.assert_metric('snmp.ifOutErrors', count=4)
+    aggregator.assert_metric('snmp.ifInDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutDiscards.rate', count=4)
+    aggregator.assert_metric('snmp.ifInErrors.rate', count=4)
+    aggregator.assert_metric('snmp.ifOutErrors.rate', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)

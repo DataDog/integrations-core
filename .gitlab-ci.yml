@@ -16,7 +16,7 @@ variables:
 #     - master
 #   script:
 #     - ./.gitlab/reminder/release-reminder.sh 2>&1
-#   tags: [ "runner:main", "size:large" ]
+#   tags: [ "runner:main" ]
 
 stages:
   - build
@@ -25,6 +25,11 @@ stages:
   - release
   - notify
 
+cache: &slack-cache
+  key: integrations-core-slack-cache
+  paths:
+    - .slack-cache
+  policy: pull-push
 
 validate-log-integrations:
   stage: validate
@@ -32,78 +37,129 @@ validate-log-integrations:
   only:
   - schedules
   variables:
-    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/shared/integrations/integrations.ts
-    LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
-    INTEGRATIONS_CORE_ROOT: .
+    INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
   script:
     - cd /app
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
+    - export WEBUI_INTGS_FILE=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.webui_intgs_file --with-decryption --query "Parameter.Value" --out text)
+    - export LOGS_BACKEND_INTGS_ROOT=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.logs_backend_intgs_root --with-decryption --query "Parameter.Value" --out text)
+    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
     - ts-node parse_ts.ts > logs_integrations.json
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 validate_log_intgs.py logs_integrations.json 2> errors.txt
+    - git clone -b prod https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
+    - python3 validate_log_intgs.py logs_integrations.json 2> $CI_PROJECT_DIR/errors.txt
   artifacts:
     paths:
-    - errors.txt
+    - $CI_PROJECT_DIR/errors.txt
     expire_in: 1 day
     when: always
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 trigger-agent-build:
   stage: trigger
   image: $VALIDATE_AGENT_BUILD
-  only:
-    changes:
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
-    - DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+    - export AGENT_REQUIREMENTS_CHANGED="false"
+    - git fetch origin master
+    - git --no-pager diff --exit-code --name-only HEAD $(git merge-base HEAD FETCH_HEAD) -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
+    - |
+      if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
+          echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
+          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /trigger_agent_build.py --output-file pipeline_id.txt
+
+          # Get slack user
+          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+
+          MESSAGE="Starting a build of the agent, watch ${CI_PIPELINE_URL}."
+          postmessage "$SLACK_AUTHOR" "$MESSAGE"
+      else
+          echo "Nothing to run, skipping job."
+      fi
   artifacts:
     paths:
     - pipeline_id.txt
     expire_in: 1 day
     when: always
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 validate-agent-build:
   stage: validate
   image: $VALIDATE_AGENT_BUILD
-  only:
-    changes:
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  timeout: 2 hours
+  cache:
+    <<: *slack-cache
   script:
-    - GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
-    - DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
-    - GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt)
-  tags: [ "runner:main", "size:large" ]
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
+    - |
+      if [[ -s ./pipeline_id.txt ]]; then
+          # Fetch secrets from SCM
+          GITLAB_TOKEN=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.temp_gitlab_token --with-decryption --query "Parameter.Value" --out text)
+          DATADOG_AGENT_PIPELINE_URL=$(aws ssm get-parameter --region us-east-1 --name ci.integrations-core.datadog-agent-pipeline-url --with-decryption --query "Parameter.Value" --out text)
+          PIPELINE_ID=$(cat pipeline_id.txt)
+
+          # Get slack user
+          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
+          if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$NOTIFICATIONS_SLACK_CHANNEL; fi
+
+          # Wait for the agent build to complete
+          export BUILD_SUCCESS="true"
+          GITLAB_TOKEN=$GITLAB_TOKEN DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL python -u /validate_agent_build.py --pipeline-id $(cat pipeline_id.txt) || export BUILD_SUCCESS="false" || true
+          echo $BUILD_SUCCESS
+          if [[ "$BUILD_SUCCESS" = "true" ]]; then
+              echo "Agent build was successful!"
+              postmessage "$SLACK_AUTHOR" "Build was successful, you can merge your PR!" success
+          else
+              echo "Agent build failed."
+              postmessage "$SLACK_AUTHOR" "The build failed, you might want to retry this job: ${CI_JOB_URL}" alert
+              exit 1
+          fi
+      else
+        echo "A pipeline was not triggered, skipping this job."
+      fi
+
+  tags: [ "runner:main" ]
 
 notify-slack:
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
   - schedules
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
-      if [[ -s ./errors.txt ]]; then
-          cat errors.txt
+      if [[ -s $CI_PROJECT_DIR/errors.txt ]]; then
+          cat $CI_PROJECT_DIR/errors.txt
           MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
       else
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
           postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
+  only:
+  - master
   when: on_failure
+  cache:
+    <<: *slack-cache
   script:
+    - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
       MESSAGE="The pipeline uncountered an unexpected error."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 
 release-auto:
@@ -118,7 +174,7 @@ release-auto:
     - ddev config set core .
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 release-manual:
   stage: release
@@ -140,7 +196,7 @@ release-manual:
       else
           ./.gitlab/tagger/build-packages.sh
       fi
-  tags: [ "runner:main", "size:large" ]
+  tags: [ "runner:main" ]
 
 reminder-image-builder:
   stage: build
@@ -155,7 +211,7 @@ reminder-image-builder:
     - docker images $REMINDER_IMAGE
     - docker push $REMINDER_IMAGE
   except: [ tags, schedules ]
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 tagger-image-builder:
   stage: build
@@ -171,7 +227,7 @@ tagger-image-builder:
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 validate-log-intgs-builder:
   stage: build
@@ -186,7 +242,7 @@ validate-log-intgs-builder:
     - docker build --tag $VALIDATE_LOG_INTGS .
     - docker images $VALIDATE_LOG_INTGS
     - docker push $VALIDATE_LOG_INTGS
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]
 
 validate-agent-build-builder:
   stage: build
@@ -198,7 +254,8 @@ validate-agent-build-builder:
       - master
   script:
     - cd .gitlab/validate-agent-build/
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
     - docker build --tag $VALIDATE_AGENT_BUILD .
     - docker images $VALIDATE_AGENT_BUILD
     - docker push $VALIDATE_AGENT_BUILD
-  tags: [ "runner:docker", "size:large" ]
+  tags: [ "runner:docker" ]

@@ -40,7 +40,7 @@ nav:
     - HTTP: base/http.md
     - TLS/SSL: base/tls.md
     - Databases: base/databases.md
-    - Prometheus: base/prometheus.md
+    - OpenMetrics: base/openmetrics.md
     - Metadata: base/metadata.md
     - API: base/api.md
   - Dev Package:
@@ -60,7 +60,6 @@ nav:
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
     - Config models: meta/config-models.md
-    - Docs specs: meta/docs-specs.md
     - Status: meta/status.md
   - Tutorials:
     - JMX:
@@ -75,6 +74,7 @@ nav:
       - tutorials/snmp/tools.md
     - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
+    - IBM i: architecture/ibm_i.md
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
     - Windows Event Log: architecture/win32_event_log.md

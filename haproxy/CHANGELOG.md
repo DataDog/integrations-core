@@ -1,5 +1,26 @@
 # CHANGELOG - haproxy
 
+## 3.1.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 3.0.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+* [Changed] Remove messages for integrations for OK service checks. See [#9888](https://github.com/DataDog/integrations-core/pull/9888).
+
+## 2.18.1 / 2021-06-07 / Agent 7.29.0
+
+* [Fixed] Fix `collect_aggregates_only` option type in example config. See [#9473](https://github.com/DataDog/integrations-core/pull/9473).
+
+## 2.18.0 / 2021-05-28
+
+* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+* [Added] Add runtime configuration validation. See [#8924](https://github.com/DataDog/integrations-core/pull/8924).
+
 ## 2.17.0 / 2021-03-07 / Agent 7.27.0
 
 * [Added] Add listener stats. See [#8723](https://github.com/DataDog/integrations-core/pull/8723). Thanks [wdauchy](https://github.com/wdauchy).

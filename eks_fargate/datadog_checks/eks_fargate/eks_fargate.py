@@ -35,7 +35,7 @@ class EksFargateCheck(KubeletBase):
             self.tags.append('virtual_node:' + virtual_node)
             self.tags.extend(instances[0].get('tags', []))
 
-    def check(self, instance):
+    def check(self, _):
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:

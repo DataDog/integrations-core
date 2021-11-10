@@ -39,13 +39,14 @@ def test_check(aggregator, dd_environment, get_test_instance, caplog):
 
     # Test metrics
     common.assert_stat_metrics(aggregator)
+    common.assert_latency_metrics(aggregator)
     common.assert_mntr_metrics_by_version(aggregator, skipped_metrics)
 
     common.assert_service_checks_ok(aggregator)
 
     expected_mode = get_test_instance['expected_mode']
     mname = "zookeeper.instances.{}".format(expected_mode)
-    aggregator.assert_metric(mname, value=1)
+    aggregator.assert_metric(mname, value=1, tags=["mytag"])
     aggregator.assert_all_metrics_covered()
 
 
@@ -71,11 +72,11 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
 
     aggregator.assert_service_check("zookeeper.ruok", status=zk_check.CRITICAL)
 
-    aggregator.assert_metric("zookeeper.instances", tags=["mode:down"], count=1)
+    aggregator.assert_metric("zookeeper.instances", tags=["mode:down", "mytag"], count=1)
 
     expected_mode = get_conn_failure_config['expected_mode']
     mname = "zookeeper.instances.{}".format(expected_mode)
-    aggregator.assert_metric(mname, value=1, count=1)
+    aggregator.assert_metric(mname, value=1, count=1, tags=["mytag"])
 
 
 def test_metadata(datadog_agent, get_test_instance):

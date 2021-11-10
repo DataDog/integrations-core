@@ -1,6 +1,38 @@
 # CHANGELOG - snmp
 
-## 5.1.0 / 2021-04-19
+## 5.4.2 / 2021-10-07 / Agent 7.32.0
+
+* [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).
+
+## 5.4.1 / 2021-10-06
+
+* [Fixed] Remove python only mention from check discovery props. See [#10352](https://github.com/DataDog/integrations-core/pull/10352).
+
+## 5.4.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Add autodiscovery integration configs. See [#10079](https://github.com/DataDog/integrations-core/pull/10079).
+* [Added] Add autodiscovery_subnet tag to discovered_devices_count metric. See [#10072](https://github.com/DataDog/integrations-core/pull/10072).
+* [Fixed] Better naming for testing environments. See [#10070](https://github.com/DataDog/integrations-core/pull/10070).
+* [Fixed] Bump base package requirement. See [#10078](https://github.com/DataDog/integrations-core/pull/10078).
+
+## 5.3.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add `ifNumber` to `_generic-if.yaml`. See [#9875](https://github.com/DataDog/integrations-core/pull/9875).
+* [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
+* [Fixed] Enclose community string using single quote. See [#9742](https://github.com/DataDog/integrations-core/pull/9742).
+* [Fixed] Test string float value in e2e. See [#9689](https://github.com/DataDog/integrations-core/pull/9689).
+
+## 5.2.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add collect device metadata config. See [#9393](https://github.com/DataDog/integrations-core/pull/9393).
+* [Added] Add rate type to error and discard counters. See [#9218](https://github.com/DataDog/integrations-core/pull/9218). Thanks [loganmc10](https://github.com/loganmc10).
+* [Fixed] Improve snmp example config. See [#9417](https://github.com/DataDog/integrations-core/pull/9417).
+* [Fixed] Revert "Add collect device metadata config". See [#9439](https://github.com/DataDog/integrations-core/pull/9439).
+* [Fixed] Fix mypy lint issue. See [#9288](https://github.com/DataDog/integrations-core/pull/9288).
+* [Fixed] Update conf.yaml.example - wrong file name. See [#7704](https://github.com/DataDog/integrations-core/pull/7704).
+
+## 5.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
 * [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).

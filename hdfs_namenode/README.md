@@ -1,6 +1,6 @@
 # HDFS NameNode Integration
 
-![HDFS Dashboard][111]
+![HDFS Dashboard][1]
 
 ## Overview
 
@@ -10,37 +10,24 @@ Use this check (hdfs_namenode) and its counterpart check (hdfs_datanode), not th
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][112] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
 ### Installation
 
-The HDFS NameNode check is included in the [Datadog Agent][113] package, so you don't need to install anything else on your NameNodes.
+The HDFS NameNode check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your NameNodes.
 
 ### Configuration
 
-#### Prepare the NameNode
-
-1. The Agent collects metrics from the NameNode's JMX remote interface. The interface is disabled by default, so enable it by setting the following option in `hadoop-env.sh` (usually found in \$HADOOP_HOME/conf):
-
-    ```conf
-    export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote
-      -Dcom.sun.management.jmxremote.authenticate=false
-      -Dcom.sun.management.jmxremote.ssl=false
-      -Dcom.sun.management.jmxremote.port=50070 $HADOOP_NAMENODE_OPTS"
-    ```
-
-2. Restart the NameNode process to enable the JMX interface.
-
 #### Connect the Agent
 
-#<!-- xxx tabs xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
 #### Host
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample hdfs_namenode.d/conf.yaml][115] for all available configuration options:
+1. Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample hdfs_namenode.d/conf.yaml][5] for all available configuration options:
 
    ```yaml
    init_config:
@@ -53,25 +40,25 @@ To configure this check for an Agent running on a host:
      ##
      ## The hostname and port can be found in the hdfs-site.xml conf file under
      ## the property dfs.namenode.http-address
-     ## https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
+     ## https://hadoop.apache.org/docs/r3.1.3/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
      #
-     - hdfs_namenode_jmx_uri: http://localhost:50070
+     - hdfs_namenode_jmx_uri: http://localhost:9870
    ```
 
-2. [Restart the Agent][116].
+2. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][112] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                 |
-| -------------------- | ----------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `hdfs_namenode`                                       |
-| `<INIT_CONFIG>`      | blank or `{}`                                         |
-| `<INSTANCE_CONFIG>`  | `{"hdfs_namenode_jmx_uri": "https://%%host%%:50070"}` |
+| Parameter            | Value                                                |
+| -------------------- | ---------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `hdfs_namenode`                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                        |
+| `<INSTANCE_CONFIG>`  | `{"hdfs_namenode_jmx_uri": "https://%%host%%:9870"}` |
 
 #### Log collection
 
@@ -102,13 +89,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ### Validation
 
-[Run the Agent's status subcommand][117] and look for `hdfs_namenode` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `hdfs_namenode` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][118] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -116,30 +103,30 @@ The HDFS-namenode check does not include any events.
 
 ### Service Checks
 
-**hdfs.namenode.jmx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][119].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Hadoop architectural overview][1110]
-- [How to monitor Hadoop metrics][1111]
-- [How to collect Hadoop metrics][1112]
-- [How to monitor Hadoop with Datadog][1113]
+- [Hadoop architectural overview][11]
+- [How to monitor Hadoop metrics][12]
+- [How to collect Hadoop metrics][13]
+- [How to monitor Hadoop with Datadog][14]
 
-[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_namenode/images/hadoop_dashboard.png
-[112]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[113]: https://app.datadoghq.com/account/settings#agent
-[114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[115]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/datadog_checks/hdfs_namenode/data/conf.yaml.example
-[116]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[118]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
-[119]: https://docs.datadoghq.com/help/
-[1110]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[1111]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[1112]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[1113]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_namenode/images/hadoop_dashboard.png
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/datadog_checks/hdfs_namenode/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/hadoop-architecture-overview
+[12]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
+[13]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
+[14]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
