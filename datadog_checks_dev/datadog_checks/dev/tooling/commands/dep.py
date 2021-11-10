@@ -27,6 +27,7 @@ IGNORED_DEPS = {
     # https://github.com/DataDog/integrations-core/pull/10105;
     # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
     'cryptography',
+    'dnspython',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
