@@ -20,6 +20,14 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_port(field, value):
+    return 4730
+
+
+def instance_server(field, value):
+    return 'localhost'
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
