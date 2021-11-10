@@ -152,7 +152,7 @@ To ensure that your Openmetrics configuration does not redundantly collect metri
 
 #### Openmetrics V2 configuration with generic metric collection
 
-Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if configuring the Openmetrics V2 (`openmetrics_endpoint` enabled).
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if using the Openmetrics V2 configuration (`openmetrics_endpoint` enabled).
  
 ```yaml
 ## Every instance is scheduled independent of the others.
