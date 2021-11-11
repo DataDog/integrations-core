@@ -7,6 +7,7 @@ import re
 
 import mock
 import pytest
+from six import PY3
 
 from datadog_checks.zk import ZookeeperCheck
 
@@ -81,13 +82,19 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
 def test_parse_replica_mntr(aggregator, mock_mntr_output, get_test_instance):
     unparsed_line = "zk_peer_state	following - broadcast\n"
     expected_message = "Unexpected 'mntr' output `%s`: %s"
+
+    # Value Error is more verbose in PY 3
+    error_message = 'too many values to unpack'
+    if PY3:
+        error_message = "too many values to unpack (expected 2)"
+
     check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
     check.log = mock.MagicMock()
     metrics, mode = check.parse_mntr(mock_mntr_output)
+
     assert mode == 'follower'
     assert len(metrics) == 499
-    check.log.debug.assert_called_once_with(expected_message, unparsed_line, 'too many values to unpack (expected 2)')
-    aggregator.assert_all_metrics_covered()
+    check.log.debug.assert_called_once_with(expected_message, unparsed_line, error_message)
 
 
 def test_metadata(datadog_agent, get_test_instance):
