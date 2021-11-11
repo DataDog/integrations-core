@@ -53,7 +53,7 @@ def validate_check_instance(check_name, file, verbose):
         if found_match_arg and verbose:
             message = (
                 "The instance argument in the `check()` function is going to be "
-                "deprecated in Agent 6. Please use `self.instance` instead."
+                "deprecated in Agent 8. Please use `self.instance` instead."
             )
             echo_warning(f"{check_name}: " + message)
             annotate_warning(file, message)
