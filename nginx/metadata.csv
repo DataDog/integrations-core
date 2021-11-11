@@ -38,7 +38,7 @@ nginx.cache.miss.responses_written,gauge,,response,,The total number of response
 nginx.cache.miss.responses_written_count,count,,response,,The total number of responses written to the cache,0,nginx,cache miss responses_written
 nginx.cache.revalidated.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache revalidated bytes
 nginx.cache.revalidated.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache revalidated bytes
-nginx.cache.revalidated.response,gauge,,response,,The total number of responses read from the cache,0,nginx,cache revalidated responses
+nginx.cache.revalidated.responses,gauge,,response,,The total number of responses read from the cache,0,nginx,cache revalidated responses
 nginx.cache.revalidated.response_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
 nginx.cache.size,gauge,,response,,The current size of the cache,0,nginx,cache size
 nginx.cache.stale.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache stale bytes
@@ -88,12 +88,12 @@ nginx.server_zone.sent,gauge,,byte,,The total amount of data sent to clients.,0,
 nginx.server_zone.sent_count,count,,byte,,The total amount of data sent to clients (shown as count).,0,nginx,server zone sent
 nginx.slab.pages.free,gauge,,page,,The current number of free memory pages,0,nginx,slab pages free
 nginx.slab.pages.used,gauge,,page,,The current number of used memory pages,0,nginx,slab pages used
-nginx.slab.slots.fails,gauge,,request,,The number of unsuccessful attempts to allocate memory of specified size,-1,nginx,slab slots fails
-nginx.slab.slots.fails_count,count,,request,,The number of unsuccessful attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots fails
-nginx.slab.slots.free,gauge,,,,The current number of free memory slots,-1,nginx,slab slots free
-nginx.slab.slots.reqs,gauge,,request,,The total number of attempts to allocate memory of specified size,-1,nginx,slab slots reqs
-nginx.slab.slots.reqs_count,count,,request,,The total number of attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots reqs
-nginx.slab.slots.used,gauge,,,,The current number of used memory slots,-1,nginx,slab slots used
+nginx.slab.slot.fails,gauge,,request,,The number of unsuccessful attempts to allocate memory of specified size,-1,nginx,slab slots fails
+nginx.slab.slot.fails_count,count,,request,,The number of unsuccessful attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots fails
+nginx.slab.slot.free,gauge,,,,The current number of free memory slots,-1,nginx,slab slots free
+nginx.slab.slot.reqs,gauge,,request,,The total number of attempts to allocate memory of specified size,-1,nginx,slab slots reqs
+nginx.slab.slot.reqs_count,count,,request,,The total number of attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots reqs
+nginx.slab.slot.used,gauge,,,,The current number of used memory slots,-1,nginx,slab slots used
 nginx.ssl.handshakes,gauge,,,,The total number of successful SSL handshakes.,0,nginx,ssl handshakes
 nginx.ssl.handshakes_count,count,,,,The total number of successful SSL handshakes (shown as count).,0,nginx,ssl handshakes
 nginx.ssl.handshakes_failed,gauge,,,,The total number of failed SSL handshakes.,-1,nginx,ssl handshakes failed
@@ -119,6 +119,10 @@ nginx.stream.server_zone.sessions.total,gauge,,session,,The total number of resp
 nginx.stream.server_zone.sessions.total_count,count,,session,,The total number of responses sent to clients (shown as count).,0,nginx,stream server zone sessions total
 nginx.stream.upstream.peers.active,gauge,,connection,,The current number of connections,0,nginx,stream upstr peers active
 nginx.stream.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,stream upstr peers backup
+nginx.stream.upstream.peers.connect_time,gauge,,millisecond,,The average time to connect to this server.,0,nginx,stream upstr peers conn tm
+nginx.stream.upstream.peers.first_byte_time,gauge,,millisecond,,The average time to receive the first byte of data from this server.,0,nginx,stream upstr peers first byte
+nginx.stream.upstream.peers.max_conns,gauge,,connection,,The max_conns limit for the server.,0,nginx,stream upstr peers max conn
+nginx.stream.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data from this server.,0,nginx,stream upstr peers resp time
 nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of client connections forwarded to this server.,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
@@ -144,12 +148,14 @@ nginx.stream.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,stream
 nginx.stream.upstream.zombies,gauge,,host,,The current number of servers removed from the group but still processing active client connections.,0,nginx,stream upstr zombies
 nginx.timestamp,gauge,,millisecond,,Current time since Epoch.,0,nginx,timestamp
 nginx.upstream.keepalive,gauge,,connection,,The current number of idle keepalive connections.,0,nginx,upstr keepalive
+nginx.upstream.zombies,gauge,,server,,The current number of servers removed from the group but still processing active client connections.,0,nginx,upstr zombies
 nginx.upstream.peers.active,gauge,,connection,,The current number of active connections.,0,nginx,upstr peers active
 nginx.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,upstr peers backup
 nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became "unavail" or "unhealthy".,0,nginx,upstr peers downstart
 nginx.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime
 nginx.upstream.peers.fails,gauge,,,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,upstr peers fails
 nginx.upstream.peers.fails_count,count,,,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,upstr peers fails
+nginx.upstream.peers.header_time,gauge,,millisecond,,The total amount of time spent on receiving the response header from the upstream server.,0,nginx,upstr peers header tm
 nginx.upstream.peers.health_checks.checks,gauge,,,,The total number of health check requests made.,0,nginx,upstr peers health chk
 nginx.upstream.peers.health_checks.checks_count,count,,,,The total number of health check requests made (shown as count).,0,nginx,upstr peers health chk
 nginx.upstream.peers.health_checks.fails,gauge,,,,The number of failed health checks.,-1,nginx,upstr peers health chk fail
@@ -158,10 +164,12 @@ nginx.upstream.peers.health_checks.last_passed,gauge,,,,Boolean indicating if th
 nginx.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state "unhealthy").,-1,nginx,upstr peers health chk unhealthy
 nginx.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state "unhealthy") (shown as count).,-1,nginx,upstr peers health chk unhealthy
 nginx.upstream.peers.id,gauge,,,,The ID of the server.,0,nginx,upstr peers id
+nginx.upstream.peers.max_conns,gauge,,connection,,The max_conns limit for this server.,0,nginx,upstr peers max conns
 nginx.upstream.peers.received,gauge,,byte,,The total amount of data received from this server.,0,nginx,upstr peers rec
 nginx.upstream.peers.received_count,count,,byte,,The total amount of data received from this server (shown as count).,0,nginx,upstr peers rec
 nginx.upstream.peers.requests,gauge,,request,,The total number of client requests forwarded to this server.,0,nginx,upstr peers req
 nginx.upstream.peers.requests_count,count,,request,,The total number of client requests forwarded to this server (shown as count).,0,nginx,upstr peers req
+nginx.upstream.peers.response_time,gauge,,millisecond,,The average time to receive the last byte of data.,0,nginx,upstr peers resp time
 nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,upstr peers resp 1xx
 nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,upstr peers resp 1xx count
 nginx.upstream.peers.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,upstr peers resp 2xx
