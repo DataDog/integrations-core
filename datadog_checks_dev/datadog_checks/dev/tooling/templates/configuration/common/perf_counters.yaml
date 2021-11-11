@@ -36,16 +36,16 @@
                               any defined value in `init_config`.
 
     The key for each counter object represents the name of the desired counter.
-    Counters may be defined in 2 ways:
+    Counters may be defined in the following ways:
 
-    1. If a value is a string, then it represents the suffix of the sent metric name. For example:
+    1. If a value is a string, then it represents the suffix of the sent metric name, for example:
 
          counters:
          - '% Free Space': usable
          - Current Disk Queue Length: queue_length.current
 
     2. If a value is a mapping, then it must have a `name` key that represents the suffix of the
-       sent metric name. For example:
+       sent metric name, for example:
 
          counters:
          - '% Free Space':
@@ -63,8 +63,8 @@
       aggregate: Whether or not to send an additional metric that is the aggregation of all values for
                  every monitored instance. If `average` is set to `true` the check submits the average as
                  a metric suffixed by `avg`, otherwise it submits the sum as a metric suffixed by `sum`.
-                 If this is set to `only`, the check will not submit a metric per instance.
-      metric_name: This represents the full metric name in lieu of a `name` key and will not be prefixed by
+                 If this is set to `only`, the check does not submit a metric per instance.
+      metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
                    the parent object's `name` key.
   value:
     type: object

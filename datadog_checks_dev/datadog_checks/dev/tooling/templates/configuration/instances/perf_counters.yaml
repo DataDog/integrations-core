@@ -5,7 +5,7 @@
     type: string
 - name: username
   description: |
-    The username used to connect to `server`.
+    The username used to connect to the `server`.
   value:
     type: string
 - name: password
@@ -22,7 +22,7 @@
     type: boolean
 - name: server_tag
   description: |
-    The name used for tagging `server`. The value defined here will replace the `server:` tag key.
+    The name used for tagging `server`. The value defined here replaces the `server:` tag key.
   value:
     type: string
 - name: namespace  # Only shown for the `windows_performance_counters` provider integration
