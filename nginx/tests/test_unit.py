@@ -7,6 +7,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import Nginx
 
 from .common import CHECK_NAME, FIXTURES_PATH, TAGS
@@ -98,7 +99,8 @@ def test_plus_api_v7(check, instance, aggregator):
         print(m)
         total += len(aggregator.metrics(m))
 
-    assert total == 1187
+    assert total == 1629
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_nest_payload(check):

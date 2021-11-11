@@ -47,19 +47,36 @@ PLUS_API_V3_STREAM_ENDPOINTS = {
     "stream/zone_sync": ["stream", "zone_sync"],
 }
 
-PLUS_API_V7_ENDPOINTS = {
-    "http/limit_reqs": ["http", "limit_reqs"],
+PLUS_API_V6_STREAM_ENDPOINTS = {
+    "stream/limit_conns": ["stream", "limit_conns"],
+}
+
+PLUS_API_V5_ENDPOINTS = {
+    "http/location_zones": ["location_zones"],
+    "resolvers": ["resolvers"],
+}
+
+PLUS_API_V6_ENDPOINTS = {
+    "http/limit_reqs": ["limit_reqs"],
+    "http/upstreams": ["upstreams"],
 }
 
 TAGGED_KEYS = {
     'caches': 'cache',
+    'limit_conns': 'limit_conn',
+    'limitConns': 'limit_conns',  # VTS
+    'limit_reqs': 'limit_req',
+    'limitReqs': 'limit_req',
+    'location_zones': 'location_zone',
+    'locationZones': 'location_zone',  # VTS
+    'resolvers': 'resolver',
     'server_zones': 'server_zone',
     'serverZones': 'server_zone',  # VTS
-    'upstreams': 'upstream',
-    'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot',
+    'upstreams': 'upstream',
     'zones': 'zone',
+    'codes': 'code',
 }
 
 
@@ -222,14 +239,19 @@ class Nginx(AgentCheck):
 
     def _get_plus_api_endpoints(self, plus_api_version):
         endpoints = iteritems(PLUS_API_ENDPOINTS)
-        if int(plus_api_version) >= 7:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V7_ENDPOINTS))
+
+        if int(plus_api_version) >= 5:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V5_ENDPOINTS))
+        if int(plus_api_version) >= 6:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V6_ENDPOINTS))
         return endpoints
 
     def _get_plus_api_stream_endpoints(self, plus_api_version):
         endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
         if int(plus_api_version) >= 3:
             endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+        if int(plus_api_version) >= 6:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V6_STREAM_ENDPOINTS))
         return endpoints
 
     def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):

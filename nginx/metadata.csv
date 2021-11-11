@@ -101,6 +101,9 @@ nginx.ssl.handshakes_failed_count,count,,,,The total number of failed SSL handsh
 nginx.ssl.session_reuses,gauge,,,,The total number of session reuses during SSL handshake.,0,nginx,ssl session reuses
 nginx.ssl.session_reuses_count,count,,,,The total number of session reuses during SSL handshake (shown as count).,0,nginx,ssl session reuses
 nginx.stream.server_zone.connections,gauge,,connection,,The total number of connections accepted from clients,0,nginx,stream server zone discarded
+nginx.stream.limit_conns.passed,count,,connection,,The total number of connections that were neither limited nor accounted as limited.,0,nginx,stream limit conn passed
+nginx.stream.limit_conns.rejected,count,,connection,,The total number of connections that were rejected.s,0,nginx,stream limit conn rejected
+nginx.stream.limit_conns.rejected_dry_run,count,,connection,,The total number of connections accounted as rejected in the dry run mode.,0,nginx,stream limit conn rejected dry
 nginx.stream.server_zone.connections_count,count,,connection,,The total number of connections accepted from clients (shown as count),0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,stream server zone discarded
 nginx.stream.server_zone.discarded_count,count,,request,,The total number of requests completed without sending a response (shown as count).,0,nginx,stream server zone discarded
